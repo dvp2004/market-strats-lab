@@ -8,6 +8,7 @@ import yaml
 
 from market_strats.analysis.metrics import calculate_metrics
 from market_strats.analysis.plots import plot_drawdowns, plot_equity_curves
+from market_strats.analysis.regimes import calculate_regime_metrics, create_regime_summary
 from market_strats.data.fetch_yfinance import (
     fetch_daily_prices,
     load_prices_from_parquet,
@@ -106,10 +107,24 @@ def main() -> None:
     plot_equity_curves(results, equity_plot_path)
     plot_drawdowns(results, drawdown_plot_path)
 
-    print("\nStrategy comparison:")
+    regime_metrics_df = calculate_regime_metrics(results)
+    regime_summary_df = create_regime_summary(regime_metrics_df)
+
+    regime_metrics_path = reports_dir / f"{ticker}_regime_metrics.csv"
+    regime_summary_path = reports_dir / f"{ticker}_regime_summary.csv"
+
+    regime_metrics_df.to_csv(regime_metrics_path, index=False)
+    regime_summary_df.to_csv(regime_summary_path, index=False)
+
+    print("\nFull-period strategy comparison:")
     print(metrics_df.to_string(index=False))
 
-    print(f"\nSaved metrics to: {metrics_path}")
+    print("\nRegime summary:")
+    print(regime_summary_df.to_string(index=False))
+
+    print(f"\nSaved full-period metrics to: {metrics_path}")
+    print(f"Saved regime metrics to: {regime_metrics_path}")
+    print(f"Saved regime summary to: {regime_summary_path}")
     print(f"Saved equity curve chart to: {equity_plot_path}")
     print(f"Saved drawdown chart to: {drawdown_plot_path}")
 
