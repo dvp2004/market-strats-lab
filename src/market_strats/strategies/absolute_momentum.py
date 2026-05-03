@@ -4,23 +4,23 @@ import numpy as np
 import pandas as pd
 
 
-def run_sma_trend_strategy(
+def run_absolute_momentum_strategy(
     prices: pd.DataFrame,
     initial_capital: float,
-    sma_months: int,
+    momentum_months: int,
     slippage_bps: float,
 ) -> pd.DataFrame:
     """
-    Monthly SMA trend strategy.
+    Monthly absolute momentum strategy.
 
     Rule:
-    - At each month-end, calculate whether adjusted close is above its SMA.
-    - If above, target position = 1.
-    - If below, target position = 0.
+    - At each month-end, calculate trailing N-month return.
+    - If trailing return is positive, target position = 1.
+    - If trailing return is zero or negative, target position = 0.
     - Execute at the next trading day's close.
     - Position affects returns from the following day.
 
-    This is intentionally conservative to avoid lookahead bias.
+    This tests whether positive medium-term momentum is useful as a simple market-timing signal.
     """
     df = prices.copy()
     df = df.sort_values("date").reset_index(drop=True)
@@ -31,8 +31,8 @@ def run_sma_trend_strategy(
     monthly_last_rows = df.groupby(df.index.to_period("M")).tail(1)
     monthly_close = monthly_last_rows["adj_close"]
 
-    sma = monthly_close.rolling(sma_months).mean()
-    monthly_signal = (monthly_close > sma).astype(float)
+    trailing_return = (monthly_close / monthly_close.shift(momentum_months)) - 1.0
+    monthly_signal = (trailing_return > 0).astype(float)
     monthly_signal = monthly_signal.dropna()
 
     target_position = pd.Series(np.nan, index=df.index, dtype=float)

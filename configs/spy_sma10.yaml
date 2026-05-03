@@ -3,4 +3,5 @@ start_date: "1993-01-29"
 end_date:
 initial_capital: 10000
 sma_months: 10
+momentum_months: 12
 slippage_bps: 5

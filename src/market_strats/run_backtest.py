@@ -14,6 +14,7 @@ from market_strats.data.fetch_yfinance import (
     save_prices_to_parquet,
 )
 from market_strats.data.validation import validate_price_data
+from market_strats.strategies.absolute_momentum import run_absolute_momentum_strategy
 from market_strats.strategies.buy_and_hold import run_buy_and_hold
 from market_strats.strategies.sma_trend import run_sma_trend_strategy
 
@@ -56,6 +57,7 @@ def main() -> None:
     ticker = config["ticker"].upper()
     initial_capital = float(config["initial_capital"])
     sma_months = int(config["sma_months"])
+    momentum_months = int(config["momentum_months"])
     slippage_bps = float(config["slippage_bps"])
 
     reports_dir = Path("reports")
@@ -64,6 +66,7 @@ def main() -> None:
     prices = get_or_fetch_prices(config)
 
     buy_hold = run_buy_and_hold(prices, initial_capital)
+
     sma_trend = run_sma_trend_strategy(
         prices=prices,
         initial_capital=initial_capital,
@@ -71,14 +74,26 @@ def main() -> None:
         slippage_bps=slippage_bps,
     )
 
+    absolute_momentum = run_absolute_momentum_strategy(
+        prices=prices,
+        initial_capital=initial_capital,
+        momentum_months=momentum_months,
+        slippage_bps=slippage_bps,
+    )
+
     results = {
         "Buy and Hold": buy_hold,
         f"{sma_months}-Month SMA": sma_trend,
+        f"{momentum_months}-Month Absolute Momentum": absolute_momentum,
     }
 
     metrics = [
         calculate_metrics(buy_hold, "Buy and Hold"),
         calculate_metrics(sma_trend, f"{sma_months}-Month SMA"),
+        calculate_metrics(
+            absolute_momentum,
+            f"{momentum_months}-Month Absolute Momentum",
+        ),
     ]
 
     metrics_df = pd.DataFrame(metrics)
