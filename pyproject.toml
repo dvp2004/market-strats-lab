@@ -1,0 +1,26 @@
+[project]
+name = "market-strats-lab"
+version = "0.1.0"
+description = "A reproducible systematic trading research lab for testing market strategies honestly."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "yfinance>=0.2.40",
+    "matplotlib>=3.7.0",
+    "pyarrow>=14.0.0",
+    "pyyaml>=6.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.5.0",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.setuptools.packages.find]
+where = ["src"]
