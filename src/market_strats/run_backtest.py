@@ -9,6 +9,10 @@ import yaml
 from market_strats.analysis.metrics import calculate_metrics
 from market_strats.analysis.plots import plot_drawdowns, plot_equity_curves
 from market_strats.analysis.regimes import calculate_regime_metrics, create_regime_summary
+from market_strats.analysis.rolling import (
+    calculate_rolling_window_metrics,
+    create_rolling_summary,
+)
 from market_strats.data.fetch_yfinance import (
     fetch_daily_prices,
     load_prices_from_parquet,
@@ -116,15 +120,29 @@ def main() -> None:
     regime_metrics_df.to_csv(regime_metrics_path, index=False)
     regime_summary_df.to_csv(regime_summary_path, index=False)
 
+    rolling_metrics_df = calculate_rolling_window_metrics(results)
+    rolling_summary_df = create_rolling_summary(rolling_metrics_df)
+
+    rolling_metrics_path = reports_dir / f"{ticker}_rolling_metrics.csv"
+    rolling_summary_path = reports_dir / f"{ticker}_rolling_summary.csv"
+
+    rolling_metrics_df.to_csv(rolling_metrics_path, index=False)
+    rolling_summary_df.to_csv(rolling_summary_path, index=False)
+
     print("\nFull-period strategy comparison:")
     print(metrics_df.to_string(index=False))
 
     print("\nRegime summary:")
     print(regime_summary_df.to_string(index=False))
 
+    print("\nRolling-window summary:")
+    print(rolling_summary_df.to_string(index=False))
+
     print(f"\nSaved full-period metrics to: {metrics_path}")
     print(f"Saved regime metrics to: {regime_metrics_path}")
     print(f"Saved regime summary to: {regime_summary_path}")
+    print(f"Saved rolling metrics to: {rolling_metrics_path}")
+    print(f"Saved rolling summary to: {rolling_summary_path}")
     print(f"Saved equity curve chart to: {equity_plot_path}")
     print(f"Saved drawdown chart to: {drawdown_plot_path}")
 
