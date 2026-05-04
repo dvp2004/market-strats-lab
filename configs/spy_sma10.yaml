@@ -23,6 +23,16 @@ momentum_robustness_months:
   - 12
   - 13
 
+dual_momentum_pairs:
+  - name: US_vs_International
+    assets:
+      - SPY
+      - EFA
+  - name: Equity_vs_Long_Bonds
+    assets:
+      - SPY
+      - TLT
+
 drawdown_base_allocation: 0.70
 drawdown_tranche_allocation: 0.10
 drawdown_levels:

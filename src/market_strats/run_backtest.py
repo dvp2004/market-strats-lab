@@ -48,6 +48,8 @@ from market_strats.analysis.cross_asset_diagnostics import (
     write_buy_hold_vs_momentum_markdown,
 )
 
+from market_strats.strategies.dual_momentum import run_dual_momentum_strategy
+
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -63,6 +65,21 @@ def get_tickers(config: dict) -> list[str]:
 
     raise ValueError("Config must contain either 'ticker' or 'tickers'")
 
+def get_dual_momentum_pairs(config: dict) -> list[dict]:
+    pairs = config.get("dual_momentum_pairs", [])
+
+    validated_pairs = []
+
+    for pair in pairs:
+        name = str(pair["name"])
+        assets = [str(asset).upper() for asset in pair["assets"]]
+
+        if len(assets) != 2:
+            raise ValueError(f"Dual momentum pair {name} must contain exactly 2 assets")
+
+        validated_pairs.append({"name": name, "assets": assets})
+
+    return validated_pairs
 
 def get_or_fetch_prices(ticker: str, config: dict) -> pd.DataFrame:
     ticker = ticker.upper()
@@ -113,6 +130,13 @@ def get_or_fetch_cash_returns(config: dict, price_dates: pd.Series) -> pd.Series
 
     return align_cash_returns_to_price_dates(cash_rates, price_dates)
 
+def make_safe_filename(value: str) -> str:
+    return (
+        value.replace(" ", "_")
+        .replace("/", "_")
+        .replace("\\", "_")
+        .replace(":", "_")
+    )
 
 def run_backtest_for_ticker(
     ticker: str,
@@ -450,6 +474,162 @@ def write_cross_asset_summaries(
     print("Do not compare scorecard numbers across tickers as universal rankings.")
     print("Use each ticker scorecard to rank strategies within that ticker only.")
 
+def run_dual_momentum_pair(
+    pair: dict,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    pair_name = str(pair["name"])
+    asset_a, asset_b = pair["assets"]
+
+    safe_pair_name = make_safe_filename(pair_name)
+
+    print(f"\n{'=' * 100}")
+    print(f"Running dual momentum pair: {pair_name} ({asset_a} vs {asset_b})")
+    print(f"{'=' * 100}")
+
+    initial_capital = float(config["initial_capital"])
+    momentum_months = int(config["momentum_months"])
+    slippage_bps = float(config["slippage_bps"])
+
+    asset_a_prices = get_or_fetch_prices(asset_a, config)
+    asset_b_prices = get_or_fetch_prices(asset_b, config)
+
+    common_dates = sorted(
+        set(pd.to_datetime(asset_a_prices["date"])).intersection(
+            set(pd.to_datetime(asset_b_prices["date"]))
+        )
+    )
+
+    if not common_dates:
+        raise ValueError(f"No overlapping dates for {asset_a} and {asset_b}")
+
+    asset_a_common = asset_a_prices[
+        pd.to_datetime(asset_a_prices["date"]).isin(common_dates)
+    ].copy()
+    asset_b_common = asset_b_prices[
+        pd.to_datetime(asset_b_prices["date"]).isin(common_dates)
+    ].copy()
+
+    cash_returns = get_or_fetch_cash_returns(
+        config=config,
+        price_dates=pd.Series(common_dates),
+    )
+
+    start_date = pd.to_datetime(common_dates[0]).date()
+    end_date = pd.to_datetime(common_dates[-1]).date()
+
+    print(f"{pair_name} common test period: {start_date} to {end_date}")
+
+    buy_hold_a = run_buy_and_hold(
+        prices=asset_a_common,
+        initial_capital=initial_capital,
+        cash_returns=cash_returns,
+    )
+
+    buy_hold_b = run_buy_and_hold(
+        prices=asset_b_common,
+        initial_capital=initial_capital,
+        cash_returns=cash_returns,
+    )
+
+    dual_momentum = run_dual_momentum_strategy(
+        asset_a_prices=asset_a_common,
+        asset_b_prices=asset_b_common,
+        asset_a_name=asset_a,
+        asset_b_name=asset_b,
+        initial_capital=initial_capital,
+        momentum_months=momentum_months,
+        slippage_bps=slippage_bps,
+        cash_returns=cash_returns,
+    )
+
+    dual_strategy_name = f"Dual Momentum {asset_a}/{asset_b}"
+
+    results = {
+        f"Buy and Hold {asset_a}": buy_hold_a,
+        f"Buy and Hold {asset_b}": buy_hold_b,
+        dual_strategy_name: dual_momentum,
+    }
+
+    metrics = [
+        calculate_metrics(buy_hold_a, f"Buy and Hold {asset_a}"),
+        calculate_metrics(buy_hold_b, f"Buy and Hold {asset_b}"),
+        calculate_metrics(dual_momentum, dual_strategy_name),
+    ]
+
+    metrics_df = pd.DataFrame(metrics)
+    metrics_df.insert(0, "pair", pair_name)
+
+    rolling_metrics_df = calculate_rolling_window_metrics(results)
+    rolling_metrics_df.insert(0, "pair", pair_name)
+
+    rolling_summary_df = create_rolling_summary(rolling_metrics_df)
+    if not rolling_summary_df.empty and "pair" not in rolling_summary_df.columns:
+        rolling_summary_df.insert(0, "pair", pair_name)
+
+    strategy_scorecard_df = create_strategy_scorecard(
+        full_period_metrics=metrics_df.drop(columns=["pair"]),
+        rolling_summary=rolling_summary_df.drop(columns=["pair"])
+        if "pair" in rolling_summary_df.columns
+        else rolling_summary_df,
+    )
+    strategy_scorecard_df = create_strategy_verdicts(strategy_scorecard_df)
+    strategy_scorecard_df.insert(0, "pair", pair_name)
+
+    metrics_path = reports_dir / f"dual_momentum_{safe_pair_name}_metrics.csv"
+    rolling_path = reports_dir / f"dual_momentum_{safe_pair_name}_rolling_summary.csv"
+    scorecard_path = reports_dir / f"dual_momentum_{safe_pair_name}_scorecard.csv"
+    scorecard_md_path = reports_dir / f"dual_momentum_{safe_pair_name}_scorecard.md"
+    equity_plot_path = reports_dir / f"dual_momentum_{safe_pair_name}_equity_curves.png"
+    drawdown_plot_path = reports_dir / f"dual_momentum_{safe_pair_name}_drawdowns.png"
+
+    metrics_df.to_csv(metrics_path, index=False)
+    rolling_summary_df.to_csv(rolling_path, index=False)
+    strategy_scorecard_df.to_csv(scorecard_path, index=False)
+    write_scorecard_markdown(
+        strategy_scorecard_df.drop(columns=["pair"]),
+        scorecard_md_path,
+    )
+
+    plot_equity_curves(results, equity_plot_path)
+    plot_drawdowns(results, drawdown_plot_path)
+
+    print("\nDual momentum full-period comparison:")
+    print(metrics_df.to_string(index=False))
+
+    print("\nDual momentum rolling summary:")
+    print(rolling_summary_df.to_string(index=False))
+
+    print("\nDual momentum scorecard:")
+    print(
+        strategy_scorecard_df[
+            [
+                "composite_rank",
+                "pair",
+                "strategy",
+                "composite_score",
+                "cagr_pct",
+                "max_drawdown_pct",
+                "sharpe",
+                "trade_count",
+                "verdict",
+            ]
+        ].to_string(index=False)
+    )
+
+    print(f"\nSaved dual momentum metrics to: {metrics_path}")
+    print(f"Saved dual momentum rolling summary to: {rolling_path}")
+    print(f"Saved dual momentum scorecard to: {scorecard_path}")
+    print(f"Saved dual momentum scorecard report to: {scorecard_md_path}")
+    print(f"Saved dual momentum equity curve chart to: {equity_plot_path}")
+    print(f"Saved dual momentum drawdown chart to: {drawdown_plot_path}")
+
+    return {
+        "metrics": metrics_df,
+        "rolling_summary": rolling_summary_df,
+        "scorecard": strategy_scorecard_df,
+    }
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -473,6 +653,15 @@ def main() -> None:
 
     if len(ticker_outputs) > 1:
         write_cross_asset_summaries(ticker_outputs, reports_dir)
+
+    dual_momentum_pairs = get_dual_momentum_pairs(config)
+
+    for pair in dual_momentum_pairs:
+        run_dual_momentum_pair(
+            pair=pair,
+            config=config,
+            reports_dir=reports_dir,
+        )    
 
 
 if __name__ == "__main__":
