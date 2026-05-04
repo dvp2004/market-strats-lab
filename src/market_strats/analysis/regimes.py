@@ -135,7 +135,11 @@ def create_regime_summary(regime_metrics: pd.DataFrame) -> pd.DataFrame:
     """
     columns = [
         "period",
+        "period_start",
+        "period_end",
         "strategy",
+        "start_date",
+        "end_date",
         "cagr_pct",
         "total_return_pct",
         "max_drawdown_pct",

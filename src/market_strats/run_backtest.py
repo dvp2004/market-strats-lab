@@ -6,12 +6,27 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
+from market_strats.analysis.comparison import (
+    create_strategy_scorecard,
+    create_strategy_verdicts,
+    write_scorecard_markdown,
+)
 from market_strats.analysis.metrics import calculate_metrics
+from market_strats.analysis.momentum_robustness import (
+    run_momentum_window_robustness,
+    write_momentum_robustness_markdown,
+)
 from market_strats.analysis.plots import plot_drawdowns, plot_equity_curves
 from market_strats.analysis.regimes import calculate_regime_metrics, create_regime_summary
 from market_strats.analysis.rolling import (
     calculate_rolling_window_metrics,
     create_rolling_summary,
+)
+from market_strats.data.cash_rates import (
+    align_cash_returns_to_price_dates,
+    fetch_cash_yield_rates,
+    load_cash_rates_from_parquet,
+    save_cash_rates_to_parquet,
 )
 from market_strats.data.fetch_yfinance import (
     fetch_daily_prices,
@@ -27,23 +42,6 @@ from market_strats.strategies.sma_trend import run_sma_trend_strategy
 from market_strats.strategies.trend_filtered_drawdown import (
     run_trend_filtered_drawdown_strategy,
 )
-from market_strats.analysis.comparison import (
-    create_strategy_scorecard,
-    create_strategy_verdicts,
-    write_scorecard_markdown,
-)
-
-from market_strats.data.cash_rates import (
-    align_cash_returns_to_price_dates,
-    fetch_cash_yield_rates,
-    load_cash_rates_from_parquet,
-    save_cash_rates_to_parquet,
-)
-
-from market_strats.analysis.momentum_robustness import (
-    run_momentum_window_robustness,
-    write_momentum_robustness_markdown,
-)
 
 
 def load_config(config_path: str | Path) -> dict:
@@ -51,8 +49,18 @@ def load_config(config_path: str | Path) -> dict:
         return yaml.safe_load(file)
 
 
-def get_or_fetch_prices(config: dict) -> pd.DataFrame:
-    ticker = config["ticker"].upper()
+def get_tickers(config: dict) -> list[str]:
+    if "tickers" in config and config["tickers"]:
+        return [str(ticker).upper() for ticker in config["tickers"]]
+
+    if "ticker" in config and config["ticker"]:
+        return [str(config["ticker"]).upper()]
+
+    raise ValueError("Config must contain either 'ticker' or 'tickers'")
+
+
+def get_or_fetch_prices(ticker: str, config: dict) -> pd.DataFrame:
+    ticker = ticker.upper()
     processed_dir = Path("data/processed")
     price_path = processed_dir / f"{ticker}.parquet"
 
@@ -72,6 +80,7 @@ def get_or_fetch_prices(config: dict) -> pd.DataFrame:
     validate_price_data(prices, ticker)
 
     return prices
+
 
 def get_or_fetch_cash_returns(config: dict, price_dates: pd.Series) -> pd.Series:
     use_cash_yield = bool(config.get("use_cash_yield", False))
@@ -99,14 +108,16 @@ def get_or_fetch_cash_returns(config: dict, price_dates: pd.Series) -> pd.Series
 
     return align_cash_returns_to_price_dates(cash_rates, price_dates)
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", required=True, help="Path to YAML config file")
-    args = parser.parse_args()
 
-    config = load_config(args.config)
+def run_backtest_for_ticker(
+    ticker: str,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    print(f"\n{'=' * 100}")
+    print(f"Running strategy suite for {ticker}")
+    print(f"{'=' * 100}")
 
-    ticker = config["ticker"].upper()
     initial_capital = float(config["initial_capital"])
 
     sma_months = int(config["sma_months"])
@@ -122,12 +133,19 @@ def main() -> None:
 
     slippage_bps = float(config["slippage_bps"])
 
-    reports_dir = Path("reports")
-    reports_dir.mkdir(parents=True, exist_ok=True)
-
-    prices = get_or_fetch_prices(config)
+    prices = get_or_fetch_prices(ticker, config)
     cash_returns = get_or_fetch_cash_returns(config, prices["date"])
-    buy_hold = run_buy_and_hold(prices, initial_capital, cash_returns=cash_returns)
+
+    actual_start_date = pd.to_datetime(prices["date"]).min().date()
+    actual_end_date = pd.to_datetime(prices["date"]).max().date()
+
+    print(f"{ticker} available test period: {actual_start_date} to {actual_end_date}")
+
+    buy_hold = run_buy_and_hold(
+        prices=prices,
+        initial_capital=initial_capital,
+        cash_returns=cash_returns,
+    )
 
     sma_trend = run_sma_trend_strategy(
         prices=prices,
@@ -197,6 +215,8 @@ def main() -> None:
     ]
 
     metrics_df = pd.DataFrame(metrics)
+    metrics_df.insert(0, "ticker", ticker)
+
     metrics_path = reports_dir / f"{ticker}_strategy_comparison_metrics.csv"
     metrics_df.to_csv(metrics_path, index=False)
 
@@ -207,7 +227,11 @@ def main() -> None:
     plot_drawdowns(results, drawdown_plot_path)
 
     regime_metrics_df = calculate_regime_metrics(results)
+    regime_metrics_df.insert(0, "ticker", ticker)
+
     regime_summary_df = create_regime_summary(regime_metrics_df)
+    if not regime_summary_df.empty and "ticker" not in regime_summary_df.columns:
+        regime_summary_df.insert(0, "ticker", ticker)
 
     regime_metrics_path = reports_dir / f"{ticker}_regime_metrics.csv"
     regime_summary_path = reports_dir / f"{ticker}_regime_summary.csv"
@@ -216,7 +240,11 @@ def main() -> None:
     regime_summary_df.to_csv(regime_summary_path, index=False)
 
     rolling_metrics_df = calculate_rolling_window_metrics(results)
+    rolling_metrics_df.insert(0, "ticker", ticker)
+
     rolling_summary_df = create_rolling_summary(rolling_metrics_df)
+    if not rolling_summary_df.empty and "ticker" not in rolling_summary_df.columns:
+        rolling_summary_df.insert(0, "ticker", ticker)
 
     rolling_metrics_path = reports_dir / f"{ticker}_rolling_metrics.csv"
     rolling_summary_path = reports_dir / f"{ticker}_rolling_summary.csv"
@@ -225,16 +253,22 @@ def main() -> None:
     rolling_summary_df.to_csv(rolling_summary_path, index=False)
 
     strategy_scorecard_df = create_strategy_scorecard(
-        full_period_metrics=metrics_df,
-        rolling_summary=rolling_summary_df,
+        full_period_metrics=metrics_df.drop(columns=["ticker"]),
+        rolling_summary=rolling_summary_df.drop(columns=["ticker"])
+        if "ticker" in rolling_summary_df.columns
+        else rolling_summary_df,
     )
     strategy_scorecard_df = create_strategy_verdicts(strategy_scorecard_df)
+    strategy_scorecard_df.insert(0, "ticker", ticker)
 
     strategy_scorecard_path = reports_dir / f"{ticker}_strategy_scorecard.csv"
     strategy_scorecard_markdown_path = reports_dir / f"{ticker}_strategy_scorecard.md"
 
     strategy_scorecard_df.to_csv(strategy_scorecard_path, index=False)
-    write_scorecard_markdown(strategy_scorecard_df, strategy_scorecard_markdown_path)
+    write_scorecard_markdown(
+        strategy_scorecard_df.drop(columns=["ticker"]),
+        strategy_scorecard_markdown_path,
+    )
 
     momentum_robustness_months = [
         int(month) for month in config.get("momentum_robustness_months", [])
@@ -251,13 +285,14 @@ def main() -> None:
             )
         )
 
+        momentum_robustness_df.insert(0, "ticker", ticker)
+        momentum_robustness_rolling_df.insert(0, "ticker", ticker)
+
         momentum_robustness_path = reports_dir / f"{ticker}_momentum_robustness.csv"
         momentum_robustness_rolling_path = (
             reports_dir / f"{ticker}_momentum_robustness_rolling_summary.csv"
         )
-        momentum_robustness_markdown_path = (
-            reports_dir / f"{ticker}_momentum_robustness.md"
-        )
+        momentum_robustness_markdown_path = reports_dir / f"{ticker}_momentum_robustness.md"
 
         momentum_robustness_df.to_csv(momentum_robustness_path, index=False)
         momentum_robustness_rolling_df.to_csv(
@@ -265,7 +300,7 @@ def main() -> None:
             index=False,
         )
         write_momentum_robustness_markdown(
-            momentum_robustness_df,
+            momentum_robustness_df.drop(columns=["ticker"]),
             momentum_robustness_markdown_path,
         )
     else:
@@ -277,9 +312,6 @@ def main() -> None:
     print("\nFull-period strategy comparison:")
     print(metrics_df.to_string(index=False))
 
-    print("\nRegime summary:")
-    print(regime_summary_df.to_string(index=False))
-
     print("\nRolling-window summary:")
     print(rolling_summary_df.to_string(index=False))
 
@@ -288,6 +320,7 @@ def main() -> None:
         strategy_scorecard_df[
             [
                 "composite_rank",
+                "ticker",
                 "strategy",
                 "composite_score",
                 "cagr_pct",
@@ -304,6 +337,7 @@ def main() -> None:
         print(
             momentum_robustness_df[
                 [
+                    "ticker",
                     "lookback_months",
                     "end_value",
                     "cagr_pct",
@@ -330,6 +364,93 @@ def main() -> None:
         print(f"Saved momentum robustness to: {momentum_robustness_path}")
         print(f"Saved momentum robustness rolling summary to: {momentum_robustness_rolling_path}")
         print(f"Saved momentum robustness report to: {momentum_robustness_markdown_path}")
+
+    return {
+        "metrics": metrics_df,
+        "regime_summary": regime_summary_df,
+        "rolling_summary": rolling_summary_df,
+        "scorecard": strategy_scorecard_df,
+        "momentum_robustness": momentum_robustness_df,
+    }
+
+
+def write_cross_asset_summaries(
+    ticker_outputs: dict[str, dict[str, pd.DataFrame]],
+    reports_dir: Path,
+) -> None:
+    full_metrics = []
+    scorecards = []
+    rolling_summaries = []
+    momentum_robustness = []
+
+    for ticker, outputs in ticker_outputs.items():
+        if not outputs["metrics"].empty:
+            full_metrics.append(outputs["metrics"])
+
+        if not outputs["scorecard"].empty:
+            scorecards.append(outputs["scorecard"])
+
+        if not outputs["rolling_summary"].empty:
+            rolling_summaries.append(outputs["rolling_summary"])
+
+        if not outputs["momentum_robustness"].empty:
+            momentum_robustness.append(outputs["momentum_robustness"])
+
+    if full_metrics:
+        combined_metrics = pd.concat(full_metrics, ignore_index=True)
+        combined_metrics.to_csv(
+            reports_dir / "cross_asset_strategy_comparison_metrics.csv",
+            index=False,
+        )
+
+    if scorecards:
+        combined_scorecards = pd.concat(scorecards, ignore_index=True)
+        combined_scorecards.to_csv(
+            reports_dir / "cross_asset_strategy_scorecards.csv",
+            index=False,
+        )
+
+    if rolling_summaries:
+        combined_rolling = pd.concat(rolling_summaries, ignore_index=True)
+        combined_rolling.to_csv(
+            reports_dir / "cross_asset_rolling_summaries.csv",
+            index=False,
+        )
+
+    if momentum_robustness:
+        combined_momentum_robustness = pd.concat(momentum_robustness, ignore_index=True)
+        combined_momentum_robustness.to_csv(
+            reports_dir / "cross_asset_momentum_robustness.csv",
+            index=False,
+        )
+
+    print("\nCross-asset summary files saved into reports/")
+    print("Do not compare scorecard numbers across tickers as universal rankings.")
+    print("Use each ticker scorecard to rank strategies within that ticker only.")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", required=True, help="Path to YAML config file")
+    args = parser.parse_args()
+
+    config = load_config(args.config)
+    tickers = get_tickers(config)
+
+    reports_dir = Path("reports")
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
+    ticker_outputs: dict[str, dict[str, pd.DataFrame]] = {}
+
+    for ticker in tickers:
+        ticker_outputs[ticker] = run_backtest_for_ticker(
+            ticker=ticker,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    if len(ticker_outputs) > 1:
+        write_cross_asset_summaries(ticker_outputs, reports_dir)
 
 
 if __name__ == "__main__":

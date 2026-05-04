@@ -1,4 +1,10 @@
-ticker: SPY
+tickers:
+  - SPY
+  - QQQ
+  - EFA
+  - GLD
+  - TLT
+
 start_date: "1993-01-29"
 end_date:
 initial_capital: 10000
