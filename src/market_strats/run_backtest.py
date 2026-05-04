@@ -24,6 +24,9 @@ from market_strats.strategies.buy_and_hold import run_buy_and_hold
 from market_strats.strategies.daily_sma_trend import run_daily_sma_trend_strategy
 from market_strats.strategies.drawdown_tranche import run_drawdown_tranche_strategy
 from market_strats.strategies.sma_trend import run_sma_trend_strategy
+from market_strats.strategies.trend_filtered_drawdown import (
+    run_trend_filtered_drawdown_strategy,
+)
 
 
 def load_config(config_path: str | Path) -> dict:
@@ -71,6 +74,9 @@ def main() -> None:
     drawdown_base_allocation = float(config["drawdown_base_allocation"])
     drawdown_tranche_allocation = float(config["drawdown_tranche_allocation"])
     drawdown_levels = [float(level) for level in config["drawdown_levels"]]
+    trend_filtered_drawdown_off_allocation = float(
+        config["trend_filtered_drawdown_off_allocation"]
+    )
 
     slippage_bps = float(config["slippage_bps"])
 
@@ -111,12 +117,24 @@ def main() -> None:
         slippage_bps=slippage_bps,
     )
 
+    trend_filtered_drawdown = run_trend_filtered_drawdown_strategy(
+        prices=prices,
+        initial_capital=initial_capital,
+        base_allocation=drawdown_base_allocation,
+        tranche_allocation=drawdown_tranche_allocation,
+        drawdown_levels=drawdown_levels,
+        momentum_months=momentum_months,
+        trend_off_allocation=trend_filtered_drawdown_off_allocation,
+        slippage_bps=slippage_bps,
+    )
+
     results = {
         "Buy and Hold": buy_hold,
         f"{sma_months}-Month SMA": sma_trend,
         f"{sma_days}-Day SMA": daily_sma_trend,
         f"{momentum_months}-Month Absolute Momentum": absolute_momentum,
         "Drawdown Tranche": drawdown_tranche,
+        "Trend-Filtered Drawdown": trend_filtered_drawdown,
     }
 
     metrics = [
@@ -128,6 +146,7 @@ def main() -> None:
             f"{momentum_months}-Month Absolute Momentum",
         ),
         calculate_metrics(drawdown_tranche, "Drawdown Tranche"),
+        calculate_metrics(trend_filtered_drawdown, "Trend-Filtered Drawdown"),
     ]
 
     metrics_df = pd.DataFrame(metrics)

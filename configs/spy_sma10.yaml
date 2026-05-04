@@ -14,4 +14,6 @@ drawdown_levels:
   - 0.20
   - 0.30
 
+trend_filtered_drawdown_off_allocation: 0.00
+
 slippage_bps: 5
