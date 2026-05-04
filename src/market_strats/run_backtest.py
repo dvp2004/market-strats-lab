@@ -33,6 +33,13 @@ from market_strats.analysis.comparison import (
     write_scorecard_markdown,
 )
 
+from market_strats.data.cash_rates import (
+    align_cash_returns_to_price_dates,
+    fetch_cash_yield_rates,
+    load_cash_rates_from_parquet,
+    save_cash_rates_to_parquet,
+)
+
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -61,6 +68,31 @@ def get_or_fetch_prices(config: dict) -> pd.DataFrame:
 
     return prices
 
+def get_or_fetch_cash_returns(config: dict, price_dates: pd.Series) -> pd.Series:
+    use_cash_yield = bool(config.get("use_cash_yield", False))
+
+    if not use_cash_yield:
+        return pd.Series(0.0, index=pd.to_datetime(price_dates), name="cash_return")
+
+    cash_ticker = config["cash_ticker"]
+    processed_dir = Path("data/processed")
+    safe_ticker = cash_ticker.replace("^", "")
+    cash_path = processed_dir / f"{safe_ticker.upper()}_cash_rates.parquet"
+
+    if cash_path.exists():
+        print(f"Loading existing cash yield data from {cash_path}")
+        cash_rates = load_cash_rates_from_parquet(cash_ticker, processed_dir)
+    else:
+        print(f"Fetching cash yield data from yfinance: {cash_ticker}")
+        cash_rates = fetch_cash_yield_rates(
+            ticker=cash_ticker,
+            start_date=config["start_date"],
+            end_date=config.get("end_date"),
+        )
+        save_path = save_cash_rates_to_parquet(cash_rates, cash_ticker, processed_dir)
+        print(f"Saved cash yield data to {save_path}")
+
+    return align_cash_returns_to_price_dates(cash_rates, price_dates)
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -89,14 +121,15 @@ def main() -> None:
     reports_dir.mkdir(parents=True, exist_ok=True)
 
     prices = get_or_fetch_prices(config)
-
-    buy_hold = run_buy_and_hold(prices, initial_capital)
+    cash_returns = get_or_fetch_cash_returns(config, prices["date"])
+    buy_hold = run_buy_and_hold(prices, initial_capital, cash_returns=cash_returns)
 
     sma_trend = run_sma_trend_strategy(
         prices=prices,
         initial_capital=initial_capital,
         sma_months=sma_months,
         slippage_bps=slippage_bps,
+        cash_returns=cash_returns,
     )
 
     daily_sma_trend = run_daily_sma_trend_strategy(
@@ -104,6 +137,7 @@ def main() -> None:
         initial_capital=initial_capital,
         sma_days=sma_days,
         slippage_bps=slippage_bps,
+        cash_returns=cash_returns,
     )
 
     absolute_momentum = run_absolute_momentum_strategy(
@@ -111,6 +145,7 @@ def main() -> None:
         initial_capital=initial_capital,
         momentum_months=momentum_months,
         slippage_bps=slippage_bps,
+        cash_returns=cash_returns,
     )
 
     drawdown_tranche = run_drawdown_tranche_strategy(
@@ -120,6 +155,7 @@ def main() -> None:
         tranche_allocation=drawdown_tranche_allocation,
         drawdown_levels=drawdown_levels,
         slippage_bps=slippage_bps,
+        cash_returns=cash_returns,
     )
 
     trend_filtered_drawdown = run_trend_filtered_drawdown_strategy(
@@ -131,6 +167,7 @@ def main() -> None:
         momentum_months=momentum_months,
         trend_off_allocation=trend_filtered_drawdown_off_allocation,
         slippage_bps=slippage_bps,
+        cash_returns=cash_returns,
     )
 
     results = {

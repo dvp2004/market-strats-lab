@@ -3,6 +3,9 @@ start_date: "1993-01-29"
 end_date:
 initial_capital: 10000
 
+cash_ticker: "^IRX"
+use_cash_yield: true
+
 sma_months: 10
 sma_days: 200
 momentum_months: 12

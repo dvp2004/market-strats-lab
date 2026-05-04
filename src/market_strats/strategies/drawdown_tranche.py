@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pandas as pd
-
+from market_strats.strategies.accounting import calculate_allocation_strategy_returns
 
 def run_drawdown_tranche_strategy(
     prices: pd.DataFrame,
@@ -10,6 +10,7 @@ def run_drawdown_tranche_strategy(
     tranche_allocation: float,
     drawdown_levels: list[float],
     slippage_bps: float,
+    cash_returns: pd.Series | None = None,
 ) -> pd.DataFrame:
     """
     Drawdown tranche dip-buying strategy.
@@ -81,9 +82,13 @@ def run_drawdown_tranche_strategy(
     held_position = target_position.shift(1).fillna(base_allocation)
 
     turnover = target_position.diff().abs().fillna(target_position.abs())
-    slippage_cost = turnover * (slippage_bps / 10_000.0)
-
-    strategy_return = (held_position * asset_return) - slippage_cost
+    strategy_return = calculate_allocation_strategy_returns(
+        asset_return=asset_return,
+        held_position=held_position,
+        turnover=turnover,
+        slippage_bps=slippage_bps,
+        cash_returns=cash_returns,
+    )
     equity = initial_capital * (1.0 + strategy_return).cumprod()
 
     result = pd.DataFrame(
@@ -93,6 +98,7 @@ def run_drawdown_tranche_strategy(
             "strategy_return": strategy_return.values,
             "equity": equity.values,
             "position": held_position.values,
+            "cash_position": (1.0 - held_position).values,
             "target_position": target_position.values,
             "drawdown_from_high": drawdown.values,
             "turnover": turnover.values,
