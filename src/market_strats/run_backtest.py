@@ -27,6 +27,11 @@ from market_strats.strategies.sma_trend import run_sma_trend_strategy
 from market_strats.strategies.trend_filtered_drawdown import (
     run_trend_filtered_drawdown_strategy,
 )
+from market_strats.analysis.comparison import (
+    create_strategy_scorecard,
+    create_strategy_verdicts,
+    write_scorecard_markdown,
+)
 
 
 def load_config(config_path: str | Path) -> dict:
@@ -177,6 +182,18 @@ def main() -> None:
     rolling_metrics_df.to_csv(rolling_metrics_path, index=False)
     rolling_summary_df.to_csv(rolling_summary_path, index=False)
 
+    strategy_scorecard_df = create_strategy_scorecard(
+        full_period_metrics=metrics_df,
+        rolling_summary=rolling_summary_df,
+    )
+    strategy_scorecard_df = create_strategy_verdicts(strategy_scorecard_df)
+
+    strategy_scorecard_path = reports_dir / f"{ticker}_strategy_scorecard.csv"
+    strategy_scorecard_markdown_path = reports_dir / f"{ticker}_strategy_scorecard.md"
+
+    strategy_scorecard_df.to_csv(strategy_scorecard_path, index=False)
+    write_scorecard_markdown(strategy_scorecard_df, strategy_scorecard_markdown_path)
+
     print("\nFull-period strategy comparison:")
     print(metrics_df.to_string(index=False))
 
@@ -186,11 +203,29 @@ def main() -> None:
     print("\nRolling-window summary:")
     print(rolling_summary_df.to_string(index=False))
 
+    print("\nStrategy scorecard:")
+    print(
+        strategy_scorecard_df[
+            [
+                "composite_rank",
+                "strategy",
+                "composite_score",
+                "cagr_pct",
+                "max_drawdown_pct",
+                "sharpe",
+                "trade_count",
+                "verdict",
+            ]
+        ].to_string(index=False)
+    )
+
     print(f"\nSaved full-period metrics to: {metrics_path}")
     print(f"Saved regime metrics to: {regime_metrics_path}")
     print(f"Saved regime summary to: {regime_summary_path}")
     print(f"Saved rolling metrics to: {rolling_metrics_path}")
     print(f"Saved rolling summary to: {rolling_summary_path}")
+    print(f"Saved strategy scorecard to: {strategy_scorecard_path}")
+    print(f"Saved strategy scorecard report to: {strategy_scorecard_markdown_path}")
     print(f"Saved equity curve chart to: {equity_plot_path}")
     print(f"Saved drawdown chart to: {drawdown_plot_path}")
 
