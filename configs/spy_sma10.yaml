@@ -2,7 +2,16 @@ ticker: SPY
 start_date: "1993-01-29"
 end_date:
 initial_capital: 10000
+
 sma_months: 10
 sma_days: 200
 momentum_months: 12
+
+drawdown_base_allocation: 0.70
+drawdown_tranche_allocation: 0.10
+drawdown_levels:
+  - 0.10
+  - 0.20
+  - 0.30
+
 slippage_bps: 5

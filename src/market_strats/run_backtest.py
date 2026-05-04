@@ -22,6 +22,7 @@ from market_strats.data.validation import validate_price_data
 from market_strats.strategies.absolute_momentum import run_absolute_momentum_strategy
 from market_strats.strategies.buy_and_hold import run_buy_and_hold
 from market_strats.strategies.daily_sma_trend import run_daily_sma_trend_strategy
+from market_strats.strategies.drawdown_tranche import run_drawdown_tranche_strategy
 from market_strats.strategies.sma_trend import run_sma_trend_strategy
 
 
@@ -62,9 +63,15 @@ def main() -> None:
 
     ticker = config["ticker"].upper()
     initial_capital = float(config["initial_capital"])
+
     sma_months = int(config["sma_months"])
     sma_days = int(config["sma_days"])
     momentum_months = int(config["momentum_months"])
+
+    drawdown_base_allocation = float(config["drawdown_base_allocation"])
+    drawdown_tranche_allocation = float(config["drawdown_tranche_allocation"])
+    drawdown_levels = [float(level) for level in config["drawdown_levels"]]
+
     slippage_bps = float(config["slippage_bps"])
 
     reports_dir = Path("reports")
@@ -95,11 +102,21 @@ def main() -> None:
         slippage_bps=slippage_bps,
     )
 
+    drawdown_tranche = run_drawdown_tranche_strategy(
+        prices=prices,
+        initial_capital=initial_capital,
+        base_allocation=drawdown_base_allocation,
+        tranche_allocation=drawdown_tranche_allocation,
+        drawdown_levels=drawdown_levels,
+        slippage_bps=slippage_bps,
+    )
+
     results = {
         "Buy and Hold": buy_hold,
         f"{sma_months}-Month SMA": sma_trend,
         f"{sma_days}-Day SMA": daily_sma_trend,
         f"{momentum_months}-Month Absolute Momentum": absolute_momentum,
+        "Drawdown Tranche": drawdown_tranche,
     }
 
     metrics = [
@@ -110,6 +127,7 @@ def main() -> None:
             absolute_momentum,
             f"{momentum_months}-Month Absolute Momentum",
         ),
+        calculate_metrics(drawdown_tranche, "Drawdown Tranche"),
     ]
 
     metrics_df = pd.DataFrame(metrics)
