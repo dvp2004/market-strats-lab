@@ -43,6 +43,11 @@ from market_strats.strategies.trend_filtered_drawdown import (
     run_trend_filtered_drawdown_strategy,
 )
 
+from market_strats.analysis.cross_asset_diagnostics import (
+    create_buy_hold_vs_momentum_diagnostic,
+    write_buy_hold_vs_momentum_markdown,
+)
+
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -416,6 +421,23 @@ def write_cross_asset_summaries(
             reports_dir / "cross_asset_rolling_summaries.csv",
             index=False,
         )
+
+    if full_metrics and rolling_summaries:
+        diagnostic = create_buy_hold_vs_momentum_diagnostic(
+            metrics=pd.concat(full_metrics, ignore_index=True),
+            rolling_summary=pd.concat(rolling_summaries, ignore_index=True),
+        )
+
+        diagnostic_path = reports_dir / "cross_asset_buy_hold_vs_12m_momentum.csv"
+        diagnostic_markdown_path = (
+            reports_dir / "cross_asset_buy_hold_vs_12m_momentum.md"
+        )
+
+        diagnostic.to_csv(diagnostic_path, index=False)
+        write_buy_hold_vs_momentum_markdown(diagnostic, diagnostic_markdown_path)
+
+        print(f"Saved cross-asset diagnostic to: {diagnostic_path}")
+        print(f"Saved cross-asset diagnostic report to: {diagnostic_markdown_path}")    
 
     if momentum_robustness:
         combined_momentum_robustness = pd.concat(momentum_robustness, ignore_index=True)
