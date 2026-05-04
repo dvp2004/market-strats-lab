@@ -9,6 +9,13 @@ use_cash_yield: true
 sma_months: 10
 sma_days: 200
 momentum_months: 12
+momentum_robustness_months:
+  - 6
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
 
 drawdown_base_allocation: 0.70
 drawdown_tranche_allocation: 0.10

@@ -40,6 +40,11 @@ from market_strats.data.cash_rates import (
     save_cash_rates_to_parquet,
 )
 
+from market_strats.analysis.momentum_robustness import (
+    run_momentum_window_robustness,
+    write_momentum_robustness_markdown,
+)
+
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -231,6 +236,44 @@ def main() -> None:
     strategy_scorecard_df.to_csv(strategy_scorecard_path, index=False)
     write_scorecard_markdown(strategy_scorecard_df, strategy_scorecard_markdown_path)
 
+    momentum_robustness_months = [
+        int(month) for month in config.get("momentum_robustness_months", [])
+    ]
+
+    if momentum_robustness_months:
+        momentum_robustness_df, momentum_robustness_rolling_df, _ = (
+            run_momentum_window_robustness(
+                prices=prices,
+                initial_capital=initial_capital,
+                lookback_months=momentum_robustness_months,
+                slippage_bps=slippage_bps,
+                cash_returns=cash_returns,
+            )
+        )
+
+        momentum_robustness_path = reports_dir / f"{ticker}_momentum_robustness.csv"
+        momentum_robustness_rolling_path = (
+            reports_dir / f"{ticker}_momentum_robustness_rolling_summary.csv"
+        )
+        momentum_robustness_markdown_path = (
+            reports_dir / f"{ticker}_momentum_robustness.md"
+        )
+
+        momentum_robustness_df.to_csv(momentum_robustness_path, index=False)
+        momentum_robustness_rolling_df.to_csv(
+            momentum_robustness_rolling_path,
+            index=False,
+        )
+        write_momentum_robustness_markdown(
+            momentum_robustness_df,
+            momentum_robustness_markdown_path,
+        )
+    else:
+        momentum_robustness_df = pd.DataFrame()
+        momentum_robustness_path = None
+        momentum_robustness_rolling_path = None
+        momentum_robustness_markdown_path = None
+
     print("\nFull-period strategy comparison:")
     print(metrics_df.to_string(index=False))
 
@@ -256,6 +299,23 @@ def main() -> None:
         ].to_string(index=False)
     )
 
+    if not momentum_robustness_df.empty:
+        print("\nMomentum-window robustness:")
+        print(
+            momentum_robustness_df[
+                [
+                    "lookback_months",
+                    "end_value",
+                    "cagr_pct",
+                    "max_drawdown_pct",
+                    "sharpe",
+                    "trade_count",
+                    "rolling_3y_worst_cagr_pct",
+                    "rolling_5y_worst_cagr_pct",
+                ]
+            ].to_string(index=False)
+        )
+
     print(f"\nSaved full-period metrics to: {metrics_path}")
     print(f"Saved regime metrics to: {regime_metrics_path}")
     print(f"Saved regime summary to: {regime_summary_path}")
@@ -265,6 +325,11 @@ def main() -> None:
     print(f"Saved strategy scorecard report to: {strategy_scorecard_markdown_path}")
     print(f"Saved equity curve chart to: {equity_plot_path}")
     print(f"Saved drawdown chart to: {drawdown_plot_path}")
+
+    if momentum_robustness_path is not None:
+        print(f"Saved momentum robustness to: {momentum_robustness_path}")
+        print(f"Saved momentum robustness rolling summary to: {momentum_robustness_rolling_path}")
+        print(f"Saved momentum robustness report to: {momentum_robustness_markdown_path}")
 
 
 if __name__ == "__main__":
