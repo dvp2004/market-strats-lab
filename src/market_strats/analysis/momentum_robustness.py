@@ -70,6 +70,14 @@ def _get_rolling_value(
     window_years: int,
     column: str,
 ) -> float:
+    if rolling_summary.empty:
+        return float("nan")
+
+    required_columns = {"strategy", "window_years", column}
+
+    if not required_columns.issubset(set(rolling_summary.columns)):
+        return float("nan")
+
     row = rolling_summary[
         (rolling_summary["strategy"] == strategy)
         & (rolling_summary["window_years"] == window_years)

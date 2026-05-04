@@ -17,6 +17,10 @@ def slice_result_by_rolling_window(
 
     The sliced return series is recalculated from the sliced equity curve so that
     each window starts cleanly at 0% return.
+
+    A window is only accepted if it contains enough trading days for the requested
+    lookback length. This avoids treating partial early-history windows as full
+    3-year or 5-year windows.
     """
     df = result.copy()
     df["date"] = pd.to_datetime(df["date"])
@@ -27,7 +31,14 @@ def slice_result_by_rolling_window(
     mask = (df["date"] >= window_start) & (df["date"] <= end_date)
     window_df = df.loc[mask].copy().reset_index(drop=True)
 
-    if len(window_df) < 252:
+    min_required_rows = int(252 * years * 0.90)
+
+    if len(window_df) < min_required_rows:
+        return pd.DataFrame()
+
+    actual_years = (window_df["date"].iloc[-1] - window_df["date"].iloc[0]).days / 365.25
+
+    if actual_years < years * 0.90:
         return pd.DataFrame()
 
     window_df["strategy_return"] = window_df["equity"].pct_change().fillna(0.0)

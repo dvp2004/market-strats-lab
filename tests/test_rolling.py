@@ -7,8 +7,8 @@ from market_strats.analysis.rolling import (
 
 
 def test_slice_result_by_rolling_window_recalculates_returns():
-    dates = pd.date_range("2020-01-01", periods=600, freq="B")
-    equity = pd.Series(range(1000, 1600), dtype=float)
+    dates = pd.date_range("2020-01-01", periods=800, freq="B")
+    equity = pd.Series(range(1000, 1800), dtype=float)
 
     result = pd.DataFrame(
         {
@@ -23,15 +23,39 @@ def test_slice_result_by_rolling_window_recalculates_returns():
 
     sliced = slice_result_by_rolling_window(
         result=result,
-        end_date=pd.Timestamp("2022-01-03"),
+        end_date=pd.Timestamp("2022-12-30"),
         years=1,
     )
 
     assert not sliced.empty
     assert sliced["strategy_return"].iloc[0] == 0.0
-    assert sliced["date"].min() >= pd.Timestamp("2021-01-03")
-    assert sliced["date"].max() <= pd.Timestamp("2022-01-03")
+    assert sliced["date"].min() >= pd.Timestamp("2021-12-30")
+    assert sliced["date"].max() <= pd.Timestamp("2022-12-30")
 
+
+def test_slice_result_by_rolling_window_rejects_short_partial_window():
+    dates = pd.date_range("2020-01-01", periods=300, freq="B")
+    equity = pd.Series(range(1000, 1300), dtype=float)
+
+    result = pd.DataFrame(
+        {
+            "date": dates,
+            "adj_close": equity.values,
+            "strategy_return": 0.0,
+            "equity": equity.values,
+            "position": 1.0,
+            "turnover": 0.0,
+        }
+    )
+
+    sliced = slice_result_by_rolling_window(
+        result=result,
+        end_date=pd.Timestamp("2020-12-31"),
+        years=3,
+    )
+
+    assert sliced.empty
+    
 
 def test_create_rolling_summary_groups_by_window_and_strategy():
     rolling_metrics = pd.DataFrame(

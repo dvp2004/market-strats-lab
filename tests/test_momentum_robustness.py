@@ -37,7 +37,7 @@ def test_run_momentum_window_robustness_rejects_empty_lookbacks():
 
 
 def test_run_momentum_window_robustness_outputs_one_row_per_lookback():
-    prices = make_price_frame(list(range(100, 800)))
+    prices = make_price_frame(list(range(100, 1800)))
     lookbacks = [6, 12]
 
     result, rolling_summary, strategy_results = run_momentum_window_robustness(
