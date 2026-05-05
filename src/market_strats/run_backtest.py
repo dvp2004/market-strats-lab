@@ -71,6 +71,11 @@ from market_strats.analysis.core_satellite_diagnostic import (
     write_core_satellite_diagnostic_markdown,
 )
 
+from market_strats.analysis.expanded_universe_diagnostic import (
+    create_expanded_universe_diagnostic,
+    write_expanded_universe_diagnostic_markdown,
+)
+
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -540,6 +545,31 @@ def write_cross_asset_summaries(
             reports_dir / "cross_asset_strategy_scorecards.csv",
             index=False,
         )
+
+    if full_metrics and scorecards:
+        expanded_diagnostic = create_expanded_universe_diagnostic(
+            metrics=pd.concat(full_metrics, ignore_index=True),
+            scorecards=pd.concat(scorecards, ignore_index=True),
+        )
+
+        expanded_diagnostic_path = reports_dir / "expanded_universe_diagnostic.csv"
+        expanded_diagnostic_markdown_path = (
+            reports_dir / "expanded_universe_diagnostic.md"
+        )
+
+        expanded_diagnostic.to_csv(expanded_diagnostic_path, index=False)
+        write_expanded_universe_diagnostic_markdown(
+            diagnostic=expanded_diagnostic,
+            output_path=expanded_diagnostic_markdown_path,
+        )
+
+        print("\nExpanded universe diagnostic:")
+        print(expanded_diagnostic.to_string(index=False))
+        print(f"Saved expanded universe diagnostic to: {expanded_diagnostic_path}")
+        print(
+            "Saved expanded universe diagnostic report to: "
+            f"{expanded_diagnostic_markdown_path}"
+        )    
 
     if rolling_summaries:
         combined_rolling = pd.concat(rolling_summaries, ignore_index=True)

@@ -5,7 +5,9 @@ from pathlib import Path
 import pandas as pd
 import yfinance as yf
 
-from market_strats.analysis.metrics import TRADING_DAYS_PER_YEAR
+
+def _safe_cash_filename(ticker: str) -> str:
+    return ticker.replace("^", "").replace("-", "_").upper()
 
 
 def fetch_cash_yield_rates(
@@ -14,16 +16,13 @@ def fetch_cash_yield_rates(
     end_date: str | None = None,
 ) -> pd.DataFrame:
     """
-    Fetch a cash yield proxy.
+    Fetch annualised cash yield proxy data.
 
-    For the first implementation, we use Yahoo Finance ^IRX as a proxy for
-    short-term Treasury bill yield.
-
-    Yahoo typically reports ^IRX as a percentage-like yield value, e.g. 5.25
-    meaning approximately 5.25% annualised. We convert this to a decimal
-    annual yield, then to an approximate daily return.
+    For ^IRX, Yahoo reports the 13-week T-bill yield in percentage terms.
+    We store the annualised yield as a decimal. Conversion into per-period
+    cash returns happens later, when we know the asset's date frequency.
     """
-    raw = yf.download(
+    data = yf.download(
         ticker,
         start=start_date,
         end=end_date,
@@ -31,62 +30,121 @@ def fetch_cash_yield_rates(
         progress=False,
     )
 
-    if raw.empty:
-        raise ValueError(f"No cash yield data returned for ticker={ticker}")
+    if data.empty:
+        raise ValueError(f"No cash yield data returned for {ticker}")
 
-    if isinstance(raw.columns, pd.MultiIndex):
-        raw.columns = [col[0] for col in raw.columns]
+    data = data.reset_index()
 
-    df = raw.reset_index()
+    if isinstance(data.columns, pd.MultiIndex):
+        data.columns = [column[0].lower() for column in data.columns]
+    else:
+        data.columns = [str(column).lower().replace(" ", "_") for column in data.columns]
 
-    if "Date" not in df.columns or "Close" not in df.columns:
-        raise ValueError(f"Cash yield data for {ticker} must contain Date and Close columns")
+    if "date" not in data.columns:
+        raise ValueError(f"Cash yield data for {ticker} does not contain date column")
 
-    result = pd.DataFrame(
-        {
-            "date": pd.to_datetime(df["Date"]).dt.tz_localize(None),
-            "yield_pct": pd.to_numeric(df["Close"], errors="coerce"),
-        }
-    )
+    close_column = "adj_close" if "adj_close" in data.columns else "close"
 
-    result = result.dropna(subset=["yield_pct"])
-    result = result.sort_values("date").reset_index(drop=True)
+    if close_column not in data.columns:
+        raise ValueError(f"Cash yield data for {ticker} does not contain close column")
 
-    result["annual_yield_decimal"] = result["yield_pct"] / 100.0
-    result["daily_cash_return"] = (
-        (1.0 + result["annual_yield_decimal"]) ** (1.0 / TRADING_DAYS_PER_YEAR)
-    ) - 1.0
+    cash_rates = data[["date", close_column]].copy()
+    cash_rates = cash_rates.rename(columns={close_column: "annual_yield_pct"})
+    cash_rates["date"] = pd.to_datetime(cash_rates["date"])
+    cash_rates["annual_yield"] = cash_rates["annual_yield_pct"].astype(float) / 100.0
 
-    return result[["date", "yield_pct", "annual_yield_decimal", "daily_cash_return"]]
+    return cash_rates[["date", "annual_yield"]].sort_values("date").reset_index(drop=True)
 
 
 def save_cash_rates_to_parquet(
-    df: pd.DataFrame,
+    cash_rates: pd.DataFrame,
     ticker: str,
-    output_dir: str | Path,
+    output_dir: str | Path = "data/processed",
 ) -> Path:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    safe_ticker = ticker.replace("^", "")
-    output_path = output_dir / f"{safe_ticker.upper()}_cash_rates.parquet"
+    safe_ticker = _safe_cash_filename(ticker)
+    output_path = output_dir / f"{safe_ticker}_cash_rates.parquet"
 
-    df.to_parquet(output_path, index=False)
+    cash_rates.to_parquet(output_path, index=False)
 
     return output_path
 
+def normalise_cash_rates_schema(cash_rates: pd.DataFrame) -> pd.DataFrame:
+    """
+    Normalise older cached cash-rate parquet files to the current schema.
 
-def load_cash_rates_from_parquet(ticker: str, input_dir: str | Path) -> pd.DataFrame:
-    safe_ticker = ticker.replace("^", "")
-    input_path = Path(input_dir) / f"{safe_ticker.upper()}_cash_rates.parquet"
+    Current schema:
+    - date
+    - annual_yield
 
-    if not input_path.exists():
-        raise FileNotFoundError(f"Could not find cash rates file: {input_path}")
+    Older cached files may contain:
+    - annual_yield_pct
+    - daily_cash_return
+    - cash_return
+    """
+    df = cash_rates.copy()
 
-    df = pd.read_parquet(input_path)
+    if "date" not in df.columns:
+        raise ValueError("Cash rates data must contain a date column")
+
     df["date"] = pd.to_datetime(df["date"])
 
-    return df.sort_values("date").reset_index(drop=True)
+    if "annual_yield" in df.columns:
+        df["annual_yield"] = df["annual_yield"].astype(float)
+        return df[["date", "annual_yield"]].sort_values("date").reset_index(drop=True)
+
+    if "annual_yield_pct" in df.columns:
+        df["annual_yield"] = df["annual_yield_pct"].astype(float) / 100.0
+        return df[["date", "annual_yield"]].sort_values("date").reset_index(drop=True)
+
+    if "daily_cash_return" in df.columns:
+        df["annual_yield"] = (1.0 + df["daily_cash_return"].astype(float)) ** 252 - 1.0
+        return df[["date", "annual_yield"]].sort_values("date").reset_index(drop=True)
+
+    if "cash_return" in df.columns:
+        df["annual_yield"] = (1.0 + df["cash_return"].astype(float)) ** 252 - 1.0
+        return df[["date", "annual_yield"]].sort_values("date").reset_index(drop=True)
+
+    raise ValueError(
+        "Cash rates data must contain one of: annual_yield, annual_yield_pct, "
+        "daily_cash_return, cash_return"
+    )
+
+
+def load_cash_rates_from_parquet(
+    ticker: str,
+    input_dir: str | Path = "data/processed",
+) -> pd.DataFrame:
+    safe_ticker = _safe_cash_filename(ticker)
+    input_path = Path(input_dir) / f"{safe_ticker}_cash_rates.parquet"
+
+    if not input_path.exists():
+        raise FileNotFoundError(f"Cash rates file not found: {input_path}")
+
+    cash_rates = pd.read_parquet(input_path)
+
+    return normalise_cash_rates_schema(cash_rates)
+
+
+def _infer_periods_per_year_from_dates(dates: pd.Series) -> float:
+    dates = pd.Series(pd.to_datetime(dates)).sort_values().reset_index(drop=True)
+
+    if len(dates) < 2:
+        return 252.0
+
+    elapsed_years = (dates.iloc[-1] - dates.iloc[0]).days / 365.25
+
+    if elapsed_years <= 0:
+        return 252.0
+
+    periods_per_year = len(dates) / elapsed_years
+
+    if periods_per_year <= 0:
+        return 252.0
+
+    return float(periods_per_year)
 
 
 def align_cash_returns_to_price_dates(
@@ -94,17 +152,28 @@ def align_cash_returns_to_price_dates(
     price_dates: pd.Series,
 ) -> pd.Series:
     """
-    Align daily cash returns to the asset trading dates.
+    Align annualised cash yields to asset dates and convert them into per-period returns.
 
-    Missing cash yield dates are forward-filled. If no cash rate is available
-    at the beginning, cash return is set to 0 until data begins.
+    This matters because ETFs use trading-day dates while BTC-USD uses calendar-day dates.
+    ETF cash returns should annualise around 252 observations per year.
+    BTC cash returns should annualise closer to 365 observations per year.
     """
-    cash_df = cash_rates.copy()
-    cash_df["date"] = pd.to_datetime(cash_df["date"])
-    cash_df = cash_df.sort_values("date").set_index("date")
+    if cash_rates.empty:
+        return pd.Series(0.0, index=pd.to_datetime(price_dates), name="cash_return")
 
-    target_dates = pd.to_datetime(price_dates)
-    aligned = cash_df["daily_cash_return"].reindex(target_dates, method="ffill")
-    aligned = aligned.fillna(0.0)
+    cash_rates = normalise_cash_rates_schema(cash_rates)
+    
+    dates = pd.to_datetime(price_dates)
+    periods_per_year = _infer_periods_per_year_from_dates(dates)
 
-    return pd.Series(aligned.values, index=target_dates, name="cash_return")
+    cash = cash_rates.copy()
+    cash["date"] = pd.to_datetime(cash["date"])
+    cash = cash.sort_values("date").set_index("date")
+
+    aligned = cash["annual_yield"].reindex(dates).ffill().fillna(0.0)
+
+    per_period_cash_return = (1.0 + aligned) ** (1.0 / periods_per_year) - 1.0
+    per_period_cash_return.name = "cash_return"
+    per_period_cash_return.index = dates
+
+    return per_period_cash_return
