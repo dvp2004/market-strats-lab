@@ -62,6 +62,10 @@ from market_strats.analysis.dual_momentum_opportunity import (
     write_dual_momentum_opportunity_markdown,
 )
 
+from market_strats.strategies.core_satellite import (
+    run_independent_core_satellite_strategy,
+)
+
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
         return yaml.safe_load(file)
@@ -140,6 +144,34 @@ def get_or_fetch_cash_returns(config: dict, price_dates: pd.Series) -> pd.Series
         print(f"Saved cash yield data to {save_path}")
 
     return align_cash_returns_to_price_dates(cash_rates, price_dates)
+
+def get_core_satellite_config(config: dict) -> dict | None:
+    core_satellite_config = config.get("core_satellite")
+
+    if not core_satellite_config:
+        return None
+
+    if not bool(core_satellite_config.get("enabled", False)):
+        return None
+
+    ticker = str(core_satellite_config["ticker"]).upper()
+    core_weight = float(core_satellite_config["core_weight"])
+    satellite_weight = float(core_satellite_config["satellite_weight"])
+    rebalance_mode = str(core_satellite_config["rebalance_mode"])
+
+    if rebalance_mode != "independent_sleeves":
+        raise ValueError("Only independent_sleeves rebalance_mode is supported for now")
+
+    if round(core_weight + satellite_weight, 10) != 1.0:
+        raise ValueError("core_weight + satellite_weight must equal 1")
+
+    return {
+        "ticker": ticker,
+        "core_weight": core_weight,
+        "satellite_weight": satellite_weight,
+        "satellite_strategy": str(core_satellite_config["satellite_strategy"]),
+        "rebalance_mode": rebalance_mode,
+    }
 
 def make_safe_filename(value: str) -> str:
     return (
@@ -242,16 +274,31 @@ def run_backtest_for_ticker(
         "Trend-Filtered Drawdown": trend_filtered_drawdown,
     }
 
+    core_satellite_config = get_core_satellite_config(config)
+
+    if core_satellite_config is not None and ticker == core_satellite_config["ticker"]:
+        core_weight = core_satellite_config["core_weight"]
+        satellite_weight = core_satellite_config["satellite_weight"]
+
+        core_satellite_strategy_name = (
+            f"{int(core_weight * 100)}/{int(satellite_weight * 100)} "
+            "Core-Satellite SPY B&H + 12M Momentum"
+        )
+
+        core_satellite = run_independent_core_satellite_strategy(
+            core_result=buy_hold,
+            satellite_result=absolute_momentum,
+            initial_capital=initial_capital,
+            core_weight=core_weight,
+            satellite_weight=satellite_weight,
+            strategy_name=core_satellite_strategy_name,
+        )
+
+        results[core_satellite_strategy_name] = core_satellite
+
     metrics = [
-        calculate_metrics(buy_hold, "Buy and Hold"),
-        calculate_metrics(sma_trend, f"{sma_months}-Month SMA"),
-        calculate_metrics(daily_sma_trend, f"{sma_days}-Day SMA"),
-        calculate_metrics(
-            absolute_momentum,
-            f"{momentum_months}-Month Absolute Momentum",
-        ),
-        calculate_metrics(drawdown_tranche, "Drawdown Tranche"),
-        calculate_metrics(trend_filtered_drawdown, "Trend-Filtered Drawdown"),
+        calculate_metrics(result, strategy_name)
+        for strategy_name, result in results.items()
     ]
 
     metrics_df = pd.DataFrame(metrics)

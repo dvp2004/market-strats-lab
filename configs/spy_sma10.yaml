@@ -43,3 +43,11 @@ drawdown_levels:
 trend_filtered_drawdown_off_allocation: 0.00
 
 slippage_bps: 5
+
+core_satellite:
+  enabled: true
+  ticker: SPY
+  core_weight: 0.60
+  satellite_weight: 0.40
+  satellite_strategy: 12_month_absolute_momentum
+  rebalance_mode: independent_sleeves

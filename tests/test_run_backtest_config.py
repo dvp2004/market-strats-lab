@@ -1,6 +1,10 @@
 import pytest
 
-from market_strats.run_backtest import get_dual_momentum_pairs, get_tickers
+from market_strats.run_backtest import (
+    get_core_satellite_config,
+    get_dual_momentum_pairs,
+    get_tickers,
+)
 
 def test_get_tickers_uses_tickers_list_when_available():
     config = {"tickers": ["spy", "qqq"]}
@@ -47,3 +51,56 @@ def test_get_dual_momentum_pairs_rejects_invalid_pair_length():
 
     with pytest.raises(ValueError):
         get_dual_momentum_pairs(config)        
+
+def test_get_core_satellite_config_returns_enabled_config():
+    config = {
+        "core_satellite": {
+            "enabled": True,
+            "ticker": "spy",
+            "core_weight": 0.60,
+            "satellite_weight": 0.40,
+            "satellite_strategy": "12_month_absolute_momentum",
+            "rebalance_mode": "independent_sleeves",
+        }
+    }
+
+    result = get_core_satellite_config(config)
+
+    assert result == {
+        "ticker": "SPY",
+        "core_weight": 0.60,
+        "satellite_weight": 0.40,
+        "satellite_strategy": "12_month_absolute_momentum",
+        "rebalance_mode": "independent_sleeves",
+    }
+
+
+def test_get_core_satellite_config_returns_none_when_disabled():
+    config = {
+        "core_satellite": {
+            "enabled": False,
+            "ticker": "SPY",
+            "core_weight": 0.60,
+            "satellite_weight": 0.40,
+            "satellite_strategy": "12_month_absolute_momentum",
+            "rebalance_mode": "independent_sleeves",
+        }
+    }
+
+    assert get_core_satellite_config(config) is None
+
+
+def test_get_core_satellite_config_rejects_non_independent_mode():
+    config = {
+        "core_satellite": {
+            "enabled": True,
+            "ticker": "SPY",
+            "core_weight": 0.60,
+            "satellite_weight": 0.40,
+            "satellite_strategy": "12_month_absolute_momentum",
+            "rebalance_mode": "annual",
+        }
+    }
+
+    with pytest.raises(ValueError):
+        get_core_satellite_config(config)
