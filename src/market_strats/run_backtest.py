@@ -76,6 +76,11 @@ from market_strats.analysis.expanded_universe_diagnostic import (
     write_expanded_universe_diagnostic_markdown,
 )
 
+from market_strats.analysis.strategy_purpose import (
+    classify_strategy_purpose,
+    write_strategy_purpose_markdown,
+)
+
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -368,6 +373,19 @@ def run_backtest_for_ticker(
         strategy_scorecard_markdown_path,
     )
 
+    strategy_purpose_df = classify_strategy_purpose(
+        metrics=metrics_df,
+        rolling_summary=rolling_summary_df,
+    )
+
+    strategy_purpose_path = reports_dir / f"{ticker}_strategy_purpose_classification.csv"
+    strategy_purpose_markdown_path = (
+        reports_dir / f"{ticker}_strategy_purpose_classification.md"
+    )
+
+    strategy_purpose_df.to_csv(strategy_purpose_path, index=False)
+    write_strategy_purpose_markdown(strategy_purpose_df, strategy_purpose_markdown_path)
+
     core_satellite_diagnostic_df = pd.DataFrame()
     core_satellite_diagnostic_path = None
     core_satellite_diagnostic_markdown_path = None
@@ -456,6 +474,23 @@ def run_backtest_for_ticker(
         ].to_string(index=False)
     )
 
+    print("\nStrategy purpose classification:")
+    print(
+        strategy_purpose_df[
+            [
+                "ticker",
+                "strategy",
+                "purpose_classification",
+                "wealth_test_pass",
+                "cagr_pct",
+                "buy_hold_cagr_pct",
+                "cagr_delta_vs_buy_hold_pct_points",
+                "drawdown_improvement_vs_buy_hold_pct_points",
+                "classification_note",
+            ]
+        ].to_string(index=False)
+    )
+
     if not core_satellite_diagnostic_df.empty:
         print("\nCore-satellite diagnostic:")
         print(core_satellite_diagnostic_df.to_string(index=False))
@@ -485,6 +520,11 @@ def run_backtest_for_ticker(
     print(f"Saved rolling summary to: {rolling_summary_path}")
     print(f"Saved strategy scorecard to: {strategy_scorecard_path}")
     print(f"Saved strategy scorecard report to: {strategy_scorecard_markdown_path}")
+    print(f"Saved strategy purpose classification to: {strategy_purpose_path}")
+    print(
+        "Saved strategy purpose classification report to: "
+        f"{strategy_purpose_markdown_path}"
+    )
     print(f"Saved equity curve chart to: {equity_plot_path}")
     print(f"Saved drawdown chart to: {drawdown_plot_path}")
 
@@ -507,6 +547,7 @@ def run_backtest_for_ticker(
         "scorecard": strategy_scorecard_df,
         "momentum_robustness": momentum_robustness_df,
         "core_satellite_diagnostic": core_satellite_diagnostic_df,
+        "strategy_purpose": strategy_purpose_df,
     }
 
 
@@ -569,6 +610,36 @@ def write_cross_asset_summaries(
         print(
             "Saved expanded universe diagnostic report to: "
             f"{expanded_diagnostic_markdown_path}"
+        )    
+
+    if full_metrics and rolling_summaries:
+        strategy_purpose = classify_strategy_purpose(
+            metrics=pd.concat(full_metrics, ignore_index=True),
+            rolling_summary=pd.concat(rolling_summaries, ignore_index=True),
+        )
+
+        strategy_purpose_path = (
+            reports_dir / "cross_asset_strategy_purpose_classification.csv"
+        )
+        strategy_purpose_markdown_path = (
+            reports_dir / "cross_asset_strategy_purpose_classification.md"
+        )
+
+        strategy_purpose.to_csv(strategy_purpose_path, index=False)
+        write_strategy_purpose_markdown(
+            classifications=strategy_purpose,
+            output_path=strategy_purpose_markdown_path,
+        )
+
+        print("\nCross-asset strategy purpose classification:")
+        print(strategy_purpose.to_string(index=False))
+        print(
+            "Saved cross-asset strategy purpose classification to: "
+            f"{strategy_purpose_path}"
+        )
+        print(
+            "Saved cross-asset strategy purpose classification report to: "
+            f"{strategy_purpose_markdown_path}"
         )    
 
     if rolling_summaries:
