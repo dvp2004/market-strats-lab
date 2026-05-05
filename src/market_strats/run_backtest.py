@@ -49,7 +49,18 @@ from market_strats.analysis.cross_asset_diagnostics import (
 )
 
 from market_strats.strategies.dual_momentum import run_dual_momentum_strategy
+from market_strats.analysis.dual_momentum_audit import (
+    create_allocation_audit,
+    create_cash_reason_summary,
+    create_holding_segments,
+    write_dual_momentum_audit_markdown,
+)
 
+from market_strats.analysis.dual_momentum_opportunity import (
+    create_opportunity_cost_segments,
+    create_opportunity_cost_summary,
+    write_dual_momentum_opportunity_markdown,
+)
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -577,6 +588,25 @@ def run_dual_momentum_pair(
     strategy_scorecard_df = create_strategy_verdicts(strategy_scorecard_df)
     strategy_scorecard_df.insert(0, "pair", pair_name)
 
+    holding_segments_df = create_holding_segments(
+        result=dual_momentum,
+        pair_name=pair_name,
+    )
+    allocation_audit_df = create_allocation_audit(
+        result=dual_momentum,
+        pair_name=pair_name,
+    )
+    cash_reason_summary_df = create_cash_reason_summary(
+        result=dual_momentum,
+        pair_name=pair_name,
+    )
+
+    opportunity_segments_df = create_opportunity_cost_segments(
+        result=dual_momentum,
+        pair_name=pair_name,
+    )
+    opportunity_summary_df = create_opportunity_cost_summary(opportunity_segments_df)
+
     metrics_path = reports_dir / f"dual_momentum_{safe_pair_name}_metrics.csv"
     rolling_path = reports_dir / f"dual_momentum_{safe_pair_name}_rolling_summary.csv"
     scorecard_path = reports_dir / f"dual_momentum_{safe_pair_name}_scorecard.csv"
@@ -584,12 +614,51 @@ def run_dual_momentum_pair(
     equity_plot_path = reports_dir / f"dual_momentum_{safe_pair_name}_equity_curves.png"
     drawdown_plot_path = reports_dir / f"dual_momentum_{safe_pair_name}_drawdowns.png"
 
+    holding_segments_path = (
+        reports_dir / f"dual_momentum_{safe_pair_name}_holding_segments.csv"
+    )
+    allocation_audit_path = (
+        reports_dir / f"dual_momentum_{safe_pair_name}_allocation_audit.csv"
+    )
+    cash_reason_summary_path = (
+        reports_dir / f"dual_momentum_{safe_pair_name}_cash_reason_summary.csv"
+    )
+    audit_markdown_path = reports_dir / f"dual_momentum_{safe_pair_name}_allocation_audit.md"
+
+    opportunity_segments_path = (
+        reports_dir / f"dual_momentum_{safe_pair_name}_opportunity_cost.csv"
+    )
+    opportunity_summary_path = (
+        reports_dir / f"dual_momentum_{safe_pair_name}_opportunity_summary.csv"
+    )
+    opportunity_markdown_path = (
+        reports_dir / f"dual_momentum_{safe_pair_name}_opportunity_cost.md"
+    )
+
     metrics_df.to_csv(metrics_path, index=False)
     rolling_summary_df.to_csv(rolling_path, index=False)
     strategy_scorecard_df.to_csv(scorecard_path, index=False)
     write_scorecard_markdown(
         strategy_scorecard_df.drop(columns=["pair"]),
         scorecard_md_path,
+    )
+
+    holding_segments_df.to_csv(holding_segments_path, index=False)
+    allocation_audit_df.to_csv(allocation_audit_path, index=False)
+    cash_reason_summary_df.to_csv(cash_reason_summary_path, index=False)
+    write_dual_momentum_audit_markdown(
+        allocation_audit=allocation_audit_df,
+        holding_segments=holding_segments_df,
+        cash_summary=cash_reason_summary_df,
+        output_path=audit_markdown_path,
+    )
+
+    opportunity_segments_df.to_csv(opportunity_segments_path, index=False)
+    opportunity_summary_df.to_csv(opportunity_summary_path, index=False)
+    write_dual_momentum_opportunity_markdown(
+        opportunity_segments=opportunity_segments_df,
+        opportunity_summary=opportunity_summary_df,
+        output_path=opportunity_markdown_path,
     )
 
     plot_equity_curves(results, equity_plot_path)
@@ -618,6 +687,32 @@ def run_dual_momentum_pair(
         ].to_string(index=False)
     )
 
+    print("\nDual momentum allocation audit:")
+    print(allocation_audit_df.to_string(index=False))
+
+    print("\nDual momentum cash reason summary:")
+    print(cash_reason_summary_df.to_string(index=False))
+
+    print("\nDual momentum worst holding segments:")
+    print(
+        holding_segments_df.sort_values("segment_return_pct")
+        .head(10)
+        .to_string(index=False)
+    )
+
+    print("\nDual momentum opportunity-cost summary:")
+    print(opportunity_summary_df.to_string(index=False))
+
+    print("\nDual momentum worst missed-opportunity segments:")
+    print(
+        opportunity_segments_df.sort_values(
+            "missed_return_vs_best_pct_points",
+            ascending=False,
+        )
+        .head(10)
+        .to_string(index=False)
+    )
+
     print(f"\nSaved dual momentum metrics to: {metrics_path}")
     print(f"Saved dual momentum rolling summary to: {rolling_path}")
     print(f"Saved dual momentum scorecard to: {scorecard_path}")
@@ -625,10 +720,24 @@ def run_dual_momentum_pair(
     print(f"Saved dual momentum equity curve chart to: {equity_plot_path}")
     print(f"Saved dual momentum drawdown chart to: {drawdown_plot_path}")
 
+    print(f"Saved dual momentum holding segments to: {holding_segments_path}")
+    print(f"Saved dual momentum allocation audit to: {allocation_audit_path}")
+    print(f"Saved dual momentum cash reason summary to: {cash_reason_summary_path}")
+    print(f"Saved dual momentum allocation audit report to: {audit_markdown_path}")
+
+    print(f"Saved dual momentum opportunity-cost segments to: {opportunity_segments_path}")
+    print(f"Saved dual momentum opportunity-cost summary to: {opportunity_summary_path}")
+    print(f"Saved dual momentum opportunity-cost report to: {opportunity_markdown_path}")
+
     return {
         "metrics": metrics_df,
         "rolling_summary": rolling_summary_df,
         "scorecard": strategy_scorecard_df,
+        "holding_segments": holding_segments_df,
+        "allocation_audit": allocation_audit_df,
+        "cash_reason_summary": cash_reason_summary_df,
+        "opportunity_segments": opportunity_segments_df,
+        "opportunity_summary": opportunity_summary_df,
     }
 
 def main() -> None:

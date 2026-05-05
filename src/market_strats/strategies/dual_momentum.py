@@ -90,6 +90,16 @@ def run_dual_momentum_strategy(
     signal_selected_asset = pd.Series(index=df.index, dtype="object")
     signal_selected_asset.iloc[0] = "CASH"
 
+    signal_cash_reason = pd.Series(index=df.index, dtype="object")
+    signal_cash_reason.iloc[0] = "INSUFFICIENT_HISTORY"
+
+    signal_relative_winner = pd.Series(index=df.index, dtype="object")
+    signal_winner_return = pd.Series(np.nan, index=df.index, dtype=float)
+    signal_cash_return = pd.Series(np.nan, index=df.index, dtype=float)
+
+    signal_reason = pd.Series(index=df.index, dtype="object")
+    signal_reason.iloc[0] = "WARMUP_CASH"
+
     signal_dates = trailing_return_a.dropna().index.intersection(
         trailing_return_b.dropna().index
     )
@@ -111,10 +121,12 @@ def run_dual_momentum_strategy(
             next_weight_a = 1.0 if winning_asset == asset_a_name else 0.0
             next_weight_b = 1.0 if winning_asset == asset_b_name else 0.0
             selected_asset = winning_asset
+            cash_reason = "INVESTED"
         else:
             next_weight_a = 0.0
             next_weight_b = 0.0
             selected_asset = "CASH"
+            cash_reason = "ABSOLUTE_FILTER"
 
         execution_index = df.index.searchsorted(signal_date, side="right")
 
@@ -123,10 +135,19 @@ def run_dual_momentum_strategy(
             target_weight_a.loc[execution_date] = next_weight_a
             target_weight_b.loc[execution_date] = next_weight_b
             signal_selected_asset.loc[execution_date] = selected_asset
+            signal_cash_reason.loc[execution_date] = cash_reason
+            signal_relative_winner.loc[execution_date] = winning_asset
+            signal_winner_return.loc[execution_date] = winning_return
+            signal_cash_return.loc[execution_date] = cash_momentum
 
     target_weight_a = target_weight_a.ffill().fillna(0.0)
     target_weight_b = target_weight_b.ffill().fillna(0.0)
     target_selected_asset = signal_selected_asset.ffill().fillna("CASH")
+    target_cash_reason = signal_cash_reason.ffill().fillna("INSUFFICIENT_HISTORY")
+    target_relative_winner = signal_relative_winner.ffill()
+    target_winner_return = signal_winner_return.ffill()
+    target_cash_return = signal_cash_return.ffill()
+    target_reason = signal_reason.ffill().fillna("WARMUP_CASH")
 
     held_weight_a = target_weight_a.shift(1).fillna(0.0)
     held_weight_b = target_weight_b.shift(1).fillna(0.0)
@@ -153,12 +174,20 @@ def run_dual_momentum_strategy(
     equity = initial_capital * (1.0 + strategy_return).cumprod()
 
     held_selected_asset = target_selected_asset.shift(1).fillna("CASH")
+    held_cash_reason = target_cash_reason.shift(1).fillna("INSUFFICIENT_HISTORY")
+    held_relative_winner = target_relative_winner.shift(1)
+    held_winner_return = target_winner_return.shift(1)
+    held_cash_return = target_cash_return.shift(1)
+    held_reason = target_reason.shift(1).fillna("WARMUP_CASH")
 
     result = pd.DataFrame(
         {
             "date": df.index,
             f"adj_close_{asset_a_name}": close_a.values,
             f"adj_close_{asset_b_name}": close_b.values,
+            f"return_{asset_a_name}": return_a.values,
+            f"return_{asset_b_name}": return_b.values,
+            "cash_return": aligned_cash_returns.values,
             "strategy_return": strategy_return.values,
             "equity": equity.values,
             "position": (held_weight_a + held_weight_b).values,
@@ -169,6 +198,16 @@ def run_dual_momentum_strategy(
             f"target_weight_{asset_b_name}": target_weight_b.values,
             "selected_asset": held_selected_asset.values,
             "target_selected_asset": target_selected_asset.values,
+            "selected_reason": held_reason.values,
+            "target_reason": target_reason.values,
+            "cash_reason": held_cash_reason.values,
+            "target_cash_reason": target_cash_reason.values,
+            "relative_winner": held_relative_winner.values,
+            "target_relative_winner": target_relative_winner.values,
+            "relative_winner_return": held_winner_return.values,
+            "target_relative_winner_return": target_winner_return.values,
+            "trailing_cash_return": held_cash_return.values,
+            "target_trailing_cash_return": target_cash_return.values,
             "turnover": turnover.values,
         }
     )
