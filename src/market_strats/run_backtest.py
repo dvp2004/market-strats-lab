@@ -66,6 +66,12 @@ from market_strats.strategies.core_satellite import (
     run_independent_core_satellite_strategy,
 )
 
+from market_strats.analysis.core_satellite_diagnostic import (
+    create_core_satellite_diagnostic,
+    write_core_satellite_diagnostic_markdown,
+)
+
+
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
         return yaml.safe_load(file)
@@ -357,6 +363,32 @@ def run_backtest_for_ticker(
         strategy_scorecard_markdown_path,
     )
 
+    core_satellite_diagnostic_df = pd.DataFrame()
+    core_satellite_diagnostic_path = None
+    core_satellite_diagnostic_markdown_path = None
+
+    if core_satellite_config is not None and ticker == core_satellite_config["ticker"]:
+        core_satellite_diagnostic_df = create_core_satellite_diagnostic(
+            metrics=metrics_df.drop(columns=["ticker"]),
+            rolling_summary=rolling_summary_df.drop(columns=["ticker"])
+            if "ticker" in rolling_summary_df.columns
+            else rolling_summary_df,
+            core_satellite_strategy=core_satellite_strategy_name,
+        )
+
+        core_satellite_diagnostic_path = (
+            reports_dir / f"{ticker}_core_satellite_diagnostic.csv"
+        )
+        core_satellite_diagnostic_markdown_path = (
+            reports_dir / f"{ticker}_core_satellite_diagnostic.md"
+        )
+
+        core_satellite_diagnostic_df.to_csv(core_satellite_diagnostic_path, index=False)
+        write_core_satellite_diagnostic_markdown(
+            diagnostic=core_satellite_diagnostic_df,
+            output_path=core_satellite_diagnostic_markdown_path,
+        )
+
     momentum_robustness_months = [
         int(month) for month in config.get("momentum_robustness_months", [])
     ]
@@ -419,6 +451,10 @@ def run_backtest_for_ticker(
         ].to_string(index=False)
     )
 
+    if not core_satellite_diagnostic_df.empty:
+        print("\nCore-satellite diagnostic:")
+        print(core_satellite_diagnostic_df.to_string(index=False))
+
     if not momentum_robustness_df.empty:
         print("\nMomentum-window robustness:")
         print(
@@ -447,6 +483,13 @@ def run_backtest_for_ticker(
     print(f"Saved equity curve chart to: {equity_plot_path}")
     print(f"Saved drawdown chart to: {drawdown_plot_path}")
 
+    if core_satellite_diagnostic_path is not None:
+        print(f"Saved core-satellite diagnostic to: {core_satellite_diagnostic_path}")
+        print(
+            "Saved core-satellite diagnostic report to: "
+            f"{core_satellite_diagnostic_markdown_path}"
+        )
+
     if momentum_robustness_path is not None:
         print(f"Saved momentum robustness to: {momentum_robustness_path}")
         print(f"Saved momentum robustness rolling summary to: {momentum_robustness_rolling_path}")
@@ -458,6 +501,7 @@ def run_backtest_for_ticker(
         "rolling_summary": rolling_summary_df,
         "scorecard": strategy_scorecard_df,
         "momentum_robustness": momentum_robustness_df,
+        "core_satellite_diagnostic": core_satellite_diagnostic_df,
     }
 
 
