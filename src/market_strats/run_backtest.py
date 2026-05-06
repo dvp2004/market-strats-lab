@@ -6,10 +6,38 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
+from market_strats.analysis.annual_rebalance_audit import (
+    create_annual_rebalance_audit,
+    create_annual_rebalance_audit_summary,
+    write_annual_rebalance_audit_markdown,
+)
 from market_strats.analysis.comparison import (
     create_strategy_scorecard,
     create_strategy_verdicts,
     write_scorecard_markdown,
+)
+from market_strats.analysis.core_satellite_diagnostic import (
+    create_core_satellite_diagnostic,
+    write_core_satellite_diagnostic_markdown,
+)
+from market_strats.analysis.cross_asset_diagnostics import (
+    create_buy_hold_vs_momentum_diagnostic,
+    write_buy_hold_vs_momentum_markdown,
+)
+from market_strats.analysis.dual_momentum_audit import (
+    create_allocation_audit,
+    create_cash_reason_summary,
+    create_holding_segments,
+    write_dual_momentum_audit_markdown,
+)
+from market_strats.analysis.dual_momentum_opportunity import (
+    create_opportunity_cost_segments,
+    create_opportunity_cost_summary,
+    write_dual_momentum_opportunity_markdown,
+)
+from market_strats.analysis.expanded_universe_diagnostic import (
+    create_expanded_universe_diagnostic,
+    write_expanded_universe_diagnostic_markdown,
 )
 from market_strats.analysis.metrics import calculate_metrics
 from market_strats.analysis.momentum_robustness import (
@@ -21,6 +49,10 @@ from market_strats.analysis.regimes import calculate_regime_metrics, create_regi
 from market_strats.analysis.rolling import (
     calculate_rolling_window_metrics,
     create_rolling_summary,
+)
+from market_strats.analysis.strategy_purpose import (
+    classify_strategy_purpose,
+    write_strategy_purpose_markdown,
 )
 from market_strats.data.cash_rates import (
     align_cash_returns_to_price_dates,
@@ -36,57 +68,18 @@ from market_strats.data.fetch_yfinance import (
 from market_strats.data.validation import validate_price_data
 from market_strats.strategies.absolute_momentum import run_absolute_momentum_strategy
 from market_strats.strategies.buy_and_hold import run_buy_and_hold
+from market_strats.strategies.core_satellite import (
+    run_annual_rebalanced_core_satellite_strategy,
+    run_independent_core_satellite_strategy,
+)
 from market_strats.strategies.daily_sma_trend import run_daily_sma_trend_strategy
 from market_strats.strategies.drawdown_tranche import run_drawdown_tranche_strategy
+from market_strats.strategies.dual_momentum import run_dual_momentum_strategy
 from market_strats.strategies.sma_trend import run_sma_trend_strategy
 from market_strats.strategies.trend_filtered_drawdown import (
     run_trend_filtered_drawdown_strategy,
 )
 
-from market_strats.analysis.cross_asset_diagnostics import (
-    create_buy_hold_vs_momentum_diagnostic,
-    write_buy_hold_vs_momentum_markdown,
-)
-
-from market_strats.strategies.dual_momentum import run_dual_momentum_strategy
-from market_strats.analysis.dual_momentum_audit import (
-    create_allocation_audit,
-    create_cash_reason_summary,
-    create_holding_segments,
-    write_dual_momentum_audit_markdown,
-)
-
-from market_strats.analysis.dual_momentum_opportunity import (
-    create_opportunity_cost_segments,
-    create_opportunity_cost_summary,
-    write_dual_momentum_opportunity_markdown,
-)
-
-from market_strats.strategies.core_satellite import (
-    run_annual_rebalanced_core_satellite_strategy,
-    run_independent_core_satellite_strategy,
-)
-
-from market_strats.analysis.core_satellite_diagnostic import (
-    create_core_satellite_diagnostic,
-    write_core_satellite_diagnostic_markdown,
-)
-
-from market_strats.analysis.expanded_universe_diagnostic import (
-    create_expanded_universe_diagnostic,
-    write_expanded_universe_diagnostic_markdown,
-)
-
-from market_strats.analysis.strategy_purpose import (
-    classify_strategy_purpose,
-    write_strategy_purpose_markdown,
-)
-
-from market_strats.analysis.annual_rebalance_audit import (
-    create_annual_rebalance_audit,
-    create_annual_rebalance_audit_summary,
-    write_annual_rebalance_audit_markdown,
-)
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -102,9 +95,9 @@ def get_tickers(config: dict) -> list[str]:
 
     raise ValueError("Config must contain either 'ticker' or 'tickers'")
 
+
 def get_dual_momentum_pairs(config: dict) -> list[dict]:
     pairs = config.get("dual_momentum_pairs", [])
-
     validated_pairs = []
 
     for pair in pairs:
@@ -118,54 +111,6 @@ def get_dual_momentum_pairs(config: dict) -> list[dict]:
 
     return validated_pairs
 
-def get_or_fetch_prices(ticker: str, config: dict) -> pd.DataFrame:
-    ticker = ticker.upper()
-    processed_dir = Path("data/processed")
-    price_path = processed_dir / f"{ticker}.parquet"
-
-    if price_path.exists():
-        print(f"Loading existing data from {price_path}")
-        prices = load_prices_from_parquet(ticker, processed_dir)
-    else:
-        print(f"Fetching {ticker} data from yfinance")
-        prices = fetch_daily_prices(
-            ticker=ticker,
-            start_date=config["start_date"],
-            end_date=config.get("end_date"),
-        )
-        save_path = save_prices_to_parquet(prices, ticker, processed_dir)
-        print(f"Saved data to {save_path}")
-
-    validate_price_data(prices, ticker)
-
-    return prices
-
-
-def get_or_fetch_cash_returns(config: dict, price_dates: pd.Series) -> pd.Series:
-    use_cash_yield = bool(config.get("use_cash_yield", False))
-
-    if not use_cash_yield:
-        return pd.Series(0.0, index=pd.to_datetime(price_dates), name="cash_return")
-
-    cash_ticker = config["cash_ticker"]
-    processed_dir = Path("data/processed")
-    safe_ticker = cash_ticker.replace("^", "")
-    cash_path = processed_dir / f"{safe_ticker.upper()}_cash_rates.parquet"
-
-    if cash_path.exists():
-        print(f"Loading existing cash yield data from {cash_path}")
-        cash_rates = load_cash_rates_from_parquet(cash_ticker, processed_dir)
-    else:
-        print(f"Fetching cash yield data from yfinance: {cash_ticker}")
-        cash_rates = fetch_cash_yield_rates(
-            ticker=cash_ticker,
-            start_date=config["start_date"],
-            end_date=config.get("end_date"),
-        )
-        save_path = save_cash_rates_to_parquet(cash_rates, cash_ticker, processed_dir)
-        print(f"Saved cash yield data to {save_path}")
-
-    return align_cash_returns_to_price_dates(cash_rates, price_dates)
 
 def get_core_satellite_config(config: dict) -> dict | None:
     core_satellite_config = config.get("core_satellite")
@@ -195,6 +140,7 @@ def get_core_satellite_config(config: dict) -> dict | None:
         "rebalance_mode": rebalance_mode,
     }
 
+
 def make_safe_filename(value: str) -> str:
     return (
         value.replace(" ", "_")
@@ -202,6 +148,80 @@ def make_safe_filename(value: str) -> str:
         .replace("\\", "_")
         .replace(":", "_")
     )
+
+
+def get_or_fetch_prices(ticker: str, config: dict) -> pd.DataFrame:
+    ticker = ticker.upper()
+    processed_dir = Path("data/processed")
+    price_path = processed_dir / f"{ticker}.parquet"
+
+    if price_path.exists():
+        print(f"Loading existing data from {price_path}")
+        prices = load_prices_from_parquet(ticker, processed_dir)
+    else:
+        print(f"Fetching {ticker} data from yfinance")
+        prices = fetch_daily_prices(
+            ticker=ticker,
+            start_date=config["start_date"],
+            end_date=config.get("end_date"),
+        )
+        save_path = save_prices_to_parquet(prices, ticker, processed_dir)
+        print(f"Saved data to {save_path}")
+
+    validate_price_data(prices, ticker)
+    return prices
+
+
+def get_or_fetch_cash_returns(config: dict, price_dates: pd.Series) -> pd.Series:
+    use_cash_yield = bool(config.get("use_cash_yield", False))
+
+    if not use_cash_yield:
+        return pd.Series(0.0, index=pd.to_datetime(price_dates), name="cash_return")
+
+    cash_ticker = config["cash_ticker"]
+    processed_dir = Path("data/processed")
+    safe_ticker = cash_ticker.replace("^", "")
+    cash_path = processed_dir / f"{safe_ticker.upper()}_cash_rates.parquet"
+
+    if cash_path.exists():
+        print(f"Loading existing cash yield data from {cash_path}")
+        cash_rates = load_cash_rates_from_parquet(cash_ticker, processed_dir)
+    else:
+        print(f"Fetching cash yield data from yfinance: {cash_ticker}")
+        cash_rates = fetch_cash_yield_rates(
+            ticker=cash_ticker,
+            start_date=config["start_date"],
+            end_date=config.get("end_date"),
+        )
+        save_path = save_cash_rates_to_parquet(cash_rates, cash_ticker, processed_dir)
+        print(f"Saved cash yield data to {save_path}")
+
+    return align_cash_returns_to_price_dates(cash_rates, price_dates)
+
+
+def save_annual_rebalance_audit_reports(
+    audit: pd.DataFrame,
+    summary: pd.DataFrame,
+    ticker: str,
+    reports_dir: Path,
+) -> tuple[Path | None, Path | None, Path | None]:
+    if audit.empty:
+        return None, None, None
+
+    audit_path = reports_dir / f"{ticker}_annual_rebalance_audit.csv"
+    summary_path = reports_dir / f"{ticker}_annual_rebalance_audit_summary.csv"
+    markdown_path = reports_dir / f"{ticker}_annual_rebalance_audit.md"
+
+    audit.to_csv(audit_path, index=False)
+    summary.to_csv(summary_path, index=False)
+    write_annual_rebalance_audit_markdown(
+        audit=audit,
+        summary=summary,
+        output_path=markdown_path,
+    )
+
+    return audit_path, summary_path, markdown_path
+
 
 def run_backtest_for_ticker(
     ticker: str,
@@ -213,10 +233,10 @@ def run_backtest_for_ticker(
     print(f"{'=' * 100}")
 
     initial_capital = float(config["initial_capital"])
-
     sma_months = int(config["sma_months"])
     sma_days = int(config["sma_days"])
     momentum_months = int(config["momentum_months"])
+    slippage_bps = float(config["slippage_bps"])
 
     drawdown_base_allocation = float(config["drawdown_base_allocation"])
     drawdown_tranche_allocation = float(config["drawdown_tranche_allocation"])
@@ -225,14 +245,24 @@ def run_backtest_for_ticker(
         config["trend_filtered_drawdown_off_allocation"]
     )
 
-    slippage_bps = float(config["slippage_bps"])
+    core_satellite_config = get_core_satellite_config(config)
+
+    core_satellite_strategy_name: str | None = None
+    annual_rebalanced_core_satellite_strategy_name: str | None = None
+    core_satellite_diagnostic_df = pd.DataFrame()
+    core_satellite_diagnostic_path: Path | None = None
+    core_satellite_diagnostic_markdown_path: Path | None = None
+    annual_rebalance_audit_df = pd.DataFrame()
+    annual_rebalance_audit_summary_df = pd.DataFrame()
+    annual_rebalance_audit_path: Path | None = None
+    annual_rebalance_audit_summary_path: Path | None = None
+    annual_rebalance_audit_markdown_path: Path | None = None
 
     prices = get_or_fetch_prices(ticker, config)
     cash_returns = get_or_fetch_cash_returns(config, prices["date"])
 
     actual_start_date = pd.to_datetime(prices["date"]).min().date()
     actual_end_date = pd.to_datetime(prices["date"]).max().date()
-
     print(f"{ticker} available test period: {actual_start_date} to {actual_end_date}")
 
     buy_hold = run_buy_and_hold(
@@ -240,7 +270,6 @@ def run_backtest_for_ticker(
         initial_capital=initial_capital,
         cash_returns=cash_returns,
     )
-
     sma_trend = run_sma_trend_strategy(
         prices=prices,
         initial_capital=initial_capital,
@@ -248,7 +277,6 @@ def run_backtest_for_ticker(
         slippage_bps=slippage_bps,
         cash_returns=cash_returns,
     )
-
     daily_sma_trend = run_daily_sma_trend_strategy(
         prices=prices,
         initial_capital=initial_capital,
@@ -256,7 +284,6 @@ def run_backtest_for_ticker(
         slippage_bps=slippage_bps,
         cash_returns=cash_returns,
     )
-
     absolute_momentum = run_absolute_momentum_strategy(
         prices=prices,
         initial_capital=initial_capital,
@@ -264,7 +291,6 @@ def run_backtest_for_ticker(
         slippage_bps=slippage_bps,
         cash_returns=cash_returns,
     )
-
     drawdown_tranche = run_drawdown_tranche_strategy(
         prices=prices,
         initial_capital=initial_capital,
@@ -274,7 +300,6 @@ def run_backtest_for_ticker(
         slippage_bps=slippage_bps,
         cash_returns=cash_returns,
     )
-
     trend_filtered_drawdown = run_trend_filtered_drawdown_strategy(
         prices=prices,
         initial_capital=initial_capital,
@@ -296,8 +321,6 @@ def run_backtest_for_ticker(
         "Trend-Filtered Drawdown": trend_filtered_drawdown,
     }
 
-    core_satellite_config = get_core_satellite_config(config)
-
     if core_satellite_config is not None and ticker == core_satellite_config["ticker"]:
         core_weight = core_satellite_config["core_weight"]
         satellite_weight = core_satellite_config["satellite_weight"]
@@ -305,6 +328,10 @@ def run_backtest_for_ticker(
         core_satellite_strategy_name = (
             f"{int(core_weight * 100)}/{int(satellite_weight * 100)} "
             "Core-Satellite SPY B&H + 12M Momentum"
+        )
+        annual_rebalanced_core_satellite_strategy_name = (
+            f"{int(core_weight * 100)}/{int(satellite_weight * 100)} "
+            "Annual Rebalanced Core-Satellite SPY B&H + 12M Momentum"
         )
 
         core_satellite = run_independent_core_satellite_strategy(
@@ -315,22 +342,14 @@ def run_backtest_for_ticker(
             satellite_weight=satellite_weight,
             strategy_name=core_satellite_strategy_name,
         )
-
-        annual_rebalanced_core_satellite_strategy_name = (
-            f"{int(core_weight * 100)}/{int(satellite_weight * 100)} "
-            "Annual Rebalanced Core-Satellite SPY B&H + 12M Momentum"
-        )
-
-        annual_rebalanced_core_satellite = (
-            run_annual_rebalanced_core_satellite_strategy(
-                core_result=buy_hold,
-                satellite_result=absolute_momentum,
-                initial_capital=initial_capital,
-                core_weight=core_weight,
-                satellite_weight=satellite_weight,
-                strategy_name=annual_rebalanced_core_satellite_strategy_name,
-                slippage_bps=slippage_bps,
-            )
+        annual_rebalanced_core_satellite = run_annual_rebalanced_core_satellite_strategy(
+            core_result=buy_hold,
+            satellite_result=absolute_momentum,
+            initial_capital=initial_capital,
+            core_weight=core_weight,
+            satellite_weight=satellite_weight,
+            strategy_name=annual_rebalanced_core_satellite_strategy_name,
+            slippage_bps=slippage_bps,
         )
 
         annual_rebalance_audit_df = create_annual_rebalance_audit(
@@ -346,12 +365,12 @@ def run_backtest_for_ticker(
             annual_rebalanced_core_satellite
         )
 
-    metrics = [
-        calculate_metrics(result, strategy_name)
-        for strategy_name, result in results.items()
-    ]
-
-    metrics_df = pd.DataFrame(metrics)
+    metrics_df = pd.DataFrame(
+        [
+            calculate_metrics(result, strategy_name)
+            for strategy_name, result in results.items()
+        ]
+    )
     metrics_df.insert(0, "ticker", ticker)
 
     metrics_path = reports_dir / f"{ticker}_strategy_comparison_metrics.csv"
@@ -359,7 +378,6 @@ def run_backtest_for_ticker(
 
     equity_plot_path = reports_dir / f"{ticker}_equity_curves.png"
     drawdown_plot_path = reports_dir / f"{ticker}_drawdowns.png"
-
     plot_equity_curves(results, equity_plot_path)
     plot_drawdowns(results, drawdown_plot_path)
 
@@ -372,7 +390,6 @@ def run_backtest_for_ticker(
 
     regime_metrics_path = reports_dir / f"{ticker}_regime_metrics.csv"
     regime_summary_path = reports_dir / f"{ticker}_regime_summary.csv"
-
     regime_metrics_df.to_csv(regime_metrics_path, index=False)
     regime_summary_df.to_csv(regime_summary_path, index=False)
 
@@ -385,7 +402,6 @@ def run_backtest_for_ticker(
 
     rolling_metrics_path = reports_dir / f"{ticker}_rolling_metrics.csv"
     rolling_summary_path = reports_dir / f"{ticker}_rolling_summary.csv"
-
     rolling_metrics_df.to_csv(rolling_metrics_path, index=False)
     rolling_summary_df.to_csv(rolling_summary_path, index=False)
 
@@ -400,7 +416,6 @@ def run_backtest_for_ticker(
 
     strategy_scorecard_path = reports_dir / f"{ticker}_strategy_scorecard.csv"
     strategy_scorecard_markdown_path = reports_dir / f"{ticker}_strategy_scorecard.md"
-
     strategy_scorecard_df.to_csv(strategy_scorecard_path, index=False)
     write_scorecard_markdown(
         strategy_scorecard_df.drop(columns=["ticker"]),
@@ -411,25 +426,14 @@ def run_backtest_for_ticker(
         metrics=metrics_df,
         rolling_summary=rolling_summary_df,
     )
-
     strategy_purpose_path = reports_dir / f"{ticker}_strategy_purpose_classification.csv"
     strategy_purpose_markdown_path = (
         reports_dir / f"{ticker}_strategy_purpose_classification.md"
     )
-
     strategy_purpose_df.to_csv(strategy_purpose_path, index=False)
     write_strategy_purpose_markdown(strategy_purpose_df, strategy_purpose_markdown_path)
 
-    annual_rebalance_audit_df = pd.DataFrame()
-    annual_rebalance_audit_summary_df = pd.DataFrame()
-    annual_rebalance_audit_path = None
-    annual_rebalance_audit_summary_path = None
-    annual_rebalance_audit_markdown_path = None
-    core_satellite_diagnostic_df = pd.DataFrame()
-    core_satellite_diagnostic_path = None
-    core_satellite_diagnostic_markdown_path = None
-
-    if core_satellite_config is not None and ticker == core_satellite_config["ticker"]:
+    if core_satellite_strategy_name is not None:
         core_satellite_diagnostic_df = create_core_satellite_diagnostic(
             metrics=metrics_df.drop(columns=["ticker"]),
             rolling_summary=rolling_summary_df.drop(columns=["ticker"])
@@ -440,43 +444,35 @@ def run_backtest_for_ticker(
                 annual_rebalanced_core_satellite_strategy_name
             ),
         )
-
         core_satellite_diagnostic_path = (
             reports_dir / f"{ticker}_core_satellite_diagnostic.csv"
         )
         core_satellite_diagnostic_markdown_path = (
             reports_dir / f"{ticker}_core_satellite_diagnostic.md"
         )
-
         core_satellite_diagnostic_df.to_csv(core_satellite_diagnostic_path, index=False)
         write_core_satellite_diagnostic_markdown(
             diagnostic=core_satellite_diagnostic_df,
             output_path=core_satellite_diagnostic_markdown_path,
         )
 
-        if not annual_rebalance_audit_df.empty:
-            annual_rebalance_audit_path = reports_dir / f"{ticker}_annual_rebalance_audit.csv"
-            annual_rebalance_audit_summary_path = (
-                reports_dir / f"{ticker}_annual_rebalance_audit_summary.csv"
-            )
-            annual_rebalance_audit_markdown_path = (
-                reports_dir / f"{ticker}_annual_rebalance_audit.md"
-            )
-
-            annual_rebalance_audit_df.to_csv(annual_rebalance_audit_path, index=False)
-            annual_rebalance_audit_summary_df.to_csv(
-                annual_rebalance_audit_summary_path,
-                index=False,
-            )
-            write_annual_rebalance_audit_markdown(
-                audit=annual_rebalance_audit_df,
-                summary=annual_rebalance_audit_summary_df,
-                output_path=annual_rebalance_audit_markdown_path,
-            )
+    (
+        annual_rebalance_audit_path,
+        annual_rebalance_audit_summary_path,
+        annual_rebalance_audit_markdown_path,
+    ) = save_annual_rebalance_audit_reports(
+        audit=annual_rebalance_audit_df,
+        summary=annual_rebalance_audit_summary_df,
+        ticker=ticker,
+        reports_dir=reports_dir,
+    )
 
     momentum_robustness_months = [
         int(month) for month in config.get("momentum_robustness_months", [])
     ]
+    momentum_robustness_path: Path | None = None
+    momentum_robustness_rolling_path: Path | None = None
+    momentum_robustness_markdown_path: Path | None = None
 
     if momentum_robustness_months:
         momentum_robustness_df, momentum_robustness_rolling_df, _ = (
@@ -488,7 +484,6 @@ def run_backtest_for_ticker(
                 cash_returns=cash_returns,
             )
         )
-
         momentum_robustness_df.insert(0, "ticker", ticker)
         momentum_robustness_rolling_df.insert(0, "ticker", ticker)
 
@@ -496,8 +491,9 @@ def run_backtest_for_ticker(
         momentum_robustness_rolling_path = (
             reports_dir / f"{ticker}_momentum_robustness_rolling_summary.csv"
         )
-        momentum_robustness_markdown_path = reports_dir / f"{ticker}_momentum_robustness.md"
-
+        momentum_robustness_markdown_path = (
+            reports_dir / f"{ticker}_momentum_robustness.md"
+        )
         momentum_robustness_df.to_csv(momentum_robustness_path, index=False)
         momentum_robustness_rolling_df.to_csv(
             momentum_robustness_rolling_path,
@@ -509,9 +505,6 @@ def run_backtest_for_ticker(
         )
     else:
         momentum_robustness_df = pd.DataFrame()
-        momentum_robustness_path = None
-        momentum_robustness_rolling_path = None
-        momentum_robustness_markdown_path = None
 
     print("\nFull-period strategy comparison:")
     print(metrics_df.to_string(index=False))
@@ -562,7 +555,7 @@ def run_backtest_for_ticker(
         print(annual_rebalance_audit_summary_df.to_string(index=False))
 
         print("\nAnnual rebalance audit:")
-        print(annual_rebalance_audit_df.to_string(index=False))    
+        print(annual_rebalance_audit_df.to_string(index=False))
 
     if not momentum_robustness_df.empty:
         print("\nMomentum-window robustness:")
@@ -617,7 +610,10 @@ def run_backtest_for_ticker(
 
     if momentum_robustness_path is not None:
         print(f"Saved momentum robustness to: {momentum_robustness_path}")
-        print(f"Saved momentum robustness rolling summary to: {momentum_robustness_rolling_path}")
+        print(
+            "Saved momentum robustness rolling summary to: "
+            f"{momentum_robustness_rolling_path}"
+        )
         print(f"Saved momentum robustness report to: {momentum_robustness_markdown_path}")
 
     return {
@@ -642,7 +638,7 @@ def write_cross_asset_summaries(
     rolling_summaries = []
     momentum_robustness = []
 
-    for ticker, outputs in ticker_outputs.items():
+    for outputs in ticker_outputs.values():
         if not outputs["metrics"].empty:
             full_metrics.append(outputs["metrics"])
 
@@ -655,31 +651,45 @@ def write_cross_asset_summaries(
         if not outputs["momentum_robustness"].empty:
             momentum_robustness.append(outputs["momentum_robustness"])
 
-    if full_metrics:
-        combined_metrics = pd.concat(full_metrics, ignore_index=True)
+    combined_metrics = (
+        pd.concat(full_metrics, ignore_index=True) if full_metrics else pd.DataFrame()
+    )
+    combined_scorecards = (
+        pd.concat(scorecards, ignore_index=True) if scorecards else pd.DataFrame()
+    )
+    combined_rolling = (
+        pd.concat(rolling_summaries, ignore_index=True)
+        if rolling_summaries
+        else pd.DataFrame()
+    )
+
+    if not combined_metrics.empty:
         combined_metrics.to_csv(
             reports_dir / "cross_asset_strategy_comparison_metrics.csv",
             index=False,
         )
 
-    if scorecards:
-        combined_scorecards = pd.concat(scorecards, ignore_index=True)
+    if not combined_scorecards.empty:
         combined_scorecards.to_csv(
             reports_dir / "cross_asset_strategy_scorecards.csv",
             index=False,
         )
 
-    if full_metrics and scorecards:
-        expanded_diagnostic = create_expanded_universe_diagnostic(
-            metrics=pd.concat(full_metrics, ignore_index=True),
-            scorecards=pd.concat(scorecards, ignore_index=True),
+    if not combined_rolling.empty:
+        combined_rolling.to_csv(
+            reports_dir / "cross_asset_rolling_summaries.csv",
+            index=False,
         )
 
+    if not combined_metrics.empty and not combined_scorecards.empty:
+        expanded_diagnostic = create_expanded_universe_diagnostic(
+            metrics=combined_metrics,
+            scorecards=combined_scorecards,
+        )
         expanded_diagnostic_path = reports_dir / "expanded_universe_diagnostic.csv"
         expanded_diagnostic_markdown_path = (
             reports_dir / "expanded_universe_diagnostic.md"
         )
-
         expanded_diagnostic.to_csv(expanded_diagnostic_path, index=False)
         write_expanded_universe_diagnostic_markdown(
             diagnostic=expanded_diagnostic,
@@ -692,21 +702,19 @@ def write_cross_asset_summaries(
         print(
             "Saved expanded universe diagnostic report to: "
             f"{expanded_diagnostic_markdown_path}"
-        )    
-
-    if full_metrics and rolling_summaries:
-        strategy_purpose = classify_strategy_purpose(
-            metrics=pd.concat(full_metrics, ignore_index=True),
-            rolling_summary=pd.concat(rolling_summaries, ignore_index=True),
         )
 
+    if not combined_metrics.empty and not combined_rolling.empty:
+        strategy_purpose = classify_strategy_purpose(
+            metrics=combined_metrics,
+            rolling_summary=combined_rolling,
+        )
         strategy_purpose_path = (
             reports_dir / "cross_asset_strategy_purpose_classification.csv"
         )
         strategy_purpose_markdown_path = (
             reports_dir / "cross_asset_strategy_purpose_classification.md"
         )
-
         strategy_purpose.to_csv(strategy_purpose_path, index=False)
         write_strategy_purpose_markdown(
             classifications=strategy_purpose,
@@ -722,31 +730,22 @@ def write_cross_asset_summaries(
         print(
             "Saved cross-asset strategy purpose classification report to: "
             f"{strategy_purpose_markdown_path}"
-        )    
-
-    if rolling_summaries:
-        combined_rolling = pd.concat(rolling_summaries, ignore_index=True)
-        combined_rolling.to_csv(
-            reports_dir / "cross_asset_rolling_summaries.csv",
-            index=False,
         )
 
-    if full_metrics and rolling_summaries:
+    if not combined_metrics.empty and not combined_rolling.empty:
         diagnostic = create_buy_hold_vs_momentum_diagnostic(
-            metrics=pd.concat(full_metrics, ignore_index=True),
-            rolling_summary=pd.concat(rolling_summaries, ignore_index=True),
+            metrics=combined_metrics,
+            rolling_summary=combined_rolling,
         )
-
         diagnostic_path = reports_dir / "cross_asset_buy_hold_vs_12m_momentum.csv"
         diagnostic_markdown_path = (
             reports_dir / "cross_asset_buy_hold_vs_12m_momentum.md"
         )
-
         diagnostic.to_csv(diagnostic_path, index=False)
         write_buy_hold_vs_momentum_markdown(diagnostic, diagnostic_markdown_path)
 
         print(f"Saved cross-asset diagnostic to: {diagnostic_path}")
-        print(f"Saved cross-asset diagnostic report to: {diagnostic_markdown_path}")    
+        print(f"Saved cross-asset diagnostic report to: {diagnostic_markdown_path}")
 
     if momentum_robustness:
         combined_momentum_robustness = pd.concat(momentum_robustness, ignore_index=True)
@@ -759,6 +758,7 @@ def write_cross_asset_summaries(
     print("Do not compare scorecard numbers across tickers as universal rankings.")
     print("Use each ticker scorecard to rank strategies within that ticker only.")
 
+
 def run_dual_momentum_pair(
     pair: dict,
     config: dict,
@@ -766,7 +766,6 @@ def run_dual_momentum_pair(
 ) -> dict[str, pd.DataFrame]:
     pair_name = str(pair["name"])
     asset_a, asset_b = pair["assets"]
-
     safe_pair_name = make_safe_filename(pair_name)
 
     print(f"\n{'=' * 100}")
@@ -803,7 +802,6 @@ def run_dual_momentum_pair(
 
     start_date = pd.to_datetime(common_dates[0]).date()
     end_date = pd.to_datetime(common_dates[-1]).date()
-
     print(f"{pair_name} common test period: {start_date} to {end_date}")
 
     buy_hold_a = run_buy_and_hold(
@@ -811,13 +809,11 @@ def run_dual_momentum_pair(
         initial_capital=initial_capital,
         cash_returns=cash_returns,
     )
-
     buy_hold_b = run_buy_and_hold(
         prices=asset_b_common,
         initial_capital=initial_capital,
         cash_returns=cash_returns,
     )
-
     dual_momentum = run_dual_momentum_strategy(
         asset_a_prices=asset_a_common,
         asset_b_prices=asset_b_common,
@@ -830,20 +826,19 @@ def run_dual_momentum_pair(
     )
 
     dual_strategy_name = f"Dual Momentum {asset_a}/{asset_b}"
-
     results = {
         f"Buy and Hold {asset_a}": buy_hold_a,
         f"Buy and Hold {asset_b}": buy_hold_b,
         dual_strategy_name: dual_momentum,
     }
 
-    metrics = [
-        calculate_metrics(buy_hold_a, f"Buy and Hold {asset_a}"),
-        calculate_metrics(buy_hold_b, f"Buy and Hold {asset_b}"),
-        calculate_metrics(dual_momentum, dual_strategy_name),
-    ]
-
-    metrics_df = pd.DataFrame(metrics)
+    metrics_df = pd.DataFrame(
+        [
+            calculate_metrics(buy_hold_a, f"Buy and Hold {asset_a}"),
+            calculate_metrics(buy_hold_b, f"Buy and Hold {asset_b}"),
+            calculate_metrics(dual_momentum, dual_strategy_name),
+        ]
+    )
     metrics_df.insert(0, "pair", pair_name)
 
     rolling_metrics_df = calculate_rolling_window_metrics(results)
@@ -874,7 +869,6 @@ def run_dual_momentum_pair(
         result=dual_momentum,
         pair_name=pair_name,
     )
-
     opportunity_segments_df = create_opportunity_cost_segments(
         result=dual_momentum,
         pair_name=pair_name,
@@ -887,7 +881,6 @@ def run_dual_momentum_pair(
     scorecard_md_path = reports_dir / f"dual_momentum_{safe_pair_name}_scorecard.md"
     equity_plot_path = reports_dir / f"dual_momentum_{safe_pair_name}_equity_curves.png"
     drawdown_plot_path = reports_dir / f"dual_momentum_{safe_pair_name}_drawdowns.png"
-
     holding_segments_path = (
         reports_dir / f"dual_momentum_{safe_pair_name}_holding_segments.csv"
     )
@@ -897,8 +890,9 @@ def run_dual_momentum_pair(
     cash_reason_summary_path = (
         reports_dir / f"dual_momentum_{safe_pair_name}_cash_reason_summary.csv"
     )
-    audit_markdown_path = reports_dir / f"dual_momentum_{safe_pair_name}_allocation_audit.md"
-
+    audit_markdown_path = reports_dir / (
+        f"dual_momentum_{safe_pair_name}_allocation_audit.md"
+    )
     opportunity_segments_path = (
         reports_dir / f"dual_momentum_{safe_pair_name}_opportunity_cost.csv"
     )
@@ -916,7 +910,6 @@ def run_dual_momentum_pair(
         strategy_scorecard_df.drop(columns=["pair"]),
         scorecard_md_path,
     )
-
     holding_segments_df.to_csv(holding_segments_path, index=False)
     allocation_audit_df.to_csv(allocation_audit_path, index=False)
     cash_reason_summary_df.to_csv(cash_reason_summary_path, index=False)
@@ -926,7 +919,6 @@ def run_dual_momentum_pair(
         cash_summary=cash_reason_summary_df,
         output_path=audit_markdown_path,
     )
-
     opportunity_segments_df.to_csv(opportunity_segments_path, index=False)
     opportunity_summary_df.to_csv(opportunity_summary_path, index=False)
     write_dual_momentum_opportunity_markdown(
@@ -934,7 +926,6 @@ def run_dual_momentum_pair(
         opportunity_summary=opportunity_summary_df,
         output_path=opportunity_markdown_path,
     )
-
     plot_equity_curves(results, equity_plot_path)
     plot_drawdowns(results, drawdown_plot_path)
 
@@ -993,12 +984,10 @@ def run_dual_momentum_pair(
     print(f"Saved dual momentum scorecard report to: {scorecard_md_path}")
     print(f"Saved dual momentum equity curve chart to: {equity_plot_path}")
     print(f"Saved dual momentum drawdown chart to: {drawdown_plot_path}")
-
     print(f"Saved dual momentum holding segments to: {holding_segments_path}")
     print(f"Saved dual momentum allocation audit to: {allocation_audit_path}")
     print(f"Saved dual momentum cash reason summary to: {cash_reason_summary_path}")
     print(f"Saved dual momentum allocation audit report to: {audit_markdown_path}")
-
     print(f"Saved dual momentum opportunity-cost segments to: {opportunity_segments_path}")
     print(f"Saved dual momentum opportunity-cost summary to: {opportunity_summary_path}")
     print(f"Saved dual momentum opportunity-cost report to: {opportunity_markdown_path}")
@@ -1013,6 +1002,7 @@ def run_dual_momentum_pair(
         "opportunity_segments": opportunity_segments_df,
         "opportunity_summary": opportunity_summary_df,
     }
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -1044,7 +1034,7 @@ def main() -> None:
             pair=pair,
             config=config,
             reports_dir=reports_dir,
-        )    
+        )
 
 
 if __name__ == "__main__":
