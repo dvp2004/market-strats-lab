@@ -45,10 +45,19 @@ from market_strats.analysis.momentum_robustness import (
     write_momentum_robustness_markdown,
 )
 from market_strats.analysis.plots import plot_drawdowns, plot_equity_curves
+from market_strats.analysis.rebalance_month_sensitivity import (
+    run_rebalance_month_sensitivity,
+    write_rebalance_month_sensitivity_markdown,
+)
 from market_strats.analysis.regimes import calculate_regime_metrics, create_regime_summary
 from market_strats.analysis.rolling import (
     calculate_rolling_window_metrics,
     create_rolling_summary,
+)
+from market_strats.analysis.sma_window_robustness import (
+    create_sma_window_robustness_summary,
+    run_sma_window_robustness,
+    write_sma_window_robustness_markdown,
 )
 from market_strats.analysis.strategy_purpose import (
     classify_strategy_purpose,
@@ -78,11 +87,6 @@ from market_strats.strategies.dual_momentum import run_dual_momentum_strategy
 from market_strats.strategies.sma_trend import run_sma_trend_strategy
 from market_strats.strategies.trend_filtered_drawdown import (
     run_trend_filtered_drawdown_strategy,
-)
-
-from market_strats.analysis.rebalance_month_sensitivity import (
-    run_rebalance_month_sensitivity,
-    write_rebalance_month_sensitivity_markdown,
 )
 
 
@@ -257,14 +261,22 @@ def run_backtest_for_ticker(
     core_satellite_diagnostic_df = pd.DataFrame()
     core_satellite_diagnostic_path: Path | None = None
     core_satellite_diagnostic_markdown_path: Path | None = None
+
     annual_rebalance_audit_df = pd.DataFrame()
     annual_rebalance_audit_summary_df = pd.DataFrame()
     annual_rebalance_audit_path: Path | None = None
     annual_rebalance_audit_summary_path: Path | None = None
     annual_rebalance_audit_markdown_path: Path | None = None
+
     rebalance_month_sensitivity_df = pd.DataFrame()
-    rebalance_month_sensitivity_path = None
-    rebalance_month_sensitivity_markdown_path = None
+    rebalance_month_sensitivity_path: Path | None = None
+    rebalance_month_sensitivity_markdown_path: Path | None = None
+
+    sma_window_robustness_df = pd.DataFrame()
+    sma_window_robustness_summary_df = pd.DataFrame()
+    sma_window_robustness_path: Path | None = None
+    sma_window_robustness_summary_path: Path | None = None
+    sma_window_robustness_markdown_path: Path | None = None
 
     prices = get_or_fetch_prices(ticker, config)
     cash_returns = get_or_fetch_cash_returns(config, prices["date"])
@@ -405,6 +417,52 @@ def run_backtest_for_ticker(
         write_rebalance_month_sensitivity_markdown(
             sensitivity=rebalance_month_sensitivity_df,
             output_path=rebalance_month_sensitivity_markdown_path,
+        )
+
+    sma_window_robustness_config = config.get("sma_window_robustness", {})
+
+    if (
+        sma_window_robustness_config.get("enabled", False)
+        and ticker == str(sma_window_robustness_config.get("ticker", "")).upper()
+    ):
+        robustness_sma_days = [
+            int(value) for value in sma_window_robustness_config["sma_days"]
+        ]
+
+        sma_window_robustness_df = run_sma_window_robustness(
+            ticker=ticker,
+            prices=prices,
+            buy_hold_result=buy_hold,
+            initial_capital=initial_capital,
+            sma_days=robustness_sma_days,
+            slippage_bps=slippage_bps,
+            cash_returns=cash_returns,
+        )
+
+        sma_window_robustness_summary_df = create_sma_window_robustness_summary(
+            sma_window_robustness_df,
+            anchor_sma_days=int(sma_window_robustness_config.get("anchor_sma_days", 200)),
+        )
+
+        sma_window_robustness_path = (
+            reports_dir / f"{ticker}_sma_window_robustness.csv"
+        )
+        sma_window_robustness_summary_path = (
+            reports_dir / f"{ticker}_sma_window_robustness_summary.csv"
+        )
+        sma_window_robustness_markdown_path = (
+            reports_dir / f"{ticker}_sma_window_robustness.md"
+        )
+
+        sma_window_robustness_df.to_csv(sma_window_robustness_path, index=False)
+        sma_window_robustness_summary_df.to_csv(
+            sma_window_robustness_summary_path,
+            index=False,
+        )
+        write_sma_window_robustness_markdown(
+            robustness=sma_window_robustness_df,
+            summary=sma_window_robustness_summary_df,
+            output_path=sma_window_robustness_markdown_path,
         )
 
     metrics_df = pd.DataFrame(
@@ -579,6 +637,7 @@ def run_backtest_for_ticker(
                 "strategy",
                 "purpose_classification",
                 "wealth_test_pass",
+                "pending_validation",
                 "cagr_pct",
                 "buy_hold_cagr_pct",
                 "cagr_delta_vs_buy_hold_pct_points",
@@ -601,7 +660,14 @@ def run_backtest_for_ticker(
 
     if not rebalance_month_sensitivity_df.empty:
         print("\nRebalance-month sensitivity:")
-        print(rebalance_month_sensitivity_df.to_string(index=False))    
+        print(rebalance_month_sensitivity_df.to_string(index=False))
+
+    if not sma_window_robustness_df.empty:
+        print("\nSMA window robustness:")
+        print(sma_window_robustness_df.to_string(index=False))
+
+        print("\nSMA window robustness summary:")
+        print(sma_window_robustness_summary_df.to_string(index=False))
 
     if not momentum_robustness_df.empty:
         print("\nMomentum-window robustness:")
@@ -654,14 +720,6 @@ def run_backtest_for_ticker(
             f"{annual_rebalance_audit_markdown_path}"
         )
 
-    if momentum_robustness_path is not None:
-        print(f"Saved momentum robustness to: {momentum_robustness_path}")
-        print(
-            "Saved momentum robustness rolling summary to: "
-            f"{momentum_robustness_rolling_path}"
-        )
-        print(f"Saved momentum robustness report to: {momentum_robustness_markdown_path}")
-
     if rebalance_month_sensitivity_path is not None:
         print(
             "Saved rebalance-month sensitivity to: "
@@ -670,7 +728,26 @@ def run_backtest_for_ticker(
         print(
             "Saved rebalance-month sensitivity report to: "
             f"{rebalance_month_sensitivity_markdown_path}"
-        )    
+        )
+
+    if sma_window_robustness_path is not None:
+        print(f"Saved SMA window robustness to: {sma_window_robustness_path}")
+        print(
+            "Saved SMA window robustness summary to: "
+            f"{sma_window_robustness_summary_path}"
+        )
+        print(
+            "Saved SMA window robustness report to: "
+            f"{sma_window_robustness_markdown_path}"
+        )
+
+    if momentum_robustness_path is not None:
+        print(f"Saved momentum robustness to: {momentum_robustness_path}")
+        print(
+            "Saved momentum robustness rolling summary to: "
+            f"{momentum_robustness_rolling_path}"
+        )
+        print(f"Saved momentum robustness report to: {momentum_robustness_markdown_path}")
 
     return {
         "metrics": metrics_df,
@@ -683,6 +760,8 @@ def run_backtest_for_ticker(
         "annual_rebalance_audit": annual_rebalance_audit_df,
         "annual_rebalance_audit_summary": annual_rebalance_audit_summary_df,
         "rebalance_month_sensitivity": rebalance_month_sensitivity_df,
+        "sma_window_robustness": sma_window_robustness_df,
+        "sma_window_robustness_summary": sma_window_robustness_summary_df,
     }
 
 

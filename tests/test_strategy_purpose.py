@@ -178,7 +178,7 @@ def test_qqq_like_momentum_can_be_risk_control_candidate_when_wealth_test_passes
     assert bool(strategy["wealth_test_pass"]) is True
 
 
-def test_classify_strategy_purpose_marks_efa_200d_as_unvalidated_lead():
+def test_classify_strategy_purpose_marks_efa_200d_as_return_enhancing_after_validation():
     metrics = pd.DataFrame(
         {
             "ticker": ["EFA", "EFA"],
@@ -203,9 +203,9 @@ def test_classify_strategy_purpose_marks_efa_200d_as_unvalidated_lead():
 
     strategy = result[result["strategy"] == "200-Day SMA"].iloc[0]
 
-    assert strategy["purpose_classification"] == "Unvalidated lead"
+    assert strategy["purpose_classification"] == "Return-enhancing candidate"
     assert strategy["base_purpose_classification"] == "Return-enhancing candidate"
-    assert bool(strategy["pending_validation"]) is True
+    assert bool(strategy["pending_validation"]) is False
 
 
 def test_classify_strategy_purpose_quarantines_btc():
@@ -244,3 +244,32 @@ def test_classify_strategy_purpose_returns_empty_for_empty_metrics():
     )
 
     assert result.empty
+
+def test_classify_strategy_purpose_keeps_efa_10m_as_unvalidated_lead():
+    metrics = pd.DataFrame(
+        {
+            "ticker": ["EFA", "EFA"],
+            "strategy": ["Buy and Hold", "10-Month SMA"],
+            "cagr_pct": [6.38, 6.27],
+            "max_drawdown_pct": [-61.04, -34.73],
+            "sharpe": [0.35, 0.55],
+            "trade_count": [1, 40],
+        }
+    )
+
+    rolling_summary = pd.DataFrame(
+        {
+            "ticker": ["EFA", "EFA"],
+            "strategy": ["Buy and Hold", "10-Month SMA"],
+            "window_years": [5, 5],
+            "worst_cagr_pct": [-7.0, -2.0],
+        }
+    )
+
+    result = classify_strategy_purpose(metrics, rolling_summary)
+
+    strategy = result[result["strategy"] == "10-Month SMA"].iloc[0]
+
+    assert strategy["purpose_classification"] == "Unvalidated lead"
+    assert strategy["base_purpose_classification"] == "Wealth-equivalent risk reducer"
+    assert bool(strategy["pending_validation"]) is True 
