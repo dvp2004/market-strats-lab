@@ -63,6 +63,7 @@ from market_strats.analysis.dual_momentum_opportunity import (
 )
 
 from market_strats.strategies.core_satellite import (
+    run_annual_rebalanced_core_satellite_strategy,
     run_independent_core_satellite_strategy,
 )
 
@@ -310,7 +311,27 @@ def run_backtest_for_ticker(
             strategy_name=core_satellite_strategy_name,
         )
 
+        annual_rebalanced_core_satellite_strategy_name = (
+            f"{int(core_weight * 100)}/{int(satellite_weight * 100)} "
+            "Annual Rebalanced Core-Satellite SPY B&H + 12M Momentum"
+        )
+
+        annual_rebalanced_core_satellite = (
+            run_annual_rebalanced_core_satellite_strategy(
+                core_result=buy_hold,
+                satellite_result=absolute_momentum,
+                initial_capital=initial_capital,
+                core_weight=core_weight,
+                satellite_weight=satellite_weight,
+                strategy_name=annual_rebalanced_core_satellite_strategy_name,
+                slippage_bps=slippage_bps,
+            )
+        )
+
         results[core_satellite_strategy_name] = core_satellite
+        results[annual_rebalanced_core_satellite_strategy_name] = (
+            annual_rebalanced_core_satellite
+        )
 
     metrics = [
         calculate_metrics(result, strategy_name)
@@ -397,6 +418,9 @@ def run_backtest_for_ticker(
             if "ticker" in rolling_summary_df.columns
             else rolling_summary_df,
             core_satellite_strategy=core_satellite_strategy_name,
+            annual_rebalanced_core_satellite_strategy=(
+                annual_rebalanced_core_satellite_strategy_name
+            ),
         )
 
         core_satellite_diagnostic_path = (

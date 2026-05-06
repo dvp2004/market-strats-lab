@@ -54,6 +54,18 @@ def _build_verdict(
             "Current leader: buy-and-hold-like compounding with materially lower "
             "drawdown and simple rules."
         )
+    
+    if "Annual Rebalanced Core-Satellite" in strategy:
+        if cagr_delta_vs_momentum >= -0.25 and max_dd_delta_vs_momentum >= -2.0:
+            return (
+                "Annual rebalance did not materially damage the full-momentum trade-off; "
+                "compare directly against independent sleeves."
+            )
+
+        return (
+            "Annual rebalance needs caution: may reintroduce averaging-down behaviour "
+            "and should be compared against independent sleeves."
+        )
 
     if "Core-Satellite" in strategy:
         if cagr_delta_vs_momentum >= -0.25 and max_dd_delta_vs_momentum >= -2.0:
@@ -80,6 +92,7 @@ def create_core_satellite_diagnostic(
     metrics: pd.DataFrame,
     rolling_summary: pd.DataFrame,
     core_satellite_strategy: str,
+    annual_rebalanced_core_satellite_strategy: str | None = None,
     momentum_strategy: str = "12-Month Absolute Momentum",
     buy_hold_strategy: str = "Buy and Hold",
 ) -> pd.DataFrame:
@@ -97,9 +110,18 @@ def create_core_satellite_diagnostic(
     momentum = _get_strategy_row(metrics, momentum_strategy)
     core_satellite = _get_strategy_row(metrics, core_satellite_strategy)
 
+    rows_to_compare = [buy_hold, momentum, core_satellite]
+
+    if annual_rebalanced_core_satellite_strategy is not None:
+        annual_rebalanced_core_satellite = _get_strategy_row(
+            metrics,
+            annual_rebalanced_core_satellite_strategy,
+        )
+        rows_to_compare.append(annual_rebalanced_core_satellite)
+
     rows = []
 
-    for row in [buy_hold, momentum, core_satellite]:
+    for row in rows_to_compare:
         strategy = str(row["strategy"])
 
         cagr_delta_vs_buy_hold = float(row["cagr_pct"] - buy_hold["cagr_pct"])
