@@ -1,12 +1,24 @@
 from __future__ import annotations
+
 from pathlib import Path
+
 import pandas as pd
+
 
 MAX_CAGR_LAG_PCT_POINTS = 1.50
 MAX_CAGR_SACRIFICE_OF_BUY_HOLD = 0.20
+RETURN_ENHANCING_MIN_CAGR_DELTA_PCT_POINTS = 0.20
+WEALTH_EQUIVALENT_MIN_CAGR_DELTA_PCT_POINTS = -0.25
 MATERIAL_DRAWDOWN_IMPROVEMENT_PCT_POINTS = 10.0
+DEFENSIVE_DRAWDOWN_IMPROVEMENT_PCT_POINTS = 3.0
 CORE_SATELLITE_MAX_CAGR_LAG_PCT_POINTS = 0.50
 HIGH_TRADE_COUNT = 150
+
+UNVALIDATED_LEADS = {
+    ("EFA", "200-Day SMA"),
+    ("EFA", "10-Month SMA"),
+}
+
 
 def _get_benchmark_row(metrics: pd.DataFrame, ticker: str | None) -> pd.Series:
     df = metrics.copy()
@@ -60,8 +72,14 @@ def _safe_float(value: object) -> float:
     return float(value)
 
 
-def _classify_strategy(
-    ticker: str | None,
+def _is_unvalidated_lead(ticker: str | None, strategy: str) -> bool:
+    if ticker is None:
+        return False
+
+    return (ticker, strategy) in UNVALIDATED_LEADS
+
+
+def _classify_base_strategy(
     strategy: str,
     cagr_delta_vs_buy_hold: float,
     cagr_sacrifice_pct_of_buy_hold: float,
@@ -70,51 +88,11 @@ def _classify_strategy(
     trade_count: int,
 ) -> tuple[str, bool, str]:
     """
-    Return:
-    - purpose classification
-    - wealth test pass
-    - note
+    Classify non-BTC, non-core-satellite strategies.
 
-    Wealth-test rule:
-    An active strategy passes the wealth test only if it does not lag
-    buy-and-hold CAGR by more than MAX_CAGR_LAG_PCT_POINTS and does not
-    sacrifice more than MAX_CAGR_SACRIFICE_OF_BUY_HOLD of buy-and-hold CAGR.
-
-    This prevents low-CAGR defensive systems from being labelled as candidates
-    just because they reduce drawdown.
+    The classifier separates return improvement from risk reduction.
+    It avoids calling tiny positive CAGR differences "wealth-building alpha".
     """
-    if ticker == "BTC-USD":
-        return (
-            "Quarantined / separate branch",
-            False,
-            "BTC history is short, extreme, and not comparable with mature ETF markets.",
-        )
-
-    if strategy == "Buy and Hold":
-        return (
-            "Benchmark",
-            True,
-            "Passive benchmark for this ticker.",
-        )
-
-    if "Core-Satellite" in strategy:
-        if (
-            cagr_delta_vs_buy_hold >= -CORE_SATELLITE_MAX_CAGR_LAG_PCT_POINTS
-            and drawdown_improvement_vs_buy_hold
-            >= MATERIAL_DRAWDOWN_IMPROVEMENT_PCT_POINTS
-        ):
-            return (
-                "Behavioural compromise",
-                True,
-                "Preserves most compounding while reducing drawdown versus buy-and-hold.",
-            )
-
-        return (
-            "Rejected / weak",
-            False,
-            "Core-satellite complexity is not justified by the return/drawdown trade-off.",
-        )
-
     wealth_test_pass = (
         cagr_delta_vs_buy_hold >= -MAX_CAGR_LAG_PCT_POINTS
         and cagr_sacrifice_pct_of_buy_hold <= MAX_CAGR_SACRIFICE_OF_BUY_HOLD
@@ -135,28 +113,42 @@ def _classify_strategy(
         )
 
     if (
-        cagr_delta_vs_buy_hold >= -0.25
+        cagr_delta_vs_buy_hold >= RETURN_ENHANCING_MIN_CAGR_DELTA_PCT_POINTS
+        and drawdown_improvement_vs_buy_hold >= 0
+    ):
+        return (
+            "Return-enhancing candidate",
+            True,
+            "Improves CAGR by a meaningful threshold and does not worsen drawdown versus buy-and-hold.",
+        )
+
+    if (
+        cagr_delta_vs_buy_hold >= WEALTH_EQUIVALENT_MIN_CAGR_DELTA_PCT_POINTS
         and drawdown_improvement_vs_buy_hold
         >= MATERIAL_DRAWDOWN_IMPROVEMENT_PCT_POINTS
     ):
         return (
-            "Wealth-builder candidate",
+            "Wealth-equivalent risk reducer",
             True,
-            "Preserves buy-and-hold-like CAGR while materially reducing drawdown.",
+            "Keeps CAGR close to buy-and-hold while materially reducing drawdown.",
         )
 
-    if cagr_delta_vs_buy_hold > 0 and drawdown_improvement_vs_buy_hold >= 0:
+    if (
+        cagr_delta_vs_buy_hold >= WEALTH_EQUIVALENT_MIN_CAGR_DELTA_PCT_POINTS
+        and drawdown_improvement_vs_buy_hold
+        >= DEFENSIVE_DRAWDOWN_IMPROVEMENT_PCT_POINTS
+    ):
         return (
-            "Wealth-builder candidate",
+            "Defensive sleeve candidate",
             True,
-            "Improves CAGR and does not worsen drawdown versus buy-and-hold.",
+            "Keeps CAGR close to buy-and-hold while modestly reducing drawdown.",
         )
 
     if drawdown_improvement_vs_buy_hold >= MATERIAL_DRAWDOWN_IMPROVEMENT_PCT_POINTS:
         return (
             "Risk-control candidate",
             True,
-            "Passes the wealth hurdle and materially improves drawdown, but does not clearly beat buy-and-hold on CAGR.",
+            "Passes the wealth hurdle and materially improves drawdown, but gives up noticeable CAGR.",
         )
 
     if (
@@ -183,6 +175,93 @@ def _classify_strategy(
     )
 
 
+def _classify_strategy(
+    ticker: str | None,
+    strategy: str,
+    cagr_delta_vs_buy_hold: float,
+    cagr_sacrifice_pct_of_buy_hold: float,
+    drawdown_improvement_vs_buy_hold: float,
+    worst_5y_cagr_delta_vs_buy_hold: float,
+    trade_count: int,
+) -> tuple[str, str, bool, bool, str]:
+    """
+    Return:
+    - purpose classification
+    - base classification
+    - wealth test pass
+    - pending validation
+    - note
+    """
+    if ticker == "BTC-USD":
+        return (
+            "Quarantined / separate branch",
+            "Quarantined / separate branch",
+            False,
+            True,
+            "BTC history is short, extreme, and not comparable with mature ETF markets.",
+        )
+
+    if strategy == "Buy and Hold":
+        return (
+            "Benchmark",
+            "Benchmark",
+            True,
+            False,
+            "Passive benchmark for this ticker.",
+        )
+
+    if "Core-Satellite" in strategy:
+        if (
+            cagr_delta_vs_buy_hold >= -CORE_SATELLITE_MAX_CAGR_LAG_PCT_POINTS
+            and drawdown_improvement_vs_buy_hold
+            >= MATERIAL_DRAWDOWN_IMPROVEMENT_PCT_POINTS
+        ):
+            return (
+                "Behavioural compromise",
+                "Behavioural compromise",
+                True,
+                False,
+                "Preserves most compounding while reducing drawdown versus buy-and-hold.",
+            )
+
+        return (
+            "Rejected / weak",
+            "Rejected / weak",
+            False,
+            False,
+            "Core-satellite complexity is not justified by the return/drawdown trade-off.",
+        )
+
+    base_classification, wealth_test_pass, base_note = _classify_base_strategy(
+        strategy=strategy,
+        cagr_delta_vs_buy_hold=cagr_delta_vs_buy_hold,
+        cagr_sacrifice_pct_of_buy_hold=cagr_sacrifice_pct_of_buy_hold,
+        drawdown_improvement_vs_buy_hold=drawdown_improvement_vs_buy_hold,
+        worst_5y_cagr_delta_vs_buy_hold=worst_5y_cagr_delta_vs_buy_hold,
+        trade_count=trade_count,
+    )
+
+    if _is_unvalidated_lead(ticker, strategy):
+        return (
+            "Unvalidated lead",
+            base_classification,
+            wealth_test_pass,
+            True,
+            (
+                f"Base classification is '{base_classification}', but this result "
+                "emerged from a broad strategy scan and needs neighbouring-window robustness."
+            ),
+        )
+
+    return (
+        base_classification,
+        base_classification,
+        wealth_test_pass,
+        False,
+        base_note,
+    )
+
+
 def classify_strategy_purpose(
     metrics: pd.DataFrame,
     rolling_summary: pd.DataFrame,
@@ -190,9 +269,9 @@ def classify_strategy_purpose(
     """
     Classify each strategy by practical research purpose.
 
-    This is a decision-support layer. It prevents low-CAGR defensive strategies
-    from being treated as wealth-building strategies simply because their
-    drawdown or Sharpe looks better.
+    This decision-support layer prevents low-CAGR defensive strategies from
+    being mistaken for wealth-building strategies simply because drawdown or
+    Sharpe looks better.
     """
     if metrics.empty:
         return pd.DataFrame()
@@ -262,7 +341,13 @@ def classify_strategy_purpose(
             )
             worst_5y_delta = strategy_worst_5y - benchmark_worst_5y
 
-            classification, wealth_test_pass, note = _classify_strategy(
+            (
+                classification,
+                base_classification,
+                wealth_test_pass,
+                pending_validation,
+                note,
+            ) = _classify_strategy(
                 ticker=ticker,
                 strategy=strategy,
                 cagr_delta_vs_buy_hold=cagr_delta,
@@ -277,7 +362,9 @@ def classify_strategy_purpose(
                     "ticker": ticker if ticker is not None else "",
                     "strategy": strategy,
                     "purpose_classification": classification,
+                    "base_purpose_classification": base_classification,
                     "wealth_test_pass": wealth_test_pass,
+                    "pending_validation": pending_validation,
                     "cagr_pct": strategy_cagr,
                     "buy_hold_cagr_pct": benchmark_cagr,
                     "cagr_delta_vs_buy_hold_pct_points": cagr_delta,
@@ -302,13 +389,16 @@ def classify_strategy_purpose(
         output[column] = output[column].round(2)
 
     classification_order = {
-        "Wealth-builder candidate": 1,
-        "Behavioural compromise": 2,
-        "Benchmark": 3,
-        "Risk-control candidate": 4,
-        "Risk-control only": 5,
-        "Quarantined / separate branch": 6,
-        "Rejected / weak": 7,
+        "Return-enhancing candidate": 1,
+        "Wealth-equivalent risk reducer": 2,
+        "Defensive sleeve candidate": 3,
+        "Behavioural compromise": 4,
+        "Benchmark": 5,
+        "Risk-control candidate": 6,
+        "Risk-control only": 7,
+        "Unvalidated lead": 8,
+        "Quarantined / separate branch": 9,
+        "Rejected / weak": 10,
     }
 
     output["classification_rank"] = output["purpose_classification"].map(
@@ -347,7 +437,9 @@ def write_strategy_purpose_markdown(
         "ticker",
         "strategy",
         "purpose_classification",
+        "base_purpose_classification",
         "wealth_test_pass",
+        "pending_validation",
         "cagr_pct",
         "buy_hold_cagr_pct",
         "cagr_delta_vs_buy_hold_pct_points",
@@ -378,9 +470,13 @@ The purpose is to prevent defensive low-CAGR strategies from being mistaken for 
 
 ## Classification Rules
 
-- Wealth-builder candidate: preserves or improves buy-and-hold-like CAGR while materially reducing drawdown.
-- Behavioural compromise: preserves most compounding while improving liveability.
+- Return-enhancing candidate: meaningfully improves CAGR and does not worsen drawdown.
+- Wealth-equivalent risk reducer: keeps CAGR close to buy-and-hold while materially reducing drawdown.
+- Defensive sleeve candidate: keeps CAGR close to buy-and-hold while modestly improving drawdown.
+- Behavioural compromise: improves liveability without necessarily being mathematically optimal.
+- Risk-control candidate: passes the wealth hurdle and materially improves risk, but gives up noticeable CAGR.
 - Risk-control only: improves drawdown but sacrifices too much CAGR.
+- Unvalidated lead: promising result that emerged from a broad scan and needs robustness testing.
 - Rejected / weak: does not justify itself versus buy-and-hold.
 - Quarantined / separate branch: not comparable enough to the main ETF universe.
 """
