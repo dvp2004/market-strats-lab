@@ -1,9 +1,14 @@
 tickers:
   - SPY
   - QQQ
+  - IWM
   - EFA
+  - EEM
   - GLD
   - TLT
+  - AGG
+  - VNQ
+  - BTC-USD
 
 start_date: "1993-01-29"
 end_date:
