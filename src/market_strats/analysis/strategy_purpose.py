@@ -1,9 +1,12 @@
 from __future__ import annotations
-
 from pathlib import Path
-
 import pandas as pd
 
+MAX_CAGR_LAG_PCT_POINTS = 1.50
+MAX_CAGR_SACRIFICE_OF_BUY_HOLD = 0.20
+MATERIAL_DRAWDOWN_IMPROVEMENT_PCT_POINTS = 10.0
+CORE_SATELLITE_MAX_CAGR_LAG_PCT_POINTS = 0.50
+HIGH_TRADE_COUNT = 150
 
 def _get_benchmark_row(metrics: pd.DataFrame, ticker: str | None) -> pd.Series:
     df = metrics.copy()
@@ -71,6 +74,14 @@ def _classify_strategy(
     - purpose classification
     - wealth test pass
     - note
+
+    Wealth-test rule:
+    An active strategy passes the wealth test only if it does not lag
+    buy-and-hold CAGR by more than MAX_CAGR_LAG_PCT_POINTS and does not
+    sacrifice more than MAX_CAGR_SACRIFICE_OF_BUY_HOLD of buy-and-hold CAGR.
+
+    This prevents low-CAGR defensive systems from being labelled as candidates
+    just because they reduce drawdown.
     """
     if ticker == "BTC-USD":
         return (
@@ -87,7 +98,11 @@ def _classify_strategy(
         )
 
     if "Core-Satellite" in strategy:
-        if cagr_delta_vs_buy_hold >= -0.50 and drawdown_improvement_vs_buy_hold >= 10:
+        if (
+            cagr_delta_vs_buy_hold >= -CORE_SATELLITE_MAX_CAGR_LAG_PCT_POINTS
+            and drawdown_improvement_vs_buy_hold
+            >= MATERIAL_DRAWDOWN_IMPROVEMENT_PCT_POINTS
+        ):
             return (
                 "Behavioural compromise",
                 True,
@@ -101,50 +116,64 @@ def _classify_strategy(
         )
 
     wealth_test_pass = (
-        cagr_delta_vs_buy_hold >= -1.50
-        and cagr_sacrifice_pct_of_buy_hold <= 0.20
+        cagr_delta_vs_buy_hold >= -MAX_CAGR_LAG_PCT_POINTS
+        and cagr_sacrifice_pct_of_buy_hold <= MAX_CAGR_SACRIFICE_OF_BUY_HOLD
     )
 
-    if wealth_test_pass and cagr_delta_vs_buy_hold >= -0.25 and drawdown_improvement_vs_buy_hold >= 10:
+    if not wealth_test_pass:
+        if drawdown_improvement_vs_buy_hold >= MATERIAL_DRAWDOWN_IMPROVEMENT_PCT_POINTS:
+            return (
+                "Risk-control only",
+                False,
+                "Drawdown improved, but CAGR sacrifice is too large for wealth-building.",
+            )
+
+        return (
+            "Rejected / weak",
+            False,
+            "Does not preserve enough compounding or improve drawdown enough versus buy-and-hold.",
+        )
+
+    if (
+        cagr_delta_vs_buy_hold >= -0.25
+        and drawdown_improvement_vs_buy_hold
+        >= MATERIAL_DRAWDOWN_IMPROVEMENT_PCT_POINTS
+    ):
         return (
             "Wealth-builder candidate",
             True,
             "Preserves buy-and-hold-like CAGR while materially reducing drawdown.",
         )
 
-    if wealth_test_pass and cagr_delta_vs_buy_hold > 0 and drawdown_improvement_vs_buy_hold >= 0:
+    if cagr_delta_vs_buy_hold > 0 and drawdown_improvement_vs_buy_hold >= 0:
         return (
             "Wealth-builder candidate",
             True,
             "Improves CAGR and does not worsen drawdown versus buy-and-hold.",
         )
 
-    if not wealth_test_pass and drawdown_improvement_vs_buy_hold >= 10:
-        return (
-            "Risk-control only",
-            False,
-            "Drawdown improved, but CAGR sacrifice is too large for wealth-building.",
-        )
-
-    if wealth_test_pass and drawdown_improvement_vs_buy_hold >= 10:
+    if drawdown_improvement_vs_buy_hold >= MATERIAL_DRAWDOWN_IMPROVEMENT_PCT_POINTS:
         return (
             "Risk-control candidate",
             True,
-            "Acceptable CAGR sacrifice with meaningful drawdown improvement.",
+            "Passes the wealth hurdle and materially improves drawdown, but does not clearly beat buy-and-hold on CAGR.",
         )
 
-    if trade_count > 150 and cagr_delta_vs_buy_hold < 0:
+    if (
+        worst_5y_cagr_delta_vs_buy_hold > 0
+        and drawdown_improvement_vs_buy_hold > 0
+    ):
+        return (
+            "Risk-control candidate",
+            True,
+            "Passes the wealth hurdle and improves bad-window behaviour, but needs manual review.",
+        )
+
+    if trade_count > HIGH_TRADE_COUNT and cagr_delta_vs_buy_hold < 0:
         return (
             "Rejected / weak",
             False,
             "Too trade-heavy without enough return improvement.",
-        )
-
-    if worst_5y_cagr_delta_vs_buy_hold > 0 and drawdown_improvement_vs_buy_hold > 0:
-        return (
-            "Risk-control candidate",
-            wealth_test_pass,
-            "Improves bad-window behaviour, but needs manual review.",
         )
 
     return (

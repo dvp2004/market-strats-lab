@@ -97,3 +97,60 @@ def test_classify_strategy_purpose_returns_empty_for_empty_metrics():
     )
 
     assert result.empty
+
+def test_risk_control_candidate_requires_wealth_test_pass():
+    metrics = pd.DataFrame(
+        {
+            "ticker": ["GLD", "GLD"],
+            "strategy": ["Buy and Hold", "10-Month SMA"],
+            "cagr_pct": [11.09, 8.69],
+            "max_drawdown_pct": [-45.56, -41.58],
+            "sharpe": [0.67, 0.63],
+            "trade_count": [1, 37],
+        }
+    )
+
+    rolling_summary = pd.DataFrame(
+        {
+            "ticker": ["GLD", "GLD"],
+            "strategy": ["Buy and Hold", "10-Month SMA"],
+            "window_years": [5, 5],
+            "worst_cagr_pct": [-8.06, -7.74],
+        }
+    )
+
+    result = classify_strategy_purpose(metrics, rolling_summary)
+
+    strategy = result[result["strategy"] == "10-Month SMA"].iloc[0]
+
+    assert strategy["purpose_classification"] != "Risk-control candidate"
+    assert strategy["purpose_classification"] in {"Risk-control only", "Rejected / weak"}
+    assert bool(strategy["wealth_test_pass"]) is False
+
+def test_qqq_like_momentum_can_be_risk_control_candidate_when_wealth_test_passes():
+    metrics = pd.DataFrame(
+        {
+            "ticker": ["QQQ", "QQQ"],
+            "strategy": ["Buy and Hold", "12-Month Absolute Momentum"],
+            "cagr_pct": [10.66, 10.30],
+            "max_drawdown_pct": [-82.96, -40.97],
+            "sharpe": [0.51, 0.61],
+            "trade_count": [1, 19],
+        }
+    )
+
+    rolling_summary = pd.DataFrame(
+        {
+            "ticker": ["QQQ", "QQQ"],
+            "strategy": ["Buy and Hold", "12-Month Absolute Momentum"],
+            "window_years": [5, 5],
+            "worst_cagr_pct": [-19.54, -6.40],
+        }
+    )
+
+    result = classify_strategy_purpose(metrics, rolling_summary)
+
+    strategy = result[result["strategy"] == "12-Month Absolute Momentum"].iloc[0]
+
+    assert strategy["purpose_classification"] == "Risk-control candidate"
+    assert bool(strategy["wealth_test_pass"]) is True        
