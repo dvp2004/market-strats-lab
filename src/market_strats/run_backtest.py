@@ -80,6 +80,11 @@ from market_strats.strategies.trend_filtered_drawdown import (
     run_trend_filtered_drawdown_strategy,
 )
 
+from market_strats.analysis.rebalance_month_sensitivity import (
+    run_rebalance_month_sensitivity,
+    write_rebalance_month_sensitivity_markdown,
+)
+
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -257,6 +262,9 @@ def run_backtest_for_ticker(
     annual_rebalance_audit_path: Path | None = None
     annual_rebalance_audit_summary_path: Path | None = None
     annual_rebalance_audit_markdown_path: Path | None = None
+    rebalance_month_sensitivity_df = pd.DataFrame()
+    rebalance_month_sensitivity_path = None
+    rebalance_month_sensitivity_markdown_path = None
 
     prices = get_or_fetch_prices(ticker, config)
     cash_returns = get_or_fetch_cash_returns(config, prices["date"])
@@ -363,6 +371,40 @@ def run_backtest_for_ticker(
         results[core_satellite_strategy_name] = core_satellite
         results[annual_rebalanced_core_satellite_strategy_name] = (
             annual_rebalanced_core_satellite
+        )
+
+        rebalance_months = [
+            int(month)
+            for month in config.get(
+                "rebalance_month_sensitivity_months",
+                [3, 6, 9, 12],
+            )
+        ]
+
+        rebalance_month_sensitivity_df = run_rebalance_month_sensitivity(
+            core_result=buy_hold,
+            satellite_result=absolute_momentum,
+            initial_capital=initial_capital,
+            core_weight=core_weight,
+            satellite_weight=satellite_weight,
+            slippage_bps=slippage_bps,
+            rebalance_months=rebalance_months,
+        )
+
+        rebalance_month_sensitivity_path = (
+            reports_dir / f"{ticker}_rebalance_month_sensitivity.csv"
+        )
+        rebalance_month_sensitivity_markdown_path = (
+            reports_dir / f"{ticker}_rebalance_month_sensitivity.md"
+        )
+
+        rebalance_month_sensitivity_df.to_csv(
+            rebalance_month_sensitivity_path,
+            index=False,
+        )
+        write_rebalance_month_sensitivity_markdown(
+            sensitivity=rebalance_month_sensitivity_df,
+            output_path=rebalance_month_sensitivity_markdown_path,
         )
 
     metrics_df = pd.DataFrame(
@@ -557,6 +599,10 @@ def run_backtest_for_ticker(
         print("\nAnnual rebalance audit:")
         print(annual_rebalance_audit_df.to_string(index=False))
 
+    if not rebalance_month_sensitivity_df.empty:
+        print("\nRebalance-month sensitivity:")
+        print(rebalance_month_sensitivity_df.to_string(index=False))    
+
     if not momentum_robustness_df.empty:
         print("\nMomentum-window robustness:")
         print(
@@ -616,6 +662,16 @@ def run_backtest_for_ticker(
         )
         print(f"Saved momentum robustness report to: {momentum_robustness_markdown_path}")
 
+    if rebalance_month_sensitivity_path is not None:
+        print(
+            "Saved rebalance-month sensitivity to: "
+            f"{rebalance_month_sensitivity_path}"
+        )
+        print(
+            "Saved rebalance-month sensitivity report to: "
+            f"{rebalance_month_sensitivity_markdown_path}"
+        )    
+
     return {
         "metrics": metrics_df,
         "regime_summary": regime_summary_df,
@@ -626,6 +682,7 @@ def run_backtest_for_ticker(
         "strategy_purpose": strategy_purpose_df,
         "annual_rebalance_audit": annual_rebalance_audit_df,
         "annual_rebalance_audit_summary": annual_rebalance_audit_summary_df,
+        "rebalance_month_sensitivity": rebalance_month_sensitivity_df,
     }
 
 

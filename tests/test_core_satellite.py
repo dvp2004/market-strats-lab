@@ -168,4 +168,64 @@ def test_annual_rebalanced_core_satellite_creates_rebalance_days():
     )
 
     assert result["is_rebalance_day"].sum() >= 1
-    assert "rebalance_turnover" in result.columns        
+    assert "rebalance_turnover" in result.columns
+
+def test_annual_rebalanced_core_satellite_supports_custom_rebalance_month():
+    dates = pd.bdate_range("2020-01-01", "2021-12-31")
+
+    core = make_result(
+        dates=dates,
+        equity=list(range(10_000, 10_000 + len(dates))),
+        position=[1.0] * len(dates),
+        turnover=[1.0] + [0.0] * (len(dates) - 1),
+    )
+    satellite = make_result(
+        dates=dates,
+        equity=[10_000] * len(dates),
+        position=[0.0] * len(dates),
+        turnover=[0.0] * len(dates),
+    )
+
+    result = run_annual_rebalanced_core_satellite_strategy(
+        core_result=core,
+        satellite_result=satellite,
+        initial_capital=10_000,
+        core_weight=0.60,
+        satellite_weight=0.40,
+        strategy_name="Annual Rebalanced Test",
+        slippage_bps=0,
+        rebalance_month=6,
+    )
+
+    rebalance_dates = result.loc[result["is_rebalance_day"], "date"]
+
+    assert not rebalance_dates.empty
+    assert set(pd.to_datetime(rebalance_dates).dt.month) == {6}
+
+def test_annual_rebalanced_core_satellite_rejects_invalid_rebalance_month():
+    dates = pd.bdate_range("2020-01-01", periods=260)
+
+    core = make_result(
+        dates=dates,
+        equity=[10_000 + index for index in range(260)],
+        position=[1.0] * 260,
+        turnover=[1.0] + [0.0] * 259,
+    )
+    satellite = make_result(
+        dates=dates,
+        equity=[10_000] * 260,
+        position=[0.0] * 260,
+        turnover=[0.0] * 260,
+    )
+
+    with pytest.raises(ValueError):
+        run_annual_rebalanced_core_satellite_strategy(
+            core_result=core,
+            satellite_result=satellite,
+            initial_capital=10_000,
+            core_weight=0.60,
+            satellite_weight=0.40,
+            strategy_name="Annual Rebalanced Test",
+            slippage_bps=0,
+            rebalance_month=13,
+        )

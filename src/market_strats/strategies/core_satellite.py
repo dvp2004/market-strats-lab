@@ -149,6 +149,7 @@ def run_annual_rebalanced_core_satellite_strategy(
     satellite_weight: float,
     strategy_name: str,
     slippage_bps: float,
+    rebalance_month: int = 12,
 ) -> pd.DataFrame:
     """
     Blend two sleeves and rebalance back to target weights at each year-end.
@@ -176,6 +177,9 @@ def run_annual_rebalanced_core_satellite_strategy(
 
     if round(core_weight + satellite_weight, 10) != 1.0:
         raise ValueError("core_weight + satellite_weight must equal 1")
+    
+    if not 1 <= rebalance_month <= 12:
+        raise ValueError("rebalance_month must be between 1 and 12")
 
     required_columns = {
         "date",
@@ -237,8 +241,18 @@ def run_annual_rebalanced_core_satellite_strategy(
     df = df.sort_values("date").reset_index(drop=True)
 
     year = df["date"].dt.year
-    is_year_end = year != year.shift(-1)
-    is_year_end.iloc[-1] = False
+    month = df["date"].dt.month
+    next_year = year.shift(-1)
+    next_month = month.shift(-1)
+
+    is_rebalance_day = (
+        (month == rebalance_month)
+        & (
+            (next_month != rebalance_month)
+            | (next_year != year)
+        )
+    )
+    is_rebalance_day.iloc[-1] = False
 
     core_sleeve_equity = initial_capital * core_weight
     satellite_sleeve_equity = initial_capital * satellite_weight
@@ -263,7 +277,7 @@ def run_annual_rebalanced_core_satellite_strategy(
             satellite_sleeve_equity_before_rebalance / total_equity_before_rebalance
         )
 
-        if bool(is_year_end.iloc[index]):
+        if bool(is_rebalance_day.iloc[index]):
             target_core_equity = total_equity_before_rebalance * core_weight
             target_satellite_equity = total_equity_before_rebalance * satellite_weight
 
@@ -327,7 +341,8 @@ def run_annual_rebalanced_core_satellite_strategy(
                 "core_initial_weight": core_weight,
                 "satellite_initial_weight": satellite_weight,
                 "rebalance_turnover": rebalance_turnover,
-                "is_rebalance_day": bool(is_year_end.iloc[index]),
+                "is_rebalance_day": bool(is_rebalance_day.iloc[index]),
+                "rebalance_month": rebalance_month,
                 "total_equity_before_rebalance": total_equity_before_rebalance,
                 "core_sleeve_equity_before_rebalance": core_sleeve_equity_before_rebalance,
                 "satellite_sleeve_equity_before_rebalance": satellite_sleeve_equity_before_rebalance,
