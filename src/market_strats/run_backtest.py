@@ -82,6 +82,11 @@ from market_strats.analysis.strategy_purpose import (
     write_strategy_purpose_markdown,
 )
 
+from market_strats.analysis.annual_rebalance_audit import (
+    create_annual_rebalance_audit,
+    create_annual_rebalance_audit_summary,
+    write_annual_rebalance_audit_markdown,
+)
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -328,6 +333,14 @@ def run_backtest_for_ticker(
             )
         )
 
+        annual_rebalance_audit_df = create_annual_rebalance_audit(
+            result=annual_rebalanced_core_satellite,
+            strategy_name=annual_rebalanced_core_satellite_strategy_name,
+        )
+        annual_rebalance_audit_summary_df = create_annual_rebalance_audit_summary(
+            annual_rebalance_audit_df
+        )
+
         results[core_satellite_strategy_name] = core_satellite
         results[annual_rebalanced_core_satellite_strategy_name] = (
             annual_rebalanced_core_satellite
@@ -407,6 +420,11 @@ def run_backtest_for_ticker(
     strategy_purpose_df.to_csv(strategy_purpose_path, index=False)
     write_strategy_purpose_markdown(strategy_purpose_df, strategy_purpose_markdown_path)
 
+    annual_rebalance_audit_df = pd.DataFrame()
+    annual_rebalance_audit_summary_df = pd.DataFrame()
+    annual_rebalance_audit_path = None
+    annual_rebalance_audit_summary_path = None
+    annual_rebalance_audit_markdown_path = None
     core_satellite_diagnostic_df = pd.DataFrame()
     core_satellite_diagnostic_path = None
     core_satellite_diagnostic_markdown_path = None
@@ -435,6 +453,26 @@ def run_backtest_for_ticker(
             diagnostic=core_satellite_diagnostic_df,
             output_path=core_satellite_diagnostic_markdown_path,
         )
+
+        if not annual_rebalance_audit_df.empty:
+            annual_rebalance_audit_path = reports_dir / f"{ticker}_annual_rebalance_audit.csv"
+            annual_rebalance_audit_summary_path = (
+                reports_dir / f"{ticker}_annual_rebalance_audit_summary.csv"
+            )
+            annual_rebalance_audit_markdown_path = (
+                reports_dir / f"{ticker}_annual_rebalance_audit.md"
+            )
+
+            annual_rebalance_audit_df.to_csv(annual_rebalance_audit_path, index=False)
+            annual_rebalance_audit_summary_df.to_csv(
+                annual_rebalance_audit_summary_path,
+                index=False,
+            )
+            write_annual_rebalance_audit_markdown(
+                audit=annual_rebalance_audit_df,
+                summary=annual_rebalance_audit_summary_df,
+                output_path=annual_rebalance_audit_markdown_path,
+            )
 
     momentum_robustness_months = [
         int(month) for month in config.get("momentum_robustness_months", [])
@@ -519,6 +557,13 @@ def run_backtest_for_ticker(
         print("\nCore-satellite diagnostic:")
         print(core_satellite_diagnostic_df.to_string(index=False))
 
+    if not annual_rebalance_audit_df.empty:
+        print("\nAnnual rebalance audit summary:")
+        print(annual_rebalance_audit_summary_df.to_string(index=False))
+
+        print("\nAnnual rebalance audit:")
+        print(annual_rebalance_audit_df.to_string(index=False))    
+
     if not momentum_robustness_df.empty:
         print("\nMomentum-window robustness:")
         print(
@@ -559,6 +604,17 @@ def run_backtest_for_ticker(
             f"{core_satellite_diagnostic_markdown_path}"
         )
 
+    if annual_rebalance_audit_path is not None:
+        print(f"Saved annual rebalance audit to: {annual_rebalance_audit_path}")
+        print(
+            "Saved annual rebalance audit summary to: "
+            f"{annual_rebalance_audit_summary_path}"
+        )
+        print(
+            "Saved annual rebalance audit report to: "
+            f"{annual_rebalance_audit_markdown_path}"
+        )
+
     if momentum_robustness_path is not None:
         print(f"Saved momentum robustness to: {momentum_robustness_path}")
         print(f"Saved momentum robustness rolling summary to: {momentum_robustness_rolling_path}")
@@ -572,6 +628,8 @@ def run_backtest_for_ticker(
         "momentum_robustness": momentum_robustness_df,
         "core_satellite_diagnostic": core_satellite_diagnostic_df,
         "strategy_purpose": strategy_purpose_df,
+        "annual_rebalance_audit": annual_rebalance_audit_df,
+        "annual_rebalance_audit_summary": annual_rebalance_audit_summary_df,
     }
 
 

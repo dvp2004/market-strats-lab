@@ -254,6 +254,14 @@ def run_annual_rebalanced_core_satellite_strategy(
         total_equity_before_rebalance = core_sleeve_equity + satellite_sleeve_equity
 
         rebalance_turnover = 0.0
+        core_sleeve_equity_before_rebalance = core_sleeve_equity
+        satellite_sleeve_equity_before_rebalance = satellite_sleeve_equity
+        core_weight_before_rebalance = (
+            core_sleeve_equity_before_rebalance / total_equity_before_rebalance
+        )
+        satellite_weight_before_rebalance = (
+            satellite_sleeve_equity_before_rebalance / total_equity_before_rebalance
+        )
 
         if bool(is_year_end.iloc[index]):
             target_core_equity = total_equity_before_rebalance * core_weight
@@ -320,6 +328,11 @@ def run_annual_rebalanced_core_satellite_strategy(
                 "satellite_initial_weight": satellite_weight,
                 "rebalance_turnover": rebalance_turnover,
                 "is_rebalance_day": bool(is_year_end.iloc[index]),
+                "total_equity_before_rebalance": total_equity_before_rebalance,
+                "core_sleeve_equity_before_rebalance": core_sleeve_equity_before_rebalance,
+                "satellite_sleeve_equity_before_rebalance": satellite_sleeve_equity_before_rebalance,
+                "core_weight_before_rebalance": core_weight_before_rebalance,
+                "satellite_weight_before_rebalance": satellite_weight_before_rebalance,
                 "strategy_name": strategy_name,
             }
         )
