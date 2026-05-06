@@ -88,7 +88,11 @@ from market_strats.strategies.sma_trend import run_sma_trend_strategy
 from market_strats.strategies.trend_filtered_drawdown import (
     run_trend_filtered_drawdown_strategy,
 )
-
+from market_strats.analysis.monthly_sma_window_robustness import (
+    create_monthly_sma_window_robustness_summary,
+    run_monthly_sma_window_robustness,
+    write_monthly_sma_window_robustness_markdown,
+)
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -278,6 +282,12 @@ def run_backtest_for_ticker(
     sma_window_robustness_summary_path: Path | None = None
     sma_window_robustness_markdown_path: Path | None = None
 
+    monthly_sma_window_robustness_df = pd.DataFrame()
+    monthly_sma_window_robustness_summary_df = pd.DataFrame()
+    monthly_sma_window_robustness_path = None
+    monthly_sma_window_robustness_summary_path = None
+    monthly_sma_window_robustness_markdown_path = None
+
     prices = get_or_fetch_prices(ticker, config)
     cash_returns = get_or_fetch_cash_returns(config, prices["date"])
 
@@ -463,6 +473,61 @@ def run_backtest_for_ticker(
             robustness=sma_window_robustness_df,
             summary=sma_window_robustness_summary_df,
             output_path=sma_window_robustness_markdown_path,
+        )
+
+    monthly_sma_window_robustness_config = config.get(
+        "monthly_sma_window_robustness",
+        {},
+    )
+
+    if (
+        monthly_sma_window_robustness_config.get("enabled", False)
+        and ticker == monthly_sma_window_robustness_config.get("ticker")
+    ):
+        robustness_sma_months = [
+            int(value)
+            for value in monthly_sma_window_robustness_config["sma_months"]
+        ]
+
+        monthly_sma_window_robustness_df = run_monthly_sma_window_robustness(
+            ticker=ticker,
+            prices=prices,
+            buy_hold_result=buy_hold,
+            initial_capital=initial_capital,
+            sma_months=robustness_sma_months,
+            slippage_bps=slippage_bps,
+            cash_returns=cash_returns,
+        )
+
+        monthly_sma_window_robustness_summary_df = (
+            create_monthly_sma_window_robustness_summary(
+                monthly_sma_window_robustness_df,
+                anchor_sma_months=10,
+            )
+        )
+
+        monthly_sma_window_robustness_path = (
+            reports_dir / f"{ticker}_monthly_sma_window_robustness.csv"
+        )
+        monthly_sma_window_robustness_summary_path = (
+            reports_dir / f"{ticker}_monthly_sma_window_robustness_summary.csv"
+        )
+        monthly_sma_window_robustness_markdown_path = (
+            reports_dir / f"{ticker}_monthly_sma_window_robustness.md"
+        )
+
+        monthly_sma_window_robustness_df.to_csv(
+            monthly_sma_window_robustness_path,
+            index=False,
+        )
+        monthly_sma_window_robustness_summary_df.to_csv(
+            monthly_sma_window_robustness_summary_path,
+            index=False,
+        )
+        write_monthly_sma_window_robustness_markdown(
+            robustness=monthly_sma_window_robustness_df,
+            summary=monthly_sma_window_robustness_summary_df,
+            output_path=monthly_sma_window_robustness_markdown_path,
         )
 
     metrics_df = pd.DataFrame(
@@ -687,6 +752,13 @@ def run_backtest_for_ticker(
             ].to_string(index=False)
         )
 
+    if not monthly_sma_window_robustness_df.empty:
+        print("\nMonthly SMA window robustness:")
+        print(monthly_sma_window_robustness_df.to_string(index=False))
+
+        print("\nMonthly SMA window robustness summary:")
+        print(monthly_sma_window_robustness_summary_df.to_string(index=False))    
+
     print(f"\nSaved full-period metrics to: {metrics_path}")
     print(f"Saved regime metrics to: {regime_metrics_path}")
     print(f"Saved regime summary to: {regime_summary_path}")
@@ -749,6 +821,13 @@ def run_backtest_for_ticker(
         )
         print(f"Saved momentum robustness report to: {momentum_robustness_markdown_path}")
 
+    if not monthly_sma_window_robustness_df.empty:
+        print("\nMonthly SMA window robustness:")
+        print(monthly_sma_window_robustness_df.to_string(index=False))
+
+        print("\nMonthly SMA window robustness summary:")
+        print(monthly_sma_window_robustness_summary_df.to_string(index=False))
+
     return {
         "metrics": metrics_df,
         "regime_summary": regime_summary_df,
@@ -762,6 +841,8 @@ def run_backtest_for_ticker(
         "rebalance_month_sensitivity": rebalance_month_sensitivity_df,
         "sma_window_robustness": sma_window_robustness_df,
         "sma_window_robustness_summary": sma_window_robustness_summary_df,
+        "monthly_sma_window_robustness": monthly_sma_window_robustness_df,
+        "monthly_sma_window_robustness_summary": monthly_sma_window_robustness_summary_df,
     }
 
 

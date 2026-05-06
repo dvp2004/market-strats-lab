@@ -14,7 +14,27 @@ rebalance_month_sensitivity_months:
   - 3
   - 6
   - 9
-  - 12  
+  - 12
+
+sma_window_robustness:
+  enabled: true
+  ticker: EFA
+  sma_days:
+    - 100
+    - 150
+    - 200
+    - 250
+    - 300
+
+monthly_sma_window_robustness:
+  enabled: true
+  ticker: EFA
+  sma_months:
+    - 6
+    - 8
+    - 10
+    - 12
+    - 14        
 
 start_date: "1993-01-29"
 end_date:
