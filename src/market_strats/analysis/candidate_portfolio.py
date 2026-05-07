@@ -20,6 +20,14 @@ from market_strats.analysis.candidate_portfolio_attribution import (
     create_candidate_portfolio_sleeve_summary,
     write_candidate_portfolio_attribution_markdown,
 )
+from market_strats.analysis.candidate_portfolio_decision import (
+    create_candidate_portfolio_decision_report,
+    write_candidate_portfolio_decision_markdown,
+)
+from market_strats.analysis.candidate_portfolio_warmup_audit import (
+    create_candidate_portfolio_warmup_audit,
+    write_candidate_portfolio_warmup_audit_markdown,
+)
 
 def _safe_filename(value: str) -> str:
     return (
@@ -98,6 +106,22 @@ def run_candidate_portfolio_report(
 
     common_dates = get_common_strategy_dates(component_results)
 
+    expected_warmups = {}
+
+    for component in components:
+        ticker = str(component["ticker"]).upper()
+        strategy = str(component["strategy"])
+        component_name = f"{ticker} {strategy}"
+        expected_warmups[component_name] = int(
+            component.get("expected_warmup_trading_days", 0)
+        )
+
+    warmup_audit = create_candidate_portfolio_warmup_audit(
+        component_results=component_results,
+        expected_warmup_trading_days=expected_warmups,
+        common_dates=common_dates,
+    )
+
     sleeve_attribution = create_candidate_portfolio_sleeve_attribution(
         component_results=component_results,
         weights=weights,
@@ -144,6 +168,29 @@ def run_candidate_portfolio_report(
     rolling_metrics = calculate_rolling_window_metrics(comparison_results)
     rolling_summary = create_rolling_summary(rolling_metrics)
 
+    decision_config = config.get("candidate_portfolio_decision", {})
+
+    if decision_config.get("enabled", True):
+        decision_report = create_candidate_portfolio_decision_report(
+            metrics=metrics,
+            portfolio_strategy=portfolio_name,
+            benchmark_strategy=str(
+                decision_config.get(
+                    "benchmark_strategy",
+                    f"{benchmark_ticker} 12-Month Absolute Momentum",
+                )
+            ),
+            min_cagr_pct=float(decision_config.get("min_cagr_pct", 9.50)),
+            max_drawdown_floor_pct=float(
+                decision_config.get("max_drawdown_floor_pct", -28.0)
+            ),
+            require_calmar_above_benchmark=bool(
+                decision_config.get("require_calmar_above_benchmark", True)
+            ),
+        )
+    else:
+        decision_report = pd.DataFrame()
+
     safe_name = _safe_filename(portfolio_name)
 
     metrics_path = reports_dir / f"candidate_portfolio_{safe_name}_metrics.csv"
@@ -166,11 +213,33 @@ def run_candidate_portfolio_report(
     sleeve_attribution_markdown_path = (
         reports_dir / f"candidate_portfolio_{safe_name}_sleeve_attribution.md"
     )
+    decision_report_path = (
+        reports_dir / f"candidate_portfolio_{safe_name}_decision_report.csv"
+    )
+    decision_report_markdown_path = (
+        reports_dir / f"candidate_portfolio_{safe_name}_decision_report.md"
+    )
+    warmup_audit_path = (
+        reports_dir / f"candidate_portfolio_{safe_name}_warmup_audit.csv"
+    )
+    warmup_audit_markdown_path = (
+        reports_dir / f"candidate_portfolio_{safe_name}_warmup_audit.md"
+    )
 
     metrics.to_csv(metrics_path, index=False)
     rolling_summary.to_csv(rolling_summary_path, index=False)
     portfolio_result.to_csv(portfolio_result_path, index=False)
+    decision_report.to_csv(decision_report_path, index=False)
+    write_candidate_portfolio_decision_markdown(
+        decision_report=decision_report,
+        output_path=decision_report_markdown_path,
+    )
 
+    warmup_audit.to_csv(warmup_audit_path, index=False)
+    write_candidate_portfolio_warmup_audit_markdown(
+        warmup_audit=warmup_audit,
+        output_path=warmup_audit_markdown_path,
+    )
     sleeve_attribution.to_csv(sleeve_attribution_path, index=False)
     sleeve_summary.to_csv(sleeve_summary_path, index=False)
     write_candidate_portfolio_attribution_markdown(
@@ -198,6 +267,12 @@ def run_candidate_portfolio_report(
     print("\nCandidate portfolio rolling summary:")
     print(rolling_summary.to_string(index=False))
 
+    print("\nCandidate portfolio decision report:")
+    print(decision_report.to_string(index=False))
+
+    print("\nCandidate portfolio warmup audit:")
+    print(warmup_audit.to_string(index=False))
+
     print("\nCandidate portfolio sleeve attribution:")
     print(sleeve_attribution.to_string(index=False))
 
@@ -213,6 +288,16 @@ def run_candidate_portfolio_report(
     print("Saved candidate portfolio sleeve attribution report to: "f"{sleeve_attribution_markdown_path}")
     print(f"Saved candidate portfolio equity chart to: {equity_plot_path}")
     print(f"Saved candidate portfolio drawdown chart to: {drawdown_plot_path}")
+    print(f"Saved candidate portfolio decision report to: {decision_report_path}")
+    print(
+        "Saved candidate portfolio decision report markdown to: "
+        f"{decision_report_markdown_path}"
+    )
+    print(f"Saved candidate portfolio warmup audit to: {warmup_audit_path}")
+    print(
+        "Saved candidate portfolio warmup audit markdown to: "
+        f"{warmup_audit_markdown_path}"
+    )
 
     return {
         "metrics": metrics,
@@ -220,6 +305,8 @@ def run_candidate_portfolio_report(
         "portfolio_result": portfolio_result,
         "sleeve_attribution": sleeve_attribution,
         "sleeve_summary": sleeve_summary,
+        "decision_report": decision_report,
+        "warmup_audit": warmup_audit,
     }
 
 

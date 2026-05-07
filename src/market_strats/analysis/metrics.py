@@ -93,6 +93,22 @@ def _calculate_sortino(
     return float(annualised_return / downside_deviation)
 
 
+def calculate_calmar_ratio(cagr_pct: float, max_drawdown_pct: float) -> float:
+    """
+    Calculate Calmar ratio using percentage inputs.
+
+    Calmar = CAGR / absolute max drawdown
+
+    Example:
+    CAGR = 10
+    Max DD = -25
+    Calmar = 0.40
+    """
+    if max_drawdown_pct == 0:
+        return 0.0
+
+    return cagr_pct / abs(max_drawdown_pct)
+
 def calculate_metrics(result: pd.DataFrame, strategy_name: str) -> dict:
     """
     Calculate performance metrics for a strategy result.
@@ -133,6 +149,14 @@ def calculate_metrics(result: pd.DataFrame, strategy_name: str) -> dict:
     drawdown = calculate_drawdown(df["equity"])
     max_drawdown = float(drawdown.min())
 
+    cagr_pct = round(cagr * 100.0, 2)
+    max_drawdown_pct = round(max_drawdown * 100.0, 2)
+
+    calmar = calculate_calmar_ratio(
+        cagr_pct=float(cagr_pct),
+        max_drawdown_pct=float(max_drawdown_pct),
+    )
+
     monthly_equity = df.set_index("date")["equity"].resample("ME").last()
     monthly_returns = monthly_equity.pct_change().dropna()
 
@@ -151,11 +175,12 @@ def calculate_metrics(result: pd.DataFrame, strategy_name: str) -> dict:
         "start_value": round(start_value, 2),
         "end_value": round(end_value, 2),
         "total_return_pct": round(total_return * 100.0, 2),
-        "cagr_pct": round(cagr * 100.0, 2),
+        "cagr_pct": cagr_pct,
         "volatility_pct": round(volatility * 100.0, 2),
         "sharpe": round(sharpe, 3),
         "sortino": round(sortino, 3),
-        "max_drawdown_pct": round(max_drawdown * 100.0, 2),
+        "max_drawdown_pct": max_drawdown_pct,
+        "calmar": round(calmar, 3),
         "best_month_pct": round(best_month * 100.0, 2),
         "worst_month_pct": round(worst_month * 100.0, 2),
         "exposure_time_pct": round(exposure_time * 100.0, 2),
@@ -163,3 +188,5 @@ def calculate_metrics(result: pd.DataFrame, strategy_name: str) -> dict:
         "trade_count": trade_count,
         "time_underwater_pct": round(time_underwater * 100.0, 2),
     }
+
+

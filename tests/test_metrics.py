@@ -1,5 +1,5 @@
 import pandas as pd
-from market_strats.analysis.metrics import calculate_drawdown, infer_periods_per_year
+from market_strats.analysis.metrics import calculate_drawdown, infer_periods_per_year, calculate_calmar_ratio
 
 def test_drawdown_is_zero_at_equity_highs():
     equity = pd.Series([100, 110, 105, 120])
@@ -40,3 +40,8 @@ def test_infer_periods_per_year_detects_calendar_day_data():
     periods_per_year = infer_periods_per_year(result)
 
     assert 350 <= periods_per_year <= 380    
+
+def test_calculate_calmar_ratio():
+    result = calculate_calmar_ratio(cagr_pct=10.0, max_drawdown_pct=-25.0)
+
+    assert result == 0.4

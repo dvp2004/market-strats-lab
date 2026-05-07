@@ -10,6 +10,13 @@ tickers:
   - VNQ
   - BTC-USD
 
+candidate_portfolio_decision:
+  enabled: true
+  benchmark_strategy: SPY 12-Month Absolute Momentum
+  min_cagr_pct: 9.50
+  max_drawdown_floor_pct: -28.0
+  require_calmar_above_benchmark: true
+
 candidate_portfolio:
   enabled: true
   name: Validated Signal Portfolio
@@ -17,12 +24,15 @@ candidate_portfolio:
     - ticker: SPY
       strategy: 12-Month Absolute Momentum
       weight: 0.50
+      expected_warmup_trading_days: 252
     - ticker: EFA
       strategy: 200-Day SMA
       weight: 0.30
+      expected_warmup_trading_days: 200
     - ticker: AGG
       strategy: 12-Month Absolute Momentum
       weight: 0.20
+      expected_warmup_trading_days: 252
   benchmark_ticker: SPY
   benchmark_strategies:
     - Buy and Hold
