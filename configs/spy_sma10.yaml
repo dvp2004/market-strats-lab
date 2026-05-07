@@ -10,6 +10,24 @@ tickers:
   - VNQ
   - BTC-USD
 
+candidate_portfolio:
+  enabled: true
+  name: Validated Signal Portfolio
+  components:
+    - ticker: SPY
+      strategy: 12-Month Absolute Momentum
+      weight: 0.50
+    - ticker: EFA
+      strategy: 200-Day SMA
+      weight: 0.30
+    - ticker: AGG
+      strategy: 12-Month Absolute Momentum
+      weight: 0.20
+  benchmark_ticker: SPY
+  benchmark_strategies:
+    - Buy and Hold
+    - 12-Month Absolute Momentum
+
 rebalance_month_sensitivity_months:
   - 3
   - 6

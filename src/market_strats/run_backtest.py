@@ -93,6 +93,7 @@ from market_strats.analysis.monthly_sma_window_robustness import (
     run_monthly_sma_window_robustness,
     write_monthly_sma_window_robustness_markdown,
 )
+from market_strats.analysis.candidate_portfolio import run_candidate_portfolio_report
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -843,6 +844,7 @@ def run_backtest_for_ticker(
         "sma_window_robustness_summary": sma_window_robustness_summary_df,
         "monthly_sma_window_robustness": monthly_sma_window_robustness_df,
         "monthly_sma_window_robustness_summary": monthly_sma_window_robustness_summary_df,
+        "strategy_results": results,
     }
 
 
@@ -1243,6 +1245,14 @@ def main() -> None:
 
     if len(ticker_outputs) > 1:
         write_cross_asset_summaries(ticker_outputs, reports_dir)
+
+    if len(ticker_outputs) > 1:
+        write_cross_asset_summaries(ticker_outputs, reports_dir)
+        run_candidate_portfolio_report(
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )    
 
     dual_momentum_pairs = get_dual_momentum_pairs(config)
 
