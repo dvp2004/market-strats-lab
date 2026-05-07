@@ -14,8 +14,21 @@ DEFENSIVE_DRAWDOWN_IMPROVEMENT_PCT_POINTS = 3.0
 CORE_SATELLITE_MAX_CAGR_LAG_PCT_POINTS = 0.50
 HIGH_TRADE_COUNT = 150
 
-UNVALIDATED_LEADS = {
-    ("EFA", "10-Month SMA"),
+UNVALIDATED_LEADS: set[tuple[str, str]] = set()
+
+
+MANUAL_CLASSIFICATION_OVERRIDES = {
+    ("EFA", "10-Month SMA"): {
+        "purpose_classification": "Risk-control candidate",
+        "base_purpose_classification": "Wealth-equivalent risk reducer",
+        "wealth_test_pass": True,
+        "pending_validation": False,
+        "classification_note": (
+            "Monthly SMA robustness showed the surrounding monthly windows gave up "
+            "return versus buy-and-hold; treat as risk-control rather than a "
+            "validated wealth-equivalent lead."
+        ),
+    },
 }
 
 
@@ -207,6 +220,17 @@ def _classify_strategy(
             True,
             False,
             "Passive benchmark for this ticker.",
+        )
+
+    manual_override = MANUAL_CLASSIFICATION_OVERRIDES.get((ticker, strategy))
+
+    if manual_override is not None:
+        return (
+            str(manual_override["purpose_classification"]),
+            str(manual_override["base_purpose_classification"]),
+            bool(manual_override["wealth_test_pass"]),
+            bool(manual_override["pending_validation"]),
+            str(manual_override["classification_note"]),
         )
 
     if "Core-Satellite" in strategy:

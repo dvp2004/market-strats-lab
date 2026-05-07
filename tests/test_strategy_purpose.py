@@ -245,7 +245,7 @@ def test_classify_strategy_purpose_returns_empty_for_empty_metrics():
 
     assert result.empty
 
-def test_classify_strategy_purpose_keeps_efa_10m_as_unvalidated_lead():
+def test_classify_strategy_purpose_demotes_efa_10m_after_monthly_robustness():
     metrics = pd.DataFrame(
         {
             "ticker": ["EFA", "EFA"],
@@ -262,7 +262,7 @@ def test_classify_strategy_purpose_keeps_efa_10m_as_unvalidated_lead():
             "ticker": ["EFA", "EFA"],
             "strategy": ["Buy and Hold", "10-Month SMA"],
             "window_years": [5, 5],
-            "worst_cagr_pct": [-7.0, -2.0],
+            "worst_cagr_pct": [-7.0, -4.53],
         }
     )
 
@@ -270,6 +270,7 @@ def test_classify_strategy_purpose_keeps_efa_10m_as_unvalidated_lead():
 
     strategy = result[result["strategy"] == "10-Month SMA"].iloc[0]
 
-    assert strategy["purpose_classification"] == "Unvalidated lead"
+    assert strategy["purpose_classification"] == "Risk-control candidate"
     assert strategy["base_purpose_classification"] == "Wealth-equivalent risk reducer"
-    assert bool(strategy["pending_validation"]) is True 
+    assert bool(strategy["wealth_test_pass"]) is True
+    assert bool(strategy["pending_validation"]) is False
