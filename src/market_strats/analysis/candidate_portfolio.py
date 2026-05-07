@@ -15,7 +15,11 @@ from market_strats.strategies.fixed_weight_portfolio import (
     rebase_strategy_result_to_dates,
     run_independent_weighted_portfolio,
 )
-
+from market_strats.analysis.candidate_portfolio_attribution import (
+    create_candidate_portfolio_sleeve_attribution,
+    create_candidate_portfolio_sleeve_summary,
+    write_candidate_portfolio_attribution_markdown,
+)
 
 def _safe_filename(value: str) -> str:
     return (
@@ -94,6 +98,19 @@ def run_candidate_portfolio_report(
 
     common_dates = get_common_strategy_dates(component_results)
 
+    sleeve_attribution = create_candidate_portfolio_sleeve_attribution(
+        component_results=component_results,
+        weights=weights,
+        portfolio_result=portfolio_result,
+        common_dates=common_dates,
+        initial_capital=initial_capital,
+    )
+    sleeve_summary = create_candidate_portfolio_sleeve_summary(
+        attribution=sleeve_attribution,
+        portfolio_result=portfolio_result,
+        initial_capital=initial_capital,
+    )
+
     benchmark_ticker = str(candidate_config["benchmark_ticker"]).upper()
     benchmark_strategies = [
         str(strategy) for strategy in candidate_config["benchmark_strategies"]
@@ -140,9 +157,27 @@ def run_candidate_portfolio_report(
     equity_plot_path = reports_dir / f"candidate_portfolio_{safe_name}_equity_curves.png"
     drawdown_plot_path = reports_dir / f"candidate_portfolio_{safe_name}_drawdowns.png"
 
+    sleeve_attribution_path = (
+        reports_dir / f"candidate_portfolio_{safe_name}_sleeve_attribution.csv"
+    )
+    sleeve_summary_path = (
+        reports_dir / f"candidate_portfolio_{safe_name}_sleeve_summary.csv"
+    )
+    sleeve_attribution_markdown_path = (
+        reports_dir / f"candidate_portfolio_{safe_name}_sleeve_attribution.md"
+    )
+
     metrics.to_csv(metrics_path, index=False)
     rolling_summary.to_csv(rolling_summary_path, index=False)
     portfolio_result.to_csv(portfolio_result_path, index=False)
+
+    sleeve_attribution.to_csv(sleeve_attribution_path, index=False)
+    sleeve_summary.to_csv(sleeve_summary_path, index=False)
+    write_candidate_portfolio_attribution_markdown(
+        attribution=sleeve_attribution,
+        summary=sleeve_summary,
+        output_path=sleeve_attribution_markdown_path,
+    )
 
     plot_equity_curves(comparison_results, equity_plot_path)
     plot_drawdowns(comparison_results, drawdown_plot_path)
@@ -163,10 +198,19 @@ def run_candidate_portfolio_report(
     print("\nCandidate portfolio rolling summary:")
     print(rolling_summary.to_string(index=False))
 
+    print("\nCandidate portfolio sleeve attribution:")
+    print(sleeve_attribution.to_string(index=False))
+
+    print("\nCandidate portfolio sleeve summary:")
+    print(sleeve_summary.to_string(index=False))
+
     print(f"\nSaved candidate portfolio metrics to: {metrics_path}")
     print(f"Saved candidate portfolio rolling summary to: {rolling_summary_path}")
     print(f"Saved candidate portfolio daily result to: {portfolio_result_path}")
     print(f"Saved candidate portfolio report to: {markdown_path}")
+    print(f"Saved candidate portfolio sleeve attribution to: {sleeve_attribution_path}")
+    print(f"Saved candidate portfolio sleeve summary to: {sleeve_summary_path}")
+    print("Saved candidate portfolio sleeve attribution report to: "f"{sleeve_attribution_markdown_path}")
     print(f"Saved candidate portfolio equity chart to: {equity_plot_path}")
     print(f"Saved candidate portfolio drawdown chart to: {drawdown_plot_path}")
 
@@ -174,6 +218,8 @@ def run_candidate_portfolio_report(
         "metrics": metrics,
         "rolling_summary": rolling_summary,
         "portfolio_result": portfolio_result,
+        "sleeve_attribution": sleeve_attribution,
+        "sleeve_summary": sleeve_summary,
     }
 
 
