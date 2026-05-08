@@ -94,6 +94,15 @@ from market_strats.analysis.monthly_sma_window_robustness import (
     write_monthly_sma_window_robustness_markdown,
 )
 from market_strats.analysis.candidate_portfolio import run_candidate_portfolio_report
+from market_strats.analysis.final_strategy_report import (
+    save_final_strategy_decision_report,
+)
+from market_strats.analysis.finalist_holdout_validation import (
+    save_finalist_holdout_validation_report,
+)
+from market_strats.analysis.final_validation_conclusion import (
+    save_final_validation_conclusion,
+)
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -1254,6 +1263,14 @@ def main() -> None:
             reports_dir=reports_dir,
         )    
 
+    save_final_strategy_decision_report(reports_dir)
+
+    save_finalist_holdout_validation_report(
+        ticker_outputs=ticker_outputs,
+        config=config,
+        reports_dir=reports_dir,
+    )
+
     dual_momentum_pairs = get_dual_momentum_pairs(config)
 
     for pair in dual_momentum_pairs:
@@ -1262,7 +1279,8 @@ def main() -> None:
             config=config,
             reports_dir=reports_dir,
         )
-
+        
+    save_final_validation_conclusion(reports_dir)
 
 if __name__ == "__main__":
     main()

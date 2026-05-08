@@ -10,6 +10,45 @@ tickers:
   - VNQ
   - BTC-USD
 
+finalist_holdout_validation:
+  enabled: true
+  reference_end_date: "2015-12-31"
+  holdout_start_date: "2016-01-01"
+  finalist_portfolios:
+    - name: Defensive Diversified Portfolio
+      components:
+        - ticker: SPY
+          strategy: 12-Month Absolute Momentum
+          weight: 0.50
+        - ticker: EFA
+          strategy: 200-Day SMA
+          weight: 0.30
+        - ticker: AGG
+          strategy: 12-Month Absolute Momentum
+          weight: 0.20
+    - name: Growth Biased Signal Portfolio
+      components:
+        - ticker: SPY
+          strategy: 12-Month Absolute Momentum
+          weight: 0.70
+        - ticker: EFA
+          strategy: 200-Day SMA
+          weight: 0.20
+        - ticker: AGG
+          strategy: 12-Month Absolute Momentum
+          weight: 0.10
+    - name: SPY Dominant Signal Portfolio
+      components:
+        - ticker: SPY
+          strategy: 12-Month Absolute Momentum
+          weight: 0.80
+        - ticker: EFA
+          strategy: 200-Day SMA
+          weight: 0.10
+        - ticker: AGG
+          strategy: 12-Month Absolute Momentum
+          weight: 0.10
+
 candidate_portfolio_decision:
   enabled: true
   benchmark_strategy: SPY 12-Month Absolute Momentum
@@ -19,19 +58,19 @@ candidate_portfolio_decision:
 
 candidate_portfolio:
   enabled: true
-  name: Validated Signal Portfolio
+  name: SPY Dominant Signal Portfolio
   components:
     - ticker: SPY
       strategy: 12-Month Absolute Momentum
-      weight: 0.50
+      weight: 0.80
       expected_warmup_trading_days: 252
     - ticker: EFA
       strategy: 200-Day SMA
-      weight: 0.30
+      weight: 0.10
       expected_warmup_trading_days: 200
     - ticker: AGG
       strategy: 12-Month Absolute Momentum
-      weight: 0.20
+      weight: 0.10
       expected_warmup_trading_days: 252
   benchmark_ticker: SPY
   benchmark_strategies:
