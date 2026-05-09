@@ -103,6 +103,9 @@ from market_strats.analysis.finalist_holdout_validation import (
 from market_strats.analysis.final_validation_conclusion import (
     save_final_validation_conclusion,
 )
+from market_strats.analysis.relative_momentum_report import (
+    run_relative_momentum_allocator_report,
+)
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -854,6 +857,7 @@ def run_backtest_for_ticker(
         "monthly_sma_window_robustness": monthly_sma_window_robustness_df,
         "monthly_sma_window_robustness_summary": monthly_sma_window_robustness_summary_df,
         "strategy_results": results,
+        "cash_returns": cash_returns,
     }
 
 
@@ -1261,7 +1265,12 @@ def main() -> None:
             ticker_outputs=ticker_outputs,
             config=config,
             reports_dir=reports_dir,
-        )    
+        )
+        run_relative_momentum_allocator_report(
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        ) 
 
     save_final_strategy_decision_report(reports_dir)
 
