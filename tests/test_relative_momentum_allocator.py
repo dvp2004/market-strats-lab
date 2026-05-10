@@ -166,3 +166,58 @@ def test_relative_momentum_allocator_rejects_invalid_weighting():
             min_momentum=0.0,
             weighting="bad_weighting",
         )
+
+def test_trend_filter_reduces_exposure_when_asset_breaks_below_sma():
+    dates = pd.bdate_range("2018-01-01", "2021-12-31")
+
+    trend_ok_returns = [0.0]
+    trend_broken_returns = [0.0]
+
+    for index in range(1, len(dates)):
+        trend_ok_returns.append(0.0005)
+
+        if index < 650:
+            trend_broken_returns.append(0.0008)
+        else:
+            trend_broken_returns.append(-0.0020)
+
+    result_without_filter = run_relative_momentum_allocator(
+        price_data_by_ticker={
+            "TREND_OK": make_prices_from_returns(dates, 100.0, trend_ok_returns),
+            "BROKEN": make_prices_from_returns(dates, 100.0, trend_broken_returns),
+        },
+        initial_capital=10_000,
+        lookback_months=12,
+        top_n=2,
+        slippage_bps=0.0,
+        min_momentum=0.0,
+        weighting="equal",
+        trend_filter_enabled=False,
+        trend_sma_days=200,
+    )
+
+    result_with_filter = run_relative_momentum_allocator(
+        price_data_by_ticker={
+            "TREND_OK": make_prices_from_returns(dates, 100.0, trend_ok_returns),
+            "BROKEN": make_prices_from_returns(dates, 100.0, trend_broken_returns),
+        },
+        initial_capital=10_000,
+        lookback_months=12,
+        top_n=2,
+        slippage_bps=0.0,
+        min_momentum=0.0,
+        weighting="equal",
+        trend_filter_enabled=True,
+        trend_sma_days=200,
+    )
+
+    late_without_filter = result_without_filter[
+        pd.to_datetime(result_without_filter["date"]) > pd.Timestamp("2020-10-01")
+    ]
+    late_with_filter = result_with_filter[
+        pd.to_datetime(result_with_filter["date"]) > pd.Timestamp("2020-10-01")
+    ]
+
+    assert late_with_filter["BROKEN_weight"].mean() < late_without_filter[
+        "BROKEN_weight"
+    ].mean()

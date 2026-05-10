@@ -112,6 +112,8 @@ def run_relative_momentum_allocator(
     cash_returns: pd.Series | None = None,
     weighting: str = "equal",
     volatility_lookback_days: int = 63,
+    trend_filter_enabled: bool = False,
+    trend_sma_days: int = 200,
 ) -> pd.DataFrame:
     """
     Monthly top-N relative momentum allocator.
@@ -148,6 +150,14 @@ def run_relative_momentum_allocator(
 
     rolling_volatility = asset_returns.rolling(volatility_lookback_days).std()
 
+    if trend_sma_days <= 0:
+        raise ValueError("trend_sma_days must be positive")
+
+    if trend_filter_enabled:
+        trend_sma = close_panel.rolling(trend_sma_days).mean()
+    else:
+        trend_sma = None
+
     monthly_last_dates = close_panel.groupby(close_panel.index.to_period("M")).tail(1)
     monthly_close = monthly_last_dates.copy()
 
@@ -168,6 +178,19 @@ def run_relative_momentum_allocator(
 
         eligible = momentum_row.dropna()
         eligible = eligible[eligible > min_momentum]
+
+        if trend_filter_enabled and trend_sma is not None:
+            price_row = close_panel.loc[signal_date]
+            sma_row = trend_sma.loc[signal_date]
+
+            trend_confirmed = price_row > sma_row
+            trend_confirmed = trend_confirmed.fillna(False)
+
+            eligible = eligible[
+                eligible.index.isin(
+                    trend_confirmed[trend_confirmed].index
+                )
+            ]
 
         selected = eligible.sort_values(ascending=False).head(top_n).index.tolist()
 
@@ -233,6 +256,8 @@ def run_relative_momentum_allocator(
     result["slippage_cost"] = slippage_cost.values
     result["weighting"] = weighting
     result["volatility_lookback_days"] = volatility_lookback_days
+    result["trend_filter_enabled"] = trend_filter_enabled
+    result["trend_sma_days"] = trend_sma_days
 
     numeric_columns = result.select_dtypes(include=[np.number]).columns
 

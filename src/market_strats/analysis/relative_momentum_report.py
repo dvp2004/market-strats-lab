@@ -239,6 +239,10 @@ def _run_single_relative_momentum_variant(
         volatility_lookback_days=int(
             variant_config.get("volatility_lookback_days", 63)
         ),
+        trend_filter_enabled=bool(
+            variant_config.get("trend_filter_enabled", False)
+        ),
+        trend_sma_days=int(variant_config.get("trend_sma_days", 200)),
     )
 
     common_dates = get_common_strategy_dates(
