@@ -243,6 +243,13 @@ def _run_single_relative_momentum_variant(
             variant_config.get("trend_filter_enabled", False)
         ),
         trend_sma_days=int(variant_config.get("trend_sma_days", 200)),
+        max_asset_weight=(
+            None
+            if variant_config.get("max_asset_weight") is None
+            else float(variant_config["max_asset_weight"])
+        ),
+        asset_groups=allocator_config.get("asset_groups"),
+        asset_group_caps=variant_config.get("asset_group_caps"),
     )
 
     common_dates = get_common_strategy_dates(

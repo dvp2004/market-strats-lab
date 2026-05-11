@@ -109,6 +109,14 @@ from market_strats.analysis.relative_momentum_report import (
 from market_strats.analysis.relative_momentum_decision_report import (
     save_relative_momentum_variant_decision_report,
 )
+from market_strats.analysis.relative_momentum_holdout_validation import (
+    save_relative_momentum_holdout_validation_report,
+)
+from market_strats.analysis.relative_momentum_validation_conclusion import (
+    save_relative_momentum_validation_conclusion,
+)
+
+
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -1261,21 +1269,25 @@ def main() -> None:
 
     if len(ticker_outputs) > 1:
         write_cross_asset_summaries(ticker_outputs, reports_dir)
-
-    if len(ticker_outputs) > 1:
-        write_cross_asset_summaries(ticker_outputs, reports_dir)
         run_candidate_portfolio_report(
             ticker_outputs=ticker_outputs,
             config=config,
             reports_dir=reports_dir,
         )
-        run_relative_momentum_allocator_report(
+        relative_momentum_outputs = run_relative_momentum_allocator_report(
             ticker_outputs=ticker_outputs,
             config=config,
             reports_dir=reports_dir,
-        ) 
+        )
         save_relative_momentum_variant_decision_report(reports_dir)
-
+        save_relative_momentum_holdout_validation_report(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+        save_relative_momentum_validation_conclusion(reports_dir)
+        
     save_final_strategy_decision_report(reports_dir)
 
     save_finalist_holdout_validation_report(

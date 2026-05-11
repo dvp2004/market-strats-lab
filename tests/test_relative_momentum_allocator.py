@@ -221,3 +221,59 @@ def test_trend_filter_reduces_exposure_when_asset_breaks_below_sma():
     assert late_with_filter["BROKEN_weight"].mean() < late_without_filter[
         "BROKEN_weight"
     ].mean()
+
+def test_max_asset_weight_caps_selected_asset_weight():
+    dates = pd.bdate_range("2018-01-01", "2021-12-31")
+
+    result = run_relative_momentum_allocator(
+        price_data_by_ticker={
+            "AAA": make_prices(dates, 100.0, 0.0010),
+            "BBB": make_prices(dates, 100.0, 0.0008),
+            "CCC": make_prices(dates, 100.0, 0.0006),
+        },
+        initial_capital=10_000,
+        lookback_months=12,
+        top_n=3,
+        slippage_bps=0.0,
+        min_momentum=0.0,
+        weighting="equal",
+        max_asset_weight=0.25,
+    )
+
+    post_warmup = result[pd.to_datetime(result["date"]) > pd.Timestamp("2019-06-01")]
+
+    assert post_warmup["AAA_weight"].max() <= 0.250001
+    assert post_warmup["BBB_weight"].max() <= 0.250001
+    assert post_warmup["CCC_weight"].max() <= 0.250001
+    assert post_warmup["cash_position"].mean() > 0.20
+
+
+def test_asset_group_cap_limits_group_exposure():
+    dates = pd.bdate_range("2018-01-01", "2021-12-31")
+
+    result = run_relative_momentum_allocator(
+        price_data_by_ticker={
+            "GLD": make_prices(dates, 100.0, 0.0010),
+            "SLV": make_prices(dates, 100.0, 0.0009),
+            "DBC": make_prices(dates, 100.0, 0.0008),
+        },
+        initial_capital=10_000,
+        lookback_months=12,
+        top_n=3,
+        slippage_bps=0.0,
+        min_momentum=0.0,
+        weighting="equal",
+        asset_groups={"commodities": ["GLD", "SLV", "DBC"]},
+        asset_group_caps={"commodities": 0.50},
+    )
+
+    post_warmup = result[pd.to_datetime(result["date"]) > pd.Timestamp("2019-06-01")]
+
+    commodity_weight = (
+        post_warmup["GLD_weight"]
+        + post_warmup["SLV_weight"]
+        + post_warmup["DBC_weight"]
+    )
+
+    assert commodity_weight.max() <= 0.500001
+    assert post_warmup["cash_position"].mean() > 0.45

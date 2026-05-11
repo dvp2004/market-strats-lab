@@ -50,6 +50,10 @@ def test_create_relative_momentum_variant_decision_report(tmp_path: Path):
             "relative_momentum_top_3_inverse_volatility_trend_confirmed_relative_momentum_allocator_metrics.csv",
             "Top 3 Inverse Volatility Trend Confirmed Relative Momentum Allocator",
         ),
+        (
+            "relative_momentum_top_3_equal_weight_trend_confirmed_constrained_relative_momentum_allocator_metrics.csv",
+            "Top 3 Equal Weight Trend Confirmed Constrained Relative Momentum Allocator",
+        ),
     ]
 
     for filename, strategy in files:
@@ -57,7 +61,7 @@ def test_create_relative_momentum_variant_decision_report(tmp_path: Path):
 
     report = create_relative_momentum_variant_decision_report(reports_dir=tmp_path)
 
-    assert len(report) == 6
+    assert len(report) == 7
     assert "classification" in report.columns
     assert "verdict" in report.columns
     assert "calmar_delta_vs_spy_12m" in report.columns

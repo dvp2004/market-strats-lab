@@ -51,6 +51,17 @@ RELATIVE_MOMENTUM_VARIANTS = [
             "too much CAGR versus the equal-weight trend-confirmed version."
         ),
     },
+    {
+        "source_file": (
+            "relative_momentum_top_3_equal_weight_trend_confirmed_constrained_relative_momentum_allocator_metrics.csv"
+        ),
+        "strategy": "Top 3 Equal Weight Trend Confirmed Constrained Relative Momentum Allocator",
+        "classification": "Constrained Phase 2 candidate",
+        "verdict": (
+            "Tests whether practical concentration limits improve liveability and "
+            "drawdown control versus the unconstrained trend-confirmed leader."
+        ),
+    },
 ]
 
 

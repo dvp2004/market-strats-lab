@@ -114,6 +114,9 @@ def run_relative_momentum_allocator(
     volatility_lookback_days: int = 63,
     trend_filter_enabled: bool = False,
     trend_sma_days: int = 200,
+    max_asset_weight: float | None = None,
+    asset_groups: dict[str, list[str]] | None = None,
+    asset_group_caps: dict[str, float] | None = None,
 ) -> pd.DataFrame:
     """
     Monthly top-N relative momentum allocator.
@@ -204,6 +207,13 @@ def run_relative_momentum_allocator(
             volatility_row=rolling_volatility.loc[signal_date],
         )
 
+        selected_weights = _apply_portfolio_constraints(
+            weights=selected_weights,
+            max_asset_weight=max_asset_weight,
+            asset_groups=asset_groups,
+            asset_group_caps=asset_group_caps,
+        )
+
         for ticker, weight in selected_weights.items():
             target_weights.loc[execution_date, ticker] = weight
 
@@ -259,9 +269,109 @@ def run_relative_momentum_allocator(
     result["trend_filter_enabled"] = trend_filter_enabled
     result["trend_sma_days"] = trend_sma_days
 
+    result["max_asset_weight"] = (
+        np.nan if max_asset_weight is None else float(max_asset_weight)
+    )
+
+    if asset_group_caps:
+        result["asset_group_caps_enabled"] = True
+    else:
+        result["asset_group_caps_enabled"] = False
+
     numeric_columns = result.select_dtypes(include=[np.number]).columns
 
     for column in numeric_columns:
         result[column] = result[column].astype(float)
 
     return result.reset_index(drop=True)
+
+def _normalise_asset_groups(
+    asset_groups: dict[str, list[str]] | None,
+) -> dict[str, list[str]]:
+    if not asset_groups:
+        return {}
+
+    return {
+        str(group_name): [str(asset).upper() for asset in assets]
+        for group_name, assets in asset_groups.items()
+    }
+
+
+def _apply_max_asset_weight(
+    weights: dict[str, float],
+    max_asset_weight: float | None,
+) -> dict[str, float]:
+    if max_asset_weight is None:
+        return weights
+
+    if max_asset_weight <= 0 or max_asset_weight > 1:
+        raise ValueError("max_asset_weight must be in the range (0, 1]")
+
+    return {
+        asset: min(float(weight), max_asset_weight)
+        for asset, weight in weights.items()
+    }
+
+
+def _apply_asset_group_caps(
+    weights: dict[str, float],
+    asset_groups: dict[str, list[str]] | None,
+    asset_group_caps: dict[str, float] | None,
+) -> dict[str, float]:
+    if not asset_group_caps:
+        return weights
+
+    normalised_groups = _normalise_asset_groups(asset_groups)
+
+    adjusted = dict(weights)
+
+    for group_name, cap in asset_group_caps.items():
+        cap = float(cap)
+
+        if cap <= 0 or cap > 1:
+            raise ValueError("asset group caps must be in the range (0, 1]")
+
+        group_assets = normalised_groups.get(str(group_name), [])
+        present_assets = [
+            asset for asset in group_assets
+            if asset in adjusted and adjusted[asset] > 0
+        ]
+
+        if not present_assets:
+            continue
+
+        group_weight = sum(adjusted[asset] for asset in present_assets)
+
+        if group_weight <= cap:
+            continue
+
+        scale = cap / group_weight
+
+        for asset in present_assets:
+            adjusted[asset] = adjusted[asset] * scale
+
+    return adjusted
+
+
+def _apply_portfolio_constraints(
+    weights: dict[str, float],
+    max_asset_weight: float | None = None,
+    asset_groups: dict[str, list[str]] | None = None,
+    asset_group_caps: dict[str, float] | None = None,
+) -> dict[str, float]:
+    constrained = _apply_max_asset_weight(
+        weights=weights,
+        max_asset_weight=max_asset_weight,
+    )
+    constrained = _apply_asset_group_caps(
+        weights=constrained,
+        asset_groups=asset_groups,
+        asset_group_caps=asset_group_caps,
+    )
+
+    total_weight = sum(constrained.values())
+
+    if total_weight > 1.000001:
+        raise ValueError("portfolio constraints produced total weight above 100%")
+
+    return constrained
