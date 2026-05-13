@@ -12,6 +12,56 @@ tickers:
   - SLV
   - DBC
 
+regime_switch_overlay:
+  enabled: true
+  name: SPY Trend Regime Switch Overlay 3D Confirmed
+  benchmark_ticker: SPY
+  offensive_strategy: Buy and Hold
+  defensive_allocator_name: Top 3 Equal Weight Trend Confirmed Constrained Relative Momentum Allocator
+  trend_sma_days: 200
+  confirmation_days: 3
+  benchmarks:
+    - ticker: SPY
+      strategy: Buy and Hold
+    - ticker: SPY
+      strategy: 12-Month Absolute Momentum
+  comparison_allocators:
+    - Top 3 Equal Weight Trend Confirmed Relative Momentum Allocator
+    - Top 3 Equal Weight Trend Confirmed Constrained Relative Momentum Allocator
+
+regime_switch_overlay_audit:
+  enabled: true
+  whipsaw_days: 30
+  future_return_horizons:
+    - 21
+    - 63
+    - 126
+    - 252
+  focus_years:
+    - 2011
+    - 2015
+    - 2016
+    - 2018
+    - 2022
+
+regime_switch_overlay_holdout_validation:
+  enabled: true
+  reference_end_date: "2015-12-31"
+  holdout_start_date: "2016-01-01"
+
+relative_momentum_holdout_validation:
+  enabled: true
+  reference_end_date: "2015-12-31"
+  holdout_start_date: "2016-01-01"
+
+relative_momentum_regime_diagnostic:
+  enabled: true
+  benchmark_ticker: SPY
+  benchmark_strategy: Buy and Hold
+  benchmark_momentum_strategy: 12-Month Absolute Momentum
+  trend_sma_days: 200
+  momentum_lookback_days: 252
+
 relative_momentum_allocator:
   enabled: true
   universe:
@@ -26,23 +76,76 @@ relative_momentum_allocator:
     - SLV
     - VNQ
     - DBC
+
+  asset_groups:
+    equities:
+      - SPY
+      - QQQ
+      - IWM
+      - EFA
+      - EEM
+      - VNQ
+    bonds:
+      - AGG
+      - TLT
+    commodities:
+      - GLD
+      - SLV
+      - DBC
+
   benchmarks:
     - ticker: SPY
       strategy: Buy and Hold
     - ticker: SPY
       strategy: 12-Month Absolute Momentum
+
   variants:
     - name: Top 3 Equal Weight Relative Momentum Allocator
       lookback_months: 12
       top_n: 3
       min_momentum: 0.0
       weighting: equal
+      trend_filter_enabled: false
+      trend_sma_days: 200
+
     - name: Top 3 Inverse Volatility Relative Momentum Allocator
       lookback_months: 12
       top_n: 3
       min_momentum: 0.0
       weighting: inverse_volatility
       volatility_lookback_days: 63
+      trend_filter_enabled: false
+      trend_sma_days: 200
+
+    - name: Top 3 Equal Weight Trend Confirmed Relative Momentum Allocator
+      lookback_months: 12
+      top_n: 3
+      min_momentum: 0.0
+      weighting: equal
+      trend_filter_enabled: true
+      trend_sma_days: 200
+
+    - name: Top 3 Inverse Volatility Trend Confirmed Relative Momentum Allocator
+      lookback_months: 12
+      top_n: 3
+      min_momentum: 0.0
+      weighting: inverse_volatility
+      volatility_lookback_days: 63
+      trend_filter_enabled: true
+      trend_sma_days: 200
+
+    - name: Top 3 Equal Weight Trend Confirmed Constrained Relative Momentum Allocator
+      lookback_months: 12
+      top_n: 3
+      min_momentum: 0.0
+      weighting: equal
+      trend_filter_enabled: true
+      trend_sma_days: 200
+      max_asset_weight: 0.40
+      asset_group_caps:
+        equities: 0.80
+        bonds: 0.60
+        commodities: 0.50
 
 finalist_holdout_validation:
   enabled: true
