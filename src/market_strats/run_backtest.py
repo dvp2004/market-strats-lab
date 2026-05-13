@@ -115,8 +115,24 @@ from market_strats.analysis.relative_momentum_holdout_validation import (
 from market_strats.analysis.relative_momentum_validation_conclusion import (
     save_relative_momentum_validation_conclusion,
 )
-
-
+from market_strats.analysis.relative_momentum_regime_diagnostic import (
+    save_relative_momentum_regime_diagnostic,
+)
+from market_strats.analysis.regime_switch_overlay_report import (
+    run_regime_switch_overlay_report,
+)
+from market_strats.analysis.regime_switch_overlay_audit import (
+    save_regime_switch_overlay_audit,
+)
+from market_strats.analysis.regime_switch_overlay_decision_report import (
+    save_regime_switch_overlay_decision_report,
+)
+from market_strats.analysis.regime_switch_overlay_holdout_validation import (
+    save_regime_switch_overlay_holdout_validation_report,
+)
+from market_strats.analysis.regime_switch_overlay_validation_conclusion import (
+    save_regime_switch_overlay_validation_conclusion,
+)
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -1287,7 +1303,41 @@ def main() -> None:
             reports_dir=reports_dir,
         )
         save_relative_momentum_validation_conclusion(reports_dir)
-        
+
+        save_relative_momentum_regime_diagnostic(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        overlay_outputs = run_regime_switch_overlay_report(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_regime_switch_overlay_audit(
+            overlay_outputs=overlay_outputs,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_regime_switch_overlay_decision_report(reports_dir)
+
+        save_regime_switch_overlay_holdout_validation_report(
+            overlay_outputs=overlay_outputs,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_regime_switch_overlay_validation_conclusion(reports_dir)
+
     save_final_strategy_decision_report(reports_dir)
 
     save_finalist_holdout_validation_report(
