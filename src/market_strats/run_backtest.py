@@ -130,6 +130,9 @@ from market_strats.analysis.regime_switch_overlay_decision_report import (
 from market_strats.analysis.regime_switch_overlay_holdout_validation import (
     save_regime_switch_overlay_holdout_validation_report,
 )
+from market_strats.analysis.regime_switch_overlay_validation_conclusion import (
+    save_regime_switch_overlay_validation_conclusion,
+)
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -1332,6 +1335,8 @@ def main() -> None:
             config=config,
             reports_dir=reports_dir,
         )
+
+        save_regime_switch_overlay_validation_conclusion(reports_dir)
 
     save_final_strategy_decision_report(reports_dir)
 
