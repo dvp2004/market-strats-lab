@@ -154,6 +154,87 @@ from market_strats.analysis.asset_expansion_diagnostic import (
 from market_strats.analysis.asset_expansion_conclusion import (
     save_asset_expansion_conclusion,
 )
+from market_strats.analysis.eth_quarantine_diagnostic import (
+    save_eth_quarantine_diagnostic,
+)
+
+def _apply_research_period_filter_to_result(
+    result: pd.DataFrame,
+    config: dict,
+    strategy_name: str,
+) -> pd.DataFrame:
+    research_period = config.get("research_period", {})
+    research_end_date = research_period.get("end_date")
+
+    filtered = result.copy()
+
+    if "date" not in filtered.columns:
+        raise ValueError(f"{strategy_name} result has no date column.")
+
+    filtered["date"] = pd.to_datetime(filtered["date"])
+
+    if research_end_date is not None:
+        end_timestamp = pd.to_datetime(research_end_date)
+        filtered = filtered[filtered["date"] <= end_timestamp].copy()
+
+    filtered = filtered.sort_values("date").reset_index(drop=True)
+
+    if filtered.empty:
+        raise ValueError(
+            f"{strategy_name} has no rows after applying research-period result filter."
+        )
+
+    actual_end_date = filtered["date"].max().date()
+
+    if research_end_date is not None and actual_end_date > pd.to_datetime(
+        research_end_date
+    ).date():
+        raise ValueError(
+            f"{strategy_name} result filter failed. "
+            f"Expected end <= {research_end_date}, got {actual_end_date}."
+        )
+
+    return filtered
+
+def _apply_research_period_filter(
+    prices: pd.DataFrame,
+    config: dict,
+    ticker: str,
+) -> pd.DataFrame:
+    research_period = config.get("research_period", {})
+    research_end_date = research_period.get("end_date")
+
+    filtered = prices.copy()
+    filtered["date"] = pd.to_datetime(filtered["date"])
+
+    raw_max_date = filtered["date"].max().date()
+
+    if research_end_date is not None:
+        end_timestamp = pd.to_datetime(research_end_date)
+
+        filtered = filtered[filtered["date"] <= end_timestamp].copy()
+
+        if filtered.empty:
+            raise ValueError(
+                f"{ticker} has no price data on or before research_period.end_date="
+                f"{research_end_date}. Raw max date was {raw_max_date}."
+            )
+
+        filtered_max_date = filtered["date"].max().date()
+
+        if filtered_max_date > end_timestamp.date():
+            raise ValueError(
+                f"{ticker} research period filter failed. "
+                f"Expected max date <= {end_timestamp.date()}, "
+                f"got {filtered_max_date}."
+            )
+
+        print(
+            f"{ticker}: research period filter applied. "
+            f"raw_max_date={raw_max_date}, filtered_max_date={filtered_max_date}"
+        )
+
+    return filtered.sort_values("date").reset_index(drop=True)
 
 def _preserve_price_data_for_outputs(price_data: pd.DataFrame) -> pd.DataFrame:
     """Return a clean copy of raw price data for downstream diagnostics.
@@ -392,6 +473,8 @@ def run_backtest_for_ticker(
     monthly_sma_window_robustness_markdown_path = None
 
     prices = get_or_fetch_prices(ticker, config)
+    prices = _apply_research_period_filter(prices=prices, config=config, ticker=ticker)
+
     preserved_price_data = _preserve_price_data_for_outputs(prices)
     cash_returns = get_or_fetch_cash_returns(config, prices["date"])
 
@@ -935,6 +1018,7 @@ def run_backtest_for_ticker(
     return {
         "data": preserved_price_data,
         "price_data": preserved_price_data,
+        "cash_returns": cash_returns,
         "metrics": metrics_df,
         "regime_summary": regime_summary_df,
         "rolling_summary": rolling_summary_df,
@@ -950,7 +1034,6 @@ def run_backtest_for_ticker(
         "monthly_sma_window_robustness": monthly_sma_window_robustness_df,
         "monthly_sma_window_robustness_summary": monthly_sma_window_robustness_summary_df,
         "strategy_results": results,
-        "cash_returns": cash_returns,
     }
 
 
@@ -1104,6 +1187,20 @@ def run_dual_momentum_pair(
     asset_a_prices = get_or_fetch_prices(asset_a, config)
     asset_b_prices = get_or_fetch_prices(asset_b, config)
 
+    offensive_prices = get_or_fetch_prices(asset_a, config)
+    offensive_prices = _apply_research_period_filter(
+        prices=offensive_prices,
+        config=config,
+        ticker=asset_a,
+    )
+
+    defensive_prices = get_or_fetch_prices(asset_b, config)
+    defensive_prices = _apply_research_period_filter(
+        prices=defensive_prices,
+        config=config,
+        ticker=asset_b,
+    )
+
     common_dates = sorted(
         set(pd.to_datetime(asset_a_prices["date"])).intersection(
             set(pd.to_datetime(asset_b_prices["date"]))
@@ -1129,16 +1226,53 @@ def run_dual_momentum_pair(
     end_date = pd.to_datetime(common_dates[-1]).date()
     print(f"{pair_name} common test period: {start_date} to {end_date}")
 
+    asset_a_common = _apply_research_period_filter(
+        prices=asset_a_common,
+        config=config,
+        ticker=asset_a,
+    )
+
+    asset_b_common = _apply_research_period_filter(
+        prices=asset_b_common,
+        config=config,
+        ticker=asset_b,
+    )
+
+    common_dates = sorted(
+        set(pd.to_datetime(asset_a_common["date"]))
+        .intersection(set(pd.to_datetime(asset_b_common["date"])))
+    )
+
+    asset_a_common = asset_a_common[
+        pd.to_datetime(asset_a_common["date"]).isin(common_dates)
+    ].copy()
+
+    asset_b_common = asset_b_common[
+        pd.to_datetime(asset_b_common["date"]).isin(common_dates)
+    ].copy()
+
     buy_hold_a = run_buy_and_hold(
         prices=asset_a_common,
         initial_capital=initial_capital,
         cash_returns=cash_returns,
     )
+    buy_hold_a = _apply_research_period_filter_to_result(
+        result=buy_hold_a,
+        config=config,
+        strategy_name=f"Buy and Hold {asset_a}",
+    )
+
     buy_hold_b = run_buy_and_hold(
         prices=asset_b_common,
         initial_capital=initial_capital,
         cash_returns=cash_returns,
     )
+    buy_hold_b = _apply_research_period_filter_to_result(
+        result=buy_hold_b,
+        config=config,
+        strategy_name=f"Buy and Hold {asset_b}",
+    )
+
     dual_momentum = run_dual_momentum_strategy(
         asset_a_prices=asset_a_common,
         asset_b_prices=asset_b_common,
@@ -1149,6 +1283,26 @@ def run_dual_momentum_pair(
         slippage_bps=slippage_bps,
         cash_returns=cash_returns,
     )
+    dual_momentum = _apply_research_period_filter_to_result(
+        result=dual_momentum,
+        config=config,
+        strategy_name=f"Dual Momentum {asset_a}/{asset_b}",
+    )
+
+    expected_end = pd.to_datetime(config["research_period"]["end_date"]).date()
+
+    for name, frame in {
+        f"Buy and Hold {asset_a}": buy_hold_a,
+        f"Buy and Hold {asset_b}": buy_hold_b,
+        f"Dual Momentum {asset_a}/{asset_b}": dual_momentum,
+    }.items():
+        max_date = pd.to_datetime(frame["date"]).max().date()
+
+        if max_date > expected_end:
+            raise ValueError(
+                f"{name} still exceeds research end date. "
+                f"Expected <= {expected_end}, got {max_date}."
+            )
 
     dual_strategy_name = f"Dual Momentum {asset_a}/{asset_b}"
     results = {
@@ -1433,6 +1587,12 @@ def main() -> None:
         )
 
         save_asset_expansion_conclusion(reports_dir)
+
+        save_eth_quarantine_diagnostic(
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
 
         save_secondary_data_source_cross_check(
             ticker_outputs=ticker_outputs,

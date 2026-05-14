@@ -28,6 +28,8 @@ The project now has two major research phases:
 |---|---|---|
 | Phase 1 | Single-asset ETF timing, SPY strategies, core-satellite structures, cross-asset classification | Complete |
 | Phase 2 | Tactical relative-momentum allocation and regime-switch portfolio management | Validated checkpoint reached |
+| Phase 3A | Robustness checks for the 3D confirmed regime-switch overlay | Complete |
+| Phase 3B | Controlled asset expansion: oil and ETH quarantine diagnostics | Oil promising but not validated; ETH rejected |
 
 The central conclusion is:
 
@@ -42,6 +44,32 @@ This system keeps exposure to SPY when SPY is in a confirmed healthy trend regim
 It does **not** beat SPY buy-and-hold on raw terminal wealth. SPY buy-and-hold remains the raw wealth benchmark.
 
 But it does beat SPY 12-month absolute momentum on full-period and holdout risk-adjusted performance.
+
+### Canonical Research Checkpoint
+
+The canonical project endpoint is now explicitly pinned:
+
+```text
+2026-05-01
+```
+
+This matters because the data cache previously refreshed to 2026-05-13 during later experiments. That refreshed run is treated as exploratory only. The official README numbers below use the pinned 2026-05-01 endpoint.
+
+The current validated checkpoint is:
+
+| Item | Value |
+|---|---:|
+| Canonical Phase 2/3 period | 2006-04-28 to 2026-05-01 |
+| Best system | SPY Trend Regime Switch Overlay 3D Confirmed |
+| Best system CAGR | 10.22% |
+| Best system Calmar | 0.429 |
+| Best system max drawdown | -23.83% / -23.84% depending report rounding |
+| SPY Buy & Hold CAGR over same period | 10.90% |
+| SPY Buy & Hold max drawdown | -55.19% |
+| SPY 12M Momentum CAGR over same period | 9.68% |
+| SPY 12M Momentum max drawdown | -33.72% |
+
+Strict endpoint checks are now part of the research discipline: generated reports should not contain `end_date` later than `2026-05-01` unless a deliberate new refreshed checkpoint is opened.
 
 ---
 
@@ -61,7 +89,7 @@ Common period for the Phase 2 system comparison:
 | SPY 12M Absolute Momentum | Defensive timing benchmark | $63,497.24 | 9.68% | 0.287 | 15.05% | -33.72% | Strong simple benchmark |
 | Top 3 Equal Weight Trend-Confirmed Relative Momentum | Best standalone balanced allocator | $58,401.74 | 9.22% | 0.317 | 16.29% | -29.06% | Useful standalone Phase 2 allocator |
 | Top 3 Equal Weight Trend-Confirmed Constrained Relative Momentum | Best standalone defensive allocator | $52,197.16 | 8.61% | 0.351 | 13.35% | -24.54% | Strong defensive/liveability allocator |
-| **SPY Trend Regime Switch Overlay 3D Confirmed** | **Best overall risk-adjusted system** | **$70,048.77** | **10.22%** | **0.429** | **13.58%** | **-23.83%** | **Current best risk-adjusted candidate** |
+| **SPY Trend Regime Switch Overlay 3D Confirmed** | **Best overall risk-adjusted system** | **$70,048.61** | **10.22%** | **0.429** | **13.58%** | **-23.84%** | **Current best risk-adjusted candidate** |
 
 ### Holdout Validation
 
@@ -82,6 +110,24 @@ Holdout period:
 Holdout conclusion:
 
 > The 3D confirmed overlay beat SPY 12M in the holdout on CAGR, Calmar, max drawdown, volatility, Sharpe, and Sortino. SPY buy-and-hold still won raw CAGR, but with materially worse drawdown.
+
+### Phase 3A Robustness Summary
+
+After the 3D confirmed overlay became the current best system candidate, it was tested against execution-cost, cash-yield, and raw-close signal sensitivity.
+
+| Robustness Check | CAGR | Calmar | Max Drawdown | Status |
+|---|---:|---:|---:|---|
+| Baseline 5 bps slippage | 10.22% | 0.429 | -23.84% | Baseline |
+| 10 bps slippage | 9.93% | 0.415 | -23.91% | Passed |
+| 25 bps slippage | 9.08% | 0.376 | -24.12% | Defensive only / weakened |
+| 50 bps slippage | 7.67% | 0.304 | -25.21% | Failed as wealth-growth case |
+| 0% cash yield | 9.85% | 0.413 | -23.84% | Passed |
+| Raw-close signal full period | 9.72% | 0.408 | -23.84% | Passed with caveat |
+| Raw-close signal holdout | 11.72% | 0.492 | -23.84% | Passed |
+
+Robustness conclusion:
+
+> The 3D overlay is viable under low/moderate friction and is not dependent on cash yield. Its main current weakness is high execution friction. The raw-close signal test passed with caveat, meaning the system did not collapse when SPY trend signals were based on raw closes rather than adjusted closes.
 
 ---
 
@@ -159,12 +205,14 @@ but also:
 | `GLD` | Gold | Non-equity crisis / real-rate-sensitive asset |
 | `SLV` | Silver | High-volatility commodity / precious-metal exposure |
 | `DBC` | Broad commodities | Commodity cycle exposure |
+| `USO` | Oil proxy | Controlled oil-expansion diagnostic |
 | `TLT` | Long-duration US Treasuries | Duration-heavy bond / defensive asset |
 | `AGG` | Aggregate US bonds | Broad defensive bond sleeve |
 | `VNQ` | US REITs | Real-estate equity / credit-sensitive asset |
 | `BTC-USD` | Bitcoin | Quarantined separate research branch |
+| `ETH-USD` | Ethereum | Quarantined crypto diagnostic |
 
-Bitcoin is deliberately treated as a **separate/quarantined research branch** because its history is short, extreme, structurally different, and subject to strong selection bias.
+Bitcoin and Ethereum are deliberately treated as **separate/quarantined research branches** because their histories are shorter, extreme, structurally different, and subject to strong selection bias. They are not part of the main validated ETF allocator.
 
 ---
 
@@ -978,7 +1026,220 @@ It also beat SPY buy-and-hold on every major risk-adjusted metric, while trailin
 
 ---
 
+# Phase 3A: Robustness Validation
+
+## Phase 3A Goal
+
+Phase 3A tested whether the current best system, the **SPY Trend Regime Switch Overlay 3D Confirmed**, was fragile.
+
+The robustness question was:
+
+> Does the 3D overlay still work after changing realistic assumptions around trading costs, cash yield, and signal price basis?
+
+---
+
+## Slippage Sensitivity
+
+| Slippage | CAGR | Calmar | Max Drawdown | Interpretation |
+|---:|---:|---:|---:|---|
+| 5 bps | 10.22% | 0.429 | -23.84% | Baseline |
+| 10 bps | 9.93% | 0.415 | -23.91% | Passed |
+| 25 bps | 9.08% | 0.376 | -24.12% | Defensive only / weakened |
+| 50 bps | 7.67% | 0.304 | -25.21% | Failed as wealth-growth case |
+
+Conclusion:
+
+> Execution friction is the system's main vulnerability. The strategy survives low/moderate ETF-like friction, but it is not friction-proof.
+
+---
+
+## Cash-Yield Sensitivity
+
+The baseline strategy earns cash returns when out of risky assets. To test whether the result was secretly powered by cash yield, the strategy was rerun with 0% cash yield.
+
+| Scenario | CAGR | Calmar | Max Drawdown | Status |
+|---|---:|---:|---:|---|
+| Baseline cash yield | 10.22% | 0.429 | -23.84% | Baseline |
+| 0% cash yield | 9.85% | 0.413 | -23.84% | Passed |
+
+Conclusion:
+
+> The 3D overlay does not depend heavily on cash yield.
+
+---
+
+## Raw-Close Signal Sensitivity
+
+Because adjusted-close data is backward-adjusted, the project tested whether using raw close for SPY trend signals would break the result.
+
+| Signal Test | Period | CAGR | Calmar | Max Drawdown | Status |
+|---|---|---:|---:|---:|---|
+| Adjusted-close signal | Full period | 10.22% | 0.429 | -23.84% | Baseline |
+| Raw-close signal | Full period | 9.72% | 0.408 | -23.84% | Passed with caveat |
+| Raw-close signal | Holdout | 11.72% | 0.492 | -23.84% | Passed |
+
+Conclusion:
+
+> The raw-close signal version still works, although with weaker full-period CAGR and Calmar. This supports the idea that the system is not entirely dependent on adjusted-close signal artefacts.
+
+---
+
+## Phase 3A Conclusion
+
+| Claim | Status | Interpretation |
+|---|---|---|
+| The 3D overlay survives low/moderate slippage | Survived | 10 bps passed with 9.93% CAGR and 0.415 Calmar |
+| The 3D overlay is friction-proof | Failed | 25 bps weakened the result; 50 bps failed wealth-growth |
+| High execution friction is the main current vulnerability | Survived | Slippage sensitivity produced the largest degradation |
+| The 3D overlay depends heavily on cash yield | Failed | 0% cash yield still passed |
+| The 3D overlay survives raw-close signal sensitivity | Survived with caveat | Raw-close full-period result remained viable |
+| Immediate macro/sentiment/ML expansion is justified | Not yet | Documentation and checkpoint discipline come first |
+
+---
+
+# Phase 3B: Controlled Asset Expansion
+
+## Phase 3B Goal
+
+Phase 3B tested whether adding new investable assets improves the existing portfolio-management system.
+
+The key rule was:
+
+> New assets are not promoted because they improve a standalone allocator. They must improve the actual 3D overlay system.
+
+---
+
+## USO / Oil Expansion Diagnostic
+
+Oil was tested using `USO` as an oil proxy.
+
+The comparison was:
+
+```text
+Base universe
+vs
+Base + Oil
+```
+
+### USO Allocator Impact
+
+| Metric | Base Allocator | Base + Oil Allocator | Delta |
+|---|---:|---:|---:|
+| CAGR | 7.96% | 8.93% | +0.97 pts |
+| Calmar | 0.280 | 0.376 | +0.096 |
+| Max Drawdown | -28.42% | -23.73% | +4.69 pts |
+
+### USO Overlay Impact
+
+| Metric | Base 3D Overlay | Base + Oil 3D Overlay | Delta |
+|---|---:|---:|---:|
+| Full-period CAGR | 9.78% | 10.47% | +0.69 pts |
+| Full-period Calmar | 0.335 | 0.400 | +0.065 |
+| Full-period Max Drawdown | -29.18% | -26.20% | +2.98 pts |
+| Holdout CAGR | 12.62% | 12.66% | +0.04 pts |
+| Holdout Calmar | 0.482 | 0.483 | +0.001 |
+
+USO allocation behaviour:
+
+| Metric | Value |
+|---|---:|
+| Average USO weight | 2.563% |
+| Days held | 466 |
+| % days held | 9.257% |
+| Final weight | 33.333% |
+
+USO conclusion:
+
+> Oil improved the allocator and full-period overlay, but the holdout overlay improvement was too small to validate it. USO is **promising but not validated**.
+
+---
+
+## ETH Quarantine Diagnostic
+
+ETH was tested separately because its history is shorter and structurally different from the ETF universe.
+
+ETH was capped through a crypto group cap:
+
+```text
+crypto cap = 10%
+```
+
+### ETH Overlay Impact
+
+| Metric | Base Overlay | Base + ETH Overlay | Delta |
+|---|---:|---:|---:|
+| CAGR | 12.02% | 11.46% | -0.56 pts |
+| Calmar | 0.459 | 0.437 | -0.022 |
+| Max Drawdown | -26.20% | -26.20% | 0.00 pts |
+| Volatility | Baseline | -0.21 pts | Lower, but not enough |
+
+ETH allocation behaviour:
+
+| Metric | Value |
+|---|---:|
+| Average ETH weight | 3.527% |
+| Max ETH weight | 10.000% |
+| Days held | 751 |
+| % days held | 35.275% |
+| Final weight | 0.000% |
+| Dominates flag | True |
+
+ETH conclusion:
+
+> ETH improved allocator CAGR but worsened the actual 3D overlay. It was used often enough to matter, but it did not improve the system. ETH is **rejected** for now.
+
+---
+
+## Oil + ETH Combined Diagnostic
+
+The combined `Base + Oil + ETH Quarantine` system also failed to validate.
+
+| Metric | Base Overlay | Oil + ETH Overlay | Delta |
+|---|---:|---:|---:|
+| CAGR | 12.02% | 12.00% | -0.02 pts |
+| Calmar | 0.459 | 0.458 | -0.001 |
+| Max Drawdown | -26.20% | -26.20% | 0.00 pts |
+| Volatility | Baseline | +0.31 pts | Worse |
+
+Combined conclusion:
+
+> Oil + ETH did not improve the overlay enough to validate inclusion. The combined expansion is **not validated**.
+
+---
+
+## Phase 3B Conclusion
+
+| Expansion | Status | Interpretation |
+|---|---|---|
+| USO / Oil | Promising but not validated | Helped allocator and full-period overlay, failed holdout materiality |
+| ETH | Rejected | Improved allocator but worsened overlay CAGR and Calmar |
+| Oil + ETH | Not validated | Did not improve overlay enough to justify inclusion |
+
+---
+
 # Methodology Notes
+
+## Research Period Pinning
+
+The canonical Phase 2/3 research endpoint is pinned in configuration:
+
+```yaml
+research_period:
+  phase1_start_date: "1993-01-29"
+  phase2_start_date: "2006-04-28"
+  end_date: "2026-05-01"
+```
+
+This was added after a data-refresh drift caused some exploratory reports to extend to 2026-05-13. The pinned endpoint prevents refreshed data from silently changing validated results.
+
+The project now enforces this through:
+
+- filtering each ticker's price data immediately after loading,
+- filtering the dual-momentum branch separately,
+- preserving filtered price data in `ticker_outputs`,
+- checking generated CSV reports for `end_date > 2026-05-01`.
+
+Canonical README numbers should be read as **2026-05-01 pinned checkpoint results**.
 
 ## Lookahead Bias Controls
 
@@ -1019,9 +1280,11 @@ A future validation step should test raw-close signals with adjusted-close retur
 
 ## Slippage
 
-A flat 5 basis points slippage is applied per trade.
+A flat 5 basis points slippage is applied per trade in the baseline runs.
 
-This is simple and conservative enough for low-turnover ETF strategies, but it does not fully model wider bid-ask spreads during market stress.
+Phase 3A tested 10 bps, 25 bps, and 50 bps sensitivity. The strategy survived 10 bps, weakened at 25 bps, and failed the wealth-growth case at 50 bps.
+
+This is simple enough for research, but it does not fully model wider bid-ask spreads during market stress. Since regime switches happen during stressful periods, real-world friction could be materially higher than the baseline.
 
 ## Cached Data
 
@@ -1037,7 +1300,7 @@ Remaining concerns include:
 
 - `yfinance` data reliability
 - Adjusted-close retroactive adjustment
-- No second data-source cross-check
+- Second data-source cross-check was attempted but deferred after secondary-provider ingestion issues
 - No tax modelling
 - No bid-ask spread modelling during stress periods
 - No FX cost modelling for non-USD investors
@@ -1048,10 +1311,14 @@ Remaining concerns include:
 - Limited out-of-sample testing
 - Asset universe selection bias
 - BTC selection bias
+- ETH selection bias and shorter crypto history
+- USO/oil result is promising but not validated
 - Strategy conclusions are regime-dependent
 - Investor behaviour and tracking-error regret are not directly modelled
 - The 3D overlay confirmation rule was selected after auditing the full-period raw overlay
 - The holdout validation is a robustness check, not a perfectly clean out-of-sample experiment
+- Execution friction is the main current vulnerability
+- The project is still not a production trading system
 
 ---
 
@@ -1071,6 +1338,12 @@ Remaining concerns include:
 - Missing report fixtures after adding constrained allocator
 - Raw 200D regime-switch whipsaw issue diagnosed through audit
 - 3D confirmation logic added after whipsaw audit
+- Relative momentum allocator forward-fill exposure bug fixed
+- Raw-close signal sensitivity added after adjusted-close concern
+- Endpoint drift to 2026-05-13 diagnosed and fixed with `research_period.end_date`
+- Dual-momentum branch endpoint bypass fixed
+- Duplicate `cash_returns` return-key issue fixed
+- Secondary data-source cross-check deferred after ingestion/parsing failure
 
 ---
 
@@ -1178,6 +1451,31 @@ reports/regime_switch_overlay_validation_conclusion.csv
 reports/regime_switch_overlay_current_winners.csv
 ```
 
+## Phase 3A Robustness Reports
+
+```text
+reports/regime_switch_overlay_slippage_sensitivity.csv
+reports/regime_switch_overlay_slippage_sensitivity_summary.csv
+reports/regime_switch_overlay_cash_sensitivity.csv
+reports/regime_switch_overlay_cash_sensitivity_summary.csv
+reports/regime_switch_overlay_raw_close_signal_sensitivity.csv
+reports/regime_switch_overlay_raw_close_signal_sensitivity_summary.csv
+reports/phase3a_robustness_conclusion.csv
+reports/phase3a_robustness_current_status.csv
+```
+
+## Phase 3B Asset Expansion Reports
+
+```text
+reports/asset_expansion_diagnostic_metrics.csv
+reports/asset_expansion_diagnostic_allocation_summary.csv
+reports/asset_expansion_diagnostic_decision.csv
+reports/asset_expansion_conclusion.csv
+reports/eth_quarantine_diagnostic_metrics.csv
+reports/eth_quarantine_diagnostic_allocation_summary.csv
+reports/eth_quarantine_diagnostic_decision.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -1208,7 +1506,7 @@ Markdown reports and PNG charts are generated for major outputs.
 
 The main config currently tests:
 
-- SPY, QQQ, IWM, EFA, EEM, GLD, SLV, DBC, TLT, AGG, VNQ, BTC-USD
+- SPY, QQQ, IWM, EFA, EEM, GLD, SLV, DBC, USO, TLT, AGG, VNQ, BTC-USD, ETH-USD
 - Buy and hold
 - Monthly SMA
 - Daily SMA
@@ -1229,6 +1527,12 @@ The main config currently tests:
 - Regime-switch overlays
 - Regime-switch whipsaw audits
 - Regime-switch holdout validation
+- Regime-switch slippage sensitivity
+- Regime-switch cash-yield sensitivity
+- Raw-close signal sensitivity
+- Controlled USO/oil asset expansion diagnostic
+- ETH quarantine diagnostic
+- Endpoint-pinned research-period validation
 - Final decision reports
 - Validation conclusion reports
 
@@ -1259,6 +1563,11 @@ configs/spy_sma10.yaml
 | Raw SPY 200D regime switch overlay | Failed due to whipsaw |
 | SPY 3D confirmed regime switch overlay | Current best overall risk-adjusted candidate |
 | BTC | Quarantined |
+| USO / oil expansion | Promising but not validated |
+| ETH quarantine | Rejected |
+| Oil + ETH combined expansion | Not validated |
+| Phase 3A robustness | Complete |
+| Research endpoint pinning | Fixed at 2026-05-01 |
 
 ---
 
@@ -1278,16 +1587,16 @@ Future research branches should be opened only after this checkpoint is document
 
 Potential future branches:
 
-1. Raw-close signal sensitivity
-2. Cash proxy sensitivity
-3. Tax-aware analysis
-4. Execution/slippage sensitivity
-5. Second data-source cross-check
-6. Expanded walk-forward validation
-7. Bootstrap confidence intervals
-8. Behavioural/tracking-error regret analysis
-9. BTC-specific quarantined research branch
-10. Sentiment/macro/ML layer, but only after the current price/risk system is documented
+1. Tax-aware analysis
+2. Dynamic execution-cost model using stress/slippage assumptions
+3. Second data-source cross-check with a more reliable ingestion path
+4. Expanded walk-forward validation
+5. Bootstrap confidence intervals
+6. Behavioural/tracking-error regret analysis
+7. BTC-specific quarantined research branch
+8. Additional commodity or real-asset expansion only under strict holdout materiality gates
+9. Sentiment/macro/ML layer, but only after the current price/risk system is documented
+10. Production-readiness audit, if the project ever moves beyond research
 
 ---
 
@@ -1312,5 +1621,15 @@ It beats SPY 12M on full-period and holdout risk-adjusted performance, including
 But:
 
 > SPY buy-and-hold remains the raw wealth winner.
+
+The current checkpoint also shows:
+
+- the 3D overlay survives low/moderate slippage,
+- the system is not dependent on cash yield,
+- raw-close signal testing passes with caveat,
+- USO/oil is promising but not validated,
+- ETH is rejected,
+- oil + ETH is not validated,
+- all canonical results are pinned to 2026-05-01.
 
 That distinction is the whole point of the project.
