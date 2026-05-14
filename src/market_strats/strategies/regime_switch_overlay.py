@@ -91,6 +91,7 @@ def run_spy_trend_regime_switch_overlay(
     trend_sma_days: int,
     slippage_bps: float,
     confirmation_days: int = 1,
+    signal_price_column: str = "adj_close",
 ) -> pd.DataFrame:
     """
     Regime-switching overlay.
@@ -113,10 +114,19 @@ def run_spy_trend_regime_switch_overlay(
     offensive = _prepare_result(offensive_result, "offensive")
     defensive = _prepare_result(defensive_result, "defensive")
 
+    if signal_price_column not in offensive.columns:
+        raise ValueError(
+            f"signal_price_column '{signal_price_column}' not found in offensive "
+            f"result. Available columns: {sorted(offensive.columns)}"
+        )
+
+    offensive["signal_price"] = offensive[signal_price_column].astype(float)
+
     merged = offensive[
         [
             "date",
             "adj_close",
+            "signal_price",
             "strategy_return",
             "position",
             "cash_position",
@@ -145,10 +155,10 @@ def run_spy_trend_regime_switch_overlay(
     if confirmation_days <= 0:
         raise ValueError("confirmation_days must be positive")
 
-    merged["trend_sma"] = merged["adj_close"].rolling(trend_sma_days).mean()
+    merged["trend_sma"] = merged["signal_price"].rolling(trend_sma_days).mean()
     merged["trend_ready"] = merged["trend_sma"].notna()
     merged["offensive_above_trend"] = (
-        merged["trend_ready"] & (merged["adj_close"] > merged["trend_sma"])
+        merged["trend_ready"] & (merged["signal_price"] > merged["trend_sma"])
     )
 
     signal_use_defensive = _create_confirmed_defensive_signal(
@@ -220,6 +230,8 @@ def run_spy_trend_regime_switch_overlay(
             "target_offensive_weight": target_offensive_weight.values,
             "target_defensive_weight": target_defensive_weight.values,
             "offensive_above_trend": merged["offensive_above_trend"].fillna(False).values,
+            "signal_price": merged["signal_price"].values,
+            "signal_price_column": signal_price_column,
             "trend_sma": merged["trend_sma"].values,
             "trend_ready": merged["trend_ready"].values,
             "confirmation_days": confirmation_days,

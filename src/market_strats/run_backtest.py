@@ -133,6 +133,63 @@ from market_strats.analysis.regime_switch_overlay_holdout_validation import (
 from market_strats.analysis.regime_switch_overlay_validation_conclusion import (
     save_regime_switch_overlay_validation_conclusion,
 )
+from market_strats.analysis.regime_switch_overlay_slippage_sensitivity import (
+    save_regime_switch_overlay_slippage_sensitivity,
+)
+from market_strats.analysis.regime_switch_overlay_cash_sensitivity import (
+    save_regime_switch_overlay_cash_sensitivity,
+)
+from market_strats.analysis.regime_switch_overlay_raw_close_signal_sensitivity import (
+    save_regime_switch_overlay_raw_close_signal_sensitivity,
+)
+from market_strats.analysis.phase3a_robustness_conclusion import (
+    save_phase3a_robustness_conclusion,
+)
+from market_strats.analysis.secondary_data_source_cross_check import (
+    save_secondary_data_source_cross_check,
+)
+
+def _preserve_price_data_for_outputs(price_data: pd.DataFrame) -> pd.DataFrame:
+    """Return a clean copy of raw price data for downstream diagnostics.
+
+    Strategy result frames usually retain only adjusted close and derived fields.
+    Phase 3 raw-close signal sensitivity needs access to the original raw close,
+    so the unmodified price dataframe is preserved in ``ticker_outputs``.
+
+    Preferred schema:
+    - date
+    - close       raw/unadjusted close from Yahoo
+    - adj_close   adjusted close used for return calculations
+
+    If older cached data does not contain ``close``, this function keeps the run
+    alive by falling back to ``adj_close`` and marking the row as not truly raw.
+    Freshly downloaded ETF files should contain a real ``close`` column because
+    ``fetch_yfinance.py`` maps Yahoo ``Close`` to ``close``.
+    """
+
+    preserved = price_data.copy()
+    preserved["date"] = pd.to_datetime(preserved["date"])
+    preserved = preserved.sort_values("date").reset_index(drop=True)
+
+    required_columns = {"date", "adj_close"}
+    missing_columns = required_columns - set(preserved.columns)
+
+    if missing_columns:
+        raise ValueError(
+            f"Price data missing required columns before preserving output: "
+            f"{sorted(missing_columns)}"
+        )
+
+    if "close" not in preserved.columns:
+        preserved["close"] = preserved["adj_close"]
+        preserved["raw_close_available"] = False
+    else:
+        preserved["raw_close_available"] = True
+
+    preserved["close"] = preserved["close"].astype(float)
+    preserved["adj_close"] = preserved["adj_close"].astype(float)
+
+    return preserved
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -329,6 +386,7 @@ def run_backtest_for_ticker(
     monthly_sma_window_robustness_markdown_path = None
 
     prices = get_or_fetch_prices(ticker, config)
+    preserved_price_data = _preserve_price_data_for_outputs(prices)
     cash_returns = get_or_fetch_cash_returns(config, prices["date"])
 
     actual_start_date = pd.to_datetime(prices["date"]).min().date()
@@ -869,6 +927,8 @@ def run_backtest_for_ticker(
         print(monthly_sma_window_robustness_summary_df.to_string(index=False))
 
     return {
+        "data": preserved_price_data,
+        "price_data": preserved_price_data,
         "metrics": metrics_df,
         "regime_summary": regime_summary_df,
         "rolling_summary": rolling_summary_df,
@@ -1338,6 +1398,34 @@ def main() -> None:
 
         save_regime_switch_overlay_validation_conclusion(reports_dir)
 
+        save_regime_switch_overlay_slippage_sensitivity(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_regime_switch_overlay_cash_sensitivity(
+            overlay_outputs=overlay_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_regime_switch_overlay_raw_close_signal_sensitivity(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase3a_robustness_conclusion(reports_dir)
+
+        save_secondary_data_source_cross_check(
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
     save_final_strategy_decision_report(reports_dir)
 
     save_finalist_holdout_validation_report(
@@ -1356,6 +1444,7 @@ def main() -> None:
         )
         
     save_final_validation_conclusion(reports_dir)
+
 
 if __name__ == "__main__":
     main()
