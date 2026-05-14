@@ -145,6 +145,9 @@ from market_strats.analysis.regime_switch_overlay_raw_close_signal_sensitivity i
 from market_strats.analysis.phase3a_robustness_conclusion import (
     save_phase3a_robustness_conclusion,
 )
+from market_strats.analysis.secondary_data_source_cross_check import (
+    save_secondary_data_source_cross_check,
+)
 
 def _preserve_price_data_for_outputs(price_data: pd.DataFrame) -> pd.DataFrame:
     """Return a clean copy of raw price data for downstream diagnostics.
@@ -1414,8 +1417,14 @@ def main() -> None:
             config=config,
             reports_dir=reports_dir,
         )
-        
+
         save_phase3a_robustness_conclusion(reports_dir)
+
+        save_secondary_data_source_cross_check(
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
 
     save_final_strategy_decision_report(reports_dir)
 
