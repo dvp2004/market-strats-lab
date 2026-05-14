@@ -887,7 +887,7 @@ No other confirmation windows, bands, blends, macro filters, sentiment filters, 
 
 | Metric | Value |
 |---|---:|
-| End Value | $70,048.77 |
+| End Value | $70,048.61 |
 | CAGR | 10.22% |
 | Calmar | 0.429 |
 | Volatility | 13.58% |
@@ -903,7 +903,7 @@ Compared to SPY 12M:
 | Calmar | 0.429 | 0.287 |
 | Volatility | 13.58% | 15.05% |
 | Max Drawdown | -23.83% | -33.72% |
-| End Value | $70,048.77 | $63,497.24 |
+| End Value | $70,048.61 | $63,497.24 |
 
 Conclusion:
 
