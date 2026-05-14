@@ -12,6 +12,38 @@ tickers:
   - SLV
   - DBC
 
+regime_switch_overlay_raw_close_signal_sensitivity:
+  enabled: true
+  benchmark_ticker: SPY
+  raw_close_column_candidates:
+    - raw_close
+    - close
+    - Close
+  reference_end_date: "2015-12-31"
+  holdout_start_date: "2016-01-01"
+
+regime_switch_overlay_cash_sensitivity:
+  enabled: true
+  baseline_cash_annual_yield_pct: 4.0
+  cash_yield_multipliers:
+    - 0.0
+    - 0.5
+    - 1.0
+    - 1.5
+  reference_end_date: "2015-12-31"
+  holdout_start_date: "2016-01-01"
+
+regime_switch_overlay_slippage_sensitivity:
+  enabled: true
+  slippage_bps_values:
+    - 0
+    - 5
+    - 10
+    - 25
+    - 50
+  reference_end_date: "2015-12-31"
+  holdout_start_date: "2016-01-01"
+
 regime_switch_overlay:
   enabled: true
   name: SPY Trend Regime Switch Overlay 3D Confirmed
