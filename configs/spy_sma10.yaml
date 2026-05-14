@@ -11,6 +11,144 @@ tickers:
   - BTC-USD
   - SLV
   - DBC
+  - USO
+  - ETH-USD
+
+research_period:
+  phase1_start_date: "1993-01-29"
+  phase2_start_date: "2006-04-28"
+  end_date: "2026-05-01"
+
+eth_quarantine_diagnostic:
+  enabled: true
+  baseline_universe_name: Base
+  eth_universe_name: Base + ETH Quarantine
+  oil_eth_universe_name: Base + Oil + ETH Quarantine
+
+  baseline_assets:
+    - SPY
+    - QQQ
+    - IWM
+    - EFA
+    - EEM
+    - AGG
+    - TLT
+    - GLD
+    - SLV
+    - VNQ
+    - DBC
+
+  eth_assets:
+    - SPY
+    - QQQ
+    - IWM
+    - EFA
+    - EEM
+    - AGG
+    - TLT
+    - GLD
+    - SLV
+    - VNQ
+    - DBC
+    - ETH-USD
+
+  oil_eth_assets:
+    - SPY
+    - QQQ
+    - IWM
+    - EFA
+    - EEM
+    - AGG
+    - TLT
+    - GLD
+    - SLV
+    - VNQ
+    - DBC
+    - USO
+    - ETH-USD
+
+  top_n: 3
+  lookback_months: 12
+  trend_sma_days: 200
+  confirmation_days: 3
+  max_asset_weight: 0.333333
+
+  group_caps:
+    equity: 1.0
+    bonds: 1.0
+    precious_metals: 0.50
+    commodities: 0.50
+    real_estate: 0.333333
+    crypto: 0.10
+
+  asset_groups:
+    SPY: equity
+    QQQ: equity
+    IWM: equity
+    EFA: equity
+    EEM: equity
+    AGG: bonds
+    TLT: bonds
+    GLD: precious_metals
+    SLV: precious_metals
+    VNQ: real_estate
+    DBC: commodities
+    USO: commodities
+    ETH-USD: crypto
+
+asset_expansion_diagnostic:
+  enabled: true
+  baseline_universe_name: Base
+  expanded_universe_name: Base + Oil
+  baseline_assets:
+    - SPY
+    - QQQ
+    - IWM
+    - EFA
+    - EEM
+    - AGG
+    - TLT
+    - GLD
+    - SLV
+    - VNQ
+    - DBC
+  expanded_assets:
+    - SPY
+    - QQQ
+    - IWM
+    - EFA
+    - EEM
+    - AGG
+    - TLT
+    - GLD
+    - SLV
+    - VNQ
+    - DBC
+    - USO
+  top_n: 3
+  lookback_months: 12
+  trend_sma_days: 200
+  confirmation_days: 3
+  max_asset_weight: 0.333333
+  group_caps:
+    equity: 1.0
+    bonds: 1.0
+    precious_metals: 0.50
+    commodities: 0.50
+    real_estate: 0.333333
+  asset_groups:
+    SPY: equity
+    QQQ: equity
+    IWM: equity
+    EFA: equity
+    EEM: equity
+    AGG: bonds
+    TLT: bonds
+    GLD: precious_metals
+    SLV: precious_metals
+    VNQ: real_estate
+    DBC: commodities
+    USO: commodities
 
 secondary_data_source_cross_check:
   enabled: False
