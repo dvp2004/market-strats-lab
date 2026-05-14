@@ -148,6 +148,12 @@ from market_strats.analysis.phase3a_robustness_conclusion import (
 from market_strats.analysis.secondary_data_source_cross_check import (
     save_secondary_data_source_cross_check,
 )
+from market_strats.analysis.asset_expansion_diagnostic import (
+    save_asset_expansion_diagnostic,
+)
+from market_strats.analysis.asset_expansion_conclusion import (
+    save_asset_expansion_conclusion,
+)
 
 def _preserve_price_data_for_outputs(price_data: pd.DataFrame) -> pd.DataFrame:
     """Return a clean copy of raw price data for downstream diagnostics.
@@ -1419,6 +1425,14 @@ def main() -> None:
         )
 
         save_phase3a_robustness_conclusion(reports_dir)
+
+        save_asset_expansion_diagnostic(
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_asset_expansion_conclusion(reports_dir)
 
         save_secondary_data_source_cross_check(
             ticker_outputs=ticker_outputs,
