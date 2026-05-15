@@ -92,6 +92,7 @@ def run_spy_trend_regime_switch_overlay(
     slippage_bps: float,
     confirmation_days: int = 1,
     signal_price_column: str = "adj_close",
+    dynamic_slippage_bps: pd.Series | None = None,
 ) -> pd.DataFrame:
     """
     Regime-switching overlay.
@@ -181,7 +182,30 @@ def run_spy_trend_regime_switch_overlay(
         + target_offensive_weight.diff().abs().fillna(target_offensive_weight.abs())
     )
 
-    overlay_slippage_cost = overlay_turnover * (slippage_bps / 10_000.0)
+    if dynamic_slippage_bps is None:
+        applied_overlay_slippage_bps = pd.Series(
+            float(slippage_bps),
+            index=merged.index,
+        )
+    else:
+        applied_overlay_slippage_bps = dynamic_slippage_bps.copy()
+        applied_overlay_slippage_bps.index = pd.to_datetime(
+            applied_overlay_slippage_bps.index
+        )
+        applied_overlay_slippage_bps = (
+            applied_overlay_slippage_bps.reindex(pd.to_datetime(merged["date"]))
+            .ffill()
+            .bfill()
+            .reset_index(drop=True)
+            .astype(float)
+        )
+
+        if applied_overlay_slippage_bps.isna().any():
+            raise ValueError("dynamic_slippage_bps could not be aligned to overlay dates")
+
+    overlay_slippage_cost = overlay_turnover * (
+        applied_overlay_slippage_bps / 10_000.0
+    )
 
     strategy_return = np.where(
         held_use_defensive,
@@ -237,6 +261,7 @@ def run_spy_trend_regime_switch_overlay(
             "confirmation_days": confirmation_days,
             "overlay_turnover": overlay_turnover.values,
             "overlay_slippage_cost": overlay_slippage_cost.values,
+            "applied_overlay_slippage_bps": applied_overlay_slippage_bps.values,
             "selected_mode": np.where(
                 held_use_defensive,
                 "defensive_allocator",
