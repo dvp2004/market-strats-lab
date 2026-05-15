@@ -887,7 +887,7 @@ No other confirmation windows, bands, blends, macro filters, sentiment filters, 
 
 | Metric | Value |
 |---|---:|
-| End Value | $70,048.77 |
+| End Value | $70,048.61 |
 | CAGR | 10.22% |
 | Calmar | 0.429 |
 | Volatility | 13.58% |
@@ -903,7 +903,7 @@ Compared to SPY 12M:
 | Calmar | 0.429 | 0.287 |
 | Volatility | 13.58% | 15.05% |
 | Max Drawdown | -23.83% | -33.72% |
-| End Value | $70,048.77 | $63,497.24 |
+| End Value | $70,048.61 | $63,497.24 |
 
 Conclusion:
 
@@ -1217,6 +1217,44 @@ Combined conclusion:
 
 ---
 
+# Phase 4A: Execution Realism Diagnostic
+
+## Goal
+
+Phase 4A tested whether the current best system, the SPY Trend Regime Switch Overlay 3D Confirmed, survives a stress-aware execution-cost model.
+
+The dynamic slippage model assumes:
+
+| Market State | Overlay Slippage |
+|---|---:|
+| Normal regime | 5 bps |
+| SPY below 200D | 15 bps |
+| SPY drawdown below -10% | 25 bps |
+| SPY drawdown below -20% | 50 bps |
+
+Costs are applied only on overlay switch days.
+
+## Result
+
+| Scenario | CAGR | Calmar | Max Drawdown |
+|---|---:|---:|---:|
+| Flat 5 bps baseline | 10.22% | 0.429 | -23.84% |
+| Dynamic stress slippage | 9.49% | 0.393 | -24.12% |
+
+## Conclusion
+
+Dynamic stress slippage reduced full-period CAGR by 0.73 percentage points and Calmar by 0.036.
+
+The 3D overlay preserved its defensive profile versus SPY 12M, because Calmar and max drawdown remained materially stronger than the SPY 12M benchmark.
+
+However, it failed the strict full-period SPY 12M triple gate because CAGR fell below SPY 12M's 9.68% pinned benchmark.
+
+Final Phase 4A verdict:
+
+> Defensive profile survived, but wealth-growth edge weakened. Execution friction remains the main unresolved vulnerability.
+
+---
+
 # Methodology Notes
 
 ## Research Period Pinning
@@ -1319,6 +1357,7 @@ Remaining concerns include:
 - The holdout validation is a robustness check, not a perfectly clean out-of-sample experiment
 - Execution friction is the main current vulnerability
 - The project is still not a production trading system
+- Dynamic stress slippage showed that execution friction can remove the 3D overlay's full-period CAGR edge over SPY 12M.
 
 ---
 
@@ -1568,6 +1607,7 @@ configs/spy_sma10.yaml
 | Oil + ETH combined expansion | Not validated |
 | Phase 3A robustness | Complete |
 | Research endpoint pinning | Fixed at 2026-05-01 |
+| Phase 4A dynamic stress slippage | Defensive profile survived; wealth-growth edge weakened |
 
 ---
 

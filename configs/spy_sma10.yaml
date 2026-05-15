@@ -19,6 +19,15 @@ research_period:
   phase2_start_date: "2006-04-28"
   end_date: "2026-05-01"
 
+phase4_dynamic_slippage:
+  enabled: true
+  reference_end_date: "2015-12-31"
+  holdout_start_date: "2016-01-04"
+  normal_bps: 5.0
+  below_200d_bps: 15.0
+  drawdown_10_bps: 25.0
+  drawdown_20_bps: 50.0
+
 eth_quarantine_diagnostic:
   enabled: true
   baseline_universe_name: Base

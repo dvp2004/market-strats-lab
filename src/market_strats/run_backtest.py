@@ -157,6 +157,9 @@ from market_strats.analysis.asset_expansion_conclusion import (
 from market_strats.analysis.eth_quarantine_diagnostic import (
     save_eth_quarantine_diagnostic,
 )
+from market_strats.analysis.regime_switch_overlay_dynamic_slippage import (
+    save_regime_switch_overlay_dynamic_slippage,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1559,6 +1562,13 @@ def main() -> None:
         save_regime_switch_overlay_validation_conclusion(reports_dir)
 
         save_regime_switch_overlay_slippage_sensitivity(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_regime_switch_overlay_dynamic_slippage(
             relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
             config=config,
