@@ -145,14 +145,15 @@ The project did **not** find a universal strategy that beats SPY buy-and-hold on
 
 What it found is more useful:
 
-| Objective | Current Winner |
-|---|---|
-| Raw terminal wealth | SPY Buy and Hold |
-| Simple defensive timing benchmark | SPY 12M Absolute Momentum |
-| Highest gross SPY architecture | 60/40 Annual Rebalanced SPY Core-Satellite |
-| Best standalone balanced allocator | Top 3 Equal Weight Trend-Confirmed Relative Momentum |
-| Best standalone defensive allocator | Top 3 Equal Weight Trend-Confirmed Constrained Relative Momentum |
-| Best overall risk-adjusted system | SPY Trend Regime Switch Overlay 3D Confirmed |
+| Objective | Current Winner | Notes |
+|---|---|---|
+| Raw terminal wealth | SPY Buy and Hold | Highest raw compounding, but with the worst drawdown profile |
+| Simple defensive timing benchmark | SPY 12M Absolute Momentum | Strong simple defensive benchmark |
+| Highest gross SPY architecture | 60/40 Annual Rebalanced SPY Core-Satellite | Highest gross SPY architecture from Phase 1 |
+| Best standalone balanced allocator | Top 3 Equal Weight Trend-Confirmed Relative Momentum | Best standalone allocator before overlay logic |
+| Best standalone defensive allocator | Top 3 Equal Weight Trend-Confirmed Constrained Relative Momentum | Strongest standalone defensive/liveability allocator |
+| Best overall risk-adjusted system | SPY Trend Regime Switch Overlay 3D Confirmed | Original Phase 3 canonical system under flat 5 bps slippage |
+| Best execution-realistic overlay candidate | SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard | Validated under dynamic stress slippage; 9.93% CAGR, 0.412 Calmar, -24.12% max drawdown |
 
 The real answer is:
 
@@ -1217,11 +1218,21 @@ Combined conclusion:
 
 ---
 
-# Phase 4A: Execution Realism Diagnostic
+# Phase 4: Execution Realism and Switch Quality
 
 ## Goal
 
-Phase 4A tested whether the current best system, the SPY Trend Regime Switch Overlay 3D Confirmed, survives a stress-aware execution-cost model.
+Phase 4 tested whether the current best system, the **SPY Trend Regime Switch Overlay 3D Confirmed**, survives more realistic execution assumptions and whether its regime switches are genuinely adding value.
+
+This phase was not about adding new assets, macro data, sentiment, or machine learning. It focused on the system’s biggest known weakness:
+
+> execution friction during regime switches.
+
+---
+
+## Phase 4A: Dynamic Stress Slippage
+
+Phase 4A tested whether the 3D confirmed overlay survives a stress-aware execution-cost model.
 
 The dynamic slippage model assumes:
 
@@ -1234,24 +1245,204 @@ The dynamic slippage model assumes:
 
 Costs are applied only on overlay switch days.
 
-## Result
+### Result
 
 | Scenario | CAGR | Calmar | Max Drawdown |
 |---|---:|---:|---:|
 | Flat 5 bps baseline | 10.22% | 0.429 | -23.84% |
 | Dynamic stress slippage | 9.49% | 0.393 | -24.12% |
 
-## Conclusion
+### Conclusion
 
-Dynamic stress slippage reduced full-period CAGR by 0.73 percentage points and Calmar by 0.036.
+Dynamic stress slippage reduced full-period CAGR by **0.73 percentage points** and Calmar by **0.036**.
 
 The 3D overlay preserved its defensive profile versus SPY 12M, because Calmar and max drawdown remained materially stronger than the SPY 12M benchmark.
 
-However, it failed the strict full-period SPY 12M triple gate because CAGR fell below SPY 12M's 9.68% pinned benchmark.
+However, it failed the strict full-period SPY 12M triple gate because CAGR fell below SPY 12M's **9.68%** pinned benchmark.
 
 Final Phase 4A verdict:
 
-> Defensive profile survived, but wealth-growth edge weakened. Execution friction remains the main unresolved vulnerability.
+> Defensive profile survived, but wealth-growth edge weakened. Execution friction remained the main unresolved vulnerability.
+
+---
+
+## Phase 4B: Switch-Effectiveness Audit
+
+Phase 4B tested whether individual regime switches added value versus the counterfactual of staying in the previous mode.
+
+### Result
+
+52 switches were audited under the dynamic stress-slippage model.
+
+| Switch Group | Switch Count | Helped 5D % | Avg 5D Value Added |
+|---|---:|---:|---:|
+| All switches | 52 | 48.077% | +0.021 pts |
+| 5 bps switches | 23 | 43.478% | +0.017 pts |
+| 15 bps switches | 9 | 77.778% | +0.980 pts |
+| 25 bps switches | 13 | 46.154% | -0.158 pts |
+| 50 bps switches | 7 | 28.571% | -0.864 pts |
+
+### Conclusion
+
+Switch quality was weak/mixed.
+
+The aggregate overlay remained defensively useful, but individual switch timing did not show a reliable event-level edge.
+
+Final Phase 4B verdict:
+
+> The system’s aggregate defensive value is stronger than its event-level switch timing quality.
+
+---
+
+## Phase 4C: Switch-Failure Attribution
+
+Phase 4C diagnosed where the bad switches were concentrated.
+
+Switches were grouped by:
+
+- transition direction,
+- dynamic slippage bucket,
+- SPY drawdown bucket,
+- SPY distance from trend.
+
+### Key Findings
+
+| Bucket | Switch Count | Helped 5D % | Avg 5D Value Added |
+|---|---:|---:|---:|
+| Deep drawdown below -20% | 7 | 28.571% | -0.864 pts |
+| 50 bps slippage | 7 | 28.571% | -0.864 pts |
+| Mild drawdown -5% to -10% | 19 | 63.158% | +0.719 pts |
+| Near highs 0% to -5% | 13 | 38.462% | -0.341 pts |
+
+### Conclusion
+
+Switch failures were concentrated enough to diagnose.
+
+The clearest failure cluster was:
+
+> high-friction / deep-drawdown switches.
+
+This suggested that the system was often switching too late in deep drawdowns, when costs were highest and mean-reversion risk was elevated.
+
+Final Phase 4C verdict:
+
+> The switch rule is more useful during mild deterioration than during late deep-drawdown conditions.
+
+---
+
+## Phase 4D: Guarded Switch Diagnostic
+
+Phase 4D tested targeted guarded switch rules derived from Phase 4C.
+
+The main candidate was:
+
+> **deep_drawdown_guard** — do not initiate new defensive switches when SPY is already below -20% drawdown.
+
+### Result
+
+| System | CAGR | Calmar | Max Drawdown | Switch Count |
+|---|---:|---:|---:|---:|
+| Dynamic no-guard baseline | 9.49% | 0.393 | -24.12% | 52 |
+| deep_drawdown_guard | 9.93% | 0.412 | -24.12% | 46 |
+| near_high_whipsaw_guard | 9.43% | 0.391 | -24.12% | 52 |
+| combined guard | 9.87% | 0.409 | -24.12% | 46 |
+
+### Conclusion
+
+The **deep_drawdown_guard** was the best guarded-switch variant.
+
+It improved full-period CAGR by **0.44 percentage points**, improved Calmar by **0.019**, reduced switch count from **52 to 46**, and did not worsen max drawdown.
+
+Final Phase 4D verdict:
+
+> deep_drawdown_guard improved the dynamic stress-slippage baseline, but was not yet ready for promotion.
+
+---
+
+## Phase 4E: Guard Validation and Removed-Switch Audit
+
+Phase 4E tested whether deep_drawdown_guard improved results for the right reason.
+
+It audited the switches removed by the guard.
+
+### Removed Switch Summary
+
+| Removed Switch Count | Avg Slippage | Avg SPY Drawdown | Avg 5D Value Added | 5D Helped % | Avg 20D Value Added | 20D Helped % |
+|---:|---:|---:|---:|---:|---:|---:|
+| 6 | 50 bps | -25.461% | -1.082 pts | 16.667% | -2.891 pts | 16.667% |
+
+### Conclusion
+
+The removed switches were genuinely harmful.
+
+They occurred in deep drawdowns, carried high execution cost, and had strongly negative average value added.
+
+Final Phase 4E verdict:
+
+> deep_drawdown_guard improved the dynamic baseline by removing genuinely bad switches, not by randomly reducing activity.
+
+---
+
+## Phase 4F: Guard Promotion Validation
+
+Phase 4F tested whether deep_drawdown_guard was robust enough to become the execution-realistic overlay candidate.
+
+### Core Result
+
+| System | CAGR | Calmar | Max Drawdown |
+|---|---:|---:|---:|
+| Dynamic no-guard baseline | 9.49% | 0.393 | -24.12% |
+| Dynamic + deep_drawdown_guard | 9.93% | 0.412 | -24.12% |
+
+### Validation Gates
+
+| Gate | Status |
+|---|---|
+| Candidate beats pinned SPY 12M strict full-period triple gate | Passed |
+| Candidate improves dynamic no-guard baseline | Passed |
+| Candidate avoids holdout damage | Passed |
+| Candidate avoids material episode-level damage | Passed |
+| Candidate can be promoted to execution-realistic overlay candidate | Passed |
+
+### Episode Validation
+
+| Episode | Baseline CAGR / Calmar / Max DD | Guarded CAGR / Calmar / Max DD | Result |
+|---|---:|---:|---|
+| Crisis 2006–2010 | 7.62% / 0.401 / -18.99% | 9.49% / 0.543 / -17.49% | Improved |
+| Post-crisis 2011–2015 | 7.01% / 0.362 / -19.39% | 7.01% / 0.362 / -19.39% | Unchanged |
+| Bull/Covid 2016–2020 | 11.25% / 0.466 / -24.12% | 11.25% / 0.466 / -24.12% | Unchanged |
+| Inflation 2021–2026 | 12.29% / 0.584 / -21.05% | 12.29% / 0.584 / -21.05% | Unchanged |
+
+### Final Phase 4F Verdict
+
+> deep_drawdown_guard is validated as the execution-realistic overlay candidate.
+
+Important distinction:
+
+| System | Role |
+|---|---|
+| SPY Trend Regime Switch Overlay 3D Confirmed | Original Phase 3 canonical system under flat 5 bps slippage |
+| SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard | Phase 4 execution-realistic candidate under dynamic stress slippage |
+
+The guarded version should **not** silently replace the original Phase 3 system. They answer different assumptions.
+
+---
+
+## Phase 4 Final Verdict
+
+Phase 4 showed that execution friction is a real vulnerability, but also produced a targeted fix.
+
+The original 3D overlay weakened under dynamic stress slippage:
+
+| System | CAGR | Calmar | Max Drawdown |
+|---|---:|---:|---:|
+| Flat 5 bps 3D overlay | 10.22% | 0.429 | -23.84% |
+| Dynamic stress-slippage 3D overlay | 9.49% | 0.393 | -24.12% |
+| Dynamic stress-slippage 3D overlay + deep_drawdown_guard | 9.93% | 0.412 | -24.12% |
+
+Final Phase 4 conclusion:
+
+> The original 3D overlay remains the Phase 3 canonical system. The deep_drawdown_guard variant is validated as the best execution-realistic overlay candidate.
 
 ---
 
@@ -1607,7 +1798,12 @@ configs/spy_sma10.yaml
 | Oil + ETH combined expansion | Not validated |
 | Phase 3A robustness | Complete |
 | Research endpoint pinning | Fixed at 2026-05-01 |
-| Phase 4A dynamic stress slippage | Defensive profile survived; wealth-growth edge weakened |
+| Phase 4A dynamic stress slippage | Completed | Defensive profile survived, but wealth-growth edge weakened |
+| Phase 4B switch-effectiveness audit | Completed | Switch quality was weak/mixed |
+| Phase 4C switch-failure attribution | Completed | Failures concentrated in high-friction/deep-drawdown switches |
+| Phase 4D guarded switch diagnostic | Completed | deep_drawdown_guard improved dynamic baseline |
+| Phase 4E guard validation | Completed | Removed switches were genuinely harmful |
+| Phase 4F guard promotion validation | Completed | deep_drawdown_guard validated as execution-realistic overlay candidate |
 
 ---
 
