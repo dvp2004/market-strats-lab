@@ -84,6 +84,38 @@ def _create_confirmed_defensive_signal(
 
     return pd.Series(states, index=above_trend.index)
 
+def _apply_defensive_entry_guard(
+    signal_use_defensive: pd.Series,
+    defensive_entry_allowed: pd.Series | None,
+) -> pd.Series:
+    if defensive_entry_allowed is None:
+        return signal_use_defensive.astype(bool)
+
+    desired_state = signal_use_defensive.astype(bool).reset_index(drop=True)
+    entry_allowed = defensive_entry_allowed.astype(bool).reset_index(drop=True)
+
+    if len(desired_state) != len(entry_allowed):
+        raise ValueError(
+            "defensive_entry_allowed must have the same length as signal_use_defensive"
+        )
+
+    guarded_states: list[bool] = []
+    current_defensive_state = False
+
+    for desired_defensive, allowed in zip(
+        desired_state,
+        entry_allowed,
+        strict=True,
+    ):
+        if not current_defensive_state and desired_defensive:
+            current_defensive_state = bool(allowed)
+        elif current_defensive_state and not desired_defensive:
+            current_defensive_state = False
+
+        guarded_states.append(current_defensive_state)
+
+    return pd.Series(guarded_states, index=signal_use_defensive.index)
+
 def run_spy_trend_regime_switch_overlay(
     offensive_result: pd.DataFrame,
     defensive_result: pd.DataFrame,
@@ -93,6 +125,8 @@ def run_spy_trend_regime_switch_overlay(
     confirmation_days: int = 1,
     signal_price_column: str = "adj_close",
     dynamic_slippage_bps: pd.Series | None = None,
+    defensive_entry_allowed: pd.Series | None = None,
+    defensive_entry_guard_name: str = "none",
 ) -> pd.DataFrame:
     """
     Regime-switching overlay.
@@ -162,10 +196,35 @@ def run_spy_trend_regime_switch_overlay(
         merged["trend_ready"] & (merged["signal_price"] > merged["trend_sma"])
     )
 
-    signal_use_defensive = _create_confirmed_defensive_signal(
+    raw_signal_use_defensive = _create_confirmed_defensive_signal(
         above_trend=merged["offensive_above_trend"],
         trend_ready=merged["trend_ready"],
         confirmation_days=confirmation_days,
+    )
+
+    if defensive_entry_allowed is None:
+        aligned_defensive_entry_allowed = pd.Series(True, index=merged.index)
+    else:
+        aligned_defensive_entry_allowed = defensive_entry_allowed.copy()
+        aligned_defensive_entry_allowed.index = pd.to_datetime(
+            aligned_defensive_entry_allowed.index
+        )
+        aligned_defensive_entry_allowed = (
+            aligned_defensive_entry_allowed.reindex(pd.to_datetime(merged["date"]))
+            .ffill()
+            .bfill()
+            .reset_index(drop=True)
+            .astype(bool)
+        )
+
+        if aligned_defensive_entry_allowed.isna().any():
+            raise ValueError(
+                "defensive_entry_allowed could not be aligned to overlay dates"
+            )
+
+    signal_use_defensive = _apply_defensive_entry_guard(
+        signal_use_defensive=raw_signal_use_defensive,
+        defensive_entry_allowed=aligned_defensive_entry_allowed,
     )
 
     target_use_defensive = signal_use_defensive.shift(1).fillna(False)
@@ -254,6 +313,10 @@ def run_spy_trend_regime_switch_overlay(
             "target_offensive_weight": target_offensive_weight.values,
             "target_defensive_weight": target_defensive_weight.values,
             "offensive_above_trend": merged["offensive_above_trend"].fillna(False).values,
+            "raw_signal_use_defensive": raw_signal_use_defensive.values,
+            "guarded_signal_use_defensive": signal_use_defensive.values,
+            "defensive_entry_allowed": aligned_defensive_entry_allowed.values,
+            "defensive_entry_guard_name": defensive_entry_guard_name,
             "signal_price": merged["signal_price"].values,
             "signal_price_column": signal_price_column,
             "trend_sma": merged["trend_sma"].values,

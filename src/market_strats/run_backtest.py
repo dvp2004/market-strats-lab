@@ -160,6 +160,21 @@ from market_strats.analysis.eth_quarantine_diagnostic import (
 from market_strats.analysis.regime_switch_overlay_dynamic_slippage import (
     save_regime_switch_overlay_dynamic_slippage,
 )
+from market_strats.analysis.regime_switch_overlay_switch_effectiveness import (
+    save_regime_switch_overlay_switch_effectiveness,
+)
+from market_strats.analysis.regime_switch_overlay_switch_failure_attribution import (
+    save_regime_switch_overlay_switch_failure_attribution,
+)
+from market_strats.analysis.regime_switch_overlay_guarded_switch_diagnostic import (
+    save_regime_switch_overlay_guarded_switch_diagnostic,
+)
+from market_strats.analysis.regime_switch_overlay_guard_validation import (
+    save_regime_switch_overlay_guard_validation,
+)
+from market_strats.analysis.regime_switch_overlay_guard_promotion_validation import (
+    save_regime_switch_overlay_guard_promotion_validation,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1569,6 +1584,41 @@ def main() -> None:
         )
 
         save_regime_switch_overlay_dynamic_slippage(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_regime_switch_overlay_switch_effectiveness(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_regime_switch_overlay_switch_failure_attribution(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_regime_switch_overlay_guarded_switch_diagnostic(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_regime_switch_overlay_guard_validation(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_regime_switch_overlay_guard_promotion_validation(
             relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
             config=config,

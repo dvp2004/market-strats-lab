@@ -28,6 +28,60 @@ phase4_dynamic_slippage:
   drawdown_10_bps: 25.0
   drawdown_20_bps: 50.0
 
+phase4_switch_effectiveness:
+  enabled: true
+  horizons: [5, 20, 60]
+  use_dynamic_slippage: true
+
+phase4_switch_failure_attribution:
+  enabled: true
+  horizons: [5, 20, 60]
+
+phase4_guarded_switch_diagnostic:
+  enabled: true
+  reference_end_date: "2015-12-31"
+  holdout_start_date: "2016-01-04"
+  near_high_drawdown_threshold: -0.05
+  near_high_min_trend_distance: -0.01
+  deep_drawdown_threshold: -0.20
+
+phase4_guard_validation:
+  enabled: true
+  reference_end_date: "2015-12-31"
+  holdout_start_date: "2016-01-04"
+  horizons: [5, 20, 60]
+  candidate_guard: "deep_drawdown_guard"
+  benchmark_guard: "baseline_no_guard"
+
+phase4_guard_promotion_validation:
+  enabled: true
+  benchmark_guard: "baseline_no_guard"
+  candidate_guard: "deep_drawdown_guard"
+  reference_end_date: "2015-12-31"
+  holdout_start_date: "2016-01-04"
+
+  spy_12m_cagr_gate: 9.68
+  spy_12m_calmar_gate: 0.287
+  spy_12m_max_drawdown_gate: -33.72
+
+  max_allowed_segment_cagr_damage_pct_points: -0.50
+  max_allowed_segment_calmar_damage: -0.05
+  max_allowed_segment_drawdown_damage_pct_points: -1.00
+
+  segments:
+    - name: "crisis_2006_2010"
+      start_date: "2006-04-28"
+      end_date: "2010-12-31"
+    - name: "post_crisis_2011_2015"
+      start_date: "2011-01-01"
+      end_date: "2015-12-31"
+    - name: "bull_covid_2016_2020"
+      start_date: "2016-01-04"
+      end_date: "2020-12-31"
+    - name: "inflation_2021_2026"
+      start_date: "2021-01-01"
+      end_date: "2026-05-01"
+
 eth_quarantine_diagnostic:
   enabled: true
   baseline_universe_name: Base
