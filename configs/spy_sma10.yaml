@@ -82,6 +82,58 @@ phase4_guard_promotion_validation:
       start_date: "2021-01-01"
       end_date: "2026-05-01"
 
+phase5_breadth_confirmation:
+  enabled: true
+  reference_end_date: "2015-12-31"
+  holdout_start_date: "2016-01-04"
+
+  benchmark_variant: "phase4_execution_candidate"
+
+  risk_assets:
+    - "SPY"
+    - "QQQ"
+    - "IWM"
+    - "EFA"
+    - "EEM"
+    - "VNQ"
+
+  breadth_sma_days: 200
+
+  defensive_breadth_max: 0.50
+  offensive_breadth_min: 0.50
+
+  max_allowed_holdout_cagr_damage_pct_points: -0.50
+  max_allowed_holdout_calmar_damage: -0.05
+  max_allowed_drawdown_damage_pct_points: -1.00
+
+phase5_breadth_materiality_validation:
+  enabled: true
+  benchmark_variant: "phase4_execution_candidate"
+  reference_end_date: "2015-12-31"
+  holdout_start_date: "2016-01-04"
+
+  breadth_thresholds: [0.33, 0.50, 0.67]
+
+  min_full_cagr_improvement_pct_points: 0.15
+  min_full_calmar_improvement: 0.005
+  max_allowed_holdout_cagr_damage_pct_points: -0.50
+  max_allowed_holdout_calmar_damage: -0.05
+  max_allowed_drawdown_damage_pct_points: -0.50
+
+  segments:
+    - name: "crisis_2006_2010"
+      start_date: "2006-04-28"
+      end_date: "2010-12-31"
+    - name: "post_crisis_2011_2015"
+      start_date: "2011-01-01"
+      end_date: "2015-12-31"
+    - name: "bull_covid_2016_2020"
+      start_date: "2016-01-04"
+      end_date: "2020-12-31"
+    - name: "inflation_2021_2026"
+      start_date: "2021-01-01"
+      end_date: "2026-05-01"
+
 eth_quarantine_diagnostic:
   enabled: true
   baseline_universe_name: Base

@@ -175,6 +175,12 @@ from market_strats.analysis.regime_switch_overlay_guard_validation import (
 from market_strats.analysis.regime_switch_overlay_guard_promotion_validation import (
     save_regime_switch_overlay_guard_promotion_validation,
 )
+from market_strats.analysis.regime_switch_overlay_breadth_confirmation import (
+    save_regime_switch_overlay_breadth_confirmation,
+)
+from market_strats.analysis.regime_switch_overlay_breadth_materiality_validation import (
+    save_regime_switch_overlay_breadth_materiality_validation,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1619,6 +1625,20 @@ def main() -> None:
         )
 
         save_regime_switch_overlay_guard_promotion_validation(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_regime_switch_overlay_breadth_confirmation(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_regime_switch_overlay_breadth_materiality_validation(
             relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
             config=config,
