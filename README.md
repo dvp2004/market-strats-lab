@@ -1630,7 +1630,7 @@ Phase 6C compared the final candidate set:
 | SPY 12M Momentum | 9.68% | 0.287 | -33.72% | $63,497.30 | 17 |
 | Phase 3 flat 5 bps 3D overlay | 10.22% | 0.429 | -23.84% | $70,048.61 | 52 |
 | Phase 4 execution candidate | 9.93% | 0.412 | -24.12% | $66,429.13 | 46 |
-| **Phase 6B loose_relief candidate** | **10.35%** | **0.429** | **-24.12%** | **$71,779.16** | **36** |
+| **Phase 6B loose_relief candidate** | **10.35%** | **0.429** | **-24.12%** | **$71,779.16** | **66 metric trades / 36 overlay switches** |
 
 ### Holdout Final Comparison
 
@@ -2147,7 +2147,8 @@ Final pinned result:
 | CAGR | 10.35% |
 | Calmar | 0.429 |
 | Max Drawdown | -24.12% |
-| Trade Count | 36 |
+| Metric Trade Count | 66 |
+| Overlay Switch Count | 36 |
 
 It improves the Phase 4 execution-realistic baseline:
 

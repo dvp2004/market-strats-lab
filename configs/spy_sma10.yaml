@@ -211,6 +211,52 @@ phase6_final_candidate_decision:
   max_allowed_holdout_calmar_damage: -0.05
   max_allowed_holdout_drawdown_damage_pct_points: -0.50
 
+phase7_report_integrity_audit:
+  enabled: true
+  pinned_end_date: "2026-05-01"
+  readme_path: "README.md"
+
+  expected_final_candidate:
+    candidate_name: "Phase 6B loose relief candidate"
+    period: "full"
+    cagr_pct: 10.35
+    calmar: 0.429
+    max_drawdown_pct: -24.12
+    end_value: 71779.16
+    trade_count: 66
+    overlay_switch_count: 36
+    overlay_switch_report: "regime_switch_overlay_offensive_relief_event_summary.csv"
+    overlay_switch_variant_name: "loose_relief"
+
+  expected_reports:
+    - "final_candidate_comparison.csv"
+    - "final_candidate_delta_vs_benchmarks.csv"
+    - "final_candidate_gate_report.csv"
+    - "final_project_decision.csv"
+    - "final_candidate_decision.md"
+    - "regime_switch_overlay_offensive_relief_metrics.csv"
+    - "regime_switch_overlay_offensive_relief_summary.csv"
+    - "regime_switch_overlay_offensive_relief_gate_report.csv"
+    - "phase6b_offensive_relief_conclusion.csv"
+    - "regime_switch_overlay_stress_confirmation_metrics.csv"
+    - "regime_switch_overlay_stress_confirmation_summary.csv"
+    - "regime_switch_overlay_stress_confirmation_gate_report.csv"
+    - "phase6a_stress_confirmation_conclusion.csv"
+    - "regime_switch_overlay_breadth_materiality_metrics.csv"
+    - "regime_switch_overlay_breadth_materiality_summary.csv"
+    - "regime_switch_overlay_breadth_materiality_gate_report.csv"
+    - "phase5b_breadth_materiality_conclusion.csv"
+    - "regime_switch_overlay_breadth_confirmation_metrics.csv"
+    - "regime_switch_overlay_breadth_confirmation_summary.csv"
+    - "regime_switch_overlay_breadth_confirmation_gate_report.csv"
+    - "phase5a_breadth_confirmation_conclusion.csv"
+    - "regime_switch_overlay_guard_promotion_metrics.csv"
+    - "regime_switch_overlay_guard_promotion_summary.csv"
+    - "regime_switch_overlay_guard_promotion_gate_report.csv"
+    - "phase4f_guard_promotion_conclusion.csv"
+    - "phase3a_robustness_conclusion.csv"
+    - "phase3a_robustness_current_status.csv"
+
 eth_quarantine_diagnostic:
   enabled: true
   baseline_universe_name: Base
