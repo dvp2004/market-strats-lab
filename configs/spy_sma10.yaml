@@ -134,6 +134,83 @@ phase5_breadth_materiality_validation:
       start_date: "2021-01-01"
       end_date: "2026-05-01"
 
+phase6_offensive_relief_validation:
+  enabled: true
+  benchmark_variant: "phase4_execution_candidate"
+  reference_end_date: "2015-12-31"
+  holdout_start_date: "2016-01-04"
+
+  volatility_window_days: 20
+
+  relief_profiles:
+    - name: "strict_relief"
+      relief_vol_annualized_threshold: 0.16
+      relief_20d_return_threshold: 0.00
+      relief_trend_distance_threshold: 0.00
+    - name: "baseline_relief"
+      relief_vol_annualized_threshold: 0.18
+      relief_20d_return_threshold: -0.02
+      relief_trend_distance_threshold: 0.00
+    - name: "loose_relief"
+      relief_vol_annualized_threshold: 0.20
+      relief_20d_return_threshold: -0.03
+      relief_trend_distance_threshold: 0.00
+
+  min_full_cagr_improvement_pct_points: 0.30
+  min_full_calmar_improvement: 0.010
+  max_allowed_holdout_cagr_damage_pct_points: -0.50
+  max_allowed_holdout_calmar_damage: -0.05
+  max_allowed_drawdown_damage_pct_points: -0.50
+  max_allowed_episode_cagr_damage_pct_points: -0.50
+  max_allowed_episode_calmar_damage: -0.05
+  max_allowed_switch_count_reduction: -10
+
+  segments:
+    - name: "crisis_2006_2010"
+      start_date: "2006-04-28"
+      end_date: "2010-12-31"
+    - name: "post_crisis_2011_2015"
+      start_date: "2011-01-01"
+      end_date: "2015-12-31"
+    - name: "bull_covid_2016_2020"
+      start_date: "2016-01-04"
+      end_date: "2020-12-31"
+    - name: "inflation_2021_2026"
+      start_date: "2021-01-01"
+      end_date: "2026-05-01"
+
+phase6_final_candidate_decision:
+  enabled: true
+
+  final_candidate_variant: "loose_relief"
+  execution_benchmark_variant: "phase4_execution_candidate"
+
+  pinned_phase2_start_date: "2006-04-28"
+  pinned_end_date: "2026-05-01"
+
+  pinned_spy_buy_hold:
+    cagr_pct: 10.90
+    calmar: 0.197
+    max_drawdown_pct: -55.19
+
+  pinned_spy_12m_momentum:
+    cagr_pct: 9.68
+    calmar: 0.287
+    max_drawdown_pct: -33.72
+
+  pinned_phase3_flat_5bps:
+    cagr_pct: 10.22
+    calmar: 0.429
+    max_drawdown_pct: -23.84
+
+  min_cagr_improvement_vs_execution_benchmark_pct_points: 0.30
+  min_calmar_improvement_vs_execution_benchmark: 0.010
+  max_allowed_drawdown_damage_pct_points: -0.50
+
+  max_allowed_holdout_cagr_damage_pct_points: -0.50
+  max_allowed_holdout_calmar_damage: -0.05
+  max_allowed_holdout_drawdown_damage_pct_points: -0.50
+
 eth_quarantine_diagnostic:
   enabled: true
   baseline_universe_name: Base
