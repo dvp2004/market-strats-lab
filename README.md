@@ -30,20 +30,28 @@ The project now has two major research phases:
 | Phase 2 | Tactical relative-momentum allocation and regime-switch portfolio management | Validated checkpoint reached |
 | Phase 3A | Robustness checks for the 3D confirmed regime-switch overlay | Complete |
 | Phase 3B | Controlled asset expansion: oil and ETH quarantine diagnostics | Oil promising but not validated; ETH rejected |
+| Phase 4 | Execution realism, dynamic stress slippage, switch-quality diagnostics, and guarded-switch validation | deep_drawdown_guard validated as execution-realistic baseline |
+| Phase 5 | Breadth-confirmation diagnostics and materiality validation | Rejected for promotion |
+| Phase 6 | SPY stress confirmation, offensive relief validation, and final candidate decision | loose_relief promoted as best execution-realistic candidate |
 
 The central conclusion is:
 
 > No strategy dominates across all regimes on both return and risk.
 
-However, the project did identify a current best risk-adjusted system:
+However, the project identified two separate winners under different execution assumptions:
 
-> **SPY Trend Regime Switch Overlay 3D Confirmed**
+| Role | System |
+|---|---|
+| Original canonical risk-adjusted system | **SPY Trend Regime Switch Overlay 3D Confirmed** under flat 5 bps slippage |
+| Best execution-realistic candidate | **SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard + loose_relief** under dynamic stress slippage |
 
 This system keeps exposure to SPY when SPY is in a confirmed healthy trend regime and switches to a constrained tactical relative-momentum allocator after persistent trend deterioration.
 
 It does **not** beat SPY buy-and-hold on raw terminal wealth. SPY buy-and-hold remains the raw wealth benchmark.
 
-But it does beat SPY 12-month absolute momentum on full-period and holdout risk-adjusted performance.
+The original Phase 3 overlay beats SPY 12-month absolute momentum on full-period and holdout risk-adjusted performance under flat 5 bps slippage.
+
+The final Phase 6C execution-realistic candidate also beats SPY 12M on the strict full-period triple gate and improves on the Phase 4 execution-realistic baseline, but it still does **not** beat SPY buy-and-hold on raw CAGR.
 
 ### Canonical Research Checkpoint
 
@@ -59,15 +67,25 @@ The current validated checkpoint is:
 
 | Item | Value |
 |---|---:|
-| Canonical Phase 2/3 period | 2006-04-28 to 2026-05-01 |
-| Best system | SPY Trend Regime Switch Overlay 3D Confirmed |
-| Best system CAGR | 10.22% |
-| Best system Calmar | 0.429 |
-| Best system max drawdown | -23.83% / -23.84% depending report rounding |
+| Canonical Phase 2/3/4/5/6 period | 2006-04-28 to 2026-05-01 |
+| Raw wealth benchmark | SPY Buy & Hold |
 | SPY Buy & Hold CAGR over same period | 10.90% |
 | SPY Buy & Hold max drawdown | -55.19% |
+| Simple defensive benchmark | SPY 12M Momentum |
 | SPY 12M Momentum CAGR over same period | 9.68% |
 | SPY 12M Momentum max drawdown | -33.72% |
+| Original canonical overlay | SPY Trend Regime Switch Overlay 3D Confirmed |
+| Original canonical overlay CAGR | 10.22% |
+| Original canonical overlay Calmar | 0.429 |
+| Original canonical overlay max drawdown | -23.83% / -23.84% depending report rounding |
+| Validated execution-realistic baseline | 3D overlay + deep_drawdown_guard |
+| Execution-realistic baseline CAGR | 9.93% |
+| Execution-realistic baseline Calmar | 0.412 |
+| Execution-realistic baseline max drawdown | -24.12% |
+| Best execution-realistic candidate | 3D overlay + deep_drawdown_guard + loose_relief |
+| Best execution-realistic candidate CAGR | 10.35% |
+| Best execution-realistic candidate Calmar | 0.429 |
+| Best execution-realistic candidate max drawdown | -24.12% |
 
 Strict endpoint checks are now part of the research discipline: generated reports should not contain `end_date` later than `2026-05-01` unless a deliberate new refreshed checkpoint is opened.
 
@@ -89,7 +107,9 @@ Common period for the Phase 2 system comparison:
 | SPY 12M Absolute Momentum | Defensive timing benchmark | $63,497.24 | 9.68% | 0.287 | 15.05% | -33.72% | Strong simple benchmark |
 | Top 3 Equal Weight Trend-Confirmed Relative Momentum | Best standalone balanced allocator | $58,401.74 | 9.22% | 0.317 | 16.29% | -29.06% | Useful standalone Phase 2 allocator |
 | Top 3 Equal Weight Trend-Confirmed Constrained Relative Momentum | Best standalone defensive allocator | $52,197.16 | 8.61% | 0.351 | 13.35% | -24.54% | Strong defensive/liveability allocator |
-| **SPY Trend Regime Switch Overlay 3D Confirmed** | **Best overall risk-adjusted system** | **$70,048.61** | **10.22%** | **0.429** | **13.58%** | **-23.84%** | **Current best risk-adjusted candidate** |
+| **SPY Trend Regime Switch Overlay 3D Confirmed** | **Original flat-slippage canonical system** | **$70,048.61** | **10.22%** | **0.429** | **13.58%** | **-23.84%** | **Original Phase 3 canonical system** |
+| SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard | Validated execution-realistic baseline | $66,429.13 | 9.93% | 0.412 | 13.60% | -24.12% | Dynamic stress-slippage baseline |
+| **SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard + loose_relief** | **Best execution-realistic candidate** | **$71,779.16** | **10.35%** | **0.429** | **13.50%** | **-24.12%** | **Final Phase 6C promoted candidate** |
 
 ### Holdout Validation
 
@@ -106,10 +126,16 @@ Holdout period:
 | SPY 12M Absolute Momentum | 11.49% | 0.341 | -33.72% | 16.12% |
 | Top 3 Equal Weight Trend-Confirmed Relative Momentum | 9.40% | 0.376 | -25.02% | 16.26% |
 | Top 3 Equal Weight Trend-Confirmed Constrained Relative Momentum | 8.70% | 0.386 | -22.52% | 14.03% |
+| SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard | 11.62% | 0.482 | -24.12% | 13.60% |
+| **SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard + loose_relief** | **12.05%** | **0.500** | **-24.12%** | **13.60%** |
 
 Holdout conclusion:
 
 > The 3D confirmed overlay beat SPY 12M in the holdout on CAGR, Calmar, max drawdown, volatility, Sharpe, and Sortino. SPY buy-and-hold still won raw CAGR, but with materially worse drawdown.
+
+Final execution-realistic holdout conclusion:
+
+> The Phase 6B loose_relief candidate improved on the Phase 4 execution-realistic baseline in the holdout, increasing CAGR from 11.62% to 12.05% and Calmar from 0.482 to 0.500, while leaving max drawdown unchanged at -24.12%.
 
 ### Phase 3A Robustness Summary
 
@@ -153,7 +179,12 @@ What it found is more useful:
 | Best standalone balanced allocator | Top 3 Equal Weight Trend-Confirmed Relative Momentum | Best standalone allocator before overlay logic |
 | Best standalone defensive allocator | Top 3 Equal Weight Trend-Confirmed Constrained Relative Momentum | Strongest standalone defensive/liveability allocator |
 | Best overall risk-adjusted system | SPY Trend Regime Switch Overlay 3D Confirmed | Original Phase 3 canonical system under flat 5 bps slippage |
-| Best execution-realistic overlay candidate | SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard | Validated under dynamic stress slippage; 9.93% CAGR, 0.412 Calmar, -24.12% max drawdown |
+| Validated execution-realistic baseline | SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard | Validated under dynamic stress slippage; 9.93% CAGR, 0.412 Calmar, -24.12% max drawdown |
+| Best execution-realistic overlay candidate | SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard + loose_relief | Final Phase 6C promoted candidate; 10.35% CAGR, 0.429 Calmar, -24.12% max drawdown |
+
+Important distinction:
+
+> The Phase 6B loose_relief candidate is the best execution-realistic candidate built so far. It is **not** the raw wealth winner. SPY buy-and-hold remains the raw CAGR and terminal-wealth benchmark.
 
 The real answer is:
 
@@ -340,7 +371,7 @@ Execute on the next trading day.
 | Trade Count | 17 |
 | Exposure Time | 79.49% |
 
-The real SPY 12M result is not “alpha”. The CAGR edge over buy-and-hold is tiny.
+The real SPY 12M result is not "alpha". The CAGR edge over buy-and-hold is tiny.
 
 The real result is:
 
@@ -364,7 +395,7 @@ Add additional exposure tranches when the asset falls from its high:
   -30% drawdown → add third tranche
 ```
 
-This strategy formally tested the original “buy more when it drops” idea.
+This strategy formally tested the original "buy more when it drops" idea.
 
 **SPY result**
 
@@ -1224,7 +1255,7 @@ Combined conclusion:
 
 Phase 4 tested whether the current best system, the **SPY Trend Regime Switch Overlay 3D Confirmed**, survives more realistic execution assumptions and whether its regime switches are genuinely adding value.
 
-This phase was not about adding new assets, macro data, sentiment, or machine learning. It focused on the system’s biggest known weakness:
+This phase was not about adding new assets, macro data, sentiment, or machine learning. It focused on the system's biggest known weakness:
 
 > execution friction during regime switches.
 
@@ -1290,7 +1321,7 @@ The aggregate overlay remained defensively useful, but individual switch timing 
 
 Final Phase 4B verdict:
 
-> The system’s aggregate defensive value is stronger than its event-level switch timing quality.
+> The system's aggregate defensive value is stronger than its event-level switch timing quality.
 
 ---
 
@@ -1298,12 +1329,7 @@ Final Phase 4B verdict:
 
 Phase 4C diagnosed where the bad switches were concentrated.
 
-Switches were grouped by:
-
-- transition direction,
-- dynamic slippage bucket,
-- SPY drawdown bucket,
-- SPY distance from trend.
+Switches were grouped by transition direction, dynamic slippage bucket, SPY drawdown bucket, and SPY distance from trend.
 
 ### Key Findings
 
@@ -1432,8 +1458,6 @@ The guarded version should **not** silently replace the original Phase 3 system.
 
 Phase 4 showed that execution friction is a real vulnerability, but also produced a targeted fix.
 
-The original 3D overlay weakened under dynamic stress slippage:
-
 | System | CAGR | Calmar | Max Drawdown |
 |---|---:|---:|---:|
 | Flat 5 bps 3D overlay | 10.22% | 0.429 | -23.84% |
@@ -1443,6 +1467,200 @@ The original 3D overlay weakened under dynamic stress slippage:
 Final Phase 4 conclusion:
 
 > The original 3D overlay remains the Phase 3 canonical system. The deep_drawdown_guard variant is validated as the best execution-realistic overlay candidate.
+
+---
+
+# Phase 5: Breadth Confirmation Validation
+
+## Phase 5A: Breadth Confirmation Diagnostic
+
+Phase 5A tested whether a simple market-breadth confirmation layer could improve the Phase 4 execution-realistic candidate.
+
+The benchmark was:
+
+| System | CAGR | Calmar | Max Drawdown |
+|---|---:|---:|---:|
+| Phase 4 execution-realistic candidate | 9.93% | 0.412 | -24.12% |
+
+Tested breadth variants:
+
+- defensive breadth confirmation,
+- offensive breadth confirmation,
+- combined breadth confirmation.
+
+### Result
+
+| Variant | CAGR | Calmar | Max Drawdown | Holdout CAGR | Verdict |
+|---|---:|---:|---:|---:|---|
+| Phase 4 execution candidate | 9.93% | 0.412 | -24.12% | 11.62% | Benchmark |
+| Defensive breadth confirmation | 9.99% | 0.414 | -24.12% | 11.62% | Marginal improvement |
+| Offensive breadth confirmation | 9.33% | 0.386 | -24.20% | 10.52% | Rejected |
+| Combined breadth confirmation | 9.39% | 0.389 | -24.20% | 10.52% | Rejected |
+
+Phase 5A conclusion:
+
+> Defensive breadth confirmation was marginally positive, but the improvement was too small for promotion. Offensive and combined breadth confirmation damaged performance.
+
+---
+
+## Phase 5B: Breadth Materiality Validation
+
+Phase 5B tested whether the defensive breadth improvement was material or just noise.
+
+Tested thresholds:
+
+```text
+0.33
+0.50
+0.67
+```
+
+### Result
+
+| Variant | CAGR | Calmar | Max Drawdown | Holdout CAGR | Verdict |
+|---|---:|---:|---:|---:|---|
+| Phase 4 execution candidate | 9.93% | 0.412 | -24.12% | 11.62% | Benchmark |
+| Breadth 0.33 | 9.70% | 0.402 | -24.12% | 11.22% | Worse |
+| Breadth 0.50 | 9.99% | 0.414 | -24.12% | 11.62% | Tiny improvement, failed materiality |
+| Breadth 0.67 | 9.93% | 0.412 | -24.12% | 11.62% | Same as benchmark |
+
+The materiality gate required:
+
+```text
+Full CAGR improvement >= +0.15 pts
+Full Calmar improvement >= +0.005
+```
+
+The best breadth result only achieved:
+
+```text
++0.06 pts CAGR
++0.002 Calmar
+```
+
+Final Phase 5 verdict:
+
+> Breadth confirmation is rejected for promotion. The improvement was too small and not worth adding complexity.
+
+---
+
+# Phase 6: Stress Confirmation and Final Candidate Decision
+
+## Phase 6A: SPY Stress Confirmation Diagnostic
+
+Phase 6A tested whether SPY-derived stress filters could improve the Phase 4 execution-realistic candidate.
+
+Tested stress inputs:
+
+- 20D realised volatility,
+- 20D SPY return shock,
+- SPY distance from 200D trend,
+- offensive relief confirmation.
+
+### Defensive Stress Results
+
+| Variant | CAGR | Calmar | Max Drawdown | Verdict |
+|---|---:|---:|---:|---|
+| Phase 4 execution candidate | 9.93% | 0.412 | -24.12% | Benchmark |
+| Defensive volatility stress | 9.25% | 0.310 | -29.83% | Rejected |
+| Defensive return shock | 8.96% | 0.296 | -30.28% | Rejected |
+| Defensive trend-distance stress | 9.84% | 0.408 | -24.12% | Rejected / not useful |
+| Defensive composite stress | 9.81% | 0.407 | -24.12% | Rejected / not useful |
+
+Defensive stress filters generally worsened performance and sometimes materially worsened drawdown.
+
+### Offensive Relief Lead
+
+| Variant | CAGR | Calmar | Max Drawdown | Holdout CAGR | Switch Count | Verdict |
+|---|---:|---:|---:|---:|---:|---|
+| Offensive relief confirmation | 10.55% | 0.437 | -24.12% | 13.14% | 30 | Promising but not validated |
+
+Phase 6A conclusion:
+
+> Defensive stress confirmation is rejected. Offensive relief looked promising, but failed initial validation because it damaged the post-crisis 2011-2015 episode and reduced switch count too aggressively.
+
+---
+
+## Phase 6B: Offensive Relief Validation
+
+Phase 6B tested whether offensive relief was genuinely useful or merely over-filtering re-entry.
+
+Tested profiles:
+
+| Profile | Rule Summary |
+|---|---|
+| strict_relief | vol <= 0.16, 20D return >= 0.00, trend distance >= 0.00 |
+| baseline_relief | vol <= 0.18, 20D return >= -0.02, trend distance >= 0.00 |
+| loose_relief | vol <= 0.20, 20D return >= -0.03, trend distance >= 0.00 |
+
+### Result
+
+| Variant | CAGR | Calmar | Max Drawdown | Switch Count | Gate Result |
+|---|---:|---:|---:|---:|---|
+| Phase 4 execution candidate | 9.93% | 0.412 | -24.12% | 46 | Benchmark |
+| strict_relief | 10.20% | 0.423 | -24.12% | 30 | Failed |
+| baseline_relief | 10.55% | 0.437 | -24.12% | 30 | Failed |
+| loose_relief | 10.35% | 0.429 | -24.12% | 36 | Passed |
+
+The initial Phase 6B gate logic incorrectly selected the highest headline-score candidate before checking all gates. That was fixed so every candidate is evaluated independently.
+
+Corrected conclusion:
+
+> baseline_relief remains rejected despite stronger headline CAGR because it damaged the post-crisis episode and reduced switches too aggressively. loose_relief passed all Phase 6B validation gates.
+
+---
+
+## Phase 6C: Final Candidate Decision
+
+Phase 6C compared the final candidate set:
+
+| Candidate | Role |
+|---|---|
+| SPY Buy & Hold | Raw wealth benchmark |
+| SPY 12M Momentum | Simple defensive timing benchmark |
+| Phase 3 flat 5 bps 3D overlay | Original canonical overlay |
+| Phase 4 execution candidate | Validated execution-realistic baseline |
+| Phase 6B loose_relief candidate | Enhanced execution-realistic candidate |
+
+### Full-Period Final Comparison
+
+| Candidate | CAGR | Calmar | Max Drawdown | End Value | Trade Count |
+|---|---:|---:|---:|---:|---:|
+| SPY Buy & Hold | 10.90% | 0.197 | -55.19% | $79,306.62 | 1 |
+| SPY 12M Momentum | 9.68% | 0.287 | -33.72% | $63,497.30 | 17 |
+| Phase 3 flat 5 bps 3D overlay | 10.22% | 0.429 | -23.84% | $70,048.61 | 52 |
+| Phase 4 execution candidate | 9.93% | 0.412 | -24.12% | $66,429.13 | 46 |
+| **Phase 6B loose_relief candidate** | **10.35%** | **0.429** | **-24.12%** | **$71,779.16** | **36** |
+
+### Holdout Final Comparison
+
+| Candidate | Holdout CAGR | Holdout Calmar | Holdout Max Drawdown |
+|---|---:|---:|---:|
+| SPY Buy & Hold | 15.03% | 0.446 | -33.72% |
+| SPY 12M Momentum | 11.49% | 0.341 | -33.72% |
+| Phase 3 flat 5 bps 3D overlay | 12.06% | 0.506 | -23.84% |
+| Phase 4 execution candidate | 11.62% | 0.482 | -24.12% |
+| **Phase 6B loose_relief candidate** | **12.05%** | **0.500** | **-24.12%** |
+
+### Final Gates
+
+| Gate | Status |
+|---|---|
+| Phase 6B candidate improves Phase 4 execution candidate full-period | Passed |
+| Phase 6B candidate avoids holdout damage versus Phase 4 execution candidate | Passed |
+| Phase 6B candidate avoids material episode-level damage | Passed |
+| Phase 6B candidate beats pinned SPY 12M strict full-period triple gate | Passed |
+| Phase 6B candidate beats SPY Buy & Hold on raw CAGR | Failed |
+| Phase 3 flat 5 bps canonical overlay remains separately documented | Passed |
+| Phase 6B candidate can be promoted as best execution-realistic candidate | Passed |
+
+Final Phase 6C verdict:
+
+> Phase 6B loose_relief is promoted as the best execution-realistic candidate.
+
+Important distinction:
+
+> The project still does **not** beat SPY Buy & Hold on raw wealth. The final promoted candidate is the best execution-realistic risk-adjusted system built so far, not a universal raw-return champion.
 
 ---
 
@@ -1460,13 +1678,6 @@ research_period:
 ```
 
 This was added after a data-refresh drift caused some exploratory reports to extend to 2026-05-13. The pinned endpoint prevents refreshed data from silently changing validated results.
-
-The project now enforces this through:
-
-- filtering each ticker's price data immediately after loading,
-- filtering the dual-momentum branch separately,
-- preserving filtered price data in `ticker_outputs`,
-- checking generated CSV reports for `end_date > 2026-05-01`.
 
 Canonical README numbers should be read as **2026-05-01 pinned checkpoint results**.
 
@@ -1547,8 +1758,11 @@ Remaining concerns include:
 - The 3D overlay confirmation rule was selected after auditing the full-period raw overlay
 - The holdout validation is a robustness check, not a perfectly clean out-of-sample experiment
 - Execution friction is the main current vulnerability
-- The project is still not a production trading system
-- Dynamic stress slippage showed that execution friction can remove the 3D overlay's full-period CAGR edge over SPY 12M.
+- Dynamic stress slippage showed that execution friction can remove the 3D overlay's full-period CAGR edge over SPY 12M
+- Breadth confirmation was tested and rejected for promotion after failing materiality validation
+- Defensive SPY stress filters were tested and rejected after weakening performance or worsening drawdown
+- Offensive relief improved the execution-realistic candidate, but remains a price-derived timing refinement, not proof of production readiness
+- Phase 6B loose_relief is the best execution-realistic candidate built so far, but it still trails SPY Buy & Hold on raw CAGR
 
 ---
 
@@ -1574,6 +1788,7 @@ Remaining concerns include:
 - Dual-momentum branch endpoint bypass fixed
 - Duplicate `cash_returns` return-key issue fixed
 - Secondary data-source cross-check deferred after ingestion/parsing failure
+- Phase 6B offensive-relief gate logic initially selected the highest headline-score candidate before checking all validation gates; fixed to evaluate all candidates independently and select the best passing candidate
 
 ---
 
@@ -1706,6 +1921,52 @@ reports/eth_quarantine_diagnostic_allocation_summary.csv
 reports/eth_quarantine_diagnostic_decision.csv
 ```
 
+## Phase 4 Execution Realism Reports
+
+```text
+reports/regime_switch_overlay_dynamic_slippage_sensitivity.csv
+reports/phase4_execution_realism_conclusion.csv
+reports/regime_switch_overlay_trade_event_audit.csv
+reports/regime_switch_overlay_switch_effectiveness_summary.csv
+reports/regime_switch_overlay_switch_failure_attribution.csv
+reports/regime_switch_overlay_guarded_switch_metrics.csv
+reports/regime_switch_overlay_guard_validation_removed_switch_summary.csv
+reports/regime_switch_overlay_guard_promotion_metrics.csv
+reports/regime_switch_overlay_guard_promotion_gate_report.csv
+reports/phase4f_guard_promotion_conclusion.csv
+```
+
+## Phase 5 Breadth Confirmation Reports
+
+```text
+reports/regime_switch_overlay_breadth_confirmation_metrics.csv
+reports/regime_switch_overlay_breadth_confirmation_summary.csv
+reports/regime_switch_overlay_breadth_confirmation_gate_report.csv
+reports/phase5a_breadth_confirmation_conclusion.csv
+reports/regime_switch_overlay_breadth_materiality_metrics.csv
+reports/regime_switch_overlay_breadth_materiality_summary.csv
+reports/regime_switch_overlay_breadth_materiality_gate_report.csv
+reports/phase5b_breadth_materiality_conclusion.csv
+```
+
+## Phase 6 Stress / Relief / Final Candidate Reports
+
+```text
+reports/regime_switch_overlay_stress_confirmation_metrics.csv
+reports/regime_switch_overlay_stress_confirmation_summary.csv
+reports/regime_switch_overlay_stress_confirmation_gate_report.csv
+reports/phase6a_stress_confirmation_conclusion.csv
+reports/regime_switch_overlay_offensive_relief_metrics.csv
+reports/regime_switch_overlay_offensive_relief_summary.csv
+reports/regime_switch_overlay_offensive_relief_gate_report.csv
+reports/phase6b_offensive_relief_conclusion.csv
+reports/final_candidate_comparison.csv
+reports/final_candidate_delta_vs_benchmarks.csv
+reports/final_candidate_gate_report.csv
+reports/final_project_decision.csv
+reports/final_candidate_decision.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -1763,6 +2024,15 @@ The main config currently tests:
 - Controlled USO/oil asset expansion diagnostic
 - ETH quarantine diagnostic
 - Endpoint-pinned research-period validation
+- Dynamic stress-slippage execution realism diagnostics
+- Switch-effectiveness audits
+- Switch-failure attribution
+- deep_drawdown_guard validation
+- Breadth-confirmation diagnostics
+- Breadth materiality validation
+- SPY stress-confirmation diagnostics
+- Offensive relief validation
+- Final candidate comparison and promotion decision
 - Final decision reports
 - Validation conclusion reports
 
@@ -1791,47 +2061,53 @@ configs/spy_sma10.yaml
 | Trend-confirmed relative momentum allocator | Survived as best standalone balanced allocator |
 | Constrained trend-confirmed allocator | Survived as best standalone defensive allocator |
 | Raw SPY 200D regime switch overlay | Failed due to whipsaw |
-| SPY 3D confirmed regime switch overlay | Current best overall risk-adjusted candidate |
+| SPY 3D confirmed regime switch overlay | Original Phase 3 flat-slippage canonical system |
+| SPY 3D confirmed regime switch overlay + deep_drawdown_guard + loose_relief | Best execution-realistic candidate |
 | BTC | Quarantined |
 | USO / oil expansion | Promising but not validated |
 | ETH quarantine | Rejected |
 | Oil + ETH combined expansion | Not validated |
 | Phase 3A robustness | Complete |
 | Research endpoint pinning | Fixed at 2026-05-01 |
-| Phase 4A dynamic stress slippage | Completed | Defensive profile survived, but wealth-growth edge weakened |
-| Phase 4B switch-effectiveness audit | Completed | Switch quality was weak/mixed |
-| Phase 4C switch-failure attribution | Completed | Failures concentrated in high-friction/deep-drawdown switches |
-| Phase 4D guarded switch diagnostic | Completed | deep_drawdown_guard improved dynamic baseline |
-| Phase 4E guard validation | Completed | Removed switches were genuinely harmful |
-| Phase 4F guard promotion validation | Completed | deep_drawdown_guard validated as execution-realistic overlay candidate |
+| Phase 4A dynamic stress slippage | Completed — defensive profile survived, wealth-growth edge weakened |
+| Phase 4B switch-effectiveness audit | Completed — switch quality was weak/mixed |
+| Phase 4C switch-failure attribution | Completed — failures concentrated in high-friction/deep-drawdown switches |
+| Phase 4D guarded switch diagnostic | Completed — deep_drawdown_guard improved dynamic baseline |
+| Phase 4E guard validation | Completed — removed switches were genuinely harmful |
+| Phase 4F guard promotion validation | Completed — deep_drawdown_guard validated as execution-realistic overlay candidate |
+| Phase 5A breadth confirmation | Completed — defensive breadth was marginally positive; offensive and combined breadth rejected |
+| Phase 5B breadth materiality validation | Completed — breadth confirmation failed stricter materiality gates and was rejected for promotion |
+| Phase 6A stress confirmation | Completed — defensive stress filters rejected; offensive relief identified as promising but not validated |
+| Phase 6B offensive relief validation | Completed — loose_relief passed validation gates; baseline_relief rejected despite stronger headline CAGR |
+| Phase 6C final candidate decision | Completed — loose_relief promoted as best execution-realistic candidate |
 
 ---
 
 # What Should Happen Next
 
-Do **not** keep adding strategy variants immediately.
+Do **not** add more strategy variants immediately.
 
-The correct next step is repository and documentation polish:
+The correct next step is repository and documentation checkpointing:
 
 1. Ensure all tests pass.
 2. Ensure `ruff` passes.
-3. Update `README.md`.
-4. Push the cleaned checkpoint to GitHub.
-5. Tag this as the current validated research checkpoint.
+3. Commit the Phase 6C final candidate decision.
+4. Tag this as the current validated research checkpoint.
+5. Only then open any future research branch.
 
 Future research branches should be opened only after this checkpoint is documented.
 
 Potential future branches:
 
 1. Tax-aware analysis
-2. Dynamic execution-cost model using stress/slippage assumptions
+2. More realistic bid-ask / market-impact modelling during stress
 3. Second data-source cross-check with a more reliable ingestion path
 4. Expanded walk-forward validation
 5. Bootstrap confidence intervals
 6. Behavioural/tracking-error regret analysis
 7. BTC-specific quarantined research branch
 8. Additional commodity or real-asset expansion only under strict holdout materiality gates
-9. Sentiment/macro/ML layer, but only after the current price/risk system is documented
+9. Sentiment/macro/ML layer, but only after the final price/risk system is checkpointed
 10. Production-readiness audit, if the project ever moves beyond research
 
 ---
@@ -1846,26 +2122,60 @@ The final answer is not:
 
 The real answer is:
 
-> Simple systematic rules can improve the path of returns, but the winner depends on objective and regime.
+> Simple systematic rules can improve the path of returns, but the winner depends on objective, regime, and execution assumptions.
 
-The current best result is:
+The current final hierarchy is:
 
-> **SPY Trend Regime Switch Overlay 3D Confirmed** is the best overall risk-adjusted system built so far.
+| Role | Winner |
+|---|---|
+| Raw wealth benchmark | SPY Buy & Hold |
+| Simple defensive timing benchmark | SPY 12M Momentum |
+| Original flat-slippage canonical overlay | SPY Trend Regime Switch Overlay 3D Confirmed |
+| Validated execution-realistic baseline | SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard |
+| Best execution-realistic candidate | SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard + loose_relief |
 
-It beats SPY 12M on full-period and holdout risk-adjusted performance, including holdout CAGR, Calmar, and max drawdown.
+The best execution-realistic candidate is:
+
+> **SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard + loose_relief**
+
+Final pinned result:
+
+| Metric | Value |
+|---|---:|
+| Period | 2006-04-28 to 2026-05-01 |
+| End Value | $71,779.16 |
+| CAGR | 10.35% |
+| Calmar | 0.429 |
+| Max Drawdown | -24.12% |
+| Trade Count | 36 |
+
+It improves the Phase 4 execution-realistic baseline:
+
+| Metric | Phase 4 baseline | Phase 6B loose_relief |
+|---|---:|---:|
+| CAGR | 9.93% | 10.35% |
+| Calmar | 0.412 | 0.429 |
+| Max Drawdown | -24.12% | -24.12% |
+
+It also beats SPY 12M on the pinned full-period strict risk-adjusted gate.
 
 But:
 
 > SPY buy-and-hold remains the raw wealth winner.
 
-The current checkpoint also shows:
+The current checkpoint shows:
 
-- the 3D overlay survives low/moderate slippage,
+- the original 3D overlay survives low/moderate slippage,
 - the system is not dependent on cash yield,
 - raw-close signal testing passes with caveat,
 - USO/oil is promising but not validated,
 - ETH is rejected,
 - oil + ETH is not validated,
+- execution friction is a real vulnerability,
+- deep_drawdown_guard fixes the worst deep-drawdown/high-friction switch cluster,
+- breadth confirmation was tested and rejected for promotion,
+- defensive stress confirmation was tested and rejected,
+- loose_relief improves offensive re-entry discipline and is now promoted as the best execution-realistic candidate,
 - all canonical results are pinned to 2026-05-01.
 
 That distinction is the whole point of the project.
