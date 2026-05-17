@@ -193,6 +193,9 @@ from market_strats.analysis.regime_switch_overlay_final_candidate_decision impor
 from market_strats.analysis.report_integrity_audit import (
     save_report_integrity_audit,
 )
+from market_strats.analysis.lookahead_signal_execution_audit import (
+    save_lookahead_signal_execution_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1679,6 +1682,13 @@ def main() -> None:
         )
 
         save_report_integrity_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_lookahead_signal_execution_audit(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
             config=config,
             reports_dir=reports_dir,
         )

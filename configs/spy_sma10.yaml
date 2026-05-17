@@ -257,6 +257,34 @@ phase7_report_integrity_audit:
     - "phase3a_robustness_conclusion.csv"
     - "phase3a_robustness_current_status.csv"
 
+phase7_lookahead_signal_execution_audit:
+  enabled: true
+  pinned_end_date: "2026-05-01"
+
+  audited_variant: "loose_relief"
+  audited_candidate_name: "Phase 6B loose relief candidate"
+
+  trend_sma_tolerance: 0.000001
+  ignored_initial_sma_warmup_rows: 200
+
+  max_allowed_trend_sma_mismatches: 0
+  max_allowed_confirmation_mismatches: 0
+  max_allowed_switches_before_trend_available: 0
+
+  required_columns:
+    - "date"
+    - "equity"
+    - "strategy_return"
+    - "selected_mode"
+    - "signal_price"
+    - "trend_sma"
+    - "raw_signal_use_defensive"
+    - "guarded_signal_use_defensive"
+    - "target_defensive_weight"
+    - "overlay_turnover"
+    - "overlay_slippage_cost"
+    - "applied_overlay_slippage_bps"
+
 eth_quarantine_diagnostic:
   enabled: true
   baseline_universe_name: Base
