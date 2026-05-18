@@ -270,7 +270,7 @@ phase7_lookahead_signal_execution_audit:
   - overlay_slippage_cost
   - applied_overlay_slippage_bps
 phase7_secondary_data_source_cross_check_v2:
-  enabled: true
+  enabled: false
   source_name: stooq
   stooq_api_key_env_var: STOOQ_API_KEY
   pinned_start_date: '2006-04-28'
@@ -298,6 +298,30 @@ phase7_secondary_data_source_cross_check_v2:
     VNQ: vnq.us
     DBC: dbc.us
     USO: uso.us
+phase7_bootstrap_stability_audit:
+  enabled: true
+  input_returns_report: "phase7d_bootstrap_input_returns.csv"
+  require_existing_input_report: true
+
+  bootstrap_iterations: 300
+  block_lengths_days:
+    - 5
+    - 21
+    - 63
+  random_seeds:
+    - 7
+    - 42
+    - 123
+
+  min_probability_candidate_beats_spy_12m_cagr: 0.55
+  min_probability_candidate_beats_spy_12m_calmar: 0.60
+  min_probability_candidate_beats_spy_12m_max_drawdown: 0.60
+
+  min_probability_candidate_beats_buy_hold_calmar: 0.60
+  min_probability_candidate_beats_buy_hold_max_drawdown: 0.70
+  max_allowed_probability_candidate_beats_buy_hold_cagr_claim: 0.50
+
+  min_profiles_passing_all_gates: 1.00
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

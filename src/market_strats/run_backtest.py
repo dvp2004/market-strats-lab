@@ -202,6 +202,9 @@ from market_strats.analysis.secondary_data_source_difference_attribution import 
 from market_strats.analysis.bootstrap_statistical_robustness import (
     save_bootstrap_statistical_robustness,
 )
+from market_strats.analysis.bootstrap_stability_audit import (
+    save_bootstrap_stability_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1712,6 +1715,13 @@ def main() -> None:
         )
 
         save_bootstrap_statistical_robustness(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_bootstrap_stability_audit(
             relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
             config=config,

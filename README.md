@@ -2003,7 +2003,7 @@ Remaining concerns include:
 - Phase 6B `loose_relief` is the best execution-realistic candidate built so far, but it still trails SPY Buy & Hold on raw CAGR,
 - Phase 7B found no obvious lookahead issue, but that does not prove the system is live-trading ready,
 - Phase 7C attributed secondary-source differences, but Stooq close cannot fully validate yfinance adjusted-close total-return series.
-
+- Phase 7D/7E bootstrap robustness passed, but bootstrap resampling is still not formal statistical proof and does not guarantee future performance.
 ---
 
 # Bugs Caught and Fixed
@@ -2241,6 +2241,11 @@ reports/secondary_data_source_difference_attribution.csv
 reports/secondary_data_source_difference_attribution_summary.csv
 reports/secondary_data_source_difference_attribution_conclusion.csv
 reports/secondary_data_source_difference_attribution.md
+reports/phase7e_bootstrap_stability_profiles.csv
+reports/phase7e_bootstrap_stability_probability_summary.csv
+reports/phase7e_bootstrap_stability_gate_report.csv
+reports/phase7e_bootstrap_stability_conclusion.csv
+reports/phase7e_bootstrap_stability.md
 ```
 
 ## Other Important Reports
@@ -2364,7 +2369,7 @@ configs/spy_sma10.yaml
 | Phase 7B lookahead / signal-execution audit | Completed — passed |
 | Phase 7C secondary data-source cross-check | Completed — usable cross-check survived, but raw agreement needed attribution |
 | Phase 7C.2 secondary source difference attribution | Completed — no unresolved source issues remained; Stooq close cannot fully validate adjusted-close data |
-
+| Phase 7E bootstrap stability audit | Completed — all 9 bootstrap profiles passed across block lengths 5/21/63 and seeds 7/42/123 |
 ---
 
 # What Should Happen Next
@@ -2405,6 +2410,20 @@ The audit used 500 bootstrap iterations with 21-trading-day blocks over the pinn
 
 ```text
 2006-04-28 to 2026-05-01
+```
+
+## Phase 7E: Bootstrap Stability Audit
+
+Phase 7E tested whether the Phase 7D bootstrap conclusion depended on one specific resampling setup.
+
+The audit reran the paired block bootstrap across:
+
+```text
+block lengths: 5, 21, 63 trading days
+random seeds: 7, 42, 123
+bootstrap profiles: 9 total
+iterations per profile: 300
+```
 
 ---
 
