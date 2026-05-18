@@ -199,6 +199,9 @@ from market_strats.analysis.secondary_data_source_cross_check_v2 import (
 from market_strats.analysis.secondary_data_source_difference_attribution import (
     save_secondary_data_source_difference_attribution,
 )
+from market_strats.analysis.bootstrap_statistical_robustness import (
+    save_bootstrap_statistical_robustness,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1703,6 +1706,13 @@ def main() -> None:
         )
 
         save_secondary_data_source_difference_attribution(
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_bootstrap_statistical_robustness(
+            relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
             config=config,
             reports_dir=reports_dir,

@@ -1,7 +1,7 @@
-# FAST RUN PROFILE: Phase 7C.2 secondary-source difference attribution only.
-# Heavy strategy/validation sections are kept but disabled for this run.
-# Do not commit this disabled-fast profile unless intentionally making the main config a fast audit profile.
-# Requires prior Phase 7C v2 reports and/or STOOQ_API_KEY if the attribution module re-downloads Stooq data.
+# FAST RUN PROFILE: Phase 7C secondary data-source cross-check only.
+# Heavy strategy/validation sections are kept in this file but their enabled flags are set to false for this run.
+# Do not commit this disabled-fast profile unless you intentionally want the main config to stay in fast-audit mode.
+# Requires a real Stooq key in environment variable STOOQ_API_KEY for actual data comparison.
 
 tickers:
 - SPY
@@ -270,7 +270,7 @@ phase7_lookahead_signal_execution_audit:
   - overlay_slippage_cost
   - applied_overlay_slippage_bps
 phase7_secondary_data_source_cross_check_v2:
-  enabled: false
+  enabled: true
   source_name: stooq
   stooq_api_key_env_var: STOOQ_API_KEY
   pinned_start_date: '2006-04-28'
@@ -472,8 +472,7 @@ regime_switch_overlay:
   name: SPY Trend Regime Switch Overlay 3D Confirmed
   benchmark_ticker: SPY
   offensive_strategy: Buy and Hold
-  defensive_allocator_name: Top 3 Equal Weight Trend Confirmed Constrained Relative
-    Momentum Allocator
+  defensive_allocator_name: Top 3 Equal Weight Trend Confirmed Constrained Relative Momentum Allocator
   trend_sma_days: 200
   confirmation_days: 3
   benchmarks:
@@ -716,36 +715,3 @@ core_satellite:
   satellite_weight: 0.4
   satellite_strategy: 12_month_absolute_momentum
   rebalance_mode: independent_sleeves
-phase7_secondary_data_source_difference_attribution:
-  enabled: true
-  source_cross_check_report: secondary_data_source_cross_check_v2.csv
-  source_name: stooq
-  pinned_start_date: '2006-04-28'
-  pinned_end_date: '2026-05-01'
-  tickers:
-    SPY: spy.us
-    QQQ: qqq.us
-    IWM: iwm.us
-    EFA: efa.us
-    EEM: eem.us
-    AGG: agg.us
-    TLT: tlt.us
-    GLD: gld.us
-    SLV: slv.us
-    VNQ: vnq.us
-    DBC: dbc.us
-    USO: uso.us
-  distribution_sensitive_tickers:
-  - AGG
-  - TLT
-  - VNQ
-  - EFA
-  - EEM
-  - DBC
-  clean_min_return_correlation: 0.995
-  raw_close_match_min_correlation: 0.995
-  raw_close_match_max_cagr_delta_pct_points: 0.75
-  adjusted_vs_secondary_large_cagr_delta_pct_points: 0.75
-  potential_issue_min_cagr_delta_pct_points: 1.5
-  potential_issue_min_drawdown_delta_pct_points: 5.0
-  max_allowed_unresolved_potential_issues: 0

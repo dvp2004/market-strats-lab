@@ -22,7 +22,7 @@ It is not financial advice, investment advice, or a recommendation to buy or sel
 
 Market Strats Lab started as a simple ETF trend-following project and evolved into a structured systematic strategy research framework.
 
-The project now has two major research phases:
+The project now has several completed research phases:
 
 | Phase | Focus | Status |
 |---|---|---|
@@ -30,9 +30,12 @@ The project now has two major research phases:
 | Phase 2 | Tactical relative-momentum allocation and regime-switch portfolio management | Validated checkpoint reached |
 | Phase 3A | Robustness checks for the 3D confirmed regime-switch overlay | Complete |
 | Phase 3B | Controlled asset expansion: oil and ETH quarantine diagnostics | Oil promising but not validated; ETH rejected |
-| Phase 4 | Execution realism, dynamic stress slippage, switch-quality diagnostics, and guarded-switch validation | deep_drawdown_guard validated as execution-realistic baseline |
+| Phase 4 | Execution realism, dynamic stress slippage, switch-quality diagnostics, and guarded-switch validation | `deep_drawdown_guard` validated as execution-realistic baseline |
 | Phase 5 | Breadth-confirmation diagnostics and materiality validation | Rejected for promotion |
-| Phase 6 | SPY stress confirmation, offensive relief validation, and final candidate decision | loose_relief promoted as best execution-realistic candidate |
+| Phase 6 | SPY stress confirmation, offensive relief validation, and final candidate decision | `loose_relief` promoted as best execution-realistic candidate |
+| Phase 7A | Final checkpoint integrity audit | Passed |
+| Phase 7B | Lookahead / signal-execution audit | Passed |
+| Phase 7C | Secondary data-source reliability cross-check and difference attribution | Survived with caveat |
 
 The central conclusion is:
 
@@ -55,19 +58,19 @@ The final Phase 6C execution-realistic candidate also beats SPY 12M on the stric
 
 ### Canonical Research Checkpoint
 
-The canonical project endpoint is now explicitly pinned:
+The canonical project endpoint is explicitly pinned:
 
 ```text
 2026-05-01
 ```
 
-This matters because the data cache previously refreshed to 2026-05-13 during later experiments. That refreshed run is treated as exploratory only. The official README numbers below use the pinned 2026-05-01 endpoint.
+This matters because the data cache previously refreshed to `2026-05-13` during later experiments. That refreshed run is treated as exploratory only. The official README numbers below use the pinned `2026-05-01` endpoint.
 
 The current validated checkpoint is:
 
 | Item | Value |
 |---|---:|
-| Canonical Phase 2/3/4/5/6 period | 2006-04-28 to 2026-05-01 |
+| Canonical Phase 2/3/4/5/6/7 period | 2006-04-28 to 2026-05-01 |
 | Raw wealth benchmark | SPY Buy & Hold |
 | SPY Buy & Hold CAGR over same period | 10.90% |
 | SPY Buy & Hold max drawdown | -55.19% |
@@ -86,6 +89,12 @@ The current validated checkpoint is:
 | Best execution-realistic candidate CAGR | 10.35% |
 | Best execution-realistic candidate Calmar | 0.429 |
 | Best execution-realistic candidate max drawdown | -24.12% |
+| Best execution-realistic candidate end value | $71,779.16 |
+| Best execution-realistic candidate metric trade count | 66 |
+| Best execution-realistic candidate overlay switch count | 36 |
+| Phase 7A checkpoint integrity audit | Passed |
+| Phase 7B lookahead / signal-execution audit | Passed |
+| Phase 7C secondary data-source audit | Survived with caveat |
 
 Strict endpoint checks are now part of the research discipline: generated reports should not contain `end_date` later than `2026-05-01` unless a deliberate new refreshed checkpoint is opened.
 
@@ -95,7 +104,7 @@ Strict endpoint checks are now part of the research discipline: generated report
 
 ### Full-Period Comparison
 
-Common period for the Phase 2 system comparison:
+Common period for the Phase 2+ system comparison:
 
 ```text
 2006-04-28 to 2026-05-01
@@ -135,7 +144,7 @@ Holdout conclusion:
 
 Final execution-realistic holdout conclusion:
 
-> The Phase 6B loose_relief candidate improved on the Phase 4 execution-realistic baseline in the holdout, increasing CAGR from 11.62% to 12.05% and Calmar from 0.482 to 0.500, while leaving max drawdown unchanged at -24.12%.
+> The Phase 6B `loose_relief` candidate improved on the Phase 4 execution-realistic baseline in the holdout, increasing CAGR from 11.62% to 12.05% and Calmar from 0.482 to 0.500, while leaving max drawdown unchanged at -24.12%.
 
 ### Phase 3A Robustness Summary
 
@@ -163,6 +172,8 @@ The 3D confirmation rule was selected after auditing the raw 200D overlay's whip
 
 This matters. The result is strong, but it should not be oversold.
 
+The final Phase 6C candidate also uses price-derived refinements added after earlier diagnostics. It is a validated research candidate, not a production trading system.
+
 ---
 
 ## Final Project View
@@ -184,11 +195,11 @@ What it found is more useful:
 
 Important distinction:
 
-> The Phase 6B loose_relief candidate is the best execution-realistic candidate built so far. It is **not** the raw wealth winner. SPY buy-and-hold remains the raw CAGR and terminal-wealth benchmark.
+> The Phase 6B `loose_relief` candidate is the best execution-realistic candidate built so far. It is **not** the raw wealth winner. SPY buy-and-hold remains the raw CAGR and terminal-wealth benchmark.
 
 The real answer is:
 
-> Simple systematic rules can improve the path of returns, but the winner depends on objective and regime.
+> Simple systematic rules can improve the path of returns, but the winner depends on objective, regime, and execution assumptions.
 
 ---
 
@@ -214,6 +225,9 @@ Strategies are evaluated on:
 | Regime performance | How behaviour changes across market environments |
 | Strategy-purpose classification | Whether a strategy is wealth-building, defensive, behavioural, or rejected |
 | Holdout validation | Whether conclusions survive outside the reference period |
+| Endpoint integrity | Whether reports are pinned to the official research date |
+| Signal-execution audit | Whether signal state can be reconstructed without lookahead |
+| Secondary-source reliability | Whether data-source disagreements are explained rather than ignored |
 
 The goal is not only to ask:
 
@@ -1589,9 +1603,9 @@ Tested profiles:
 
 | Profile | Rule Summary |
 |---|---|
-| strict_relief | vol <= 0.16, 20D return >= 0.00, trend distance >= 0.00 |
-| baseline_relief | vol <= 0.18, 20D return >= -0.02, trend distance >= 0.00 |
-| loose_relief | vol <= 0.20, 20D return >= -0.03, trend distance >= 0.00 |
+| `strict_relief` | vol <= 0.16, 20D return >= 0.00, trend distance >= 0.00 |
+| `baseline_relief` | vol <= 0.18, 20D return >= -0.02, trend distance >= 0.00 |
+| `loose_relief` | vol <= 0.20, 20D return >= -0.03, trend distance >= 0.00 |
 
 ### Result
 
@@ -1606,7 +1620,7 @@ The initial Phase 6B gate logic incorrectly selected the highest headline-score 
 
 Corrected conclusion:
 
-> baseline_relief remains rejected despite stronger headline CAGR because it damaged the post-crisis episode and reduced switches too aggressively. loose_relief passed all Phase 6B validation gates.
+> `baseline_relief` remains rejected despite stronger headline CAGR because it damaged the post-crisis episode and reduced switches too aggressively. `loose_relief` passed all Phase 6B validation gates.
 
 ---
 
@@ -1656,7 +1670,7 @@ Phase 6C compared the final candidate set:
 
 Final Phase 6C verdict:
 
-> Phase 6B loose_relief is promoted as the best execution-realistic candidate.
+> Phase 6B `loose_relief` is promoted as the best execution-realistic candidate.
 
 Important distinction:
 
@@ -1664,11 +1678,210 @@ Important distinction:
 
 ---
 
+# Phase 7: Checkpoint Integrity, Lookahead, and Data Reliability
+
+Phase 7 did **not** add another strategy variant. It audited whether the Phase 6C checkpoint could be trusted as a research result.
+
+The focus was:
+
+1. internal checkpoint consistency,
+2. signal/execution timing,
+3. secondary data-source reliability.
+
+---
+
+## Phase 7A: Final Checkpoint Integrity Audit
+
+Phase 7A checked whether the final checkpoint was internally consistent before tagging.
+
+### Checks Performed
+
+| Check | Result |
+|---|---|
+| No report endpoint drift beyond 2026-05-01 | Passed |
+| All expected checkpoint reports exist | Passed |
+| Final candidate headline metrics match configured checkpoint values | Passed |
+| README contains final Phase 6C checkpoint story | Passed |
+| Checkpoint ready to commit and tag | Passed |
+
+### Important Trade Count Clarification
+
+Phase 7A caught an important ambiguity:
+
+| Concept | Value | Meaning |
+|---|---:|---|
+| Metric trade count | 66 | Trade count reported by the final metrics framework |
+| Overlay switch count | 36 | Number of overlay regime switches in the `loose_relief` candidate |
+
+These are not the same thing. The audit now checks them separately.
+
+Phase 7A verdict:
+
+> Final checkpoint integrity passed. The Phase 6C candidate metrics, endpoint pin, report existence, and README story are internally consistent.
+
+---
+
+## Phase 7B: Lookahead / Signal-Execution Audit
+
+Phase 7B audited whether the final candidate’s signal and execution path could be reconstructed without obvious lookahead leakage.
+
+### Checks Performed
+
+| Check | Result |
+|---|---|
+| Required signal/execution columns exist | Passed |
+| Trend SMA can be reconstructed from trailing `signal_price` | Passed |
+| Raw 3D confirmation state can be reconstructed without future data | Passed |
+| Switches occurred only after `trend_sma` availability | Passed |
+| Slippage costs align with positive overlay turnover | Passed |
+| No obvious lookahead issue found in audited final candidate | Passed |
+
+### Key Numbers
+
+| Audit | Result |
+|---|---:|
+| Trend SMA rows checked | 4,834 |
+| Trend SMA mismatches | 0 |
+| Trend SMA max absolute difference | 0.0 |
+| Raw 3D confirmation rows checked | 5,034 |
+| Raw confirmation mismatches | 0 |
+| Mode switches | 36 |
+| Slippage rows | 37 |
+| Turnover rows | 37 |
+| Slippage-without-turnover rows | 0 |
+
+One expected diagnostic value was:
+
+```text
+positive_bps_without_cost_or_turnover_rows = 4,997
+```
+
+This is not a hidden-cost bug. It means the daily dynamic slippage schedule had a positive basis-point value on most days, but costs were only charged when turnover occurred. The important value is:
+
+```text
+slippage_without_turnover_rows = 0
+```
+
+Phase 7B verdict:
+
+> No obvious lookahead issue was found in the audited final candidate. This strengthens the checkpoint materially, but it still does not make the system production-ready.
+
+---
+
+## Phase 7C: Secondary Data-Source Reliability Audit
+
+Phase 7C compared the primary yfinance adjusted-close data against Stooq daily close data.
+
+Stooq required API-key authentication, so the final working audit used a local environment variable:
+
+```text
+STOOQ_API_KEY
+```
+
+The key is not stored in the repository and should not be committed.
+
+### Phase 7C Cross-Check Result
+
+| Classification | Count |
+|---|---:|
+| Clean match | 4 |
+| Acceptable difference | 4 |
+| Review difference | 2 |
+| Potential data issue | 2 |
+| Authentication failures | 0 |
+| Unavailable tickers | 0 |
+
+Ticker-level classification:
+
+| Ticker | Classification | Notes |
+|---|---|---|
+| QQQ | Clean match | Strong agreement |
+| GLD | Clean match | Strong agreement |
+| SLV | Clean match | Strong agreement |
+| USO | Clean match | Strong agreement |
+| SPY | Acceptable difference | Broadly aligned |
+| IWM | Acceptable difference | Broadly aligned |
+| EEM | Acceptable difference | Broadly aligned |
+| DBC | Acceptable difference | Broadly aligned |
+| EFA | Review difference | Larger CAGR divergence |
+| TLT | Review difference | Distribution-sensitive ETF |
+| AGG | Potential data issue | Distribution-heavy bond ETF; large CAGR divergence versus Stooq close |
+| VNQ | Potential data issue | Distribution-heavy REIT ETF; large CAGR divergence versus Stooq close |
+
+Initial Phase 7C conclusion:
+
+> A usable secondary data-source cross-check was completed, but broad agreement did not fully pass before attribution because AGG and VNQ showed material differences and EFA/TLT required review.
+
+That was not the end of the audit. The differences had to be attributed rather than ignored.
+
+---
+
+## Phase 7C.2: Secondary Source Difference Attribution
+
+Phase 7C.2 investigated whether the Stooq/yfinance differences were true data issues or expected price-basis differences.
+
+The main suspicion was:
+
+> Stooq close data is not equivalent to yfinance adjusted-close total-return data, especially for distribution-heavy ETFs.
+
+### Attribution Result
+
+| Item | Count |
+|---|---:|
+| Tickers checked | 12 |
+| No material data-source concern | 8 |
+| Distribution / price-basis differences | 4 |
+| Review differences unresolved | 0 |
+| Unresolved potential data issues | 0 |
+
+Final attribution status:
+
+```text
+Differences mostly attributable to price-basis/distributions
+```
+
+### Attribution by Ticker
+
+| Ticker | Prior Cross-Check Classification | Attribution |
+|---|---|---|
+| SPY | Acceptable difference | No material data-source concern |
+| QQQ | Clean match | No material data-source concern |
+| IWM | Acceptable difference | No material data-source concern |
+| EEM | Acceptable difference | No material data-source concern |
+| GLD | Clean match | No material data-source concern |
+| SLV | Clean match | No material data-source concern |
+| DBC | Acceptable difference | No material data-source concern |
+| USO | Clean match | No material data-source concern |
+| EFA | Review difference | Likely distribution / price-basis difference |
+| AGG | Potential data issue | Likely distribution / price-basis difference |
+| TLT | Review difference | Likely distribution / price-basis difference |
+| VNQ | Potential data issue | Likely distribution / price-basis difference |
+
+### Phase 7C.2 Conclusion
+
+| Claim | Status | Interpretation |
+|---|---|---|
+| Secondary-source differences were attributed rather than ignored | Survived | The report separates clean matches, likely price-basis differences, and unresolved issues |
+| Distribution-heavy ETF differences are likely explained by price basis | Survived | EFA, AGG, TLT, and VNQ were classified as likely distribution/price-basis differences |
+| No unresolved secondary-source data issues remain | Survived | No unresolved potential issues remained after attribution |
+| Stooq close can fully validate yfinance adjusted-close total-return data | Failed | A close-price source cannot fully validate adjusted-close total-return data without matching adjustment methodology |
+| The next step should be more strategy optimisation | Not yet | Data reliability and statistical robustness remain higher-priority than new signals |
+
+Phase 7C final verdict:
+
+> Secondary data-source reliability survived with caveat. Stooq confirms broad source agreement, but Stooq close is not a perfect validator of yfinance adjusted-close total-return data.
+
+Important limitation:
+
+> Stooq close is useful as a broad sanity check. It does **not** fully validate distribution-adjusted total-return backtests.
+
+---
+
 # Methodology Notes
 
 ## Research Period Pinning
 
-The canonical Phase 2/3 research endpoint is pinned in configuration:
+The canonical Phase 2/3/4/5/6/7 research endpoint is pinned in configuration:
 
 ```yaml
 research_period:
@@ -1677,7 +1890,7 @@ research_period:
   end_date: "2026-05-01"
 ```
 
-This was added after a data-refresh drift caused some exploratory reports to extend to 2026-05-13. The pinned endpoint prevents refreshed data from silently changing validated results.
+This was added after a data-refresh drift caused some exploratory reports to extend to `2026-05-13`. The pinned endpoint prevents refreshed data from silently changing validated results.
 
 Canonical README numbers should be read as **2026-05-01 pinned checkpoint results**.
 
@@ -1686,7 +1899,8 @@ Canonical README numbers should be read as **2026-05-01 pinned checkpoint result
 - Signals are generated using only data available at the signal date.
 - Execution occurs on the next trading day.
 - Positions are applied after execution, not on the signal day.
-- The implementation is intentionally conservative, but still needs additional dedicated lookahead audit tests before real-money interpretation.
+- Phase 7B reconstructed the trend SMA and raw 3D confirmation signal from trailing data and found zero mismatches.
+- Phase 7B found no obvious lookahead issue in the audited final candidate.
 
 ## Cash Returns
 
@@ -1716,7 +1930,14 @@ Known issue:
 
 > Adjusted close is not perfectly point-in-time because historical prices are retroactively adjusted.
 
-A future validation step should test raw-close signals with adjusted-close returns.
+The project ran raw-close signal sensitivity and a secondary-source comparison against Stooq close data.
+
+The secondary-source audit found:
+
+- broad agreement for most tickers,
+- no unresolved source issues after attribution,
+- larger differences in distribution-sensitive ETFs,
+- Stooq close is not a full validator of yfinance adjusted-close total-return data.
 
 ## Slippage
 
@@ -1724,11 +1945,27 @@ A flat 5 basis points slippage is applied per trade in the baseline runs.
 
 Phase 3A tested 10 bps, 25 bps, and 50 bps sensitivity. The strategy survived 10 bps, weakened at 25 bps, and failed the wealth-growth case at 50 bps.
 
-This is simple enough for research, but it does not fully model wider bid-ask spreads during market stress. Since regime switches happen during stressful periods, real-world friction could be materially higher than the baseline.
+Phase 4 introduced dynamic stress slippage, charging higher costs during deteriorating or stressed markets.
+
+This is more realistic than a flat 5 bps assumption, but it still does not fully model bid-ask spreads, market impact, taxes, fund-level liquidity, or broker-specific execution.
 
 ## Cached Data
 
 Price and cash-rate data are cached in `data/processed/`. The loaders include schema normalisation so older cached files remain compatible after refactors.
+
+## Secondary Data-Source API Key
+
+Phase 7C uses Stooq as a secondary data source.
+
+Stooq requires API-key authentication for CSV downloads. The project expects the key through a local environment variable:
+
+```text
+STOOQ_API_KEY
+```
+
+The key should live in `.env` or the local shell environment, not in committed config files.
+
+`.env` must remain ignored by Git.
 
 ---
 
@@ -1738,31 +1975,34 @@ This project is **not production-ready**.
 
 Remaining concerns include:
 
-- `yfinance` data reliability
-- Adjusted-close retroactive adjustment
-- Second data-source cross-check was attempted but deferred after secondary-provider ingestion issues
-- No tax modelling
-- No bid-ask spread modelling during stress periods
-- No FX cost modelling for non-USD investors
-- Cash proxy may overstate retail-accessible yields
-- No bootstrap confidence intervals
-- No multiple-comparisons correction across strategy/asset combinations
-- No full walk-forward optimisation framework
-- Limited out-of-sample testing
-- Asset universe selection bias
-- BTC selection bias
-- ETH selection bias and shorter crypto history
-- USO/oil result is promising but not validated
-- Strategy conclusions are regime-dependent
-- Investor behaviour and tracking-error regret are not directly modelled
-- The 3D overlay confirmation rule was selected after auditing the full-period raw overlay
-- The holdout validation is a robustness check, not a perfectly clean out-of-sample experiment
-- Execution friction is the main current vulnerability
-- Dynamic stress slippage showed that execution friction can remove the 3D overlay's full-period CAGR edge over SPY 12M
-- Breadth confirmation was tested and rejected for promotion after failing materiality validation
-- Defensive SPY stress filters were tested and rejected after weakening performance or worsening drawdown
-- Offensive relief improved the execution-realistic candidate, but remains a price-derived timing refinement, not proof of production readiness
-- Phase 6B loose_relief is the best execution-realistic candidate built so far, but it still trails SPY Buy & Hold on raw CAGR
+- `yfinance` data reliability,
+- adjusted-close retroactive adjustment,
+- Stooq close is not a full adjusted-close total-return validator,
+- no tax modelling,
+- no bid-ask spread modelling during stress periods,
+- no market-impact modelling,
+- no FX cost modelling for non-USD investors,
+- cash proxy may overstate retail-accessible yields,
+- no bootstrap confidence intervals yet,
+- no multiple-comparisons correction across strategy/asset combinations,
+- no full walk-forward optimisation framework,
+- limited out-of-sample testing,
+- asset universe selection bias,
+- BTC selection bias,
+- ETH selection bias and shorter crypto history,
+- USO/oil result is promising but not validated,
+- strategy conclusions are regime-dependent,
+- investor behaviour and tracking-error regret are not directly modelled,
+- the 3D overlay confirmation rule was selected after auditing the full-period raw overlay,
+- the holdout validation is a robustness check, not a perfectly clean out-of-sample experiment,
+- execution friction is the main current vulnerability,
+- dynamic stress slippage showed that execution friction can remove the 3D overlay's full-period CAGR edge over SPY 12M,
+- breadth confirmation was tested and rejected for promotion after failing materiality validation,
+- defensive SPY stress filters were tested and rejected after weakening performance or worsening drawdown,
+- offensive relief improved the execution-realistic candidate, but remains a price-derived timing refinement, not proof of production readiness,
+- Phase 6B `loose_relief` is the best execution-realistic candidate built so far, but it still trails SPY Buy & Hold on raw CAGR,
+- Phase 7B found no obvious lookahead issue, but that does not prove the system is live-trading ready,
+- Phase 7C attributed secondary-source differences, but Stooq close cannot fully validate yfinance adjusted-close total-return series.
 
 ---
 
@@ -1789,6 +2029,10 @@ Remaining concerns include:
 - Duplicate `cash_returns` return-key issue fixed
 - Secondary data-source cross-check deferred after ingestion/parsing failure
 - Phase 6B offensive-relief gate logic initially selected the highest headline-score candidate before checking all validation gates; fixed to evaluate all candidates independently and select the best passing candidate
+- Phase 7A separated metric trade count from overlay switch count
+- Phase 7B confirmed trend SMA and raw confirmation state could be reconstructed without mismatches
+- Phase 7C fixed Stooq CSV authentication handling and API-key environment-variable support
+- Phase 7C.2 attributed Stooq/yfinance differences to price-basis/distribution treatment rather than leaving them as unresolved source failures
 
 ---
 
@@ -1845,6 +2089,12 @@ Save full terminal output:
 
 ```bash
 .\.venv\Scripts\python -m market_strats.run_backtest --config configs/spy_sma10.yaml *> reports\latest_terminal_output.txt
+```
+
+Load local `.env` variables in PowerShell when running Stooq-authenticated data checks:
+
+```powershell
+Get-Content .env | ForEach-Object { if ($_ -match "^\s*([^#][^=]+)=(.*)$") { [Environment]::SetEnvironmentVariable($matches[1].Trim(), $matches[2].Trim(), "Process") } }
 ```
 
 ---
@@ -1967,6 +2217,32 @@ reports/final_project_decision.csv
 reports/final_candidate_decision.md
 ```
 
+## Phase 7 Integrity / Lookahead / Data Reliability Reports
+
+```text
+reports/final_checkpoint_integrity_conclusion.csv
+reports/final_checkpoint_claim_audit.csv
+reports/report_endpoint_audit.csv
+reports/expected_report_audit.csv
+reports/readme_checkpoint_audit.csv
+reports/lookahead_required_column_audit.csv
+reports/lookahead_trend_sma_audit.csv
+reports/lookahead_confirmation_reconstruction_audit.csv
+reports/lookahead_switch_timing_audit.csv
+reports/lookahead_slippage_turnover_audit.csv
+reports/lookahead_signal_execution_conclusion.csv
+reports/lookahead_signal_execution_audit.md
+reports/secondary_data_source_cross_check_v2.csv
+reports/secondary_data_source_cross_check_v2_summary.csv
+reports/secondary_data_source_cross_check_v2_conclusion.csv
+reports/secondary_data_source_cross_check_v2.md
+reports/secondary_data_source_difference_basis_comparison.csv
+reports/secondary_data_source_difference_attribution.csv
+reports/secondary_data_source_difference_attribution_summary.csv
+reports/secondary_data_source_difference_attribution_conclusion.csv
+reports/secondary_data_source_difference_attribution.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -2027,12 +2303,16 @@ The main config currently tests:
 - Dynamic stress-slippage execution realism diagnostics
 - Switch-effectiveness audits
 - Switch-failure attribution
-- deep_drawdown_guard validation
+- `deep_drawdown_guard` validation
 - Breadth-confirmation diagnostics
 - Breadth materiality validation
 - SPY stress-confirmation diagnostics
 - Offensive relief validation
 - Final candidate comparison and promotion decision
+- Final checkpoint integrity audit
+- Lookahead / signal-execution audit
+- Secondary data-source cross-check
+- Secondary source difference attribution
 - Final decision reports
 - Validation conclusion reports
 
@@ -2072,14 +2352,18 @@ configs/spy_sma10.yaml
 | Phase 4A dynamic stress slippage | Completed — defensive profile survived, wealth-growth edge weakened |
 | Phase 4B switch-effectiveness audit | Completed — switch quality was weak/mixed |
 | Phase 4C switch-failure attribution | Completed — failures concentrated in high-friction/deep-drawdown switches |
-| Phase 4D guarded switch diagnostic | Completed — deep_drawdown_guard improved dynamic baseline |
+| Phase 4D guarded switch diagnostic | Completed — `deep_drawdown_guard` improved dynamic baseline |
 | Phase 4E guard validation | Completed — removed switches were genuinely harmful |
-| Phase 4F guard promotion validation | Completed — deep_drawdown_guard validated as execution-realistic overlay candidate |
+| Phase 4F guard promotion validation | Completed — `deep_drawdown_guard` validated as execution-realistic overlay candidate |
 | Phase 5A breadth confirmation | Completed — defensive breadth was marginally positive; offensive and combined breadth rejected |
 | Phase 5B breadth materiality validation | Completed — breadth confirmation failed stricter materiality gates and was rejected for promotion |
 | Phase 6A stress confirmation | Completed — defensive stress filters rejected; offensive relief identified as promising but not validated |
-| Phase 6B offensive relief validation | Completed — loose_relief passed validation gates; baseline_relief rejected despite stronger headline CAGR |
-| Phase 6C final candidate decision | Completed — loose_relief promoted as best execution-realistic candidate |
+| Phase 6B offensive relief validation | Completed — `loose_relief` passed validation gates; `baseline_relief` rejected despite stronger headline CAGR |
+| Phase 6C final candidate decision | Completed — `loose_relief` promoted as best execution-realistic candidate |
+| Phase 7A final checkpoint integrity audit | Completed — passed |
+| Phase 7B lookahead / signal-execution audit | Completed — passed |
+| Phase 7C secondary data-source cross-check | Completed — usable cross-check survived, but raw agreement needed attribution |
+| Phase 7C.2 secondary source difference attribution | Completed — no unresolved source issues remained; Stooq close cannot fully validate adjusted-close data |
 
 ---
 
@@ -2091,24 +2375,36 @@ The correct next step is repository and documentation checkpointing:
 
 1. Ensure all tests pass.
 2. Ensure `ruff` passes.
-3. Commit the Phase 6C final candidate decision.
-4. Tag this as the current validated research checkpoint.
-5. Only then open any future research branch.
+3. Confirm `.env` is ignored and no API key is staged.
+4. Commit the Phase 7C secondary-source reliability attribution work.
+5. Tag this as the current validated research checkpoint.
+6. Only then open the next research branch.
 
 Future research branches should be opened only after this checkpoint is documented.
 
 Potential future branches:
 
-1. Tax-aware analysis
-2. More realistic bid-ask / market-impact modelling during stress
-3. Second data-source cross-check with a more reliable ingestion path
+1. Phase 7D bootstrap / statistical robustness
+2. Tax-aware analysis
+3. More realistic bid-ask / market-impact modelling during stress
 4. Expanded walk-forward validation
-5. Bootstrap confidence intervals
+5. Multiple-comparisons correction across strategy/asset combinations
 6. Behavioural/tracking-error regret analysis
 7. BTC-specific quarantined research branch
 8. Additional commodity or real-asset expansion only under strict holdout materiality gates
 9. Sentiment/macro/ML layer, but only after the final price/risk system is checkpointed
 10. Production-readiness audit, if the project ever moves beyond research
+
+The next implementation should be:
+
+## Phase 7D: Bootstrap / Statistical Robustness Audit
+
+Phase 7D tested whether the final Phase 6B loose_relief candidate remained robust under paired block bootstrap resampling of daily returns.
+
+The audit used 500 bootstrap iterations with 21-trading-day blocks over the pinned period:
+
+```text
+2006-04-28 to 2026-05-01
 
 ---
 
@@ -2173,10 +2469,13 @@ The current checkpoint shows:
 - ETH is rejected,
 - oil + ETH is not validated,
 - execution friction is a real vulnerability,
-- deep_drawdown_guard fixes the worst deep-drawdown/high-friction switch cluster,
+- `deep_drawdown_guard` fixes the worst deep-drawdown/high-friction switch cluster,
 - breadth confirmation was tested and rejected for promotion,
 - defensive stress confirmation was tested and rejected,
-- loose_relief improves offensive re-entry discipline and is now promoted as the best execution-realistic candidate,
+- `loose_relief` improves offensive re-entry discipline and is now promoted as the best execution-realistic candidate,
+- Phase 7A confirmed checkpoint integrity,
+- Phase 7B found no obvious lookahead issue,
+- Phase 7C confirmed secondary data-source reliability survived with caveat,
 - all canonical results are pinned to 2026-05-01.
 
 That distinction is the whole point of the project.
