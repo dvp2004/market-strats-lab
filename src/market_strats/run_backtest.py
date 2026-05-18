@@ -205,6 +205,9 @@ from market_strats.analysis.bootstrap_statistical_robustness import (
 from market_strats.analysis.bootstrap_stability_audit import (
     save_bootstrap_stability_audit,
 )
+from market_strats.analysis.rolling_window_survivability_audit import (
+    save_rolling_window_survivability_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1724,6 +1727,11 @@ def main() -> None:
         save_bootstrap_stability_audit(
             relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_rolling_window_survivability_audit(
             config=config,
             reports_dir=reports_dir,
         )

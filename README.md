@@ -35,7 +35,10 @@ The project now has several completed research phases:
 | Phase 6 | SPY stress confirmation, offensive relief validation, and final candidate decision | `loose_relief` promoted as best execution-realistic candidate |
 | Phase 7A | Final checkpoint integrity audit | Passed |
 | Phase 7B | Lookahead / signal-execution audit | Passed |
-| Phase 7C | Secondary data-source reliability cross-check and difference attribution | Survived with caveat |
+| Phase 7C / 7C.2 | Secondary data-source reliability cross-check and difference attribution | Survived with caveat |
+| Phase 7D | Bootstrap / statistical robustness audit | Passed |
+| Phase 7E | Bootstrap stability audit across block lengths and seeds | Passed |
+| Phase 7F | Rolling-window survivability audit | Failed overall; useful caveat documented |
 
 The central conclusion is:
 
@@ -55,6 +58,8 @@ It does **not** beat SPY buy-and-hold on raw terminal wealth. SPY buy-and-hold r
 The original Phase 3 overlay beats SPY 12-month absolute momentum on full-period and holdout risk-adjusted performance under flat 5 bps slippage.
 
 The final Phase 6C execution-realistic candidate also beats SPY 12M on the strict full-period triple gate and improves on the Phase 4 execution-realistic baseline, but it still does **not** beat SPY buy-and-hold on raw CAGR.
+
+Phase 7 strengthened the checkpoint through integrity, lookahead, data-source, bootstrap, and bootstrap-stability audits. It also exposed an important limitation: rolling-window survivability failed overall, so the candidate's liveability claim must be kept narrow.
 
 ### Canonical Research Checkpoint
 
@@ -95,6 +100,9 @@ The current validated checkpoint is:
 | Phase 7A checkpoint integrity audit | Passed |
 | Phase 7B lookahead / signal-execution audit | Passed |
 | Phase 7C secondary data-source audit | Survived with caveat |
+| Phase 7D bootstrap robustness audit | Passed all bootstrap gates |
+| Phase 7E bootstrap stability audit | Passed 9/9 bootstrap profiles |
+| Phase 7F rolling-window survivability audit | Failed overall; 3Y/5Y vs SPY 12M mostly survived; 1Y and buy-and-hold rolling risk gates failed |
 
 Strict endpoint checks are now part of the research discipline: generated reports should not contain `end_date` later than `2026-05-01` unless a deliberate new refreshed checkpoint is opened.
 
@@ -228,6 +236,9 @@ Strategies are evaluated on:
 | Endpoint integrity | Whether reports are pinned to the official research date |
 | Signal-execution audit | Whether signal state can be reconstructed without lookahead |
 | Secondary-source reliability | Whether data-source disagreements are explained rather than ignored |
+| Bootstrap robustness | Whether the candidate's risk-adjusted evidence survives return resampling |
+| Bootstrap stability | Whether bootstrap conclusions survive different block lengths and seeds |
+| Rolling-window survivability | Whether the strategy remains liveable across 1Y, 3Y, and 5Y windows |
 
 The goal is not only to ask:
 
@@ -1678,7 +1689,7 @@ Important distinction:
 
 ---
 
-# Phase 7: Checkpoint Integrity, Lookahead, and Data Reliability
+# Phase 7: Final Validation, Data Reliability, Bootstrap Robustness, and Rolling Survivability
 
 Phase 7 did **not** add another strategy variant. It audited whether the Phase 6C checkpoint could be trusted as a research result.
 
@@ -1686,7 +1697,11 @@ The focus was:
 
 1. internal checkpoint consistency,
 2. signal/execution timing,
-3. secondary data-source reliability.
+3. secondary data-source reliability,
+4. bootstrap/statistical robustness,
+5. rolling-window survivability.
+
+Phase 7 deliberately did **not** optimise the strategy again. Its job was to narrow the claims, expose weaknesses, and decide whether the Phase 6C candidate deserved to be documented as the final research checkpoint.
 
 ---
 
@@ -1877,6 +1892,160 @@ Important limitation:
 
 ---
 
+## Phase 7D: Bootstrap / Statistical Robustness Audit
+
+Phase 7D tested whether the final Phase 6B `loose_relief` candidate remained robust under paired block bootstrap resampling of daily returns.
+
+The audit used:
+
+```text
+500 bootstrap iterations
+21-trading-day blocks
+Pinned period: 2006-04-28 to 2026-05-01
+```
+
+The comparison set was:
+
+- Phase 6B `loose_relief` candidate,
+- SPY Buy & Hold,
+- SPY 12M Absolute Momentum.
+
+### Bootstrap Probability Results
+
+| Claim | Probability | Gate | Result |
+|---|---:|---:|---|
+| Candidate beats SPY 12M on CAGR | 64.0% | >= 55% | Passed |
+| Candidate beats SPY 12M on Calmar | 72.2% | >= 60% | Passed |
+| Candidate has better max drawdown than SPY 12M | 74.0% | >= 60% | Passed |
+| Candidate beats SPY Buy & Hold on CAGR | 42.0% | <= 50% hierarchy check | Passed |
+| Candidate beats SPY Buy & Hold on Calmar | 77.8% | >= 60% | Passed |
+| Candidate has better max drawdown than SPY Buy & Hold | 92.2% | >= 70% | Passed |
+
+### Distribution Summary
+
+| Metric | Candidate | SPY Buy & Hold | SPY 12M |
+|---|---:|---:|---:|
+| Mean CAGR | 10.42% | 10.88% | 9.70% |
+| Median CAGR | 10.36% | 10.91% | 9.65% |
+| Mean Calmar | 0.405 | 0.304 | 0.340 |
+| Median Calmar | 0.366 | 0.283 | 0.312 |
+| Mean max drawdown | -28.57% | -40.01% | -32.30% |
+| Median max drawdown | -27.81% | -38.70% | -31.18% |
+
+### Phase 7D Verdict
+
+> The final candidate survived bootstrap robustness versus SPY 12M and preserved its risk-adjusted advantage versus SPY Buy & Hold.
+
+However:
+
+> The bootstrap did not justify replacing SPY Buy & Hold as the raw wealth benchmark.
+
+The correct interpretation is:
+
+> Bootstrap supports the final candidate's risk-adjusted edge, but it does not statistically prove the strategy and does not guarantee future performance.
+
+---
+
+## Phase 7E: Bootstrap Stability Audit
+
+Phase 7E tested whether the Phase 7D bootstrap conclusion depended on one specific resampling setup.
+
+The audit reran the paired block bootstrap across:
+
+```text
+block lengths: 5, 21, 63 trading days
+random seeds: 7, 42, 123
+bootstrap profiles: 9 total
+iterations per profile: 300
+```
+
+### Bootstrap Stability Result
+
+| Profile Group | Result |
+|---|---:|
+| Total bootstrap profiles | 9 |
+| Profiles passing all gates | 9 |
+| Profiles failing any gate | 0 |
+
+### Probability Stability Summary
+
+| Claim | Min Probability | Mean Probability | Max Probability | Result |
+|---|---:|---:|---:|---|
+| Candidate beats SPY 12M on CAGR | 59.67% | 63.70% | 68.33% | Passed |
+| Candidate beats SPY 12M on Calmar | 67.67% | 72.78% | 77.00% | Passed |
+| Candidate has better max drawdown than SPY 12M | 70.67% | 74.48% | 78.33% | Passed |
+| Candidate beats SPY Buy & Hold on CAGR | 36.67% | 41.41% | 49.67% | Passed hierarchy check |
+| Candidate beats SPY Buy & Hold on Calmar | 73.33% | 77.52% | 80.67% | Passed |
+| Candidate has better max drawdown than SPY Buy & Hold | 92.33% | 93.30% | 94.33% | Passed |
+
+### Phase 7E Verdict
+
+> The Phase 7D bootstrap conclusion was stable across tested block lengths and random seeds.
+
+The weakest buy-and-hold CAGR hierarchy profile was close to the gate:
+
+```text
+max probability candidate beats SPY Buy & Hold CAGR = 49.67%
+gate = must remain <= 50%
+```
+
+That means the hierarchy survived, but the result should not be oversold. The final candidate remains a risk-adjusted candidate, not a raw-CAGR replacement for buy-and-hold.
+
+---
+
+## Phase 7F: Rolling-Window Survivability Audit
+
+Phase 7F tested whether the final Phase 6B loose_relief candidate remained liveable across rolling 1Y, 3Y, and 5Y windows.
+
+This audit used the Phase 7D input-return series and compared:
+
+- the final Phase 6B loose_relief candidate,
+- SPY Buy & Hold,
+- SPY 12M Absolute Momentum.
+
+### Rolling-Window Gate Result
+
+| Window | Result | Interpretation |
+|---|---|---|
+| 1Y | Failed | Candidate did not consistently beat SPY 12M or Buy & Hold on short-window Calmar/drawdown |
+| 3Y vs SPY 12M | Passed | Candidate beat SPY 12M on 3Y Calmar and drawdown often enough |
+| 5Y vs SPY 12M | Passed | Candidate beat SPY 12M on 5Y Calmar and drawdown often enough |
+| 3Y/5Y vs Buy & Hold | Failed | Candidate did not clear the rolling buy-and-hold risk gates |
+| Worst 3Y/5Y CAGR | Passed | Candidate avoided negative worst rolling 3Y and 5Y CAGR windows |
+
+### Key Rolling-Window Results
+
+| Metric | 1Y | 3Y | 5Y |
+|---|---:|---:|---:|
+| Candidate beats SPY 12M on CAGR | 39.87% | 64.01% | 73.67% |
+| Candidate beats SPY 12M on Calmar | 36.13% | 68.26% | 73.80% |
+| Candidate beats SPY 12M on max drawdown | 37.26% | 65.46% | 69.77% |
+| Candidate beats Buy & Hold on CAGR | 19.86% | 19.21% | 16.34% |
+| Candidate beats Buy & Hold on Calmar | 20.82% | 37.91% | 52.45% |
+| Candidate beats Buy & Hold on max drawdown | 39.35% | 61.53% | 67.52% |
+
+### Worst Rolling Windows
+
+| Window | Worst Candidate CAGR | Window |
+|---|---:|---|
+| 1Y | -15.42% | 2022-01-05 to 2023-01-05 |
+| 3Y | 1.45% | 2017-03-17 to 2020-03-18 |
+| 5Y | 1.73% | 2015-03-19 to 2020-03-19 |
+
+### Phase 7F Verdict
+
+> Rolling-window survivability failed overall.
+
+The final candidate is not consistently superior across short rolling windows, and it does not reliably beat SPY Buy & Hold on rolling risk metrics.
+
+However, the result is not a full strategy rejection. The candidate still preserved positive worst rolling 3Y and 5Y CAGR and retained a stronger 3Y/5Y profile versus SPY 12M.
+
+The correct interpretation is:
+
+> The final candidate has strong full-period, bootstrap, and medium/long-horizon evidence, but short-window liveability is mixed and should not be oversold.
+
+---
+
 # Methodology Notes
 
 ## Research Period Pinning
@@ -2002,8 +2171,9 @@ Remaining concerns include:
 - offensive relief improved the execution-realistic candidate, but remains a price-derived timing refinement, not proof of production readiness,
 - Phase 6B `loose_relief` is the best execution-realistic candidate built so far, but it still trails SPY Buy & Hold on raw CAGR,
 - Phase 7B found no obvious lookahead issue, but that does not prove the system is live-trading ready,
-- Phase 7C attributed secondary-source differences, but Stooq close cannot fully validate yfinance adjusted-close total-return series.
-- Phase 7D/7E bootstrap robustness passed, but bootstrap resampling is still not formal statistical proof and does not guarantee future performance.
+- Phase 7C attributed secondary-source differences, but Stooq close cannot fully validate yfinance adjusted-close total-return series,
+- Phase 7D/7E bootstrap robustness passed, but bootstrap resampling is still not formal statistical proof and does not guarantee future performance,
+- Phase 7F rolling-window survivability failed overall, meaning the final candidate has mixed short-window liveability and should not be described as consistently superior across all rolling windows.
 ---
 
 # Bugs Caught and Fixed
@@ -2217,7 +2387,7 @@ reports/final_project_decision.csv
 reports/final_candidate_decision.md
 ```
 
-## Phase 7 Integrity / Lookahead / Data Reliability Reports
+## Phase 7 Integrity / Lookahead / Data Reliability / Robustness Reports
 
 ```text
 reports/final_checkpoint_integrity_conclusion.csv
@@ -2241,11 +2411,24 @@ reports/secondary_data_source_difference_attribution.csv
 reports/secondary_data_source_difference_attribution_summary.csv
 reports/secondary_data_source_difference_attribution_conclusion.csv
 reports/secondary_data_source_difference_attribution.md
+reports/phase7d_bootstrap_input_returns.csv
+reports/phase7d_bootstrap_samples.csv
+reports/phase7d_bootstrap_distribution_summary.csv
+reports/phase7d_bootstrap_probability_report.csv
+reports/phase7d_bootstrap_gate_report.csv
+reports/phase7d_bootstrap_conclusion.csv
+reports/phase7d_bootstrap_statistical_robustness.md
 reports/phase7e_bootstrap_stability_profiles.csv
 reports/phase7e_bootstrap_stability_probability_summary.csv
 reports/phase7e_bootstrap_stability_gate_report.csv
 reports/phase7e_bootstrap_stability_conclusion.csv
 reports/phase7e_bootstrap_stability.md
+reports/phase7f_rolling_window_metrics.csv
+reports/phase7f_rolling_window_survivability_summary.csv
+reports/phase7f_rolling_window_worst_windows.csv
+reports/phase7f_rolling_window_gate_report.csv
+reports/phase7f_rolling_window_conclusion.csv
+reports/phase7f_rolling_window_survivability.md
 ```
 
 ## Other Important Reports
@@ -2318,6 +2501,9 @@ The main config currently tests:
 - Lookahead / signal-execution audit
 - Secondary data-source cross-check
 - Secondary source difference attribution
+- Bootstrap robustness audit
+- Bootstrap stability audit
+- Rolling-window survivability audit
 - Final decision reports
 - Validation conclusion reports
 
@@ -2369,7 +2555,9 @@ configs/spy_sma10.yaml
 | Phase 7B lookahead / signal-execution audit | Completed — passed |
 | Phase 7C secondary data-source cross-check | Completed — usable cross-check survived, but raw agreement needed attribution |
 | Phase 7C.2 secondary source difference attribution | Completed — no unresolved source issues remained; Stooq close cannot fully validate adjusted-close data |
+| Phase 7D bootstrap/statistical robustness audit | Completed — final candidate passed all bootstrap gates; SPY Buy & Hold remained raw wealth benchmark |
 | Phase 7E bootstrap stability audit | Completed — all 9 bootstrap profiles passed across block lengths 5/21/63 and seeds 7/42/123 |
+| Phase 7F rolling-window survivability audit | Completed — failed overall; 3Y/5Y versus SPY 12M mostly survived, but 1Y and buy-and-hold rolling risk gates failed |
 ---
 
 # What Should Happen Next
@@ -2381,49 +2569,33 @@ The correct next step is repository and documentation checkpointing:
 1. Ensure all tests pass.
 2. Ensure `ruff` passes.
 3. Confirm `.env` is ignored and no API key is staged.
-4. Commit the Phase 7C secondary-source reliability attribution work.
+4. Commit the Phase 7A–7F validation/audit work.
 5. Tag this as the current validated research checkpoint.
-6. Only then open the next research branch.
+6. Freeze this branch before opening any new research branch.
 
-Future research branches should be opened only after this checkpoint is documented.
+The current checkpoint should be documented as:
+
+> Final Phase 6B `loose_relief` candidate promoted as the best execution-realistic risk-adjusted candidate, with Phase 7A–7E strengthening the checkpoint and Phase 7F narrowing the liveability claim.
+
+The key caveat is:
+
+> Rolling-window survivability failed overall. The candidate is not consistently superior across short rolling windows and does not reliably beat SPY Buy & Hold on rolling risk metrics.
+
+Future research branches should be opened only after this checkpoint is committed and tagged.
 
 Potential future branches:
 
-1. Phase 7D bootstrap / statistical robustness
-2. Tax-aware analysis
-3. More realistic bid-ask / market-impact modelling during stress
-4. Expanded walk-forward validation
-5. Multiple-comparisons correction across strategy/asset combinations
-6. Behavioural/tracking-error regret analysis
-7. BTC-specific quarantined research branch
-8. Additional commodity or real-asset expansion only under strict holdout materiality gates
-9. Sentiment/macro/ML layer, but only after the final price/risk system is checkpointed
-10. Production-readiness audit, if the project ever moves beyond research
+1. Tax-aware analysis
+2. More realistic bid-ask / market-impact modelling during stress
+3. Expanded walk-forward validation
+4. Multiple-comparisons correction across strategy/asset combinations
+5. Behavioural/tracking-error regret analysis
+6. BTC-specific quarantined research branch
+7. Additional commodity or real-asset expansion only under strict holdout materiality gates
+8. Sentiment/macro/ML layer, but only after the final price/risk system is checkpointed
+9. Production-readiness audit, if the project ever moves beyond research
 
-The next implementation should be:
-
-## Phase 7D: Bootstrap / Statistical Robustness Audit
-
-Phase 7D tested whether the final Phase 6B loose_relief candidate remained robust under paired block bootstrap resampling of daily returns.
-
-The audit used 500 bootstrap iterations with 21-trading-day blocks over the pinned period:
-
-```text
-2006-04-28 to 2026-05-01
-```
-
-## Phase 7E: Bootstrap Stability Audit
-
-Phase 7E tested whether the Phase 7D bootstrap conclusion depended on one specific resampling setup.
-
-The audit reran the paired block bootstrap across:
-
-```text
-block lengths: 5, 21, 63 trading days
-random seeds: 7, 42, 123
-bootstrap profiles: 9 total
-iterations per profile: 300
-```
+Do **not** treat the failed Phase 7F rolling-window audit as an invitation to tune more thresholds. That would be overfitting. The failed audit is part of the final result.
 
 ---
 
@@ -2448,6 +2620,9 @@ The current final hierarchy is:
 | Original flat-slippage canonical overlay | SPY Trend Regime Switch Overlay 3D Confirmed |
 | Validated execution-realistic baseline | SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard |
 | Best execution-realistic candidate | SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard + loose_relief |
+| Bootstrap robustness status | Phase 7D passed |
+| Bootstrap stability status | Phase 7E passed |
+| Rolling-window survivability status | Phase 7F failed overall; mixed liveability |
 
 The best execution-realistic candidate is:
 
@@ -2479,6 +2654,12 @@ But:
 
 > SPY buy-and-hold remains the raw wealth winner.
 
+The final candidate is therefore best described as:
+
+> **The best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability.**
+
+It should **not** be described as a universally liveable system or as a raw-CAGR replacement for buy-and-hold.
+
 The current checkpoint shows:
 
 - the original 3D overlay survives low/moderate slippage,
@@ -2495,6 +2676,9 @@ The current checkpoint shows:
 - Phase 7A confirmed checkpoint integrity,
 - Phase 7B found no obvious lookahead issue,
 - Phase 7C confirmed secondary data-source reliability survived with caveat,
+- Phase 7D bootstrap robustness passed,
+- Phase 7E bootstrap stability passed across tested block lengths and seeds,
+- Phase 7F rolling-window survivability failed overall and narrowed the liveability claim,
 - all canonical results are pinned to 2026-05-01.
 
 That distinction is the whole point of the project.

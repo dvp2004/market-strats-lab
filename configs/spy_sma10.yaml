@@ -299,7 +299,7 @@ phase7_secondary_data_source_cross_check_v2:
     DBC: dbc.us
     USO: uso.us
 phase7_bootstrap_stability_audit:
-  enabled: true
+  enabled: false
   input_returns_report: "phase7d_bootstrap_input_returns.csv"
   require_existing_input_report: true
 
@@ -537,7 +537,7 @@ relative_momentum_regime_diagnostic:
   trend_sma_days: 200
   momentum_lookback_days: 252
 relative_momentum_allocator:
-  enabled: false
+  enabled: true
   universe:
   - SPY
   - QQQ
