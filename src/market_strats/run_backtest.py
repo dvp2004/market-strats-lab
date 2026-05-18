@@ -145,9 +145,6 @@ from market_strats.analysis.regime_switch_overlay_raw_close_signal_sensitivity i
 from market_strats.analysis.phase3a_robustness_conclusion import (
     save_phase3a_robustness_conclusion,
 )
-from market_strats.analysis.secondary_data_source_cross_check import (
-    save_secondary_data_source_cross_check,
-)
 from market_strats.analysis.asset_expansion_diagnostic import (
     save_asset_expansion_diagnostic,
 )
@@ -195,6 +192,12 @@ from market_strats.analysis.report_integrity_audit import (
 )
 from market_strats.analysis.lookahead_signal_execution_audit import (
     save_lookahead_signal_execution_audit,
+)
+from market_strats.analysis.secondary_data_source_cross_check_v2 import (
+    save_secondary_data_source_cross_check_v2,
+)
+from market_strats.analysis.secondary_data_source_difference_attribution import (
+    save_secondary_data_source_difference_attribution,
 )
 
 def _apply_research_period_filter_to_result(
@@ -1693,6 +1696,18 @@ def main() -> None:
             reports_dir=reports_dir,
         )
 
+        save_secondary_data_source_cross_check_v2(
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_secondary_data_source_difference_attribution(
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
         save_regime_switch_overlay_cash_sensitivity(
             overlay_outputs=overlay_outputs,
             config=config,
@@ -1717,12 +1732,6 @@ def main() -> None:
         save_asset_expansion_conclusion(reports_dir)
 
         save_eth_quarantine_diagnostic(
-            ticker_outputs=ticker_outputs,
-            config=config,
-            reports_dir=reports_dir,
-        )
-
-        save_secondary_data_source_cross_check(
             ticker_outputs=ticker_outputs,
             config=config,
             reports_dir=reports_dir,
