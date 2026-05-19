@@ -208,6 +208,9 @@ from market_strats.analysis.bootstrap_stability_audit import (
 from market_strats.analysis.rolling_window_survivability_audit import (
     save_rolling_window_survivability_audit,
 )
+from market_strats.analysis.tax_drag_diagnostic import (
+    save_tax_drag_diagnostic,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1760,6 +1763,13 @@ def main() -> None:
         save_asset_expansion_conclusion(reports_dir)
 
         save_eth_quarantine_diagnostic(
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+        
+        save_tax_drag_diagnostic(
+            relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
             config=config,
             reports_dir=reports_dir,
