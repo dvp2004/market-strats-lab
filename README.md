@@ -39,6 +39,7 @@ The project now has several completed research phases:
 | Phase 7D | Bootstrap / statistical robustness audit | Passed |
 | Phase 7E | Bootstrap stability audit across block lengths and seeds | Passed |
 | Phase 7F | Rolling-window survivability audit | Failed overall; useful caveat documented |
+| Phase 8A | Simplified tax-drag diagnostic | Survived at 20% tax proxy with caveat; 30% proxy erased SPY 12M CAGR edge |
 
 The central conclusion is:
 
@@ -61,6 +62,8 @@ The final Phase 6C execution-realistic candidate also beats SPY 12M on the stric
 
 Phase 7 strengthened the checkpoint through integrity, lookahead, data-source, bootstrap, and bootstrap-stability audits. It also exposed an important limitation: rolling-window survivability failed overall, so the candidate's liveability claim must be kept narrow.
 
+Phase 8A added a simplified tax-drag diagnostic. The candidate survived the benchmark 20% tax proxy versus SPY 12M on CAGR, Calmar, and max drawdown, but the CAGR edge was thin and disappeared under the harsher 30% proxy.
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -75,7 +78,7 @@ The current validated checkpoint is:
 
 | Item | Value |
 |---|---:|
-| Canonical Phase 2/3/4/5/6/7 period | 2006-04-28 to 2026-05-01 |
+| Canonical Phase 2/3/4/5/6/7/8A period | 2006-04-28 to 2026-05-01 |
 | Raw wealth benchmark | SPY Buy & Hold |
 | SPY Buy & Hold CAGR over same period | 10.90% |
 | SPY Buy & Hold max drawdown | -55.19% |
@@ -103,6 +106,7 @@ The current validated checkpoint is:
 | Phase 7D bootstrap robustness audit | Passed all bootstrap gates |
 | Phase 7E bootstrap stability audit | Passed 9/9 bootstrap profiles |
 | Phase 7F rolling-window survivability audit | Failed overall; 3Y/5Y vs SPY 12M mostly survived; 1Y and buy-and-hold rolling risk gates failed |
+| Phase 8A simplified tax-drag diagnostic | Survived at 20% tax proxy; candidate CAGR edge over SPY 12M disappeared at 30% proxy |
 
 Strict endpoint checks are now part of the research discipline: generated reports should not contain `end_date` later than `2026-05-01` unless a deliberate new refreshed checkpoint is opened.
 
@@ -154,6 +158,23 @@ Final execution-realistic holdout conclusion:
 
 > The Phase 6B `loose_relief` candidate improved on the Phase 4 execution-realistic baseline in the holdout, increasing CAGR from 11.62% to 12.05% and Calmar from 0.482 to 0.500, while leaving max drawdown unchanged at -24.12%.
 
+### Simplified Tax-Drag Snapshot
+
+Phase 8A applied a simple turnover-based realised-gain tax proxy at 0%, 10%, 20%, and 30%.
+
+At the benchmark 20% tax proxy:
+
+| Strategy | Tax Rate | CAGR | Calmar | Max Drawdown | Avg Annual Tax Drag | Trade Count |
+|---|---:|---:|---:|---:|---:|---:|
+| Final candidate | 20% | 9.83% | 0.386 | -25.48% | 0.4851 pts | 66 |
+| SPY Buy & Hold | 20% | 10.90% | 0.197 | -55.19% | 0.0000 pts | 0 |
+| SPY 12M Momentum | 20% | 9.66% | 0.286 | -33.72% | 0.0183 pts | 14 |
+
+Tax-drag conclusion:
+
+> The final candidate survived the simplified 20% tax-drag diagnostic, but the edge over SPY 12M was thin. At the harsher 30% proxy, final-candidate CAGR fell to 9.57% versus SPY 12M at 9.65%, so the strategy should not be described as tax-proof.
+
+
 ### Phase 3A Robustness Summary
 
 After the 3D confirmed overlay became the current best system candidate, it was tested against execution-cost, cash-yield, and raw-close signal sensitivity.
@@ -200,6 +221,7 @@ What it found is more useful:
 | Best overall risk-adjusted system | SPY Trend Regime Switch Overlay 3D Confirmed | Original Phase 3 canonical system under flat 5 bps slippage |
 | Validated execution-realistic baseline | SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard | Validated under dynamic stress slippage; 9.93% CAGR, 0.412 Calmar, -24.12% max drawdown |
 | Best execution-realistic overlay candidate | SPY Trend Regime Switch Overlay 3D Confirmed + deep_drawdown_guard + loose_relief | Final Phase 6C promoted candidate; 10.35% CAGR, 0.429 Calmar, -24.12% max drawdown |
+| Tax-drag-adjusted candidate status | Same final candidate | Survived 20% simplified tax proxy; 30% proxy erased SPY 12M CAGR edge |
 
 Important distinction:
 
@@ -239,6 +261,7 @@ Strategies are evaluated on:
 | Bootstrap robustness | Whether the candidate's risk-adjusted evidence survives return resampling |
 | Bootstrap stability | Whether bootstrap conclusions survive different block lengths and seeds |
 | Rolling-window survivability | Whether the strategy remains liveable across 1Y, 3Y, and 5Y windows |
+| Tax-drag sensitivity | Whether turnover-based tax drag destroys the candidate's edge |
 
 The goal is not only to ask:
 
@@ -2046,11 +2069,110 @@ The correct interpretation is:
 
 ---
 
+
+# Phase 8: Real-World Friction Diagnostics
+
+Phase 8 moved beyond backtest-path validation and tested whether the final candidate remained credible after adding a simple real-world implementation friction.
+
+This phase did **not** add a new alpha signal or optimise the `loose_relief` rule. It tested whether the already-promoted Phase 6B final candidate was fragile once a basic tax-drag proxy was applied.
+
+---
+
+## Phase 8A: Simplified Tax-Drag Diagnostic
+
+Phase 8A tested whether the final Phase 6B `loose_relief` candidate survived a simple turnover-based taxable-account drag model.
+
+This was not a production tax engine. It did not model tax lots, wash-sale rules, dividend taxation, final liquidation, holding-period rules, jurisdiction-specific treatment, or investor-specific circumstances.
+
+The purpose was narrower:
+
+> Does the final candidate obviously collapse once turnover creates a simple realised-gain tax drag?
+
+The tested tax-rate proxies were:
+
+```text
+0%, 10%, 20%, 30%
+```
+
+The benchmark gate used the 20% tax-rate proxy.
+
+### Tax-Adjusted Metrics
+
+| Strategy | Tax Rate | CAGR | Calmar | Max Drawdown | Avg Annual Tax Drag | Trade Count |
+|---|---:|---:|---:|---:|---:|---:|
+| Final candidate | 0% | 10.35% | 0.429 | -24.12% | 0.0000 pts | 66 |
+| Final candidate | 10% | 10.09% | 0.407 | -24.80% | 0.2426 pts | 66 |
+| Final candidate | 20% | 9.83% | 0.386 | -25.48% | 0.4851 pts | 66 |
+| Final candidate | 30% | 9.57% | 0.366 | -26.16% | 0.7277 pts | 66 |
+| SPY Buy & Hold | 0% | 10.90% | 0.197 | -55.19% | 0.0000 pts | 0 |
+| SPY Buy & Hold | 10% | 10.90% | 0.197 | -55.19% | 0.0000 pts | 0 |
+| SPY Buy & Hold | 20% | 10.90% | 0.197 | -55.19% | 0.0000 pts | 0 |
+| SPY Buy & Hold | 30% | 10.90% | 0.197 | -55.19% | 0.0000 pts | 0 |
+| SPY 12M Momentum | 0% | 9.68% | 0.287 | -33.72% | 0.0000 pts | 14 |
+| SPY 12M Momentum | 10% | 9.67% | 0.287 | -33.72% | 0.0091 pts | 14 |
+| SPY 12M Momentum | 20% | 9.66% | 0.286 | -33.72% | 0.0183 pts | 14 |
+| SPY 12M Momentum | 30% | 9.65% | 0.286 | -33.72% | 0.0274 pts | 14 |
+
+### Benchmark 20% Tax-Proxy Gate Result
+
+| Gate | Result |
+|---|---|
+| Candidate beats SPY 12M after tax on CAGR | Passed |
+| Candidate beats SPY 12M after tax on Calmar | Passed |
+| Candidate has better after-tax max drawdown than SPY 12M | Passed |
+| Candidate is not promoted as after-tax raw-CAGR winner over Buy & Hold | Passed |
+| Candidate beats Buy & Hold after tax on Calmar | Passed |
+| Candidate has better after-tax max drawdown than Buy & Hold | Passed |
+
+At the 20% tax proxy:
+
+| Comparison | Value |
+|---|---:|
+| Candidate minus SPY 12M CAGR | +0.17 pts |
+| Candidate minus SPY 12M Calmar | +0.100 |
+| Candidate drawdown advantage vs SPY 12M | +8.24 pts |
+| Candidate minus Buy & Hold CAGR | -1.07 pts |
+| Candidate Calmar advantage vs Buy & Hold | +0.189 |
+| Candidate drawdown advantage vs Buy & Hold | +29.71 pts |
+
+### Phase 8A Verdict
+
+> The final candidate survived the simplified 20% tax-drag diagnostic.
+
+At the 20% proxy, the candidate still beat SPY 12M on CAGR, Calmar, and max drawdown, while preserving SPY Buy & Hold as the raw-CAGR benchmark.
+
+However:
+
+> The tax-adjusted CAGR edge over SPY 12M is thin.
+
+At the 30% tax proxy, the candidate's CAGR fell to 9.57%, slightly below SPY 12M at 9.65%. Therefore, the strategy should not be described as tax-proof.
+
+The correct interpretation is:
+
+> The final candidate remains credible under a simplified moderate tax-drag proxy, but tax sensitivity is now a documented implementation risk.
+
+### Phase 8A Limitations
+
+The tax model is deliberately simple. It does not include:
+
+- tax-lot accounting,
+- long-term versus short-term gain treatment,
+- dividend taxation,
+- final liquidation taxation,
+- wash-sale rules,
+- jurisdiction-specific tax treatment,
+- account-type differences,
+- investor-specific tax circumstances.
+
+Therefore, Phase 8A should be read as a first-pass research diagnostic, not a production-grade after-tax backtest.
+
+---
+
 # Methodology Notes
 
 ## Research Period Pinning
 
-The canonical Phase 2/3/4/5/6/7 research endpoint is pinned in configuration:
+The canonical Phase 2/3/4/5/6/7/8A research endpoint is pinned in configuration:
 
 ```yaml
 research_period:
@@ -2147,7 +2269,7 @@ Remaining concerns include:
 - `yfinance` data reliability,
 - adjusted-close retroactive adjustment,
 - Stooq close is not a full adjusted-close total-return validator,
-- no tax modelling,
+- simplified tax-drag modelling only; no production-grade tax engine,
 - no bid-ask spread modelling during stress periods,
 - no market-impact modelling,
 - no FX cost modelling for non-USD investors,
@@ -2174,6 +2296,8 @@ Remaining concerns include:
 - Phase 7C attributed secondary-source differences, but Stooq close cannot fully validate yfinance adjusted-close total-return series,
 - Phase 7D/7E bootstrap robustness passed, but bootstrap resampling is still not formal statistical proof and does not guarantee future performance,
 - Phase 7F rolling-window survivability failed overall, meaning the final candidate has mixed short-window liveability and should not be described as consistently superior across all rolling windows.
+- Phase 8A used a simplified turnover-based tax proxy only. It does not model tax lots, dividends, final liquidation, wash-sale rules, holding-period rules, jurisdiction-specific treatment, or investor-specific tax circumstances.
+- The final candidate survived the 20% tax-drag proxy, but its CAGR edge over SPY 12M disappeared under the harsher 30% proxy.
 ---
 
 # Bugs Caught and Fixed
@@ -2203,6 +2327,7 @@ Remaining concerns include:
 - Phase 7B confirmed trend SMA and raw confirmation state could be reconstructed without mismatches
 - Phase 7C fixed Stooq CSV authentication handling and API-key environment-variable support
 - Phase 7C.2 attributed Stooq/yfinance differences to price-basis/distribution treatment rather than leaving them as unresolved source failures
+- Phase 8A tax-drag test used approximate float assertions after floating-point precision caused an exact equality test failure
 
 ---
 
@@ -2431,6 +2556,17 @@ reports/phase7f_rolling_window_conclusion.csv
 reports/phase7f_rolling_window_survivability.md
 ```
 
+## Phase 8A Tax-Drag Reports
+
+```text
+reports/phase8a_tax_drag_metrics.csv
+reports/phase8a_tax_drag_daily_returns.csv
+reports/phase8a_tax_drag_summary.csv
+reports/phase8a_tax_drag_gate_report.csv
+reports/phase8a_tax_drag_conclusion.csv
+reports/phase8a_tax_drag_diagnostic.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -2504,6 +2640,7 @@ The main config currently tests:
 - Bootstrap robustness audit
 - Bootstrap stability audit
 - Rolling-window survivability audit
+- Simplified tax-drag diagnostic
 - Final decision reports
 - Validation conclusion reports
 
@@ -2558,6 +2695,7 @@ configs/spy_sma10.yaml
 | Phase 7D bootstrap/statistical robustness audit | Completed — final candidate passed all bootstrap gates; SPY Buy & Hold remained raw wealth benchmark |
 | Phase 7E bootstrap stability audit | Completed — all 9 bootstrap profiles passed across block lengths 5/21/63 and seeds 7/42/123 |
 | Phase 7F rolling-window survivability audit | Completed — failed overall; 3Y/5Y versus SPY 12M mostly survived, but 1Y and buy-and-hold rolling risk gates failed |
+| Phase 8A simplified tax-drag diagnostic | Completed — survived at 20% tax proxy with caveat; CAGR edge over SPY 12M disappeared under 30% proxy |
 ---
 
 # What Should Happen Next
@@ -2569,33 +2707,36 @@ The correct next step is repository and documentation checkpointing:
 1. Ensure all tests pass.
 2. Ensure `ruff` passes.
 3. Confirm `.env` is ignored and no API key is staged.
-4. Commit the Phase 7A–7F validation/audit work.
-5. Tag this as the current validated research checkpoint.
-6. Freeze this branch before opening any new research branch.
+4. Confirm `phase8a_tax_drag_diagnostic.enabled` is `false` in the committed main config unless deliberately running Phase 8A.
+5. Commit the Phase 8A tax-drag diagnostic and README update.
+6. Tag this as the current validated research checkpoint.
+7. Freeze this branch before opening any new research branch.
 
 The current checkpoint should be documented as:
 
-> Final Phase 6B `loose_relief` candidate promoted as the best execution-realistic risk-adjusted candidate, with Phase 7A–7E strengthening the checkpoint and Phase 7F narrowing the liveability claim.
+> Final Phase 6B `loose_relief` candidate promoted as the best execution-realistic risk-adjusted candidate, with Phase 7A–7E strengthening the checkpoint, Phase 7F narrowing the liveability claim, and Phase 8A documenting simplified tax-drag sensitivity.
 
-The key caveat is:
+The key caveats are:
 
 > Rolling-window survivability failed overall. The candidate is not consistently superior across short rolling windows and does not reliably beat SPY Buy & Hold on rolling risk metrics.
+
+> The candidate survived the simplified 20% tax-drag proxy, but the CAGR edge over SPY 12M disappeared under the harsher 30% proxy.
 
 Future research branches should be opened only after this checkpoint is committed and tagged.
 
 Potential future branches:
 
-1. Tax-aware analysis
-2. More realistic bid-ask / market-impact modelling during stress
-3. Expanded walk-forward validation
-4. Multiple-comparisons correction across strategy/asset combinations
-5. Behavioural/tracking-error regret analysis
+1. More realistic bid-ask / market-impact modelling during stress
+2. Expanded walk-forward validation
+3. Multiple-comparisons correction across strategy/asset combinations
+4. Behavioural/tracking-error regret analysis
+5. Production-grade tax modelling with lots/dividends/final liquidation
 6. BTC-specific quarantined research branch
 7. Additional commodity or real-asset expansion only under strict holdout materiality gates
 8. Sentiment/macro/ML layer, but only after the final price/risk system is checkpointed
 9. Production-readiness audit, if the project ever moves beyond research
 
-Do **not** treat the failed Phase 7F rolling-window audit as an invitation to tune more thresholds. That would be overfitting. The failed audit is part of the final result.
+Do **not** treat the failed Phase 7F rolling-window audit or thin Phase 8A tax edge as invitations to tune more thresholds. That would be overfitting. These limitations are part of the final result.
 
 ---
 
@@ -2623,6 +2764,7 @@ The current final hierarchy is:
 | Bootstrap robustness status | Phase 7D passed |
 | Bootstrap stability status | Phase 7E passed |
 | Rolling-window survivability status | Phase 7F failed overall; mixed liveability |
+| Simplified tax-drag status | Phase 8A survived at 20% proxy; 30% proxy erased SPY 12M CAGR edge |
 
 The best execution-realistic candidate is:
 
@@ -2679,6 +2821,7 @@ The current checkpoint shows:
 - Phase 7D bootstrap robustness passed,
 - Phase 7E bootstrap stability passed across tested block lengths and seeds,
 - Phase 7F rolling-window survivability failed overall and narrowed the liveability claim,
+- Phase 8A simplified tax-drag diagnostic survived at the 20% proxy but exposed tax sensitivity at the 30% proxy,
 - all canonical results are pinned to 2026-05-01.
 
 That distinction is the whole point of the project.

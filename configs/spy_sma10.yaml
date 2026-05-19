@@ -1,8 +1,3 @@
-# FAST RUN PROFILE: Phase 7C secondary data-source cross-check only.
-# Heavy strategy/validation sections are kept in this file but their enabled flags are set to false for this run.
-# Do not commit this disabled-fast profile unless you intentionally want the main config to stay in fast-audit mode.
-# Requires a real Stooq key in environment variable STOOQ_API_KEY for actual data comparison.
-
 tickers:
 - SPY
 - QQQ
@@ -10,12 +5,14 @@ tickers:
 - EFA
 - EEM
 - GLD
-- TLT
-- AGG
-- VNQ
 - SLV
 - DBC
 - USO
+- TLT
+- AGG
+- VNQ
+- BTC-USD
+- ETH-USD
 research_period:
   phase1_start_date: '1993-01-29'
   phase2_start_date: '2006-04-28'
@@ -322,6 +319,57 @@ phase7_bootstrap_stability_audit:
   max_allowed_probability_candidate_beats_buy_hold_cagr_claim: 0.50
 
   min_profiles_passing_all_gates: 1.00
+phase8_tracking_error_regret_audit:
+  enabled: false
+  input_returns_report: "phase7d_bootstrap_input_returns.csv"
+  require_existing_input_report: true
+
+  initial_capital: 10000.0
+
+  rolling_windows:
+    - name: "1Y"
+      trading_days: 252
+    - name: "3Y"
+      trading_days: 756
+    - name: "5Y"
+      trading_days: 1260
+
+  max_acceptable_final_regret_vs_buy_hold_pct: -20.0
+  max_acceptable_relative_drawdown_vs_buy_hold_pct: -35.0
+  max_acceptable_longest_buy_hold_underperformance_streak_days: 1260
+
+  min_candidate_beats_spy_12m_rolling_cagr_share_3y: 0.55
+  min_candidate_beats_spy_12m_rolling_cagr_share_5y: 0.55
+
+  max_candidate_beats_buy_hold_rolling_cagr_share_3y_for_raw_wealth_hierarchy: 0.50
+  max_candidate_beats_buy_hold_rolling_cagr_share_5y_for_raw_wealth_hierarchy: 0.50 
+phase8a_tax_drag_diagnostic:
+  enabled: false
+  audited_variant: loose_relief
+  audited_candidate_name: Phase 6B loose relief candidate
+
+  pinned_start_date: "2006-04-28"
+  pinned_end_date: "2026-05-01"
+
+  initial_capital: 10000.0
+
+  tax_rates:
+    - 0.00
+    - 0.10
+    - 0.20
+    - 0.30
+
+  taxable_turnover_multiplier: 1.0
+
+  benchmark_tax_rate: 0.20
+
+  min_after_tax_candidate_cagr_minus_spy_12m_pct_points: 0.0
+  min_after_tax_candidate_calmar_minus_spy_12m: 0.0
+  min_after_tax_candidate_drawdown_minus_spy_12m_pct_points: 0.0
+
+  max_allowed_after_tax_candidate_cagr_minus_buy_hold_pct_points: 0.0
+  min_after_tax_candidate_calmar_minus_buy_hold: 0.0
+  min_after_tax_candidate_drawdown_minus_buy_hold_pct_points: 0.0
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
