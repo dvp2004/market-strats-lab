@@ -474,6 +474,124 @@ phase8d_behavioural_regret_audit:
     max_time_lagging_spy12m_rate: 0.60
     max_rolling_3y_underperformance_rate_vs_buy_hold: 0.80
     min_worst_3y_active_cagr_vs_buy_hold: -0.10    
+phase8e_research_degrees_of_freedom_audit:
+  enabled: false
+
+  claim_context:
+    final_candidate: "SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief"
+    final_candidate_role: "Best execution-realistic risk-adjusted candidate built so far"
+    raw_wealth_benchmark: "SPY Buy & Hold"
+    simple_defensive_benchmark: "SPY 12M Momentum"
+    canonical_start_date: "2006-04-28"
+    canonical_end_date: "2026-05-01"
+
+  gates:
+    require_failed_branches_documented: true
+    require_multiple_comparisons_caveat: true
+    require_raw_wealth_hierarchy_preserved: true
+    require_final_claim_narrowed: true
+    max_promoted_share_of_tested_units: 0.25
+    min_failed_or_rejected_units: 5
+
+  inventory:
+    - phase: "Phase 1"
+      branch: "Single-asset ETF/SPY timing and allocation"
+      tested_units: 9
+      promoted_units: 2
+      failed_or_rejected_units: 5
+      mixed_or_caveated_units: 2
+      status: "Mixed"
+      notes: "SPY Buy & Hold and SPY 12M became benchmarks; drawdown tranche, trend-filtered drawdown, dual momentum, and fixed multi-asset wealth-growth replacements failed or were demoted."
+
+    - phase: "Phase 1"
+      branch: "EFA SMA robustness"
+      tested_units: 2
+      promoted_units: 1
+      failed_or_rejected_units: 1
+      mixed_or_caveated_units: 0
+      status: "Mixed"
+      notes: "EFA 200D SMA survived as a non-SPY signal family; EFA 10M SMA failed as return-enhancing monthly signal."
+
+    - phase: "Phase 2"
+      branch: "Relative momentum allocator variants"
+      tested_units: 5
+      promoted_units: 2
+      failed_or_rejected_units: 1
+      mixed_or_caveated_units: 2
+      status: "Mixed"
+      notes: "Trend confirmation and constraints improved defensive quality, but allocator did not replace SPY Buy & Hold on raw wealth."
+
+    - phase: "Regime Switch"
+      branch: "Raw 200D and 3D confirmed overlay"
+      tested_units: 2
+      promoted_units: 1
+      failed_or_rejected_units: 1
+      mixed_or_caveated_units: 0
+      status: "Survived with caveat"
+      notes: "Raw overlay failed due to whipsaw; 3D confirmed overlay became original flat-slippage canonical system."
+
+    - phase: "Phase 3A"
+      branch: "Robustness checks"
+      tested_units: 4
+      promoted_units: 0
+      failed_or_rejected_units: 1
+      mixed_or_caveated_units: 3
+      status: "Caveated"
+      notes: "Low/moderate slippage and 0% cash passed; high friction weakened or failed wealth-growth case."
+
+    - phase: "Phase 3B"
+      branch: "Controlled asset expansion"
+      tested_units: 3
+      promoted_units: 0
+      failed_or_rejected_units: 2
+      mixed_or_caveated_units: 1
+      status: "Not promoted"
+      notes: "USO/oil promising but not validated; ETH rejected; oil+ETH not validated."
+
+    - phase: "Phase 4"
+      branch: "Execution realism and guard validation"
+      tested_units: 6
+      promoted_units: 1
+      failed_or_rejected_units: 2
+      mixed_or_caveated_units: 3
+      status: "Survived with caveat"
+      notes: "Dynamic slippage weakened 3D overlay; deep_drawdown_guard was promoted after removed-switch validation."
+
+    - phase: "Phase 5"
+      branch: "Breadth confirmation"
+      tested_units: 4
+      promoted_units: 0
+      failed_or_rejected_units: 3
+      mixed_or_caveated_units: 1
+      status: "Rejected"
+      notes: "Defensive breadth was marginal but failed materiality; offensive and combined breadth rejected."
+
+    - phase: "Phase 6"
+      branch: "Stress confirmation and offensive relief"
+      tested_units: 7
+      promoted_units: 1
+      failed_or_rejected_units: 5
+      mixed_or_caveated_units: 1
+      status: "Survived with caveat"
+      notes: "Defensive stress filters rejected; baseline_relief rejected despite stronger CAGR; loose_relief promoted."
+
+    - phase: "Phase 7"
+      branch: "Final validation audits"
+      tested_units: 6
+      promoted_units: 0
+      failed_or_rejected_units: 1
+      mixed_or_caveated_units: 5
+      status: "Mixed"
+      notes: "Integrity/lookahead/bootstrap passed; rolling-window survivability failed overall."
+
+    - phase: "Phase 8"
+      branch: "Real-world friction and validation diagnostics"
+      tested_units: 4
+      promoted_units: 0
+      failed_or_rejected_units: 3
+      mixed_or_caveated_units: 1
+      status: "Mostly failed / caveated"
+      notes: "Tax survived 20% with caveat; spread/impact failed stress gate; walk-forward mixed; behavioural regret failed."    
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

@@ -43,6 +43,7 @@ The project now has several completed research phases:
 | Phase 8B | Bid-ask / market-impact stress diagnostic | Failed configured stress gate; candidate kept Calmar/drawdown edge but lost CAGR edge versus SPY 12M under stress |
 | Phase 8C | Walk-forward / expanding-window validation audit | Failed / mixed evidence; candidate stayed positive in all forward windows and retained drawdown usefulness, but failed CAGR/Calmar consistency gates |
 | Phase 8D | Behavioural / tracking-error regret audit | Failed / material behavioural regret; terminal wealth versus Buy & Hold remained tolerable, but relative drawdown and worst 3Y active CAGR failed gates |
+| Phase 8E | Multiple-comparisons / research-degrees-of-freedom audit | Completed — claims narrowed; 11 research branches documented, 25 failed/rejected units, promoted share 15.38% |
 
 The central conclusion is:
 
@@ -113,6 +114,7 @@ The current validated checkpoint is:
 | Phase 8B bid-ask / market-impact diagnostic | Failed configured stress gate; candidate CAGR fell to 8.17% under stress versus SPY 12M at 9.38%, while Calmar/drawdown edge survived |
 | Phase 8C walk-forward validation audit | Failed / mixed evidence; 5 forward windows generated, candidate positive-CAGR rate 100%, but beat SPY 12M on CAGR and Calmar only 40% of windows |
 | Phase 8D behavioural regret audit | Failed / material behavioural regret; terminal relative wealth vs Buy & Hold was 0.905, but relative drawdown vs Buy & Hold reached -57.38% and worst 3Y active CAGR was -18.17% |
+| Phase 8E research-degrees-of-freedom audit | Completed — claims narrowed; documented 11 branches, 25 failed/rejected units, promoted share 15.38%, and preserved narrow final-candidate wording |
 
 Strict endpoint checks are now part of the research discipline: generated reports should not contain `end_date` later than `2026-05-01` unless a deliberate new refreshed checkpoint is opened.
 
@@ -2323,6 +2325,43 @@ Correct interpretation:
 
 > The final candidate is defensively useful, but behavioural regret versus Buy & Hold is material. Lower absolute drawdown does not automatically mean the strategy is easy to hold.
 
+## Phase 8E: Multiple-Comparisons / Research-Degrees-of-Freedom Audit
+
+Phase 8E documented the number of strategy families, diagnostics, branches, and caveated results that contributed to the final project state.
+
+This was not a formal multiple-comparisons correction. Inventory counts are research-ledger units, not independent statistical trials. The purpose was to narrow the claim and prevent the final candidate from being overstated.
+
+### Phase 8E Summary
+
+| Metric | Result |
+|---|---:|
+| Research branches documented | 11 |
+| Total tested units | 52 |
+| Total promoted units | 8 |
+| Failed/rejected units | 25 |
+| Mixed/caveated units | 19 |
+| Promoted share of tested units | 15.38% |
+| Claim strength after audit | Narrow / heavily caveated |
+
+### Phase 8E Gate Result
+
+| Gate | Result |
+|---|---|
+| Inventory contains tested research branches | Passed |
+| Failed/rejected branches are documented | Passed |
+| Promoted share of tested units is not excessive | Passed |
+| Multiple-comparisons caveat is produced | Passed |
+| Raw wealth hierarchy is preserved | Passed |
+| Final claim is narrow rather than overpromoted | Passed |
+
+### Phase 8E Verdict
+
+> Phase 8E completed the research-degrees-of-freedom audit and narrowed the claim.
+
+Correct interpretation:
+
+> The final candidate emerged after many tested branches, rejected ideas, caveated diagnostics, and validation filters. It should therefore be described as the best execution-realistic risk-adjusted candidate built so far, not as a broadly proven market-beating system.
+
 ---
 
 # Methodology Notes
@@ -2462,6 +2501,8 @@ Remaining concerns include:
 - Phase 8C failed / produced mixed evidence: the candidate stayed positive in all forward windows and often improved drawdown, but it did not beat SPY 12M on CAGR or Calmar often enough.
 - Phase 8D failed / showed material behavioural regret. The final candidate remained ahead of SPY 12M on terminal relative wealth, but relative drawdown versus SPY Buy & Hold reached -57.38% and worst 3Y active CAGR versus Buy & Hold was -18.17%.
 - Lower absolute drawdown does not mean the strategy is behaviourally easy to hold; tracking-error regret versus SPY Buy & Hold remains a material liveability risk.
+- Phase 8E documented research degrees of freedom across 11 research branches. This is not a formal multiple-comparisons correction, but it reinforces that final-candidate claims must remain narrow.
+- The final candidate emerged after many tested and rejected branches, so it should not be described as a broadly proven or statistically definitive market-beating system.
 
 ---
 
@@ -2991,5 +3032,6 @@ The current checkpoint shows:
 - all canonical results are pinned to 2026-05-01.
 Phase 8C further narrows the claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but sequential forward-window evidence is mixed rather than clean.
 Phase 8D further narrows the liveability claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but behavioural regret versus SPY Buy & Hold is material.
+Phase 8E further narrows the claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but the project has accumulated enough research degrees of freedom that claims must remain explicitly caveated.
 
 That distinction is the whole point of the project.
