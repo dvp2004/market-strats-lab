@@ -716,6 +716,72 @@ phase8f_production_readiness_boundary_audit:
       current_project_state: "README describes a research lab, not a trading recommendation."
       required_for_production: "Legal, regulatory, suitability, and jurisdiction-specific review."
       recommended_next_step: "Keep non-advice wording prominent."
+phase8g_final_phase8_checkpoint_audit:
+  enabled: false
+
+  readme_path: "README.md"
+  config_path: "configs/spy_sma10.yaml"
+
+  canonical:
+    final_candidate: "SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief"
+    raw_wealth_benchmark: "SPY Buy & Hold"
+    simple_defensive_benchmark: "SPY 12M Momentum"
+    canonical_start_date: "2006-04-28"
+    canonical_end_date: "2026-05-01"
+
+  required_readme_phrases:
+    - "SPY Buy & Hold remains the raw wealth benchmark"
+    - "SPY 12M Momentum"
+    - "best execution-realistic risk-adjusted candidate built so far"
+    - "mixed rolling-window liveability"
+    - "meaningful spread/impact sensitivity"
+    - "mixed walk-forward evidence"
+    - "material behavioural-regret risk"
+    - "research-degrees-of-freedom caveat"
+    - "research-only"
+    - "not production-ready"
+    - "not live-tradable"
+    - "not financial advice"
+    - "2006-04-28"
+    - "2026-05-01"
+
+  forbidden_readme_phrases:
+    - "Phase 8F production-readiness passed"
+    - "strategy beats the market"
+    - "statistically proven"
+    - "production-ready strategy"
+    - "is a live-trading system"
+    - "this is a live-trading system"
+    - "guaranteed to outperform"
+    - "better than buy-and-hold"
+
+  expected_disabled_flags:
+    phase8a_tax_drag_diagnostic: false
+    phase8b_bid_ask_market_impact_diagnostic: false
+    phase8c_walk_forward_validation_audit: false
+    phase8d_behavioural_regret_audit: false
+    phase8e_research_degrees_of_freedom_audit: false
+    phase8f_production_readiness_boundary_audit: false
+    phase8g_final_phase8_checkpoint_audit: true
+    phase7_bootstrap_stability_audit: false
+    phase7_secondary_data_source_cross_check_v2: false
+    phase8_tracking_error_regret_audit: false
+    relative_momentum_allocator: true
+
+  expected_report_prefixes:
+    - "phase8a_tax_drag"
+    - "phase8b_bid_ask_market_impact"
+    - "phase8c_walk_forward"
+    - "phase8d_behavioural_regret"
+    - "phase8e_research_degrees_of_freedom"
+    - "phase8f_production_boundary"
+
+  gates:
+    require_all_readme_required_phrases: true
+    require_no_forbidden_readme_phrases: true
+    require_all_config_flags_match: true
+    require_expected_phase8_reports_present: true
+    require_final_candidate_wording_caveated: true      
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
