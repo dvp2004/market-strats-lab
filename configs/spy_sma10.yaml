@@ -423,6 +423,33 @@ phase8b_bid_ask_market_impact_diagnostic:
       deep_stress_drawdown_threshold: -0.20
       stress_multiplier: 4.0
       deep_stress_multiplier: 8.0
+phase8c_walk_forward_validation_audit:
+  enabled: false
+
+  initial_capital: 10000.0
+
+  strategy_names:
+    final_candidate: "Final candidate"
+    spy_buy_hold: "SPY Buy & Hold"
+    spy_12m_momentum: "SPY 12M Momentum"
+
+  window:
+    initial_train_years: 5
+    test_years: 3
+    step_years: 3
+    include_partial_last_window: true
+    min_test_years: 2.0
+
+  gates:
+    min_test_windows: 4
+    min_candidate_beats_spy12m_cagr_rate: 0.50
+    min_candidate_beats_spy12m_calmar_rate: 0.60
+    min_candidate_better_spy12m_drawdown_rate: 0.60
+    min_candidate_positive_cagr_rate: 0.80
+    max_candidate_beats_buy_hold_cagr_rate_for_hierarchy: 0.50
+    min_candidate_beats_buy_hold_calmar_rate: 0.50
+    min_candidate_better_buy_hold_drawdown_rate: 0.60
+    require_worst_candidate_cagr_positive: true
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

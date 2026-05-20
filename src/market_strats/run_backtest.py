@@ -214,7 +214,9 @@ from market_strats.analysis.tax_drag_diagnostic import (
 from market_strats.analysis.bid_ask_market_impact_diagnostic import (
     save_phase8b_bid_ask_market_impact_diagnostic,
 )
-
+from market_strats.analysis.walk_forward_validation_audit import (
+    save_phase8c_walk_forward_validation_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1780,6 +1782,13 @@ def main() -> None:
         )
 
         save_phase8b_bid_ask_market_impact_diagnostic(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase8c_walk_forward_validation_audit(
             relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
             config=config,

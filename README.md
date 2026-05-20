@@ -41,6 +41,7 @@ The project now has several completed research phases:
 | Phase 7F | Rolling-window survivability audit | Failed overall; useful caveat documented |
 | Phase 8A | Simplified tax-drag diagnostic | Survived at 20% tax proxy with caveat; 30% proxy erased SPY 12M CAGR edge |
 | Phase 8B | Bid-ask / market-impact stress diagnostic | Failed configured stress gate; candidate kept Calmar/drawdown edge but lost CAGR edge versus SPY 12M under stress |
+| Phase 8C | Walk-forward / expanding-window validation audit | Failed / mixed evidence; candidate stayed positive in all forward windows and retained drawdown usefulness, but failed CAGR/Calmar consistency gates |
 
 The central conclusion is:
 
@@ -109,6 +110,7 @@ The current validated checkpoint is:
 | Phase 7F rolling-window survivability audit | Failed overall; 3Y/5Y vs SPY 12M mostly survived; 1Y and buy-and-hold rolling risk gates failed |
 | Phase 8A simplified tax-drag diagnostic | Survived at 20% tax proxy; candidate CAGR edge over SPY 12M disappeared at 30% proxy |
 | Phase 8B bid-ask / market-impact diagnostic | Failed configured stress gate; candidate CAGR fell to 8.17% under stress versus SPY 12M at 9.38%, while Calmar/drawdown edge survived |
+| Phase 8C walk-forward validation audit | Failed / mixed evidence; 5 forward windows generated, candidate positive-CAGR rate 100%, but beat SPY 12M on CAGR and Calmar only 40% of windows |
 
 Strict endpoint checks are now part of the research discipline: generated reports should not contain `end_date` later than `2026-05-01` unless a deliberate new refreshed checkpoint is opened.
 
@@ -2218,6 +2220,60 @@ The correct interpretation is:
 
 This should narrow the execution-realistic claim. It should not trigger immediate threshold tuning.
 
+## Phase 8C: Walk-Forward / Expanding-Window Validation Audit
+
+Phase 8C tested the final fixed Phase 6B `loose_relief` candidate across sequential forward windows after an expanding training-history period.
+
+This was not a full prospective model-selection test. The final candidate had already been selected. The audit tested sequential robustness, not whether the rule would have been discovered in real time.
+
+The configured structure used:
+
+| Setting | Value |
+|---|---:|
+| Initial expanding-history period | 5 years |
+| Forward test window | 3 years |
+| Step size | 3 years |
+| Minimum test length | 2 years |
+| Forward windows generated | 5 |
+
+### Phase 8C Forward-Window Summary
+
+| Metric | Result |
+|---|---:|
+| Test windows | 5 |
+| Candidate positive CAGR rate | 100% |
+| Candidate beats SPY 12M on CAGR | 40% |
+| Candidate beats SPY 12M on Calmar | 40% |
+| Candidate has better drawdown than SPY 12M | 80% |
+| Candidate beats Buy & Hold on CAGR | 0% |
+| Candidate beats Buy & Hold on Calmar | 20% |
+| Candidate has better drawdown than Buy & Hold | 60% |
+| Worst candidate forward-window CAGR | 5.38% |
+
+### Phase 8C Gate Result
+
+| Gate | Result |
+|---|---|
+| Enough forward windows were generated | Passed |
+| Candidate beats SPY 12M on CAGR often enough | Failed |
+| Candidate beats SPY 12M on Calmar often enough | Failed |
+| Candidate has better drawdown than SPY 12M often enough | Passed |
+| Candidate keeps positive CAGR often enough | Passed |
+| Candidate does not warrant raw-CAGR promotion over Buy & Hold | Passed |
+| Candidate beats Buy & Hold on Calmar often enough | Failed |
+| Candidate has better drawdown than Buy & Hold often enough | Passed |
+| Worst candidate forward-window CAGR remains positive | Passed |
+
+### Phase 8C Verdict
+
+> Phase 8C failed / produced mixed walk-forward evidence.
+
+The final candidate stayed positive in every forward window and preserved useful drawdown characteristics, but it did not beat SPY 12M on CAGR or Calmar often enough, and it beat Buy & Hold on Calmar in only 20% of forward windows.
+
+Correct interpretation:
+
+> Phase 8C narrows the validation claim. The candidate has useful path-improvement properties, but its sequential forward-window evidence is mixed and should not be described as clean prospective validation.
+
 ---
 
 # Methodology Notes
@@ -2353,6 +2409,8 @@ Remaining concerns include:
 - Phase 8B used scenario-based bid-ask / market-impact stress only. It does not model order books, intraday liquidity, broker routing, partial fills, or production execution.
 - Phase 8B failed the configured stress gate: the final candidate kept its Calmar and drawdown edge but lost its CAGR edge versus SPY 12M under stress.
 - The final candidate is materially more sensitive to added execution friction than SPY 12M because it has higher turnover.
+- Phase 8C was a walk-forward / expanding-window audit, not a full prospective model-selection framework. The final candidate had already been selected before the audit.
+- Phase 8C failed / produced mixed evidence: the candidate stayed positive in all forward windows and often improved drawdown, but it did not beat SPY 12M on CAGR or Calmar often enough.
 
 ---
 
@@ -2880,5 +2938,6 @@ The current checkpoint shows:
 - Phase 8A simplified tax-drag diagnostic survived at the 20% proxy but exposed tax sensitivity at the 30% proxy,
 - Phase 8B further narrows the claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but its edge is sensitive to spread/impact assumptions and should not be described as friction-robust.
 - all canonical results are pinned to 2026-05-01.
+Phase 8C further narrows the claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but sequential forward-window evidence is mixed rather than clean.
 
 That distinction is the whole point of the project.
