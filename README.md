@@ -44,6 +44,7 @@ The project now has several completed research phases:
 | Phase 8C | Walk-forward / expanding-window validation audit | Failed / mixed evidence; candidate stayed positive in all forward windows and retained drawdown usefulness, but failed CAGR/Calmar consistency gates |
 | Phase 8D | Behavioural / tracking-error regret audit | Failed / material behavioural regret; terminal wealth versus Buy & Hold remained tolerable, but relative drawdown and worst 3Y active CAGR failed gates |
 | Phase 8E | Multiple-comparisons / research-degrees-of-freedom audit | Completed — claims narrowed; 11 research branches documented, 25 failed/rejected units, promoted share 15.38% |
+| Phase 8F | Production-readiness / non-production boundary audit | Completed — research-only boundary documented; 7 critical blockers and 11 total boundary items documented |
 
 The central conclusion is:
 
@@ -115,6 +116,7 @@ The current validated checkpoint is:
 | Phase 8C walk-forward validation audit | Failed / mixed evidence; 5 forward windows generated, candidate positive-CAGR rate 100%, but beat SPY 12M on CAGR and Calmar only 40% of windows |
 | Phase 8D behavioural regret audit | Failed / material behavioural regret; terminal relative wealth vs Buy & Hold was 0.905, but relative drawdown vs Buy & Hold reached -57.38% and worst 3Y active CAGR was -18.17% |
 | Phase 8E research-degrees-of-freedom audit | Completed — claims narrowed; documented 11 branches, 25 failed/rejected units, promoted share 15.38%, and preserved narrow final-candidate wording |
+| Phase 8F production-readiness boundary audit | Completed — research-only boundary documented; confirmed the project is not production-ready, not a live-trading system, and not financial advice |
 
 Strict endpoint checks are now part of the research discipline: generated reports should not contain `end_date` later than `2026-05-01` unless a deliberate new refreshed checkpoint is opened.
 
@@ -2362,6 +2364,63 @@ Correct interpretation:
 
 > The final candidate emerged after many tested branches, rejected ideas, caveated diagnostics, and validation filters. It should therefore be described as the best execution-realistic risk-adjusted candidate built so far, not as a broadly proven market-beating system.
 
+## Phase 8F: Production-Readiness / Non-Production Boundary Audit
+
+Phase 8F documented why Market Strats Lab remains a research-grade systematic strategy lab rather than a production trading system.
+
+This was not a production approval. It did not make the strategy live-tradable. A pass meant the non-production boundary was documented clearly.
+
+### Phase 8F Summary
+
+| Metric | Result |
+|---|---:|
+| Total boundary items | 11 |
+| Critical items | 7 |
+| Major items | 4 |
+| Blocker items | 7 |
+| Gap items | 3 |
+| Caveat items | 1 |
+| Categories documented | 9 |
+| Production-ready after audit | False |
+| Live-trading claim | False |
+
+### Phase 8F Boundary Categories
+
+| Category | Items | Critical | Major | Blockers | Gaps | Caveats |
+|---|---:|---:|---:|---:|---:|---:|
+| Data | 2 | 2 | 0 | 2 | 0 | 0 |
+| Execution | 2 | 1 | 1 | 1 | 1 | 0 |
+| Tax | 1 | 1 | 0 | 1 | 0 | 0 |
+| Portfolio | 1 | 0 | 1 | 0 | 1 | 0 |
+| Monitoring | 1 | 1 | 0 | 1 | 0 | 0 |
+| Operations | 1 | 0 | 1 | 0 | 1 | 0 |
+| Validation | 1 | 0 | 1 | 0 | 0 | 1 |
+| Governance | 1 | 1 | 0 | 1 | 0 | 0 |
+| Compliance | 1 | 1 | 0 | 1 | 0 | 0 |
+
+### Phase 8F Gate Result
+
+| Gate | Result |
+|---|---|
+| Audit explicitly preserves non-production status | Passed |
+| Audit makes no live-trading claim | Passed |
+| Critical production blockers are documented | Passed |
+| Data risk is documented | Passed |
+| Execution risk is documented | Passed |
+| Tax risk is documented | Passed |
+| Operational/configuration risk is documented | Passed |
+| Monitoring risk is documented | Passed |
+| Human review / governance boundary is documented | Passed |
+| Boundary statement is produced | Passed |
+
+### Phase 8F Verdict
+
+> Phase 8F completed the production-readiness / non-production boundary audit.
+
+Correct interpretation:
+
+> The project documented why the final candidate remains research-only and not production-ready. This is a boundary-control pass, not a production approval.
+
 ---
 
 # Methodology Notes
@@ -2503,6 +2562,9 @@ Remaining concerns include:
 - Lower absolute drawdown does not mean the strategy is behaviourally easy to hold; tracking-error regret versus SPY Buy & Hold remains a material liveability risk.
 - Phase 8E documented research degrees of freedom across 11 research branches. This is not a formal multiple-comparisons correction, but it reinforces that final-candidate claims must remain narrow.
 - The final candidate emerged after many tested and rejected branches, so it should not be described as a broadly proven or statistically definitive market-beating system.
+- Phase 8F confirmed the non-production boundary. Market Strats Lab remains a research-grade systematic strategy lab, not a production trading system, not financial advice, and not a live-trading recommendation.
+- Phase 8F documented 7 critical production blockers across data, execution, tax, monitoring, governance, and compliance.
+- A Phase 8F pass means the boundary was documented clearly; it does not mean the strategy is production-ready.
 
 ---
 
@@ -3033,5 +3095,6 @@ The current checkpoint shows:
 Phase 8C further narrows the claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but sequential forward-window evidence is mixed rather than clean.
 Phase 8D further narrows the liveability claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but behavioural regret versus SPY Buy & Hold is material.
 Phase 8E further narrows the claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but the project has accumulated enough research degrees of freedom that claims must remain explicitly caveated.
+Phase 8F closes the production-readiness boundary: the final candidate remains a research result only. It is not production-ready, not live-tradable, and not a financial recommendation.
 
 That distinction is the whole point of the project.

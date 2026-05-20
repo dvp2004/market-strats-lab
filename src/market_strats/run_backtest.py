@@ -223,6 +223,9 @@ from market_strats.analysis.behavioural_regret_audit import (
 from market_strats.analysis.research_degrees_of_freedom_audit import (
     save_phase8e_research_degrees_of_freedom_audit,
 )
+from market_strats.analysis.production_readiness_boundary_audit import (
+    save_phase8f_production_readiness_boundary_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1809,6 +1812,11 @@ def main() -> None:
         )
 
         save_phase8e_research_degrees_of_freedom_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase8f_production_readiness_boundary_audit(
             config=config,
             reports_dir=reports_dir,
         )

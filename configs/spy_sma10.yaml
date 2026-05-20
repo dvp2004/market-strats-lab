@@ -592,6 +592,130 @@ phase8e_research_degrees_of_freedom_audit:
       mixed_or_caveated_units: 1
       status: "Mostly failed / caveated"
       notes: "Tax survived 20% with caveat; spread/impact failed stress gate; walk-forward mixed; behavioural regret failed."    
+phase8f_production_readiness_boundary_audit:
+  enabled: false
+
+  claim_context:
+    project_scope: "Research-grade systematic strategy lab"
+    production_ready: false
+    live_trading_claim: false
+    final_candidate: "SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief"
+    final_candidate_role: "Best execution-realistic risk-adjusted candidate built so far"
+    raw_wealth_benchmark: "SPY Buy & Hold"
+    simple_defensive_benchmark: "SPY 12M Momentum"
+    canonical_start_date: "2006-04-28"
+    canonical_end_date: "2026-05-01"
+
+  gates:
+    require_not_production_ready: true
+    require_no_live_trading_claim: true
+    min_critical_blockers: 5
+    require_data_risk_documented: true
+    require_execution_risk_documented: true
+    require_tax_risk_documented: true
+    require_operational_risk_documented: true
+    require_monitoring_risk_documented: true
+    require_human_review_required: true
+
+  blockers:
+    - category: "Data"
+      area: "Primary data dependency"
+      severity: "Critical"
+      status: "Blocker"
+      production_gap: "The research pipeline relies mainly on cached Yahoo/yfinance adjusted-close data."
+      current_project_state: "Secondary-source checks survived with caveat, but Stooq close data cannot fully validate adjusted-close total-return data."
+      required_for_production: "Independent institutional-quality data source, corporate-action validation, reproducible vendor snapshots, and data-drift monitoring."
+      recommended_next_step: "Keep as research-only unless a production-grade data stack is implemented."
+
+    - category: "Data"
+      area: "Corporate actions and distributions"
+      severity: "Critical"
+      status: "Blocker"
+      production_gap: "Adjusted-close assumptions drive historical total-return behaviour."
+      current_project_state: "Phase 7C.2 attributed major differences partly to adjusted-close versus close/distribution treatment."
+      required_for_production: "Explicit dividend, split, distribution, and total-return reconciliation."
+      recommended_next_step: "Do not treat current adjusted-close backtest as production-grade accounting."
+
+    - category: "Execution"
+      area: "Order fills and liquidity"
+      severity: "Critical"
+      status: "Blocker"
+      production_gap: "No broker fills, intraday liquidity, order-book depth, partial fills, or routing assumptions are modelled."
+      current_project_state: "Phase 8B used scenario-based spread/impact stress and failed the configured stress gate."
+      required_for_production: "Broker-specific execution simulator, fill model, liquidity checks, order sizing rules, and slippage monitoring."
+      recommended_next_step: "Treat Phase 8B failure as a serious execution-risk caveat."
+
+    - category: "Execution"
+      area: "Signal timing and operational latency"
+      severity: "Major"
+      status: "Gap"
+      production_gap: "Signals are end-of-day research signals, not operational trading instructions."
+      current_project_state: "Phase 7B found no obvious lookahead issue, but production timing and order submission are not modelled."
+      required_for_production: "Defined signal timestamp, order timestamp, execution window, holiday handling, broker outage logic, and missed-trade policy."
+      recommended_next_step: "Document that signal/execution audit is backtest integrity, not production operations."
+
+    - category: "Tax"
+      area: "Tax accounting"
+      severity: "Critical"
+      status: "Blocker"
+      production_gap: "No tax lots, holding-period treatment, dividend taxation, wash-sale rules, final liquidation, or jurisdiction-specific assumptions."
+      current_project_state: "Phase 8A used a simplified turnover-based realised-gain tax proxy only."
+      required_for_production: "Investor-specific tax engine with tax lots, distributions, realised/unrealised gains, and jurisdiction rules."
+      recommended_next_step: "Keep tax conclusions as diagnostic only."
+
+    - category: "Portfolio"
+      area: "Position sizing and account constraints"
+      severity: "Major"
+      status: "Gap"
+      production_gap: "No real account constraints, minimum trade sizes, cash drag from settlement, margin, leverage, or broker restrictions."
+      current_project_state: "Backtests use simplified allocation returns and cash-return assumptions."
+      required_for_production: "Account-level portfolio accounting, order sizing, settlement mechanics, and cash-management rules."
+      recommended_next_step: "Do not call the allocation stream directly tradable."
+
+    - category: "Monitoring"
+      area: "Live monitoring and alerting"
+      severity: "Critical"
+      status: "Blocker"
+      production_gap: "No live monitoring, data-quality alerts, signal alerts, execution reconciliation, or kill-switch."
+      current_project_state: "Reports are generated research artefacts under reports/ and are ignored by Git."
+      required_for_production: "Automated monitoring, alerting, audit logs, fail-safe behaviour, and daily reconciliation."
+      recommended_next_step: "Boundary audit should explicitly state that no live monitoring exists."
+
+    - category: "Operations"
+      area: "Configuration drift"
+      severity: "Major"
+      status: "Gap"
+      production_gap: "The project has previously risked committing fast-run or audit-only config states."
+      current_project_state: "Checkpoint discipline now checks phase flags before commit."
+      required_for_production: "Immutable run manifests, config versioning, environment capture, and deployment controls."
+      recommended_next_step: "Continue config checks; do not treat research YAML as production control."
+
+    - category: "Validation"
+      area: "Forward evidence and liveability"
+      severity: "Major"
+      status: "Caveat"
+      production_gap: "Validation evidence is mixed under rolling, walk-forward, friction, and regret diagnostics."
+      current_project_state: "Phase 7F failed rolling-window survivability; Phase 8C mixed; Phase 8D failed behavioural regret."
+      required_for_production: "Prospective paper-trading period and pre-registered live evaluation plan."
+      recommended_next_step: "Do not skip paper-trading if the project ever moves beyond research."
+
+    - category: "Governance"
+      area: "Human review and change control"
+      severity: "Critical"
+      status: "Blocker"
+      production_gap: "No formal approval workflow, change-control process, risk limits, or model-governance record."
+      current_project_state: "Git tags and README checkpoints document research, not operational approval."
+      required_for_production: "Change-control policy, risk sign-off, deployment checklist, rollback plan, and model-owner accountability."
+      recommended_next_step: "State that human review is mandatory before any real-money use."
+
+    - category: "Compliance"
+      area: "Financial advice and regulatory boundary"
+      severity: "Critical"
+      status: "Blocker"
+      production_gap: "The project is not financial advice and does not assess investor suitability."
+      current_project_state: "README describes a research lab, not a trading recommendation."
+      required_for_production: "Legal, regulatory, suitability, and jurisdiction-specific review."
+      recommended_next_step: "Keep non-advice wording prominent."
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
