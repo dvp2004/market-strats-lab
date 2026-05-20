@@ -217,6 +217,9 @@ from market_strats.analysis.bid_ask_market_impact_diagnostic import (
 from market_strats.analysis.walk_forward_validation_audit import (
     save_phase8c_walk_forward_validation_audit,
 )
+from market_strats.analysis.behavioural_regret_audit import (
+    save_phase8d_behavioural_regret_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1789,6 +1792,13 @@ def main() -> None:
         )
 
         save_phase8c_walk_forward_validation_audit(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase8d_behavioural_regret_audit(
             relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
             config=config,

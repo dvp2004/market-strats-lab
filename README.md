@@ -42,6 +42,7 @@ The project now has several completed research phases:
 | Phase 8A | Simplified tax-drag diagnostic | Survived at 20% tax proxy with caveat; 30% proxy erased SPY 12M CAGR edge |
 | Phase 8B | Bid-ask / market-impact stress diagnostic | Failed configured stress gate; candidate kept Calmar/drawdown edge but lost CAGR edge versus SPY 12M under stress |
 | Phase 8C | Walk-forward / expanding-window validation audit | Failed / mixed evidence; candidate stayed positive in all forward windows and retained drawdown usefulness, but failed CAGR/Calmar consistency gates |
+| Phase 8D | Behavioural / tracking-error regret audit | Failed / material behavioural regret; terminal wealth versus Buy & Hold remained tolerable, but relative drawdown and worst 3Y active CAGR failed gates |
 
 The central conclusion is:
 
@@ -111,6 +112,7 @@ The current validated checkpoint is:
 | Phase 8A simplified tax-drag diagnostic | Survived at 20% tax proxy; candidate CAGR edge over SPY 12M disappeared at 30% proxy |
 | Phase 8B bid-ask / market-impact diagnostic | Failed configured stress gate; candidate CAGR fell to 8.17% under stress versus SPY 12M at 9.38%, while Calmar/drawdown edge survived |
 | Phase 8C walk-forward validation audit | Failed / mixed evidence; 5 forward windows generated, candidate positive-CAGR rate 100%, but beat SPY 12M on CAGR and Calmar only 40% of windows |
+| Phase 8D behavioural regret audit | Failed / material behavioural regret; terminal relative wealth vs Buy & Hold was 0.905, but relative drawdown vs Buy & Hold reached -57.38% and worst 3Y active CAGR was -18.17% |
 
 Strict endpoint checks are now part of the research discipline: generated reports should not contain `end_date` later than `2026-05-01` unless a deliberate new refreshed checkpoint is opened.
 
@@ -2274,6 +2276,53 @@ Correct interpretation:
 
 > Phase 8C narrows the validation claim. The candidate has useful path-improvement properties, but its sequential forward-window evidence is mixed and should not be described as clean prospective validation.
 
+## Phase 8D: Behavioural / Tracking-Error Regret Audit
+
+Phase 8D tested how painful the final Phase 6B `loose_relief` candidate would feel versus SPY Buy & Hold and SPY 12M Momentum.
+
+This was not a new strategy and did not tune the final candidate. It measured terminal relative wealth, time spent lagging benchmarks, relative drawdown, longest lagging streaks, and rolling active underperformance.
+
+### Phase 8D Summary
+
+| Benchmark | Terminal Relative Wealth | Candidate CAGR | Benchmark CAGR | Candidate Minus Benchmark CAGR |
+|---|---:|---:|---:|---:|
+| SPY Buy & Hold | 0.905 | 10.35% | 10.90% | -0.55 pts |
+| SPY 12M Momentum | 1.130 | 10.35% | 9.68% | +0.67 pts |
+
+### Phase 8D Rolling Regret Snapshot
+
+| Benchmark | Window | Underperformance Rate | Mean Active CAGR | Median Active CAGR | Worst Active CAGR |
+|---|---:|---:|---:|---:|---:|
+| SPY Buy & Hold | 1Y | 68.76% | -1.20 pts | -0.65 pts | -46.51 pts |
+| SPY Buy & Hold | 3Y | 78.04% | -0.76 pts | -3.31 pts | -18.17 pts |
+| SPY Buy & Hold | 5Y | 78.45% | -1.34 pts | -3.11 pts | -11.03 pts |
+| SPY 12M Momentum | 1Y | 50.49% | +0.73 pts | 0.00 pts | -19.58 pts |
+| SPY 12M Momentum | 3Y | 35.87% | +0.89 pts | +0.72 pts | -7.13 pts |
+| SPY 12M Momentum | 5Y | 24.78% | +1.02 pts | +1.21 pts | -3.58 pts |
+
+### Phase 8D Gate Result
+
+| Gate | Result |
+|---|---|
+| Terminal relative wealth versus Buy & Hold remains tolerable | Passed |
+| Time lagging Buy & Hold is not excessive | Passed |
+| Relative drawdown versus Buy & Hold is not excessive | Failed |
+| Longest lagging streak versus Buy & Hold is tolerable | Passed |
+| Terminal relative wealth versus SPY 12M remains favourable | Passed |
+| Time lagging SPY 12M is not excessive | Passed |
+| 3Y rolling underperformance versus Buy & Hold is not excessive | Passed |
+| Worst 3Y active CAGR versus Buy & Hold is tolerable | Failed |
+
+### Phase 8D Verdict
+
+> Phase 8D failed / showed material behavioural regret.
+
+The final candidate remained favourable versus SPY 12M on terminal relative wealth and lagged SPY 12M only rarely over the full period. However, versus SPY Buy & Hold, it suffered a large relative drawdown and a poor worst 3Y active CAGR.
+
+Correct interpretation:
+
+> The final candidate is defensively useful, but behavioural regret versus Buy & Hold is material. Lower absolute drawdown does not automatically mean the strategy is easy to hold.
+
 ---
 
 # Methodology Notes
@@ -2411,6 +2460,8 @@ Remaining concerns include:
 - The final candidate is materially more sensitive to added execution friction than SPY 12M because it has higher turnover.
 - Phase 8C was a walk-forward / expanding-window audit, not a full prospective model-selection framework. The final candidate had already been selected before the audit.
 - Phase 8C failed / produced mixed evidence: the candidate stayed positive in all forward windows and often improved drawdown, but it did not beat SPY 12M on CAGR or Calmar often enough.
+- Phase 8D failed / showed material behavioural regret. The final candidate remained ahead of SPY 12M on terminal relative wealth, but relative drawdown versus SPY Buy & Hold reached -57.38% and worst 3Y active CAGR versus Buy & Hold was -18.17%.
+- Lower absolute drawdown does not mean the strategy is behaviourally easy to hold; tracking-error regret versus SPY Buy & Hold remains a material liveability risk.
 
 ---
 
@@ -2939,5 +2990,6 @@ The current checkpoint shows:
 - Phase 8B further narrows the claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but its edge is sensitive to spread/impact assumptions and should not be described as friction-robust.
 - all canonical results are pinned to 2026-05-01.
 Phase 8C further narrows the claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but sequential forward-window evidence is mixed rather than clean.
+Phase 8D further narrows the liveability claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but behavioural regret versus SPY Buy & Hold is material.
 
 That distinction is the whole point of the project.
