@@ -40,6 +40,7 @@ The project now has several completed research phases:
 | Phase 7E | Bootstrap stability audit across block lengths and seeds | Passed |
 | Phase 7F | Rolling-window survivability audit | Failed overall; useful caveat documented |
 | Phase 8A | Simplified tax-drag diagnostic | Survived at 20% tax proxy with caveat; 30% proxy erased SPY 12M CAGR edge |
+| Phase 8B | Bid-ask / market-impact stress diagnostic | Failed configured stress gate; candidate kept Calmar/drawdown edge but lost CAGR edge versus SPY 12M under stress |
 
 The central conclusion is:
 
@@ -107,6 +108,7 @@ The current validated checkpoint is:
 | Phase 7E bootstrap stability audit | Passed 9/9 bootstrap profiles |
 | Phase 7F rolling-window survivability audit | Failed overall; 3Y/5Y vs SPY 12M mostly survived; 1Y and buy-and-hold rolling risk gates failed |
 | Phase 8A simplified tax-drag diagnostic | Survived at 20% tax proxy; candidate CAGR edge over SPY 12M disappeared at 30% proxy |
+| Phase 8B bid-ask / market-impact diagnostic | Failed configured stress gate; candidate CAGR fell to 8.17% under stress versus SPY 12M at 9.38%, while Calmar/drawdown edge survived |
 
 Strict endpoint checks are now part of the research discipline: generated reports should not contain `end_date` later than `2026-05-01` unless a deliberate new refreshed checkpoint is opened.
 
@@ -2166,6 +2168,56 @@ The tax model is deliberately simple. It does not include:
 
 Therefore, Phase 8A should be read as a first-pass research diagnostic, not a production-grade after-tax backtest.
 
+## Phase 8B: Bid-Ask / Market-Impact Stress Diagnostic
+
+Phase 8B tested whether the final Phase 6B `loose_relief` candidate survived additional scenario-based spread and market-impact costs on turnover days.
+
+This was not a production execution simulator. It did not model order books, intraday liquidity, broker routing, partial fills, fund-level liquidity, or real broker execution. It mechanically applied scenario-based spread and impact costs to turnover days.
+
+The tested scenarios were:
+
+| Scenario | Spread bps | Impact bps per 100% turnover | Stress multiplier | Deep-stress multiplier |
+|---|---:|---:|---:|---:|
+| No extra cost | 0.0 | 0.0 | 1.0 | 1.0 |
+| Moderate | 2.5 | 5.0 | 2.0 | 3.0 |
+| Stress | 5.0 | 10.0 | 3.0 | 5.0 |
+| Severe | 10.0 | 20.0 | 4.0 | 8.0 |
+
+### Phase 8B Metrics
+
+| Strategy | Scenario | CAGR | Calmar | Max Drawdown | Total Turnover | Trade Count | Avg Annual Extra Drag |
+|---|---|---:|---:|---:|---:|---:|---:|
+| Final candidate | No extra cost | 10.35% | 0.429 | -24.12% | 93.27 | 66 | 0.00 pts |
+| Final candidate | Moderate | 9.52% | 0.389 | -24.49% | 93.27 | 66 | 0.76 pts |
+| Final candidate | Stress | 8.17% | 0.324 | -25.21% | 93.27 | 66 | 2.00 pts |
+| Final candidate | Severe | 4.96% | 0.147 | -33.81% | 93.27 | 66 | 4.95 pts |
+| SPY Buy & Hold | Stress | 10.90% | 0.198 | -55.19% | 0.00 | 0 | 0.00 pts |
+| SPY 12M Momentum | Stress | 9.38% | 0.278 | -33.72% | 14.00 | 14 | 0.27 pts |
+
+### Phase 8B Gate Result
+
+| Gate | Result |
+|---|---|
+| Candidate beats SPY 12M on CAGR under stress | Failed |
+| Candidate beats SPY 12M on Calmar under stress | Passed |
+| Candidate has better max drawdown than SPY 12M under stress | Passed |
+| Candidate does not become raw-CAGR winner over Buy & Hold | Passed |
+| Candidate beats Buy & Hold on Calmar under stress | Passed |
+| Candidate has better max drawdown than Buy & Hold under stress | Passed |
+| Candidate CAGR degradation versus no-extra-cost case is not excessive | Failed |
+
+### Phase 8B Verdict
+
+> The final candidate failed the configured Phase 8B stress gate.
+
+Under the stress scenario, final-candidate CAGR fell to 8.17% versus SPY 12M at 9.38%. The candidate still preserved better Calmar and max drawdown than SPY 12M and SPY Buy & Hold, but the wealth-growth edge versus SPY 12M did not survive added spread/impact stress.
+
+The correct interpretation is:
+
+> The final candidate remains a risk-adjusted path-improvement candidate, but it is meaningfully sensitive to spread/impact assumptions because its turnover is much higher than SPY 12M.
+
+This should narrow the execution-realistic claim. It should not trigger immediate threshold tuning.
+
 ---
 
 # Methodology Notes
@@ -2298,6 +2350,10 @@ Remaining concerns include:
 - Phase 7F rolling-window survivability failed overall, meaning the final candidate has mixed short-window liveability and should not be described as consistently superior across all rolling windows.
 - Phase 8A used a simplified turnover-based tax proxy only. It does not model tax lots, dividends, final liquidation, wash-sale rules, holding-period rules, jurisdiction-specific treatment, or investor-specific tax circumstances.
 - The final candidate survived the 20% tax-drag proxy, but its CAGR edge over SPY 12M disappeared under the harsher 30% proxy.
+- Phase 8B used scenario-based bid-ask / market-impact stress only. It does not model order books, intraday liquidity, broker routing, partial fills, or production execution.
+- Phase 8B failed the configured stress gate: the final candidate kept its Calmar and drawdown edge but lost its CAGR edge versus SPY 12M under stress.
+- The final candidate is materially more sensitive to added execution friction than SPY 12M because it has higher turnover.
+
 ---
 
 # Bugs Caught and Fixed
@@ -2822,6 +2878,7 @@ The current checkpoint shows:
 - Phase 7E bootstrap stability passed across tested block lengths and seeds,
 - Phase 7F rolling-window survivability failed overall and narrowed the liveability claim,
 - Phase 8A simplified tax-drag diagnostic survived at the 20% proxy but exposed tax sensitivity at the 30% proxy,
+- Phase 8B further narrows the claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but its edge is sensitive to spread/impact assumptions and should not be described as friction-robust.
 - all canonical results are pinned to 2026-05-01.
 
 That distinction is the whole point of the project.

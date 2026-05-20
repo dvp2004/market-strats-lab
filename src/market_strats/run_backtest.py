@@ -211,6 +211,10 @@ from market_strats.analysis.rolling_window_survivability_audit import (
 from market_strats.analysis.tax_drag_diagnostic import (
     save_tax_drag_diagnostic,
 )
+from market_strats.analysis.bid_ask_market_impact_diagnostic import (
+    save_phase8b_bid_ask_market_impact_diagnostic,
+)
+
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -998,7 +1002,7 @@ def run_backtest_for_ticker(
         print(monthly_sma_window_robustness_df.to_string(index=False))
 
         print("\nMonthly SMA window robustness summary:")
-        print(monthly_sma_window_robustness_summary_df.to_string(index=False))    
+        print(monthly_sma_window_robustness_summary_df.to_string(index=False))
 
     print(f"\nSaved full-period metrics to: {metrics_path}")
     print(f"Saved regime metrics to: {regime_metrics_path}")
@@ -1767,8 +1771,15 @@ def main() -> None:
             config=config,
             reports_dir=reports_dir,
         )
-        
+
         save_tax_drag_diagnostic(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase8b_bid_ask_market_impact_diagnostic(
             relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
             config=config,
@@ -1791,7 +1802,7 @@ def main() -> None:
             config=config,
             reports_dir=reports_dir,
         )
-        
+
     save_final_validation_conclusion(reports_dir)
 
 

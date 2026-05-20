@@ -370,6 +370,59 @@ phase8a_tax_drag_diagnostic:
   max_allowed_after_tax_candidate_cagr_minus_buy_hold_pct_points: 0.0
   min_after_tax_candidate_calmar_minus_buy_hold: 0.0
   min_after_tax_candidate_drawdown_minus_buy_hold_pct_points: 0.0
+phase8b_bid_ask_market_impact_diagnostic:
+  enabled: false
+
+  initial_capital: 10000.0
+
+  strategy_names:
+    final_candidate: "Final candidate"
+    spy_buy_hold: "SPY Buy & Hold"
+    spy_12m_momentum: "SPY 12M Momentum"
+
+  gate_scenario: "stress"
+
+  gates:
+    candidate_must_beat_spy12m_cagr: true
+    candidate_must_beat_spy12m_calmar: true
+    candidate_must_have_better_spy12m_drawdown: true
+    candidate_must_not_beat_buy_hold_raw_cagr: true
+    candidate_must_beat_buy_hold_calmar: true
+    candidate_must_have_better_buy_hold_drawdown: true
+    max_candidate_cagr_degradation_pts_vs_no_extra_cost: 0.50
+
+  scenarios:
+    no_extra_cost:
+      spread_bps: 0.0
+      impact_bps_per_100pct_turnover: 0.0
+      stress_drawdown_threshold: -0.10
+      deep_stress_drawdown_threshold: -0.20
+      stress_multiplier: 1.0
+      deep_stress_multiplier: 1.0
+
+    moderate:
+      spread_bps: 2.5
+      impact_bps_per_100pct_turnover: 5.0
+      stress_drawdown_threshold: -0.10
+      deep_stress_drawdown_threshold: -0.20
+      stress_multiplier: 2.0
+      deep_stress_multiplier: 3.0
+
+    stress:
+      spread_bps: 5.0
+      impact_bps_per_100pct_turnover: 10.0
+      stress_drawdown_threshold: -0.10
+      deep_stress_drawdown_threshold: -0.20
+      stress_multiplier: 3.0
+      deep_stress_multiplier: 5.0
+
+    severe:
+      spread_bps: 10.0
+      impact_bps_per_100pct_turnover: 20.0
+      stress_drawdown_threshold: -0.10
+      deep_stress_drawdown_threshold: -0.20
+      stress_multiplier: 4.0
+      deep_stress_multiplier: 8.0
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
