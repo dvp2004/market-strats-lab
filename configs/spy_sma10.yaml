@@ -814,6 +814,43 @@ phase9a_technical_indicator_expansion_diagnostic:
     require_no_strategy_promotion: true
     require_underperformance_clusters_reported: true
     max_allowed_final_candidate_role: "Diagnostic only" 
+phase9b_technical_regime_cluster_stability_audit:
+  enabled: false
+
+  ticker: "SPY"
+
+  episode_definitions:
+    crisis_2006_2010:
+      start_date: "2006-04-28"
+      end_date: "2010-12-31"
+    post_crisis_2011_2015:
+      start_date: "2011-01-01"
+      end_date: "2015-12-31"
+    bull_covid_2016_2020:
+      start_date: "2016-01-01"
+      end_date: "2020-12-31"
+    inflation_2021_2026:
+      start_date: "2021-01-01"
+      end_date: "2026-05-01"
+
+  regime_columns:
+    - "trend_state"
+    - "drawdown_bucket"
+    - "trend_distance_bucket"
+    - "rsi_bucket"
+    - "volatility_bucket"
+    - "long_momentum_state"
+    - "technical_risk_state"
+
+  gates:
+    min_full_period_cluster_rows: 60
+    min_episode_cluster_rows: 20
+    min_episode_coverage_count: 3
+    min_stability_rows: 8
+    min_direction_consistency_rate: 0.60
+    require_instability_report: true
+    require_no_strategy_promotion: true
+    max_allowed_diagnostic_role: "Diagnostic only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

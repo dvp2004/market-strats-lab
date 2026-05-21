@@ -2511,6 +2511,53 @@ Correct interpretation:
 
 > Phase 9A produced interpretable technical-regime evidence but did not change the final candidate hierarchy. The results can inform future hypotheses, but they are not validated trading rules.
 
+## Phase 9B: Technical Regime Cluster Stability Audit
+
+Phase 9B tested whether the Phase 9A technical-regime clusters were stable across subperiods and episodes.
+
+This was diagnostic only. It did not create, tune, validate, or promote a new trading rule.
+
+### Phase 9B Summary
+
+| Metric | Result |
+|---|---:|
+| Cluster episode metric rows | 110 |
+| Stability rows | 25 |
+| Stable across both benchmarks | 6 |
+| Unstable rows | 19 |
+| Instability report rows | 15 |
+| Helpful stability report rows | 13 |
+| Mean direction consistency vs Buy & Hold | 79.33% |
+| Mean direction consistency vs SPY 12M | 61.33% |
+
+### Phase 9B Main Diagnostic Findings
+
+Phase 9B showed that Phase 9A’s technical-regime evidence is useful but mixed.
+
+The most stable helpful cluster was `rsi_bucket = oversold_below_30`, which helped versus both Buy & Hold and SPY 12M with full direction consistency across covered episodes.
+
+`long_momentum_state = negative_12m_momentum` also remained useful, especially versus SPY 12M.
+
+However, many clusters were unstable across episodes. Only 6 of 25 stability rows were stable across both benchmarks. This means Phase 9A/9B evidence should inform future hypotheses, not directly become trading rules.
+
+### Phase 9B Gate Result
+
+| Gate | Result |
+|---|---|
+| Cluster stability rows were generated | Passed |
+| Instability report was produced | Passed |
+| Helpful stability report was produced | Passed |
+| Diagnostic does not promote a new strategy | Passed |
+| Diagnostic role remains bounded | Passed |
+
+### Phase 9B Verdict
+
+> Phase 9B completed as a diagnostic-only technical regime cluster stability audit.
+
+Correct interpretation:
+
+> Phase 9B documented which Phase 9A technical clusters were more stable or unstable across episodes. It did not validate a new trading rule and did not change the final candidate hierarchy.
+
 ---
 
 # Methodology Notes
@@ -2615,8 +2662,6 @@ Remaining concerns include:
 - adjusted-close retroactive adjustment,
 - Stooq close is not a full adjusted-close total-return validator,
 - simplified tax-drag modelling only; no production-grade tax engine,
-- no bid-ask spread modelling during stress periods,
-- no market-impact modelling,
 - no FX cost modelling for non-USD investors,
 - cash proxy may overstate retail-accessible yields,
 - no bootstrap confidence intervals yet,
@@ -2645,6 +2690,7 @@ Remaining concerns include:
 - The final candidate survived the 20% tax-drag proxy, but its CAGR edge over SPY 12M disappeared under the harsher 30% proxy.
 - Phase 8B used scenario-based bid-ask / market-impact stress only. It does not model order books, intraday liquidity, broker routing, partial fills, or production execution.
 - Phase 8B failed the configured stress gate: the final candidate kept its Calmar and drawdown edge but lost its CAGR edge versus SPY 12M under stress.
+- Phase 8B added scenario-based bid-ask / market-impact stress testing, but the project still lacks production-grade execution modelling, including order books, intraday liquidity, routing, partial fills, broker-specific fills, and real execution reconciliation.
 - The final candidate is materially more sensitive to added execution friction than SPY 12M because it has higher turnover.
 - Phase 8C was a walk-forward / expanding-window audit, not a full prospective model-selection framework. The final candidate had already been selected before the audit.
 - Phase 8C failed / produced mixed evidence: the candidate stayed positive in all forward windows and often improved drawdown, but it did not beat SPY 12M on CAGR or Calmar often enough.
@@ -2658,6 +2704,7 @@ Remaining concerns include:
 - Phase 8G was a final checkpoint / README consistency audit. It confirmed that Phase 8 documentation, config flags, report artefacts, hierarchy, dates, and caveat wording were internally consistent. It was not a strategy test, not production approval, and did not make the final candidate live-tradable.
 - Phase 9A was diagnostic only. It identified technical-regime clusters where the final candidate helped or lagged, but it did not create, tune, validate, or promote a new trading rule.
 - Any future technical indicator rule must be pre-defined and separately validated. Phase 9A cluster evidence cannot be treated as proof of a new strategy.
+- Phase 9B was diagnostic only. It showed that some technical clusters, especially oversold RSI and negative 12-month momentum regimes, were more stable, but most clusters were not stable across both benchmarks. Phase 9A/9B cluster evidence should not be treated as a validated trading rule.
 
 ---
 
@@ -2699,10 +2746,13 @@ Market-strats-lab/
 ├── configs/
 │   └── spy_sma10.yaml
 ├── data/
-│   └── processed/
+│   ├── processed/
+│   └── raw/
+├── experiments/
 ├── reports/
 ├── src/
 │   └── market_strats/
+│       ├── __init__.py
 │       ├── analysis/
 │       ├── data/
 │       ├── strategies/
@@ -3011,6 +3061,21 @@ reports/phase9a_technical_indicator_conclusion.csv
 reports/phase9a_technical_indicator_expansion_diagnostic.md
 ```
 
+## Phase 9B Technical Regime Cluster Stability Reports
+
+```text
+reports/phase9b_technical_cluster_analysis_frame.csv
+reports/phase9b_technical_cluster_episode_frame.csv
+reports/phase9b_technical_cluster_episode_metrics.csv
+reports/phase9b_technical_cluster_stability_summary.csv
+reports/phase9b_technical_cluster_instability_report.csv
+reports/phase9b_technical_cluster_helpful_stability_report.csv
+reports/phase9b_technical_cluster_summary.csv
+reports/phase9b_technical_cluster_gate_report.csv
+reports/phase9b_technical_cluster_conclusion.csv
+reports/phase9b_technical_regime_cluster_stability_audit.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -3154,6 +3219,8 @@ configs/spy_sma10.yaml
 | Phase 8F boundary-control / non-production boundary audit | Completed — research-only boundary documented; not production-ready, not live-tradable, not financial advice |
 | Phase 8G final Phase 8 checkpoint audit | Completed — Phase 8 checkpoint consistent; README/config/report consistency passed |
 | Phase 9A technical indicator expansion diagnostic | Completed — diagnostic only; 94.99% indicator coverage, 25 regime rows, 15 underperformance cluster rows, no strategy promotion |
+| Phase 9B technical regime cluster stability audit | Completed — diagnostic only; 25 stability rows, 6 stable across both benchmarks, 19 unstable rows, no strategy promotion |
+
 ---
 
 # What Should Happen Next
@@ -3289,4 +3356,5 @@ Phase 8F closes the research-only/non-production boundary: the final candidate r
 - Phase 9A completed as a diagnostic-only technical indicator expansion and produced interpretable regime evidence without changing the hierarchy.
 - Phase 9A cluster evidence may inform future hypotheses, but it is not a validated trading rule.
 
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, and diagnostic-only Phase 9B cluster-stability evidence.
 That distinction is the whole point of the project.
