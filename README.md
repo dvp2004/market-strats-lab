@@ -67,7 +67,7 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, and a documented research-only/non-production boundary.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, and a Phase 9C pre-registered technical-rule design spec.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -2558,6 +2558,61 @@ Correct interpretation:
 
 > Phase 9B documented which Phase 9A technical clusters were more stable or unstable across episodes. It did not validate a new trading rule and did not change the final candidate hierarchy.
 
+## Phase 9C: Pre-Registered Technical Rule Design Spec
+
+Phase 9C pre-registered the only technical-rule hypotheses allowed to move into a later Phase 9D test.
+
+This was not a strategy test, not a backtest, not parameter optimisation, and not strategy promotion.
+
+### Phase 9C Summary
+
+| Metric | Result |
+|---|---:|
+| Spec role | Pre-registered design spec only |
+| Proposed test phase | Phase 9D |
+| Hypothesis count | 2 |
+| Allowed input rows | 8 |
+| Allowed inputs all registered | True |
+| Forbidden keyword rows | 32 |
+| Forbidden keywords absent from testable hypothesis text | True |
+| Validation gate rows | 18 |
+| Forbidden action rows | 6 |
+
+### Phase 9C Hypotheses
+
+| Hypothesis | Description |
+|---|---|
+| `H1_oversold_rsi_reentry_relief` | Oversold RSI re-entry relief hypothesis |
+| `H2_negative_12m_momentum_defensive_confirmation` | Negative 12M momentum defensive confirmation hypothesis |
+
+### Phase 9C Gate Result
+
+| Gate | Result |
+|---|---|
+| Hypothesis count is bounded | Passed |
+| Source evidence is documented | Passed |
+| Allowed inputs are documented | Passed |
+| Forbidden inputs are documented | Passed |
+| Proposed rule logic is documented | Passed |
+| Validation gates are documented | Passed |
+| Failure conditions are documented | Passed |
+| README wording outcomes are documented | Passed |
+| Promotion constraints are documented | Passed |
+| Allowed inputs stay inside registry | Passed |
+| Forbidden keywords are absent from allowed hypothesis text | Passed |
+| Spec does not allow strategy testing | Passed |
+| Spec does not allow parameter optimisation | Passed |
+| Spec does not allow strategy promotion | Passed |
+| Spec role is correct | Passed |
+
+### Phase 9C Verdict
+
+> Phase 9C completed as a pre-registered technical rule design spec.
+
+Correct interpretation:
+
+> Phase 9C pre-registered the only technical-rule hypotheses allowed for a later Phase 9D test. It did not run performance tests, tune parameters, or promote a strategy.
+
 ---
 
 # Methodology Notes
@@ -2705,7 +2760,7 @@ Remaining concerns include:
 - Phase 9A was diagnostic only. It identified technical-regime clusters where the final candidate helped or lagged, but it did not create, tune, validate, or promote a new trading rule.
 - Any future technical indicator rule must be pre-defined and separately validated. Phase 9A cluster evidence cannot be treated as proof of a new strategy.
 - Phase 9B was diagnostic only. It showed that some technical clusters, especially oversold RSI and negative 12-month momentum regimes, were more stable, but most clusters were not stable across both benchmarks. Phase 9A/9B cluster evidence should not be treated as a validated trading rule.
-
+- Phase 9C was a pre-registration step only. It did not test, tune, validate, or promote any technical rule. Phase 9D must follow this spec exactly or be rejected as post-hoc rule design.
 ---
 
 # Bugs Caught and Fixed
@@ -3076,6 +3131,20 @@ reports/phase9b_technical_cluster_conclusion.csv
 reports/phase9b_technical_regime_cluster_stability_audit.md
 ```
 
+## Phase 9C Pre-Registered Technical Rule Design Spec Reports
+
+```text
+reports/phase9c_preregistered_rule_hypothesis_spec.csv
+reports/phase9c_preregistered_rule_allowed_inputs.csv
+reports/phase9c_preregistered_rule_forbidden_inputs.csv
+reports/phase9c_preregistered_rule_validation_gates.csv
+reports/phase9c_preregistered_rule_forbidden_actions.csv
+reports/phase9c_preregistered_rule_summary.csv
+reports/phase9c_preregistered_rule_gate_report.csv
+reports/phase9c_preregistered_rule_conclusion.csv
+reports/phase9c_preregistered_technical_rule_design_spec.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -3220,7 +3289,7 @@ configs/spy_sma10.yaml
 | Phase 8G final Phase 8 checkpoint audit | Completed — Phase 8 checkpoint consistent; README/config/report consistency passed |
 | Phase 9A technical indicator expansion diagnostic | Completed — diagnostic only; 94.99% indicator coverage, 25 regime rows, 15 underperformance cluster rows, no strategy promotion |
 | Phase 9B technical regime cluster stability audit | Completed — diagnostic only; 25 stability rows, 6 stable across both benchmarks, 19 unstable rows, no strategy promotion |
-
+| Phase 9C pre-registered technical rule design spec | Completed — pre-registered spec only; 2 bounded hypotheses, 8 allowed input rows, 18 validation gate rows, no strategy testing, no optimisation, no promotion |
 ---
 
 # What Should Happen Next
@@ -3355,6 +3424,4 @@ Phase 8F closes the research-only/non-production boundary: the final candidate r
 - Phase 8G confirmed README/config/report consistency and closed Phase 8 as a research checkpoint.
 - Phase 9A completed as a diagnostic-only technical indicator expansion and produced interpretable regime evidence without changing the hierarchy.
 - Phase 9A cluster evidence may inform future hypotheses, but it is not a validated trading rule.
-
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, and diagnostic-only Phase 9B cluster-stability evidence.
 That distinction is the whole point of the project.

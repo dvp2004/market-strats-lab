@@ -851,6 +851,166 @@ phase9b_technical_regime_cluster_stability_audit:
     require_instability_report: true
     require_no_strategy_promotion: true
     max_allowed_diagnostic_role: "Diagnostic only"
+phase9c_preregistered_technical_rule_design_spec:
+  enabled: false
+
+  spec_role: "Pre-registered design spec only"
+  proposed_test_phase: "Phase 9D"
+  allow_strategy_test: false
+  allow_parameter_optimisation: false
+  allow_strategy_promotion: false
+
+  allowed_input_registry:
+    - "rsi_14"
+    - "rsi_oversold_below_30"
+    - "long_momentum_252"
+    - "negative_12m_momentum"
+    - "existing_final_candidate_signal"
+    - "existing_final_candidate_mode"
+    - "existing_phase9a_regime_frame"
+    - "existing_phase9b_cluster_stability_evidence"
+
+  forbidden_input_keywords:
+    - "macro"
+    - "fundamental"
+    - "sentiment"
+    - "machine learning"
+    - "ml"
+    - "llm"
+    - "news"
+    - "earnings"
+    - "valuation"
+    - "rates"
+    - "inflation"
+    - "btc"
+    - "eth"
+    - "uso"
+    - "oil"
+    - "tax"
+
+  forbidden_actions:
+    - "No threshold search after seeing Phase 9D results."
+    - "No adding extra indicators after Phase 9D results."
+    - "No changing Phase 9D gates after seeing results."
+    - "No promoting a rule that only improves headline CAGR while damaging drawdown, Calmar, holdout, or liveability."
+    - "No replacing SPY Buy & Hold as raw wealth benchmark unless raw wealth evidence actually proves it."
+    - "No claiming production readiness, live tradability, financial advice, or statistical proof."
+
+  required_validation_gates:
+    - "Must improve the final candidate full-period Calmar without worsening max drawdown."
+    - "Must not reduce full-period CAGR by more than 0.15 percentage points versus the final candidate."
+    - "Must improve or preserve holdout CAGR, Calmar, and max drawdown versus the final candidate."
+    - "Must avoid material episode-level damage."
+    - "Must survive Phase 8B-style stress friction comparison."
+    - "Must not worsen Phase 8D behavioural-regret conclusions."
+    - "Must preserve SPY Buy & Hold as raw wealth benchmark unless directly beaten on raw wealth."
+    - "Must remain research-only and not production-ready."
+
+  hypotheses:
+    - hypothesis_id: "H1_oversold_rsi_reentry_relief"
+      name: "Oversold RSI re-entry relief hypothesis"
+      source_evidence:
+        - "Phase 9A identified oversold RSI below 30 as a helpful technical regime."
+        - "Phase 9B showed rsi_bucket = oversold_below_30 helped versus both Buy & Hold and SPY 12M with full direction consistency across covered episodes."
+      allowed_inputs:
+        - "rsi_14"
+        - "rsi_oversold_below_30"
+        - "existing_final_candidate_signal"
+        - "existing_final_candidate_mode"
+      forbidden_inputs:
+        - "macro"
+        - "fundamental"
+        - "sentiment"
+        - "machine learning"
+        - "valuation"
+        - "rates"
+        - "btc"
+        - "eth"
+        - "tax"
+      proposed_rule_logic:
+        - "Use RSI 14 only as a constrained re-entry relief diagnostic around existing final-candidate defensive/offensive state."
+        - "Do not search RSI thresholds; only the pre-registered below-30 oversold bucket is allowed."
+        - "Do not create a standalone RSI strategy."
+        - "Do not override the raw 3D trend regime system broadly."
+      validation_gates:
+        - "Must improve Calmar versus final candidate."
+        - "Must not worsen max drawdown versus final candidate."
+        - "Must not materially reduce CAGR versus final candidate."
+        - "Must avoid holdout damage."
+        - "Must avoid worsening behavioural regret versus Buy & Hold."
+      failure_conditions:
+        - "Fails if CAGR improvement comes with worse max drawdown."
+        - "Fails if holdout performance weakens materially."
+        - "Fails if benefit is isolated to one episode."
+        - "Fails if stress friction removes the benefit."
+      readme_wording_if_passed: "Oversold RSI relief survived pre-defined validation as a research candidate, not as production approval."
+      readme_wording_if_mixed: "Oversold RSI relief produced mixed evidence and remains diagnostic only."
+      readme_wording_if_failed: "Oversold RSI relief failed validation and should not be promoted."
+      promotion_constraints:
+        - "May only become a candidate after Phase 9D validation."
+        - "Cannot replace the final candidate without Phase 9E robustness and Phase 9F consistency checks."
+        - "Cannot be described as statistically proven."
+
+    - hypothesis_id: "H2_negative_12m_momentum_defensive_confirmation"
+      name: "Negative 12M momentum defensive confirmation hypothesis"
+      source_evidence:
+        - "Phase 9A showed negative 12-month momentum as a regime where the final candidate was useful."
+        - "Phase 9B showed long_momentum_state = negative_12m_momentum was directionally helpful, especially versus SPY 12M."
+      allowed_inputs:
+        - "long_momentum_252"
+        - "negative_12m_momentum"
+        - "existing_final_candidate_signal"
+        - "existing_final_candidate_mode"
+      forbidden_inputs:
+        - "macro"
+        - "fundamental"
+        - "sentiment"
+        - "machine learning"
+        - "valuation"
+        - "rates"
+        - "btc"
+        - "eth"
+        - "tax"
+      proposed_rule_logic:
+        - "Use 252-day momentum sign only as a defensive confirmation diagnostic."
+        - "Do not search lookback windows; only the existing 252-day / 12-month momentum state is allowed."
+        - "Do not create a standalone momentum strategy."
+        - "Do not weaken the existing final-candidate hierarchy."
+      validation_gates:
+        - "Must improve or preserve Calmar versus final candidate."
+        - "Must improve or preserve max drawdown versus final candidate."
+        - "Must not materially reduce CAGR versus final candidate."
+        - "Must avoid holdout damage."
+        - "Must avoid excessive switch-count reduction."
+      failure_conditions:
+        - "Fails if it merely delays re-entry and sacrifices wealth."
+        - "Fails if it damages bull/Covid or post-crisis episodes materially."
+        - "Fails if it only improves standalone allocator behaviour but not the final overlay."
+        - "Fails if stress friction removes the benefit."
+      readme_wording_if_passed: "Negative 12M momentum confirmation survived pre-defined validation as a research candidate, not as production approval."
+      readme_wording_if_mixed: "Negative 12M momentum confirmation produced mixed evidence and remains diagnostic only."
+      readme_wording_if_failed: "Negative 12M momentum confirmation failed validation and should not be promoted."
+      promotion_constraints:
+        - "May only become a candidate after Phase 9D validation."
+        - "Cannot replace the final candidate without Phase 9E robustness and Phase 9F consistency checks."
+        - "Cannot be described as statistically proven."
+
+  gates:
+    min_hypotheses: 1
+    max_hypotheses: 2
+    require_source_evidence: true
+    require_allowed_inputs: true
+    require_forbidden_inputs: true
+    require_proposed_rule_logic: true
+    require_validation_gates: true
+    require_failure_conditions: true
+    require_readme_wording: true
+    require_promotion_constraints: true
+    require_no_forbidden_inputs: true
+    require_no_strategy_test: true
+    require_no_parameter_optimisation: true
+    require_no_strategy_promotion: true
+    required_spec_role: "Pre-registered design spec only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
