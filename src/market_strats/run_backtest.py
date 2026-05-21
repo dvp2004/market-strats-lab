@@ -238,6 +238,9 @@ from market_strats.analysis.technical_regime_cluster_stability_audit import (
 from market_strats.analysis.preregistered_technical_rule_design_spec import (
     save_phase9c_preregistered_technical_rule_design_spec,
 )
+from market_strats.analysis.preregistered_technical_rule_test import (
+    save_phase9d_preregistered_technical_rule_test,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1853,6 +1856,13 @@ def main() -> None:
         )
 
         save_phase9c_preregistered_technical_rule_design_spec(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase9d_preregistered_technical_rule_test(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
             config=config,
             reports_dir=reports_dir,
         )

@@ -1011,6 +1011,80 @@ phase9c_preregistered_technical_rule_design_spec:
     require_no_parameter_optimisation: true
     require_no_strategy_promotion: true
     required_spec_role: "Pre-registered design spec only"
+phase9d_preregistered_technical_rule_test:
+  enabled: false
+
+  initial_capital: 10000.0
+  ticker: "SPY"
+
+  baseline_strategy_name: "Final candidate"
+
+  rule_definitions:
+    - rule_id: "H1_oversold_rsi_reentry_relief"
+      name: "Oversold RSI re-entry relief"
+      hypothesis_source: "Phase 9C"
+      rule_type: "oversold_rsi_reentry_relief"
+      rsi_threshold: 30.0
+      allowed_inputs:
+        - "rsi_14"
+        - "rsi_oversold_below_30"
+        - "existing_final_candidate_signal"
+        - "existing_final_candidate_mode"
+      rule_logic: "When RSI 14 is below 30, use SPY Buy & Hold return for that day; otherwise use final candidate return."
+
+    - rule_id: "H2_negative_12m_momentum_defensive_confirmation"
+      name: "Negative 12M momentum defensive confirmation"
+      hypothesis_source: "Phase 9C"
+      rule_type: "negative_12m_momentum_defensive_confirmation"
+      momentum_threshold: 0.0
+      allowed_inputs:
+        - "long_momentum_252"
+        - "negative_12m_momentum"
+        - "existing_final_candidate_signal"
+        - "existing_final_candidate_mode"
+      rule_logic: "When 252-day SPY momentum is negative, use SPY 12M Momentum return for that day; otherwise use final candidate return."
+
+  holdout:
+    start_date: "2021-01-01"
+    end_date: "2026-05-01"
+
+  episode_definitions:
+    crisis_2006_2010:
+      start_date: "2006-04-28"
+      end_date: "2010-12-31"
+    post_crisis_2011_2015:
+      start_date: "2011-01-01"
+      end_date: "2015-12-31"
+    bull_covid_2016_2020:
+      start_date: "2016-01-01"
+      end_date: "2020-12-31"
+    inflation_2021_2026:
+      start_date: "2021-01-01"
+      end_date: "2026-05-01"
+
+  stress_friction:
+    scenario_name: "phase8b_style_stress"
+    spread_bps: 5.0
+    impact_bps_per_100pct_turnover: 10.0
+    stress_drawdown_threshold: -0.10
+    deep_stress_drawdown_threshold: -0.20
+    stress_multiplier: 3.0
+    deep_stress_multiplier: 5.0
+
+  gates:
+    max_full_cagr_reduction_pts_vs_baseline: 0.15
+    min_full_calmar_delta_vs_baseline: 0.0001
+    require_full_drawdown_not_worse: true
+    require_holdout_cagr_not_worse: true
+    require_holdout_calmar_not_worse: true
+    require_holdout_drawdown_not_worse: true
+    max_episode_cagr_damage_pts: 0.25
+    max_episode_calmar_damage: 0.02
+    require_stress_calmar_not_worse: true
+    require_stress_drawdown_not_worse: true
+    require_behavioural_relative_drawdown_not_worse: true
+    require_no_strategy_promotion: true
+    max_allowed_role: "Candidate for further validation only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

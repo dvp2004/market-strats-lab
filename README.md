@@ -67,7 +67,7 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, and a Phase 9C pre-registered technical-rule design spec.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, and a failed Phase 9D pre-registered technical-rule test.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -2613,6 +2613,37 @@ Correct interpretation:
 
 > Phase 9C pre-registered the only technical-rule hypotheses allowed for a later Phase 9D test. It did not run performance tests, tune parameters, or promote a strategy.
 
+## Phase 9D: Pre-Registered Technical Rule Test
+
+Phase 9D tested only the two Phase 9C pre-registered technical-rule hypotheses:
+
+1. `H1_oversold_rsi_reentry_relief`
+2. `H2_negative_12m_momentum_defensive_confirmation`
+
+This was not an open-ended indicator search. It did not add new inputs, search thresholds, or promote a strategy.
+
+### Phase 9D Summary
+
+| Rule | Full CAGR | Full Calmar | Result |
+|---|---:|---:|---|
+| H1 oversold RSI re-entry relief | 5.52% | 0.102 | Failed |
+| H2 negative 12M momentum defensive confirmation | 8.66% | 0.266 | Failed |
+| Baseline final candidate | 10.35% | 0.429 | Existing benchmark |
+
+### Phase 9D Gate Result
+
+Both pre-registered rules failed the configured validation gates. They failed on full-period CAGR, full-period Calmar, max drawdown, holdout performance, episode damage, stress-friction performance, and behavioural relative drawdown versus Buy & Hold.
+
+The only gates they passed were discipline gates confirming that the rules were not promoted and remained bounded as candidates for further validation only.
+
+### Phase 9D Verdict
+
+> Phase 9D failed. No pre-registered technical rule passed.
+
+Correct interpretation:
+
+> Phase 9A/9B technical-regime evidence was useful diagnostically, but the two Phase 9C pre-registered rule implementations failed validation. No technical rule should be promoted or tuned around this result.
+
 ---
 
 # Methodology Notes
@@ -2761,6 +2792,7 @@ Remaining concerns include:
 - Any future technical indicator rule must be pre-defined and separately validated. Phase 9A cluster evidence cannot be treated as proof of a new strategy.
 - Phase 9B was diagnostic only. It showed that some technical clusters, especially oversold RSI and negative 12-month momentum regimes, were more stable, but most clusters were not stable across both benchmarks. Phase 9A/9B cluster evidence should not be treated as a validated trading rule.
 - Phase 9C was a pre-registration step only. It did not test, tune, validate, or promote any technical rule. Phase 9D must follow this spec exactly or be rejected as post-hoc rule design.
+- Phase 9D showed that diagnostic technical-regime evidence did not translate into a validated rule. Both pre-registered technical rules failed, so Phase 9A/9B cluster evidence should remain diagnostic rather than promotional.
 ---
 
 # Bugs Caught and Fixed
@@ -3145,6 +3177,19 @@ reports/phase9c_preregistered_rule_conclusion.csv
 reports/phase9c_preregistered_technical_rule_design_spec.md
 ```
 
+## Phase 9D Pre-Registered Technical Rule Test Reports
+
+```text
+reports/phase9d_preregistered_rule_returns.csv
+reports/phase9d_preregistered_rule_metrics.csv
+reports/phase9d_preregistered_rule_stress_metrics.csv
+reports/phase9d_preregistered_rule_behavioural_metrics.csv
+reports/phase9d_preregistered_rule_comparison_summary.csv
+reports/phase9d_preregistered_rule_gate_report.csv
+reports/phase9d_preregistered_rule_conclusion.csv
+reports/phase9d_preregistered_technical_rule_test.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -3290,6 +3335,7 @@ configs/spy_sma10.yaml
 | Phase 9A technical indicator expansion diagnostic | Completed — diagnostic only; 94.99% indicator coverage, 25 regime rows, 15 underperformance cluster rows, no strategy promotion |
 | Phase 9B technical regime cluster stability audit | Completed — diagnostic only; 25 stability rows, 6 stable across both benchmarks, 19 unstable rows, no strategy promotion |
 | Phase 9C pre-registered technical rule design spec | Completed — pre-registered spec only; 2 bounded hypotheses, 8 allowed input rows, 18 validation gate rows, no strategy testing, no optimisation, no promotion |
+| Phase 9D pre-registered technical rule test | Failed — no pre-registered rule passed; both H1 oversold RSI relief and H2 negative 12M momentum confirmation failed validation gates |
 ---
 
 # What Should Happen Next
