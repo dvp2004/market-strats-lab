@@ -229,6 +229,9 @@ from market_strats.analysis.production_readiness_boundary_audit import (
 from market_strats.analysis.final_phase8_checkpoint_audit import (
     save_phase8g_final_phase8_checkpoint_audit,
 )
+from market_strats.analysis.technical_indicator_expansion_diagnostic import (
+    save_phase9a_technical_indicator_expansion_diagnostic,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1825,6 +1828,13 @@ def main() -> None:
         )
 
         save_phase8g_final_phase8_checkpoint_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        
+        save_phase9a_technical_indicator_expansion_diagnostic(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
             config=config,
             reports_dir=reports_dir,
         )

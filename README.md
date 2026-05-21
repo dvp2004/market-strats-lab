@@ -44,7 +44,9 @@ The project now has several completed research phases:
 | Phase 8C | Walk-forward / expanding-window validation audit | Failed / mixed evidence; candidate stayed positive in all forward windows and retained drawdown usefulness, but failed CAGR/Calmar consistency gates |
 | Phase 8D | Behavioural / tracking-error regret audit | Failed / material behavioural regret; terminal wealth versus Buy & Hold remained tolerable, but relative drawdown and worst 3Y active CAGR failed gates |
 | Phase 8E | Multiple-comparisons / research-degrees-of-freedom audit | Completed — claims narrowed; 11 research branches documented, 25 failed/rejected units, promoted share 15.38% |
-| Phase 8F | Production-readiness / non-production boundary audit | Completed — research-only boundary documented; 7 critical blockers and 11 total boundary items documented |
+| Phase 8F | Boundary-control / non-production boundary audit | Completed — research-only boundary documented; 7 critical blockers and 11 total boundary items documented |
+| Phase 8G | Final Phase 8 checkpoint / README consistency audit | Completed — Phase 8 checkpoint consistent; README wording, config flags, report inventory, hierarchy, dates, and caveat stack passed |
+| Phase 9A | Technical indicator expansion diagnostic | Completed — diagnostic only; 94.99% indicator coverage, 25 technical regime rows, 15 underperformance cluster rows, no strategy promotion |
 
 The central conclusion is:
 
@@ -93,7 +95,7 @@ The current validated checkpoint is:
 
 | Item | Value |
 |---|---:|
-| Canonical Phase 2/3/4/5/6/7/8A period | 2006-04-28 to 2026-05-01 |
+| Canonical Phase 2+ / Phase 9A checkpoint period | 2006-04-28 to 2026-05-01 |
 | Raw wealth benchmark | SPY Buy & Hold |
 | SPY Buy & Hold CAGR over same period | 10.90% |
 | SPY Buy & Hold max drawdown | -55.19% |
@@ -126,7 +128,9 @@ The current validated checkpoint is:
 | Phase 8C walk-forward validation audit | Failed / mixed evidence; 5 forward windows generated, candidate positive-CAGR rate 100%, but beat SPY 12M on CAGR and Calmar only 40% of windows |
 | Phase 8D behavioural regret audit | Failed / material behavioural regret; terminal relative wealth vs Buy & Hold was 0.905, but relative drawdown vs Buy & Hold reached -57.38% and worst 3Y active CAGR was -18.17% |
 | Phase 8E research-degrees-of-freedom audit | Completed — claims narrowed; documented 11 branches, 25 failed/rejected units, promoted share 15.38%, and preserved narrow final-candidate wording |
-| Phase 8F production-readiness boundary audit | Completed — research-only boundary documented; confirmed the project is not production-ready, not a live-trading system, and not financial advice |
+| Phase 8F boundary-control / non-production boundary audit | Completed — research-only boundary documented; confirmed the project is not production-ready, not a live-trading system, and not financial advice |
+| Phase 8G final Phase 8 checkpoint audit | Completed — Phase 8 checkpoint consistent; required README wording passed, forbidden overclaiming phrases absent, config flags matched permanent checkpoint state, Phase 8 report artefacts present, and canonical hierarchy/dates documented |
+| Phase 9A technical indicator expansion diagnostic | Completed — diagnostic only; 94.99% indicator coverage, 25 technical regime rows, 15 underperformance cluster rows, no strategy promotion |
 
 Strict endpoint checks are now part of the research discipline: generated reports should not contain `end_date` later than `2026-05-01` unless a deliberate new refreshed checkpoint is opened.
 
@@ -282,6 +286,11 @@ Strategies are evaluated on:
 | Bootstrap stability | Whether bootstrap conclusions survive different block lengths and seeds |
 | Rolling-window survivability | Whether the strategy remains liveable across 1Y, 3Y, and 5Y windows |
 | Tax-drag sensitivity | Whether turnover-based tax drag destroys the candidate's edge |
+| Bid-ask / market-impact sensitivity | Whether spread and impact assumptions destroy the candidate's edge |
+| Walk-forward evidence | Whether candidate behaviour survives sequential forward windows |
+| Behavioural / tracking-error regret | Whether the strategy remains tolerable versus major benchmarks |
+| Research-degrees-of-freedom discipline | Whether final claims are narrowed after many tested branches |
+| Technical-regime diagnostics | Whether technical indicator clusters explain where the candidate helps or lags |
 
 The goal is not only to ask:
 
@@ -2092,9 +2101,9 @@ The correct interpretation is:
 
 # Phase 8: Real-World Friction Diagnostics
 
-Phase 8 moved beyond backtest-path validation and tested whether the final candidate remained credible after adding a simple real-world implementation friction.
+Phase 8 moved beyond backtest-path validation and tested whether the final candidate remained credible under real-world friction, sequential validation, behavioural-regret, research-degrees-of-freedom, and non-production boundary audits.
 
-This phase did **not** add a new alpha signal or optimise the `loose_relief` rule. It tested whether the already-promoted Phase 6B final candidate was fragile once a basic tax-drag proxy was applied.
+This phase did **not** add a new alpha signal or optimise the `loose_relief` rule. It narrowed the already-promoted Phase 6B final candidate by testing tax-drag sensitivity, bid-ask / market-impact stress, walk-forward evidence, tracking-error regret, research flexibility, and research-only boundary discipline.
 
 ---
 
@@ -2374,7 +2383,7 @@ Correct interpretation:
 
 > The final candidate emerged after many tested branches, rejected ideas, caveated diagnostics, and validation filters. It should therefore be described as the best execution-realistic risk-adjusted candidate built so far, not as a broadly proven market-beating system.
 
-## Phase 8F: Production-Readiness / Non-Production Boundary Audit
+## Phase 8F: Boundary-Control / Non-Production Boundary Audit
 
 Phase 8F documented why Market Strats Lab remains a research-grade systematic strategy lab rather than a production trading system.
 
@@ -2425,11 +2434,82 @@ This was not a production approval. It did not make the strategy live-tradable. 
 
 ### Phase 8F Verdict
 
-> Phase 8F completed the production-readiness / non-production boundary audit.
+> Phase 8F documented the research-only boundary.
 
 Correct interpretation:
 
 > The project documented why the final candidate remains research-only and not production-ready. This is a boundary-control pass, not a production approval.
+
+
+
+## Phase 8G: Final Phase 8 Checkpoint / README Consistency Audit
+
+Phase 8G checked that the README, config flags, local Phase 8 report artefacts, final hierarchy, canonical dates, and research-only boundary were internally consistent after Phases 8A–8F.
+
+This was not a strategy test and not production approval. It did not make the strategy production-ready, live-tradable, or financial advice.
+
+### Phase 8G Audit Scope
+
+| Check Area | Result |
+|---|---|
+| README contains all required Phase 8 wording | Passed |
+| README contains no forbidden overclaiming phrases | Passed |
+| Config flags match permanent checkpoint state | Passed |
+| Expected Phase 8 report artefacts are present locally | Passed |
+| Canonical hierarchy and dates are documented | Passed |
+| Final candidate wording includes full caveat stack | Passed |
+
+### Phase 8G Verdict
+
+> Phase 8G completed the final Phase 8 checkpoint audit.
+
+Correct interpretation:
+
+> Phase 8G confirmed that Phase 8 is internally consistent as a research checkpoint. This closes Phase 8 documentation/config consistency, but it is not production approval and does not change the strategy hierarchy.
+
+
+## Phase 9A: Technical Indicator Expansion Diagnostic
+
+Phase 9A tested whether additional price-derived technical indicators helped explain where the final candidate helped or failed.
+
+This was diagnostic only. It did not create, tune, or promote a new trading rule.
+
+### Phase 9A Summary
+
+| Metric | Result |
+|---|---:|
+| Start date | 2006-04-28 |
+| End date | 2026-05-01 |
+| Rows | 5,034 |
+| Indicator coverage rate | 94.99% |
+| Technical regime rows | 25 |
+| Underperformance cluster rows | 15 |
+| Candidate underperforms Buy & Hold daily-return rate | 10.91% |
+| Candidate underperforms SPY 12M daily-return rate | 11.62% |
+
+### Phase 9A Main Diagnostic Findings
+
+The diagnostic found that candidate underperformance versus Buy & Hold was most concentrated in intermediate drawdowns, near-long-SMA transition zones, mild drawdowns, high-volatility regimes, and overbought regimes.
+
+The candidate’s defensive usefulness was more visible in deep bear states, below-long-SMA regimes, negative 12-month momentum regimes, and oversold regimes.
+
+### Phase 9A Gate Result
+
+| Gate | Result |
+|---|---|
+| Indicator coverage is sufficient | Passed |
+| Technical regime rows were generated | Passed |
+| Underperformance clusters were reported | Passed |
+| Diagnostic does not promote a new strategy | Passed |
+| Diagnostic role remains bounded | Passed |
+
+### Phase 9A Verdict
+
+> Phase 9A completed as a diagnostic-only technical indicator expansion.
+
+Correct interpretation:
+
+> Phase 9A produced interpretable technical-regime evidence but did not change the final candidate hierarchy. The results can inform future hypotheses, but they are not validated trading rules.
 
 ---
 
@@ -2437,7 +2517,7 @@ Correct interpretation:
 
 ## Research Period Pinning
 
-The canonical Phase 2/3/4/5/6/7/8A research endpoint is pinned in configuration:
+The canonical Phase 2+ research endpoint is pinned in configuration:
 
 ```yaml
 research_period:
@@ -2448,7 +2528,7 @@ research_period:
 
 This was added after a data-refresh drift caused some exploratory reports to extend to `2026-05-13`. The pinned endpoint prevents refreshed data from silently changing validated results.
 
-Canonical README numbers should be read as **2026-05-01 pinned checkpoint results**.
+Canonical README numbers, including Phase 8 and Phase 9A diagnostics, should be read as **2026-05-01 pinned checkpoint results** unless a deliberately refreshed checkpoint is opened.
 
 ## Lookahead Bias Controls
 
@@ -2575,6 +2655,9 @@ Remaining concerns include:
 - Phase 8F confirmed the non-production boundary. Market Strats Lab remains a research-grade systematic strategy lab, not a production trading system, not financial advice, and not a live-trading recommendation.
 - Phase 8F documented 7 critical production blockers across data, execution, tax, monitoring, governance, and compliance.
 - A Phase 8F pass means the boundary was documented clearly; it does not mean the strategy is production-ready.
+- Phase 8G was a final checkpoint / README consistency audit. It confirmed that Phase 8 documentation, config flags, report artefacts, hierarchy, dates, and caveat wording were internally consistent. It was not a strategy test, not production approval, and did not make the final candidate live-tradable.
+- Phase 9A was diagnostic only. It identified technical-regime clusters where the final candidate helped or lagged, but it did not create, tune, validate, or promote a new trading rule.
+- Any future technical indicator rule must be pre-defined and separately validated. Phase 9A cluster evidence cannot be treated as proof of a new strategy.
 
 ---
 
@@ -2845,6 +2928,89 @@ reports/phase8a_tax_drag_conclusion.csv
 reports/phase8a_tax_drag_diagnostic.md
 ```
 
+## Phase 8B Bid-Ask / Market-Impact Reports
+
+```text
+reports/phase8b_bid_ask_market_impact_daily_returns.csv
+reports/phase8b_bid_ask_market_impact_metrics.csv
+reports/phase8b_bid_ask_market_impact_summary.csv
+reports/phase8b_bid_ask_market_impact_gate_report.csv
+reports/phase8b_bid_ask_market_impact_conclusion.csv
+reports/phase8b_bid_ask_market_impact_diagnostic.md
+```
+
+## Phase 8C Walk-Forward Validation Reports
+
+```text
+reports/phase8c_walk_forward_windows.csv
+reports/phase8c_walk_forward_metrics.csv
+reports/phase8c_walk_forward_summary.csv
+reports/phase8c_walk_forward_gate_report.csv
+reports/phase8c_walk_forward_conclusion.csv
+reports/phase8c_walk_forward_validation_audit.md
+```
+
+## Phase 8D Behavioural Regret Reports
+
+```text
+reports/phase8d_behavioural_regret_daily.csv
+reports/phase8d_behavioural_regret_summary.csv
+reports/phase8d_behavioural_regret_rolling_windows.csv
+reports/phase8d_behavioural_regret_rolling_summary.csv
+reports/phase8d_behavioural_regret_gate_report.csv
+reports/phase8d_behavioural_regret_conclusion.csv
+reports/phase8d_behavioural_regret_audit.md
+```
+
+## Phase 8E Research Degrees-of-Freedom Reports
+
+```text
+reports/phase8e_research_degrees_of_freedom_inventory.csv
+reports/phase8e_research_degrees_of_freedom_summary.csv
+reports/phase8e_research_degrees_of_freedom_claim_adjustment.csv
+reports/phase8e_research_degrees_of_freedom_gate_report.csv
+reports/phase8e_research_degrees_of_freedom_conclusion.csv
+reports/phase8e_research_degrees_of_freedom_audit.md
+```
+
+## Phase 8F Research-Only Boundary Reports
+
+```text
+reports/phase8f_production_boundary_blocker_inventory.csv
+reports/phase8f_production_boundary_category_summary.csv
+reports/phase8f_production_boundary_summary.csv
+reports/phase8f_production_boundary_statement.csv
+reports/phase8f_production_boundary_gate_report.csv
+reports/phase8f_production_boundary_conclusion.csv
+reports/phase8f_production_readiness_boundary_audit.md
+```
+
+## Phase 8G Final Phase 8 Checkpoint Reports
+
+```text
+reports/phase8g_final_checkpoint_readme_phrase_check.csv
+reports/phase8g_final_checkpoint_config_flag_check.csv
+reports/phase8g_final_checkpoint_report_inventory_check.csv
+reports/phase8g_final_checkpoint_canonical_check.csv
+reports/phase8g_final_checkpoint_gate_report.csv
+reports/phase8g_final_checkpoint_conclusion.csv
+reports/phase8g_final_phase8_checkpoint_audit.md
+```
+
+## Phase 9A Technical Indicator Diagnostic Reports
+
+```text
+reports/phase9a_technical_indicator_frame.csv
+reports/phase9a_technical_regime_frame.csv
+reports/phase9a_technical_indicator_analysis_frame.csv
+reports/phase9a_technical_regime_summary.csv
+reports/phase9a_technical_underperformance_clusters.csv
+reports/phase9a_technical_indicator_summary.csv
+reports/phase9a_technical_indicator_gate_report.csv
+reports/phase9a_technical_indicator_conclusion.csv
+reports/phase9a_technical_indicator_expansion_diagnostic.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -2919,6 +3085,13 @@ The main config currently tests:
 - Bootstrap stability audit
 - Rolling-window survivability audit
 - Simplified tax-drag diagnostic
+- Bid-ask / market-impact stress diagnostic
+- Walk-forward / expanding-window validation audit
+- Behavioural / tracking-error regret audit
+- Multiple-comparisons / research-degrees-of-freedom audit
+- Research-only / non-production boundary audit
+- Final Phase 8 checkpoint / README consistency audit
+- Technical indicator expansion diagnostic
 - Final decision reports
 - Validation conclusion reports
 
@@ -2974,47 +3147,46 @@ configs/spy_sma10.yaml
 | Phase 7E bootstrap stability audit | Completed — all 9 bootstrap profiles passed across block lengths 5/21/63 and seeds 7/42/123 |
 | Phase 7F rolling-window survivability audit | Completed — failed overall; 3Y/5Y versus SPY 12M mostly survived, but 1Y and buy-and-hold rolling risk gates failed |
 | Phase 8A simplified tax-drag diagnostic | Completed — survived at 20% tax proxy with caveat; CAGR edge over SPY 12M disappeared under 30% proxy |
+| Phase 8B bid-ask / market-impact stress diagnostic | Completed — failed configured stress gate; candidate kept Calmar/drawdown edge but lost CAGR edge versus SPY 12M under stress |
+| Phase 8C walk-forward / expanding-window validation audit | Completed — failed / mixed evidence; candidate stayed positive in all forward windows but failed CAGR/Calmar consistency gates |
+| Phase 8D behavioural / tracking-error regret audit | Completed — failed / material behavioural regret; relative drawdown and worst 3Y active CAGR versus Buy & Hold failed gates |
+| Phase 8E research-degrees-of-freedom audit | Completed — claims narrowed; 11 branches documented, 25 failed/rejected units, promoted share 15.38% |
+| Phase 8F boundary-control / non-production boundary audit | Completed — research-only boundary documented; not production-ready, not live-tradable, not financial advice |
+| Phase 8G final Phase 8 checkpoint audit | Completed — Phase 8 checkpoint consistent; README/config/report consistency passed |
+| Phase 9A technical indicator expansion diagnostic | Completed — diagnostic only; 94.99% indicator coverage, 25 regime rows, 15 underperformance cluster rows, no strategy promotion |
 ---
 
 # What Should Happen Next
 
-Do **not** add more strategy variants immediately.
+Do **not** add another strategy variant immediately.
 
-The correct next step is repository and documentation checkpointing:
+Phase 8 is closed. Phase 9A has completed as a diagnostic-only technical indicator expansion. It identified interpretable technical-regime clusters, but it did not create, tune, validate, or promote a new trading rule.
 
-1. Ensure all tests pass.
-2. Ensure `ruff` passes.
-3. Confirm `.env` is ignored and no API key is staged.
-4. Confirm `phase8a_tax_drag_diagnostic.enabled` is `false` in the committed main config unless deliberately running Phase 8A.
-5. Commit the Phase 8A tax-drag diagnostic and README update.
-6. Tag this as the current validated research checkpoint.
-7. Freeze this branch before opening any new research branch.
+The immediate checkpoint work is:
+
+1. Ensure `phase9a_technical_indicator_expansion_diagnostic.enabled` is `false` in the permanent config.
+2. Ensure all Phase 8A–8G diagnostic flags are disabled in the permanent config.
+3. Keep `relative_momentum_allocator.enabled` set to `true`.
+4. Ensure all tests pass.
+5. Ensure `ruff` passes.
+6. Confirm `.env` is ignored and no API key or secret is staged.
+7. Commit the Phase 9A source, tests, config, and README update directly to `main`.
+8. Push directly to `main`.
+9. Tag the Phase 9A checkpoint.
 
 The current checkpoint should be documented as:
 
-> Final Phase 6B `loose_relief` candidate promoted as the best execution-realistic risk-adjusted candidate, with Phase 7A–7E strengthening the checkpoint, Phase 7F narrowing the liveability claim, and Phase 8A documenting simplified tax-drag sensitivity.
+> Final Phase 6B `loose_relief` candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, and diagnostic-only Phase 9A technical-regime evidence.
 
-The key caveats are:
+The next research phase after Phase 9A checkpointing should be:
 
-> Rolling-window survivability failed overall. The candidate is not consistently superior across short rolling windows and does not reliably beat SPY Buy & Hold on rolling risk metrics.
+> **Phase 9B: Technical Regime Cluster Stability Audit**
 
-> The candidate survived the simplified 20% tax-drag proxy, but the CAGR edge over SPY 12M disappeared under the harsher 30% proxy.
+Phase 9B should test whether the Phase 9A underperformance/helpfulness clusters are stable across subperiods and episodes, or whether they are full-period artefacts.
 
-Future research branches should be opened only after this checkpoint is committed and tagged.
+Do **not** turn Phase 9A clusters into rules yet. That would be overfitting. Any future technical indicator rule must be pre-defined and validated separately.
 
-Potential future branches:
-
-1. More realistic bid-ask / market-impact modelling during stress
-2. Expanded walk-forward validation
-3. Multiple-comparisons correction across strategy/asset combinations
-4. Behavioural/tracking-error regret analysis
-5. Production-grade tax modelling with lots/dividends/final liquidation
-6. BTC-specific quarantined research branch
-7. Additional commodity or real-asset expansion only under strict holdout materiality gates
-8. Sentiment/macro/ML layer, but only after the final price/risk system is checkpointed
-9. Production-readiness audit, if the project ever moves beyond research
-
-Do **not** treat the failed Phase 7F rolling-window audit or thin Phase 8A tax edge as invitations to tune more thresholds. That would be overfitting. These limitations are part of the final result.
+No macro, sentiment, fundamentals, ML, or new tax work should be opened before Phase 9B cluster stability is completed.
 
 ---
 
@@ -3043,6 +3215,13 @@ The current final hierarchy is:
 | Bootstrap stability status | Phase 7E passed |
 | Rolling-window survivability status | Phase 7F failed overall; mixed liveability |
 | Simplified tax-drag status | Phase 8A survived at 20% proxy; 30% proxy erased SPY 12M CAGR edge |
+| Bid-ask / market-impact status | Phase 8B failed configured stress gate; execution friction remains a major caveat |
+| Walk-forward validation status | Phase 8C failed / mixed evidence; forward-window superiority was not clean |
+| Behavioural regret status | Phase 8D failed / material behavioural regret versus Buy & Hold |
+| Research degrees-of-freedom status | Phase 8E completed; claims narrowed explicitly |
+| Research-only boundary status | Phase 8F boundary-control audit passed; research-only boundary documented |
+| Final Phase 8 checkpoint status | Phase 8G completed; README/config/report consistency passed |
+| Technical indicator expansion status | Phase 9A completed diagnostic-only; no strategy promotion |
 
 The best execution-realistic candidate is:
 
@@ -3076,7 +3255,7 @@ But:
 
 The final candidate is therefore best described as:
 
-> **The best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability.**
+> **The best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, and diagnostic-only Phase 9A technical-regime evidence.**
 
 It should **not** be described as a universally liveable system or as a raw-CAGR replacement for buy-and-hold.
 
@@ -3105,6 +3284,9 @@ The current checkpoint shows:
 Phase 8C further narrows the claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but sequential forward-window evidence is mixed rather than clean.
 Phase 8D further narrows the liveability claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but behavioural regret versus SPY Buy & Hold is material.
 Phase 8E further narrows the claim: the final candidate remains the best execution-realistic risk-adjusted candidate built so far, but the project has accumulated enough research degrees of freedom that claims must remain explicitly caveated.
-Phase 8F closes the production-readiness boundary: the final candidate remains a research result only. It is not production-ready, not live-tradable, and not a financial recommendation.
+Phase 8F closes the research-only/non-production boundary: the final candidate remains a research result only. It is not production-ready, not live-tradable, and not a financial recommendation.
+- Phase 8G confirmed README/config/report consistency and closed Phase 8 as a research checkpoint.
+- Phase 9A completed as a diagnostic-only technical indicator expansion and produced interpretable regime evidence without changing the hierarchy.
+- Phase 9A cluster evidence may inform future hypotheses, but it is not a validated trading rule.
 
 That distinction is the whole point of the project.

@@ -781,7 +781,39 @@ phase8g_final_phase8_checkpoint_audit:
     require_no_forbidden_readme_phrases: true
     require_all_config_flags_match: true
     require_expected_phase8_reports_present: true
-    require_final_candidate_wording_caveated: true      
+    require_final_candidate_wording_caveated: true     
+phase9a_technical_indicator_expansion_diagnostic:
+  enabled: false
+
+  initial_capital: 10000.0
+
+  strategy_names:
+    final_candidate: "Final candidate"
+    spy_buy_hold: "SPY Buy & Hold"
+    spy_12m_momentum: "SPY 12M Momentum"
+
+  ticker: "SPY"
+
+  indicators:
+    sma_short_days: 50
+    sma_long_days: 200
+    rsi_days: 14
+    volatility_days: 63
+    short_momentum_days: 63
+    medium_momentum_days: 126
+    long_momentum_days: 252
+    drawdown_near_high_threshold: -0.05
+    drawdown_correction_threshold: -0.10
+    drawdown_bear_threshold: -0.20
+    trend_distance_near_threshold: 0.03
+    trend_distance_extended_threshold: 0.10
+
+  gates:
+    min_indicator_coverage_rate: 0.90
+    min_regime_rows: 4
+    require_no_strategy_promotion: true
+    require_underperformance_clusters_reported: true
+    max_allowed_final_candidate_role: "Diagnostic only" 
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
