@@ -1085,6 +1085,52 @@ phase9d_preregistered_technical_rule_test:
     require_behavioural_relative_drawdown_not_worse: true
     require_no_strategy_promotion: true
     max_allowed_role: "Candidate for further validation only"
+phase9e_technical_extension_closeout_audit:
+  enabled: false
+
+  closeout_scope:
+    branch: "Phase 9 technical indicator extension"
+    status: "Closed — no rule promoted"
+    successor_candidate_created: false
+    final_candidate_changed: false
+    rule_promotion_allowed: false
+    next_allowed_step: "Phase 9 final README/checkpoint consistency or pause"
+
+  expected_disabled_flags:
+    phase9a_technical_indicator_expansion_diagnostic: false
+    phase9b_technical_regime_cluster_stability_audit: false
+    phase9c_preregistered_technical_rule_design_spec: false
+    phase9d_preregistered_technical_rule_test: false
+    phase9e_technical_extension_closeout_audit: true
+    relative_momentum_allocator: true
+
+  expected_report_prefixes:
+    - "phase9a_technical"
+    - "phase9b_technical"
+    - "phase9c_preregistered"
+    - "phase9d_preregistered"
+
+  phase9d_expected:
+    conclusion_verdict: "Failed / no pre-registered rule passed"
+    no_passed_rules: true
+    no_strategy_promotion: true
+    no_successor_candidate: true
+
+  required_closeout_wording:
+    - "Phase 9A/9B technical-regime evidence remained diagnostic"
+    - "Phase 9C pre-registered two hypotheses"
+    - "Phase 9D rejected both pre-registered rule implementations"
+    - "No technical rule was promoted"
+    - "The final candidate hierarchy is unchanged"
+
+  gates:
+    require_expected_reports_present: true
+    require_config_flags_match: true
+    require_phase9d_failure_documented: true
+    require_no_phase9d_rule_passed: true
+    require_no_strategy_promotion: true
+    require_no_successor_candidate: true
+    require_branch_closed_without_promotion: true
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

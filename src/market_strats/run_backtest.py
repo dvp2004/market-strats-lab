@@ -241,6 +241,9 @@ from market_strats.analysis.preregistered_technical_rule_design_spec import (
 from market_strats.analysis.preregistered_technical_rule_test import (
     save_phase9d_preregistered_technical_rule_test,
 )
+from market_strats.analysis.technical_extension_closeout_audit import (
+    save_phase9e_technical_extension_closeout_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1863,6 +1866,11 @@ def main() -> None:
         save_phase9d_preregistered_technical_rule_test(
             relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase9e_technical_extension_closeout_audit(
             config=config,
             reports_dir=reports_dir,
         )

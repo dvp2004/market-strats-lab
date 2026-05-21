@@ -67,7 +67,7 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, and a failed Phase 9D pre-registered technical-rule test.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -2644,6 +2644,43 @@ Correct interpretation:
 
 > Phase 9A/9B technical-regime evidence was useful diagnostically, but the two Phase 9C pre-registered rule implementations failed validation. No technical rule should be promoted or tuned around this result.
 
+## Phase 9E: Technical Extension Closeout / Failure Documentation Audit
+
+Phase 9E closed the Phase 9 technical-extension branch after the Phase 9D pre-registered rule test failed.
+
+This did not create a new rule, tune a failed rule, or promote a successor candidate.
+
+### Phase 9E Summary
+
+| Metric | Result |
+|---|---|
+| Branch | Phase 9 technical indicator extension |
+| Status | Closed — no rule promoted |
+| Successor candidate created | False |
+| Final candidate changed | False |
+| Rule promotion allowed | False |
+| Next allowed step | Phase 9 final README/checkpoint consistency or pause |
+
+### Phase 9E Gate Result
+
+| Gate | Result |
+|---|---|
+| Expected Phase 9 reports are present | Passed |
+| Config flags match closeout state | Passed |
+| Phase 9D failure is documented | Passed |
+| No Phase 9D rule passed all gates | Passed |
+| No strategy promotion occurred | Passed |
+| No successor candidate was created | Passed |
+| Technical branch is closed without promotion | Passed |
+
+### Phase 9E Verdict
+
+> Phase 9E completed the technical-extension closeout audit.
+
+Correct interpretation:
+
+> Phase 9A/9B technical-regime evidence remained diagnostic, Phase 9C pre-registered two hypotheses, Phase 9D rejected both pre-registered rule implementations, and no technical rule was promoted.
+
 ---
 
 # Methodology Notes
@@ -2793,6 +2830,7 @@ Remaining concerns include:
 - Phase 9B was diagnostic only. It showed that some technical clusters, especially oversold RSI and negative 12-month momentum regimes, were more stable, but most clusters were not stable across both benchmarks. Phase 9A/9B cluster evidence should not be treated as a validated trading rule.
 - Phase 9C was a pre-registration step only. It did not test, tune, validate, or promote any technical rule. Phase 9D must follow this spec exactly or be rejected as post-hoc rule design.
 - Phase 9D showed that diagnostic technical-regime evidence did not translate into a validated rule. Both pre-registered technical rules failed, so Phase 9A/9B cluster evidence should remain diagnostic rather than promotional.
+- Phase 9E closed the technical-extension branch without promotion. This confirms that the Phase 9A/9B diagnostic evidence did not translate into a validated technical rule through the Phase 9C/9D pre-registration path.
 ---
 
 # Bugs Caught and Fixed
@@ -3190,6 +3228,18 @@ reports/phase9d_preregistered_rule_conclusion.csv
 reports/phase9d_preregistered_technical_rule_test.md
 ```
 
+## Phase 9E Technical Extension Closeout Reports
+
+```text
+reports/phase9e_technical_extension_report_inventory_check.csv
+reports/phase9e_technical_extension_config_flag_check.csv
+reports/phase9e_technical_extension_phase9d_failure_check.csv
+reports/phase9e_technical_extension_closeout_summary.csv
+reports/phase9e_technical_extension_gate_report.csv
+reports/phase9e_technical_extension_conclusion.csv
+reports/phase9e_technical_extension_closeout_audit.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -3336,6 +3386,7 @@ configs/spy_sma10.yaml
 | Phase 9B technical regime cluster stability audit | Completed — diagnostic only; 25 stability rows, 6 stable across both benchmarks, 19 unstable rows, no strategy promotion |
 | Phase 9C pre-registered technical rule design spec | Completed — pre-registered spec only; 2 bounded hypotheses, 8 allowed input rows, 18 validation gate rows, no strategy testing, no optimisation, no promotion |
 | Phase 9D pre-registered technical rule test | Failed — no pre-registered rule passed; both H1 oversold RSI relief and H2 negative 12M momentum confirmation failed validation gates |
+| Phase 9E technical extension closeout audit | Completed — technical extension closed without promotion; Phase 9D failure documented, no technical rule promoted, no successor candidate created |
 ---
 
 # What Should Happen Next
