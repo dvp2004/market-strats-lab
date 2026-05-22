@@ -2646,7 +2646,7 @@ Correct interpretation:
 
 ## Phase 9E: Technical Extension Closeout / Failure Documentation Audit
 
-Phase 9E closed the Phase 9 technical-extension branch after the Phase 9D pre-registered rule test failed.
+Phase 9E closed the Phase 9 technical-extension branch after the Phase 9D pre-registered rule test failed. 
 
 This did not create a new rule, tune a failed rule, or promote a successor candidate.
 
@@ -2681,6 +2681,34 @@ Correct interpretation:
 
 > Phase 9A/9B technical-regime evidence remained diagnostic, Phase 9C pre-registered two hypotheses, Phase 9D rejected both pre-registered rule implementations, and no technical rule was promoted.
 
+The final candidate hierarchy is unchanged.
+
+## Phase 9F: Final Phase 9 Checkpoint / README Consistency Audit
+
+Phase 9F checked that the README, config flags, local Phase 9 report artefacts, final hierarchy, canonical dates, and technical-extension closeout were internally consistent after Phases 9A–9E.
+
+This was not a strategy test and not production approval.
+
+### Phase 9F Gate Result
+
+| Gate | Result |
+|---|---|
+| README contains all required Phase 9 wording | Passed |
+| README contains no forbidden overclaiming phrases | Passed |
+| Config flags match permanent checkpoint state | Passed |
+| Expected Phase 9 report artefacts are present locally | Passed |
+| Canonical hierarchy and dates are documented | Passed |
+| Phase 9 closeout is documented | Passed |
+| No technical rule was promoted | Passed |
+| No successor candidate was created | Passed |
+
+### Phase 9F Verdict
+
+> Phase 9F completed the final Phase 9 checkpoint audit.
+
+Correct interpretation:
+
+> Phase 9A/9B diagnostic evidence, Phase 9C pre-registration, Phase 9D failure, and Phase 9E closeout were documented consistently. No technical rule was promoted and the final candidate hierarchy remains unchanged.
 ---
 
 # Methodology Notes
@@ -2831,6 +2859,7 @@ Remaining concerns include:
 - Phase 9C was a pre-registration step only. It did not test, tune, validate, or promote any technical rule. Phase 9D must follow this spec exactly or be rejected as post-hoc rule design.
 - Phase 9D showed that diagnostic technical-regime evidence did not translate into a validated rule. Both pre-registered technical rules failed, so Phase 9A/9B cluster evidence should remain diagnostic rather than promotional.
 - Phase 9E closed the technical-extension branch without promotion. This confirms that the Phase 9A/9B diagnostic evidence did not translate into a validated technical rule through the Phase 9C/9D pre-registration path.
+- Phase 9F confirmed Phase 9 was internally consistent after closeout, but it did not create a new strategy, validate a technical rule, or change the final candidate hierarchy.
 ---
 
 # Bugs Caught and Fixed
@@ -3240,6 +3269,20 @@ reports/phase9e_technical_extension_conclusion.csv
 reports/phase9e_technical_extension_closeout_audit.md
 ```
 
+## Phase 9F Final Phase 9 Checkpoint Reports
+
+```text
+reports/phase9f_final_checkpoint_readme_phrase_check.csv
+reports/phase9f_final_checkpoint_config_flag_check.csv
+reports/phase9f_final_checkpoint_report_inventory_check.csv
+reports/phase9f_final_checkpoint_canonical_check.csv
+reports/phase9f_final_checkpoint_closeout_check.csv
+reports/phase9f_final_checkpoint_summary.csv
+reports/phase9f_final_checkpoint_gate_report.csv
+reports/phase9f_final_checkpoint_conclusion.csv
+reports/phase9f_final_phase9_checkpoint_audit.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -3387,6 +3430,7 @@ configs/spy_sma10.yaml
 | Phase 9C pre-registered technical rule design spec | Completed — pre-registered spec only; 2 bounded hypotheses, 8 allowed input rows, 18 validation gate rows, no strategy testing, no optimisation, no promotion |
 | Phase 9D pre-registered technical rule test | Failed — no pre-registered rule passed; both H1 oversold RSI relief and H2 negative 12M momentum confirmation failed validation gates |
 | Phase 9E technical extension closeout audit | Completed — technical extension closed without promotion; Phase 9D failure documented, no technical rule promoted, no successor candidate created |
+| Phase 9F final Phase 9 checkpoint audit | Completed — Phase 9 checkpoint consistent; README wording, config flags, report inventory, hierarchy, and closeout documentation passed |
 ---
 
 # What Should Happen Next

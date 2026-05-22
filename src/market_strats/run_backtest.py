@@ -244,6 +244,9 @@ from market_strats.analysis.preregistered_technical_rule_test import (
 from market_strats.analysis.technical_extension_closeout_audit import (
     save_phase9e_technical_extension_closeout_audit,
 )
+from market_strats.analysis.final_phase9_checkpoint_audit import (
+    save_phase9f_final_phase9_checkpoint_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1871,6 +1874,11 @@ def main() -> None:
         )
 
         save_phase9e_technical_extension_closeout_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase9f_final_phase9_checkpoint_audit(
             config=config,
             reports_dir=reports_dir,
         )
