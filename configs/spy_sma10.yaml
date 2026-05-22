@@ -1331,6 +1331,204 @@ phase9f_final_phase9_checkpoint_audit:
     require_phase9_closeout_documented: true
     require_no_technical_rule_promotion: true
     require_no_successor_candidate: true
+phase10a_feature_family_feasibility_spec:
+  enabled: false
+
+  spec_role: "Feature-family feasibility spec only"
+  proposed_next_phase: "Phase 10B"
+  allow_data_ingestion: false
+  allow_model_training: false
+  allow_strategy_test: false
+  allow_strategy_promotion: false
+
+  expected_first_family: "macro_rates_inflation"
+
+  scoring_weights:
+    conceptual_relevance: 1.25
+    data_availability: 1.00
+    leakage_control: 1.50
+    update_frequency_fit: 1.00
+    validation_clarity: 1.25
+    overfit_resistance: 1.50
+    implementation_readiness: 1.00
+
+  feature_families:
+    - family_id: "macro_rates_inflation"
+      name: "Macro / rates / inflation"
+      role: "Feasibility candidate only"
+      candidate_priority: 1
+      rationale:
+        - "Strong conceptual link to equity regimes and risk appetite."
+        - "More structured release calendars than sentiment/narrative data."
+        - "Better suited for pre-defined regime diagnostics than immediate ML."
+      allowed_feature_examples:
+        - "policy_rate_proxy"
+        - "yield_curve_proxy"
+        - "inflation_proxy"
+        - "real_rate_proxy"
+        - "recession_risk_proxy"
+        - "liquidity_conditions_proxy"
+      data_requirements:
+        - data_type: "macro_timeseries"
+          frequency: "monthly_or_daily_release_dependent"
+          timing_requirement: "must use release-date-aware point-in-time alignment"
+          revision_policy: "must document whether data is revised and whether vintage data is available"
+          minimum_history_requirement: "must cover canonical Phase 2+ period or explicitly document shorter overlap"
+      leakage_controls:
+        - "No use of revised macro values unless vintage/release-date treatment is documented."
+        - "No same-day macro value use unless release timing is safely aligned after availability."
+        - "No lookback window search after seeing performance."
+        - "No macro regime labels created using future returns."
+      validation_requirements:
+        - "Must first run a data-source reliability audit before any strategy test."
+        - "Must compare against final candidate, SPY Buy & Hold, and SPY 12M Momentum."
+        - "Must preserve final candidate hierarchy unless later validation earns a change."
+        - "Must include holdout, episode, friction, and behavioural-regret checks."
+      scorecard:
+        conceptual_relevance: 5
+        data_availability: 4
+        leakage_control: 3
+        update_frequency_fit: 4
+        validation_clarity: 4
+        overfit_resistance: 4
+        implementation_readiness: 4
+      disqualifiers:
+        - name: "No release-date handling"
+          active: false
+        - name: "Insufficient historical coverage"
+          active: false
+
+    - family_id: "fundamental_valuation"
+      name: "Fundamental / valuation"
+      role: "Future feasibility candidate only"
+      candidate_priority: 2
+      rationale:
+        - "Useful for long-horizon valuation context."
+        - "Less suitable for fast timing unless carefully framed."
+      allowed_feature_examples:
+        - "earnings_yield_proxy"
+        - "valuation_percentile_proxy"
+        - "equity_risk_premium_proxy"
+      data_requirements:
+        - data_type: "fundamental_or_valuation_timeseries"
+          frequency: "monthly_or_quarterly"
+          timing_requirement: "must account for publication lag and revisions"
+          revision_policy: "must document whether restated data is used"
+          minimum_history_requirement: "must cover enough cycles for meaningful regime tests"
+      leakage_controls:
+        - "No using revised valuation/fundamental data as if known historically."
+        - "No quarterly data aligned before publication date."
+        - "No valuation threshold search after seeing returns."
+      validation_requirements:
+        - "Must be evaluated as regime context, not a short-term timing signal."
+        - "Must pass separate data-timing audit before strategy testing."
+      scorecard:
+        conceptual_relevance: 4
+        data_availability: 3
+        leakage_control: 2
+        update_frequency_fit: 3
+        validation_clarity: 3
+        overfit_resistance: 3
+        implementation_readiness: 2
+      disqualifiers:
+        - name: "Unclear publication lag"
+          active: false
+
+    - family_id: "sentiment_narrative"
+      name: "Sentiment / narrative"
+      role: "Future feasibility candidate only"
+      candidate_priority: 3
+      rationale:
+        - "Potentially useful for risk appetite and market narrative shifts."
+        - "Very noisy and easy to overfit."
+        - "Requires strict source, timestamp, and survivorship controls."
+      allowed_feature_examples:
+        - "news_sentiment_proxy"
+        - "risk_appetite_proxy"
+        - "market_narrative_regime_proxy"
+        - "search_interest_proxy"
+      data_requirements:
+        - data_type: "timestamped_text_or_sentiment_series"
+          frequency: "daily_or_intraday_source_dependent"
+          timing_requirement: "must use timestamped availability before market decision point"
+          revision_policy: "must document source changes and backfilled histories"
+          minimum_history_requirement: "must cover enough stress/risk-on/risk-off regimes"
+      leakage_controls:
+        - "No article/text use after decision timestamp."
+        - "No training labels from future returns inside feature construction."
+        - "No prompt/model changes after seeing strategy performance."
+        - "No cherry-picked sentiment source."
+      validation_requirements:
+        - "Must pass timestamp and data-survivorship audit before any model/rule test."
+        - "Must be benchmarked against simple technical/macro baselines."
+      scorecard:
+        conceptual_relevance: 3
+        data_availability: 2
+        leakage_control: 1
+        update_frequency_fit: 3
+        validation_clarity: 2
+        overfit_resistance: 1
+        implementation_readiness: 1
+      disqualifiers:
+        - name: "No timestamp control"
+          active: false
+        - name: "Unstable source history"
+          active: false
+
+    - family_id: "ml_ensemble"
+      name: "ML / ensemble modelling"
+      role: "Future research branch only"
+      candidate_priority: 4
+      rationale:
+        - "Long-term ambition, but premature before clean feature families exist."
+        - "Requires walk-forward, feature leakage, and multiple-comparisons discipline."
+      allowed_feature_examples:
+        - "walk_forward_regime_classifier"
+        - "feature_importance_diagnostic"
+        - "probabilistic_allocation_confidence"
+        - "signal_ensemble_score"
+      data_requirements:
+        - data_type: "clean_prevalidated_feature_matrix"
+          frequency: "depends_on_underlying_features"
+          timing_requirement: "all features must be point-in-time aligned before modelling"
+          revision_policy: "must inherit strictest revision policy from input features"
+          minimum_history_requirement: "must support walk-forward validation without tiny sample artefacts"
+      leakage_controls:
+        - "No random train/test split for time-series strategy validation."
+        - "No feature selection on full-period performance."
+        - "No hyperparameter tuning on holdout."
+        - "No model promotion without simple-rule benchmark comparison."
+      validation_requirements:
+        - "Must use walk-forward or expanding-window validation."
+        - "Must compare against existing final candidate and simple rule baselines."
+        - "Must include multiple-comparisons documentation."
+        - "Must not be treated as a magic alpha layer."
+      scorecard:
+        conceptual_relevance: 4
+        data_availability: 1
+        leakage_control: 1
+        update_frequency_fit: 2
+        validation_clarity: 2
+        overfit_resistance: 1
+        implementation_readiness: 1
+      disqualifiers:
+        - name: "No validated input features"
+          active: true
+
+  gates:
+    min_feature_families: 4
+    max_feature_families: 4
+    require_expected_first_family: true
+    require_no_active_disqualifier_for_recommended_family: true
+    require_data_requirements: true
+    require_leakage_controls: true
+    require_validation_requirements: true
+    require_scorecard: true
+    require_no_data_ingestion: true
+    require_no_model_training: true
+    require_no_strategy_test: true
+    require_no_strategy_promotion: true
+    required_spec_role: "Feature-family feasibility spec only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

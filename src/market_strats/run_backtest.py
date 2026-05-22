@@ -247,6 +247,9 @@ from market_strats.analysis.technical_extension_closeout_audit import (
 from market_strats.analysis.final_phase9_checkpoint_audit import (
     save_phase9f_final_phase9_checkpoint_audit,
 )
+from market_strats.analysis.feature_family_feasibility_spec import (
+    save_phase10a_feature_family_feasibility_spec,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1879,6 +1882,11 @@ def main() -> None:
         )
 
         save_phase9f_final_phase9_checkpoint_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase10a_feature_family_feasibility_spec(
             config=config,
             reports_dir=reports_dir,
         )

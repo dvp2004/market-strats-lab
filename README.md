@@ -67,7 +67,7 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -2467,7 +2467,7 @@ Correct interpretation:
 
 > Phase 8G confirmed that Phase 8 is internally consistent as a research checkpoint. This closes Phase 8 documentation/config consistency, but it is not production approval and does not change the strategy hierarchy.
 
-
+# Phase 9
 ## Phase 9A: Technical Indicator Expansion Diagnostic
 
 Phase 9A tested whether additional price-derived technical indicators helped explain where the final candidate helped or failed.
@@ -2709,6 +2709,61 @@ This was not a strategy test and not production approval.
 Correct interpretation:
 
 > Phase 9A/9B diagnostic evidence, Phase 9C pre-registration, Phase 9D failure, and Phase 9E closeout were documented consistently. No technical rule was promoted and the final candidate hierarchy remains unchanged.
+
+# Phase 10
+## Phase 10A: Feature-Family Feasibility Spec
+
+Phase 10A evaluated which non-price feature family should enter the framework first.
+
+This was a feasibility specification only. It did not ingest data, train a model, test a strategy, or promote a candidate.
+
+### Phase 10A Summary
+
+| Metric | Result |
+|---|---:|
+| Spec role | Feature-family feasibility spec only |
+| Proposed next phase | Phase 10B |
+| Feature-family count | 4 |
+| Data requirement rows | 4 |
+| Leakage control rows | 15 |
+| Validation requirement rows | 12 |
+| Scorecard rows | 4 |
+| Recommended family | macro_rates_inflation |
+| Matches expected first family | True |
+
+### Phase 10A Feature-Family Ranking
+
+| Rank | Feature family | Interpretation |
+|---:|---|---|
+| 1 | Macro / rates / inflation | Selected as first non-price family to audit |
+| 2 | Fundamental / valuation | Future candidate; slower-moving and timing-sensitive |
+| 3 | Sentiment / narrative | Future candidate; noisy and high overfit risk |
+| 4 | ML / ensemble modelling | Long-term branch only; premature without clean features |
+
+### Phase 10A Gate Result
+
+| Gate | Result |
+|---|---|
+| Feature-family count is bounded | Passed |
+| Recommended family matches expected first family | Passed |
+| Recommended family has no active disqualifier | Passed |
+| Each family documents data requirements | Passed |
+| Each family documents leakage controls | Passed |
+| Each family documents validation requirements | Passed |
+| Scorecard exists for all families | Passed |
+| Spec does not allow data ingestion | Passed |
+| Spec does not allow model training | Passed |
+| Spec does not allow strategy testing | Passed |
+| Spec does not allow strategy promotion | Passed |
+| Spec role is correct | Passed |
+
+### Phase 10A Verdict
+
+> Phase 10A completed as a feature-family feasibility spec.
+
+Correct interpretation:
+
+> Phase 10A selected macro/rates/inflation as the first non-price feature family to audit in Phase 10B. It did not ingest data, train a model, test a strategy, or promote a candidate.
 ---
 
 # Methodology Notes
@@ -2860,6 +2915,7 @@ Remaining concerns include:
 - Phase 9D showed that diagnostic technical-regime evidence did not translate into a validated rule. Both pre-registered technical rules failed, so Phase 9A/9B cluster evidence should remain diagnostic rather than promotional.
 - Phase 9E closed the technical-extension branch without promotion. This confirms that the Phase 9A/9B diagnostic evidence did not translate into a validated technical rule through the Phase 9C/9D pre-registration path.
 - Phase 9F confirmed Phase 9 was internally consistent after closeout, but it did not create a new strategy, validate a technical rule, or change the final candidate hierarchy.
+- Phase 10A was a feasibility specification only. It selected macro/rates/inflation as the first non-price feature family to audit, but did not ingest data, train a model, test a strategy, or promote any candidate.
 ---
 
 # Bugs Caught and Fixed
@@ -3283,6 +3339,21 @@ reports/phase9f_final_checkpoint_conclusion.csv
 reports/phase9f_final_phase9_checkpoint_audit.md
 ```
 
+## Phase 10A Feature-Family Feasibility Reports
+
+```text
+reports/phase10a_feature_family_spec.csv
+reports/phase10a_feature_family_data_requirements.csv
+reports/phase10a_feature_family_leakage_controls.csv
+reports/phase10a_feature_family_validation_requirements.csv
+reports/phase10a_feature_family_scorecard.csv
+reports/phase10a_feature_family_recommendation.csv
+reports/phase10a_feature_family_summary.csv
+reports/phase10a_feature_family_gate_report.csv
+reports/phase10a_feature_family_conclusion.csv
+reports/phase10a_feature_family_feasibility_spec.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -3431,6 +3502,7 @@ configs/spy_sma10.yaml
 | Phase 9D pre-registered technical rule test | Failed — no pre-registered rule passed; both H1 oversold RSI relief and H2 negative 12M momentum confirmation failed validation gates |
 | Phase 9E technical extension closeout audit | Completed — technical extension closed without promotion; Phase 9D failure documented, no technical rule promoted, no successor candidate created |
 | Phase 9F final Phase 9 checkpoint audit | Completed — Phase 9 checkpoint consistent; README wording, config flags, report inventory, hierarchy, and closeout documentation passed |
+| Phase 10A feature-family feasibility spec | Completed — feature-family feasibility spec only; macro/rates/inflation selected as first non-price family to audit in Phase 10B |
 ---
 
 # What Should Happen Next
