@@ -256,6 +256,9 @@ from market_strats.analysis.macro_data_source_leakage_audit import (
 from market_strats.analysis.macro_source_reliability_alignment_audit import (
     save_phase10c_macro_source_reliability_alignment_audit,
 )
+from market_strats.analysis.diagnostic_macro_regime_analysis import (
+    save_phase10d_diagnostic_macro_regime_analysis,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1906,6 +1909,13 @@ def main() -> None:
             config=config,
             reports_dir=reports_dir,
             ticker_outputs=ticker_outputs,
+        )
+
+        save_phase10d_diagnostic_macro_regime_analysis(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
         )
 
     save_final_strategy_decision_report(reports_dir)

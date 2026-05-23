@@ -1844,6 +1844,101 @@ phase10c_macro_source_reliability_alignment_audit:
     require_no_strategy_promotion: true
     require_phase10d_boundary_diagnostic_only: true
     required_audit_role: "Macro source reliability and point-in-time alignment audit only"
+phase10d_diagnostic_macro_regime_analysis:
+  enabled: false
+
+  diagnostic_role: "Diagnostic-only macro regime analysis"
+  proposed_next_phase: "Phase 10E"
+
+  canonical_start_date: "2006-04-28"
+  canonical_end_date: "2026-05-01"
+
+  macro_aligned_series_path: "reports/phase10c_macro_aligned_series.csv"
+
+  allow_macro_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_model_feature_creation: false
+  allow_model_training: false
+  allow_strategy_test: false
+  allow_strategy_promotion: false
+
+  phase10e_boundary:
+    allowed_next_step: "pre-registered macro hypothesis design spec only"
+    forbidden_next_step: "macro allocation rule, predictive model, or strategy test"
+    phase10e_may_create_hypothesis_spec: true
+    phase10e_may_create_strategy_signal: false
+    phase10e_may_test_strategy: false
+    phase10e_may_train_model: false
+    phase10e_may_promote_candidate: false
+
+  regime_definitions:
+    unemployment_level:
+      source_series: "UNRATE"
+      low_threshold: 4.0
+      high_threshold: 6.0
+      labels:
+        low: "low_unemployment_below_4"
+        normal: "normal_unemployment_4_to_6"
+        high: "high_unemployment_above_6"
+
+    unemployment_6m_change:
+      source_series: "UNRATE"
+      lookback_trading_days: 126
+      falling_threshold: -0.30
+      rising_threshold: 0.30
+      labels:
+        falling: "unemployment_falling"
+        stable: "unemployment_stable"
+        rising: "unemployment_rising"
+
+    yield_curve_10y_2y:
+      long_rate_series: "DGS10"
+      short_rate_series: "DGS2"
+      inverted_threshold: 0.0
+      steep_threshold: 1.0
+      labels:
+        inverted: "yield_curve_inverted"
+        normal: "yield_curve_normal_0_to_1"
+        steep: "yield_curve_steep_above_1"
+
+    short_rate_level:
+      source_series: "DGS2"
+      low_threshold: 1.5
+      high_threshold: 4.0
+      labels:
+        low: "low_short_rates_below_1_5"
+        normal: "normal_short_rates_1_5_to_4"
+        high: "high_short_rates_above_4"
+
+    inflation_yoy:
+      source_series: "CPIAUCSL"
+      lookback_trading_days: 252
+      low_threshold: 0.02
+      high_threshold: 0.04
+      labels:
+        low: "low_inflation_below_2"
+        normal: "normal_inflation_2_to_4"
+        high: "high_inflation_above_4"
+
+  gates:
+    min_macro_panel_rows: 4000
+    min_regime_families: 5
+    min_regime_metric_rows: 10
+    min_rows_per_regime: 126
+    require_macro_panel_loaded: true
+    require_unrate_present: true
+    require_dgs2_present: true
+    require_dgs10_present: true
+    require_cpi_present: true
+    require_regime_metrics_generated: true
+    require_no_macro_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_model_feature_creation: true
+    require_no_model_training: true
+    require_no_strategy_test: true
+    require_no_strategy_promotion: true
+    require_phase10e_boundary_spec_only: true
+    required_diagnostic_role: "Diagnostic-only macro regime analysis"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
