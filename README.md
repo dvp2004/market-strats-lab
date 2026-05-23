@@ -67,7 +67,7 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -2764,6 +2764,67 @@ This was a feasibility specification only. It did not ingest data, train a model
 Correct interpretation:
 
 > Phase 10A selected macro/rates/inflation as the first non-price feature family to audit in Phase 10B. It did not ingest data, train a model, test a strategy, or promote a candidate.
+
+## Phase 10B: Macro / Rates / Inflation Data-Source & Leakage Feasibility Audit
+
+Phase 10B audited whether macro/rates/inflation data sources were feasible enough for a later point-in-time data-source audit.
+
+This did not download data, engineer features, create signals, train models, test strategies, or promote candidates.
+
+### Phase 10B Summary
+
+| Metric | Result |
+|---|---:|
+| Audit role | Data-source and leakage feasibility audit only |
+| Recommended family | macro_rates_inflation |
+| Proposed next phase | Phase 10C |
+| Source candidate count | 5 |
+| Release-policy ready count | 5 |
+| Revision-policy ready count | 5 |
+| Leakage-controls ready count | 5 |
+| Vintage-capable source count | 1 |
+| Recommended source count for Phase 10C audit | 3 |
+
+### Phase 10B Recommended Sources for Phase 10C Audit
+
+| Source | Role |
+|---|---|
+| `fred_alfred_macro_vintage` | General macro / vintage-capable candidate |
+| `treasury_rates_yield_curve` | Rates and yield-curve candidate |
+| `bls_cpi_inflation` | Inflation candidate |
+
+BEA growth/activity and NBER recession dates remain documented but constrained. BEA-style data has revision-treatment risk, and NBER recession dates are suitable only for ex-post labelling/diagnostics, not live decision inputs.
+
+### Phase 10B Gate Result
+
+| Gate | Result |
+|---|---|
+| Source candidate count is sufficient | Passed |
+| Recommended family is macro/rates/inflation | Passed |
+| No data download is allowed in Phase 10B | Passed |
+| No feature engineering is allowed in Phase 10B | Passed |
+| No signal creation is allowed in Phase 10B | Passed |
+| No model training is allowed in Phase 10B | Passed |
+| No strategy test is allowed in Phase 10B | Passed |
+| No strategy promotion is allowed in Phase 10B | Passed |
+| Each source has a release-date policy | Passed |
+| Each source has a revision policy | Passed |
+| Each source has leakage controls | Passed |
+| At least one source has vintage/revision support | Passed |
+| At least one rates source is present | Passed |
+| At least one inflation source is present | Passed |
+| No source is allowed for strategy testing now | Passed |
+| Phase 10C boundary is data-audit only | Passed |
+| Audit role is correct | Passed |
+
+### Phase 10B Verdict
+
+> Phase 10B completed as a macro/rates/inflation data-source leakage feasibility audit.
+
+Correct interpretation:
+
+> Phase 10B found that selected macro/rates/inflation data-source candidates are feasible enough to audit in Phase 10C. Phase 10C is allowed only as a data-source reliability and point-in-time alignment audit, not as a macro signal or strategy test.
+
 ---
 
 # Methodology Notes
@@ -2916,6 +2977,7 @@ Remaining concerns include:
 - Phase 9E closed the technical-extension branch without promotion. This confirms that the Phase 9A/9B diagnostic evidence did not translate into a validated technical rule through the Phase 9C/9D pre-registration path.
 - Phase 9F confirmed Phase 9 was internally consistent after closeout, but it did not create a new strategy, validate a technical rule, or change the final candidate hierarchy.
 - Phase 10A was a feasibility specification only. It selected macro/rates/inflation as the first non-price feature family to audit, but did not ingest data, train a model, test a strategy, or promote any candidate.
+- Phase 10B was a feasibility audit only. It identified macro/rates/inflation sources suitable for a later Phase 10C source reliability and point-in-time alignment audit, but did not download data, create macro features, test allocation rules, train models, or promote any candidate.
 ---
 
 # Bugs Caught and Fixed
@@ -3354,6 +3416,20 @@ reports/phase10a_feature_family_conclusion.csv
 reports/phase10a_feature_family_feasibility_spec.md
 ```
 
+## Phase 10B Macro Data-Source Leakage Feasibility Reports
+
+```text
+reports/phase10b_macro_source_catalog.csv
+reports/phase10b_macro_timing_revision_check.csv
+reports/phase10b_macro_leakage_control_check.csv
+reports/phase10b_macro_source_recommendation.csv
+reports/phase10b_macro_phase10c_boundary_check.csv
+reports/phase10b_macro_summary.csv
+reports/phase10b_macro_gate_report.csv
+reports/phase10b_macro_conclusion.csv
+reports/phase10b_macro_data_source_leakage_audit.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -3503,6 +3579,7 @@ configs/spy_sma10.yaml
 | Phase 9E technical extension closeout audit | Completed — technical extension closed without promotion; Phase 9D failure documented, no technical rule promoted, no successor candidate created |
 | Phase 9F final Phase 9 checkpoint audit | Completed — Phase 9 checkpoint consistent; README wording, config flags, report inventory, hierarchy, and closeout documentation passed |
 | Phase 10A feature-family feasibility spec | Completed — feature-family feasibility spec only; macro/rates/inflation selected as first non-price family to audit in Phase 10B |
+| Phase 10B macro/rates/inflation data-source leakage audit | Completed — data-source and leakage feasibility audit only; FRED/ALFRED, Treasury/rates, and BLS CPI selected for Phase 10C source reliability/alignment audit; no data download, feature engineering, signal creation, model training, strategy testing, or promotion |
 ---
 
 # What Should Happen Next

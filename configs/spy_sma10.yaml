@@ -1529,6 +1529,181 @@ phase10a_feature_family_feasibility_spec:
     require_no_strategy_test: true
     require_no_strategy_promotion: true
     required_spec_role: "Feature-family feasibility spec only"
+phase10b_macro_data_source_leakage_audit:
+  enabled: false
+
+  audit_role: "Data-source and leakage feasibility audit only"
+  proposed_next_phase: "Phase 10C"
+  recommended_family: "macro_rates_inflation"
+
+  allow_data_download: false
+  allow_feature_engineering: false
+  allow_signal_creation: false
+  allow_model_training: false
+  allow_strategy_test: false
+  allow_strategy_promotion: false
+
+  phase10c_boundary:
+    allowed_next_step: "data-source reliability and point-in-time alignment audit only"
+    forbidden_next_step: "macro signal backtest or allocation rule test"
+    phase10c_may_download_data: true
+    phase10c_may_create_strategy_signal: false
+    phase10c_may_test_strategy: false
+    phase10c_may_promote_candidate: false
+
+  source_candidates:
+    - source_id: "fred_alfred_macro_vintage"
+      name: "FRED / ALFRED macro time series"
+      provider_type: "public_macro_database"
+      macro_role: "general_macro_vintage_candidate"
+      source_family: "macro_rates_inflation"
+      example_series:
+        - "policy_rate_proxy"
+        - "inflation_proxy"
+        - "unemployment_proxy"
+        - "industrial_activity_proxy"
+      frequency: "mixed"
+      expected_history_coverage: "strong"
+      release_date_policy: "must use release-date-aware alignment"
+      revision_policy: "vintage treatment required where series are revised"
+      has_release_calendar_or_timestamp: true
+      has_vintage_or_revision_support: true
+      supports_point_in_time_alignment: true
+      known_leakage_risks:
+        - "revised series values"
+        - "publication lag"
+        - "mixed frequencies"
+      required_controls:
+        - "Use only values available as of decision date."
+        - "Prefer vintage observations where available."
+        - "Document release lag and alignment rule for each series."
+      allowed_for_phase10c_source_audit: true
+      allowed_for_strategy_test_now: false
+      active_disqualifiers: []
+
+    - source_id: "treasury_rates_yield_curve"
+      name: "Treasury / rates yield-curve source"
+      provider_type: "public_rates_source"
+      macro_role: "rates_and_yield_curve_candidate"
+      source_family: "macro_rates_inflation"
+      example_series:
+        - "short_rate_proxy"
+        - "long_rate_proxy"
+        - "yield_curve_slope_proxy"
+      frequency: "daily"
+      expected_history_coverage: "strong"
+      release_date_policy: "must align rates to availability date"
+      revision_policy: "low revision risk but still document source changes"
+      has_release_calendar_or_timestamp: true
+      has_vintage_or_revision_support: false
+      supports_point_in_time_alignment: true
+      known_leakage_risks:
+        - "same-day availability assumption"
+        - "holiday/calendar mismatches"
+      required_controls:
+        - "Apply conservative one-trading-day lag unless timestamp is reliable."
+        - "Document trading-calendar alignment."
+      allowed_for_phase10c_source_audit: true
+      allowed_for_strategy_test_now: false
+      active_disqualifiers: []
+
+    - source_id: "bls_cpi_inflation"
+      name: "BLS CPI / inflation source"
+      provider_type: "public_inflation_source"
+      macro_role: "inflation_candidate"
+      source_family: "macro_rates_inflation"
+      example_series:
+        - "headline_inflation_proxy"
+        - "core_inflation_proxy"
+      frequency: "monthly"
+      expected_history_coverage: "strong"
+      release_date_policy: "must align CPI values only after public release date"
+      revision_policy: "must document seasonal/revision treatment"
+      has_release_calendar_or_timestamp: true
+      has_vintage_or_revision_support: false
+      supports_point_in_time_alignment: true
+      known_leakage_risks:
+        - "publication lag"
+        - "seasonal adjustment revision"
+        - "monthly-to-daily forward-fill leakage"
+      required_controls:
+        - "Forward-fill only after release date."
+        - "Do not use month label as availability date."
+        - "Document whether adjusted or unadjusted series is used."
+      allowed_for_phase10c_source_audit: true
+      allowed_for_strategy_test_now: false
+      active_disqualifiers: []
+
+    - source_id: "bea_growth_activity"
+      name: "BEA growth / activity source"
+      provider_type: "public_growth_source"
+      macro_role: "growth_and_activity_candidate"
+      source_family: "macro_rates_inflation"
+      example_series:
+        - "gdp_growth_proxy"
+        - "pce_proxy"
+      frequency: "quarterly_or_monthly"
+      expected_history_coverage: "moderate"
+      release_date_policy: "must account for publication date and release revisions"
+      revision_policy: "high revision risk; vintage treatment strongly preferred"
+      has_release_calendar_or_timestamp: true
+      has_vintage_or_revision_support: false
+      supports_point_in_time_alignment: false
+      known_leakage_risks:
+        - "major revisions"
+        - "quarterly publication lag"
+        - "backfilled history"
+      required_controls:
+        - "Do not use as strategy feature until revision treatment is solved."
+        - "Use initially only for feasibility documentation unless vintage data exists."
+      allowed_for_phase10c_source_audit: true
+      allowed_for_strategy_test_now: false
+      active_disqualifiers:
+        - "revision_treatment_not_yet_solved"
+
+    - source_id: "nber_recession_dates"
+      name: "NBER recession dates"
+      provider_type: "public_cycle_label_source"
+      macro_role: "evaluation_label_only"
+      source_family: "macro_rates_inflation"
+      example_series:
+        - "recession_label_for_diagnostics_only"
+      frequency: "irregular"
+      expected_history_coverage: "strong"
+      release_date_policy: "not suitable as real-time decision feature"
+      revision_policy: "cycle dates may be announced after the fact"
+      has_release_calendar_or_timestamp: false
+      has_vintage_or_revision_support: false
+      supports_point_in_time_alignment: false
+      known_leakage_risks:
+        - "after-the-fact labels"
+        - "future regime knowledge"
+      required_controls:
+        - "May be used only for ex-post episode labelling or diagnostics."
+        - "Must not be used as live decision input."
+      allowed_for_phase10c_source_audit: true
+      allowed_for_strategy_test_now: false
+      active_disqualifiers:
+        - "label_only_not_real_time_feature"
+
+  gates:
+    min_source_candidates: 5
+    require_recommended_family_macro_rates_inflation: true
+    require_no_data_download: true
+    require_no_feature_engineering: true
+    require_no_signal_creation: true
+    require_no_model_training: true
+    require_no_strategy_test: true
+    require_no_strategy_promotion: true
+    require_each_source_has_release_policy: true
+    require_each_source_has_revision_policy: true
+    require_each_source_has_leakage_controls: true
+    require_at_least_one_vintage_capable_source: true
+    require_at_least_one_rates_source: true
+    require_at_least_one_inflation_source: true
+    require_no_source_allowed_for_strategy_test_now: true
+    require_phase10c_boundary_is_data_audit_only: true
+    required_audit_role: "Data-source and leakage feasibility audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
