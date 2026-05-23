@@ -1704,6 +1704,146 @@ phase10b_macro_data_source_leakage_audit:
     require_no_source_allowed_for_strategy_test_now: true
     require_phase10c_boundary_is_data_audit_only: true
     required_audit_role: "Data-source and leakage feasibility audit only"
+phase10c_macro_source_reliability_alignment_audit:
+  enabled: false
+
+  audit_role: "Macro source reliability and point-in-time alignment audit only"
+  proposed_next_phase: "Phase 10D"
+  recommended_family: "macro_rates_inflation"
+
+  canonical_start_date: "2006-04-28"
+  canonical_end_date: "2026-05-01"
+
+  data_dir: "data/raw/macro"
+  allow_remote_fetch: true
+  remote_fetch_timeout_seconds: 30
+
+  allow_macro_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_model_feature_creation: false
+  allow_model_training: false
+  allow_strategy_test: false
+  allow_strategy_promotion: false
+
+  phase10d_boundary:
+    allowed_next_step: "diagnostic-only macro regime analysis"
+    forbidden_next_step: "macro allocation rule, predictive model, or strategy test"
+    phase10d_may_create_macro_regime_diagnostic: true
+    phase10d_may_create_strategy_signal: false
+    phase10d_may_test_strategy: false
+    phase10d_may_train_model: false
+    phase10d_may_promote_candidate: false
+
+  selected_sources:
+    - source_id: "fred_alfred_macro_vintage"
+      name: "FRED / ALFRED macro time series"
+      source_role: "general_macro_vintage_candidate"
+      provider: "FRED/ALFRED"
+      release_date_policy: "FRED current values may be loaded for coverage/alignment audit; ALFRED/vintage treatment is required before any strategy use."
+      revision_policy: "Revision/vintage risk must remain documented. Current FRED values are not treated as live point-in-time strategy inputs."
+      source_caveat: "Audit source only; not strategy-ready without vintage/release-date controls."
+      selected_for_phase10c: true
+      allowed_for_phase10d_diagnostic: true
+      allowed_for_strategy_test: false
+      series:
+        - series_id: "UNRATE"
+          display_name: "Unemployment rate"
+          fetch_url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=UNRATE"
+          local_csv_path: "data/raw/macro/UNRATE.csv"
+          date_column: "observation_date"
+          value_column: "UNRATE"
+          frequency: "monthly"
+          value_type: "macro_level"
+          availability_lag_trading_days: 3
+          has_explicit_release_dates: false
+          has_vintage_support: true
+          uses_current_revised_values: true
+          revision_risk_documented: true
+
+    - source_id: "treasury_rates_yield_curve"
+      name: "Treasury / rates yield-curve source"
+      source_role: "rates_and_yield_curve_candidate"
+      provider: "Treasury/FRED proxy"
+      release_date_policy: "Daily rates must be lagged conservatively to avoid same-day availability assumptions."
+      revision_policy: "Low revision risk relative to macro releases, but source changes and calendar mismatches remain documented."
+      source_caveat: "Audit source only; not a strategy signal."
+      selected_for_phase10c: true
+      allowed_for_phase10d_diagnostic: true
+      allowed_for_strategy_test: false
+      series:
+        - series_id: "DGS2"
+          display_name: "2-year Treasury yield"
+          fetch_url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS2"
+          local_csv_path: "data/raw/macro/DGS2.csv"
+          date_column: "observation_date"
+          value_column: "DGS2"
+          frequency: "daily"
+          value_type: "rate_level"
+          availability_lag_trading_days: 1
+          has_explicit_release_dates: true
+          has_vintage_support: false
+          uses_current_revised_values: false
+          revision_risk_documented: true
+        - series_id: "DGS10"
+          display_name: "10-year Treasury yield"
+          fetch_url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10"
+          local_csv_path: "data/raw/macro/DGS10.csv"
+          date_column: "observation_date"
+          value_column: "DGS10"
+          frequency: "daily"
+          value_type: "rate_level"
+          availability_lag_trading_days: 1
+          has_explicit_release_dates: true
+          has_vintage_support: false
+          uses_current_revised_values: false
+          revision_risk_documented: true
+
+    - source_id: "bls_cpi_inflation"
+      name: "BLS CPI / inflation source"
+      source_role: "inflation_candidate"
+      provider: "BLS/FRED proxy"
+      release_date_policy: "CPI values must be treated as unavailable until after public release; month labels must not be treated as release dates."
+      revision_policy: "Seasonal adjustment/revision risk remains documented. Current values are audit-only unless vintage/release treatment is solved."
+      source_caveat: "Audit source only; not strategy-ready without release-date treatment."
+      selected_for_phase10c: true
+      allowed_for_phase10d_diagnostic: true
+      allowed_for_strategy_test: false
+      series:
+        - series_id: "CPIAUCSL"
+          display_name: "CPI all urban consumers"
+          fetch_url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL"
+          local_csv_path: "data/raw/macro/CPIAUCSL.csv"
+          date_column: "observation_date"
+          value_column: "CPIAUCSL"
+          frequency: "monthly"
+          value_type: "inflation_level"
+          availability_lag_trading_days: 15
+          has_explicit_release_dates: false
+          has_vintage_support: false
+          uses_current_revised_values: true
+          revision_risk_documented: true
+
+  gates:
+    min_selected_sources: 3
+    min_loaded_series: 4
+    min_phase10d_ready_series: 3
+    min_aligned_availability_rate: 0.80
+    require_remote_or_local_load_success: true
+    require_release_policy_documented: true
+    require_revision_policy_documented: true
+    require_conservative_lag_applied: true
+    require_revision_risk_documented: true
+    require_rates_series_ready: true
+    require_inflation_series_ready: true
+    require_macro_series_ready: true
+    require_no_macro_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_model_feature_creation: true
+    require_no_model_training: true
+    require_no_strategy_test: true
+    require_no_strategy_promotion: true
+    require_phase10d_boundary_diagnostic_only: true
+    required_audit_role: "Macro source reliability and point-in-time alignment audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

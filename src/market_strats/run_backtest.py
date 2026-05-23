@@ -253,6 +253,9 @@ from market_strats.analysis.feature_family_feasibility_spec import (
 from market_strats.analysis.macro_data_source_leakage_audit import (
     save_phase10b_macro_data_source_leakage_audit,
 )
+from market_strats.analysis.macro_source_reliability_alignment_audit import (
+    save_phase10c_macro_source_reliability_alignment_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1897,6 +1900,12 @@ def main() -> None:
         save_phase10b_macro_data_source_leakage_audit(
             config=config,
             reports_dir=reports_dir,
+        )
+
+        save_phase10c_macro_source_reliability_alignment_audit(
+            config=config,
+            reports_dir=reports_dir,
+            ticker_outputs=ticker_outputs,
         )
 
     save_final_strategy_decision_report(reports_dir)

@@ -67,7 +67,7 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D is allowed only as diagnostic macro regime analysis. No macro signal, model feature, strategy test, allocation rule, or candidate promotion exists yet.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -2825,6 +2825,66 @@ Correct interpretation:
 
 > Phase 10B found that selected macro/rates/inflation data-source candidates are feasible enough to audit in Phase 10C. Phase 10C is allowed only as a data-source reliability and point-in-time alignment audit, not as a macro signal or strategy test.
 
+## Phase 10C: Macro Source Reliability & Point-in-Time Alignment Audit
+
+Phase 10C loaded/fetched selected macro/rates/inflation sources and checked source reliability, historical coverage, conservative trading-day lagging, revision/vintage risk documentation, missingness, and Phase 10D readiness.
+
+This did not create macro signals, allocation rules, predictive model features, model training, strategy tests, or candidate promotion.
+
+### Phase 10C Summary
+
+| Metric | Result |
+|---|---:|
+| Audit role | Macro source reliability and point-in-time alignment audit only |
+| Recommended family | macro_rates_inflation |
+| Proposed next phase | Phase 10D |
+| Selected source count | 3 |
+| Series count | 4 |
+| Loaded series count | 4 |
+| Phase 10D ready series count | 4 |
+| Phase 10D allowed | True |
+
+### Phase 10C Loaded Series
+
+| Series | Role | Raw rows | Aligned rows | Non-missing aligned rows |
+|---|---|---:|---:|---:|
+| `UNRATE` | General macro / labour proxy | 940 | 5034 | 5008 |
+| `DGS2` | 2-year Treasury yield / rates proxy | 13038 | 5034 | 4961 |
+| `DGS10` | 10-year Treasury yield / rates proxy | 16798 | 5034 | 4969 |
+| `CPIAUCSL` | CPI / inflation proxy | 952 | 5034 | 4996 |
+
+### Phase 10C Gate Result
+
+| Gate | Result |
+|---|---|
+| Selected source count is sufficient | Passed |
+| Remote/local macro series load succeeded | Passed |
+| Release-date policies are documented | Passed |
+| Revision/vintage policies are documented | Passed |
+| Aligned series meet missingness threshold | Passed |
+| Conservative trading-day lag is applied | Passed |
+| Revision risk is documented for every series | Passed |
+| Rates series is ready for diagnostic audit | Passed |
+| Inflation series is ready for diagnostic audit | Passed |
+| Macro series is ready for diagnostic audit | Passed |
+| No macro signal creation is allowed | Passed |
+| No allocation rule creation is allowed | Passed |
+| No model feature creation is allowed | Passed |
+| No model training is allowed | Passed |
+| No strategy test is allowed | Passed |
+| No strategy promotion is allowed | Passed |
+| Phase 10D boundary is diagnostic-only | Passed |
+| Enough series are ready to allow Phase 10D diagnostic-only analysis | Passed |
+| Audit role is correct | Passed |
+
+### Phase 10C Verdict
+
+> Phase 10C completed as a macro source reliability and point-in-time alignment audit.
+
+Correct interpretation:
+
+> Phase 10C loaded and aligned the selected macro/rates/inflation sources with conservative trading-day lagging and documented revision risk. Phase 10D is allowed only as diagnostic macro regime analysis, not as a macro signal, model, strategy test, or candidate promotion.
+
 ---
 
 # Methodology Notes
@@ -2978,6 +3038,7 @@ Remaining concerns include:
 - Phase 9F confirmed Phase 9 was internally consistent after closeout, but it did not create a new strategy, validate a technical rule, or change the final candidate hierarchy.
 - Phase 10A was a feasibility specification only. It selected macro/rates/inflation as the first non-price feature family to audit, but did not ingest data, train a model, test a strategy, or promote any candidate.
 - Phase 10B was a feasibility audit only. It identified macro/rates/inflation sources suitable for a later Phase 10C source reliability and point-in-time alignment audit, but did not download data, create macro features, test allocation rules, train models, or promote any candidate.
+- Phase 10C loaded and aligned selected macro/rates/inflation data, but it remained an audit only. Current/revised macro values may still carry revision risk, and no macro signal, model feature, strategy test, allocation rule, or candidate promotion was created.
 ---
 
 # Bugs Caught and Fixed
@@ -3430,6 +3491,23 @@ reports/phase10b_macro_conclusion.csv
 reports/phase10b_macro_data_source_leakage_audit.md
 ```
 
+## Phase 10C Macro Source Reliability / Alignment Reports
+
+```text
+reports/phase10c_macro_source_catalog.csv
+reports/phase10c_macro_series_catalog.csv
+reports/phase10c_macro_raw_series.csv
+reports/phase10c_macro_load_report.csv
+reports/phase10c_macro_aligned_series.csv
+reports/phase10c_macro_coverage_alignment_summary.csv
+reports/phase10c_macro_phase10d_readiness.csv
+reports/phase10c_macro_phase10d_boundary_check.csv
+reports/phase10c_macro_summary.csv
+reports/phase10c_macro_gate_report.csv
+reports/phase10c_macro_conclusion.csv
+reports/phase10c_macro_source_reliability_alignment_audit.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -3580,6 +3658,7 @@ configs/spy_sma10.yaml
 | Phase 9F final Phase 9 checkpoint audit | Completed — Phase 9 checkpoint consistent; README wording, config flags, report inventory, hierarchy, and closeout documentation passed |
 | Phase 10A feature-family feasibility spec | Completed — feature-family feasibility spec only; macro/rates/inflation selected as first non-price family to audit in Phase 10B |
 | Phase 10B macro/rates/inflation data-source leakage audit | Completed — data-source and leakage feasibility audit only; FRED/ALFRED, Treasury/rates, and BLS CPI selected for Phase 10C source reliability/alignment audit; no data download, feature engineering, signal creation, model training, strategy testing, or promotion |
+| Phase 10C macro source reliability and point-in-time alignment audit | Completed — source reliability/alignment audit passed; UNRATE, DGS2, DGS10, and CPIAUCSL loaded and aligned; Phase 10D allowed only as diagnostic macro regime analysis |
 ---
 
 # What Should Happen Next
