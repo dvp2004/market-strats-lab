@@ -259,6 +259,9 @@ from market_strats.analysis.macro_source_reliability_alignment_audit import (
 from market_strats.analysis.diagnostic_macro_regime_analysis import (
     save_phase10d_diagnostic_macro_regime_analysis,
 )
+from market_strats.analysis.preregistered_macro_hypothesis_spec import (
+    save_phase10e_preregistered_macro_hypothesis_spec,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1914,6 +1917,11 @@ def main() -> None:
         save_phase10d_diagnostic_macro_regime_analysis(
             relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase10e_preregistered_macro_hypothesis_spec(
             config=config,
             reports_dir=reports_dir,
         )

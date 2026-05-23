@@ -67,7 +67,7 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -2955,6 +2955,62 @@ Correct interpretation:
 
 > Phase 10D produced macro/rates/inflation regime diagnostics that may justify pre-registering macro hypotheses in Phase 10E. It did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion.
 
+## Phase 10E: Pre-Registered Macro Hypothesis Design Spec
+
+Phase 10E pre-registered the only macro hypotheses allowed to move into a later Phase 10F macro-rule test.
+
+This did not create macro signals, allocation overlays, predictive model features, model training, strategy tests, or candidate promotion.
+
+### Phase 10E Summary
+
+| Metric | Result |
+|---|---:|
+| Spec role | Pre-registered macro hypothesis design spec only |
+| Proposed test phase | Phase 10F |
+| Hypothesis count | 2 |
+| Allowed input rows | 13 |
+| Allowed inputs all registered | True |
+| Forbidden input rows | 14 |
+| Validation gate rows | 16 |
+| Failure condition rows | 10 |
+
+### Phase 10E Pre-Registered Hypotheses
+
+| Hypothesis | Description | Max allowed role after Phase 10F |
+|---|---|---|
+| `H1_supportive_low_rate_low_inflation_relief` | Tests a fixed low-rate / low-inflation supportive macro-relief hypothesis derived from Phase 10D diagnostics | Candidate for further validation only |
+| `H2_high_rate_high_unemployment_stress_guard` | Tests a fixed high-rate / high-unemployment macro stress-guard hypothesis derived from Phase 10D diagnostics | Candidate for further validation only |
+
+### Phase 10E Gate Result
+
+| Gate | Result |
+|---|---|
+| Hypothesis count is bounded | Passed |
+| Source evidence is documented | Passed |
+| Allowed macro inputs are documented | Passed |
+| Allowed macro inputs stay inside registry | Passed |
+| Forbidden inputs are documented | Passed |
+| Fixed thresholds are documented | Passed |
+| Validation gates are documented | Passed |
+| Failure conditions are documented | Passed |
+| README wording outcomes are documented | Passed |
+| Phase 10F boundary is pre-registered-test only | Passed |
+| Spec does not allow macro signal creation | Passed |
+| Spec does not allow allocation rule creation | Passed |
+| Spec does not allow model feature creation | Passed |
+| Spec does not allow model training | Passed |
+| Spec does not allow strategy testing | Passed |
+| Spec does not allow strategy promotion | Passed |
+| Spec role is correct | Passed |
+
+### Phase 10E Verdict
+
+> Phase 10E completed as a pre-registered macro hypothesis design spec.
+
+Correct interpretation:
+
+> Phase 10E pre-registered the only macro hypotheses allowed for a later Phase 10F test. It did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion.
+
 ---
 
 # Methodology Notes
@@ -3110,6 +3166,7 @@ Remaining concerns include:
 - Phase 10B was a feasibility audit only. It identified macro/rates/inflation sources suitable for a later Phase 10C source reliability and point-in-time alignment audit, but did not download data, create macro features, test allocation rules, train models, or promote any candidate.
 - Phase 10C loaded and aligned selected macro/rates/inflation data, but it remained an audit only. Current/revised macro values may still carry revision risk, and no macro signal, model feature, strategy test, allocation rule, or candidate promotion was created.
 - Phase 10D was diagnostic only. Macro/rates/inflation regimes helped describe where the final candidate looked stronger or weaker, but no macro rule, signal, model feature, allocation overlay, strategy test, or candidate promotion was created.
+- Phase 10E only pre-registered macro hypotheses. It did not test whether the hypotheses work, create a macro strategy, add an allocation overlay, train a model, or promote any candidate.
 ---
 
 # Bugs Caught and Fixed
@@ -3595,6 +3652,22 @@ reports/phase10d_macro_conclusion.csv
 reports/phase10d_diagnostic_macro_regime_analysis.md
 ```
 
+## Phase 10E Pre-Registered Macro Hypothesis Reports
+
+```text
+reports/phase10e_macro_input_registry.csv
+reports/phase10e_macro_hypothesis_spec.csv
+reports/phase10e_macro_allowed_inputs.csv
+reports/phase10e_macro_forbidden_inputs.csv
+reports/phase10e_macro_validation_gates.csv
+reports/phase10e_macro_failure_conditions.csv
+reports/phase10e_macro_phase10f_boundary_check.csv
+reports/phase10e_macro_summary.csv
+reports/phase10e_macro_gate_report.csv
+reports/phase10e_macro_conclusion.csv
+reports/phase10e_preregistered_macro_hypothesis_spec.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -3747,6 +3820,7 @@ configs/spy_sma10.yaml
 | Phase 10B macro/rates/inflation data-source leakage audit | Completed — data-source and leakage feasibility audit only; FRED/ALFRED, Treasury/rates, and BLS CPI selected for Phase 10C source reliability/alignment audit; no data download, feature engineering, signal creation, model training, strategy testing, or promotion |
 | Phase 10C macro source reliability and point-in-time alignment audit | Completed — source reliability/alignment audit passed; UNRATE, DGS2, DGS10, and CPIAUCSL loaded and aligned; Phase 10D allowed only as diagnostic macro regime analysis |
 | Phase 10D diagnostic-only macro regime analysis | Completed — diagnostic-only macro/rates/inflation regime analysis; 5 regime families and 15 regime metric rows generated; no macro signal, strategy test, model, allocation rule, or promotion |
+| Phase 10E pre-registered macro hypothesis design spec | Completed — exactly two macro hypotheses pre-registered for possible Phase 10F testing; no macro signal, allocation overlay, model feature, strategy test, or promotion |
 ---
 
 # What Should Happen Next

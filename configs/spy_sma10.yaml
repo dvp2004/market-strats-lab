@@ -1939,6 +1939,177 @@ phase10d_diagnostic_macro_regime_analysis:
     require_no_strategy_promotion: true
     require_phase10e_boundary_spec_only: true
     required_diagnostic_role: "Diagnostic-only macro regime analysis"
+phase10e_preregistered_macro_hypothesis_spec:
+  enabled: false
+
+  spec_role: "Pre-registered macro hypothesis design spec only"
+  proposed_test_phase: "Phase 10F"
+
+  allow_macro_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_model_feature_creation: false
+  allow_model_training: false
+  allow_strategy_test: false
+  allow_strategy_promotion: false
+
+  allowed_macro_input_registry:
+    - "DGS2"
+    - "DGS10"
+    - "CPIAUCSL"
+    - "UNRATE"
+    - "yield_curve_10y_2y"
+    - "cpi_yoy"
+    - "short_rate_level"
+    - "inflation_yoy"
+    - "unemployment_level"
+    - "unemployment_6m_change"
+    - "existing_final_candidate_mode"
+    - "existing_final_candidate_return"
+
+  allowed_evaluation_inputs:
+    - "SPY Buy & Hold return"
+    - "SPY 12M Momentum return"
+    - "final candidate return"
+    - "drawdown"
+    - "CAGR"
+    - "Calmar"
+    - "holdout performance"
+    - "episode performance"
+    - "stress friction performance"
+    - "behavioural regret"
+
+  forbidden_inputs:
+    - "sentiment"
+    - "news"
+    - "LLM narrative labels"
+    - "fundamental valuation"
+    - "earnings"
+    - "BTC"
+    - "ETH"
+    - "commodities"
+    - "NBER recession labels as live decision input"
+    - "future returns"
+    - "future drawdowns"
+    - "post-hoc thresholds"
+    - "optimised macro thresholds"
+    - "ML-generated regimes"
+
+  hypotheses:
+    - hypothesis_id: "H1_supportive_low_rate_low_inflation_relief"
+      name: "Supportive low-rate / low-inflation macro relief hypothesis"
+      source_phase: "Phase 10D"
+      source_evidence:
+        - "short_rate_level = low_short_rates_below_1_5 was helpful versus both benchmarks in Phase 10D diagnostics."
+        - "inflation_yoy = low_inflation_below_2 was helpful versus both benchmarks in Phase 10D diagnostics."
+        - "This is diagnostic evidence only, not a validated rule."
+      allowed_macro_inputs:
+        - "DGS2"
+        - "CPIAUCSL"
+        - "cpi_yoy"
+        - "short_rate_level"
+        - "inflation_yoy"
+        - "existing_final_candidate_mode"
+        - "existing_final_candidate_return"
+      fixed_macro_thresholds:
+        short_rate_level: "DGS2 below 1.5"
+        inflation_yoy: "CPIAUCSL 252-trading-day inflation below 2%"
+      proposed_phase10f_test_logic: "Only in the pre-defined low-short-rate AND low-inflation regime, test whether a fixed macro-relief overlay improves the existing final candidate without worsening drawdown, holdout, friction, or behavioural-regret gates. No threshold search is allowed."
+      forbidden_tuning:
+        - "Do not alter the 1.5 short-rate threshold."
+        - "Do not alter the 2% inflation threshold."
+        - "Do not add unemployment, yield-curve, sentiment, fundamental, or ML filters."
+        - "Do not optimise rule activation after seeing Phase 10F results."
+      validation_gates:
+        - "Must improve full-period Calmar versus the existing final candidate."
+        - "Must not reduce full-period CAGR by more than 0.15 percentage points versus the existing final candidate."
+        - "Must not worsen full-period max drawdown."
+        - "Must not worsen holdout CAGR, Calmar, or max drawdown."
+        - "Must not create material episode damage beyond configured limits."
+        - "Must survive Phase 8B-style stress friction."
+        - "Must not worsen behavioural relative drawdown versus Buy & Hold."
+        - "Must not become a raw-wealth overclaim versus SPY Buy & Hold."
+      failure_conditions:
+        - "Fails if full-period Calmar does not improve."
+        - "Fails if max drawdown worsens."
+        - "Fails if holdout performance worsens."
+        - "Fails if stress-friction performance weakens materially."
+        - "Fails if behavioural regret worsens."
+      readme_wording_if_passed: "Phase 10F passed for further validation only; no macro rule is promoted."
+      readme_wording_if_mixed: "Phase 10F produced mixed macro-rule evidence; no macro rule is promoted."
+      readme_wording_if_failed: "Phase 10F failed; the pre-registered macro relief hypothesis is rejected and must not be tuned around."
+      max_allowed_role_after_phase10f: "Candidate for further validation only"
+
+    - hypothesis_id: "H2_high_rate_high_unemployment_stress_guard"
+      name: "High-rate / high-unemployment macro stress-guard hypothesis"
+      source_phase: "Phase 10D"
+      source_evidence:
+        - "short_rate_level = high_short_rates_above_4 was weak versus both benchmarks in Phase 10D diagnostics."
+        - "unemployment_level = high_unemployment_above_6 was mixed/weak, especially versus SPY 12M."
+        - "This is diagnostic evidence only, not a validated rule."
+      allowed_macro_inputs:
+        - "DGS2"
+        - "UNRATE"
+        - "short_rate_level"
+        - "unemployment_level"
+        - "existing_final_candidate_mode"
+        - "existing_final_candidate_return"
+      fixed_macro_thresholds:
+        short_rate_level: "DGS2 above 4.0"
+        unemployment_level: "UNRATE above 6.0"
+      proposed_phase10f_test_logic: "Only in the pre-defined high-short-rate OR high-unemployment regime, test whether a fixed macro stress guard reduces final-candidate weakness without damaging full-period, holdout, friction, or behavioural-regret gates. No threshold search is allowed."
+      forbidden_tuning:
+        - "Do not alter the 4.0 short-rate threshold."
+        - "Do not alter the 6.0 unemployment threshold."
+        - "Do not add CPI, yield-curve, sentiment, fundamental, or ML filters."
+        - "Do not optimise defensive behaviour after seeing Phase 10F results."
+      validation_gates:
+        - "Must improve or preserve full-period Calmar versus the existing final candidate."
+        - "Must not reduce full-period CAGR by more than 0.15 percentage points versus the existing final candidate."
+        - "Must improve or preserve max drawdown."
+        - "Must not worsen holdout CAGR, Calmar, or max drawdown."
+        - "Must not create material episode damage beyond configured limits."
+        - "Must survive Phase 8B-style stress friction."
+        - "Must not worsen behavioural relative drawdown versus Buy & Hold."
+        - "Must not be promoted even if it passes Phase 10F."
+      failure_conditions:
+        - "Fails if full-period Calmar worsens."
+        - "Fails if full-period max drawdown worsens."
+        - "Fails if holdout performance worsens."
+        - "Fails if stress-friction performance weakens materially."
+        - "Fails if behavioural regret worsens."
+      readme_wording_if_passed: "Phase 10F passed for further validation only; no macro stress-guard rule is promoted."
+      readme_wording_if_mixed: "Phase 10F produced mixed macro stress-guard evidence; no macro rule is promoted."
+      readme_wording_if_failed: "Phase 10F failed; the pre-registered macro stress-guard hypothesis is rejected and must not be tuned around."
+      max_allowed_role_after_phase10f: "Candidate for further validation only"
+
+  phase10f_boundary:
+    allowed_next_step: "pre-registered macro-rule test only"
+    forbidden_next_step: "open-ended macro optimisation, ML model, or candidate promotion"
+    phase10f_may_test_only_preregistered_hypotheses: true
+    phase10f_may_create_new_thresholds: false
+    phase10f_may_add_new_inputs: false
+    phase10f_may_train_model: false
+    phase10f_may_promote_candidate: false
+
+  gates:
+    min_hypotheses: 2
+    max_hypotheses: 2
+    require_source_evidence: true
+    require_allowed_inputs: true
+    require_allowed_inputs_inside_registry: true
+    require_forbidden_inputs: true
+    require_fixed_thresholds: true
+    require_validation_gates: true
+    require_failure_conditions: true
+    require_readme_wording: true
+    require_phase10f_boundary: true
+    require_no_macro_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_model_feature_creation: true
+    require_no_model_training: true
+    require_no_strategy_test: true
+    require_no_strategy_promotion: true
+    required_spec_role: "Pre-registered macro hypothesis design spec only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
