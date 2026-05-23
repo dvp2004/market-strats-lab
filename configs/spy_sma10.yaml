@@ -2110,6 +2110,136 @@ phase10e_preregistered_macro_hypothesis_spec:
     require_no_strategy_test: true
     require_no_strategy_promotion: true
     required_spec_role: "Pre-registered macro hypothesis design spec only"
+phase10f_preregistered_macro_rule_test:
+  enabled: false
+
+  test_role: "Pre-registered macro-rule test only"
+  proposed_next_phase: "Phase 10G"
+  macro_aligned_series_path: "reports/phase10c_macro_aligned_series.csv"
+
+  canonical_start_date: "2006-04-28"
+  canonical_end_date: "2026-05-01"
+  holdout_start_date: "2016-01-01"
+
+  allow_new_thresholds: false
+  allow_new_inputs: false
+  allow_macro_signal_creation_outside_preregistered_rules: false
+  allow_allocation_rule_creation_outside_preregistered_rules: false
+  allow_model_feature_creation: false
+  allow_model_training: false
+  allow_strategy_promotion: false
+
+  friction:
+    stress_bps_per_rule_switch: 10.0
+    max_stress_cagr_degradation_pts: 0.15
+    max_stress_calmar_degradation: 0.010
+
+  episode_windows:
+    - episode: "crisis_2006_2010"
+      start_date: "2006-04-28"
+      end_date: "2010-12-31"
+    - episode: "post_crisis_2011_2015"
+      start_date: "2011-01-01"
+      end_date: "2015-12-31"
+    - episode: "bull_covid_2016_2020"
+      start_date: "2016-01-01"
+      end_date: "2020-12-31"
+    - episode: "inflation_2021_2026"
+      start_date: "2021-01-01"
+      end_date: "2026-05-01"
+
+  allowed_macro_input_registry:
+    - "DGS2"
+    - "DGS10"
+    - "CPIAUCSL"
+    - "UNRATE"
+    - "cpi_yoy"
+    - "short_rate_level"
+    - "inflation_yoy"
+    - "unemployment_level"
+    - "existing_final_candidate_return"
+
+  rules:
+    - rule_id: "H1_supportive_low_rate_low_inflation_relief"
+      hypothesis_id: "H1_supportive_low_rate_low_inflation_relief"
+      role: "Candidate for further validation only"
+      source_phase: "Phase 10E"
+      action: "use_buy_hold_return_when_active"
+      activation_join: "AND"
+      replacement_return_column: "buy_hold_return"
+      conditions:
+        - input: "DGS2"
+          derived_input: "short_rate_level"
+          operator: "<"
+          threshold: 1.5
+          locked_threshold_description: "DGS2 below 1.5"
+        - input: "cpi_yoy"
+          derived_input: "inflation_yoy"
+          operator: "<"
+          threshold: 0.02
+          locked_threshold_description: "CPIAUCSL 252-trading-day inflation below 2%"
+      forbidden_changes:
+        - "Do not alter the 1.5 short-rate threshold."
+        - "Do not alter the 2% inflation threshold."
+        - "Do not add unemployment, yield-curve, sentiment, fundamental, or ML filters."
+        - "Do not optimise rule activation after seeing results."
+
+    - rule_id: "H2_high_rate_high_unemployment_stress_guard"
+      hypothesis_id: "H2_high_rate_high_unemployment_stress_guard"
+      role: "Candidate for further validation only"
+      source_phase: "Phase 10E"
+      action: "use_spy_12m_return_when_active"
+      activation_join: "OR"
+      replacement_return_column: "spy_12m_return"
+      conditions:
+        - input: "DGS2"
+          derived_input: "short_rate_level"
+          operator: ">"
+          threshold: 4.0
+          locked_threshold_description: "DGS2 above 4.0"
+        - input: "UNRATE"
+          derived_input: "unemployment_level"
+          operator: ">"
+          threshold: 6.0
+          locked_threshold_description: "UNRATE above 6.0"
+      forbidden_changes:
+        - "Do not alter the 4.0 short-rate threshold."
+        - "Do not alter the 6.0 unemployment threshold."
+        - "Do not add CPI, yield-curve, sentiment, fundamental, or ML filters."
+        - "Do not optimise defensive behaviour after seeing results."
+
+  validation_gates:
+    max_full_cagr_damage_pts: 0.15
+    max_episode_cagr_damage_pts: 0.25
+    max_episode_calmar_damage: 0.020
+    max_episode_drawdown_damage_pts: 1.00
+    require_full_calmar_improvement_for_h1: true
+    require_full_calmar_preservation_for_h2: true
+    require_full_drawdown_not_worse: true
+    require_holdout_not_worse: true
+    require_episode_damage_control: true
+    require_stress_friction_survival: true
+    require_behavioural_relative_drawdown_not_worse: true
+    require_no_raw_wealth_overclaim: true
+    require_no_strategy_promotion: true
+
+  gates:
+    expected_rule_ids:
+      - "H1_supportive_low_rate_low_inflation_relief"
+      - "H2_high_rate_high_unemployment_stress_guard"
+    min_rules: 2
+    max_rules: 2
+    require_exact_rule_ids: true
+    require_conditions_inside_registry: true
+    require_locked_thresholds: true
+    require_no_new_thresholds: true
+    require_no_new_inputs: true
+    require_no_model_feature_creation: true
+    require_no_model_training: true
+    require_no_strategy_promotion: true
+    require_rule_metrics_generated: true
+    require_rule_gate_report_generated: true
+    required_test_role: "Pre-registered macro-rule test only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

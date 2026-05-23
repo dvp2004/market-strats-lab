@@ -67,7 +67,7 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -3011,6 +3011,46 @@ Correct interpretation:
 
 > Phase 10E pre-registered the only macro hypotheses allowed for a later Phase 10F test. It did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion.
 
+## Phase 10F: Pre-Registered Macro Rule Test
+
+Phase 10F tested only the two Phase 10E pre-registered macro hypotheses:
+
+1. `H1_supportive_low_rate_low_inflation_relief`
+2. `H2_high_rate_high_unemployment_stress_guard`
+
+This did not add new inputs, thresholds, sentiment, fundamentals, ML, optimisation, or candidate promotion.
+
+### Phase 10F Summary
+
+| Metric | Result |
+|---|---:|
+| Discipline gates passed | True |
+| Any rule passed | False |
+| Passed rules | None |
+| Strategy promotion | False |
+| Verdict | Failed / no pre-registered macro rule passed |
+
+### Phase 10F Rule Outcomes
+
+| Rule | Result | Interpretation |
+|---|---|---|
+| `H1_supportive_low_rate_low_inflation_relief` | Failed | Higher CAGR but worse Calmar, worse drawdown, holdout drawdown damage, episode damage, stress-friction failure, and raw-CAGR overclaim versus Buy & Hold |
+| `H2_high_rate_high_unemployment_stress_guard` | Failed | Better headline CAGR/Calmar and preserved drawdown, but failed episode damage control and stress-friction survival |
+
+### Phase 10F Gate Interpretation
+
+H1 failed because it improved raw return at the cost of materially worse drawdown and weaker robustness. This is not acceptable under the project’s risk-adjusted validation discipline.
+
+H2 produced more interesting evidence, but it still failed the pre-registered episode-damage and stress-friction gates. It therefore cannot be promoted, softened, or tuned around.
+
+### Phase 10F Verdict
+
+> Phase 10F failed. No pre-registered macro rule passed all configured gates.
+
+Correct interpretation:
+
+> Phase 10F validly tested the two pre-registered macro hypotheses from Phase 10E. Neither rule passed all gates. The macro branch remains diagnostically useful, but no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists.
+
 ---
 
 # Methodology Notes
@@ -3167,6 +3207,7 @@ Remaining concerns include:
 - Phase 10C loaded and aligned selected macro/rates/inflation data, but it remained an audit only. Current/revised macro values may still carry revision risk, and no macro signal, model feature, strategy test, allocation rule, or candidate promotion was created.
 - Phase 10D was diagnostic only. Macro/rates/inflation regimes helped describe where the final candidate looked stronger or weaker, but no macro rule, signal, model feature, allocation overlay, strategy test, or candidate promotion was created.
 - Phase 10E only pre-registered macro hypotheses. It did not test whether the hypotheses work, create a macro strategy, add an allocation overlay, train a model, or promote any candidate.
+- Phase 10F failed. The two pre-registered macro hypotheses did not pass all validation gates. H1 improved headline CAGR but worsened drawdown and created raw-CAGR overclaim risk; H2 looked more promising but failed episode-damage and stress-friction gates. No macro rule was promoted and no tuning around the failure is allowed.
 ---
 
 # Bugs Caught and Fixed
@@ -3668,6 +3709,23 @@ reports/phase10e_macro_conclusion.csv
 reports/phase10e_preregistered_macro_hypothesis_spec.md
 ```
 
+## Phase 10F Pre-Registered Macro Rule Test Reports
+
+```text
+reports/phase10f_macro_panel.csv
+reports/phase10f_macro_rule_activation_frame.csv
+reports/phase10f_macro_rule_returns.csv
+reports/phase10f_macro_rule_metrics.csv
+reports/phase10f_macro_benchmark_metrics.csv
+reports/phase10f_macro_episode_metrics.csv
+reports/phase10f_macro_behavioural_metrics.csv
+reports/phase10f_macro_rule_gate_report.csv
+reports/phase10f_macro_rule_comparison_summary.csv
+reports/phase10f_macro_discipline_gate_report.csv
+reports/phase10f_macro_conclusion.csv
+reports/phase10f_preregistered_macro_rule_test.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -3821,6 +3879,7 @@ configs/spy_sma10.yaml
 | Phase 10C macro source reliability and point-in-time alignment audit | Completed — source reliability/alignment audit passed; UNRATE, DGS2, DGS10, and CPIAUCSL loaded and aligned; Phase 10D allowed only as diagnostic macro regime analysis |
 | Phase 10D diagnostic-only macro regime analysis | Completed — diagnostic-only macro/rates/inflation regime analysis; 5 regime families and 15 regime metric rows generated; no macro signal, strategy test, model, allocation rule, or promotion |
 | Phase 10E pre-registered macro hypothesis design spec | Completed — exactly two macro hypotheses pre-registered for possible Phase 10F testing; no macro signal, allocation overlay, model feature, strategy test, or promotion |
+| Phase 10F pre-registered macro rule test | Failed — no pre-registered macro rule passed all configured gates; H1 failed risk/overclaim/friction gates and H2 failed episode-damage and stress-friction gates; no promotion |
 ---
 
 # What Should Happen Next

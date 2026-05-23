@@ -262,6 +262,9 @@ from market_strats.analysis.diagnostic_macro_regime_analysis import (
 from market_strats.analysis.preregistered_macro_hypothesis_spec import (
     save_phase10e_preregistered_macro_hypothesis_spec,
 )
+from market_strats.analysis.preregistered_macro_rule_test import (
+    save_phase10f_preregistered_macro_rule_test,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1922,6 +1925,13 @@ def main() -> None:
         )
 
         save_phase10e_preregistered_macro_hypothesis_spec(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase10f_preregistered_macro_rule_test(
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
             config=config,
             reports_dir=reports_dir,
         )
