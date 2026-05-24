@@ -67,7 +67,7 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec. Phase 11C completed a regime-scoring rulebook spec. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -3273,6 +3273,79 @@ Correct interpretation:
 
 > Phase 11B defined a design-only regime-scoring architecture. It did not calculate scores, create weights, create signals, run backtests, ingest new data, train models, or promote a candidate. Phase 11C may only define the score rulebook/spec.
 
+## Phase 11C: Regime Scoring Rulebook Spec
+
+Phase 11C defined the future regime-scoring rulebook grammar after Phase 11B established the regime-scoring architecture.
+
+This was not a score implementation. It did not calculate scores, assign empirical weights, create signals, create allocation rules, run strategy backtests, ingest new data, train models, or promote a candidate.
+
+### Phase 11C Summary
+
+| Metric | Result |
+|---|---:|
+| Spec role | Regime scoring rulebook spec only |
+| Phase branch | Phase 11 architecture review |
+| Source phase | Phase 11B |
+| Proposed next phase | Phase 11D |
+| Source architecture present | True |
+| Component count | 5 |
+| Active required components present | True |
+| Future unaudited families blocked | True |
+| Conceptual direction count | 6 |
+| Conceptual directions non-trading | True |
+| Missingness rule count | 5 |
+| Weighting principle count | 5 |
+| Score states non-trading | True |
+| Audit output count | 5 |
+| Future validation gate count | 6 |
+| Phase 11D boundary passed | True |
+| Strategy promotion | False |
+| Candidate promotion | False |
+
+### Phase 11C Component Rulebook
+
+| Component | Family | Role | Status | Conceptual directions |
+|---|---|---|---|---:|
+| `technical_regime_context` | technical | active conceptual component | conceptual only | 2 |
+| `macro_regime_context` | macro/rates/inflation | active conceptual component | conceptual only | 2 |
+| `validation_risk_context` | validation risk | required control component | conceptual only | 2 |
+| `future_fundamental_context` | fundamental / valuation | blocked future component | blocked | 0 |
+| `future_sentiment_context` | sentiment / narrative | blocked future component | blocked | 0 |
+
+### Phase 11C Gate Result
+
+| Gate | Result |
+|---|---|
+| Source architecture is documented | Passed |
+| Component rulebook is documented | Passed |
+| Technical, macro, and validation components are present | Passed |
+| Future unaudited families are blocked | Passed |
+| Conceptual directions are documented and non-trading | Passed |
+| Missingness rules are documented | Passed |
+| Weighting principles are documented | Passed |
+| Score states are non-trading concepts | Passed |
+| Audit output spec is documented | Passed |
+| Future validation gates are documented | Passed |
+| Phase 11D boundary is design-only | Passed |
+| No score calculation is allowed | Passed |
+| No numeric score weights are allowed | Passed |
+| No empirical return weights are allowed | Passed |
+| No signal creation is allowed | Passed |
+| No allocation rule creation is allowed | Passed |
+| No strategy backtest is allowed | Passed |
+| No model training is allowed | Passed |
+| No new data ingestion is allowed | Passed |
+| No candidate promotion is allowed | Passed |
+| Spec role is correct | Passed |
+
+### Phase 11C Verdict
+
+> Phase 11C completed the regime scoring rulebook spec.
+
+Correct interpretation:
+
+> Phase 11C defined the regime-scoring rulebook only. It documented conceptual component directions, missingness rules, weighting principles, audit outputs, and future validation gates, but did not calculate a score, create a signal, test a strategy, train a model, ingest new data, or promote a candidate.
+
 ---
 
 # Methodology Notes
@@ -3434,6 +3507,7 @@ Remaining concerns include:
 - Phase 10H closed the Phase 10 macro/rates/inflation record cleanly. Macro data was feasible and diagnostically informative, but no macro rule survived pre-registered validation and no macro successor candidate exists.
 - Phase 11A was architecture review only. It did not create a richer-information model, regime score, strategy test, allocation rule, or candidate promotion. It only concluded that the next research step should be architecture-led rather than another simple rule overlay.
 - Phase 11B was architecture-spec only. It defined the regime-scoring structure conceptually but did not calculate scores, choose weights, create signals, test allocation rules, ingest new data, train models, or promote any candidate.
+- Phase 11C was rulebook-spec only. It defined conceptual scoring directions, missingness rules, weighting principles, audit outputs, and future validation gates, but no regime score, signal, allocation rule, strategy test, model, new data ingestion, or promoted candidate exists.
 ---
 
 # Bugs Caught and Fixed
@@ -4008,6 +4082,25 @@ reports/phase11b_regime_scoring_conclusion.csv
 reports/phase11b_regime_scoring_architecture_spec.md
 ```
 
+## Phase 11C Regime Scoring Rulebook Spec Reports
+
+```text
+reports/phase11c_regime_scoring_source_architecture.csv
+reports/phase11c_regime_scoring_component_rulebook.csv
+reports/phase11c_regime_scoring_conceptual_direction_rulebook.csv
+reports/phase11c_regime_scoring_missingness_rules.csv
+reports/phase11c_regime_scoring_weighting_principles.csv
+reports/phase11c_regime_scoring_state_rulebook.csv
+reports/phase11c_regime_scoring_audit_output_spec.csv
+reports/phase11c_regime_scoring_future_validation_gates.csv
+reports/phase11c_regime_scoring_phase11d_boundary_check.csv
+reports/phase11c_regime_scoring_scope_boundary_check.csv
+reports/phase11c_regime_scoring_summary.csv
+reports/phase11c_regime_scoring_gate_report.csv
+reports/phase11c_regime_scoring_conclusion.csv
+reports/phase11c_regime_scoring_rulebook_spec.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -4166,6 +4259,7 @@ configs/spy_sma10.yaml
 | Phase 10H final Phase 10 checkpoint audit | Completed — final Phase 10 README/config/report consistency audit passed; Phase 10F failure locked, Phase 10G closeout documented, no macro successor candidate created, and final hierarchy unchanged |
 | Phase 11A richer-information architecture review | Completed — architecture review passed; simple if/then overlays rejected as the immediate next step; preferred next step is Phase 11B regime-scoring architecture spec; no strategy test, model, or promotion |
 | Phase 11B regime scoring architecture spec | Completed — design-only regime-scoring architecture spec passed; technical, macro, and validation-risk components defined conceptually; future fundamental/sentiment components blocked; no score calculation, signal, backtest, model, or promotion |
+| Phase 11C regime scoring rulebook spec | Completed — rulebook-spec phase passed; conceptual technical, macro, and validation-risk directions documented; future fundamental/sentiment components blocked; no score calculation, signal, backtest, model, new data ingestion, or promotion |
 ---
 
 # What Should Happen Next

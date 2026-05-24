@@ -2706,6 +2706,248 @@ phase11b_regime_scoring_architecture_spec:
     require_no_new_data_ingestion: true
     require_no_candidate_promotion: true
     required_spec_role: "Regime scoring architecture spec only"
+phase11c_regime_scoring_rulebook_spec:
+  enabled: false
+
+  spec_role: "Regime scoring rulebook spec only"
+  phase_branch: "Phase 11 architecture review"
+  source_phase: "Phase 11B"
+  proposed_next_phase: "Phase 11D"
+
+  source_architecture:
+    selected_architecture: "A2_regime_scoring_layer"
+    source_spec: "Phase 11B regime scoring architecture spec"
+    rationale: "Phase 11B defined the design-only regime scoring architecture after simple technical and macro rule overlays failed validation."
+
+  allow_score_calculation: false
+  allow_numeric_score_weights: false
+  allow_empirical_return_weights: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_model_training: false
+  allow_new_data_ingestion: false
+  allow_candidate_promotion: false
+
+  component_rulebook:
+    - component_id: "technical_regime_context"
+      family: "technical"
+      rulebook_role: "active_conceptual_component"
+      source_evidence: "Phase 9A/9B diagnostic evidence; Phase 9D failed as a rule test."
+      allowed_conceptual_inputs:
+        - "trend_state"
+        - "momentum_state"
+        - "volatility_state"
+        - "drawdown_state"
+        - "breadth_state"
+        - "regime_persistence"
+      conceptual_directions:
+        - direction_id: "technical_supportive"
+          condition_family: "trend/momentum/breadth confirmation"
+          conceptual_score_direction: "supportive"
+          trading_allowed: false
+        - direction_id: "technical_fragile"
+          condition_family: "drawdown/volatility/regime instability"
+          conceptual_score_direction: "fragile"
+          trading_allowed: false
+      missingness_policy: "If unavailable, mark technical component unavailable; do not infer from returns."
+      current_status: "conceptual_only"
+
+    - component_id: "macro_regime_context"
+      family: "macro_rates_inflation"
+      rulebook_role: "active_conceptual_component"
+      source_evidence: "Phase 10B/10C/10D diagnostic evidence; Phase 10F failed as a rule test."
+      allowed_conceptual_inputs:
+        - "rates_state"
+        - "inflation_state"
+        - "unemployment_state"
+        - "yield_curve_state"
+        - "macro_stress_state"
+      conceptual_directions:
+        - direction_id: "macro_supportive"
+          condition_family: "low-rate/low-inflation/improving-labour diagnostic context"
+          conceptual_score_direction: "supportive"
+          trading_allowed: false
+        - direction_id: "macro_fragile"
+          condition_family: "high-rate/high-unemployment/stress diagnostic context"
+          conceptual_score_direction: "fragile"
+          trading_allowed: false
+      missingness_policy: "If unavailable, mark macro component unavailable; do not forward-fill beyond documented source alignment rules."
+      current_status: "conceptual_only"
+
+    - component_id: "validation_risk_context"
+      family: "validation_risk"
+      rulebook_role: "required_control_component"
+      source_evidence: "Phase 8/9/10 documented friction, liveability, walk-forward, behavioural-regret, research-DOF, and failed-extension risks."
+      allowed_conceptual_inputs:
+        - "friction_sensitivity"
+        - "walk_forward_consistency"
+        - "behavioural_regret"
+        - "episode_damage"
+        - "drawdown_damage"
+        - "research_dof_risk"
+      conceptual_directions:
+        - direction_id: "validation_supportive"
+          condition_family: "low validation/liveability risk"
+          conceptual_score_direction: "supportive"
+          trading_allowed: false
+        - direction_id: "validation_fragile"
+          condition_family: "high friction/liveability/regret/research-risk context"
+          conceptual_score_direction: "fragile"
+          trading_allowed: false
+      missingness_policy: "If validation-risk data is unavailable, future score must default to caution rather than support."
+      current_status: "conceptual_only"
+
+    - component_id: "future_fundamental_context"
+      family: "fundamental_valuation"
+      rulebook_role: "blocked_future_component"
+      source_evidence: "Fundamental/valuation data has not been audited."
+      allowed_conceptual_inputs:
+        - "valuation_proxy"
+        - "earnings_yield"
+        - "risk_premia"
+      conceptual_directions: []
+      missingness_policy: "Blocked until a future source/leakage feasibility audit exists."
+      current_status: "blocked"
+
+    - component_id: "future_sentiment_context"
+      family: "sentiment_narrative"
+      rulebook_role: "blocked_future_component"
+      source_evidence: "Sentiment/narrative data has not been audited and remains high-overfit-risk."
+      allowed_conceptual_inputs:
+        - "news_sentiment"
+        - "market_fear_proxy"
+        - "narrative_classification"
+      conceptual_directions: []
+      missingness_policy: "Blocked until a future source/leakage feasibility audit exists."
+      current_status: "blocked"
+
+  missingness_rules:
+    - rule_id: "no_return_inference"
+      rule: "Missing regime evidence must not be inferred from future returns or strategy outcomes."
+      required: true
+    - rule_id: "component_unavailable_flag"
+      rule: "Unavailable component evidence must be explicitly flagged."
+      required: true
+    - rule_id: "no_silent_fill"
+      rule: "Missing data must not be silently filled without a documented source-specific policy."
+      required: true
+    - rule_id: "blocked_family_exclusion"
+      rule: "Blocked unaudited families must remain excluded from any future score."
+      required: true
+    - rule_id: "caution_on_missing_control_layer"
+      rule: "If validation-risk context is unavailable, future scoring must default to caution."
+      required: true
+
+  weighting_principles:
+    - principle_id: "no_returns_based_weights"
+      principle: "No weights may be chosen by optimising historical returns."
+      required: true
+    - principle_id: "pre_registered_weight_policy_only"
+      principle: "Any future weighting policy must be pre-registered before score calculation."
+      required: true
+    - principle_id: "component_separation"
+      principle: "Component families must remain separately auditable before aggregation."
+      required: true
+    - principle_id: "no_empirical_cutoff_search"
+      principle: "Score cutoffs must not be selected after seeing performance."
+      required: true
+    - principle_id: "validation_risk_can_only_penalise_first"
+      principle: "Validation-risk context may only act as a caution/penalty concept until separately validated."
+      required: true
+
+  score_state_rulebook:
+    - state_id: "supportive"
+      conceptual_definition: "Multiple active conceptual components point towards a favourable context for the existing final candidate."
+      current_role: "conceptual_state_only"
+      score_calculation_allowed: false
+      trading_allowed: false
+    - state_id: "neutral"
+      conceptual_definition: "Evidence is mixed, unavailable, or insufficiently consistent."
+      current_role: "conceptual_state_only"
+      score_calculation_allowed: false
+      trading_allowed: false
+    - state_id: "fragile"
+      conceptual_definition: "One or more control or regime components suggest the final candidate may be vulnerable."
+      current_role: "conceptual_state_only"
+      score_calculation_allowed: false
+      trading_allowed: false
+
+  audit_output_spec:
+    - output_id: "component_availability_report"
+      output_description: "Reports whether each component family is available, blocked, or unavailable."
+      required_for_future_phase: true
+    - output_id: "component_direction_report"
+      output_description: "Reports conceptual supportive/neutral/fragile directions by family."
+      required_for_future_phase: true
+    - output_id: "missingness_report"
+      output_description: "Reports missingness and blocked-family handling."
+      required_for_future_phase: true
+    - output_id: "weighting_policy_report"
+      output_description: "Documents that no returns-based empirical weighting is used."
+      required_for_future_phase: true
+    - output_id: "boundary_report"
+      output_description: "Confirms no signal, backtest, model, or promotion was created."
+      required_for_future_phase: true
+
+  future_validation_gates:
+    - gate_id: "rulebook_before_score"
+      gate: "A rulebook must exist before any score is calculated."
+      required: true
+    - gate_id: "component_audit_before_aggregation"
+      gate: "Component-level audit must pass before any aggregation is allowed."
+      required: true
+    - gate_id: "no_returns_based_weighting"
+      gate: "Future scoring must prove weights/cutoffs were not selected from returns."
+      required: true
+    - gate_id: "diagnostic_score_before_strategy"
+      gate: "A future score must first be evaluated diagnostically before any strategy test."
+      required: true
+    - gate_id: "benchmark_and_liveability_gates"
+      gate: "Any later score-based strategy must survive benchmark, holdout, friction, liveability, behavioural, and episode gates."
+      required: true
+    - gate_id: "promotion_block"
+      gate: "A future score-based pass can only become a candidate for further validation, not immediate promotion."
+      required: true
+
+  phase11d_boundary:
+    allowed_next_step: "Regime scoring diagnostic panel design only"
+    forbidden_next_step: "score calculation, signal creation, strategy backtest, model training, new data ingestion, or candidate promotion"
+    phase11d_may_define_diagnostic_panel: true
+    phase11d_may_calculate_scores: false
+    phase11d_may_create_signal: false
+    phase11d_may_test_strategy: false
+    phase11d_may_train_model: false
+    phase11d_may_ingest_new_data: false
+    phase11d_may_promote_candidate: false
+
+  gates:
+    require_source_architecture: true
+    require_component_rulebook: true
+    min_component_count: 5
+    require_active_technical_macro_validation_components: true
+    require_future_families_blocked: true
+    require_conceptual_directions: true
+    require_missingness_rules: true
+    min_missingness_rules: 5
+    require_weighting_principles: true
+    min_weighting_principles: 5
+    require_score_states_non_trading: true
+    require_audit_output_spec: true
+    min_audit_outputs: 5
+    require_future_validation_gates: true
+    min_future_validation_gates: 6
+    require_phase11d_boundary_spec_only: true
+    require_no_score_calculation: true
+    require_no_numeric_score_weights: true
+    require_no_empirical_return_weights: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_model_training: true
+    require_no_new_data_ingestion: true
+    require_no_candidate_promotion: true
+    required_spec_role: "Regime scoring rulebook spec only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

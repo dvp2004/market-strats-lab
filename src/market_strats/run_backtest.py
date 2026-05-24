@@ -277,6 +277,9 @@ from market_strats.analysis.richer_information_architecture_review import (
 from market_strats.analysis.regime_scoring_architecture_spec import (
     save_phase11b_regime_scoring_architecture_spec,
 )
+from market_strats.analysis.regime_scoring_rulebook_spec import (
+    save_phase11c_regime_scoring_rulebook_spec,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1964,6 +1967,11 @@ def main() -> None:
         )
 
         save_phase11b_regime_scoring_architecture_spec(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase11c_regime_scoring_rulebook_spec(
             config=config,
             reports_dir=reports_dir,
         )
