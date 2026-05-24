@@ -2240,6 +2240,62 @@ phase10f_preregistered_macro_rule_test:
     require_rule_metrics_generated: true
     require_rule_gate_report_generated: true
     required_test_role: "Pre-registered macro-rule test only"
+phase10g_macro_extension_closeout_audit:
+  enabled: false
+
+  audit_role: "Macro extension closeout / failure documentation audit"
+  branch: "Phase 10 macro/rates/inflation extension"
+  status: "Closed — no macro rule promoted"
+  next_allowed_step: "Phase 10H final Phase 10 checkpoint audit or architecture review"
+  successor_candidate_created: false
+  final_candidate_changed: false
+  macro_rule_promotion_allowed: false
+  strategy_promotion: false
+
+  expected_disabled_flags:
+    phase10a_feature_family_feasibility_spec: false
+    phase10b_macro_data_source_leakage_audit: false
+    phase10c_macro_source_reliability_alignment_audit: false
+    phase10d_diagnostic_macro_regime_analysis: false
+    phase10e_preregistered_macro_hypothesis_spec: false
+    phase10f_preregistered_macro_rule_test: false
+    relative_momentum_allocator: true
+
+  expected_report_prefixes:
+    - "phase10a_feature_family"
+    - "phase10b_macro"
+    - "phase10c_macro"
+    - "phase10d_macro"
+    - "phase10e_macro"
+    - "phase10f_macro"
+
+  expected_markdown_reports:
+    - "phase10a_feature_family_feasibility_spec.md"
+    - "phase10b_macro_data_source_leakage_audit.md"
+    - "phase10c_macro_source_reliability_alignment_audit.md"
+    - "phase10d_diagnostic_macro_regime_analysis.md"
+    - "phase10e_preregistered_macro_hypothesis_spec.md"
+    - "phase10f_preregistered_macro_rule_test.md"
+
+  phase10f_reports:
+    conclusion: "reports/phase10f_macro_conclusion.csv"
+    rule_gate_report: "reports/phase10f_macro_rule_gate_report.csv"
+    rule_comparison_summary: "reports/phase10f_macro_rule_comparison_summary.csv"
+    discipline_gate_report: "reports/phase10f_macro_discipline_gate_report.csv"
+
+  required_phase10f_verdict: "Failed / no pre-registered macro rule passed"
+
+  gates:
+    require_expected_reports_present: true
+    require_config_flags_clean: true
+    require_phase10f_failure_documented: true
+    require_no_phase10f_rule_passed: true
+    require_phase10f_discipline_passed: true
+    require_no_strategy_promotion: true
+    require_no_successor_candidate: true
+    require_final_candidate_unchanged: true
+    require_branch_closed_without_promotion: true
+    required_audit_role: "Macro extension closeout / failure documentation audit"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
