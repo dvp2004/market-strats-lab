@@ -274,6 +274,9 @@ from market_strats.analysis.final_phase10_checkpoint_audit import (
 from market_strats.analysis.richer_information_architecture_review import (
     save_phase11a_richer_information_architecture_review,
 )
+from market_strats.analysis.regime_scoring_architecture_spec import (
+    save_phase11b_regime_scoring_architecture_spec,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1956,6 +1959,11 @@ def main() -> None:
         )
 
         save_phase11a_richer_information_architecture_review(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase11b_regime_scoring_architecture_spec(
             config=config,
             reports_dir=reports_dir,
         )

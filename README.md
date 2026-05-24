@@ -3207,6 +3207,72 @@ Correct interpretation:
 
 > The project should not continue immediately with simple if/then overlays. After failed technical and macro rule-extension branches, the next step should be Phase 11B: a regime-scoring architecture spec. This should remain design-only and should not create a strategy test, allocation rule, model, or promoted candidate.
 
+## Phase 11B: Regime Scoring Architecture Spec
+
+Phase 11B defined the design boundaries for a future regime-scoring layer after both technical and macro rule-overlay extensions failed validation.
+
+This was not a score implementation. It did not calculate scores, assign weights, create signals, create allocation rules, run strategy backtests, ingest new data, train models, or promote a candidate.
+
+### Phase 11B Summary
+
+| Metric | Result |
+|---|---:|
+| Spec role | Regime scoring architecture spec only |
+| Phase branch | Phase 11 architecture review |
+| Proposed next phase | Phase 11C |
+| Source architecture decision present | True |
+| Simple overlay rejected | True |
+| Scoring principle count | 6 |
+| Required scoring principle count | 6 |
+| Component family count | 5 |
+| Validation-risk context present | True |
+| Future data families blocked | True |
+| Score states non-trading | True |
+| Future validation requirement count | 6 |
+| Phase 11C boundary passed | True |
+| Strategy promotion | False |
+| Candidate promotion | False |
+
+### Phase 11B Component Registry
+
+| Component | Family | Role | Phase 11C spec allowed |
+|---|---|---|---|
+| `technical_regime_context` | technical | diagnostic candidate | True |
+| `macro_regime_context` | macro/rates/inflation | diagnostic candidate | True |
+| `validation_risk_context` | validation risk | required control layer | True |
+| `future_fundamental_context` | fundamental / valuation | future candidate, not active | False |
+| `future_sentiment_context` | sentiment / narrative | future candidate, not active | False |
+
+### Phase 11B Gate Result
+
+| Gate | Result |
+|---|---|
+| Source architecture decision is documented | Passed |
+| Scoring principles are documented | Passed |
+| Component families are documented | Passed |
+| Validation-risk context is included | Passed |
+| Future unaudited data families are blocked | Passed |
+| Score states are non-trading concepts | Passed |
+| Future validation requirements are documented | Passed |
+| Phase 11C boundary is spec-only | Passed |
+| No score calculation is allowed | Passed |
+| No score weights are allowed | Passed |
+| No signal creation is allowed | Passed |
+| No allocation rule creation is allowed | Passed |
+| No strategy backtest is allowed | Passed |
+| No model training is allowed | Passed |
+| No new data ingestion is allowed | Passed |
+| No candidate promotion is allowed | Passed |
+| Spec role is correct | Passed |
+
+### Phase 11B Verdict
+
+> Phase 11B completed the regime scoring architecture spec.
+
+Correct interpretation:
+
+> Phase 11B defined a design-only regime-scoring architecture. It did not calculate scores, create weights, create signals, run backtests, ingest new data, train models, or promote a candidate. Phase 11C may only define the score rulebook/spec.
+
 ---
 
 # Methodology Notes
@@ -3367,6 +3433,7 @@ Remaining concerns include:
 - Phase 10G closed the macro/rates/inflation branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed. No macro rule, allocation overlay, model feature, strategy successor, or promoted candidate exists.
 - Phase 10H closed the Phase 10 macro/rates/inflation record cleanly. Macro data was feasible and diagnostically informative, but no macro rule survived pre-registered validation and no macro successor candidate exists.
 - Phase 11A was architecture review only. It did not create a richer-information model, regime score, strategy test, allocation rule, or candidate promotion. It only concluded that the next research step should be architecture-led rather than another simple rule overlay.
+- Phase 11B was architecture-spec only. It defined the regime-scoring structure conceptually but did not calculate scores, choose weights, create signals, test allocation rules, ingest new data, train models, or promote any candidate.
 ---
 
 # Bugs Caught and Fixed
@@ -3925,6 +3992,22 @@ reports/phase11a_architecture_conclusion.csv
 reports/phase11a_richer_information_architecture_review.md
 ```
 
+## Phase 11B Regime Scoring Architecture Spec Reports
+
+```text
+reports/phase11b_regime_scoring_source_decision.csv
+reports/phase11b_regime_scoring_principles.csv
+reports/phase11b_regime_scoring_component_registry.csv
+reports/phase11b_regime_scoring_state_design.csv
+reports/phase11b_regime_scoring_validation_requirements.csv
+reports/phase11b_regime_scoring_phase11c_boundary_check.csv
+reports/phase11b_regime_scoring_scope_boundary_check.csv
+reports/phase11b_regime_scoring_summary.csv
+reports/phase11b_regime_scoring_gate_report.csv
+reports/phase11b_regime_scoring_conclusion.csv
+reports/phase11b_regime_scoring_architecture_spec.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -4082,6 +4165,7 @@ configs/spy_sma10.yaml
 | Phase 10G macro extension closeout audit | Completed — macro/rates/inflation branch closed without promotion; Phase 10F failure documented; no macro rule passed, no successor candidate created, and final hierarchy unchanged |
 | Phase 10H final Phase 10 checkpoint audit | Completed — final Phase 10 README/config/report consistency audit passed; Phase 10F failure locked, Phase 10G closeout documented, no macro successor candidate created, and final hierarchy unchanged |
 | Phase 11A richer-information architecture review | Completed — architecture review passed; simple if/then overlays rejected as the immediate next step; preferred next step is Phase 11B regime-scoring architecture spec; no strategy test, model, or promotion |
+| Phase 11B regime scoring architecture spec | Completed — design-only regime-scoring architecture spec passed; technical, macro, and validation-risk components defined conceptually; future fundamental/sentiment components blocked; no score calculation, signal, backtest, model, or promotion |
 ---
 
 # What Should Happen Next

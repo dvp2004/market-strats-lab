@@ -2524,6 +2524,188 @@ phase11a_richer_information_architecture_review:
     require_no_strategy_backtest: true
     require_no_candidate_promotion: true
     required_review_role: "Architecture review for richer information layers only"
+phase11b_regime_scoring_architecture_spec:
+  enabled: false
+
+  spec_role: "Regime scoring architecture spec only"
+  phase_branch: "Phase 11 architecture review"
+  proposed_next_phase: "Phase 11C"
+
+  source_architecture_decision:
+    source_phase: "Phase 11A"
+    selected_architecture: "A2_regime_scoring_layer"
+    rejected_immediate_architecture: "A1_continue_simple_rule_overlays"
+    rationale: "Technical and macro diagnostics were informative, but both failed as pre-registered simple rule overlays."
+
+  allow_score_calculation: false
+  allow_score_weights: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_model_training: false
+  allow_new_data_ingestion: false
+  allow_candidate_promotion: false
+
+  scoring_principles:
+    - principle_id: "diagnostic_before_trading"
+      principle: "A regime score must be diagnostic before it can ever influence allocation."
+      required: true
+    - principle_id: "continuous_not_binary_first"
+      principle: "The score architecture should avoid immediate hard if/then switches."
+      required: true
+    - principle_id: "evidence_family_separation"
+      principle: "Technical, macro, future fundamental, future sentiment, validation-risk, and liveability evidence must remain separately auditable."
+      required: true
+    - principle_id: "no_post_hoc_weighting"
+      principle: "Weights, thresholds, and score cutoffs must not be chosen after seeing performance."
+      required: true
+    - principle_id: "benchmark_first_validation"
+      principle: "Any future score must be judged against the existing final candidate, SPY Buy & Hold, and SPY 12M Momentum."
+      required: true
+    - principle_id: "promotion_requires_later_validation"
+      principle: "Even a successful future score test cannot immediately replace the final candidate."
+      required: true
+
+  component_families:
+    - component_id: "technical_regime_context"
+      family: "technical"
+      role: "diagnostic_candidate"
+      source_evidence: "Phase 9A/9B found useful technical clusters, but Phase 9D failed as a pre-registered technical-rule test."
+      allowed_conceptual_inputs:
+        - "trend"
+        - "momentum"
+        - "volatility"
+        - "drawdown_state"
+        - "breadth"
+        - "regime_persistence"
+      forbidden_current_use:
+        - "No technical score calculation in Phase 11B."
+        - "No RSI or momentum rule retry."
+        - "No threshold tuning."
+      allowed_for_phase11c_spec: true
+
+    - component_id: "macro_regime_context"
+      family: "macro_rates_inflation"
+      role: "diagnostic_candidate"
+      source_evidence: "Phase 10B/10C/10D showed macro/rates/inflation was feasible and diagnostically informative, but Phase 10F failed as a pre-registered macro-rule test."
+      allowed_conceptual_inputs:
+        - "rates"
+        - "inflation"
+        - "unemployment"
+        - "yield_curve"
+        - "macro_stress"
+      forbidden_current_use:
+        - "No macro score calculation in Phase 11B."
+        - "No H1/H2 retry."
+        - "No new macro thresholds."
+      allowed_for_phase11c_spec: true
+
+    - component_id: "validation_risk_context"
+      family: "validation_risk"
+      role: "required_control_layer"
+      source_evidence: "Phase 8/9/10 exposed spread-impact sensitivity, walk-forward weakness, behavioural regret, research degrees of freedom, and failed rule extensions."
+      allowed_conceptual_inputs:
+        - "friction_sensitivity"
+        - "walk_forward_consistency"
+        - "behavioural_regret"
+        - "drawdown_damage"
+        - "episode_damage"
+        - "research_dof_risk"
+      forbidden_current_use:
+        - "No penalty score calculation in Phase 11B."
+        - "No automatic strategy rejection or acceptance."
+      allowed_for_phase11c_spec: true
+
+    - component_id: "future_fundamental_context"
+      family: "fundamental_valuation"
+      role: "future_candidate_not_active"
+      source_evidence: "Fundamental/valuation data has not yet been audited in this project."
+      allowed_conceptual_inputs:
+        - "valuation_proxy"
+        - "earnings_yield"
+        - "rates_adjusted_valuation"
+        - "risk_premia"
+      forbidden_current_use:
+        - "No fundamental data ingestion."
+        - "No valuation feature creation."
+        - "No fundamental score component yet."
+      allowed_for_phase11c_spec: false
+
+    - component_id: "future_sentiment_context"
+      family: "sentiment_narrative"
+      role: "future_candidate_not_active"
+      source_evidence: "Sentiment/narrative data has not yet been audited and is high-overfit-risk."
+      allowed_conceptual_inputs:
+        - "market_fear_proxy"
+        - "news_sentiment"
+        - "narrative_classification"
+        - "positioning_proxy"
+      forbidden_current_use:
+        - "No sentiment ingestion."
+        - "No LLM narrative labels."
+        - "No sentiment score component yet."
+      allowed_for_phase11c_spec: false
+
+  score_state_design:
+    - state_id: "supportive"
+      description: "Evidence context appears supportive for the existing final candidate."
+      allowed_current_role: "conceptual_state_only"
+      trading_allowed: false
+    - state_id: "neutral"
+      description: "Evidence context is mixed or not informative enough."
+      allowed_current_role: "conceptual_state_only"
+      trading_allowed: false
+    - state_id: "fragile"
+      description: "Evidence context suggests the final candidate may be vulnerable."
+      allowed_current_role: "conceptual_state_only"
+      trading_allowed: false
+
+  future_validation_requirements:
+    - requirement_id: "diagnostic_panel_first"
+      requirement: "Phase 11C must define the score rulebook before any score is calculated."
+    - requirement_id: "no_returns_based_weight_selection"
+      requirement: "Weights or score rules must not be selected using future performance."
+    - requirement_id: "separate_component_audit"
+      requirement: "Each component family must remain separately reportable."
+    - requirement_id: "benchmark_comparison"
+      requirement: "Any later score test must compare against final candidate, SPY Buy & Hold, and SPY 12M Momentum."
+    - requirement_id: "friction_liveability_validation"
+      requirement: "Any future score-based strategy must survive friction, liveability, behavioural, and episode gates."
+    - requirement_id: "promotion_block"
+      requirement: "A future score pass can only become a candidate for further validation, not immediate promotion."
+
+  phase11c_boundary:
+    allowed_next_step: "Regime scoring rulebook spec only"
+    forbidden_next_step: "score calculation, model training, strategy backtest, or candidate promotion"
+    phase11c_may_define_score_components: true
+    phase11c_may_define_weighting_policy: true
+    phase11c_may_calculate_scores: false
+    phase11c_may_test_strategy: false
+    phase11c_may_train_model: false
+    phase11c_may_ingest_new_data: false
+    phase11c_may_promote_candidate: false
+
+  gates:
+    require_source_architecture_decision: true
+    require_scoring_principles: true
+    min_scoring_principles: 5
+    require_component_families: true
+    min_component_families: 4
+    require_validation_risk_context: true
+    require_future_data_families_blocked: true
+    require_score_states_non_trading: true
+    require_future_validation_requirements: true
+    min_future_validation_requirements: 5
+    require_phase11c_boundary_spec_only: true
+    require_no_score_calculation: true
+    require_no_score_weights: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_model_training: true
+    require_no_new_data_ingestion: true
+    require_no_candidate_promotion: true
+    required_spec_role: "Regime scoring architecture spec only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
