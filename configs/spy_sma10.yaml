@@ -2296,6 +2296,101 @@ phase10g_macro_extension_closeout_audit:
     require_final_candidate_unchanged: true
     require_branch_closed_without_promotion: true
     required_audit_role: "Macro extension closeout / failure documentation audit"
+phase10h_final_phase10_checkpoint_audit:
+  enabled: false
+
+  audit_role: "Final Phase 10 checkpoint / README-config-report consistency audit"
+  phase_branch: "Phase 10 macro/rates/inflation extension"
+  checkpoint_status: "Phase 10 closed — macro branch closed without promotion"
+  next_allowed_step: "Architecture review for richer information layers"
+
+  readme_path: "README.md"
+
+  expected_disabled_flags:
+    phase10a_feature_family_feasibility_spec: false
+    phase10b_macro_data_source_leakage_audit: false
+    phase10c_macro_source_reliability_alignment_audit: false
+    phase10d_diagnostic_macro_regime_analysis: false
+    phase10e_preregistered_macro_hypothesis_spec: false
+    phase10f_preregistered_macro_rule_test: false
+    phase10g_macro_extension_closeout_audit: false
+    relative_momentum_allocator: true
+
+  expected_report_prefixes:
+    - "phase10a_feature_family"
+    - "phase10b_macro"
+    - "phase10c_macro"
+    - "phase10d_macro"
+    - "phase10e_macro"
+    - "phase10f_macro"
+    - "phase10g_macro"
+
+  expected_markdown_reports:
+    - "phase10a_feature_family_feasibility_spec.md"
+    - "phase10b_macro_data_source_leakage_audit.md"
+    - "phase10c_macro_source_reliability_alignment_audit.md"
+    - "phase10d_diagnostic_macro_regime_analysis.md"
+    - "phase10e_preregistered_macro_hypothesis_spec.md"
+    - "phase10f_preregistered_macro_rule_test.md"
+    - "phase10g_macro_extension_closeout_audit.md"
+
+  phase10g_reports:
+    conclusion: "reports/phase10g_macro_closeout_conclusion.csv"
+    gate_report: "reports/phase10g_macro_closeout_gate_report.csv"
+    summary: "reports/phase10g_macro_closeout_summary.csv"
+    phase10f_failure_check: "reports/phase10g_macro_closeout_phase10f_failure_check.csv"
+
+  required_readme_phrases:
+    - "Phase 10A"
+    - "Phase 10B"
+    - "Phase 10C"
+    - "Phase 10D"
+    - "Phase 10E"
+    - "Phase 10F"
+    - "Phase 10G"
+    - "macro/rates/inflation"
+    - "closed without promotion"
+    - "Phase 10F failed"
+    - "no macro successor candidate exists"
+    - "final hierarchy remains unchanged"
+    - "SPY Buy & Hold"
+    - "SPY 12M Momentum"
+    - "deep_drawdown_guard"
+    - "loose_relief"
+    - "research-only"
+
+  forbidden_readme_phrases:
+    - "Phase 10F passed"
+    - "a macro rule was promoted"
+    - "macro successor candidate was created"
+    - "a macro successor candidate was created"
+    - "macro strategy was promoted"
+    - "the macro strategy was promoted"
+    - "approved for production trading"
+    - "ready for live deployment"
+    - "recommended for live trading"
+    - "is a live-trading recommendation"
+    - "this is financial advice"
+
+  canonical_hierarchy_phrases:
+    - "SPY Buy & Hold"
+    - "SPY 12M Momentum"
+    - "3D"
+    - "deep_drawdown_guard"
+    - "loose_relief"
+
+  gates:
+    require_readme_required_phrases: true
+    require_readme_forbidden_phrases_absent: true
+    require_expected_reports_present: true
+    require_config_flags_clean: true
+    require_phase10g_closeout_passed: true
+    require_phase10f_failure_locked: true
+    require_no_successor_candidate: true
+    require_final_candidate_unchanged: true
+    require_canonical_hierarchy_present: true
+    require_no_strategy_promotion: true
+    required_audit_role: "Final Phase 10 checkpoint / README-config-report consistency audit"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

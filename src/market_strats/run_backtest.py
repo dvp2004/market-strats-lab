@@ -268,6 +268,9 @@ from market_strats.analysis.preregistered_macro_rule_test import (
 from market_strats.analysis.macro_extension_closeout_audit import (
     save_phase10g_macro_extension_closeout_audit,
 )
+from market_strats.analysis.final_phase10_checkpoint_audit import (
+    save_phase10h_final_phase10_checkpoint_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1940,6 +1943,11 @@ def main() -> None:
         )
 
         save_phase10g_macro_extension_closeout_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase10h_final_phase10_checkpoint_audit(
             config=config,
             reports_dir=reports_dir,
         )
