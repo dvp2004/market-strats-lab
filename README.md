@@ -67,7 +67,7 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -3147,6 +3147,66 @@ Correct interpretation:
 
 > Phase 10 is now closed cleanly. Macro/rates/inflation evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed. Phase 10G closed the branch without promotion, Phase 10H verified README/config/report consistency, and the final hierarchy remains unchanged.
 
+## Phase 11A: Architecture Review for Richer Information Layers
+
+Phase 11A reviewed the next research architecture after both the technical-indicator extension and macro/rates/inflation extension produced useful diagnostic evidence but failed as pre-registered rule overlays.
+
+This was not a new strategy test. It did not create a new indicator rule, macro retry, sentiment feed, fundamental feature, model, backtest, allocation rule, or candidate promotion.
+
+### Phase 11A Summary
+
+| Metric | Result |
+|---|---:|
+| Review role | Architecture review for richer information layers only |
+| Phase branch | Phase 11 architecture review |
+| Proposed next phase | Phase 11B |
+| Prior branch count | 2 |
+| Failed rule-extension count | 2 |
+| Closed-without-promotion count | 2 |
+| Architecture candidate count | 6 |
+| Simple overlay rejected as next step | True |
+| Preferred architecture | `A2_regime_scoring_layer` |
+| Recommended next phase | Phase 11B |
+| Next step is spec-only | True |
+| Strategy test allowed next | False |
+
+### Phase 11A Architecture Candidates
+
+| Architecture | Immediate next-step role |
+|---|---|
+| `A1_continue_simple_rule_overlays` | Rejected as immediate next step |
+| `A2_regime_scoring_layer` | Preferred next architecture-spec candidate |
+| `A3_probabilistic_allocation_confidence` | Secondary architecture candidate |
+| `A4_explainable_ensemble_decision_layer` | Long-term candidate, not next |
+| `A5_separate_successor_architecture` | Architecture-review candidate |
+| `A6_freeze_spy_overlay_arc` | Valid pause option |
+
+### Phase 11A Gate Result
+
+| Gate | Result |
+|---|---|
+| Prior rule-extension failures are documented | Passed |
+| Architecture candidates are documented | Passed |
+| Simple overlay continuation is rejected as immediate next step | Passed |
+| Preferred architecture is identified | Passed |
+| Next step is spec-only | Passed |
+| No new indicator rule is allowed | Passed |
+| No macro rule retry is allowed | Passed |
+| No sentiment ingestion is allowed | Passed |
+| No fundamental ingestion is allowed | Passed |
+| No model training is allowed | Passed |
+| No strategy backtest is allowed | Passed |
+| No candidate promotion is allowed | Passed |
+| Review role is correct | Passed |
+
+### Phase 11A Verdict
+
+> Phase 11A completed the richer-information architecture review.
+
+Correct interpretation:
+
+> The project should not continue immediately with simple if/then overlays. After failed technical and macro rule-extension branches, the next step should be Phase 11B: a regime-scoring architecture spec. This should remain design-only and should not create a strategy test, allocation rule, model, or promoted candidate.
+
 ---
 
 # Methodology Notes
@@ -3306,6 +3366,7 @@ Remaining concerns include:
 - Phase 10F failed. The two pre-registered macro hypotheses did not pass all validation gates. H1 improved headline CAGR but worsened drawdown and created raw-CAGR overclaim risk; H2 looked more promising but failed episode-damage and stress-friction gates. No macro rule was promoted and no tuning around the failure is allowed.
 - Phase 10G closed the macro/rates/inflation branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed. No macro rule, allocation overlay, model feature, strategy successor, or promoted candidate exists.
 - Phase 10H closed the Phase 10 macro/rates/inflation record cleanly. Macro data was feasible and diagnostically informative, but no macro rule survived pre-registered validation and no macro successor candidate exists.
+- Phase 11A was architecture review only. It did not create a richer-information model, regime score, strategy test, allocation rule, or candidate promotion. It only concluded that the next research step should be architecture-led rather than another simple rule overlay.
 ---
 
 # Bugs Caught and Fixed
@@ -3850,6 +3911,20 @@ reports/phase10h_final_checkpoint_conclusion.csv
 reports/phase10h_final_phase10_checkpoint_audit.md
 ```
 
+## Phase 11A Richer-Information Architecture Review Reports
+
+```text
+reports/phase11a_architecture_prior_branch_findings.csv
+reports/phase11a_architecture_candidates.csv
+reports/phase11a_architecture_risk_matrix.csv
+reports/phase11a_architecture_recommendation.csv
+reports/phase11a_architecture_boundary_check.csv
+reports/phase11a_architecture_summary.csv
+reports/phase11a_architecture_gate_report.csv
+reports/phase11a_architecture_conclusion.csv
+reports/phase11a_richer_information_architecture_review.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -4006,6 +4081,7 @@ configs/spy_sma10.yaml
 | Phase 10F pre-registered macro rule test | Failed — no pre-registered macro rule passed all configured gates; H1 failed risk/overclaim/friction gates and H2 failed episode-damage and stress-friction gates; no promotion |
 | Phase 10G macro extension closeout audit | Completed — macro/rates/inflation branch closed without promotion; Phase 10F failure documented; no macro rule passed, no successor candidate created, and final hierarchy unchanged |
 | Phase 10H final Phase 10 checkpoint audit | Completed — final Phase 10 README/config/report consistency audit passed; Phase 10F failure locked, Phase 10G closeout documented, no macro successor candidate created, and final hierarchy unchanged |
+| Phase 11A richer-information architecture review | Completed — architecture review passed; simple if/then overlays rejected as the immediate next step; preferred next step is Phase 11B regime-scoring architecture spec; no strategy test, model, or promotion |
 ---
 
 # What Should Happen Next

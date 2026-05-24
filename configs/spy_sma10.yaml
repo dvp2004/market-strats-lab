@@ -2391,6 +2391,139 @@ phase10h_final_phase10_checkpoint_audit:
     require_canonical_hierarchy_present: true
     require_no_strategy_promotion: true
     required_audit_role: "Final Phase 10 checkpoint / README-config-report consistency audit"
+phase11a_richer_information_architecture_review:
+  enabled: true
+
+  review_role: "Architecture review for richer information layers only"
+  phase_branch: "Phase 11 architecture review"
+  proposed_next_phase: "Phase 11B"
+
+  allow_new_indicator_rule: false
+  allow_macro_rule_retry: false
+  allow_sentiment_ingestion: false
+  allow_fundamental_ingestion: false
+  allow_model_training: false
+  allow_strategy_backtest: false
+  allow_candidate_promotion: false
+
+  prior_branch_findings:
+    technical_extension:
+      branch: "Phase 9 technical indicator extension"
+      diagnostic_evidence: "Phase 9A/9B found useful but unstable technical clusters."
+      preregistration: "Phase 9C pre-registered two technical hypotheses."
+      rule_test_result: "Phase 9D failed; no pre-registered technical rule passed."
+      closeout: "Phase 9E/9F closed the technical branch without promotion."
+      implication: "Technical diagnostics did not translate into validated simple rule overlays."
+
+    macro_extension:
+      branch: "Phase 10 macro/rates/inflation extension"
+      diagnostic_evidence: "Phase 10B/10C/10D showed macro data was feasible, alignable, and diagnostically informative."
+      preregistration: "Phase 10E pre-registered two macro hypotheses."
+      rule_test_result: "Phase 10F failed; no pre-registered macro rule passed."
+      closeout: "Phase 10G/10H closed the macro branch without promotion."
+      implication: "Macro diagnostics did not translate into validated simple rule overlays."
+
+  architecture_candidates:
+    - architecture_id: "A1_continue_simple_rule_overlays"
+      name: "Continue simple if/then overlays"
+      description: "Keep adding binary rule overlays to the existing final candidate."
+      allowed_as_next_branch: false
+      reason: "Technical and macro branches both failed as pre-registered overlays; another overlay-first branch risks repeating the same failure mode."
+      complexity: "low"
+      overfit_risk: "high"
+      interpretability: "high"
+      validation_burden: "medium"
+      recommended_role: "reject_as_immediate_next_step"
+
+    - architecture_id: "A2_regime_scoring_layer"
+      name: "Regime scoring layer"
+      description: "Convert diagnostic evidence into a transparent score that describes regime support/fragility without directly trading at first."
+      allowed_as_next_branch: true
+      reason: "Preserves interpretability while avoiding hard binary switches; suitable for a diagnostic-first Phase 11B."
+      complexity: "medium"
+      overfit_risk: "medium"
+      interpretability: "high"
+      validation_burden: "medium"
+      recommended_role: "preferred_next_architecture_spec_candidate"
+
+    - architecture_id: "A3_probabilistic_allocation_confidence"
+      name: "Probabilistic allocation-confidence layer"
+      description: "Estimate confidence in the existing final candidate under different regimes, initially as diagnostics rather than allocation changes."
+      allowed_as_next_branch: true
+      reason: "Better matches uncertainty than binary rules, but requires careful validation before it can affect returns."
+      complexity: "medium_high"
+      overfit_risk: "medium_high"
+      interpretability: "medium"
+      validation_burden: "high"
+      recommended_role: "secondary_architecture_candidate"
+
+    - architecture_id: "A4_explainable_ensemble_decision_layer"
+      name: "Explainable ensemble decision layer"
+      description: "Combine technical, macro, future fundamental, and future sentiment evidence into an interpretable decision score."
+      allowed_as_next_branch: false
+      reason: "Long-term direction, but too broad immediately after two failed rule-extension branches."
+      complexity: "high"
+      overfit_risk: "high"
+      interpretability: "medium"
+      validation_burden: "high"
+      recommended_role: "long_term_candidate_not_next"
+
+    - architecture_id: "A5_separate_successor_architecture"
+      name: "Separate successor architecture"
+      description: "Build a separate architecture instead of modifying the existing final candidate."
+      allowed_as_next_branch: true
+      reason: "May be necessary if richer information cannot improve the current overlay structure, but should start with design spec only."
+      complexity: "high"
+      overfit_risk: "medium_high"
+      interpretability: "medium"
+      validation_burden: "high"
+      recommended_role: "architecture_review_candidate"
+
+    - architecture_id: "A6_freeze_spy_overlay_arc"
+      name: "Freeze SPY overlay arc"
+      description: "Stop trying to improve the current SPY overlay and document it as a research benchmark."
+      allowed_as_next_branch: true
+      reason: "Valid option if the project prioritises closure over expansion."
+      complexity: "low"
+      overfit_risk: "low"
+      interpretability: "high"
+      validation_burden: "low"
+      recommended_role: "valid_pause_option"
+
+  recommended_next_step:
+    recommendation_id: "phase11b_regime_scoring_architecture_spec"
+    phase: "Phase 11B"
+    title: "Regime Scoring Architecture Spec"
+    recommendation: "Design a diagnostic regime scoring layer before any new data family, signal, model, or strategy test."
+    allowed_scope:
+      - "Define score components from already documented evidence."
+      - "Define allowed feature families at a conceptual level."
+      - "Define validation gates for any future score."
+      - "Define how scoring differs from binary overlays."
+      - "Define failure conditions before implementation."
+    forbidden_scope:
+      - "No strategy test."
+      - "No allocation rule."
+      - "No model training."
+      - "No sentiment ingestion."
+      - "No fundamental ingestion."
+      - "No candidate promotion."
+
+  gates:
+    require_prior_failures_documented: true
+    require_architecture_candidates: true
+    min_architecture_candidates: 5
+    require_simple_overlay_rejected_as_immediate_next: true
+    require_preferred_architecture_identified: true
+    require_next_step_spec_only: true
+    require_no_new_indicator_rule: true
+    require_no_macro_rule_retry: true
+    require_no_sentiment_ingestion: true
+    require_no_fundamental_ingestion: true
+    require_no_model_training: true
+    require_no_strategy_backtest: true
+    require_no_candidate_promotion: true
+    required_review_role: "Architecture review for richer information layers only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
