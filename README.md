@@ -3516,6 +3516,90 @@ Correct interpretation:
 
 > Phase 11E created schema-compliant diagnostic panel templates and verified required columns, blocked-family rows, boundary rows, and non-signal/non-return constraints. It did not calculate regime scores, assign weights, create signals, ingest new data, run strategy tests, train models, or promote a candidate.
 
+## Phase 11F: Regime Scoring Diagnostic Panel Content Audit
+
+Phase 11F audited the content of the regime-scoring diagnostic panel templates created in Phase 11E.
+
+This was not a score implementation. It did not calculate regime scores, assign weights, create signals, create allocation rules, run strategy backtests, ingest new data, train models, or promote a candidate.
+
+### Phase 11F Summary
+
+| Metric | Result |
+|---|---:|
+| Audit role | Regime scoring diagnostic panel content audit only |
+| Phase branch | Phase 11 architecture review |
+| Source phase | Phase 11E |
+| Proposed next phase | Phase 11G |
+| Source templates present | True |
+| Source template count | 9 |
+| Phase 11E result passed | True |
+| Component content passed | True |
+| Direction content passed | True |
+| Missingness content passed | True |
+| Weighting content passed | True |
+| Blocked-family content passed | True |
+| Boundary content passed | True |
+| Phase 11G boundary passed | True |
+| Strategy promotion | False |
+| Candidate promotion | False |
+
+### Phase 11F Content Checks
+
+| Check area | Result |
+|---|---|
+| Expected components present | Passed |
+| Blocked components flagged | Passed |
+| Active components not blocked | Passed |
+| Technical regime directions complete | Passed |
+| Macro regime directions complete | Passed |
+| Validation-risk directions complete | Passed |
+| Direction rows non-signal/non-trading | Passed |
+| Missingness blocks return inference | Passed |
+| Missingness blocks silent fill | Passed |
+| Numeric weights blocked | Passed |
+| Empirical return weights blocked | Passed |
+| Cutoff search blocked | Passed |
+| Pre-registration required | Passed |
+| Blocked families present | Passed |
+| Blocked families not usable currently | Passed |
+| Blocked families cannot be score components | Passed |
+| Boundary items present | Passed |
+| Boundary allowed values all false | Passed |
+| Boundary rows passed | Passed |
+
+### Phase 11F Gate Result
+
+| Gate | Result |
+|---|---|
+| Source templates are present | Passed |
+| Phase 11E template audit remains passed | Passed |
+| Schema compliance remains passed | Passed |
+| Component content is consistent | Passed |
+| Direction content is consistent | Passed |
+| Missingness content is consistent | Passed |
+| Weighting content is consistent | Passed |
+| Blocked-family content is consistent | Passed |
+| Boundary content is consistent | Passed |
+| Phase 11G boundary is closeout-only | Passed |
+| No score calculation is allowed | Passed |
+| No numeric score weights are allowed | Passed |
+| No empirical return weights are allowed | Passed |
+| No signal creation is allowed | Passed |
+| No allocation rule creation is allowed | Passed |
+| No strategy backtest is allowed | Passed |
+| No model training is allowed | Passed |
+| No new data ingestion is allowed | Passed |
+| No candidate promotion is allowed | Passed |
+| Audit role is correct | Passed |
+
+### Phase 11F Verdict
+
+> Phase 11F completed the regime-scoring diagnostic panel content audit.
+
+Correct interpretation:
+
+> Phase 11F confirmed that the diagnostic panel template content is internally consistent with the Phase 11E templates and Phase 11D design. No regime score, score weight, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists.
+
 ---
 
 # Methodology Notes
@@ -3680,6 +3764,7 @@ Remaining concerns include:
 - Phase 11C was rulebook-spec only. It defined conceptual scoring directions, missingness rules, weighting principles, audit outputs, and future validation gates, but no regime score, signal, allocation rule, strategy test, model, new data ingestion, or promoted candidate exists.
 - Phase 11D was diagnostic-panel design only. It defined future report layouts and required columns but did not implement a regime score, assign weights, create signals, run strategy tests, ingest new data, train models, or promote any candidate.
 - Phase 11E was a diagnostic-panel template implementation audit only. It created schema-compliant reporting templates but did not calculate regime scores, assign weights, create signals, run strategy tests, ingest new data, train models, or promote any candidate.
+- Phase 11F was a diagnostic-panel content audit only. It verified template content consistency but did not calculate regime scores, assign weights, create signals, run strategy tests, ingest new data, train models, or promote any candidate.
 ---
 
 # Bugs Caught and Fixed
@@ -4311,6 +4396,25 @@ reports/phase11e_template_conclusion.csv
 reports/phase11e_regime_scoring_diagnostic_panel_template_audit.md
 ```
 
+## Phase 11F Regime Scoring Diagnostic Panel Content Audit Reports
+
+```text
+reports/phase11f_content_source_template_inventory.csv
+reports/phase11f_content_phase11e_result_check.csv
+reports/phase11f_content_component_check.csv
+reports/phase11f_content_direction_check.csv
+reports/phase11f_content_missingness_check.csv
+reports/phase11f_content_weighting_check.csv
+reports/phase11f_content_blocked_family_check.csv
+reports/phase11f_content_boundary_check.csv
+reports/phase11f_content_phase11g_boundary_check.csv
+reports/phase11f_content_scope_boundary_check.csv
+reports/phase11f_content_summary.csv
+reports/phase11f_content_gate_report.csv
+reports/phase11f_content_conclusion.csv
+reports/phase11f_regime_scoring_diagnostic_panel_content_audit.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -4472,6 +4576,7 @@ configs/spy_sma10.yaml
 | Phase 11C regime scoring rulebook spec | Completed — rulebook-spec phase passed; conceptual technical, macro, and validation-risk directions documented; future fundamental/sentiment components blocked; no score calculation, signal, backtest, model, new data ingestion, or promotion |
 | Phase 11D regime scoring diagnostic panel design | Completed — diagnostic panel design passed; panel layouts, required columns, component availability, conceptual direction, missingness, weighting-policy, blocked-family, and boundary reports designed; no score, signal, backtest, model, new data ingestion, or promotion |
 | Phase 11E regime scoring diagnostic panel template implementation audit | Completed — schema-compliant diagnostic panel templates generated; required columns, blocked-family rows, boundary rows, and non-signal/non-return constraints verified; no score, signal, backtest, model, new data ingestion, or promotion |
+| Phase 11F regime scoring diagnostic panel content audit | Completed — diagnostic panel content audit passed; component, direction, missingness, weighting, blocked-family, and boundary content verified; no score, signal, backtest, model, new data ingestion, or promotion |
 ---
 
 # What Should Happen Next

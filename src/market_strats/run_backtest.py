@@ -286,6 +286,9 @@ from market_strats.analysis.regime_scoring_diagnostic_panel_design import (
 from market_strats.analysis.regime_scoring_diagnostic_panel_template_audit import (
     save_phase11e_regime_scoring_diagnostic_panel_template_audit,
 )
+from market_strats.analysis.regime_scoring_diagnostic_panel_content_audit import (
+    save_phase11f_regime_scoring_diagnostic_panel_content_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1988,6 +1991,11 @@ def main() -> None:
         )
 
         save_phase11e_regime_scoring_diagnostic_panel_template_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase11f_regime_scoring_diagnostic_panel_content_audit(
             config=config,
             reports_dir=reports_dir,
         )
