@@ -67,7 +67,7 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec. Phase 11C completed a regime-scoring rulebook spec. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec. Phase 11C completed a regime-scoring rulebook spec. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11D completed a diagnostic-panel design for future regime-scoring work. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -3346,6 +3346,83 @@ Correct interpretation:
 
 > Phase 11C defined the regime-scoring rulebook only. It documented conceptual component directions, missingness rules, weighting principles, audit outputs, and future validation gates, but did not calculate a score, create a signal, test a strategy, train a model, ingest new data, or promote a candidate.
 
+## Phase 11D: Regime Scoring Diagnostic Panel Design
+
+Phase 11D designed the future diagnostic panel structure for the regime-scoring architecture.
+
+This was not a score implementation. It did not calculate scores, assign weights, create signals, create allocation rules, run strategy backtests, ingest new data, train models, or promote a candidate.
+
+### Phase 11D Summary
+
+| Metric | Result |
+|---|---:|
+| Design role | Regime scoring diagnostic panel design only |
+| Phase branch | Phase 11 architecture review |
+| Source phase | Phase 11C |
+| Proposed next phase | Phase 11E |
+| Source rulebook present | True |
+| Panel section count | 6 |
+| Required column rows | 42 |
+| Required columns present | True |
+| Component availability rows | 5 |
+| Conceptual direction rows | 3 |
+| Conceptual directions non-trading | True |
+| Missingness policy count | 5 |
+| Weighting policy count | 5 |
+| Weighting non-empirical | True |
+| Blocked family count | 2 |
+| Blocked families clean | True |
+| All panels avoid returns usage | True |
+| All panels are non-signal panels | True |
+| Phase 11E boundary passed | True |
+| Strategy promotion | False |
+| Candidate promotion | False |
+
+### Phase 11D Diagnostic Panel Sections
+
+| Panel | Report | Uses returns | Creates signal | Required columns |
+|---|---|---:|---:|---:|
+| `component_availability_panel` | `component_availability_report` | False | False | 8 |
+| `conceptual_direction_panel` | `component_direction_report` | False | False | 8 |
+| `missingness_panel` | `missingness_report` | False | False | 8 |
+| `weighting_policy_panel` | `weighting_policy_report` | False | False | 7 |
+| `blocked_family_panel` | `blocked_family_report` | False | False | 6 |
+| `boundary_panel` | `boundary_report` | False | False | 5 |
+
+### Phase 11D Gate Result
+
+| Gate | Result |
+|---|---|
+| Source rulebook is documented | Passed |
+| Diagnostic panel sections are documented | Passed |
+| Required columns are documented | Passed |
+| Component availability spec is documented | Passed |
+| Conceptual direction spec is documented | Passed |
+| Missingness policy spec is documented | Passed |
+| Weighting policy spec is documented | Passed |
+| Blocked family spec is documented | Passed |
+| All panels are non-signal panels | Passed |
+| All panels avoid returns usage | Passed |
+| Phase 11E boundary is implementation-audit only | Passed |
+| No score calculation is allowed | Passed |
+| No numeric score weights are allowed | Passed |
+| No empirical return weights are allowed | Passed |
+| No signal creation is allowed | Passed |
+| No allocation rule creation is allowed | Passed |
+| No strategy backtest is allowed | Passed |
+| No model training is allowed | Passed |
+| No new data ingestion is allowed | Passed |
+| No candidate promotion is allowed | Passed |
+| Design role is correct | Passed |
+
+### Phase 11D Verdict
+
+> Phase 11D completed the regime scoring diagnostic panel design.
+
+Correct interpretation:
+
+> Phase 11D designed the diagnostic panel structure and report schemas for future regime-scoring work. It did not implement a score, assign weights, create a signal, run a strategy test, ingest new data, train a model, or promote a candidate.
+
 ---
 
 # Methodology Notes
@@ -3508,6 +3585,7 @@ Remaining concerns include:
 - Phase 11A was architecture review only. It did not create a richer-information model, regime score, strategy test, allocation rule, or candidate promotion. It only concluded that the next research step should be architecture-led rather than another simple rule overlay.
 - Phase 11B was architecture-spec only. It defined the regime-scoring structure conceptually but did not calculate scores, choose weights, create signals, test allocation rules, ingest new data, train models, or promote any candidate.
 - Phase 11C was rulebook-spec only. It defined conceptual scoring directions, missingness rules, weighting principles, audit outputs, and future validation gates, but no regime score, signal, allocation rule, strategy test, model, new data ingestion, or promoted candidate exists.
+- Phase 11D was diagnostic-panel design only. It defined future report layouts and required columns but did not implement a regime score, assign weights, create signals, run strategy tests, ingest new data, train models, or promote any candidate.
 ---
 
 # Bugs Caught and Fixed
@@ -4101,6 +4179,25 @@ reports/phase11c_regime_scoring_conclusion.csv
 reports/phase11c_regime_scoring_rulebook_spec.md
 ```
 
+## Phase 11D Regime Scoring Diagnostic Panel Design Reports
+
+```text
+reports/phase11d_diagnostic_panel_source_rulebook.csv
+reports/phase11d_diagnostic_panel_layout_spec.csv
+reports/phase11d_diagnostic_panel_required_columns_spec.csv
+reports/phase11d_diagnostic_panel_component_availability_spec.csv
+reports/phase11d_diagnostic_panel_conceptual_direction_spec.csv
+reports/phase11d_diagnostic_panel_missingness_policy_spec.csv
+reports/phase11d_diagnostic_panel_weighting_policy_spec.csv
+reports/phase11d_diagnostic_panel_blocked_family_spec.csv
+reports/phase11d_diagnostic_panel_phase11e_boundary_check.csv
+reports/phase11d_diagnostic_panel_scope_boundary_check.csv
+reports/phase11d_diagnostic_panel_summary.csv
+reports/phase11d_diagnostic_panel_gate_report.csv
+reports/phase11d_diagnostic_panel_conclusion.csv
+reports/phase11d_regime_scoring_diagnostic_panel_design.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -4260,6 +4357,7 @@ configs/spy_sma10.yaml
 | Phase 11A richer-information architecture review | Completed — architecture review passed; simple if/then overlays rejected as the immediate next step; preferred next step is Phase 11B regime-scoring architecture spec; no strategy test, model, or promotion |
 | Phase 11B regime scoring architecture spec | Completed — design-only regime-scoring architecture spec passed; technical, macro, and validation-risk components defined conceptually; future fundamental/sentiment components blocked; no score calculation, signal, backtest, model, or promotion |
 | Phase 11C regime scoring rulebook spec | Completed — rulebook-spec phase passed; conceptual technical, macro, and validation-risk directions documented; future fundamental/sentiment components blocked; no score calculation, signal, backtest, model, new data ingestion, or promotion |
+| Phase 11D regime scoring diagnostic panel design | Completed — diagnostic panel design passed; panel layouts, required columns, component availability, conceptual direction, missingness, weighting-policy, blocked-family, and boundary reports designed; no score, signal, backtest, model, new data ingestion, or promotion |
 ---
 
 # What Should Happen Next

@@ -280,6 +280,9 @@ from market_strats.analysis.regime_scoring_architecture_spec import (
 from market_strats.analysis.regime_scoring_rulebook_spec import (
     save_phase11c_regime_scoring_rulebook_spec,
 )
+from market_strats.analysis.regime_scoring_diagnostic_panel_design import (
+    save_phase11d_regime_scoring_diagnostic_panel_design,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1972,6 +1975,11 @@ def main() -> None:
         )
 
         save_phase11c_regime_scoring_rulebook_spec(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase11d_regime_scoring_diagnostic_panel_design(
             config=config,
             reports_dir=reports_dir,
         )

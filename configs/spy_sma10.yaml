@@ -2948,6 +2948,284 @@ phase11c_regime_scoring_rulebook_spec:
     require_no_new_data_ingestion: true
     require_no_candidate_promotion: true
     required_spec_role: "Regime scoring rulebook spec only"
+phase11d_regime_scoring_diagnostic_panel_design:
+  enabled: false
+
+  design_role: "Regime scoring diagnostic panel design only"
+  phase_branch: "Phase 11 architecture review"
+  source_phase: "Phase 11C"
+  proposed_next_phase: "Phase 11E"
+
+  source_rulebook:
+    source_spec: "Phase 11C regime scoring rulebook spec"
+    rulebook_status: "Completed — regime scoring rulebook spec passed"
+    rationale: "Phase 11C defined component categories, conceptual directions, missingness rules, weighting principles, audit outputs, and future validation gates without calculating scores."
+
+  allow_score_calculation: false
+  allow_numeric_score_weights: false
+  allow_empirical_return_weights: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_model_training: false
+  allow_new_data_ingestion: false
+  allow_candidate_promotion: false
+
+  diagnostic_panel_sections:
+    - panel_id: "component_availability_panel"
+      report_name: "component_availability_report"
+      purpose: "Show whether each component family is available, conceptual-only, blocked, or unavailable."
+      required: true
+      allowed_to_use_returns: false
+      allowed_to_create_signal: false
+      required_columns:
+        - "component_id"
+        - "family"
+        - "expected_status"
+        - "availability_status"
+        - "source_dependency"
+        - "unavailable_reason"
+        - "blocked_reason"
+        - "future_unblock_requirement"
+
+    - panel_id: "conceptual_direction_panel"
+      report_name: "component_direction_report"
+      purpose: "Show non-trading supportive/neutral/fragile conceptual directions by component."
+      required: true
+      allowed_to_use_returns: false
+      allowed_to_create_signal: false
+      required_columns:
+        - "component_id"
+        - "family"
+        - "direction_id"
+        - "conceptual_direction"
+        - "direction_source"
+        - "trading_allowed"
+        - "signal_allowed"
+        - "notes"
+
+    - panel_id: "missingness_panel"
+      report_name: "missingness_report"
+      purpose: "Show missingness, blocked-family handling, and no-return-inference controls."
+      required: true
+      allowed_to_use_returns: false
+      allowed_to_create_signal: false
+      required_columns:
+        - "component_id"
+        - "family"
+        - "evidence_status"
+        - "missingness_reason"
+        - "handling_policy"
+        - "returns_inference_allowed"
+        - "silent_fill_allowed"
+        - "default_action"
+
+    - panel_id: "weighting_policy_panel"
+      report_name: "weighting_policy_report"
+      purpose: "Document that no empirical return-based weighting or numeric score weights exist."
+      required: true
+      allowed_to_use_returns: false
+      allowed_to_create_signal: false
+      required_columns:
+        - "policy_id"
+        - "component_id"
+        - "weighting_policy"
+        - "numeric_weight_allowed"
+        - "empirical_return_weight_allowed"
+        - "cutoff_search_allowed"
+        - "pre_registration_required"
+
+    - panel_id: "blocked_family_panel"
+      report_name: "blocked_family_report"
+      purpose: "Show future data families that remain blocked until separate source/leakage audits exist."
+      required: true
+      allowed_to_use_returns: false
+      allowed_to_create_signal: false
+      required_columns:
+        - "family"
+        - "blocked_status"
+        - "blocked_reason"
+        - "unblock_requires"
+        - "current_use_allowed"
+        - "score_component_allowed"
+
+    - panel_id: "boundary_panel"
+      report_name: "boundary_report"
+      purpose: "Confirm no score, signal, allocation rule, backtest, model, new data, or promotion exists."
+      required: true
+      allowed_to_use_returns: false
+      allowed_to_create_signal: false
+      required_columns:
+        - "boundary_item"
+        - "allowed"
+        - "expected_allowed"
+        - "passed"
+        - "detail"
+
+  component_availability_spec:
+    - component_id: "technical_regime_context"
+      family: "technical"
+      expected_status: "conceptual_only"
+      source_dependency: "Phase 9 diagnostics and Phase 11C rulebook"
+      future_unblock_requirement: "Future diagnostic panel may reference existing documented technical diagnostics only."
+
+    - component_id: "macro_regime_context"
+      family: "macro_rates_inflation"
+      expected_status: "conceptual_only"
+      source_dependency: "Phase 10 diagnostics and Phase 11C rulebook"
+      future_unblock_requirement: "Future diagnostic panel may reference existing documented macro diagnostics only."
+
+    - component_id: "validation_risk_context"
+      family: "validation_risk"
+      expected_status: "conceptual_only"
+      source_dependency: "Phase 8/9/10 validation evidence and Phase 11C rulebook"
+      future_unblock_requirement: "Future diagnostic panel may reference existing validation-risk evidence only."
+
+    - component_id: "future_fundamental_context"
+      family: "fundamental_valuation"
+      expected_status: "blocked"
+      source_dependency: "No source/leakage audit yet"
+      future_unblock_requirement: "Requires separate fundamental/valuation source and leakage feasibility audit."
+
+    - component_id: "future_sentiment_context"
+      family: "sentiment_narrative"
+      expected_status: "blocked"
+      source_dependency: "No source/leakage audit yet"
+      future_unblock_requirement: "Requires separate sentiment/narrative source and leakage feasibility audit."
+
+  conceptual_direction_spec:
+    - component_id: "technical_regime_context"
+      family: "technical"
+      allowed_directions:
+        - "supportive"
+        - "neutral"
+        - "fragile"
+      trading_allowed: false
+      signal_allowed: false
+
+    - component_id: "macro_regime_context"
+      family: "macro_rates_inflation"
+      allowed_directions:
+        - "supportive"
+        - "neutral"
+        - "fragile"
+      trading_allowed: false
+      signal_allowed: false
+
+    - component_id: "validation_risk_context"
+      family: "validation_risk"
+      allowed_directions:
+        - "supportive"
+        - "neutral"
+        - "fragile"
+      trading_allowed: false
+      signal_allowed: false
+
+  missingness_policy_spec:
+    - policy_id: "no_return_inference"
+      policy: "Missing component evidence must not be inferred from future returns or strategy outcomes."
+      required: true
+
+    - policy_id: "explicit_unavailable_flag"
+      policy: "Unavailable component evidence must be explicitly flagged."
+      required: true
+
+    - policy_id: "no_silent_fill"
+      policy: "Missing data must not be silently filled without a documented source policy."
+      required: true
+
+    - policy_id: "blocked_family_exclusion"
+      policy: "Blocked unaudited families must remain excluded from any future panel."
+      required: true
+
+    - policy_id: "validation_risk_caution_default"
+      policy: "If validation-risk context is unavailable, the diagnostic panel must default to caution."
+      required: true
+
+  weighting_policy_spec:
+    - policy_id: "no_numeric_weights"
+      policy: "No numeric score weights may be assigned in Phase 11D."
+      numeric_weight_allowed: false
+      empirical_return_weight_allowed: false
+      required: true
+
+    - policy_id: "no_return_weight_selection"
+      policy: "No component importance may be selected by optimising historical returns."
+      numeric_weight_allowed: false
+      empirical_return_weight_allowed: false
+      required: true
+
+    - policy_id: "pre_registration_required"
+      policy: "Any future weighting policy must be pre-registered before score calculation."
+      numeric_weight_allowed: false
+      empirical_return_weight_allowed: false
+      required: true
+
+    - policy_id: "component_separation_first"
+      policy: "Components must remain separately auditable before aggregation."
+      numeric_weight_allowed: false
+      empirical_return_weight_allowed: false
+      required: true
+
+    - policy_id: "no_cutoff_search"
+      policy: "Future cutoffs must not be selected after seeing performance."
+      numeric_weight_allowed: false
+      empirical_return_weight_allowed: false
+      required: true
+
+  blocked_family_spec:
+    - family: "fundamental_valuation"
+      blocked_status: "blocked"
+      blocked_reason: "No source/leakage feasibility audit exists."
+      unblock_requires: "Future fundamental/valuation feasibility and leakage audit."
+      current_use_allowed: false
+      score_component_allowed: false
+
+    - family: "sentiment_narrative"
+      blocked_status: "blocked"
+      blocked_reason: "No source/leakage feasibility audit exists and overfit risk is high."
+      unblock_requires: "Future sentiment/narrative feasibility and leakage audit."
+      current_use_allowed: false
+      score_component_allowed: false
+
+  phase11e_boundary:
+    allowed_next_step: "Regime scoring diagnostic panel implementation audit only"
+    forbidden_next_step: "score calculation, signal creation, strategy backtest, model training, new data ingestion, or candidate promotion"
+    phase11e_may_build_empty_panel_templates: true
+    phase11e_may_calculate_scores: false
+    phase11e_may_assign_weights: false
+    phase11e_may_create_signal: false
+    phase11e_may_test_strategy: false
+    phase11e_may_train_model: false
+    phase11e_may_ingest_new_data: false
+    phase11e_may_promote_candidate: false
+
+  gates:
+    require_source_rulebook: true
+    require_panel_sections: true
+    min_panel_sections: 6
+    require_required_columns: true
+    require_component_availability_spec: true
+    require_conceptual_direction_spec: true
+    require_missingness_policy_spec: true
+    min_missingness_policies: 5
+    require_weighting_policy_spec: true
+    min_weighting_policies: 5
+    require_blocked_family_spec: true
+    min_blocked_families: 2
+    require_all_panels_non_signal: true
+    require_all_panels_no_returns: true
+    require_phase11e_boundary_design_only: true
+    require_no_score_calculation: true
+    require_no_numeric_score_weights: true
+    require_no_empirical_return_weights: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_model_training: true
+    require_no_new_data_ingestion: true
+    require_no_candidate_promotion: true
+    required_design_role: "Regime scoring diagnostic panel design only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
