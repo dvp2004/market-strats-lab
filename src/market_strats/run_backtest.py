@@ -289,6 +289,9 @@ from market_strats.analysis.regime_scoring_diagnostic_panel_template_audit impor
 from market_strats.analysis.regime_scoring_diagnostic_panel_content_audit import (
     save_phase11f_regime_scoring_diagnostic_panel_content_audit,
 )
+from market_strats.analysis.final_regime_scoring_checkpoint_audit import (
+    save_phase11g_final_regime_scoring_checkpoint_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -1996,6 +1999,11 @@ def main() -> None:
         )
 
         save_phase11f_regime_scoring_diagnostic_panel_content_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase11g_final_regime_scoring_checkpoint_audit(
             config=config,
             reports_dir=reports_dir,
         )

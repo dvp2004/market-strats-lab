@@ -3600,6 +3600,77 @@ Correct interpretation:
 
 > Phase 11F confirmed that the diagnostic panel template content is internally consistent with the Phase 11E templates and Phase 11D design. No regime score, score weight, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists.
 
+## Phase 11G: Final Phase 11 Regime Scoring Closeout / Checkpoint Audit
+
+Phase 11G closed the Phase 11 regime-scoring architecture and diagnostic-panel branch.
+
+This was not a score implementation. It did not calculate regime scores, assign weights, create signals, create allocation rules, run strategy backtests, ingest new data, train models, or promote a candidate.
+
+### Phase 11G Summary
+
+| Metric | Result |
+|---|---:|
+| Audit role | Final Phase 11 regime scoring closeout/checkpoint audit only |
+| Phase branch | Phase 11 regime scoring architecture and diagnostic panel branch |
+| Checkpoint status | Phase 11 closed — regime scoring architecture and diagnostic panel prepared without scoring |
+| Next allowed step | Phase 12A score-calculation pre-registration spec only |
+| Report prefixes present | True |
+| Markdown reports present | True |
+| Config flags clean for closeout run | True |
+| Phase conclusions passed | True |
+| Phase gate reports passed | True |
+| Boundary reports passed | True |
+| Branch closure clean | True |
+| Phase 12A boundary passed | True |
+| Strategy promotion | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 11G Closure Claims
+
+| Claim | Result |
+|---|---|
+| Regime score exists | False |
+| Signal exists | False |
+| Allocation rule exists | False |
+| Strategy test exists | False |
+| Model exists | False |
+| New data ingested | False |
+| Candidate promoted | False |
+| Final candidate changed | False |
+
+### Phase 11G Gate Result
+
+| Gate | Result |
+|---|---|
+| Expected Phase 11 report prefixes are present | Passed |
+| Expected Phase 11 markdown reports are present | Passed |
+| Config flags are clean for closeout run | Passed |
+| Phase 11 conclusions passed | Passed |
+| Phase 11 gate reports passed | Passed |
+| Phase 11F is locked as passed | Passed |
+| Boundary reports passed | Passed |
+| No score, signal, model, strategy, or promotion exists | Passed |
+| Phase 12A boundary is pre-registration-spec only | Passed |
+| No score calculation is allowed | Passed |
+| No numeric score weights are allowed | Passed |
+| No empirical return weights are allowed | Passed |
+| No signal creation is allowed | Passed |
+| No allocation rule creation is allowed | Passed |
+| No strategy backtest is allowed | Passed |
+| No model training is allowed | Passed |
+| No new data ingestion is allowed | Passed |
+| No candidate promotion is allowed | Passed |
+| Audit role is correct | Passed |
+
+### Phase 11G Verdict
+
+> Phase 11G completed the final Phase 11 regime-scoring checkpoint.
+
+Correct interpretation:
+
+> Phase 11 is now closed cleanly. The project has prepared a regime-scoring architecture, rulebook, diagnostic-panel design, schema-compliant templates, and content audits, but no regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, candidate promotion, or final-candidate change exists.
+
 ---
 
 # Methodology Notes
@@ -3765,6 +3836,7 @@ Remaining concerns include:
 - Phase 11D was diagnostic-panel design only. It defined future report layouts and required columns but did not implement a regime score, assign weights, create signals, run strategy tests, ingest new data, train models, or promote any candidate.
 - Phase 11E was a diagnostic-panel template implementation audit only. It created schema-compliant reporting templates but did not calculate regime scores, assign weights, create signals, run strategy tests, ingest new data, train models, or promote any candidate.
 - Phase 11F was a diagnostic-panel content audit only. It verified template content consistency but did not calculate regime scores, assign weights, create signals, run strategy tests, ingest new data, train models, or promote any candidate.
+- Phase 11G closed the regime-scoring preparation branch only. Phase 11 prepared the architecture, rulebook, diagnostic panels, templates, and content audits, but no regime score, score weights, signal, strategy test, model, new data ingestion, or promoted candidate exists.
 ---
 
 # Bugs Caught and Fixed
@@ -4415,6 +4487,23 @@ reports/phase11f_content_conclusion.csv
 reports/phase11f_regime_scoring_diagnostic_panel_content_audit.md
 ```
 
+## Phase 11G Final Regime Scoring Checkpoint Reports
+
+```text
+reports/phase11g_final_checkpoint_report_inventory_check.csv
+reports/phase11g_final_checkpoint_config_flag_check.csv
+reports/phase11g_final_checkpoint_phase_conclusion_check.csv
+reports/phase11g_final_checkpoint_phase_gate_report_check.csv
+reports/phase11g_final_checkpoint_boundary_report_check.csv
+reports/phase11g_final_checkpoint_branch_closure_check.csv
+reports/phase11g_final_checkpoint_phase12a_boundary_check.csv
+reports/phase11g_final_checkpoint_scope_boundary_check.csv
+reports/phase11g_final_checkpoint_summary.csv
+reports/phase11g_final_checkpoint_gate_report.csv
+reports/phase11g_final_checkpoint_conclusion.csv
+reports/phase11g_final_regime_scoring_checkpoint_audit.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -4577,6 +4666,7 @@ configs/spy_sma10.yaml
 | Phase 11D regime scoring diagnostic panel design | Completed — diagnostic panel design passed; panel layouts, required columns, component availability, conceptual direction, missingness, weighting-policy, blocked-family, and boundary reports designed; no score, signal, backtest, model, new data ingestion, or promotion |
 | Phase 11E regime scoring diagnostic panel template implementation audit | Completed — schema-compliant diagnostic panel templates generated; required columns, blocked-family rows, boundary rows, and non-signal/non-return constraints verified; no score, signal, backtest, model, new data ingestion, or promotion |
 | Phase 11F regime scoring diagnostic panel content audit | Completed — diagnostic panel content audit passed; component, direction, missingness, weighting, blocked-family, and boundary content verified; no score, signal, backtest, model, new data ingestion, or promotion |
+| Phase 11G final regime scoring closeout/checkpoint audit | Completed — final Phase 11 checkpoint passed; Phase 11A–11F reports and gates verified, config flags clean, branch closed without score/signal/backtest/model/new data/promotion, and Phase 12A limited to score-calculation pre-registration spec only |
 ---
 
 # What Should Happen Next
