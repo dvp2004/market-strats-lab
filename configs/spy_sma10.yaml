@@ -3226,6 +3226,99 @@ phase11d_regime_scoring_diagnostic_panel_design:
     require_no_new_data_ingestion: true
     require_no_candidate_promotion: true
     required_design_role: "Regime scoring diagnostic panel design only"
+phase11e_regime_scoring_diagnostic_panel_template_audit:
+  enabled: false
+
+  implementation_role: "Regime scoring diagnostic panel template implementation audit only"
+  phase_branch: "Phase 11 architecture review"
+  source_phase: "Phase 11D"
+  proposed_next_phase: "Phase 11F"
+
+  source_design_reports:
+    source_rulebook: "reports/phase11d_diagnostic_panel_source_rulebook.csv"
+    panel_layout_spec: "reports/phase11d_diagnostic_panel_layout_spec.csv"
+    required_columns_spec: "reports/phase11d_diagnostic_panel_required_columns_spec.csv"
+    component_availability_spec: "reports/phase11d_diagnostic_panel_component_availability_spec.csv"
+    conceptual_direction_spec: "reports/phase11d_diagnostic_panel_conceptual_direction_spec.csv"
+    missingness_policy_spec: "reports/phase11d_diagnostic_panel_missingness_policy_spec.csv"
+    weighting_policy_spec: "reports/phase11d_diagnostic_panel_weighting_policy_spec.csv"
+    blocked_family_spec: "reports/phase11d_diagnostic_panel_blocked_family_spec.csv"
+    phase11e_boundary_check: "reports/phase11d_diagnostic_panel_phase11e_boundary_check.csv"
+    scope_boundary_check: "reports/phase11d_diagnostic_panel_scope_boundary_check.csv"
+
+  expected_template_reports:
+    - "phase11e_template_component_availability_report.csv"
+    - "phase11e_template_component_direction_report.csv"
+    - "phase11e_template_missingness_report.csv"
+    - "phase11e_template_weighting_policy_report.csv"
+    - "phase11e_template_blocked_family_report.csv"
+    - "phase11e_template_boundary_report.csv"
+
+  allow_score_calculation: false
+  allow_numeric_score_weights: false
+  allow_empirical_return_weights: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_model_training: false
+  allow_new_data_ingestion: false
+  allow_candidate_promotion: false
+
+  template_policy:
+    component_availability_status_source: "Phase 11D component availability spec"
+    direction_source: "Phase 11D conceptual direction spec"
+    missingness_default_action: "flag_unavailable_or_blocked"
+    weighting_component_scope: "all_components"
+    boundary_expected_allowed: false
+    create_schema_compliant_rows: true
+    create_empty_return_columns: false
+    create_score_columns: false
+    create_signal_columns: false
+
+  phase11f_boundary:
+    allowed_next_step: "Regime scoring diagnostic panel content audit only"
+    forbidden_next_step: "score calculation, signal creation, strategy backtest, model training, new data ingestion, or candidate promotion"
+    phase11f_may_populate_templates_from_existing_phase_reports: true
+    phase11f_may_calculate_scores: false
+    phase11f_may_assign_weights: false
+    phase11f_may_create_signal: false
+    phase11f_may_test_strategy: false
+    phase11f_may_train_model: false
+    phase11f_may_ingest_new_data: false
+    phase11f_may_promote_candidate: false
+
+  gates:
+    require_source_design_reports_present: true
+    require_template_reports_generated: true
+    min_template_reports: 6
+    require_schema_compliance: true
+    require_component_availability_rows: true
+    min_component_availability_rows: 5
+    require_direction_rows: true
+    min_direction_rows: 9
+    require_missingness_rows: true
+    min_missingness_rows: 5
+    require_weighting_policy_rows: true
+    min_weighting_policy_rows: 5
+    require_blocked_family_rows: true
+    min_blocked_family_rows: 2
+    require_boundary_rows: true
+    min_boundary_rows: 9
+    require_non_signal_templates: true
+    require_no_returns_usage: true
+    require_weighting_non_empirical: true
+    require_blocked_families_clean: true
+    require_phase11f_boundary_content_audit_only: true
+    require_no_score_calculation: true
+    require_no_numeric_score_weights: true
+    require_no_empirical_return_weights: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_model_training: true
+    require_no_new_data_ingestion: true
+    require_no_candidate_promotion: true
+    required_implementation_role: "Regime scoring diagnostic panel template implementation audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
