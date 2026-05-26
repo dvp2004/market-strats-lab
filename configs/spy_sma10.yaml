@@ -3904,8 +3904,6 @@ phase12c_diagnostic_score_calculation:
     require_no_candidate_promotion: true
     require_phase12d_boundary_audit_only: true
     required_calculation_role: "Diagnostic score calculation only"
-
-
 phase12d_diagnostic_score_distribution_audit:
   enabled: false
 
@@ -3964,6 +3962,191 @@ phase12d_diagnostic_score_distribution_audit:
     require_no_candidate_promotion: true
     require_phase12e_boundary_interpretation_only: true
     required_audit_role: "Diagnostic score distribution and content audit only"
+phase12e_diagnostic_score_interpretation_closeout:
+  enabled: false
+
+  audit_role: "Diagnostic score interpretation and closeout audit only"
+  phase_branch: "Phase 12 diagnostic regime score branch"
+  source_phase: "Phase 12D"
+  proposed_next_phase: "Phase 12F"
+
+  allow_score_interpretation: true
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_new_data_ingestion: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_score_reports:
+    component_state_panel: "reports/phase12c_score_component_state_panel.csv"
+    component_state_distribution: "reports/phase12c_score_component_state_distribution.csv"
+    aggregate_score: "reports/phase12c_score_aggregate_score.csv"
+    phase12c_conclusion: "reports/phase12c_score_conclusion.csv"
+    phase12d_conclusion: "reports/phase12d_audit_conclusion.csv"
+    phase12d_gate_report: "reports/phase12d_audit_gate_report.csv"
+
+  expected_aggregate_state: "fragile"
+  allowed_score_states:
+    - "supportive"
+    - "neutral"
+    - "fragile"
+
+  interpretation_policy:
+    interpretation_role: "diagnostic-only research interpretation"
+    fragile_interpretation: "The diagnostic regime score is fragile because technical and macro evidence are neutral while validation-risk context is fragile."
+    neutral_interpretation: "The diagnostic regime score is neutral when evidence is mixed without a dominant validation-risk warning."
+    supportive_interpretation: "The diagnostic regime score is supportive only as a research diagnostic and never as a trading instruction."
+    permitted_use: "Document research context and caveat stack only."
+    prohibited_use: "Trading signal, allocation rule, strategy backtest, empirical weighting, model training, live-trading recommendation, candidate promotion, or final-candidate change."
+
+  closeout_claims:
+    diagnostic_score_interpreted: true
+    score_to_signal_created: false
+    allocation_rule_created: false
+    strategy_backtest_run: false
+    empirical_weights_assigned: false
+    model_trained: false
+    new_data_ingested: false
+    candidate_promoted: false
+    final_candidate_changed: false
+
+  phase12f_boundary:
+    allowed_next_step: "Final Phase 12 checkpoint audit only"
+    forbidden_next_step: "score-to-signal conversion, allocation rule, strategy backtest, empirical weighting, model training, new data ingestion, candidate promotion, or final-candidate change"
+    phase12f_may_run_final_checkpoint: true
+    phase12f_may_create_signal: false
+    phase12f_may_test_strategy: false
+    phase12f_may_assign_empirical_weights: false
+    phase12f_may_train_model: false
+    phase12f_may_ingest_new_data: false
+    phase12f_may_promote_candidate: false
+    phase12f_may_change_final_candidate: false
+
+  gates:
+    require_source_score_reports_present: true
+    require_phase12d_passed: true
+    require_aggregate_state_allowed: true
+    require_expected_fragile_state: true
+    require_interpretation_created: true
+    require_interpretation_diagnostic_only: true
+    require_closeout_claims_locked: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_new_data_ingestion: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    require_phase12f_boundary_checkpoint_only: true
+    required_audit_role: "Diagnostic score interpretation and closeout audit only"
+
+
+phase12f_final_diagnostic_score_checkpoint_audit:
+  enabled: false
+
+  audit_role: "Final Phase 12 diagnostic score checkpoint audit only"
+  phase_branch: "Phase 12 diagnostic regime score branch"
+  checkpoint_status: "Phase 12 closed — diagnostic regime score calculated, audited, interpreted, and bounded"
+  next_allowed_step: "Separate future score-to-signal pre-registration spec only, if pursued"
+
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_new_data_ingestion: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase12a_score_calculation_preregistration_spec: false
+    phase12b_score_calculation_readiness_audit: false
+    phase12c_diagnostic_score_calculation: false
+    phase12d_diagnostic_score_distribution_audit: false
+    phase12e_diagnostic_score_interpretation_closeout: true
+    phase12f_final_diagnostic_score_checkpoint_audit: true
+    relative_momentum_allocator: true
+
+  expected_report_prefixes:
+    - "phase12a_prereg"
+    - "phase12b_readiness"
+    - "phase12c_score"
+    - "phase12d_audit"
+    - "phase12e_interpretation"
+
+  expected_markdown_reports:
+    - "phase12a_score_calculation_preregistration_spec.md"
+    - "phase12b_score_calculation_readiness_audit.md"
+    - "phase12c_diagnostic_score_calculation.md"
+    - "phase12d_diagnostic_score_distribution_audit.md"
+    - "phase12e_diagnostic_score_interpretation_closeout.md"
+
+  phase_conclusion_reports:
+    phase12a: "reports/phase12a_prereg_conclusion.csv"
+    phase12b: "reports/phase12b_readiness_conclusion.csv"
+    phase12c: "reports/phase12c_score_conclusion.csv"
+    phase12d: "reports/phase12d_audit_conclusion.csv"
+    phase12e: "reports/phase12e_interpretation_conclusion.csv"
+
+  phase_gate_reports:
+    phase12a: "reports/phase12a_prereg_gate_report.csv"
+    phase12b: "reports/phase12b_readiness_gate_report.csv"
+    phase12c: "reports/phase12c_score_gate_report.csv"
+    phase12d: "reports/phase12d_audit_gate_report.csv"
+    phase12e: "reports/phase12e_interpretation_gate_report.csv"
+
+  required_phase_verdict_fragments:
+    phase12a: "score-calculation pre-registration spec passed"
+    phase12b: "score-calculation readiness audit passed"
+    phase12c: "diagnostic score calculation passed"
+    phase12d: "diagnostic score distribution audit passed"
+    phase12e: "diagnostic score interpretation closeout passed"
+
+  branch_closure_claims:
+    diagnostic_score_exists: true
+    diagnostic_score_interpreted: true
+    score_to_signal_created: false
+    allocation_rule_created: false
+    strategy_backtest_run: false
+    empirical_weights_assigned: false
+    model_trained: false
+    new_data_ingested: false
+    candidate_promoted: false
+    final_candidate_changed: false
+
+  future_phase13_boundary:
+    allowed_next_step: "Separate score-to-signal pre-registration spec only, if pursued"
+    forbidden_next_step: "direct signal creation, allocation rule, strategy backtest, empirical weighting, model training, new data ingestion, candidate promotion, or final-candidate change"
+    phase13_may_define_signal_spec: true
+    phase13_may_create_signal_immediately: false
+    phase13_may_test_strategy: false
+    phase13_may_assign_empirical_weights: false
+    phase13_may_train_model: false
+    phase13_may_ingest_new_data: false
+    phase13_may_promote_candidate: false
+    phase13_may_change_final_candidate: false
+
+  gates:
+    require_report_inventory_present: true
+    require_markdown_reports_present: true
+    require_config_flags_clean_for_run: true
+    require_phase_conclusions_passed: true
+    require_phase_gate_reports_passed: true
+    require_branch_closure_claims_locked: true
+    require_future_phase13_boundary_prereg_only: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_new_data_ingestion: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_audit_role: "Final Phase 12 diagnostic score checkpoint audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

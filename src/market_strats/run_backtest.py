@@ -300,6 +300,10 @@ from market_strats.analysis.diagnostic_score_calculation_and_audit import (
     save_phase12c_diagnostic_score_calculation,
     save_phase12d_diagnostic_score_distribution_audit,
 )
+from market_strats.analysis.diagnostic_score_interpretation_closeout import (
+    save_phase12e_diagnostic_score_interpretation_closeout,
+    save_phase12f_final_diagnostic_score_checkpoint_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2032,6 +2036,16 @@ def main() -> None:
         )
 
         save_phase12d_diagnostic_score_distribution_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase12e_diagnostic_score_interpretation_closeout(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase12f_final_diagnostic_score_checkpoint_audit(
             config=config,
             reports_dir=reports_dir,
         )
