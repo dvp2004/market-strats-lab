@@ -4975,8 +4975,6 @@ phase13e_technical_macro_feature_schema_design_spec:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_spec_role: "Technical and macro feature-contract schema design spec only"
-
-
 phase13f_feature_schema_readiness_visual_template_audit:
   enabled: false
 
@@ -5067,6 +5065,414 @@ phase13f_feature_schema_readiness_visual_template_audit:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_audit_role: "Feature schema readiness and visual report template audit only"
+phase13g_feature_calculation_preregistration_spec:
+  enabled: true
+
+  spec_role: "Technical and macro feature calculation pre-registration spec only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13F"
+  proposed_next_phase: "Phase 13H"
+
+  allow_feature_ingestion: false
+  allow_feature_calculation: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13f_conclusion: "reports/phase13f_schema_audit_conclusion.csv"
+    phase13f_gate_report: "reports/phase13f_schema_audit_gate_report.csv"
+    universal_panel_schema: "reports/phase13e_schema_universal_panel_schema.csv"
+    technical_feature_schema: "reports/phase13e_schema_technical_feature_schema.csv"
+    macro_feature_schema: "reports/phase13e_schema_macro_feature_schema.csv"
+    transform_policy: "reports/phase13e_schema_transform_policy.csv"
+    missingness_policy: "reports/phase13e_schema_missingness_policy.csv"
+    visual_report_templates: "reports/phase13e_schema_visual_report_templates.csv"
+
+  calculation_registry:
+    - feature_id: "technical_trend_state"
+      family_id: "technical"
+      formula_id: "trend_price_vs_sma_200"
+      raw_inputs: ["adjusted_close"]
+      lookback_window: "200 trading days"
+      formula_description: "Compute 200-trading-day simple moving average of adjusted_close. Compute trend_distance = adjusted_close / sma_200 - 1."
+      threshold_policy: "supportive if trend_distance > 0.00; neutral if -0.05 <= trend_distance <= 0.00; fragile if trend_distance < -0.05"
+      lag_policy: "use only data available at previous trading-day close; decision_date is at least one trading day after as_of_date"
+      revision_policy: "adjusted-close source version must be tracked; historical adjustment changes require source_version update"
+      missingness_policy: "unavailable until at least 200 prior trading days exist"
+      output_state_column: "technical_trend_state"
+      output_value_column: "technical_trend_distance"
+      leakage_check_id: "LC_TECH_CLOSE_LAG"
+      visual_check_id: "VIS_TECH_STATE_TIMELINE"
+      calculate_now: false
+
+    - feature_id: "technical_momentum_state"
+      family_id: "technical"
+      formula_id: "momentum_252d_total_return"
+      raw_inputs: ["adjusted_close"]
+      lookback_window: "252 trading days"
+      formula_description: "Compute momentum_252d = adjusted_close / adjusted_close_lag_252 - 1."
+      threshold_policy: "supportive if momentum_252d > 0.00; neutral if -0.10 <= momentum_252d <= 0.00; fragile if momentum_252d < -0.10"
+      lag_policy: "use only data available at previous trading-day close; decision_date is at least one trading day after as_of_date"
+      revision_policy: "adjusted-close source version must be tracked; historical adjustment changes require source_version update"
+      missingness_policy: "unavailable until at least 252 prior trading days exist"
+      output_state_column: "technical_momentum_state"
+      output_value_column: "technical_momentum_252d"
+      leakage_check_id: "LC_TECH_CLOSE_LAG"
+      visual_check_id: "VIS_TECH_STATE_TIMELINE"
+      calculate_now: false
+
+    - feature_id: "technical_volatility_state"
+      family_id: "technical"
+      formula_id: "volatility_63d_annualised"
+      raw_inputs: ["adjusted_close"]
+      lookback_window: "63 trading days"
+      formula_description: "Compute daily close-to-close returns, then annualised volatility = rolling_std_63d * sqrt(252)."
+      threshold_policy: "supportive if annualised_volatility_63d < 0.15; neutral if 0.15 <= annualised_volatility_63d <= 0.25; fragile if annualised_volatility_63d > 0.25"
+      lag_policy: "use only data available at previous trading-day close; decision_date is at least one trading day after as_of_date"
+      revision_policy: "adjusted-close source version must be tracked; historical adjustment changes require source_version update"
+      missingness_policy: "unavailable until at least 64 prior trading days exist"
+      output_state_column: "technical_volatility_state"
+      output_value_column: "technical_volatility_63d_ann"
+      leakage_check_id: "LC_TECH_CLOSE_LAG"
+      visual_check_id: "VIS_TECH_STATE_TIMELINE"
+      calculate_now: false
+
+    - feature_id: "technical_drawdown_state"
+      family_id: "technical"
+      formula_id: "drawdown_from_252d_high"
+      raw_inputs: ["adjusted_close"]
+      lookback_window: "252 trading days"
+      formula_description: "Compute rolling_252d_high, then drawdown_252d = adjusted_close / rolling_252d_high - 1."
+      threshold_policy: "supportive if drawdown_252d > -0.05; neutral if -0.15 <= drawdown_252d <= -0.05; fragile if drawdown_252d < -0.15"
+      lag_policy: "use only data available at previous trading-day close; decision_date is at least one trading day after as_of_date"
+      revision_policy: "adjusted-close source version must be tracked; historical adjustment changes require source_version update"
+      missingness_policy: "unavailable until at least 252 prior trading days exist"
+      output_state_column: "technical_drawdown_state"
+      output_value_column: "technical_drawdown_252d"
+      leakage_check_id: "LC_TECH_CLOSE_LAG"
+      visual_check_id: "VIS_TECH_STATE_TIMELINE"
+      calculate_now: false
+
+    - feature_id: "macro_short_rate_state"
+      family_id: "macro"
+      formula_id: "dgs2_level_regime"
+      raw_inputs: ["DGS2"]
+      lookback_window: "latest available observation after lag"
+      formula_description: "Use latest point-in-time available 2-year Treasury yield after release/availability lag."
+      threshold_policy: "supportive if DGS2 < 2.50; neutral if 2.50 <= DGS2 <= 4.50; fragile if DGS2 > 4.50"
+      lag_policy: "availability_date must be known; decision_date must be at least one trading day after availability_date"
+      revision_policy: "source_version or vintage policy required; revised values cannot overwrite prior availability assumptions without version flag"
+      missingness_policy: "unavailable if no lag-compliant DGS2 observation exists"
+      output_state_column: "macro_short_rate_state"
+      output_value_column: "macro_dgs2_level"
+      leakage_check_id: "LC_MACRO_AVAILABILITY_LAG"
+      visual_check_id: "VIS_MACRO_STATE_TIMELINE"
+      calculate_now: false
+
+    - feature_id: "macro_yield_curve_state"
+      family_id: "macro"
+      formula_id: "dgs10_minus_dgs2_curve_regime"
+      raw_inputs: ["DGS10", "DGS2"]
+      lookback_window: "latest available observations after lag"
+      formula_description: "Compute yield_curve_spread = DGS10 - DGS2 using lag-compliant observations for both inputs."
+      threshold_policy: "supportive if spread > 0.50; neutral if -0.50 <= spread <= 0.50; fragile if spread < -0.50"
+      lag_policy: "both inputs must satisfy availability-date rule; decision_date must be at least one trading day after both availability dates"
+      revision_policy: "source_version or vintage policy required for both inputs"
+      missingness_policy: "unavailable if either DGS10 or DGS2 is missing or not lag-compliant"
+      output_state_column: "macro_yield_curve_state"
+      output_value_column: "macro_dgs10_minus_dgs2"
+      leakage_check_id: "LC_MACRO_AVAILABILITY_LAG"
+      visual_check_id: "VIS_MACRO_STATE_TIMELINE"
+      calculate_now: false
+
+    - feature_id: "macro_inflation_state"
+      family_id: "macro"
+      formula_id: "cpi_yoy_inflation_regime"
+      raw_inputs: ["CPIAUCSL"]
+      lookback_window: "12 monthly observations"
+      formula_description: "Compute CPI year-on-year inflation = CPIAUCSL / CPIAUCSL_lag_12_months - 1."
+      threshold_policy: "supportive if cpi_yoy < 0.03; neutral if 0.03 <= cpi_yoy <= 0.05; fragile if cpi_yoy > 0.05"
+      lag_policy: "monthly release-date lag required; decision_date must be after conservative availability_date"
+      revision_policy: "vintage-aware source preferred; otherwise conservative lag and source_version required"
+      missingness_policy: "unavailable if current or 12-month lag CPI value is unavailable"
+      output_state_column: "macro_inflation_state"
+      output_value_column: "macro_cpi_yoy"
+      leakage_check_id: "LC_MACRO_RELEASE_DATE"
+      visual_check_id: "VIS_MACRO_STATE_TIMELINE"
+      calculate_now: false
+
+    - feature_id: "macro_labour_state"
+      family_id: "macro"
+      formula_id: "unrate_level_and_3m_change_regime"
+      raw_inputs: ["UNRATE"]
+      lookback_window: "3 monthly observations"
+      formula_description: "Use latest lag-compliant UNRATE and compute unrate_3m_change = UNRATE - UNRATE_lag_3_months."
+      threshold_policy: "supportive if UNRATE < 5.00 and unrate_3m_change <= 0.00; fragile if UNRATE >= 6.00 or unrate_3m_change > 0.50; neutral otherwise"
+      lag_policy: "monthly release-date lag required; decision_date must be after conservative availability_date"
+      revision_policy: "vintage-aware source preferred; otherwise conservative lag and source_version required"
+      missingness_policy: "unavailable if current or 3-month lag UNRATE value is unavailable"
+      output_state_column: "macro_labour_state"
+      output_value_column: "macro_unrate_3m_change"
+      leakage_check_id: "LC_MACRO_RELEASE_DATE"
+      visual_check_id: "VIS_MACRO_STATE_TIMELINE"
+      calculate_now: false
+
+  output_column_schema:
+    - column_name: "as_of_date"
+      dtype: "date"
+      required: true
+    - column_name: "observation_date"
+      dtype: "date"
+      required: true
+    - column_name: "release_date"
+      dtype: "date_or_null"
+      required: true
+    - column_name: "availability_date"
+      dtype: "date"
+      required: true
+    - column_name: "decision_date"
+      dtype: "date"
+      required: true
+    - column_name: "family_id"
+      dtype: "string"
+      required: true
+    - column_name: "feature_id"
+      dtype: "string"
+      required: true
+    - column_name: "formula_id"
+      dtype: "string"
+      required: true
+    - column_name: "source_name"
+      dtype: "string"
+      required: true
+    - column_name: "source_version"
+      dtype: "string_or_null"
+      required: true
+    - column_name: "raw_inputs_available"
+      dtype: "bool"
+      required: true
+    - column_name: "feature_value"
+      dtype: "float_or_null"
+      required: true
+    - column_name: "feature_state"
+      dtype: "enum"
+      required: true
+    - column_name: "state_reason"
+      dtype: "string"
+      required: true
+    - column_name: "missingness_state"
+      dtype: "enum"
+      required: true
+    - column_name: "leakage_flag"
+      dtype: "bool"
+      required: true
+    - column_name: "contract_version"
+      dtype: "string"
+      required: true
+
+  missingness_behaviour:
+    - rule_id: "MISS1_no_silent_fill"
+      rule: "Missing, stale, insufficient-history, blocked, or unreleased values must be marked explicitly."
+      required: true
+    - rule_id: "MISS2_insufficient_lookback"
+      rule: "Technical features remain unavailable until lookback history is complete."
+      required: true
+    - rule_id: "MISS3_macro_unreleased"
+      rule: "Macro observations remain unavailable until conservative availability_date is reached."
+      required: true
+    - rule_id: "MISS4_input_leg_missing"
+      rule: "Multi-input features are unavailable if any required input leg is unavailable."
+      required: true
+    - rule_id: "MISS5_future_model_indicator"
+      rule: "Future model matrices must preserve missingness_state or explicit missingness indicators."
+      required: true
+
+  leakage_checks:
+    - check_id: "LC_TECH_CLOSE_LAG"
+      check: "Technical features must use previous-close data only; decision_date must be later than as_of_date."
+      required: true
+    - check_id: "LC_MACRO_AVAILABILITY_LAG"
+      check: "Macro features must use release/availability-date lagging before decision_date."
+      required: true
+    - check_id: "LC_MACRO_RELEASE_DATE"
+      check: "Monthly macro features must not appear before release and conservative availability lag."
+      required: true
+    - check_id: "LC_NO_RETURN_TARGET"
+      check: "Feature states must not use future returns, future drawdowns, benchmark labels, or target labels."
+      required: true
+    - check_id: "LC_NO_TRAIN_TEST_SCALING"
+      check: "Any future scaling must be fitted inside the training window only."
+      required: true
+    - check_id: "LC_SOURCE_VERSION"
+      check: "Source version/vintage/download metadata must be preserved."
+      required: true
+
+  visual_checks:
+    - visual_check_id: "VIS_TECH_STATE_TIMELINE"
+      check: "Future technical feature states must be visible in a feature-state timeline."
+      required: true
+    - visual_check_id: "VIS_MACRO_STATE_TIMELINE"
+      check: "Future macro feature states must be visible in a feature-state timeline."
+      required: true
+    - visual_check_id: "VIS_FEATURE_AVAILABILITY"
+      check: "Future feature availability/missingness must be visible in a heatmap."
+      required: true
+    - visual_check_id: "VIS_LEAKAGE_AUDIT"
+      check: "Future release-date, availability-date, decision-date, and leakage flags must be reportable."
+      required: true
+    - visual_check_id: "VIS_MODEL_MATRIX_PREVIEW"
+      check: "Future model matrix preview must show schema only before modelling."
+      required: true
+
+  ml_feature_engineering_lock:
+    train_only_scaling_required: true
+    target_leakage_forbidden: true
+    posthoc_feature_selection_forbidden: true
+    outlier_policy_predeclared: true
+    categorical_state_first: true
+    numeric_values_allowed_only_in_future_calculation_phase: true
+    feature_importance_forbidden_until_model_phase: true
+
+  phase13h_boundary:
+    allowed_next_step: "Feature calculation readiness audit only"
+    forbidden_next_step: "feature calculation, signal creation, allocation rule, strategy backtest, model training, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13h_may_audit_formula_registry: true
+    phase13h_may_audit_output_schema: true
+    phase13h_may_audit_leakage_checks: true
+    phase13h_may_audit_visual_checks: true
+    phase13h_may_calculate_features: false
+    phase13h_may_train_model: false
+    phase13h_may_create_signal: false
+    phase13h_may_run_backtest: false
+    phase13h_may_deploy_paper_trading: false
+    phase13h_may_promote_candidate: false
+
+  gates:
+    require_phase13f_passed: true
+    require_calculation_registry: true
+    min_registered_features: 8
+    require_technical_macro_features: true
+    require_exact_formula_fields: true
+    require_output_column_schema: true
+    min_output_columns: 15
+    require_missingness_behaviour: true
+    min_missingness_rules: 5
+    require_leakage_checks: true
+    min_leakage_checks: 6
+    require_visual_checks: true
+    min_visual_checks: 5
+    require_ml_feature_engineering_lock: true
+    require_no_calculate_now: true
+    require_phase13h_boundary_readiness_only: true
+    require_no_feature_ingestion: true
+    require_no_feature_calculation: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_spec_role: "Technical and macro feature calculation pre-registration spec only"
+
+
+phase13h_feature_calculation_readiness_audit:
+  enabled: true
+
+  audit_role: "Feature calculation readiness audit only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13G"
+  proposed_next_phase: "Phase 13I"
+
+  allow_feature_ingestion: false
+  allow_feature_calculation: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase13e_technical_macro_feature_schema_design_spec: false
+    phase13f_feature_schema_readiness_visual_template_audit: false
+    phase13g_feature_calculation_preregistration_spec: true
+    phase13h_feature_calculation_readiness_audit: true
+    relative_momentum_allocator: true
+
+  phase13g_reports:
+    source_report_check: "reports/phase13g_prereg_source_report_check.csv"
+    phase13f_result_check: "reports/phase13g_prereg_phase13f_result_check.csv"
+    calculation_registry: "reports/phase13g_prereg_calculation_registry.csv"
+    output_column_schema: "reports/phase13g_prereg_output_column_schema.csv"
+    missingness_behaviour: "reports/phase13g_prereg_missingness_behaviour.csv"
+    leakage_checks: "reports/phase13g_prereg_leakage_checks.csv"
+    visual_checks: "reports/phase13g_prereg_visual_checks.csv"
+    ml_feature_engineering_lock: "reports/phase13g_prereg_ml_feature_engineering_lock.csv"
+    phase13h_boundary_check: "reports/phase13g_prereg_phase13h_boundary_check.csv"
+    scope_boundary_check: "reports/phase13g_prereg_scope_boundary_check.csv"
+    gate_report: "reports/phase13g_prereg_gate_report.csv"
+    conclusion: "reports/phase13g_prereg_conclusion.csv"
+
+  readiness_claims:
+    calculation_registry_locked: true
+    output_schema_locked: true
+    missingness_behaviour_locked: true
+    leakage_checks_locked: true
+    visual_checks_locked: true
+    ml_feature_engineering_lock_present: true
+    feature_ingested: false
+    feature_calculated: false
+    signal_created: false
+    backtest_run: false
+    model_trained: false
+    paper_trading_deployed: false
+    candidate_promoted: false
+    final_candidate_changed: false
+
+  phase13i_boundary:
+    allowed_next_step: "Technical and macro feature calculation execution only"
+    forbidden_next_step: "signal creation, allocation rule, strategy backtest, model training, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13i_may_calculate_features: true
+    phase13i_may_create_feature_panels: true
+    phase13i_may_create_visual_feature_reports: true
+    phase13i_may_create_signal: false
+    phase13i_may_train_model: false
+    phase13i_may_run_backtest: false
+    phase13i_may_deploy_paper_trading: false
+    phase13i_may_promote_candidate: false
+
+  gates:
+    require_phase13g_reports_present: true
+    require_phase13g_conclusion_passed: true
+    require_phase13g_gate_report_passed: true
+    require_config_flags_clean_for_run: true
+    require_readiness_claims_locked: true
+    require_formula_registry_locked: true
+    require_output_schema_locked: true
+    require_missingness_leakage_visual_checks_locked: true
+    require_ml_lock_ready: true
+    require_phase13i_boundary_feature_calculation_only: true
+    require_no_feature_ingestion: true
+    require_no_feature_calculation: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_audit_role: "Feature calculation readiness audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

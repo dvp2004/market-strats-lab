@@ -316,6 +316,10 @@ from market_strats.analysis.feature_schema_design_and_template_audit import (
     save_phase13e_technical_macro_feature_schema_design_spec,
     save_phase13f_feature_schema_readiness_visual_template_audit,
 )
+from market_strats.analysis.feature_calculation_prereg_and_readiness_audit import (
+    save_phase13g_feature_calculation_preregistration_spec,
+    save_phase13h_feature_calculation_readiness_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2088,6 +2092,16 @@ def main() -> None:
         )
 
         save_phase13f_feature_schema_readiness_visual_template_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13g_feature_calculation_preregistration_spec(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13h_feature_calculation_readiness_audit(
             config=config,
             reports_dir=reports_dir,
         )
