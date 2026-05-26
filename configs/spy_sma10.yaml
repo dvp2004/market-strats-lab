@@ -4226,8 +4226,6 @@ phase13a_baseline_research_arc_freeze_spec:
     require_no_final_candidate_change: true
     require_phase13b_boundary_architecture_only: true
     required_spec_role: "Baseline SPY research arc freeze and transition spec only"
-
-
 phase13b_multifactor_model_architecture_roadmap_spec:
   enabled: false
 
@@ -4409,6 +4407,271 @@ phase13b_multifactor_model_architecture_roadmap_spec:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_spec_role: "Multi-factor long-term decision model architecture roadmap spec only"
+phase13c_multifactor_feature_source_inventory_spec:
+  enabled: false
+
+  spec_role: "Multi-factor feature-source inventory and leakage-feasibility spec only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13B"
+  proposed_next_phase: "Phase 13D"
+
+  allow_feature_ingestion: false
+  allow_feature_calculation: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13b_conclusion: "reports/phase13b_roadmap_conclusion.csv"
+    phase13b_gate_report: "reports/phase13b_roadmap_gate_report.csv"
+    phase13b_feature_family_registry: "reports/phase13b_roadmap_feature_family_registry.csv"
+    phase13b_walk_forward_design: "reports/phase13b_roadmap_walk_forward_design.csv"
+    phase13b_visual_reporting_plan: "reports/phase13b_roadmap_visual_reporting_plan.csv"
+    phase13b_paper_trading_readiness_plan: "reports/phase13b_roadmap_paper_trading_readiness_plan.csv"
+
+  feature_source_inventory:
+    - family_id: "technical"
+      family_status: "source_contract_feasible"
+      candidate_sources: ["existing OHLCV market data", "SPY adjusted close", "S&P 500 proxy series", "derived price/volume indicators"]
+      feature_examples: ["trend", "momentum", "volatility", "drawdown", "breadth proxy"]
+      timing_frequency: "daily"
+      point_in_time_requirement: "market data available after close; signals must use lagged data only"
+      revision_risk: "low"
+      leakage_risk: "medium"
+      immediate_decision: "eligible_for_contract_design"
+      blocked_now: false
+
+    - family_id: "macro"
+      family_status: "source_contract_feasible_with_existing_phase10_foundation"
+      candidate_sources: ["FRED/ALFRED-style macro series", "Treasury yield curve", "CPI/inflation series", "unemployment series"]
+      feature_examples: ["rates regime", "inflation regime", "labour regime", "yield-curve regime"]
+      timing_frequency: "monthly/daily mixed"
+      point_in_time_requirement: "release-date lagging and vintage/revision policy required"
+      revision_risk: "high"
+      leakage_risk: "high"
+      immediate_decision: "eligible_for_contract_design_with_strict_lagging"
+      blocked_now: false
+
+    - family_id: "fundamental"
+      family_status: "requires_source_audit_before_use"
+      candidate_sources: ["index-level valuation data", "earnings yield", "profit margins", "quality/profitability proxies", "ETF/provider fundamentals"]
+      feature_examples: ["valuation", "earnings growth", "profitability", "quality", "margin trend"]
+      timing_frequency: "monthly/quarterly"
+      point_in_time_requirement: "publication date and reporting lag required before use"
+      revision_risk: "medium"
+      leakage_risk: "high"
+      immediate_decision: "blocked_until_dedicated_fundamental_source_audit"
+      blocked_now: true
+
+    - family_id: "sentiment"
+      family_status: "requires_source_audit_before_use"
+      candidate_sources: ["news sentiment", "risk appetite proxy", "VIX/proxy sentiment", "positioning/crowding proxy", "narrative indicators"]
+      feature_examples: ["risk appetite", "news tone", "crowding", "narrative pressure", "volatility fear proxy"]
+      timing_frequency: "daily/weekly mixed"
+      point_in_time_requirement: "timestamped source availability and noise-control policy required"
+      revision_risk: "medium"
+      leakage_risk: "very_high"
+      immediate_decision: "blocked_until_dedicated_sentiment_source_audit"
+      blocked_now: true
+
+    - family_id: "dissertation_integration"
+      family_status: "methodology_only"
+      candidate_sources: ["no direct market data source"]
+      feature_examples: ["optimisation constraints", "decision-support dashboard", "validation governance"]
+      timing_frequency: "not_applicable"
+      point_in_time_requirement: "methodology only; no alpha feature unless separately justified"
+      revision_risk: "not_applicable"
+      leakage_risk: "conceptual_overfit_risk"
+      immediate_decision: "allowed_as_methodology_not_feature"
+      blocked_now: false
+
+  feature_contract_requirements:
+    - requirement_id: "FC1_source_identity"
+      requirement: "Every feature must name its raw source and source file/API before ingestion."
+      required: true
+    - requirement_id: "FC2_timestamp_policy"
+      requirement: "Every feature must define observation date, release date, availability date, and trading decision date."
+      required: true
+    - requirement_id: "FC3_lag_policy"
+      requirement: "Every feature must specify conservative lagging before model use."
+      required: true
+    - requirement_id: "FC4_revision_policy"
+      requirement: "Every revisable series must define vintage/revision treatment."
+      required: true
+    - requirement_id: "FC5_missingness_policy"
+      requirement: "Every feature must define missingness, stale-value, and unavailable-state handling."
+      required: true
+    - requirement_id: "FC6_transform_policy"
+      requirement: "Every feature transform must be pre-registered before calculation."
+      required: true
+    - requirement_id: "FC7_no_return_selection"
+      requirement: "Feature selection cannot use future returns or post-hoc performance ranking."
+      required: true
+    - requirement_id: "FC8_audit_output"
+      requirement: "Every feature family must produce inventory, leakage, coverage, and contract reports."
+      required: true
+
+  leakage_control_policy:
+    - control_id: "LC1_no_same_day_macro"
+      control: "Macro/fundamental/sentiment data cannot be used on the observation date unless availability is timestamp-proven."
+      required: true
+    - control_id: "LC2_no_vintage_blind_macro"
+      control: "Revised macro series require conservative lagging or vintage-aware source handling."
+      required: true
+    - control_id: "LC3_no_future_index_membership"
+      control: "Index/member fundamentals cannot use future membership information."
+      required: true
+    - control_id: "LC4_no_posthoc_feature_selection"
+      control: "Feature inclusion cannot be decided from observed backtest performance without pre-registration."
+      required: true
+    - control_id: "LC5_no_signal_before_contract"
+      control: "No signal can be created until feature contracts and readiness audits pass."
+      required: true
+    - control_id: "LC6_no_model_before_data_audit"
+      control: "No model training before feature-source availability and leakage audits pass."
+      required: true
+
+  blocked_family_policy:
+    fundamental_blocked_until: "Dedicated fundamental source/leakage audit passes."
+    sentiment_blocked_until: "Dedicated sentiment source/leakage/noise audit passes."
+    dissertation_direct_alpha_blocked_until: "Market-data mapping and alpha rationale are separately justified."
+    blocked_families_may_appear_in_roadmap: true
+    blocked_families_may_be_ingested_now: false
+    blocked_families_may_be_used_in_model_now: false
+
+  phase13d_boundary:
+    allowed_next_step: "Feature contract and data availability readiness audit only"
+    forbidden_next_step: "actual feature ingestion, feature calculation, signal creation, allocation rule, strategy backtest, model training, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13d_may_audit_inventory: true
+    phase13d_may_audit_contract_requirements: true
+    phase13d_may_audit_blocked_families: true
+    phase13d_may_ingest_features: false
+    phase13d_may_calculate_features: false
+    phase13d_may_train_model: false
+    phase13d_may_create_signal: false
+    phase13d_may_run_backtest: false
+    phase13d_may_deploy_paper_trading: false
+    phase13d_may_promote_candidate: false
+
+  gates:
+    require_phase13b_passed: true
+    require_feature_source_inventory: true
+    min_feature_families: 5
+    require_technical_macro_fundamental_sentiment: true
+    require_feature_contract_requirements: true
+    min_contract_requirements: 8
+    require_leakage_control_policy: true
+    min_leakage_controls: 6
+    require_blocked_family_policy: true
+    require_fundamental_blocked_now: true
+    require_sentiment_blocked_now: true
+    require_phase13d_boundary_readiness_only: true
+    require_no_feature_ingestion: true
+    require_no_feature_calculation: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_spec_role: "Multi-factor feature-source inventory and leakage-feasibility spec only"
+
+
+phase13d_feature_contract_readiness_audit:
+  enabled: false
+
+  audit_role: "Feature contract and data availability readiness audit only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13C"
+  proposed_next_phase: "Phase 13E"
+
+  allow_feature_ingestion: false
+  allow_feature_calculation: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase13a_baseline_research_arc_freeze_spec: false
+    phase13b_multifactor_model_architecture_roadmap_spec: false
+    phase13c_multifactor_feature_source_inventory_spec: true
+    phase13d_feature_contract_readiness_audit: true
+    relative_momentum_allocator: true
+
+  phase13c_reports:
+    source_report_check: "reports/phase13c_inventory_source_report_check.csv"
+    phase13b_result_check: "reports/phase13c_inventory_phase13b_result_check.csv"
+    feature_source_inventory: "reports/phase13c_inventory_feature_source_inventory.csv"
+    feature_contract_requirements: "reports/phase13c_inventory_feature_contract_requirements.csv"
+    leakage_control_policy: "reports/phase13c_inventory_leakage_control_policy.csv"
+    blocked_family_policy: "reports/phase13c_inventory_blocked_family_policy.csv"
+    phase13d_boundary_check: "reports/phase13c_inventory_phase13d_boundary_check.csv"
+    scope_boundary_check: "reports/phase13c_inventory_scope_boundary_check.csv"
+    gate_report: "reports/phase13c_inventory_gate_report.csv"
+    conclusion: "reports/phase13c_inventory_conclusion.csv"
+
+  readiness_claims:
+    phase13c_inventory_exists: true
+    technical_contract_feasible: true
+    macro_contract_feasible_with_lagging: true
+    fundamental_blocked_until_audit: true
+    sentiment_blocked_until_audit: true
+    dissertation_methodology_only: true
+    feature_ingested: false
+    feature_calculated: false
+    signal_created: false
+    backtest_run: false
+    model_trained: false
+    paper_trading_deployed: false
+    candidate_promoted: false
+    final_candidate_changed: false
+
+  phase13e_boundary:
+    allowed_next_step: "Technical and macro feature-contract schema design spec only"
+    forbidden_next_step: "actual feature ingestion, feature calculation, signal creation, allocation rule, strategy backtest, model training, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13e_may_define_feature_schema: true
+    phase13e_may_define_transform_rules: true
+    phase13e_may_define_visual_feature_reports: true
+    phase13e_may_ingest_features: false
+    phase13e_may_calculate_features: false
+    phase13e_may_train_model: false
+    phase13e_may_create_signal: false
+    phase13e_may_run_backtest: false
+    phase13e_may_deploy_paper_trading: false
+    phase13e_may_promote_candidate: false
+
+  gates:
+    require_phase13c_reports_present: true
+    require_phase13c_conclusion_passed: true
+    require_phase13c_gate_report_passed: true
+    require_config_flags_clean_for_run: true
+    require_readiness_claims_locked: true
+    require_contract_coverage: true
+    require_blocked_families_respected: true
+    require_phase13e_boundary_schema_only: true
+    require_no_feature_ingestion: true
+    require_no_feature_calculation: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_audit_role: "Feature contract and data availability readiness audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

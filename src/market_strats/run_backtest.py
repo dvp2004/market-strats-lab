@@ -308,6 +308,10 @@ from market_strats.analysis.multifactor_model_roadmap_spec import (
     save_phase13a_baseline_research_arc_freeze_spec,
     save_phase13b_multifactor_model_architecture_roadmap_spec,
 )
+from market_strats.analysis.feature_source_inventory_and_contract_audit import (
+    save_phase13c_multifactor_feature_source_inventory_spec,
+    save_phase13d_feature_contract_readiness_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2060,6 +2064,16 @@ def main() -> None:
         )
 
         save_phase13b_multifactor_model_architecture_roadmap_spec(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13c_multifactor_feature_source_inventory_spec(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13d_feature_contract_readiness_audit(
             config=config,
             reports_dir=reports_dir,
         )
