@@ -67,7 +67,7 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec. Phase 11C completed a regime-scoring rulebook spec. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11D completed a diagnostic-panel design for future regime-scoring work. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11E completed a diagnostic-panel template implementation audit. Schema-compliant panel templates now exist, but no regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec. Phase 11C completed a regime-scoring rulebook spec. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11D completed a diagnostic-panel design for future regime-scoring work. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11E completed a diagnostic-panel template implementation audit. Schema-compliant panel templates now exist, but no regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 12A/12B locked the future diagnostic score-calculation design and readiness boundary. No regime score, score value, empirical weight, signal, allocation rule, strategy test, model, new data ingestion, candidate promotion, or final-candidate change exists yet. Phase 12C/12D calculated and audited a categorical diagnostic regime score. The current diagnostic score is fragile, reflecting neutral technical evidence, neutral macro evidence, and fragile validation-risk context. This is diagnostic only and does not create a trading signal, allocation rule, strategy backtest, model, empirical weight, new data ingestion, candidate promotion, or final-candidate change.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -3671,6 +3671,200 @@ Correct interpretation:
 
 > Phase 11 is now closed cleanly. The project has prepared a regime-scoring architecture, rulebook, diagnostic-panel design, schema-compliant templates, and content audits, but no regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, candidate promotion, or final-candidate change exists.
 
+## Phase 12B: Score-Calculation Readiness Audit
+
+Phase 12B verified that Phase 12A was complete and locked before any diagnostic score calculation.
+
+This was not a score-calculation phase. It did not calculate regime scores, assign empirical weights, create signals, create allocation rules, run strategy backtests, ingest new data, train models, or promote a candidate.
+
+### Phase 12B Summary
+
+| Metric | Result |
+|---|---:|
+| Audit role | Score-calculation readiness audit only |
+| Phase branch | Phase 12 regime score calculation preparation |
+| Source phase | Phase 12A |
+| Proposed next phase | Phase 12C |
+| Phase 12A reports present | True |
+| Phase 12A result passed | True |
+| Config flags clean for combined run | True |
+| Readiness claims locked | True |
+| Phase 12C boundary passed | True |
+| Strategy promotion | False |
+| Candidate promotion | False |
+
+### Phase 12B Readiness Claims
+
+| Claim | Result |
+|---|---|
+| Pre-registration exists | Passed |
+| Eligible components locked | Passed |
+| Blocked components locked | Passed |
+| Formula structure locked | Passed |
+| Weighting policy locked | Passed |
+| Missingness policy locked | Passed |
+| Failure conditions locked | Passed |
+| Score calculated | False |
+| Signal created | False |
+| Backtest run | False |
+| Model trained | False |
+| New data ingested | False |
+| Candidate promoted | False |
+
+### Phase 12C Boundary
+
+| Boundary | Result |
+|---|---|
+| Allowed next step | Diagnostic score calculation only |
+| Forbidden next step | Trading signal creation, allocation rule, strategy backtest, model training, new data ingestion, or candidate promotion |
+| May calculate diagnostic scores | True |
+| May assign empirical weights | False |
+| May create signal | False |
+| May test strategy | False |
+| May train model | False |
+| May ingest new data | False |
+| May promote candidate | False |
+
+### Phase 12B Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 12A reports are present | Passed |
+| Phase 12A conclusion and gates passed | Passed |
+| Config flags are clean for combined run | Passed |
+| Readiness claims are locked | Passed |
+| Phase 12C boundary is diagnostic-only | Passed |
+| No score output/signal/backtest/model/data/promotion is allowed | Passed |
+| Audit role is correct | Passed |
+
+### Phase 12B Verdict
+
+> Phase 12B completed the score-calculation readiness audit.
+
+Correct interpretation:
+
+> Phase 12B verified that the score-calculation pre-registration is complete and locked. No score, empirical weight, signal, strategy test, model, new data ingestion, or candidate promotion exists. Phase 12C may only calculate diagnostic scores.
+
+## Phase 12C: Diagnostic Score Calculation
+
+Phase 12C calculated the first categorical diagnostic regime score using the pre-registered Phase 12A grammar.
+
+This was not a trading-signal phase. It did not create an allocation rule, run a strategy backtest, assign empirical weights, ingest new data, train a model, promote a candidate, or change the final candidate.
+
+### Phase 12C Summary
+
+| Metric | Result |
+|---|---:|
+| Calculation role | Diagnostic score calculation only |
+| Phase branch | Phase 12 regime score calculation |
+| Source phase | Phase 12B |
+| Proposed next phase | Phase 12D |
+| Source reports present | True |
+| Phase 12B result passed | True |
+| Component count | 3 |
+| Component states allowed | True |
+| Aggregate score allowed | True |
+| Blocked components excluded | True |
+| Existing project sources only | True |
+| Component rows non-signal | True |
+| No empirical weights | True |
+| No numeric weights | True |
+| No returns used | True |
+| No signal/backtest/promotion | True |
+| Phase 12D boundary passed | True |
+| Strategy promotion | False |
+| Candidate promotion | False |
+
+### Phase 12C Diagnostic Score Inputs
+
+| Component | Diagnostic state | Role |
+|---|---|---|
+| `technical_regime_context` | Neutral | Eligible component state |
+| `macro_regime_context` | Neutral | Eligible component state |
+| `validation_risk_context` | Fragile | Eligible control state |
+
+### Phase 12C Aggregate Score
+
+| Item | Result |
+|---|---|
+| Score ID | `pre_registered_three_component_regime_score` |
+| Calculation scope | Static branch-level diagnostic score |
+| Aggregation method | Categorical equal vote with validation-risk control |
+| Supportive components | 0 |
+| Neutral components | 2 |
+| Fragile components | 1 |
+| Raw vote state | Neutral |
+| Final diagnostic score state | Fragile |
+| Validation-risk override | Fragile validation risk without supportive majority |
+| Empirical weights allowed | False |
+| Numeric weights allowed | False |
+| Returns used | False |
+| Trading signal created | False |
+| Strategy backtest run | False |
+| Candidate promoted | False |
+
+### Phase 12C Verdict
+
+> Phase 12C completed the diagnostic score calculation.
+
+Correct interpretation:
+
+> Phase 12C calculated a categorical diagnostic regime score from the pre-registered Phase 12A grammar. The resulting score is diagnostic only. It is not a trading signal, allocation rule, strategy test, model, candidate promotion, or final-candidate change.
+
+## Phase 12D: Diagnostic Score Distribution / Content Audit
+
+Phase 12D audited the Phase 12C diagnostic score distribution and content quality.
+
+This was not a trading-signal phase. It did not create an allocation rule, run a strategy backtest, assign empirical weights, ingest new data, train a model, promote a candidate, or change the final candidate.
+
+### Phase 12D Summary
+
+| Metric | Result |
+|---|---:|
+| Audit role | Diagnostic score distribution and content audit only |
+| Phase branch | Phase 12 regime score calculation |
+| Source phase | Phase 12C |
+| Proposed next phase | Phase 12E |
+| Phase 12C reports present | True |
+| Phase 12C result passed | True |
+| Distribution check passed | True |
+| Forbidden-column check passed | True |
+| Phase 12E boundary passed | True |
+| Strategy promotion | False |
+| Candidate promotion | False |
+
+### Phase 12D Forbidden-Column Audit
+
+| Frame | Forbidden group | Result |
+|---|---|---|
+| `component_state_panel` | Numeric score columns | Passed |
+| `component_state_panel` | Signal columns | Passed |
+| `component_state_panel` | Backtest columns | Passed |
+| `component_state_panel` | Empirical weight columns | Passed |
+| `aggregate_score` | Numeric score columns | Passed |
+| `aggregate_score` | Signal columns | Passed |
+| `aggregate_score` | Backtest columns | Passed |
+| `aggregate_score` | Empirical weight columns | Passed |
+
+### Phase 12D Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 12C reports are present | Passed |
+| Phase 12C conclusion passed | Passed |
+| Score distribution and aggregate content are valid | Passed |
+| No forbidden score/signal/backtest/weight columns exist | Passed |
+| Phase 12E boundary is interpretation-audit only | Passed |
+| Audit role is correct | Passed |
+
+### Phase 12D Verdict
+
+> Phase 12D completed the diagnostic score distribution audit.
+
+Correct interpretation:
+
+> Phase 12D confirmed that the Phase 12C diagnostic score is categorical, content-consistent, and bounded. No numeric trading score, signal, allocation rule, strategy backtest, empirical weight, model, new data ingestion, candidate promotion, or final-candidate change exists.
+
 ---
 
 # Methodology Notes
@@ -3837,6 +4031,8 @@ Remaining concerns include:
 - Phase 11E was a diagnostic-panel template implementation audit only. It created schema-compliant reporting templates but did not calculate regime scores, assign weights, create signals, run strategy tests, ingest new data, train models, or promote any candidate.
 - Phase 11F was a diagnostic-panel content audit only. It verified template content consistency but did not calculate regime scores, assign weights, create signals, run strategy tests, ingest new data, train models, or promote any candidate.
 - Phase 11G closed the regime-scoring preparation branch only. Phase 11 prepared the architecture, rulebook, diagnostic panels, templates, and content audits, but no regime score, score weights, signal, strategy test, model, new data ingestion, or promoted candidate exists.
+- Phase 12A and Phase 12B prepared and locked the diagnostic score-calculation design only. No regime score, score values, empirical weights, signal, allocation rule, strategy test, model, new data ingestion, or promoted candidate exists yet.
+- Phase 12C/12D calculated and audited a categorical diagnostic regime score only. The score is not a trading signal, allocation rule, strategy backtest, empirical model, live-trading input, candidate promotion, or final-candidate change.
 ---
 
 # Bugs Caught and Fixed
@@ -4504,6 +4700,69 @@ reports/phase11g_final_checkpoint_conclusion.csv
 reports/phase11g_final_regime_scoring_checkpoint_audit.md
 ```
 
+## Phase 12A Score-Calculation Pre-Registration Reports
+
+```text
+reports/phase12a_prereg_source_input_check.csv
+reports/phase12a_prereg_eligible_components.csv
+reports/phase12a_prereg_blocked_components.csv
+reports/phase12a_prereg_formula_structure.csv
+reports/phase12a_prereg_weighting_policy.csv
+reports/phase12a_prereg_missingness_policy.csv
+reports/phase12a_prereg_score_state_interpretation.csv
+reports/phase12a_prereg_future_validation_gates.csv
+reports/phase12a_prereg_failure_conditions.csv
+reports/phase12a_prereg_phase12b_boundary_check.csv
+reports/phase12a_prereg_scope_boundary_check.csv
+reports/phase12a_prereg_summary.csv
+reports/phase12a_prereg_gate_report.csv
+reports/phase12a_prereg_conclusion.csv
+reports/phase12a_score_calculation_preregistration_spec.md
+```
+
+## Phase 12B Score-Calculation Readiness Audit Reports
+```text
+reports/phase12b_readiness_report_inventory_check.csv
+reports/phase12b_readiness_phase12a_result_check.csv
+reports/phase12b_readiness_config_flag_check.csv
+reports/phase12b_readiness_readiness_claims_check.csv
+reports/phase12b_readiness_phase12c_boundary_check.csv
+reports/phase12b_readiness_scope_boundary_check.csv
+reports/phase12b_readiness_summary.csv
+reports/phase12b_readiness_gate_report.csv
+reports/phase12b_readiness_conclusion.csv
+reports/phase12b_score_calculation_readiness_audit.md
+```
+
+## Phase 12C Diagnostic Score Calculation Reports
+
+```text
+reports/phase12c_score_source_report_check.csv
+reports/phase12c_score_phase12b_result_check.csv
+reports/phase12c_score_component_state_panel.csv
+reports/phase12c_score_component_state_distribution.csv
+reports/phase12c_score_aggregate_score.csv
+reports/phase12c_score_phase12d_boundary_check.csv
+reports/phase12c_score_scope_boundary_check.csv
+reports/phase12c_score_summary.csv
+reports/phase12c_score_gate_report.csv
+reports/phase12c_score_conclusion.csv
+reports/phase12c_diagnostic_score_calculation.md
+```
+## Phase 12D Diagnostic Score Distribution Audit Reports
+
+```text
+reports/phase12d_audit_source_score_report_check.csv
+reports/phase12d_audit_phase12c_result_check.csv
+reports/phase12d_audit_distribution_check.csv
+reports/phase12d_audit_forbidden_column_check.csv
+reports/phase12d_audit_phase12e_boundary_check.csv
+reports/phase12d_audit_summary.csv
+reports/phase12d_audit_gate_report.csv
+reports/phase12d_audit_conclusion.csv
+reports/phase12d_diagnostic_score_distribution_audit.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -4667,6 +4926,10 @@ configs/spy_sma10.yaml
 | Phase 11E regime scoring diagnostic panel template implementation audit | Completed — schema-compliant diagnostic panel templates generated; required columns, blocked-family rows, boundary rows, and non-signal/non-return constraints verified; no score, signal, backtest, model, new data ingestion, or promotion |
 | Phase 11F regime scoring diagnostic panel content audit | Completed — diagnostic panel content audit passed; component, direction, missingness, weighting, blocked-family, and boundary content verified; no score, signal, backtest, model, new data ingestion, or promotion |
 | Phase 11G final regime scoring closeout/checkpoint audit | Completed — final Phase 11 checkpoint passed; Phase 11A–11F reports and gates verified, config flags clean, branch closed without score/signal/backtest/model/new data/promotion, and Phase 12A limited to score-calculation pre-registration spec only |
+| Phase 12A score-calculation pre-registration spec | Completed — score-calculation design pre-registered; eligible technical, macro/rates/inflation, and validation-risk components locked; fundamental/sentiment components blocked; formula grammar, non-return weighting policy, missingness handling, validation gates, and failure conditions documented; no score/signal/backtest/model/new data/promotion |
+| Phase 12B score-calculation readiness audit | Completed — readiness audit passed; Phase 12A reports and gates verified, readiness claims locked, and Phase 12C limited to diagnostic score calculation only; no score/signal/backtest/model/new data/promotion |
+| Phase 12C diagnostic score calculation | Completed — diagnostic score calculation passed; categorical supportive/neutral/fragile score calculated from Phase 12A grammar using existing project evidence only; no signal/backtest/model/new data/promotion |
+| Phase 12D diagnostic score distribution/content audit | Completed — score distribution/content audit passed; aggregate diagnostic score and component-state content verified; forbidden score/signal/backtest/empirical-weight columns absent; no signal/backtest/model/new data/promotion |
 ---
 
 # What Should Happen Next

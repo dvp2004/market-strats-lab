@@ -292,6 +292,14 @@ from market_strats.analysis.regime_scoring_diagnostic_panel_content_audit import
 from market_strats.analysis.final_regime_scoring_checkpoint_audit import (
     save_phase11g_final_regime_scoring_checkpoint_audit,
 )
+from market_strats.analysis.score_calculation_prereg_and_readiness_audit import (
+    save_phase12a_score_calculation_preregistration_spec,
+    save_phase12b_score_calculation_readiness_audit,
+)
+from market_strats.analysis.diagnostic_score_calculation_and_audit import (
+    save_phase12c_diagnostic_score_calculation,
+    save_phase12d_diagnostic_score_distribution_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2004,6 +2012,26 @@ def main() -> None:
         )
 
         save_phase11g_final_regime_scoring_checkpoint_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase12a_score_calculation_preregistration_spec(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase12b_score_calculation_readiness_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase12c_diagnostic_score_calculation(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase12d_diagnostic_score_distribution_audit(
             config=config,
             reports_dir=reports_dir,
         )

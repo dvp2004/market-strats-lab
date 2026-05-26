@@ -3545,6 +3545,425 @@ phase11g_final_regime_scoring_checkpoint_audit:
     require_no_new_data_ingestion: true
     require_no_candidate_promotion: true
     required_audit_role: "Final Phase 11 regime scoring closeout/checkpoint audit only"
+phase12a_score_calculation_preregistration_spec:
+  enabled: false
+
+  spec_role: "Score-calculation pre-registration spec only"
+  phase_branch: "Phase 12 regime score calculation preparation"
+  source_phase: "Phase 11G"
+  proposed_next_phase: "Phase 12B"
+
+  allow_score_calculation: false
+  allow_numeric_score_output: false
+  allow_empirical_return_weights: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_model_training: false
+  allow_new_data_ingestion: false
+  allow_candidate_promotion: false
+
+  source_inputs:
+    component_availability_report: "reports/phase11e_template_component_availability_report.csv"
+    component_direction_report: "reports/phase11e_template_component_direction_report.csv"
+    missingness_report: "reports/phase11e_template_missingness_report.csv"
+    weighting_policy_report: "reports/phase11e_template_weighting_policy_report.csv"
+    blocked_family_report: "reports/phase11e_template_blocked_family_report.csv"
+    phase11g_conclusion: "reports/phase11g_final_checkpoint_conclusion.csv"
+
+  eligible_components:
+    - component_id: "technical_regime_context"
+      family: "technical"
+      eligibility: "eligible_for_future_score_calculation"
+      source_basis: "Phase 9 diagnostics and Phase 11 diagnostic panel content"
+      allowed_states: ["supportive", "neutral", "fragile"]
+      may_affect_future_score: true
+      may_create_signal_now: false
+
+    - component_id: "macro_regime_context"
+      family: "macro_rates_inflation"
+      eligibility: "eligible_for_future_score_calculation"
+      source_basis: "Phase 10 diagnostics and Phase 11 diagnostic panel content"
+      allowed_states: ["supportive", "neutral", "fragile"]
+      may_affect_future_score: true
+      may_create_signal_now: false
+
+    - component_id: "validation_risk_context"
+      family: "validation_risk"
+      eligibility: "eligible_for_future_score_calculation_as_control_penalty"
+      source_basis: "Phase 8/9/10/11 validation-risk evidence"
+      allowed_states: ["supportive", "neutral", "fragile"]
+      may_affect_future_score: true
+      may_create_signal_now: false
+
+  blocked_components:
+    - component_id: "future_fundamental_context"
+      family: "fundamental_valuation"
+      blocked_reason: "No source/leakage feasibility audit exists."
+      unblock_requires: "Separate fundamental/valuation source and leakage audit."
+      may_affect_future_score: false
+
+    - component_id: "future_sentiment_context"
+      family: "sentiment_narrative"
+      blocked_reason: "No source/leakage feasibility audit exists."
+      unblock_requires: "Separate sentiment/narrative source and leakage audit."
+      may_affect_future_score: false
+
+  formula_structure:
+    formula_id: "pre_registered_three_component_regime_score"
+    formula_role: "future diagnostic score formula grammar only"
+    aggregation_policy: "non_return_based_equal_component_vote_with_validation_risk_control"
+    allowed_component_states: ["supportive", "neutral", "fragile"]
+    score_state_output: ["supportive", "neutral", "fragile"]
+    numeric_score_values_defined: false
+    empirical_weights_allowed: false
+    returns_used_for_formula_design: false
+    description: "Future Phase 12C may map the three eligible component states into a diagnostic supportive/neutral/fragile regime score without using returns to choose weights or cutoffs."
+
+  weighting_policy:
+    policy_id: "non_return_equal_component_policy"
+    policy_type: "pre_registered_non_return_based_policy"
+    eligible_component_scope: "technical_macro_validation_risk_only"
+    empirical_return_weighting_allowed: false
+    optimisation_allowed: false
+    cutoff_search_allowed: false
+    numeric_weights_assigned_now: false
+    pre_registration_required_before_calculation: true
+
+  missingness_policy:
+    policy_id: "explicit_missingness_caution_policy"
+    no_return_inference: true
+    no_silent_fill: true
+    unavailable_component_action: "mark_unavailable"
+    blocked_component_action: "exclude_and_flag_blocked"
+    validation_risk_missing_action: "default_to_caution"
+    score_calculation_allowed_with_missing_validation_risk: false
+
+  score_state_interpretation:
+    - state: "supportive"
+      interpretation: "Diagnostic context appears supportive for the existing final candidate."
+      trading_allowed: false
+      signal_allowed: false
+    - state: "neutral"
+      interpretation: "Diagnostic context is mixed, unavailable, or insufficient."
+      trading_allowed: false
+      signal_allowed: false
+    - state: "fragile"
+      interpretation: "Diagnostic context suggests elevated vulnerability for the existing final candidate."
+      trading_allowed: false
+      signal_allowed: false
+
+  future_validation_gates:
+    - gate_id: "score_content_source_gate"
+      gate: "Future score calculation may only use existing Phase 11 diagnostic panel content unless a new source audit exists."
+      required: true
+    - gate_id: "no_return_weighting_gate"
+      gate: "Future score calculation must not use returns to choose weights or cutoffs."
+      required: true
+    - gate_id: "component_audit_gate"
+      gate: "Each component contribution must remain separately auditable."
+      required: true
+    - gate_id: "missingness_gate"
+      gate: "Missingness and blocked-family handling must be explicit."
+      required: true
+    - gate_id: "diagnostic_before_strategy_gate"
+      gate: "Future score must be evaluated diagnostically before any strategy test."
+      required: true
+    - gate_id: "promotion_block_gate"
+      gate: "A future score cannot promote a candidate without later validation."
+      required: true
+
+  failure_conditions:
+    - condition_id: "returns_used_for_weights"
+      condition: "Fail if historical returns are used to choose score weights or cutoffs."
+    - condition_id: "blocked_family_used"
+      condition: "Fail if fundamental or sentiment components are used before source/leakage audits."
+    - condition_id: "signal_created"
+      condition: "Fail if the score spec creates a trading signal or allocation rule."
+    - condition_id: "score_calculated_in_prereg"
+      condition: "Fail if scores are calculated during the pre-registration phase."
+    - condition_id: "new_data_ingested"
+      condition: "Fail if new data is ingested."
+    - condition_id: "candidate_promoted"
+      condition: "Fail if any candidate is promoted."
+
+  phase12b_boundary:
+    allowed_next_step: "Score-calculation readiness audit only"
+    forbidden_next_step: "actual score calculation, signal creation, allocation rule, strategy backtest, model training, new data ingestion, or candidate promotion"
+    phase12b_may_audit_preregistration: true
+    phase12b_may_calculate_scores: false
+    phase12b_may_assign_empirical_weights: false
+    phase12b_may_create_signal: false
+    phase12b_may_test_strategy: false
+    phase12b_may_train_model: false
+    phase12b_may_ingest_new_data: false
+    phase12b_may_promote_candidate: false
+
+  gates:
+    require_source_inputs: true
+    require_eligible_components: true
+    min_eligible_components: 3
+    require_blocked_components: true
+    min_blocked_components: 2
+    require_formula_structure: true
+    require_non_return_weighting_policy: true
+    require_missingness_policy: true
+    require_score_state_interpretation: true
+    min_score_states: 3
+    require_future_validation_gates: true
+    min_future_validation_gates: 6
+    require_failure_conditions: true
+    min_failure_conditions: 6
+    require_phase12b_boundary_readiness_only: true
+    require_no_score_calculation: true
+    require_no_numeric_score_output: true
+    require_no_empirical_return_weights: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_model_training: true
+    require_no_new_data_ingestion: true
+    require_no_candidate_promotion: true
+    required_spec_role: "Score-calculation pre-registration spec only"
+
+
+phase12b_score_calculation_readiness_audit:
+  enabled: false
+
+  audit_role: "Score-calculation readiness audit only"
+  phase_branch: "Phase 12 regime score calculation preparation"
+  source_phase: "Phase 12A"
+  proposed_next_phase: "Phase 12C"
+
+  allow_score_calculation: false
+  allow_numeric_score_output: false
+  allow_empirical_return_weights: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_model_training: false
+  allow_new_data_ingestion: false
+  allow_candidate_promotion: false
+
+  expected_runtime_flags:
+    phase12a_score_calculation_preregistration_spec: true
+    phase12b_score_calculation_readiness_audit: true
+    relative_momentum_allocator: true
+
+  phase12a_reports:
+    source_input_check: "reports/phase12a_prereg_source_input_check.csv"
+    eligible_components: "reports/phase12a_prereg_eligible_components.csv"
+    blocked_components: "reports/phase12a_prereg_blocked_components.csv"
+    formula_structure: "reports/phase12a_prereg_formula_structure.csv"
+    weighting_policy: "reports/phase12a_prereg_weighting_policy.csv"
+    missingness_policy: "reports/phase12a_prereg_missingness_policy.csv"
+    score_state_interpretation: "reports/phase12a_prereg_score_state_interpretation.csv"
+    future_validation_gates: "reports/phase12a_prereg_future_validation_gates.csv"
+    failure_conditions: "reports/phase12a_prereg_failure_conditions.csv"
+    gate_report: "reports/phase12a_prereg_gate_report.csv"
+    conclusion: "reports/phase12a_prereg_conclusion.csv"
+
+  readiness_claims:
+    preregistration_exists: true
+    eligible_components_locked: true
+    blocked_components_locked: true
+    formula_structure_locked: true
+    weighting_policy_locked: true
+    missingness_policy_locked: true
+    failure_conditions_locked: true
+    score_calculated: false
+    signal_created: false
+    backtest_run: false
+    model_trained: false
+    new_data_ingested: false
+    candidate_promoted: false
+
+  phase12c_boundary:
+    allowed_next_step: "Diagnostic score calculation only"
+    forbidden_next_step: "trading signal creation, allocation rule, strategy backtest, model training, new data ingestion, or candidate promotion"
+    phase12c_may_calculate_diagnostic_scores: true
+    phase12c_may_assign_empirical_weights: false
+    phase12c_may_create_signal: false
+    phase12c_may_test_strategy: false
+    phase12c_may_train_model: false
+    phase12c_may_ingest_new_data: false
+    phase12c_may_promote_candidate: false
+
+  gates:
+    require_phase12a_reports_present: true
+    require_phase12a_conclusion_passed: true
+    require_phase12a_gate_report_passed: true
+    require_config_flags_clean_for_run: true
+    require_readiness_claims_locked: true
+    require_phase12c_boundary_diagnostic_only: true
+    require_no_score_calculation: true
+    require_no_numeric_score_output: true
+    require_no_empirical_return_weights: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_model_training: true
+    require_no_new_data_ingestion: true
+    require_no_candidate_promotion: true
+    required_audit_role: "Score-calculation readiness audit only"
+phase12c_diagnostic_score_calculation:
+  enabled: false
+
+  calculation_role: "Diagnostic score calculation only"
+  phase_branch: "Phase 12 regime score calculation"
+  source_phase: "Phase 12B"
+  proposed_next_phase: "Phase 12D"
+
+  allow_diagnostic_score_calculation: true
+  allow_numeric_score_output: false
+  allow_empirical_return_weights: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_model_training: false
+  allow_new_data_ingestion: false
+  allow_candidate_promotion: false
+
+  source_reports:
+    phase12a_eligible_components: "reports/phase12a_prereg_eligible_components.csv"
+    phase12a_blocked_components: "reports/phase12a_prereg_blocked_components.csv"
+    phase12a_formula_structure: "reports/phase12a_prereg_formula_structure.csv"
+    phase12a_weighting_policy: "reports/phase12a_prereg_weighting_policy.csv"
+    phase12a_missingness_policy: "reports/phase12a_prereg_missingness_policy.csv"
+    phase12a_score_state_interpretation: "reports/phase12a_prereg_score_state_interpretation.csv"
+    phase12b_conclusion: "reports/phase12b_readiness_conclusion.csv"
+    phase12b_gate_report: "reports/phase12b_readiness_gate_report.csv"
+
+  component_state_inputs:
+    - component_id: "technical_regime_context"
+      family: "technical"
+      diagnostic_state: "neutral"
+      state_source: "Phase 9 diagnostics found mixed technical evidence and Phase 9D failed rule validation."
+      state_role: "eligible_component_state"
+      source_is_existing_project_report: true
+      trading_allowed: false
+      signal_allowed: false
+
+    - component_id: "macro_regime_context"
+      family: "macro_rates_inflation"
+      diagnostic_state: "neutral"
+      state_source: "Phase 10 diagnostics found mixed macro evidence and Phase 10F failed rule validation."
+      state_role: "eligible_component_state"
+      source_is_existing_project_report: true
+      trading_allowed: false
+      signal_allowed: false
+
+    - component_id: "validation_risk_context"
+      family: "validation_risk"
+      diagnostic_state: "fragile"
+      state_source: "Phase 8-11 documented friction, liveability, behavioural-regret, failed-extension, and research-boundary risks."
+      state_role: "eligible_control_state"
+      source_is_existing_project_report: true
+      trading_allowed: false
+      signal_allowed: false
+
+  scoring_policy:
+    score_id: "pre_registered_three_component_regime_score"
+    allowed_states: ["supportive", "neutral", "fragile"]
+    formula_source: "Phase 12A pre-registered formula grammar"
+    calculation_scope: "static_branch_level_diagnostic_score"
+    aggregation_method: "categorical_equal_vote_with_validation_risk_control"
+    empirical_weights_allowed: false
+    numeric_weights_allowed: false
+    returns_used: false
+    validation_risk_control:
+      enabled: true
+      fragile_validation_risk_caps_supportive_score: true
+      fragile_validation_risk_with_no_supportive_majority_forces_fragile: true
+
+  phase12d_boundary:
+    allowed_next_step: "Diagnostic score distribution and content audit only"
+    forbidden_next_step: "trading signal creation, allocation rule, strategy backtest, model training, new data ingestion, or candidate promotion"
+    phase12d_may_audit_score_distribution: true
+    phase12d_may_create_signal: false
+    phase12d_may_test_strategy: false
+    phase12d_may_assign_empirical_weights: false
+    phase12d_may_train_model: false
+    phase12d_may_ingest_new_data: false
+    phase12d_may_promote_candidate: false
+
+  gates:
+    require_source_reports_present: true
+    require_phase12b_passed: true
+    require_eligible_components_present: true
+    require_component_states_allowed: true
+    require_blocked_components_excluded: true
+    require_existing_project_sources_only: true
+    require_no_numeric_score_output: true
+    require_no_empirical_return_weights: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_model_training: true
+    require_no_new_data_ingestion: true
+    require_no_candidate_promotion: true
+    require_phase12d_boundary_audit_only: true
+    required_calculation_role: "Diagnostic score calculation only"
+
+
+phase12d_diagnostic_score_distribution_audit:
+  enabled: false
+
+  audit_role: "Diagnostic score distribution and content audit only"
+  phase_branch: "Phase 12 regime score calculation"
+  source_phase: "Phase 12C"
+  proposed_next_phase: "Phase 12E"
+
+  allow_score_interpretation: true
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_new_data_ingestion: false
+  allow_candidate_promotion: false
+
+  source_score_reports:
+    component_state_panel: "reports/phase12c_score_component_state_panel.csv"
+    aggregate_score: "reports/phase12c_score_aggregate_score.csv"
+    component_state_distribution: "reports/phase12c_score_component_state_distribution.csv"
+    gate_report: "reports/phase12c_score_gate_report.csv"
+    conclusion: "reports/phase12c_score_conclusion.csv"
+
+  expected_score_states:
+    - "supportive"
+    - "neutral"
+    - "fragile"
+
+  expected_component_count: 3
+  expected_aggregate_score_count: 1
+
+  phase12e_boundary:
+    allowed_next_step: "Diagnostic score interpretation and closeout audit only"
+    forbidden_next_step: "trading signal creation, allocation rule, strategy backtest, model training, new data ingestion, or candidate promotion"
+    phase12e_may_interpret_score_diagnostically: true
+    phase12e_may_create_signal: false
+    phase12e_may_test_strategy: false
+    phase12e_may_assign_empirical_weights: false
+    phase12e_may_train_model: false
+    phase12e_may_ingest_new_data: false
+    phase12e_may_promote_candidate: false
+
+  gates:
+    require_phase12c_reports_present: true
+    require_phase12c_conclusion_passed: true
+    require_component_state_distribution: true
+    require_aggregate_score_valid: true
+    require_score_states_allowed: true
+    require_component_count_expected: true
+    require_single_aggregate_score: true
+    require_no_numeric_score_columns: true
+    require_no_signal_columns: true
+    require_no_backtest_columns: true
+    require_no_empirical_weight_columns: true
+    require_no_candidate_promotion: true
+    require_phase12e_boundary_interpretation_only: true
+    required_audit_role: "Diagnostic score distribution and content audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
