@@ -4043,8 +4043,6 @@ phase12e_diagnostic_score_interpretation_closeout:
     require_no_final_candidate_change: true
     require_phase12f_boundary_checkpoint_only: true
     required_audit_role: "Diagnostic score interpretation and closeout audit only"
-
-
 phase12f_final_diagnostic_score_checkpoint_audit:
   enabled: false
 
@@ -4147,6 +4145,270 @@ phase12f_final_diagnostic_score_checkpoint_audit:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_audit_role: "Final Phase 12 diagnostic score checkpoint audit only"
+phase13a_baseline_research_arc_freeze_spec:
+  enabled: false
+
+  spec_role: "Baseline SPY research arc freeze and transition spec only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 12F"
+  proposed_next_phase: "Phase 13B"
+
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_new_data_ingestion: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase12f_conclusion: "reports/phase12f_final_conclusion.csv"
+    phase12f_gate_report: "reports/phase12f_final_gate_report.csv"
+    phase12f_branch_closure: "reports/phase12f_final_branch_closure_claims_check.csv"
+    phase12c_aggregate_score: "reports/phase12c_score_aggregate_score.csv"
+
+  baseline_freeze:
+    baseline_arc_name: "SPY regime-switch baseline research framework"
+    baseline_arc_status: "Frozen as benchmark and validation infrastructure"
+    final_candidate: "Phase 6B/6C 3D + deep_drawdown_guard + loose_relief"
+    final_candidate_role: "Best execution-realistic risk-adjusted candidate built so far, not final project endpoint"
+    diagnostic_score_state: "fragile"
+    diagnostic_score_role: "Baseline research diagnostic, not signal"
+    hierarchy_changed: false
+    candidate_promoted: false
+    score_to_signal_created: false
+    baseline_reusable_assets:
+      - "SPY Buy & Hold benchmark"
+      - "SPY 12M Momentum benchmark"
+      - "execution-friction diagnostics"
+      - "walk-forward diagnostics"
+      - "behavioural-regret diagnostics"
+      - "pre-registration workflow"
+      - "gate reports"
+      - "closeout reports"
+      - "forbidden-column checks"
+      - "diagnostic scoring discipline"
+
+  transition_decision:
+    decision: "Open a new multi-factor model architecture branch"
+    reason: "The baseline arc produced a robust validation framework but did not build the intended technical + macro + fundamental + sentiment long-term decision model."
+    rejected_next_step: "Direct score-to-signal conversion from fragile Phase 12 score"
+    accepted_next_step: "Multi-factor model architecture roadmap spec"
+    burden_of_proof: "Any future signal/backtest requires separate pre-registration and out-of-sample validation."
+
+  phase13b_boundary:
+    allowed_next_step: "Multi-factor long-term decision model architecture roadmap spec only"
+    forbidden_next_step: "feature ingestion, signal creation, allocation rule, strategy backtest, empirical weighting, model training, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13b_may_define_architecture: true
+    phase13b_may_define_feature_families: true
+    phase13b_may_define_walk_forward_design: true
+    phase13b_may_define_visual_reports: true
+    phase13b_may_define_paper_trading_requirements: true
+    phase13b_may_ingest_data: false
+    phase13b_may_train_model: false
+    phase13b_may_create_signal: false
+    phase13b_may_run_backtest: false
+    phase13b_may_promote_candidate: false
+
+  gates:
+    require_phase12f_passed: true
+    require_baseline_freeze_complete: true
+    require_transition_decision: true
+    require_no_score_to_signal_conversion: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_new_data_ingestion: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    require_phase13b_boundary_architecture_only: true
+    required_spec_role: "Baseline SPY research arc freeze and transition spec only"
+
+
+phase13b_multifactor_model_architecture_roadmap_spec:
+  enabled: false
+
+  spec_role: "Multi-factor long-term decision model architecture roadmap spec only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13A"
+  proposed_next_phase: "Phase 13C"
+
+  ultimate_goal: "Build and eventually paper-trade long-term decision models using technical, macro, fundamental, and sentiment indicators to test whether richer models can outperform SPY / S&P 500 Buy & Hold."
+
+  allow_feature_ingestion: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13a_conclusion: "reports/phase13a_baseline_freeze_conclusion.csv"
+    phase13a_gate_report: "reports/phase13a_baseline_freeze_gate_report.csv"
+
+  feature_family_registry:
+    - family_id: "technical"
+      status: "eligible_for_future_feature_source_audit"
+      intended_role: "Trend, momentum, volatility, breadth, drawdown, and market-structure context"
+      immediate_action: "Design source inventory and leakage-safe feature contract"
+      blocked_now: false
+
+    - family_id: "macro"
+      status: "eligible_with_existing_phase10_foundation"
+      intended_role: "Rates, inflation, labour, curve, liquidity, and regime context"
+      immediate_action: "Reuse Phase 10 alignment lessons; define point-in-time feature contract"
+      blocked_now: false
+
+    - family_id: "fundamental"
+      status: "not_yet_audited"
+      intended_role: "Valuation, earnings, margins, profitability, quality, and index-level fundamentals"
+      immediate_action: "Run separate source/leakage feasibility audit before use"
+      blocked_now: true
+
+    - family_id: "sentiment"
+      status: "not_yet_audited"
+      intended_role: "Risk appetite, news tone, narrative pressure, positioning proxies, and crowding context"
+      immediate_action: "Run separate source/leakage/noise audit before use"
+      blocked_now: true
+
+    - family_id: "dissertation_integration"
+      status: "methodology_candidate_only"
+      intended_role: "Use undergraduate/dissertation-style optimisation and decision-support ideas as architecture/methodology, not direct alpha unless separately justified"
+      immediate_action: "Map dissertation concepts to model governance, optimisation constraints, visual decision support, and validation design"
+      blocked_now: false
+
+  architecture_candidates:
+    - architecture_id: "A1_interpretable_regime_score_plus_exposure_policy"
+      role: "Transparent baseline multi-factor decision layer"
+      description: "Combine audited feature-family states into a non-black-box exposure recommendation after separate signal pre-registration."
+      priority: 1
+      immediate_status: "roadmap_only"
+
+    - architecture_id: "A2_walk_forward_probabilistic_classifier"
+      role: "Probabilistic long-term exposure confidence model"
+      description: "Train only after feature contracts exist; output probability/confidence, not immediate live trades."
+      priority: 2
+      immediate_status: "future_after_data_contracts"
+
+    - architecture_id: "A3_ensemble_decision_layer"
+      role: "Blend interpretable score, probabilistic model, and risk controls"
+      description: "Potential final architecture after individual components prove stable."
+      priority: 3
+      immediate_status: "future"
+
+    - architecture_id: "A4_visual_decision_dashboard"
+      role: "Human-readable buy/sell/exposure decision system"
+      description: "Generate visual exposure, trade, equity, drawdown, feature-state, and decision-rationale reports."
+      priority: 4
+      immediate_status: "required_reporting_layer"
+
+  dissertation_integration_plan:
+    - item_id: "D1_optimisation_brain"
+      integration_type: "methodological"
+      planned_use: "Use optimisation discipline for exposure constraints and decision policy design, not curve-fitted alpha."
+      allowed_now: true
+
+    - item_id: "D2_visual_decision_support"
+      integration_type: "reporting"
+      planned_use: "Translate model outputs into visual decision dashboards similar to operational decision-support systems."
+      allowed_now: true
+
+    - item_id: "D3_validation_framework"
+      integration_type: "governance"
+      planned_use: "Reuse dissertation-style evaluation discipline for scenario comparisons, constraints, and robustness checks."
+      allowed_now: true
+
+    - item_id: "D4_direct_market_feature"
+      integration_type: "blocked"
+      planned_use: "Do not force dissertation variables into markets unless a genuine market-data mapping exists."
+      allowed_now: false
+
+  walk_forward_design:
+    design_id: "long_horizon_walk_forward_model_design"
+    train_window_policy: "anchored_and_rolling_windows_to_be_compared_later"
+    validation_policy: "walk_forward_only_after_feature_contracts_are_locked"
+    test_policy: "holdout_period_must_remain untouched until model choices are pre-registered"
+    rebalance_policy: "monthly_or_weekly_to_be_pre_registered_later"
+    leakage_controls:
+      - "point-in-time data availability"
+      - "release-date lagging"
+      - "revision/vintage handling"
+      - "no future index membership leakage"
+      - "no return-derived feature selection without pre-registration"
+      - "no post-hoc threshold tuning"
+
+  visual_reporting_plan:
+    - report_id: "exposure_timeline"
+      purpose: "Show model-recommended exposure through time"
+    - report_id: "decision_rationale_panel"
+      purpose: "Show technical/macro/fundamental/sentiment state behind each decision"
+    - report_id: "trade_marker_chart"
+      purpose: "Show buy/sell/rebalance markers on SPY or S&P 500 price"
+    - report_id: "equity_curve_comparison"
+      purpose: "Compare model, SPY Buy & Hold, SPY 12M, and baseline overlay only after backtest phase is allowed"
+    - report_id: "drawdown_comparison"
+      purpose: "Show risk behaviour versus benchmarks only after backtest phase is allowed"
+    - report_id: "paper_trading_journal"
+      purpose: "Track future paper decisions, rationale, drift, and realised outcomes"
+
+  paper_trading_readiness_plan:
+    - gate_id: "PTR1_feature_contracts_locked"
+      requirement: "All feature families must have source, leakage, missingness, and timing contracts."
+    - gate_id: "PTR2_walk_forward_results_exist"
+      requirement: "Walk-forward validation must exist before paper trading."
+    - gate_id: "PTR3_visual_reports_exist"
+      requirement: "Visual decision and exposure reports must be generated reproducibly."
+    - gate_id: "PTR4_no_live_money_claim"
+      requirement: "Paper trading must remain non-production and non-financial-advice."
+    - gate_id: "PTR5_broker_execution_not_assumed"
+      requirement: "Paper fills and live fills must not be treated as equivalent."
+    - gate_id: "PTR6_freeze_model_before_paper"
+      requirement: "The paper-trading model must be frozen before paper-trading starts."
+
+  phase13c_boundary:
+    allowed_next_step: "Multi-factor feature-source inventory and leakage-feasibility spec only"
+    forbidden_next_step: "actual feature ingestion, model training, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13c_may_define_data_inventory: true
+    phase13c_may_define_feature_contracts: true
+    phase13c_may_define_leakage_controls: true
+    phase13c_may_ingest_features: false
+    phase13c_may_train_model: false
+    phase13c_may_create_signal: false
+    phase13c_may_run_backtest: false
+    phase13c_may_deploy_paper_trading: false
+    phase13c_may_promote_candidate: false
+
+  gates:
+    require_phase13a_passed: true
+    require_ultimate_goal_present: true
+    require_feature_family_registry: true
+    min_feature_families: 5
+    require_technical_macro_fundamental_sentiment: true
+    require_architecture_candidates: true
+    min_architecture_candidates: 4
+    require_dissertation_integration_plan: true
+    require_walk_forward_design: true
+    require_visual_reporting_plan: true
+    min_visual_reports: 5
+    require_paper_trading_readiness_plan: true
+    min_paper_trading_gates: 5
+    require_phase13c_boundary_feature_inventory_only: true
+    require_no_feature_ingestion: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_spec_role: "Multi-factor long-term decision model architecture roadmap spec only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

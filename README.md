@@ -67,7 +67,7 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec. Phase 11C completed a regime-scoring rulebook spec. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11D completed a diagnostic-panel design for future regime-scoring work. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11E completed a diagnostic-panel template implementation audit. Schema-compliant panel templates now exist, but no regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 12A/12B locked the future diagnostic score-calculation design and readiness boundary. No regime score, score value, empirical weight, signal, allocation rule, strategy test, model, new data ingestion, candidate promotion, or final-candidate change exists yet. Phase 12C/12D calculated and audited a categorical diagnostic regime score. The current diagnostic score is fragile, reflecting neutral technical evidence, neutral macro evidence, and fragile validation-risk context. This is diagnostic only and does not create a trading signal, allocation rule, strategy backtest, model, empirical weight, new data ingestion, candidate promotion, or final-candidate change. Phase 12 is closed. The project calculated, audited, interpreted, and bounded a fragile categorical diagnostic regime score. The score reflects neutral technical evidence, neutral macro evidence, and fragile validation-risk context. It remains diagnostic-only and does not create a signal, allocation rule, backtest, empirical weighting system, model, new data ingestion, candidate promotion, or final-candidate change. Any future score-to-signal work requires a separate pre-registration phase.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec. Phase 11C completed a regime-scoring rulebook spec. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11D completed a diagnostic-panel design for future regime-scoring work. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11E completed a diagnostic-panel template implementation audit. Schema-compliant panel templates now exist, but no regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 12A/12B locked the future diagnostic score-calculation design and readiness boundary. No regime score, score value, empirical weight, signal, allocation rule, strategy test, model, new data ingestion, candidate promotion, or final-candidate change exists yet. Phase 12C/12D calculated and audited a categorical diagnostic regime score. The current diagnostic score is fragile, reflecting neutral technical evidence, neutral macro evidence, and fragile validation-risk context. This is diagnostic only and does not create a trading signal, allocation rule, strategy backtest, model, empirical weight, new data ingestion, candidate promotion, or final-candidate change. Phase 12 is closed. The project calculated, audited, interpreted, and bounded a fragile categorical diagnostic regime score. The score reflects neutral technical evidence, neutral macro evidence, and fragile validation-risk context. It remains diagnostic-only and does not create a signal, allocation rule, backtest, empirical weighting system, model, new data ingestion, candidate promotion, or final-candidate change. Any future score-to-signal work requires a separate pre-registration phase. The SPY regime-switch arc is now frozen as the baseline research framework. It produced benchmarks, validation infrastructure, friction/liveability/regret diagnostics, closeout discipline, and a fragile diagnostic score. It did not build the full intended multi-factor decision model. Phase 13A/13B therefore opened a new architecture path for technical, macro, fundamental, sentiment, dissertation-methodology, walk-forward, visual reporting, and eventual paper-trading work.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -4018,6 +4018,199 @@ Correct interpretation:
 
 > Phase 12 is now closed. The diagnostic regime-score branch calculated, audited, interpreted, and bounded a fragile diagnostic score. No score-to-signal conversion, allocation rule, backtest, empirical weighting, model, new data ingestion, candidate promotion, or final-candidate change exists. Any future score-to-signal work requires a separate pre-registration phase.
 
+## Phase 13A: Baseline SPY Research Arc Freeze / Transition Spec
+
+Phase 13A froze the SPY regime-switch arc as a baseline research framework and opened the new multi-factor model architecture path.
+
+This phase did not convert the fragile diagnostic score into a signal, create an allocation rule, run a backtest, train a model, ingest new data, promote a candidate, or change the final candidate.
+
+### Phase 13A Summary
+
+| Metric | Result |
+|---|---:|
+| Spec role | Baseline SPY research arc freeze and transition spec only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 12F |
+| Proposed next phase | Phase 13B |
+| Source reports present | True |
+| Phase 12F result passed | True |
+| Baseline arc frozen | True |
+| Baseline role is not final project endpoint | True |
+| Diagnostic score state | Fragile |
+| Score-to-signal created | False |
+| Candidate promoted | False |
+| Hierarchy changed | False |
+| Transition to multi-factor path | True |
+| Direct score-to-signal rejected | True |
+| Phase 13B boundary passed | True |
+| Strategy promotion | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13A Baseline Freeze
+
+| Item | Result |
+|---|---|
+| Baseline arc | SPY regime-switch baseline research framework |
+| Baseline status | Frozen as benchmark and validation infrastructure |
+| Final candidate | Phase 6B/6C 3D + deep_drawdown_guard + loose_relief |
+| Final candidate role | Best execution-realistic risk-adjusted candidate built so far, not final project endpoint |
+| Diagnostic score state | Fragile |
+| Diagnostic score role | Baseline research diagnostic, not signal |
+| Hierarchy changed | False |
+| Candidate promoted | False |
+| Score-to-signal created | False |
+
+### Phase 13A Transition Decision
+
+| Item | Decision |
+|---|---|
+| Decision | Open a new multi-factor model architecture branch |
+| Reason | The baseline arc produced a robust validation framework but did not build the intended technical + macro + fundamental + sentiment long-term decision model |
+| Rejected next step | Direct score-to-signal conversion from fragile Phase 12 score |
+| Accepted next step | Multi-factor model architecture roadmap spec |
+| Burden of proof | Any future signal/backtest requires separate pre-registration and out-of-sample validation |
+
+### Phase 13A Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 12F remains passed | Passed |
+| Baseline arc is frozen | Passed |
+| Baseline is not treated as final project endpoint | Passed |
+| Transition decision opens multi-factor architecture path | Passed |
+| Direct fragile-score-to-signal conversion is rejected | Passed |
+| No hierarchy change or candidate promotion occurred | Passed |
+| Phase 13B boundary is architecture-only | Passed |
+| Scope boundary blocks signal/backtest/model/data/promotion/change | Passed |
+| Spec role is correct | Passed |
+
+### Phase 13A Verdict
+
+> Phase 13A completed the baseline research arc freeze and transition spec.
+
+Correct interpretation:
+
+> The SPY regime-switch arc is now frozen as a reusable baseline framework. It is not the final project endpoint. The project now moves toward the original multi-factor model goal through a separate architecture path.
+
+## Phase 13B: Multi-Factor Long-Term Decision Model Architecture Roadmap Spec
+
+Phase 13B created the roadmap for the actual long-term multi-factor decision-model path.
+
+This phase did not ingest features, create signals, create allocation rules, run strategy backtests, assign empirical weights, train models, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13B Summary
+
+| Metric | Result |
+|---|---:|
+| Spec role | Multi-factor long-term decision model architecture roadmap spec only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13A |
+| Proposed next phase | Phase 13C |
+| Ultimate goal present | True |
+| Phase 13A result passed | True |
+| Feature family count | 5 |
+| Required families present | True |
+| Architecture candidate count | 4 |
+| Dissertation integration items | 4 |
+| Walk-forward design present | True |
+| Visual report count | 6 |
+| Paper-trading gate count | 6 |
+| Phase 13C boundary passed | True |
+| Feature ingestion | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Model training | False |
+| Paper-trading deployment | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13B Feature Families
+
+| Family | Status | Role |
+|---|---|---|
+| Technical | Eligible for future feature-source audit | Trend, momentum, volatility, breadth, drawdown, and market-structure context |
+| Macro | Eligible with existing Phase 10 foundation | Rates, inflation, labour, curve, liquidity, and regime context |
+| Fundamental | Not yet audited | Valuation, earnings, margins, profitability, quality, and index-level fundamentals |
+| Sentiment | Not yet audited | Risk appetite, news tone, narrative pressure, positioning proxies, and crowding context |
+| Dissertation integration | Methodology candidate only | Optimisation, decision-support, reporting, and governance methodology, not direct alpha unless separately justified |
+
+### Phase 13B Architecture Candidates
+
+| Architecture | Role | Status |
+|---|---|---|
+| A1 interpretable regime score + exposure policy | Transparent baseline multi-factor decision layer | Roadmap only |
+| A2 walk-forward probabilistic classifier | Probabilistic long-term exposure confidence model | Future after data contracts |
+| A3 ensemble decision layer | Blend interpretable score, probabilistic model, and risk controls | Future |
+| A4 visual decision dashboard | Human-readable buy/sell/exposure decision system | Required reporting layer |
+
+### Phase 13B Dissertation Integration
+
+| Item | Integration type | Planned use |
+|---|---|---|
+| D1 optimisation brain | Methodological | Use optimisation discipline for exposure constraints and decision policy design, not curve-fitted alpha |
+| D2 visual decision support | Reporting | Translate model outputs into visual decision dashboards similar to operational decision-support systems |
+| D3 validation framework | Governance | Reuse dissertation-style evaluation discipline for scenario comparisons, constraints, and robustness checks |
+| D4 direct market feature | Blocked | Do not force dissertation variables into markets unless a genuine market-data mapping exists |
+
+### Phase 13B Walk-Forward Design
+
+| Item | Decision |
+|---|---|
+| Design | Long-horizon walk-forward model design |
+| Train window policy | Anchored and rolling windows to be compared later |
+| Validation policy | Walk-forward only after feature contracts are locked |
+| Test policy | Holdout period must remain untouched until model choices are pre-registered |
+| Rebalance policy | Monthly or weekly to be pre-registered later |
+| Leakage controls | Point-in-time data availability, release-date lagging, revision/vintage handling, no future index membership leakage, no return-derived feature selection without pre-registration, no post-hoc threshold tuning |
+
+### Phase 13B Visual Reporting Plan
+
+| Report | Purpose |
+|---|---|
+| Exposure timeline | Show model-recommended exposure through time |
+| Decision rationale panel | Show technical/macro/fundamental/sentiment state behind each decision |
+| Trade marker chart | Show buy/sell/rebalance markers on SPY or S&P 500 price |
+| Equity curve comparison | Compare model, SPY Buy & Hold, SPY 12M, and baseline overlay only after backtest phase is allowed |
+| Drawdown comparison | Show risk behaviour versus benchmarks only after backtest phase is allowed |
+| Paper-trading journal | Track future paper decisions, rationale, drift, and realised outcomes |
+
+### Phase 13B Paper-Trading Readiness Plan
+
+| Gate | Requirement |
+|---|---|
+| PTR1 feature contracts locked | All feature families must have source, leakage, missingness, and timing contracts |
+| PTR2 walk-forward results exist | Walk-forward validation must exist before paper trading |
+| PTR3 visual reports exist | Visual decision and exposure reports must be generated reproducibly |
+| PTR4 no live-money claim | Paper trading must remain non-production and non-financial-advice |
+| PTR5 broker execution not assumed | Paper fills and live fills must not be treated as equivalent |
+| PTR6 freeze model before paper | The paper-trading model must be frozen before paper-trading starts |
+
+### Phase 13B Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13A passed | Passed |
+| Ultimate goal is documented | Passed |
+| Feature family registry is complete enough | Passed |
+| Technical, macro, fundamental, and sentiment families are present | Passed |
+| Architecture candidates are documented | Passed |
+| Dissertation integration plan exists | Passed |
+| Walk-forward design is documented | Passed |
+| Visual reporting plan is documented | Passed |
+| Paper-trading readiness plan is documented | Passed |
+| Phase 13C boundary is feature-inventory only | Passed |
+| No feature/signal/backtest/model/paper-trading/promotion exists | Passed |
+| Spec role is correct | Passed |
+
+### Phase 13B Verdict
+
+> Phase 13B completed the multi-factor model architecture roadmap spec.
+
+Correct interpretation:
+
+> The project has now pivoted from the frozen SPY baseline arc to the actual multi-factor model path. The roadmap covers technical, macro, fundamental, sentiment, dissertation-methodology integration, walk-forward design, visual reporting, and paper-trading readiness. No data ingestion, model, signal, backtest, paper-trading deployment, candidate promotion, or final-candidate change exists yet.
+
 ---
 
 # Methodology Notes
@@ -4187,6 +4380,7 @@ Remaining concerns include:
 - Phase 12A and Phase 12B prepared and locked the diagnostic score-calculation design only. No regime score, score values, empirical weights, signal, allocation rule, strategy test, model, new data ingestion, or promoted candidate exists yet.
 - Phase 12C/12D calculated and audited a categorical diagnostic regime score only. The score is not a trading signal, allocation rule, strategy backtest, empirical model, live-trading input, candidate promotion, or final-candidate change.
 - Phase 12E/12F closed the diagnostic score branch only. The project now has a calculated and interpreted fragile diagnostic regime score, but it is not a trading signal, allocation rule, strategy backtest, empirical model, live-trading input, candidate promotion, or final-candidate change.
+- Phase 13A/13B are architecture-planning phases only. They freeze the SPY regime-switch arc as a baseline framework and define the multi-factor model roadmap, but no new features have been ingested, no model has been trained, no signal has been created, no backtest has been run, no paper-trading system exists, and no candidate has been promoted.
 ---
 
 # Bugs Caught and Fixed
@@ -4948,6 +5142,39 @@ reports/phase12f_final_conclusion.csv
 reports/phase12f_final_diagnostic_score_checkpoint_audit.md
 ```
 
+## Phase 13A Baseline Research Arc Freeze Reports
+
+```text
+reports/phase13a_baseline_freeze_source_report_check.csv
+reports/phase13a_baseline_freeze_phase12f_result_check.csv
+reports/phase13a_baseline_freeze_baseline_freeze_report.csv
+reports/phase13a_baseline_freeze_transition_decision_report.csv
+reports/phase13a_baseline_freeze_phase13b_boundary_check.csv
+reports/phase13a_baseline_freeze_scope_boundary_check.csv
+reports/phase13a_baseline_freeze_summary.csv
+reports/phase13a_baseline_freeze_gate_report.csv
+reports/phase13a_baseline_freeze_conclusion.csv
+reports/phase13a_baseline_research_arc_freeze_spec.md
+```
+
+## Phase 13B Multi-Factor Model Architecture Roadmap Reports
+
+```text
+reports/phase13b_roadmap_phase13a_result_check.csv
+reports/phase13b_roadmap_feature_family_registry.csv
+reports/phase13b_roadmap_architecture_candidates.csv
+reports/phase13b_roadmap_dissertation_integration_plan.csv
+reports/phase13b_roadmap_walk_forward_design.csv
+reports/phase13b_roadmap_visual_reporting_plan.csv
+reports/phase13b_roadmap_paper_trading_readiness_plan.csv
+reports/phase13b_roadmap_phase13c_boundary_check.csv
+reports/phase13b_roadmap_scope_boundary_check.csv
+reports/phase13b_roadmap_summary.csv
+reports/phase13b_roadmap_gate_report.csv
+reports/phase13b_roadmap_conclusion.csv
+reports/phase13b_multifactor_model_architecture_roadmap_spec.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -5117,6 +5344,8 @@ configs/spy_sma10.yaml
 | Phase 12D diagnostic score distribution/content audit | Completed — score distribution/content audit passed; aggregate diagnostic score and component-state content verified; forbidden score/signal/backtest/empirical-weight columns absent; no signal/backtest/model/new data/promotion |
 | Phase 12E diagnostic score interpretation / closeout audit | Completed — fragile diagnostic score interpreted as research-only context; closeout claims locked; no score-to-signal conversion, allocation rule, backtest, empirical weighting, model, new data, promotion, or final-candidate change |
 | Phase 12F final diagnostic score checkpoint audit | Completed — final Phase 12 checkpoint passed; Phase 12A–12E reports and gates verified, diagnostic score branch closed, and any future score-to-signal work restricted to a separate pre-registration spec |
+| Phase 13A baseline SPY research arc freeze / transition spec | Completed — SPY regime-switch arc frozen as baseline research framework; fragile diagnostic score not converted into signal; hierarchy unchanged; new multi-factor model architecture path opened |
+| Phase 13B multi-factor long-term decision model architecture roadmap spec | Completed — roadmap passed; technical, macro, fundamental, sentiment, dissertation-integration, walk-forward design, visual reporting, and paper-trading readiness defined; no feature ingestion, signal, backtest, model, paper trading, promotion, or final-candidate change |
 ---
 
 # What Should Happen Next
