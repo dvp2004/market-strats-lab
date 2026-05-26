@@ -4582,8 +4582,6 @@ phase13c_multifactor_feature_source_inventory_spec:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_spec_role: "Multi-factor feature-source inventory and leakage-feasibility spec only"
-
-
 phase13d_feature_contract_readiness_audit:
   enabled: false
 
@@ -4672,6 +4670,403 @@ phase13d_feature_contract_readiness_audit:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_audit_role: "Feature contract and data availability readiness audit only"
+phase13e_technical_macro_feature_schema_design_spec:
+  enabled: false
+
+  spec_role: "Technical and macro feature-contract schema design spec only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13D"
+  proposed_next_phase: "Phase 13F"
+
+  allow_feature_ingestion: false
+  allow_feature_calculation: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13d_conclusion: "reports/phase13d_contract_conclusion.csv"
+    phase13d_gate_report: "reports/phase13d_contract_gate_report.csv"
+    phase13c_feature_source_inventory: "reports/phase13c_inventory_feature_source_inventory.csv"
+    phase13c_feature_contract_requirements: "reports/phase13c_inventory_feature_contract_requirements.csv"
+    phase13c_leakage_control_policy: "reports/phase13c_inventory_leakage_control_policy.csv"
+    phase13d_contract_coverage_check: "reports/phase13d_contract_contract_coverage_check.csv"
+
+  universal_panel_schema:
+    - column_name: "as_of_date"
+      dtype: "date"
+      required: true
+      description: "Canonical row date for the feature panel."
+    - column_name: "observation_date"
+      dtype: "date"
+      required: true
+      description: "Date the raw value economically refers to."
+    - column_name: "release_date"
+      dtype: "date_or_null"
+      required: true
+      description: "Date the source value was first publicly released where applicable."
+    - column_name: "availability_date"
+      dtype: "date"
+      required: true
+      description: "Conservative date on which the feature is allowed to become usable."
+    - column_name: "decision_date"
+      dtype: "date"
+      required: true
+      description: "Trading-decision date after all required lags."
+    - column_name: "family_id"
+      dtype: "string"
+      required: true
+      description: "Feature family such as technical or macro."
+    - column_name: "feature_id"
+      dtype: "string"
+      required: true
+      description: "Stable feature identifier."
+    - column_name: "source_name"
+      dtype: "string"
+      required: true
+      description: "Raw source name or provider."
+    - column_name: "source_version"
+      dtype: "string_or_null"
+      required: true
+      description: "Version, vintage, download date, or source contract version."
+    - column_name: "raw_value_available"
+      dtype: "bool"
+      required: true
+      description: "Whether raw source value exists for the row."
+    - column_name: "feature_state"
+      dtype: "enum"
+      required: true
+      description: "Categorical state: supportive, neutral, fragile, unavailable, blocked."
+    - column_name: "missingness_state"
+      dtype: "enum"
+      required: true
+      description: "available, missing, stale, unavailable, blocked."
+    - column_name: "leakage_flag"
+      dtype: "bool"
+      required: true
+      description: "True if row violates availability/revision/lag contract."
+    - column_name: "contract_version"
+      dtype: "string"
+      required: true
+      description: "Feature contract version used to generate the row."
+
+  technical_feature_schema:
+    - feature_id: "technical_trend_state"
+      family_id: "technical"
+      source_basis: "existing OHLCV / adjusted close"
+      raw_inputs: ["adjusted_close"]
+      transform_type: "rolling_trend_state"
+      timestamp_policy: "available after market close; decision date must be next trading day or later"
+      lag_policy: "minimum one trading-day lag"
+      revision_policy: "low revision risk; adjusted-close changes require source-version tracking"
+      missingness_policy: "mark unavailable if price history is insufficient"
+      allowed_states: ["supportive", "neutral", "fragile", "unavailable"]
+      ml_feature_engineering_role: "candidate interpretable trend feature"
+      calculate_now: false
+
+    - feature_id: "technical_momentum_state"
+      family_id: "technical"
+      source_basis: "existing OHLCV / adjusted close"
+      raw_inputs: ["adjusted_close"]
+      transform_type: "rolling_momentum_state"
+      timestamp_policy: "available after market close; decision date must be next trading day or later"
+      lag_policy: "minimum one trading-day lag"
+      revision_policy: "low revision risk; adjusted-close changes require source-version tracking"
+      missingness_policy: "mark unavailable if lookback history is insufficient"
+      allowed_states: ["supportive", "neutral", "fragile", "unavailable"]
+      ml_feature_engineering_role: "candidate interpretable momentum feature"
+      calculate_now: false
+
+    - feature_id: "technical_volatility_state"
+      family_id: "technical"
+      source_basis: "existing OHLCV / adjusted close"
+      raw_inputs: ["adjusted_close"]
+      transform_type: "rolling_volatility_state"
+      timestamp_policy: "available after market close; decision date must be next trading day or later"
+      lag_policy: "minimum one trading-day lag"
+      revision_policy: "low revision risk; adjusted-close changes require source-version tracking"
+      missingness_policy: "mark unavailable if rolling window is incomplete"
+      allowed_states: ["supportive", "neutral", "fragile", "unavailable"]
+      ml_feature_engineering_role: "candidate risk-regime feature"
+      calculate_now: false
+
+    - feature_id: "technical_drawdown_state"
+      family_id: "technical"
+      source_basis: "existing OHLCV / adjusted close"
+      raw_inputs: ["adjusted_close"]
+      transform_type: "rolling_drawdown_state"
+      timestamp_policy: "available after market close; decision date must be next trading day or later"
+      lag_policy: "minimum one trading-day lag"
+      revision_policy: "low revision risk; adjusted-close changes require source-version tracking"
+      missingness_policy: "mark unavailable if prior high cannot be computed"
+      allowed_states: ["supportive", "neutral", "fragile", "unavailable"]
+      ml_feature_engineering_role: "candidate downside-risk feature"
+      calculate_now: false
+
+  macro_feature_schema:
+    - feature_id: "macro_short_rate_state"
+      family_id: "macro"
+      source_basis: "Treasury / FRED-style rates source"
+      raw_inputs: ["DGS2"]
+      transform_type: "rate_regime_state"
+      timestamp_policy: "use release/availability calendar; never same-day unless timestamp-proven"
+      lag_policy: "conservative release-date lag required"
+      revision_policy: "source version or vintage policy required"
+      missingness_policy: "mark unavailable; no silent forward-fill without stale-state flag"
+      allowed_states: ["supportive", "neutral", "fragile", "unavailable"]
+      ml_feature_engineering_role: "candidate macro/rates feature"
+      calculate_now: false
+
+    - feature_id: "macro_yield_curve_state"
+      family_id: "macro"
+      source_basis: "Treasury / FRED-style rates source"
+      raw_inputs: ["DGS10", "DGS2"]
+      transform_type: "yield_curve_regime_state"
+      timestamp_policy: "both source series must satisfy availability-date rule"
+      lag_policy: "conservative release-date lag required"
+      revision_policy: "source version or vintage policy required"
+      missingness_policy: "mark unavailable if either leg is missing"
+      allowed_states: ["supportive", "neutral", "fragile", "unavailable"]
+      ml_feature_engineering_role: "candidate macro/curve feature"
+      calculate_now: false
+
+    - feature_id: "macro_inflation_state"
+      family_id: "macro"
+      source_basis: "CPI / inflation source"
+      raw_inputs: ["CPIAUCSL"]
+      transform_type: "inflation_regime_state"
+      timestamp_policy: "monthly release-date and availability-date required"
+      lag_policy: "conservative monthly release lag required"
+      revision_policy: "revised series requires vintage or conservative lag policy"
+      missingness_policy: "mark unavailable if release is not yet available"
+      allowed_states: ["supportive", "neutral", "fragile", "unavailable"]
+      ml_feature_engineering_role: "candidate inflation-regime feature"
+      calculate_now: false
+
+    - feature_id: "macro_labour_state"
+      family_id: "macro"
+      source_basis: "unemployment / labour source"
+      raw_inputs: ["UNRATE"]
+      transform_type: "labour_regime_state"
+      timestamp_policy: "monthly release-date and availability-date required"
+      lag_policy: "conservative monthly release lag required"
+      revision_policy: "revised series requires vintage or conservative lag policy"
+      missingness_policy: "mark unavailable if release is not yet available"
+      allowed_states: ["supportive", "neutral", "fragile", "unavailable"]
+      ml_feature_engineering_role: "candidate labour-regime feature"
+      calculate_now: false
+
+  transform_policy:
+    - transform_id: "TE1_train_only_scaling"
+      policy: "Any future scaling, z-scoring, winsorisation, or normalisation must be fitted on the training window only."
+      ml_principle: "avoid train-test leakage"
+      required: true
+    - transform_id: "TE2_no_return_selected_features"
+      policy: "Feature transforms cannot be selected from observed backtest performance unless pre-registered."
+      ml_principle: "avoid overfitting and data snooping"
+      required: true
+    - transform_id: "TE3_interpretable_first"
+      policy: "First feature schema favours interpretable states before black-box feature expansion."
+      ml_principle: "interpretability and debugging before model complexity"
+      required: true
+    - transform_id: "TE4_categorical_state_plus_future_numeric"
+      policy: "Current schema defines categorical states; future numeric values require separate calculation phase."
+      ml_principle: "separate schema design from feature calculation"
+      required: true
+    - transform_id: "TE5_outlier_policy_predeclared"
+      policy: "Outlier handling must be declared before feature calculation."
+      ml_principle: "stable preprocessing contract"
+      required: true
+    - transform_id: "TE6_no_target_leakage"
+      policy: "No feature transform may use future returns, future drawdowns, future benchmark labels, or future regime labels."
+      ml_principle: "target leakage prevention"
+      required: true
+
+  missingness_policy:
+    - missingness_id: "M1_no_silent_fill"
+      policy: "No silent fill is allowed. Every filled, stale, unavailable, or blocked feature must carry a missingness_state."
+      required: true
+    - missingness_id: "M2_macro_release_gap"
+      policy: "Macro series unavailable before release date must be unavailable, not inferred."
+      required: true
+    - missingness_id: "M3_price_history_gap"
+      policy: "Technical features with insufficient rolling history must be unavailable."
+      required: true
+    - missingness_id: "M4_blocked_family"
+      policy: "Blocked families may appear in roadmap but cannot appear in calculated feature panels."
+      required: true
+    - missingness_id: "M5_model_training_future_rule"
+      policy: "Future models must receive explicit missingness indicators or exclude unavailable rows by pre-registered rule."
+      required: true
+
+  feature_state_policy:
+    allowed_feature_states: ["supportive", "neutral", "fragile", "unavailable", "blocked"]
+    state_direction_required: true
+    state_reason_required: true
+    no_state_may_directly_create_trade: true
+    no_state_may_be_tuned_on_returns_now: true
+
+  visual_report_templates:
+    - template_id: "feature_availability_heatmap"
+      purpose: "Show which feature families/states are available through time."
+      required_columns: ["as_of_date", "family_id", "feature_id", "missingness_state"]
+      calculate_now: false
+    - template_id: "feature_state_timeline"
+      purpose: "Show supportive/neutral/fragile/unavailable feature states through time."
+      required_columns: ["as_of_date", "feature_id", "feature_state", "state_reason"]
+      calculate_now: false
+    - template_id: "leakage_audit_panel"
+      purpose: "Show release-date, availability-date, decision-date, and leakage flags."
+      required_columns: ["observation_date", "release_date", "availability_date", "decision_date", "leakage_flag"]
+      calculate_now: false
+    - template_id: "model_feature_matrix_preview"
+      purpose: "Future preview template for ML-ready feature matrix schema only."
+      required_columns: ["as_of_date", "feature_id", "feature_state", "missingness_state", "contract_version"]
+      calculate_now: false
+    - template_id: "decision_rationale_template"
+      purpose: "Future visual rationale report linking feature states to later model decisions."
+      required_columns: ["decision_date", "family_id", "feature_id", "feature_state", "state_reason"]
+      calculate_now: false
+
+  phase13f_boundary:
+    allowed_next_step: "Feature schema readiness and visual report template audit only"
+    forbidden_next_step: "feature ingestion, feature calculation, signal creation, allocation rule, strategy backtest, model training, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13f_may_audit_schema: true
+    phase13f_may_audit_visual_templates: true
+    phase13f_may_audit_ml_feature_engineering_policy: true
+    phase13f_may_ingest_features: false
+    phase13f_may_calculate_features: false
+    phase13f_may_train_model: false
+    phase13f_may_create_signal: false
+    phase13f_may_run_backtest: false
+    phase13f_may_deploy_paper_trading: false
+    phase13f_may_promote_candidate: false
+
+  gates:
+    require_phase13d_passed: true
+    require_universal_panel_schema: true
+    min_universal_columns: 10
+    require_technical_feature_schema: true
+    min_technical_features: 4
+    require_macro_feature_schema: true
+    min_macro_features: 4
+    require_transform_policy: true
+    min_transform_policies: 6
+    require_missingness_policy: true
+    min_missingness_policies: 5
+    require_feature_state_policy: true
+    require_visual_report_templates: true
+    min_visual_templates: 5
+    require_ml_principles_present: true
+    require_phase13f_boundary_template_audit_only: true
+    require_no_feature_ingestion: true
+    require_no_feature_calculation: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_spec_role: "Technical and macro feature-contract schema design spec only"
+
+
+phase13f_feature_schema_readiness_visual_template_audit:
+  enabled: false
+
+  audit_role: "Feature schema readiness and visual report template audit only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13E"
+  proposed_next_phase: "Phase 13G"
+
+  allow_feature_ingestion: false
+  allow_feature_calculation: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase13c_multifactor_feature_source_inventory_spec: false
+    phase13d_feature_contract_readiness_audit: false
+    phase13e_technical_macro_feature_schema_design_spec: true
+    phase13f_feature_schema_readiness_visual_template_audit: true
+    relative_momentum_allocator: true
+
+  phase13e_reports:
+    source_report_check: "reports/phase13e_schema_source_report_check.csv"
+    phase13d_result_check: "reports/phase13e_schema_phase13d_result_check.csv"
+    universal_panel_schema: "reports/phase13e_schema_universal_panel_schema.csv"
+    technical_feature_schema: "reports/phase13e_schema_technical_feature_schema.csv"
+    macro_feature_schema: "reports/phase13e_schema_macro_feature_schema.csv"
+    transform_policy: "reports/phase13e_schema_transform_policy.csv"
+    missingness_policy: "reports/phase13e_schema_missingness_policy.csv"
+    feature_state_policy: "reports/phase13e_schema_feature_state_policy.csv"
+    visual_report_templates: "reports/phase13e_schema_visual_report_templates.csv"
+    gate_report: "reports/phase13e_schema_gate_report.csv"
+    conclusion: "reports/phase13e_schema_conclusion.csv"
+
+  readiness_claims:
+    schema_defined: true
+    technical_schema_defined: true
+    macro_schema_defined: true
+    timestamp_fields_defined: true
+    lag_revision_policy_defined: true
+    missingness_policy_defined: true
+    transform_policy_defined: true
+    ml_feature_engineering_policy_defined: true
+    visual_templates_defined: true
+    feature_ingested: false
+    feature_calculated: false
+    signal_created: false
+    backtest_run: false
+    model_trained: false
+    paper_trading_deployed: false
+    candidate_promoted: false
+    final_candidate_changed: false
+
+  phase13g_boundary:
+    allowed_next_step: "Technical and macro feature calculation pre-registration spec only"
+    forbidden_next_step: "direct feature calculation, signal creation, allocation rule, strategy backtest, model training, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13g_may_preregister_feature_calculation: true
+    phase13g_may_calculate_features_immediately: false
+    phase13g_may_train_model: false
+    phase13g_may_create_signal: false
+    phase13g_may_run_backtest: false
+    phase13g_may_deploy_paper_trading: false
+    phase13g_may_promote_candidate: false
+
+  gates:
+    require_phase13e_reports_present: true
+    require_phase13e_conclusion_passed: true
+    require_phase13e_gate_report_passed: true
+    require_config_flags_clean_for_run: true
+    require_readiness_claims_locked: true
+    require_schema_coverage: true
+    require_visual_templates_ready: true
+    require_ml_policy_ready: true
+    require_phase13g_boundary_prereg_only: true
+    require_no_feature_ingestion: true
+    require_no_feature_calculation: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_audit_role: "Feature schema readiness and visual report template audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

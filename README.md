@@ -67,7 +67,7 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec. Phase 11C completed a regime-scoring rulebook spec. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11D completed a diagnostic-panel design for future regime-scoring work. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11E completed a diagnostic-panel template implementation audit. Schema-compliant panel templates now exist, but no regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 12A/12B locked the future diagnostic score-calculation design and readiness boundary. No regime score, score value, empirical weight, signal, allocation rule, strategy test, model, new data ingestion, candidate promotion, or final-candidate change exists yet. Phase 12C/12D calculated and audited a categorical diagnostic regime score. The current diagnostic score is fragile, reflecting neutral technical evidence, neutral macro evidence, and fragile validation-risk context. This is diagnostic only and does not create a trading signal, allocation rule, strategy backtest, model, empirical weight, new data ingestion, candidate promotion, or final-candidate change. Phase 12 is closed. The project calculated, audited, interpreted, and bounded a fragile categorical diagnostic regime score. The score reflects neutral technical evidence, neutral macro evidence, and fragile validation-risk context. It remains diagnostic-only and does not create a signal, allocation rule, backtest, empirical weighting system, model, new data ingestion, candidate promotion, or final-candidate change. Any future score-to-signal work requires a separate pre-registration phase. The SPY regime-switch arc is now frozen as the baseline research framework. It produced benchmarks, validation infrastructure, friction/liveability/regret diagnostics, closeout discipline, and a fragile diagnostic score. It did not build the full intended multi-factor decision model. Phase 13A/13B therefore opened a new architecture path for technical, macro, fundamental, sentiment, dissertation-methodology, walk-forward, visual reporting, and eventual paper-trading work. Phase 13C/13D moved the multi-factor path from broad architecture into feature-source inventory and contract readiness. Technical and macro families are contract-feasible, with macro requiring strict lag/revision controls. Fundamental and sentiment are deliberately present in the roadmap but blocked until dedicated audits. No feature ingestion, feature calculation, signal, model, backtest, paper-trading deployment, candidate promotion, or final-candidate change exists yet.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec. Phase 11C completed a regime-scoring rulebook spec. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11D completed a diagnostic-panel design for future regime-scoring work. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11E completed a diagnostic-panel template implementation audit. Schema-compliant panel templates now exist, but no regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 12A/12B locked the future diagnostic score-calculation design and readiness boundary. No regime score, score value, empirical weight, signal, allocation rule, strategy test, model, new data ingestion, candidate promotion, or final-candidate change exists yet. Phase 12C/12D calculated and audited a categorical diagnostic regime score. The current diagnostic score is fragile, reflecting neutral technical evidence, neutral macro evidence, and fragile validation-risk context. This is diagnostic only and does not create a trading signal, allocation rule, strategy backtest, model, empirical weight, new data ingestion, candidate promotion, or final-candidate change. Phase 12 is closed. The project calculated, audited, interpreted, and bounded a fragile categorical diagnostic regime score. The score reflects neutral technical evidence, neutral macro evidence, and fragile validation-risk context. It remains diagnostic-only and does not create a signal, allocation rule, backtest, empirical weighting system, model, new data ingestion, candidate promotion, or final-candidate change. Any future score-to-signal work requires a separate pre-registration phase. The SPY regime-switch arc is now frozen as the baseline research framework. It produced benchmarks, validation infrastructure, friction/liveability/regret diagnostics, closeout discipline, and a fragile diagnostic score. It did not build the full intended multi-factor decision model. Phase 13A/13B therefore opened a new architecture path for technical, macro, fundamental, sentiment, dissertation-methodology, walk-forward, visual reporting, and eventual paper-trading work. Phase 13C/13D moved the multi-factor path from broad architecture into feature-source inventory and contract readiness. Technical and macro families are contract-feasible, with macro requiring strict lag/revision controls. Fundamental and sentiment are deliberately present in the roadmap but blocked until dedicated audits. No feature ingestion, feature calculation, signal, model, backtest, paper-trading deployment, candidate promotion, or final-candidate change exists yet. Phase 13E/13F moved the multi-factor path from feature-source inventory into technical/macro schema design. The project now has a defined universal feature-panel schema, technical feature schema, macro feature schema, timestamp/availability/decision-date policy, lag/revision controls, missingness policy, transform policy, ML feature-engineering safeguards, feature-state columns, and visual report templates. No feature ingestion, feature calculation, signal, backtest, model training, paper-trading deployment, candidate promotion, or final-candidate change exists yet.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -4373,6 +4373,216 @@ Correct interpretation:
 
 > Phase 13D verified that the feature-source inventory and leakage controls are ready for schema design. Technical and macro may proceed to schema design. Fundamental and sentiment remain blocked until dedicated audits. No feature ingestion, feature calculation, signal, backtest, model, paper-trading deployment, promotion, or final-candidate change exists.
 
+## Phase 13E: Technical and Macro Feature-Contract Schema Design Spec
+
+Phase 13E defined the technical and macro feature-contract schemas for the future multi-factor model path.
+
+This phase did not ingest features, calculate features, create signals, create allocation rules, run strategy backtests, assign empirical weights, train models, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13E Summary
+
+| Metric | Result |
+|---|---:|
+| Spec role | Technical and macro feature-contract schema design spec only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13D |
+| Proposed next phase | Phase 13F |
+| Source reports present | True |
+| Phase 13D result passed | True |
+| Universal column count | 14 |
+| Universal schema required | True |
+| Technical feature count | 4 |
+| Technical calculate-now false | True |
+| Macro feature count | 4 |
+| Macro calculate-now false | True |
+| Transform policy count | 6 |
+| Transform policy required | True |
+| Missingness policy count | 5 |
+| Missingness policy required | True |
+| Feature-state policy clean | True |
+| Visual template count | 5 |
+| Visual templates not calculated | True |
+| ML principles present | True |
+| Phase 13F boundary passed | True |
+| Feature ingestion | False |
+| Feature calculation | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Model training | False |
+| Paper-trading deployment | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13E Universal Panel Schema
+
+The future feature panel must include timestamp, availability, source, state, missingness, leakage, and contract-version fields.
+
+Required universal fields include:
+
+| Field | Role |
+|---|---|
+| `as_of_date` | Canonical row date for the feature panel |
+| `observation_date` | Date the raw value economically refers to |
+| `release_date` | First public release date where applicable |
+| `availability_date` | Conservative date on which the feature becomes usable |
+| `decision_date` | Trading-decision date after required lags |
+| `family_id` | Feature family identifier |
+| `feature_id` | Stable feature identifier |
+| `source_name` | Raw source/provider |
+| `source_version` | Version, vintage, download date, or contract version |
+| `raw_value_available` | Whether raw source value exists |
+| `feature_state` | Supportive, neutral, fragile, unavailable, or blocked |
+| `missingness_state` | Available, missing, stale, unavailable, or blocked |
+| `leakage_flag` | Whether the row violates availability/revision/lag rules |
+| `contract_version` | Feature-contract version used |
+
+### Phase 13E Technical Feature Schema
+
+| Feature | Role |
+|---|---|
+| `technical_trend_state` | Interpretable trend-regime feature |
+| `technical_momentum_state` | Interpretable momentum-regime feature |
+| `technical_volatility_state` | Risk-regime feature |
+| `technical_drawdown_state` | Downside-risk feature |
+
+All technical features remain schema-only. They require at least a one-trading-day lag and cannot be calculated yet.
+
+### Phase 13E Macro Feature Schema
+
+| Feature | Role |
+|---|---|
+| `macro_short_rate_state` | Short-rate regime feature |
+| `macro_yield_curve_state` | Yield-curve regime feature |
+| `macro_inflation_state` | Inflation-regime feature |
+| `macro_labour_state` | Labour-regime feature |
+
+All macro features require conservative release-date, availability-date, lag, and revision/vintage handling before any future calculation.
+
+### Phase 13E ML / Feature-Engineering Discipline
+
+| Principle | Requirement |
+|---|---|
+| Train-only scaling | Any future scaling, z-scoring, winsorisation, or normalisation must be fitted on the training window only |
+| No return-selected features | Feature transforms cannot be selected from observed backtest performance unless pre-registered |
+| Interpretable-first design | First feature schema favours interpretable states before black-box feature expansion |
+| Schema before numeric features | Categorical states are defined now; future numeric values require a separate calculation phase |
+| Predeclared outlier handling | Outlier handling must be declared before feature calculation |
+| No target leakage | No transform may use future returns, future drawdowns, future benchmark labels, or future regime labels |
+
+### Phase 13E Visual Report Templates
+
+| Template | Purpose |
+|---|---|
+| `feature_availability_heatmap` | Show which feature families/states are available through time |
+| `feature_state_timeline` | Show supportive/neutral/fragile/unavailable feature states through time |
+| `leakage_audit_panel` | Show release-date, availability-date, decision-date, and leakage flags |
+| `model_feature_matrix_preview` | Future preview template for ML-ready feature-matrix schema |
+| `decision_rationale_template` | Future rationale report linking feature states to later model decisions |
+
+### Phase 13E Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13D passed | Passed |
+| Universal panel schema is complete enough | Passed |
+| Technical feature schema is complete enough | Passed |
+| Macro feature schema is complete enough | Passed |
+| Transform policy includes ML discipline | Passed |
+| Missingness policy is complete enough | Passed |
+| Feature-state policy is clean | Passed |
+| Visual report templates are documented | Passed |
+| Phase 13F boundary is template-audit only | Passed |
+| Scope blocks feature/model/signal/backtest/paper-trading/promotion | Passed |
+| Spec role is correct | Passed |
+
+### Phase 13E Verdict
+
+> Phase 13E completed the technical and macro feature schema design spec.
+
+Correct interpretation:
+
+> Phase 13E defined the technical and macro feature schemas, timestamp fields, lag/revision policies, missingness handling, transform policy, feature-state columns, ML feature-engineering discipline, and visual report templates. It did not ingest or calculate features, create signals, run backtests, train models, deploy paper trading, promote a candidate, or change the final candidate.
+
+## Phase 13F: Feature Schema Readiness / Visual Report Template Audit
+
+Phase 13F audited the Phase 13E schema, visual-template, and ML feature-engineering readiness state.
+
+This phase did not ingest features, calculate features, create signals, create allocation rules, run strategy backtests, assign empirical weights, train models, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13F Summary
+
+| Metric | Result |
+|---|---:|
+| Audit role | Feature schema readiness and visual report template audit only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13E |
+| Proposed next phase | Phase 13G |
+| Phase 13E reports present | True |
+| Phase 13E result passed | True |
+| Config flags clean for run | True |
+| Readiness claims locked | True |
+| Schema coverage passed | True |
+| Visual templates ready | True |
+| ML policy ready | True |
+| Phase 13G boundary passed | True |
+| Feature ingestion | False |
+| Feature calculation | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Model training | False |
+| Paper-trading deployment | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13F Schema Coverage
+
+| Check | Result |
+|---|---|
+| Required universal timestamp/state columns present | Passed |
+| Technical schema has at least four non-calculated features | Passed |
+| Macro schema has at least four non-calculated features | Passed |
+| Transform policy present and required | Passed |
+| Missingness policy present and required | Passed |
+
+### Phase 13F Visual Template Check
+
+| Check | Result |
+|---|---|
+| Required visual templates present | Passed |
+| Visual templates are not calculated now | Passed |
+
+### Phase 13F ML Policy Check
+
+| Check | Result |
+|---|---|
+| Train-test leakage principle present | Passed |
+| Overfitting/data-snooping principle present | Passed |
+| Preprocessing contract principle present | Passed |
+| Target leakage prevention present | Passed |
+
+### Phase 13F Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13E reports are present | Passed |
+| Phase 13E conclusion and gates passed | Passed |
+| Config flags are clean for run | Passed |
+| Readiness claims are locked | Passed |
+| Schema coverage passed | Passed |
+| Visual templates are ready | Passed |
+| ML feature-engineering policy is ready | Passed |
+| Phase 13G boundary is pre-registration-only | Passed |
+| Scope blocks feature/model/signal/backtest/paper-trading/promotion | Passed |
+| Audit role is correct | Passed |
+
+### Phase 13F Verdict
+
+> Phase 13F completed the feature schema readiness and visual template audit.
+
+Correct interpretation:
+
+> Phase 13F verified technical/macro schema coverage, visual report templates, and ML feature-engineering policy readiness. It did not ingest or calculate features, create signals, run backtests, train models, deploy paper trading, promote a candidate, or change the final candidate.
+
 ---
 
 # Methodology Notes
@@ -4545,6 +4755,8 @@ Remaining concerns include:
 - Phase 13A/13B are architecture-planning phases only. They freeze the SPY regime-switch arc as a baseline framework and define the multi-factor model roadmap, but no new features have been ingested, no model has been trained, no signal has been created, no backtest has been run, no paper-trading system exists, and no candidate has been promoted.
 - Phase 13C/13D defined and audited feature-source inventory and contract readiness only. No features have been ingested or calculated, no model has been trained, no signal or allocation rule exists, no backtest has been run, no paper-trading system exists, and no candidate has been promoted.
 - Fundamental and sentiment families remain blocked until dedicated source/leakage/noise audits pass.
+- Phase 13E/13F defined and audited technical/macro feature schemas and visual-report templates only. No features have been ingested or calculated, no ML model has been trained, no feature matrix exists, no signal or allocation rule exists, no backtest has been run, no paper-trading system exists, and no candidate has been promoted.
+- ML principles are now present at the schema/policy level, but actual feature engineering, scaling, transformations, model training, validation, and feature-importance work have not started yet.
 ---
 
 # Bugs Caught and Fixed
@@ -5373,6 +5585,44 @@ reports/phase13d_contract_conclusion.csv
 reports/phase13d_feature_contract_readiness_audit.md
 ```
 
+## Phase 13E Technical/Macro Feature Schema Reports
+
+```text
+reports/phase13e_schema_source_report_check.csv
+reports/phase13e_schema_phase13d_result_check.csv
+reports/phase13e_schema_universal_panel_schema.csv
+reports/phase13e_schema_technical_feature_schema.csv
+reports/phase13e_schema_macro_feature_schema.csv
+reports/phase13e_schema_transform_policy.csv
+reports/phase13e_schema_missingness_policy.csv
+reports/phase13e_schema_feature_state_policy.csv
+reports/phase13e_schema_visual_report_templates.csv
+reports/phase13e_schema_phase13f_boundary_check.csv
+reports/phase13e_schema_scope_boundary_check.csv
+reports/phase13e_schema_summary.csv
+reports/phase13e_schema_gate_report.csv
+reports/phase13e_schema_conclusion.csv
+reports/phase13e_technical_macro_feature_schema_design_spec.md
+```
+
+## Phase 13F Feature Schema Readiness / Visual Template Audit Reports
+
+```text
+reports/phase13f_schema_audit_report_inventory_check.csv
+reports/phase13f_schema_audit_phase13e_result_check.csv
+reports/phase13f_schema_audit_config_flag_check.csv
+reports/phase13f_schema_audit_readiness_claims_check.csv
+reports/phase13f_schema_audit_schema_coverage_check.csv
+reports/phase13f_schema_audit_visual_template_check.csv
+reports/phase13f_schema_audit_ml_policy_check.csv
+reports/phase13f_schema_audit_phase13g_boundary_check.csv
+reports/phase13f_schema_audit_scope_boundary_check.csv
+reports/phase13f_schema_audit_summary.csv
+reports/phase13f_schema_audit_gate_report.csv
+reports/phase13f_schema_audit_conclusion.csv
+reports/phase13f_feature_schema_readiness_visual_template_audit.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -5546,6 +5796,8 @@ configs/spy_sma10.yaml
 | Phase 13B multi-factor long-term decision model architecture roadmap spec | Completed — roadmap passed; technical, macro, fundamental, sentiment, dissertation-integration, walk-forward design, visual reporting, and paper-trading readiness defined; no feature ingestion, signal, backtest, model, paper trading, promotion, or final-candidate change |
 | Phase 13C multi-factor feature-source inventory / leakage-feasibility spec | Completed — feature-source inventory passed; technical and macro contract paths feasible, fundamental and sentiment present but blocked pending dedicated audits, contract requirements and leakage controls documented; no feature ingestion/signal/backtest/model/paper trading/promotion |
 | Phase 13D feature contract / data availability readiness audit | Completed — readiness audit passed; Phase 13C reports/gates verified, config flags clean, contract coverage passed, blocked families respected, and Phase 13E limited to schema design only |
+| Phase 13E technical/macro feature-contract schema design spec | Completed — technical and macro feature schemas defined; universal timestamp/availability/decision-date schema, lag/revision policy, missingness policy, transform policy, feature-state policy, ML feature-engineering principles, and visual report templates documented; no feature ingestion/calculation/signal/backtest/model/paper trading/promotion |
+| Phase 13F feature schema readiness / visual report template audit | Completed — readiness audit passed; schema coverage, visual templates, ML policy, config flags, and Phase 13G pre-registration-only boundary verified; no feature ingestion/calculation/signal/backtest/model/paper trading/promotion |
 ---
 
 # What Should Happen Next

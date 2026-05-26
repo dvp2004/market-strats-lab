@@ -312,6 +312,10 @@ from market_strats.analysis.feature_source_inventory_and_contract_audit import (
     save_phase13c_multifactor_feature_source_inventory_spec,
     save_phase13d_feature_contract_readiness_audit,
 )
+from market_strats.analysis.feature_schema_design_and_template_audit import (
+    save_phase13e_technical_macro_feature_schema_design_spec,
+    save_phase13f_feature_schema_readiness_visual_template_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2074,6 +2078,16 @@ def main() -> None:
         )
 
         save_phase13d_feature_contract_readiness_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13e_technical_macro_feature_schema_design_spec(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13f_feature_schema_readiness_visual_template_audit(
             config=config,
             reports_dir=reports_dir,
         )
