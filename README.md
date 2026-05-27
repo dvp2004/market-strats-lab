@@ -69,7 +69,9 @@ The short canonical final-candidate label is:
 
 The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec. Phase 11C completed a regime-scoring rulebook spec. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11D completed a diagnostic-panel design for future regime-scoring work. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11E completed a diagnostic-panel template implementation audit. Schema-compliant panel templates now exist, but no regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 12A/12B locked the future diagnostic score-calculation design and readiness boundary. No regime score, score value, empirical weight, signal, allocation rule, strategy test, model, new data ingestion, candidate promotion, or final-candidate change exists yet. Phase 12C/12D calculated and audited a categorical diagnostic regime score. The current diagnostic score is fragile, reflecting neutral technical evidence, neutral macro evidence, and fragile validation-risk context. This is diagnostic only and does not create a trading signal, allocation rule, strategy backtest, model, empirical weight, new data ingestion, candidate promotion, or final-candidate change. Phase 12 is closed. The project calculated, audited, interpreted, and bounded a fragile categorical diagnostic regime score. The score reflects neutral technical evidence, neutral macro evidence, and fragile validation-risk context. It remains diagnostic-only and does not create a signal, allocation rule, backtest, empirical weighting system, model, new data ingestion, candidate promotion, or final-candidate change. Any future score-to-signal work requires a separate pre-registration phase. The SPY regime-switch arc is now frozen as the baseline research framework. It produced benchmarks, validation infrastructure, friction/liveability/regret diagnostics, closeout discipline, and a fragile diagnostic score. It did not build the full intended multi-factor decision model. Phase 13A/13B therefore opened a new architecture path for technical, macro, fundamental, sentiment, dissertation-methodology, walk-forward, visual reporting, and eventual paper-trading work. Phase 13C/13D moved the multi-factor path from broad architecture into feature-source inventory and contract readiness. Technical and macro families are contract-feasible, with macro requiring strict lag/revision controls. Fundamental and sentiment are deliberately present in the roadmap but blocked until dedicated audits. No feature ingestion, feature calculation, signal, model, backtest, paper-trading deployment, candidate promotion, or final-candidate change exists yet. Phase 13E/13F moved the multi-factor path from feature-source inventory into technical/macro schema design. The project now has a defined universal feature-panel schema, technical feature schema, macro feature schema, timestamp/availability/decision-date policy, lag/revision controls, missingness policy, transform policy, ML feature-engineering safeguards, feature-state columns, and visual report templates. No feature ingestion, feature calculation, signal, backtest, model training, paper-trading deployment, candidate promotion, or final-candidate change exists yet. Phase 13G/13H moved the multi-factor path from schema readiness into calculation pre-registration and readiness. The project now has exact locked technical/macro feature formulas, raw inputs, lookbacks, thresholds, lag policies, output columns, missingness behaviour, leakage checks, visual checks, and ML feature-engineering safeguards. The next allowed phase may calculate technical/macro feature panels and visual feature reports, but still may not create signals, train models, run backtests, deploy paper trading, promote a candidate, or change the final candidate. Phase 13I/13J moved the multi-factor path from calculation readiness into the first actual bounded feature-calculation stage. The project now has calculated technical and macro feature panels, feature states, availability/missingness outputs, leakage audit outputs, feature-state timelines, availability heatmaps, model-feature-matrix previews, and decision-rationale templates. Phase 13J confirmed 53,620 feature-panel rows, 8 feature IDs, 0 leakage flags, valid output schema quality, valid missingness quality, valid visual reports, and no forbidden signal/model/backtest columns.
 
-This does not mean the model path is validated. No signal, allocation rule, ML model, strategy backtest, paper-trading system, candidate promotion, or final-candidate change exists yet. The next step must interpret the feature panel and pre-register model dataset/target/split design before any model training is allowed.
+This does not mean the model path is validated. No signal, allocation rule, ML model, strategy backtest, paper-trading system, candidate promotion, or final-candidate change exists yet. The next step must interpret the feature panel and pre-register model dataset/target/split design before any model training is allowed. Phase 13K/13L moved the multi-factor path from calculated feature-panel quality control into ML dataset and target-design pre-registration. The project now has feature-state interpretation reports, availability summaries, family coverage summaries, model-readiness planning, a pre-registered primary 63-trading-day SPY return-state target, a secondary 63-trading-day drawdown-risk target, split design, walk-forward policy, and ML leakage controls.
+
+However, Phase 13K exposed a serious macro-readiness issue: all four macro feature states currently show 0.0 availability. The feature pipeline is structurally valid, but the macro side is not yet usable for modelling. The next dataset assembly phase must either repair macro feature availability or explicitly mark macro as blocked/unusable for dataset v1. No ML model, signal, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change exists yet.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -5090,6 +5092,229 @@ Correct interpretation:
 
 > Phase 13J audited feature-panel quality, output schema, missingness, leakage, visual reports, and forbidden columns. It did not create signals, allocation rules, models, strategy backtests, paper-trading logic, candidate promotion, or final-candidate changes.
 
+## Phase 13K: Feature Panel Interpretation / Model-Readiness Planning
+
+Phase 13K interpreted the Phase 13I/13J feature panel and assessed whether the project was ready to pre-register an ML dataset, target, split, and walk-forward design.
+
+This phase did not assemble an ML dataset, calculate targets, create signals, create allocation rules, train models, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13K Summary
+
+| Metric | Result |
+|---|---:|
+| Planning role | Feature panel interpretation and model-readiness planning only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13J |
+| Proposed next phase | Phase 13L |
+| Source reports present | True |
+| Phase 13J result passed | True |
+| Feature panel rows | 53,620 |
+| Feature ID count | 8 |
+| Family count | 2 |
+| Required feature IDs present | True |
+| Required families present | True |
+| Leakage flag count | 0 |
+| State distribution rows | 20 |
+| Availability summary rows | 8 |
+| Family coverage rows | 2 |
+| Model-readiness plan rows | 1 |
+| Phase 13L boundary passed | True |
+| Signal creation | False |
+| Strategy backtest | False |
+| Model training | False |
+| Paper-trading deployment | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13K Feature Availability Summary
+
+| Family | Feature | Rows | Available rows | Unavailable rows | Available ratio | Date range |
+|---|---|---:|---:|---:|---:|---|
+| Macro | `macro_inflation_state` | 5,034 | 0 | 5,034 | 0.0000 | 2006-04-28 to 2026-05-01 |
+| Macro | `macro_labour_state` | 5,034 | 0 | 5,034 | 0.0000 | 2006-04-28 to 2026-05-01 |
+| Macro | `macro_short_rate_state` | 5,034 | 0 | 5,034 | 0.0000 | 2006-04-28 to 2026-05-01 |
+| Macro | `macro_yield_curve_state` | 5,034 | 0 | 5,034 | 0.0000 | 2006-04-28 to 2026-05-01 |
+| Technical | `technical_drawdown_state` | 8,371 | 8,120 | 251 | 0.9700 | 1993-01-29 to 2026-05-01 |
+| Technical | `technical_momentum_state` | 8,371 | 8,119 | 252 | 0.9699 | 1993-01-29 to 2026-05-01 |
+| Technical | `technical_trend_state` | 8,371 | 8,172 | 199 | 0.9762 | 1993-01-29 to 2026-05-01 |
+| Technical | `technical_volatility_state` | 8,371 | 8,308 | 63 | 0.9925 | 1993-01-29 to 2026-05-01 |
+
+### Phase 13K Family Coverage Summary
+
+| Family | Rows | Feature count | Available ratio | Date range |
+|---|---:|---:|---:|---|
+| Macro | 20,136 | 4 | 0.0000 | 2006-04-28 to 2026-05-01 |
+| Technical | 33,484 | 4 | 0.9772 | 1993-01-29 to 2026-05-01 |
+
+### Phase 13K Interpretation Caveat
+
+Phase 13K passed as a planning and interpretation phase, but the availability summary revealed that all four macro feature states were unavailable across the aligned macro period.
+
+This means the feature panel is structurally valid, but the macro side is not yet model-ready. Any future dataset assembly must either repair macro feature calculation availability or explicitly mark macro features as blocked/unusable for the first ML dataset.
+
+### Phase 13K Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13J passed | Passed |
+| Source reports are present | Passed |
+| Feature panel loaded | Passed |
+| Minimum feature-panel rows reached | Passed |
+| Minimum feature IDs reached | Passed |
+| Required families are present | Passed |
+| Required feature IDs are present | Passed |
+| State distribution exists | Passed |
+| Availability summary exists | Passed |
+| Leakage remains clean | Passed |
+| Model-readiness plan exists | Passed |
+| Phase 13L boundary is pre-registration-only | Passed |
+| Scope blocks signal/model/backtest/paper-trading/promotion | Passed |
+| Planning role is correct | Passed |
+
+### Phase 13K Verdict
+
+> Phase 13K completed the feature panel interpretation and model-readiness planning phase.
+
+Correct interpretation:
+
+> Phase 13K interpreted feature-state distributions, availability, family coverage, leakage cleanliness, and model-readiness boundaries. It did not assemble a model dataset, calculate a target, train a model, create a signal, run a backtest, deploy paper trading, promote a candidate, or change the final candidate. Macro feature availability remains a major caveat.
+
+---
+
+## Phase 13L: Dataset Split and ML Target Design Pre-Registration Spec
+
+Phase 13L pre-registered the ML dataset, target, split, walk-forward, and leakage-control design for the future dataset assembly phase.
+
+This phase did not assemble a dataset, calculate targets, create signals, create allocation rules, train models, run strategy backtests, select models, calculate feature importance, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13L Summary
+
+| Metric | Result |
+|---|---:|
+| Spec role | Dataset split and ML target design pre-registration spec only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13K |
+| Proposed next phase | Phase 13M |
+| Phase 13K reports present | True |
+| Phase 13K result passed | True |
+| Config flags clean for run | True |
+| Primary target defined | True |
+| Secondary target defined | True |
+| Dataset design defined | True |
+| Split design defined | True |
+| Walk-forward policy defined | True |
+| Leakage control count | 6 |
+| Leakage controls required | True |
+| Phase 13M boundary passed | True |
+| Dataset assembly execution | False |
+| Target calculation | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Model training | False |
+| Model selection | False |
+| Paper-trading deployment | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13L Primary Target Design
+
+| Item | Result |
+|---|---|
+| Target ID | `future_63d_spy_return_state` |
+| Target role | Long-horizon market-regime target for future supervised-learning experiments |
+| Target type | Classification |
+| Target horizon | 63 trading days |
+| Raw inputs required | SPY adjusted close or equivalent price series |
+| Formula locked for future | `future_return_63d = adjusted_close_t_plus_63 / adjusted_close_t - 1` |
+| Label policy locked for future | Supportive if future return > 5%; neutral if -5% to +5%; fragile if < -5% |
+| Target calculated now | False |
+| Trading signal created now | False |
+
+### Phase 13L Secondary Target Design
+
+| Item | Result |
+|---|---|
+| Target ID | `future_63d_drawdown_risk_state` |
+| Target role | Risk-state target for later diagnostic comparison only |
+| Target type | Classification |
+| Target horizon | 63 trading days |
+| Raw inputs required | SPY adjusted close or equivalent price series |
+| Formula locked for future | Future 63-trading-day window max drawdown |
+| Label policy locked for future | Fragile if future max drawdown <= -10%; neutral otherwise |
+| Target calculated now | False |
+| Trading signal created now | False |
+
+### Phase 13L Dataset Design
+
+| Item | Result |
+|---|---|
+| Dataset ID | `phase13m_ml_feature_dataset_v1` |
+| Row unit | One row per decision date |
+| Feature panel source | `reports/phase13i_feature_panel.csv` |
+| Matrix preview source | `reports/phase13i_model_feature_matrix_preview.csv` |
+| Allowed feature inputs | `feature_value`; `feature_state`; `missingness_state` |
+| Dataset assembled now | False |
+
+### Phase 13L Split Design
+
+| Item | Result |
+|---|---|
+| Canonical endpoint | 2026-05-01 |
+| Common feature start policy | Use common feature availability after macro and technical alignment; unavailable rows must remain explicit |
+| Initial training period | 2006-04-28 to 2016-12-30 |
+| Validation period | 2017-01-03 to 2020-12-31 |
+| Untouched holdout period | 2021-01-01 to 2026-05-01 |
+| Split selection uses future performance | False |
+| Holdout may be used for model selection | False |
+| Split calculated now | False |
+
+### Phase 13L Walk-Forward Policy
+
+| Item | Result |
+|---|---|
+| Allowed designs | Anchored expanding training window; rolling training window |
+| First allowed walk-forward start | 2017-01-03 |
+| Rebalance frequencies to compare later | Monthly; quarterly |
+| Model refit frequencies to compare later | Monthly; quarterly |
+| Walk-forward execution now | False |
+| Model training now | False |
+
+### Phase 13L Leakage Control Policy
+
+| Control | Requirement |
+|---|---|
+| `MLLC1_train_only_preprocessing` | Scaling, imputation, winsorisation, and encoding must be fitted on training windows only |
+| `MLLC2_no_future_target_features` | Future returns, drawdowns, and labels cannot enter features |
+| `MLLC3_no_holdout_model_selection` | Holdout cannot be used for model, target, feature, threshold, or hyperparameter selection |
+| `MLLC4_time_ordered_splits` | All splits must preserve chronological ordering |
+| `MLLC5_missingness_preserved` | Missingness states must be preserved or encoded by pre-registered rule |
+| `MLLC6_no_signal_from_target` | Target labels cannot be converted directly into trading signals without a later signal pre-registration phase |
+
+### Phase 13L Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13K reports are present | Passed |
+| Phase 13K conclusion and gates passed | Passed |
+| Config flags are clean for run | Passed |
+| Primary target design is defined | Passed |
+| Secondary target design is defined | Passed |
+| Dataset design is defined | Passed |
+| Split design is defined | Passed |
+| Walk-forward policy is defined | Passed |
+| Leakage controls are defined | Passed |
+| Phase 13M boundary is dataset-only | Passed |
+| Scope blocks dataset/model/signal/backtest/paper-trading/promotion | Passed |
+| Spec role is correct | Passed |
+
+### Phase 13L Verdict
+
+> Phase 13L completed the dataset split and ML target pre-registration spec.
+
+Correct interpretation:
+
+> Phase 13L pre-registered ML target design, dataset design, split design, walk-forward policy, and leakage controls. It did not assemble a dataset, calculate a target, train a model, select a model, create a signal, run a backtest, deploy paper trading, promote a candidate, or change the final candidate.
+
 ---
 
 # Methodology Notes
@@ -5269,6 +5494,9 @@ Remaining concerns include:
 - Phase 13I/13J calculated and audited technical/macro feature panels only. The feature pipeline now works, but the calculated features have not yet been interpreted, validated for predictive usefulness, used to create signals, used to train ML models, used in strategy backtests, deployed for paper trading, promoted into any candidate, or used to change the final candidate hierarchy.
 - The Phase 13I feature panel contains technical data from 1993-01-29 to 2026-05-01 and macro data from 2006-04-28 to 2026-05-01. Macro features are unavailable before the macro aligned sample begins; this is expected and handled through missingness/availability reporting.
 - The Phase 13I `model_feature_matrix_preview.csv` is a preview/reporting table only. It is not yet a model-training dataset, does not define a prediction target, and must not be used for modelling until dataset split, target design, and walk-forward validation rules are pre-registered.
+- Phase 13K/13L interpreted the feature panel and pre-registered ML dataset/target/split design only. No ML dataset has been assembled, no target has been calculated, no model has been trained, no signal or allocation rule exists, no backtest has been run, no paper-trading system exists, and no candidate has been promoted.
+- Phase 13K exposed a major macro-readiness issue: all four macro feature states have 0.0 availability in the current calculated panel. The project must not treat the next ML dataset as genuinely multi-factor unless this macro availability issue is repaired or explicitly marked as a blocked/unusable macro feature family.
+- The registered 63-trading-day target and split design are pre-registered design choices, not validated predictive targets. They must be audited during dataset assembly before any model training is allowed.
 ---
 
 # Bugs Caught and Fixed
@@ -6212,6 +6440,43 @@ reports/phase13j_quality_conclusion.csv
 reports/phase13j_feature_panel_quality_leakage_audit.md
 ```
 
+## Phase 13K Feature Panel Interpretation / Model-Readiness Reports
+
+```text
+reports/phase13k_interpretation_source_report_check.csv
+reports/phase13k_interpretation_phase13j_result_check.csv
+reports/phase13k_interpretation_feature_state_distribution.csv
+reports/phase13k_interpretation_feature_availability_summary.csv
+reports/phase13k_interpretation_family_coverage_summary.csv
+reports/phase13k_interpretation_model_readiness_plan.csv
+reports/phase13k_interpretation_phase13l_boundary_check.csv
+reports/phase13k_interpretation_scope_boundary_check.csv
+reports/phase13k_interpretation_summary.csv
+reports/phase13k_interpretation_gate_report.csv
+reports/phase13k_interpretation_conclusion.csv
+reports/phase13k_feature_panel_interpretation_model_readiness.md
+```
+
+## Phase 13L Dataset Split / ML Target Pre-Registration Reports
+
+```text
+reports/phase13l_prereg_report_inventory_check.csv
+reports/phase13l_prereg_phase13k_result_check.csv
+reports/phase13l_prereg_config_flag_check.csv
+reports/phase13l_prereg_target_design.csv
+reports/phase13l_prereg_secondary_target_design.csv
+reports/phase13l_prereg_dataset_design.csv
+reports/phase13l_prereg_split_design.csv
+reports/phase13l_prereg_walk_forward_policy.csv
+reports/phase13l_prereg_leakage_control_policy.csv
+reports/phase13l_prereg_phase13m_boundary_check.csv
+reports/phase13l_prereg_scope_boundary_check.csv
+reports/phase13l_prereg_summary.csv
+reports/phase13l_prereg_gate_report.csv
+reports/phase13l_prereg_conclusion.csv
+reports/phase13l_dataset_split_target_preregistration_spec.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -6391,6 +6656,8 @@ configs/spy_sma10.yaml
 | Phase 13H feature calculation readiness audit | Completed — readiness audit passed; formula registry, output schema, missingness/leakage/visual checks, ML locks, config flags, and Phase 13I feature-calculation-only boundary verified; no feature calculation/signal/backtest/model/paper trading/promotion |
 | Phase 13I technical/macro feature calculation execution | Completed — technical and macro feature panels calculated; feature states, availability/missingness outputs, leakage audit outputs, feature-state timeline, availability heatmap, model feature matrix preview, and decision-rationale template created; no signal/backtest/model/paper trading/promotion |
 | Phase 13J feature panel quality / leakage audit | Completed — feature-panel quality audit passed; 53,620 feature-panel rows, 8 feature IDs, 0 leakage flags, output schema quality passed, missingness quality passed, visual reports passed, forbidden-column check passed; no signal/backtest/model/paper trading/promotion |
+| Phase 13K feature panel interpretation / model-readiness planning | Completed — interpretation/planning phase passed; feature panel loaded with 53,620 rows, 8 feature IDs, required families present, state distribution and availability summaries created, 0 leakage flags, model-readiness plan created; major caveat: macro feature availability is 0.0 across all four macro features |
+| Phase 13L dataset split and ML target design pre-registration spec | Completed — primary 63D return-state target, secondary 63D drawdown-risk target, dataset design, split design, walk-forward policy, and six ML leakage controls pre-registered; no dataset assembly, target calculation, model training, signal, backtest, paper trading, or promotion |
 ---
 
 # What Should Happen Next

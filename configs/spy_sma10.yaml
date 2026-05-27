@@ -5578,8 +5578,6 @@ phase13i_feature_calculation_execution:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_execution_role: "Technical and macro feature calculation execution only"
-
-
 phase13j_feature_panel_quality_leakage_audit:
   enabled: false
 
@@ -5666,6 +5664,279 @@ phase13j_feature_panel_quality_leakage_audit:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_audit_role: "Feature panel quality and leakage audit only"
+phase13k_feature_panel_interpretation_model_readiness:
+  enabled: false
+
+  planning_role: "Feature panel interpretation and model-readiness planning only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13J"
+  proposed_next_phase: "Phase 13L"
+
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13j_conclusion: "reports/phase13j_quality_conclusion.csv"
+    phase13j_gate_report: "reports/phase13j_quality_gate_report.csv"
+    feature_panel: "reports/phase13i_feature_panel.csv"
+    feature_state_timeline: "reports/phase13i_feature_state_timeline.csv"
+    feature_availability_heatmap: "reports/phase13i_feature_availability_heatmap.csv"
+    leakage_audit_panel: "reports/phase13i_leakage_audit_panel.csv"
+    model_feature_matrix_preview: "reports/phase13i_model_feature_matrix_preview.csv"
+    decision_rationale_template: "reports/phase13i_decision_rationale_template.csv"
+    phase13j_feature_panel_quality_check: "reports/phase13j_quality_feature_panel_quality_check.csv"
+    phase13j_leakage_quality_check: "reports/phase13j_quality_leakage_quality_check.csv"
+    phase13j_forbidden_column_check: "reports/phase13j_quality_forbidden_column_check.csv"
+
+  interpretation_policy:
+    min_feature_panel_rows: 100
+    min_feature_ids: 8
+    required_families: ["technical", "macro"]
+    required_feature_ids:
+      - "technical_trend_state"
+      - "technical_momentum_state"
+      - "technical_volatility_state"
+      - "technical_drawdown_state"
+      - "macro_short_rate_state"
+      - "macro_yield_curve_state"
+      - "macro_inflation_state"
+      - "macro_labour_state"
+    max_leakage_flags: 0
+    min_available_ratio: 0.20
+    allowed_states: ["supportive", "neutral", "fragile", "unavailable", "blocked"]
+
+  model_readiness_plan:
+    dataset_unit: "one row per decision date after feature alignment"
+    eligible_feature_inputs:
+      - feature_state_categorical
+      - feature_value_numeric
+      - missingness_state_categorical
+      - family_id
+      - feature_id
+    future_encoding_policy:
+      - "Categorical feature_state values may later be one-hot encoded inside the training pipeline only."
+      - "Numeric feature_value columns may later be scaled using train-window-only fit."
+      - "Missingness indicators must be preserved or encoded by pre-registered rule."
+      - "No feature transform may be selected by observed backtest performance."
+    blocked_now:
+      - "model training"
+      - "signal creation"
+      - "allocation rule creation"
+      - "strategy backtest"
+      - "paper trading"
+      - "candidate promotion"
+    readiness_interpretation: "Feature panel is eligible for dataset/target/split pre-registration if quality, leakage, missingness, and forbidden-column checks remain clean."
+
+  phase13l_boundary:
+    allowed_next_step: "Dataset split and ML target design pre-registration spec only"
+    forbidden_next_step: "dataset assembly execution, signal creation, allocation rule, strategy backtest, model training, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13l_may_define_target: true
+    phase13l_may_define_split_policy: true
+    phase13l_may_define_walk_forward_policy: true
+    phase13l_may_define_leakage_controls: true
+    phase13l_may_assemble_dataset: false
+    phase13l_may_train_model: false
+    phase13l_may_create_signal: false
+    phase13l_may_run_backtest: false
+    phase13l_may_deploy_paper_trading: false
+    phase13l_may_promote_candidate: false
+
+  gates:
+    require_phase13j_passed: true
+    require_source_reports_present: true
+    require_feature_panel_loaded: true
+    require_min_feature_panel_rows: true
+    require_min_feature_ids: true
+    require_required_families_present: true
+    require_required_feature_ids_present: true
+    require_state_distribution: true
+    require_availability_summary: true
+    require_leakage_clean: true
+    require_model_readiness_plan: true
+    require_phase13l_boundary_prereg_only: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_planning_role: "Feature panel interpretation and model-readiness planning only"
+phase13l_dataset_split_target_preregistration_spec:
+  enabled: false
+
+  spec_role: "Dataset split and ML target design pre-registration spec only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13K"
+  proposed_next_phase: "Phase 13M"
+
+  allow_dataset_assembly_execution: false
+  allow_target_calculation: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_model_selection: false
+  allow_feature_importance: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase13i_feature_calculation_execution: false
+    phase13j_feature_panel_quality_leakage_audit: false
+    phase13k_feature_panel_interpretation_model_readiness: true
+    phase13l_dataset_split_target_preregistration_spec: true
+    relative_momentum_allocator: true
+
+  phase13k_reports:
+    source_report_check: "reports/phase13k_interpretation_source_report_check.csv"
+    phase13j_result_check: "reports/phase13k_interpretation_phase13j_result_check.csv"
+    feature_state_distribution: "reports/phase13k_interpretation_feature_state_distribution.csv"
+    feature_availability_summary: "reports/phase13k_interpretation_feature_availability_summary.csv"
+    family_coverage_summary: "reports/phase13k_interpretation_family_coverage_summary.csv"
+    model_readiness_plan: "reports/phase13k_interpretation_model_readiness_plan.csv"
+    phase13l_boundary_check: "reports/phase13k_interpretation_phase13l_boundary_check.csv"
+    scope_boundary_check: "reports/phase13k_interpretation_scope_boundary_check.csv"
+    summary: "reports/phase13k_interpretation_summary.csv"
+    gate_report: "reports/phase13k_interpretation_gate_report.csv"
+    conclusion: "reports/phase13k_interpretation_conclusion.csv"
+
+  target_design:
+    primary_target_id: "future_63d_spy_return_state"
+    target_role: "Long-horizon market-regime target for future supervised-learning experiments"
+    target_type: "classification"
+    target_horizon: "63 trading days"
+    raw_inputs_required: ["SPY adjusted close or equivalent price series"]
+    target_formula_locked_for_future: "future_return_63d = adjusted_close_t_plus_63 / adjusted_close_t - 1"
+    label_policy_locked_for_future: "supportive if future_return_63d > 0.05; neutral if -0.05 <= future_return_63d <= 0.05; fragile if future_return_63d < -0.05"
+    target_calculated_now: false
+    trading_signal_created_now: false
+    reason: "Pre-register target before dataset assembly or model training."
+
+  secondary_target_design:
+    secondary_target_id: "future_63d_drawdown_risk_state"
+    target_role: "Risk-state target for later diagnostic comparison only"
+    target_type: "classification"
+    target_horizon: "63 trading days"
+    raw_inputs_required: ["SPY adjusted close or equivalent price series"]
+    target_formula_locked_for_future: "future_window_max_drawdown_63d from t to t_plus_63"
+    label_policy_locked_for_future: "fragile if future_window_max_drawdown_63d <= -0.10; neutral otherwise"
+    target_calculated_now: false
+    trading_signal_created_now: false
+    reason: "Secondary diagnostic target only; not a trading rule."
+
+  dataset_design:
+    dataset_id: "phase13m_ml_feature_dataset_v1"
+    row_unit: "one row per decision_date"
+    feature_panel_source: "reports/phase13i_feature_panel.csv"
+    matrix_preview_source: "reports/phase13i_model_feature_matrix_preview.csv"
+    allowed_feature_inputs:
+      - "feature_value"
+      - "feature_state"
+      - "missingness_state"
+    required_metadata:
+      - "decision_date"
+      - "as_of_date"
+      - "feature_id"
+      - "family_id"
+      - "contract_version"
+    blocked_inputs:
+      - "future returns"
+      - "future drawdowns"
+      - "strategy returns"
+      - "backtest returns"
+      - "model predictions"
+      - "paper-trading outcomes"
+    dataset_assembled_now: false
+
+  split_design:
+    canonical_endpoint: "2026-05-01"
+    common_feature_start_policy: "Use common feature availability after macro and technical alignment; unavailable rows must remain explicit."
+    initial_training_period: "2006-04-28 to 2016-12-30"
+    validation_period: "2017-01-03 to 2020-12-31"
+    untouched_holdout_period: "2021-01-01 to 2026-05-01"
+    split_selection_uses_future_performance: false
+    holdout_may_be_used_for_model_selection: false
+    split_calculated_now: false
+
+  walk_forward_policy:
+    allowed_designs:
+      - "anchored expanding training window"
+      - "rolling training window"
+    first_allowed_walk_forward_start: "2017-01-03"
+    rebalance_frequency_to_compare_later: ["monthly", "quarterly"]
+    model_refit_frequency_to_compare_later: ["monthly", "quarterly"]
+    walk_forward_execution_now: false
+    model_training_now: false
+
+  leakage_control_policy:
+    - control_id: "MLLC1_train_only_preprocessing"
+      control: "Scaling, imputation, winsorisation, and encoding must be fitted on training windows only."
+      required: true
+    - control_id: "MLLC2_no_future_target_features"
+      control: "Future returns/drawdowns/labels cannot enter features."
+      required: true
+    - control_id: "MLLC3_no_holdout_model_selection"
+      control: "Holdout cannot be used for model, target, feature, threshold, or hyperparameter selection."
+      required: true
+    - control_id: "MLLC4_time_ordered_splits"
+      control: "All splits must preserve chronological ordering."
+      required: true
+    - control_id: "MLLC5_missingness_preserved"
+      control: "Missingness states must be preserved or encoded by pre-registered rule."
+      required: true
+    - control_id: "MLLC6_no_signal_from_target"
+      control: "Target labels cannot be converted directly into trading signals without a later signal pre-registration phase."
+      required: true
+
+  phase13m_boundary:
+    allowed_next_step: "ML dataset assembly execution only"
+    forbidden_next_step: "model training, model selection, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13m_may_assemble_dataset: true
+    phase13m_may_calculate_registered_targets: true
+    phase13m_may_create_dataset_quality_reports: true
+    phase13m_may_train_model: false
+    phase13m_may_select_model: false
+    phase13m_may_create_signal: false
+    phase13m_may_run_backtest: false
+    phase13m_may_deploy_paper_trading: false
+    phase13m_may_promote_candidate: false
+
+  gates:
+    require_phase13k_reports_present: true
+    require_phase13k_conclusion_passed: true
+    require_phase13k_gate_report_passed: true
+    require_config_flags_clean_for_run: true
+    require_primary_target_design: true
+    require_secondary_target_design: true
+    require_dataset_design: true
+    require_split_design: true
+    require_walk_forward_policy: true
+    require_leakage_control_policy: true
+    min_leakage_controls: 6
+    require_phase13m_boundary_dataset_only: true
+    require_no_dataset_assembly_execution: true
+    require_no_target_calculation: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_model_selection: true
+    require_no_feature_importance: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_spec_role: "Dataset split and ML target design pre-registration spec only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

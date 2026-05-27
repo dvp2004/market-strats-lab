@@ -324,6 +324,10 @@ from market_strats.analysis.feature_calculation_execution_and_quality_audit impo
     save_phase13i_feature_calculation_execution,
     save_phase13j_feature_panel_quality_leakage_audit,
 )
+from market_strats.analysis.feature_panel_interpretation_and_ml_prereg import (
+    save_phase13k_feature_panel_interpretation_model_readiness,
+    save_phase13l_dataset_split_target_preregistration_spec,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2118,6 +2122,16 @@ def main() -> None:
         )
 
         save_phase13j_feature_panel_quality_leakage_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13k_feature_panel_interpretation_model_readiness(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13l_dataset_split_target_preregistration_spec(
             config=config,
             reports_dir=reports_dir,
         )
