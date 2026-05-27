@@ -73,6 +73,10 @@ This does not mean the model path is validated. No signal, allocation rule, ML m
 
 However, Phase 13K exposed a serious macro-readiness issue: all four macro feature states currently show 0.0 availability. The feature pipeline is structurally valid, but the macro side is not yet usable for modelling. The next dataset assembly phase must either repair macro feature availability or explicitly mark macro as blocked/unusable for dataset v1. No ML model, signal, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change exists yet.
 
+Phase 13M/13N moved the project from ML dataset pre-registration into actual dataset assembly and quality auditing. The assembled dataset has 5,034 rows, registered 63-trading-day return and drawdown-risk targets, train/validation/holdout split labels, and clean dataset/target/split/forbidden-column quality checks.
+
+However, the dataset is not a true multi-factor dataset. The macro availability guard attempted repair, but repaired macro availability remained 0.0. Macro was therefore blocked, and the dataset was honestly labelled `technical_only_macro_blocked_dataset_v1`. This is a valid technical-only ML dataset checkpoint, not the original technical + macro + fundamental + sentiment goal.
+
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
 Market Strats Lab remains research-only. It is not production-ready, not live-tradable, not financial advice, and not a live-trading recommendation.
@@ -4022,6 +4026,7 @@ Correct interpretation:
 
 > Phase 12 is now closed. The diagnostic regime-score branch calculated, audited, interpreted, and bounded a fragile diagnostic score. No score-to-signal conversion, allocation rule, backtest, empirical weighting, model, new data ingestion, candidate promotion, or final-candidate change exists. Any future score-to-signal work requires a separate pre-registration phase.
 
+# Phase 13
 ## Phase 13A: Baseline SPY Research Arc Freeze / Transition Spec
 
 Phase 13A froze the SPY regime-switch arc as a baseline research framework and opened the new multi-factor model architecture path.
@@ -5315,6 +5320,233 @@ Correct interpretation:
 
 > Phase 13L pre-registered ML target design, dataset design, split design, walk-forward policy, and leakage controls. It did not assemble a dataset, calculate a target, train a model, select a model, create a signal, run a backtest, deploy paper trading, promote a candidate, or change the final candidate.
 
+## Phase 13M: ML Dataset Assembly with Macro Availability Guard
+
+Phase 13M assembled the first ML dataset only after applying a hard macro availability guard.
+
+This phase calculated the registered 63-trading-day targets and created an ML-ready dataset table. It did not train models, select models, create signals, create allocation rules, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13M Summary
+
+| Metric | Result |
+|---|---:|
+| Execution role | ML dataset assembly execution with macro availability guard only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13L |
+| Proposed next phase | Phase 13N |
+| Source reports present | True |
+| Phase 13L result passed | True |
+| Input sources found | True |
+| Macro guard rows | 1 |
+| Macro repaired | False |
+| Macro blocked | True |
+| Dataset label | `technical_only_macro_blocked_dataset_v1` |
+| Dataset rows | 5,034 |
+| Target summary rows | 1 |
+| Split summary rows | 4 |
+| Leakage flag count | 0 |
+| Phase 13N boundary passed | True |
+| Model training | False |
+| Model selection | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Paper-trading deployment | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13M Macro Availability Guard
+
+| Metric | Result |
+|---|---:|
+| Current macro available ratio | 0.0000 |
+| Repair attempted | True |
+| Repaired macro available ratio | 0.0000 |
+| Minimum macro available ratio to use | 0.2000 |
+| Repaired successfully | False |
+| Macro blocked for dataset v1 | True |
+| Dataset label | `technical_only_macro_blocked_dataset_v1` |
+
+Interpretation:
+
+> Macro repair failed. The dataset was therefore correctly labelled as technical-only / macro-blocked, not multi-factor.
+
+### Phase 13M Family Usage
+
+| Family | Used in dataset v1 | Rows | Feature count | Available ratio |
+|---|---:|---:|---:|---:|
+| Technical | True | 33,484 | 4 | 0.9772 |
+| Macro | False | 0 | 0 | 0.0000 |
+
+### Phase 13M Target Summary
+
+| Metric | Result |
+|---|---:|
+| Dataset rows | 5,034 |
+| Target available rows | 4,788 |
+| Target available ratio | 0.9511 |
+| Primary target classes | Fragile; neutral; supportive; unavailable |
+| Secondary target classes | Fragile; neutral; unavailable |
+
+### Phase 13M Split Summary
+
+| Split | Rows | Target available rows | Date range | Target available ratio |
+|---|---:|---:|---|---:|
+| Train | 2,689 | 2,594 | 2006-04-28 to 2016-12-30 | 0.9647 |
+| Validation | 1,006 | 970 | 2017-01-04 to 2020-12-31 | 0.9642 |
+| Holdout | 1,338 | 1,224 | 2021-01-01 to 2026-05-01 | 0.9148 |
+| Out of split | 1 | 0 | 2017-01-02 to 2017-01-02 | 0.0000 |
+
+### Phase 13M Dataset Metadata
+
+| Metric | Result |
+|---|---:|
+| Dataset ID | `phase13m_ml_feature_dataset_v1` |
+| Dataset label | `technical_only_macro_blocked_dataset_v1` |
+| Rows | 5,034 |
+| Value feature columns | 4 |
+| State feature columns | 4 |
+| Missingness feature columns | 4 |
+| Macro guard result | Blocked |
+| Macro blocked for dataset v1 | True |
+| Model training | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Candidate promotion | False |
+
+### Phase 13M Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13L passed | Passed |
+| Source reports are present | Passed |
+| Input sources were found | Passed |
+| Macro guard report exists | Passed |
+| Macro was repaired or explicitly blocked | Passed |
+| Dataset was created | Passed |
+| Dataset label is honest | Passed |
+| Targets were calculated | Passed |
+| Split labels were created | Passed |
+| No leakage flags are present | Passed |
+| Phase 13N boundary is quality-audit-only | Passed |
+| Scope blocks model/signal/backtest/paper-trading/promotion | Passed |
+| Execution role is correct | Passed |
+
+### Phase 13M Verdict
+
+> Phase 13M completed ML dataset assembly with macro availability guard.
+
+Correct interpretation:
+
+> Phase 13M assembled a technical-only / macro-blocked ML dataset and calculated the registered 63D targets. It did not train models, select models, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+---
+
+## Phase 13N: ML Dataset Quality / Leakage Audit
+
+Phase 13N audited the Phase 13M ML dataset, target quality, split quality, macro guard honesty, forbidden-column boundaries, and leakage controls.
+
+This phase did not train models, select models, create signals, create allocation rules, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13N Summary
+
+| Metric | Result |
+|---|---:|
+| Audit role | ML dataset quality and leakage audit only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13M |
+| Proposed next phase | Phase 13O |
+| Phase 13M reports present | True |
+| Phase 13M result passed | True |
+| Config flags clean for run | True |
+| Dataset quality passed | True |
+| Target quality passed | True |
+| Split quality passed | True |
+| Macro guard quality passed | True |
+| Forbidden column check passed | True |
+| Phase 13O boundary passed | True |
+| Model training | False |
+| Model selection | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Paper-trading deployment | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13N Dataset Quality
+
+| Check | Result |
+|---|---|
+| Dataset has enough rows | Passed |
+| Dataset has enough feature-value columns | Passed |
+| Dataset has dataset label | Passed |
+
+### Phase 13N Target Quality
+
+| Check | Result |
+|---|---|
+| Primary target column exists | Passed |
+| Secondary target column exists | Passed |
+| Target availability ratio is acceptable | Passed |
+
+Key figure:
+
+```text
+target_available_ratio = 0.9511
+```
+
+### Phase 13N Split Quality
+
+| Check | Result |
+|---|---|
+| Train split has rows | Passed |
+| Validation split has rows | Passed |
+| Holdout split has rows | Passed |
+
+### Phase 13N Macro Guard Quality
+
+| Check | Result |
+|---|---|
+| Macro was repaired or blocked | Passed |
+| Dataset label matches macro guard result | Passed |
+
+Correct label:
+
+```text
+technical_only_macro_blocked_dataset_v1
+```
+
+### Phase 13N Forbidden Column Check
+
+| Frame | Result |
+|---|---|
+| Assembled dataset | Passed |
+
+No model prediction, signal, allocation, strategy-return, backtest-return, paper-trading, or feature-importance columns were found.
+
+### Phase 13N Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13M reports are present | Passed |
+| Phase 13M conclusion and gates passed | Passed |
+| Config flags are clean for run | Passed |
+| Dataset quality passed | Passed |
+| Target quality passed | Passed |
+| Split quality passed | Passed |
+| Macro guard quality passed | Passed |
+| No forbidden model/signal/backtest columns exist | Passed |
+| Phase 13O boundary is pre-registration-only | Passed |
+| Scope blocks model/signal/backtest/paper-trading/promotion | Passed |
+| Audit role is correct | Passed |
+
+### Phase 13N Verdict
+
+> Phase 13N completed the ML dataset quality and leakage audit.
+
+Correct interpretation:
+
+> Phase 13N audited dataset quality, target quality, split quality, macro guard honesty, forbidden columns, leakage, and boundaries. It did not train models, select models, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
 ---
 
 # Methodology Notes
@@ -5497,6 +5729,9 @@ Remaining concerns include:
 - Phase 13K/13L interpreted the feature panel and pre-registered ML dataset/target/split design only. No ML dataset has been assembled, no target has been calculated, no model has been trained, no signal or allocation rule exists, no backtest has been run, no paper-trading system exists, and no candidate has been promoted.
 - Phase 13K exposed a major macro-readiness issue: all four macro feature states have 0.0 availability in the current calculated panel. The project must not treat the next ML dataset as genuinely multi-factor unless this macro availability issue is repaired or explicitly marked as a blocked/unusable macro feature family.
 - The registered 63-trading-day target and split design are pre-registered design choices, not validated predictive targets. They must be audited during dataset assembly before any model training is allowed.
+- Phase 13M/13N assembled and audited a technical-only / macro-blocked ML dataset, not a true multi-factor dataset. Macro repair was attempted but failed, leaving repaired macro availability at 0.0 and macro blocked for dataset v1.
+- The current ML dataset has only four usable technical feature-value columns plus corresponding state and missingness columns. It should not be described as a technical + macro model dataset.
+- The 63D targets and train/validation/holdout splits are now calculated and audited, but no model has been trained, no model has been selected, no signal has been created, no backtest has been run, no paper-trading logic exists, and no candidate has been promoted.
 ---
 
 # Bugs Caught and Fixed
@@ -6477,6 +6712,46 @@ reports/phase13l_prereg_conclusion.csv
 reports/phase13l_dataset_split_target_preregistration_spec.md
 ```
 
+## Phase 13M ML Dataset Assembly / Macro Guard Reports
+
+```text
+reports/phase13m_dataset_source_report_check.csv
+reports/phase13m_dataset_phase13l_result_check.csv
+reports/phase13m_dataset_input_source_check.csv
+reports/phase13m_dataset_macro_guard_report.csv
+reports/phase13m_dataset_macro_repair_panel.csv
+reports/phase13m_dataset_family_usage_report.csv
+reports/phase13m_ml_feature_dataset_v1.csv
+reports/phase13m_dataset_target_summary.csv
+reports/phase13m_dataset_split_summary.csv
+reports/phase13m_dataset_dataset_metadata.csv
+reports/phase13m_dataset_phase13n_boundary_check.csv
+reports/phase13m_dataset_scope_boundary_check.csv
+reports/phase13m_dataset_summary.csv
+reports/phase13m_dataset_gate_report.csv
+reports/phase13m_dataset_conclusion.csv
+reports/phase13m_ml_dataset_assembly_macro_guard.md
+```
+
+## Phase 13N ML Dataset Quality / Leakage Audit Reports
+
+```text
+reports/phase13n_quality_report_inventory_check.csv
+reports/phase13n_quality_phase13m_result_check.csv
+reports/phase13n_quality_config_flag_check.csv
+reports/phase13n_quality_dataset_quality_check.csv
+reports/phase13n_quality_target_quality_check.csv
+reports/phase13n_quality_split_quality_check.csv
+reports/phase13n_quality_macro_guard_quality_check.csv
+reports/phase13n_quality_forbidden_column_check.csv
+reports/phase13n_quality_phase13o_boundary_check.csv
+reports/phase13n_quality_scope_boundary_check.csv
+reports/phase13n_quality_summary.csv
+reports/phase13n_quality_gate_report.csv
+reports/phase13n_quality_conclusion.csv
+reports/phase13n_ml_dataset_quality_leakage_audit.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -6658,6 +6933,8 @@ configs/spy_sma10.yaml
 | Phase 13J feature panel quality / leakage audit | Completed — feature-panel quality audit passed; 53,620 feature-panel rows, 8 feature IDs, 0 leakage flags, output schema quality passed, missingness quality passed, visual reports passed, forbidden-column check passed; no signal/backtest/model/paper trading/promotion |
 | Phase 13K feature panel interpretation / model-readiness planning | Completed — interpretation/planning phase passed; feature panel loaded with 53,620 rows, 8 feature IDs, required families present, state distribution and availability summaries created, 0 leakage flags, model-readiness plan created; major caveat: macro feature availability is 0.0 across all four macro features |
 | Phase 13L dataset split and ML target design pre-registration spec | Completed — primary 63D return-state target, secondary 63D drawdown-risk target, dataset design, split design, walk-forward policy, and six ML leakage controls pre-registered; no dataset assembly, target calculation, model training, signal, backtest, paper trading, or promotion |
+| Phase 13M ML dataset assembly with macro availability guard | Completed — ML dataset assembled with registered 63D targets and train/validation/holdout split labels; macro repair failed, so dataset was honestly labelled `technical_only_macro_blocked_dataset_v1`; 5,034 rows, 4 value feature columns, 4 state feature columns, 4 missingness columns, target availability ratio 0.9511; no model/signal/backtest/paper trading/promotion |
+| Phase 13N ML dataset quality / leakage audit | Completed — dataset quality, target quality, split quality, macro guard quality, forbidden-column check, and leakage boundaries passed; confirms dataset is technical-only / macro-blocked, not multi-factor; no model/signal/backtest/paper trading/promotion |
 ---
 
 # What Should Happen Next

@@ -328,6 +328,10 @@ from market_strats.analysis.feature_panel_interpretation_and_ml_prereg import (
     save_phase13k_feature_panel_interpretation_model_readiness,
     save_phase13l_dataset_split_target_preregistration_spec,
 )
+from market_strats.analysis.ml_dataset_assembly_and_quality_audit import (
+    save_phase13m_ml_dataset_assembly_execution,
+    save_phase13n_ml_dataset_quality_leakage_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2132,6 +2136,18 @@ def main() -> None:
         )
 
         save_phase13l_dataset_split_target_preregistration_spec(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13m_ml_dataset_assembly_execution(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+        )
+
+        save_phase13n_ml_dataset_quality_leakage_audit(
             config=config,
             reports_dir=reports_dir,
         )

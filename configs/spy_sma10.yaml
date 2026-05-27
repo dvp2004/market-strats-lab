@@ -5937,6 +5937,226 @@ phase13l_dataset_split_target_preregistration_spec:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_spec_role: "Dataset split and ML target design pre-registration spec only"
+phase13m_ml_dataset_assembly_execution:
+  enabled: false
+
+  execution_role: "ML dataset assembly execution with macro availability guard only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13L"
+  proposed_next_phase: "Phase 13N"
+
+  allow_dataset_assembly_execution: true
+  allow_target_calculation: true
+  allow_macro_availability_repair: true
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_model_selection: false
+  allow_feature_importance: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13l_conclusion: "reports/phase13l_prereg_conclusion.csv"
+    phase13l_gate_report: "reports/phase13l_prereg_gate_report.csv"
+    phase13l_target_design: "reports/phase13l_prereg_target_design.csv"
+    phase13l_secondary_target_design: "reports/phase13l_prereg_secondary_target_design.csv"
+    phase13l_dataset_design: "reports/phase13l_prereg_dataset_design.csv"
+    phase13l_split_design: "reports/phase13l_prereg_split_design.csv"
+    phase13l_walk_forward_policy: "reports/phase13l_prereg_walk_forward_policy.csv"
+    phase13l_leakage_control_policy: "reports/phase13l_prereg_leakage_control_policy.csv"
+    feature_panel: "reports/phase13i_feature_panel.csv"
+    model_feature_matrix_preview: "reports/phase13i_model_feature_matrix_preview.csv"
+    phase13k_availability_summary: "reports/phase13k_interpretation_feature_availability_summary.csv"
+    phase13k_family_coverage_summary: "reports/phase13k_interpretation_family_coverage_summary.csv"
+
+  input_data:
+    technical_price_candidates:
+      - "reports/spy_price_panel.csv"
+      - "reports/spy_prices.csv"
+      - "reports/price_panel.csv"
+      - "reports/ticker_price_panel.csv"
+      - "reports/final_candidate_price_panel.csv"
+      - "reports/relative_momentum_price_panel.csv"
+      - "reports/phase7b_final_candidate_signal_execution_frame.csv"
+    macro_aligned_candidates:
+      - "reports/phase10c_macro_aligned_series.csv"
+      - "reports/phase10c_macro_source_aligned_series.csv"
+      - "reports/macro_aligned_series.csv"
+    date_column_candidates: ["date", "Date", "as_of_date", "timestamp"]
+    close_column_candidates: ["adjusted_close", "adj_close", "Adj Close", "close", "Close", "spy_close", "SPY"]
+    macro_column_aliases:
+      DGS2: ["DGS2", "dgs2", "dgs2_level", "macro_dgs2_level"]
+      DGS10: ["DGS10", "dgs10", "dgs10_level", "macro_dgs10_level"]
+      CPIAUCSL: ["CPIAUCSL", "cpi", "cpi_value", "macro_cpi", "macro_cpiaucsl"]
+      UNRATE: ["UNRATE", "unrate", "unemployment", "macro_unrate"]
+
+  macro_availability_guard:
+    min_macro_available_ratio_to_use: 0.20
+    repair_attempt_required: true
+    block_macro_if_repair_fails: true
+    dataset_label_if_repaired: "multi_factor_technical_macro_dataset_v1"
+    dataset_label_if_blocked: "technical_only_macro_blocked_dataset_v1"
+    macro_block_reason_if_unrepaired: "Macro feature availability remained below threshold after repair attempt."
+
+  dataset_policy:
+    dataset_id: "phase13m_ml_feature_dataset_v1"
+    common_start_date: "2006-04-28"
+    canonical_endpoint: "2026-05-01"
+    target_horizon_trading_days: 63
+    primary_target_id: "future_63d_spy_return_state"
+    secondary_target_id: "future_63d_drawdown_risk_state"
+    primary_supportive_threshold: 0.05
+    primary_fragile_threshold: -0.05
+    secondary_fragile_drawdown_threshold: -0.10
+    train_start: "2006-04-28"
+    train_end: "2016-12-30"
+    validation_start: "2017-01-03"
+    validation_end: "2020-12-31"
+    holdout_start: "2021-01-01"
+    holdout_end: "2026-05-01"
+    target_missing_allowed_for_recent_rows: true
+    min_target_available_ratio: 0.80
+
+  phase13n_boundary:
+    allowed_next_step: "ML dataset quality and leakage audit only"
+    forbidden_next_step: "model training, model selection, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13n_may_audit_dataset: true
+    phase13n_may_audit_targets: true
+    phase13n_may_audit_macro_guard: true
+    phase13n_may_audit_splits: true
+    phase13n_may_train_model: false
+    phase13n_may_select_model: false
+    phase13n_may_create_signal: false
+    phase13n_may_run_backtest: false
+    phase13n_may_deploy_paper_trading: false
+    phase13n_may_promote_candidate: false
+
+  gates:
+    require_phase13l_passed: true
+    require_source_reports_present: true
+    require_feature_panel_loaded: true
+    require_price_source_found: true
+    require_macro_guard_report: true
+    require_macro_repaired_or_blocked: true
+    require_dataset_created: true
+    require_dataset_honest_label: true
+    require_targets_calculated: true
+    require_split_labels_created: true
+    require_no_leakage_flags: true
+    require_phase13n_boundary_quality_audit_only: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_model_selection: true
+    require_no_feature_importance: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_execution_role: "ML dataset assembly execution with macro availability guard only"
+phase13n_ml_dataset_quality_leakage_audit:
+  enabled: false
+
+  audit_role: "ML dataset quality and leakage audit only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13M"
+  proposed_next_phase: "Phase 13O"
+
+  allow_model_training: false
+  allow_model_selection: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_feature_importance: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase13k_feature_panel_interpretation_model_readiness: false
+    phase13l_dataset_split_target_preregistration_spec: false
+    phase13m_ml_dataset_assembly_execution: true
+    phase13n_ml_dataset_quality_leakage_audit: true
+    relative_momentum_allocator: true
+
+  phase13m_reports:
+    source_report_check: "reports/phase13m_dataset_source_report_check.csv"
+    phase13l_result_check: "reports/phase13m_dataset_phase13l_result_check.csv"
+    input_source_check: "reports/phase13m_dataset_input_source_check.csv"
+    macro_guard_report: "reports/phase13m_dataset_macro_guard_report.csv"
+    macro_repair_panel: "reports/phase13m_dataset_macro_repair_panel.csv"
+    family_usage_report: "reports/phase13m_dataset_family_usage_report.csv"
+    assembled_dataset: "reports/phase13m_ml_feature_dataset_v1.csv"
+    target_summary: "reports/phase13m_dataset_target_summary.csv"
+    split_summary: "reports/phase13m_dataset_split_summary.csv"
+    dataset_metadata: "reports/phase13m_dataset_dataset_metadata.csv"
+    phase13n_boundary_check: "reports/phase13m_dataset_phase13n_boundary_check.csv"
+    scope_boundary_check: "reports/phase13m_dataset_scope_boundary_check.csv"
+    summary: "reports/phase13m_dataset_summary.csv"
+    gate_report: "reports/phase13m_dataset_gate_report.csv"
+    conclusion: "reports/phase13m_dataset_conclusion.csv"
+
+  quality_thresholds:
+    min_dataset_rows: 100
+    min_feature_value_columns: 4
+    min_target_available_ratio: 0.80
+    require_train_validation_holdout_rows: true
+    max_leakage_flags: 0
+    forbidden_columns:
+      - "signal"
+      - "trade_signal"
+      - "allocation"
+      - "target_weight"
+      - "model_prediction"
+      - "predicted_return"
+      - "strategy_return"
+      - "backtest_return"
+      - "paper_trade"
+      - "feature_importance"
+
+  phase13o_boundary:
+    allowed_next_step: "ML model training pre-registration and baseline-model design spec only"
+    forbidden_next_step: "model training execution, model selection, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13o_may_preregister_model_training: true
+    phase13o_may_define_baseline_models: true
+    phase13o_may_define_metrics: true
+    phase13o_may_train_model: false
+    phase13o_may_select_model: false
+    phase13o_may_create_signal: false
+    phase13o_may_run_backtest: false
+    phase13o_may_deploy_paper_trading: false
+    phase13o_may_promote_candidate: false
+
+  gates:
+    require_phase13m_reports_present: true
+    require_phase13m_conclusion_passed: true
+    require_phase13m_gate_report_passed: true
+    require_config_flags_clean_for_run: true
+    require_dataset_quality: true
+    require_target_quality: true
+    require_split_quality: true
+    require_macro_guard_quality: true
+    require_honest_dataset_label: true
+    require_no_forbidden_columns: true
+    require_no_leakage_flags: true
+    require_phase13o_boundary_prereg_only: true
+    require_no_model_training: true
+    require_no_model_selection: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_feature_importance: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_audit_role: "ML dataset quality and leakage audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
