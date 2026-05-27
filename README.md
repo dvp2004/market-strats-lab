@@ -77,6 +77,10 @@ Phase 13M/13N moved the project from ML dataset pre-registration into actual dat
 
 However, the dataset is not a true multi-factor dataset. The macro availability guard attempted repair, but repaired macro availability remained 0.0. Macro was therefore blocked, and the dataset was honestly labelled `technical_only_macro_blocked_dataset_v1`. This is a valid technical-only ML dataset checkpoint, not the original technical + macro + fundamental + sentiment goal.
 
+Phase 13O/13P clarified that the macro availability problem was not missing macro data, but a data-shape mismatch. The aligned macro source exists and contains long-format observations with `series_id` and `value`, including `UNRATE`, `DGS2`, `DGS10`, and `CPIAUCSL`. The prior repair logic expected wide columns and therefore produced 0.0 macro availability.
+
+The dataset remains correctly labelled `technical_only_macro_blocked_dataset_v1`. The next allowed step is macro feature repair execution and guarded dataset reassembly. The project must not call the dataset multi-factor until the long-to-wide macro normalisation is implemented, macro feature availability passes threshold, the dataset is reassembled with macro features, and a quality/leakage audit passes.
+
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
 Market Strats Lab remains research-only. It is not production-ready, not live-tradable, not financial advice, and not a live-trading recommendation.
@@ -5547,6 +5551,217 @@ Correct interpretation:
 
 > Phase 13N audited dataset quality, target quality, split quality, macro guard honesty, forbidden columns, leakage, and boundaries. It did not train models, select models, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
 
+## Phase 13O: Macro Availability Root-Cause Diagnostic
+
+Phase 13O diagnosed why the Phase 13M macro availability repair failed and why the ML dataset had to be labelled `technical_only_macro_blocked_dataset_v1`.
+
+This phase did not execute a macro repair, reassemble a dataset, recalculate targets, train models, select models, create signals, create allocation rules, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13O Summary
+
+| Metric | Result |
+|---|---:|
+| Diagnostic role | Macro availability root-cause diagnostic only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13N |
+| Proposed next phase | Phase 13P |
+| Source reports present | True |
+| Phase 13N result passed | True |
+| Macro source checked | True |
+| Column mapping rows | 4 |
+| Repair panel profile rows | 4 |
+| Macro guard rows | 1 |
+| Root-cause rows | 1 |
+| Root cause | `macro_source_long_format_not_normalised` |
+| Recommended action | `implement_long_to_wide_macro_normalisation` |
+| Phase 13P boundary passed | True |
+| Macro repair execution | False |
+| Dataset reassembly | False |
+| Target recalculation | False |
+| Model training | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13O Macro Source Inventory
+
+| Candidate path | Present | Rows | Columns | Result |
+|---|---:|---:|---|---|
+| `reports/phase10c_macro_aligned_series.csv` | True | 20,136 | `source_id`; `series_id`; `trading_date`; `value`; `available_date`; `availability_lag_trading_days`; `conservative_lag_applied` | Passed |
+| `reports/phase10c_macro_source_aligned_series.csv` | False | 0 |  | Failed |
+| `reports/macro_aligned_series.csv` | False | 0 |  | Failed |
+
+### Phase 13O Column Mapping Result
+
+| Input | Matched column | Numeric usable | Result |
+|---|---|---:|---|
+| `DGS2` | None | False | Failed |
+| `DGS10` | None | False | Failed |
+| `CPIAUCSL` | None | False | Failed |
+| `UNRATE` | None | False | Failed |
+
+The wide-column lookup failed because the macro aligned source is not wide-formatted.
+
+### Phase 13O Long-Format Diagnostic
+
+| Metric | Result |
+|---|---|
+| Series column | `series_id` |
+| Value column | `value` |
+| Numeric value non-null count | 19,934 |
+| Long format detected | True |
+| Sample series values | `UNRATE`; `DGS2`; `DGS10`; `CPIAUCSL` |
+
+Interpretation:
+
+> Macro data exists and is numeric, but it is stored in long format. The repair path must normalise `series_id` + `value` into wide columns before calculating macro feature states.
+
+### Phase 13O Existing Repair Panel Profile
+
+| Feature | Rows | Feature-value non-null | Available rows | Available ratio |
+|---|---:|---:|---:|---:|
+| `macro_inflation_state` | 5,034 | 0 | 0 | 0.0000 |
+| `macro_labour_state` | 5,034 | 0 | 0 | 0.0000 |
+| `macro_short_rate_state` | 5,034 | 0 | 0 | 0.0000 |
+| `macro_yield_curve_state` | 5,034 | 0 | 0 | 0.0000 |
+
+### Phase 13O Root-Cause Report
+
+| Metric | Result |
+|---|---|
+| Source found | True |
+| Long format detected | True |
+| All required columns numeric usable | False |
+| Any required columns numeric usable | False |
+| Repair panel has available rows | False |
+| Macro blocked for dataset v1 | True |
+| Root cause | `macro_source_long_format_not_normalised` |
+| Recommended action | `implement_long_to_wide_macro_normalisation` |
+| Repairability | `repairable_with_source_normalisation` |
+| Model training allowed | False |
+| Dataset label must remain blocked until repair | True |
+
+### Phase 13O Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13N passed | Passed |
+| Source reports are present | Passed |
+| Macro source was checked | Passed |
+| Macro guard was loaded | Passed |
+| Macro repair panel was loaded | Passed |
+| Column mapping report exists | Passed |
+| Root-cause report exists | Passed |
+| Phase 13P boundary is decision-only | Passed |
+| Scope blocks repair/model/signal/backtest/promotion | Passed |
+| Diagnostic role is correct | Passed |
+
+### Phase 13O Verdict
+
+> Phase 13O completed the macro availability root-cause diagnostic.
+
+Correct interpretation:
+
+> Phase 13O found that macro data exists, but the aligned macro source is long-format. The current macro repair logic expected wide columns, so macro availability stayed at 0.0. No repair, dataset reassembly, target recalculation, model training, signal creation, backtest, paper trading, or promotion occurred.
+
+---
+
+## Phase 13P: Macro Feature Repair Decision / Repair Spec
+
+Phase 13P converted the Phase 13O root-cause diagnosis into a repair decision and repair specification.
+
+This phase did not execute the macro repair, reassemble a dataset, recalculate targets, train models, select models, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13P Summary
+
+| Metric | Result |
+|---|---:|
+| Spec role | Macro feature repair decision and repair spec only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13O |
+| Proposed next phase | Phase 13Q |
+| Phase 13O reports present | True |
+| Phase 13O result passed | True |
+| Config flags clean for run | True |
+| Repair decision rows | 1 |
+| Repair spec rows | 1 |
+| Dataset label blocked until repair | `technical_only_macro_blocked_dataset_v1` |
+| Phase 13Q boundary passed | True |
+| Macro repair execution | False |
+| Dataset reassembly | False |
+| Target recalculation | False |
+| Model training | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13P Repair Decision
+
+| Item | Result |
+|---|---|
+| Root cause | `macro_source_long_format_not_normalised` |
+| Recommended action | `implement_long_to_wide_macro_normalisation` |
+| Repairability | `repairable_with_source_normalisation` |
+| Macro repair execution now | False |
+| Dataset reassembly now | False |
+| Dataset label until repair validated | `technical_only_macro_blocked_dataset_v1` |
+| Future repaired label only after audit | `multi_factor_technical_macro_dataset_v1` |
+| Phase 13Q required before multi-factor claim | True |
+
+### Phase 13P Repair Spec
+
+| Item | Result |
+|---|---|
+| Repair scope | Macro feature availability repair only |
+| Required inputs | `DGS2`; `DGS10`; `CPIAUCSL`; `UNRATE` |
+| Required outputs | `macro_short_rate_state`; `macro_yield_curve_state`; `macro_inflation_state`; `macro_labour_state` |
+
+Required checks:
+
+```text
+canonical macro columns detected or long-format source normalised
+numeric values parsed
+macro repair panel feature_value non-null ratio exceeds threshold
+missingness_state reflects actual feature_value availability
+macro availability ratio exceeds threshold before multi-factor label
+no signal/model/backtest/paper-trading columns created
+```
+
+Forbidden actions:
+
+```text
+model training
+model selection
+signal creation
+strategy backtest
+paper trading
+candidate promotion
+```
+
+### Phase 13P Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13O reports are present | Passed |
+| Phase 13O conclusion and gates passed | Passed |
+| Config flags are clean for run | Passed |
+| Repair decision exists | Passed |
+| Repair spec exists | Passed |
+| Dataset label remains blocked until repair | Passed |
+| Phase 13Q boundary is repair-only | Passed |
+| Scope blocks repair/model/signal/backtest/promotion | Passed |
+| Spec role is correct | Passed |
+
+### Phase 13P Verdict
+
+> Phase 13P completed the macro feature repair decision/spec.
+
+Correct interpretation:
+
+> Phase 13P decided that macro repair is feasible through long-to-wide macro normalisation, but the dataset must remain labelled `technical_only_macro_blocked_dataset_v1` until a future Phase 13Q repair execution and audit passes.
+
 ---
 
 # Methodology Notes
@@ -5732,6 +5947,9 @@ Remaining concerns include:
 - Phase 13M/13N assembled and audited a technical-only / macro-blocked ML dataset, not a true multi-factor dataset. Macro repair was attempted but failed, leaving repaired macro availability at 0.0 and macro blocked for dataset v1.
 - The current ML dataset has only four usable technical feature-value columns plus corresponding state and missingness columns. It should not be described as a technical + macro model dataset.
 - The 63D targets and train/validation/holdout splits are now calculated and audited, but no model has been trained, no model has been selected, no signal has been created, no backtest has been run, no paper-trading logic exists, and no candidate has been promoted.
+- Phase 13O/13P diagnosed the macro availability failure but did not execute the repair. The macro source is long-format, with series identifiers in `series_id` and numeric observations in `value`; the prior repair logic expected wide columns named `DGS2`, `DGS10`, `CPIAUCSL`, and `UNRATE`.
+- The current ML dataset remains `technical_only_macro_blocked_dataset_v1`. It must not be described as multi-factor until Phase 13Q or a later guarded repair phase successfully normalises the macro source, recalculates macro feature states, reassembles the dataset, and passes a quality/leakage audit.
+- No model has been trained, no signal has been created, no backtest has been run, no paper-trading logic exists, and no candidate has been promoted.
 ---
 
 # Bugs Caught and Fixed
@@ -6752,6 +6970,42 @@ reports/phase13n_quality_conclusion.csv
 reports/phase13n_ml_dataset_quality_leakage_audit.md
 ```
 
+## Phase 13O Macro Availability Root-Cause Diagnostic Reports
+
+```text
+reports/phase13o_macro_root_cause_source_report_check.csv
+reports/phase13o_macro_root_cause_phase13n_result_check.csv
+reports/phase13o_macro_root_cause_macro_source_inventory.csv
+reports/phase13o_macro_root_cause_macro_source_schema_profile.csv
+reports/phase13o_macro_root_cause_macro_column_mapping_report.csv
+reports/phase13o_macro_root_cause_macro_long_format_diagnostic.csv
+reports/phase13o_macro_root_cause_existing_repair_panel_profile.csv
+reports/phase13o_macro_root_cause_macro_guard_profile.csv
+reports/phase13o_macro_root_cause_root_cause_report.csv
+reports/phase13o_macro_root_cause_phase13p_boundary_check.csv
+reports/phase13o_macro_root_cause_scope_boundary_check.csv
+reports/phase13o_macro_root_cause_summary.csv
+reports/phase13o_macro_root_cause_gate_report.csv
+reports/phase13o_macro_root_cause_conclusion.csv
+reports/phase13o_macro_availability_root_cause_diagnostic.md
+```
+
+## Phase 13P Macro Feature Repair Decision / Spec Reports
+
+```text
+reports/phase13p_repair_spec_report_inventory_check.csv
+reports/phase13p_repair_spec_phase13o_result_check.csv
+reports/phase13p_repair_spec_config_flag_check.csv
+reports/phase13p_repair_spec_repair_decision.csv
+reports/phase13p_repair_spec_repair_spec.csv
+reports/phase13p_repair_spec_phase13q_boundary_check.csv
+reports/phase13p_repair_spec_scope_boundary_check.csv
+reports/phase13p_repair_spec_summary.csv
+reports/phase13p_repair_spec_gate_report.csv
+reports/phase13p_repair_spec_conclusion.csv
+reports/phase13p_macro_feature_repair_decision_spec.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -6935,6 +7189,8 @@ configs/spy_sma10.yaml
 | Phase 13L dataset split and ML target design pre-registration spec | Completed — primary 63D return-state target, secondary 63D drawdown-risk target, dataset design, split design, walk-forward policy, and six ML leakage controls pre-registered; no dataset assembly, target calculation, model training, signal, backtest, paper trading, or promotion |
 | Phase 13M ML dataset assembly with macro availability guard | Completed — ML dataset assembled with registered 63D targets and train/validation/holdout split labels; macro repair failed, so dataset was honestly labelled `technical_only_macro_blocked_dataset_v1`; 5,034 rows, 4 value feature columns, 4 state feature columns, 4 missingness columns, target availability ratio 0.9511; no model/signal/backtest/paper trading/promotion |
 | Phase 13N ML dataset quality / leakage audit | Completed — dataset quality, target quality, split quality, macro guard quality, forbidden-column check, and leakage boundaries passed; confirms dataset is technical-only / macro-blocked, not multi-factor; no model/signal/backtest/paper trading/promotion |
+| Phase 13O macro availability root-cause diagnostic | Completed — root cause diagnosed as `macro_source_long_format_not_normalised`; macro source exists with 20,136 rows and long-format columns `series_id`/`value`; long-format diagnostic detected `UNRATE`, `DGS2`, `DGS10`, and `CPIAUCSL` with 19,934 numeric non-null values; no repair/model/signal/backtest/promotion |
+| Phase 13P macro feature repair decision/spec | Completed — repair decision/spec passed; recommended action is `implement_long_to_wide_macro_normalisation`; dataset remains labelled `technical_only_macro_blocked_dataset_v1` until future repair execution and audit; no repair/model/signal/backtest/promotion |
 ---
 
 # What Should Happen Next

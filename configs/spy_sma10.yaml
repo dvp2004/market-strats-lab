@@ -6157,6 +6157,211 @@ phase13n_ml_dataset_quality_leakage_audit:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_audit_role: "ML dataset quality and leakage audit only"
+phase13o_macro_availability_root_cause_diagnostic:
+  enabled: false
+
+  diagnostic_role: "Macro availability root-cause diagnostic only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13N"
+  proposed_next_phase: "Phase 13P"
+
+  allow_macro_diagnosis: true
+  allow_macro_repair_decision: false
+  allow_macro_feature_repair_execution: false
+  allow_dataset_reassembly: false
+  allow_target_recalculation: false
+  allow_model_training: false
+  allow_model_selection: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_feature_importance: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13n_conclusion: "reports/phase13n_quality_conclusion.csv"
+    phase13n_gate_report: "reports/phase13n_quality_gate_report.csv"
+    macro_guard_report: "reports/phase13m_dataset_macro_guard_report.csv"
+    macro_repair_panel: "reports/phase13m_dataset_macro_repair_panel.csv"
+    family_usage_report: "reports/phase13m_dataset_family_usage_report.csv"
+    dataset_metadata: "reports/phase13m_dataset_dataset_metadata.csv"
+    assembled_dataset: "reports/phase13m_ml_feature_dataset_v1.csv"
+
+  macro_sources:
+    macro_aligned_candidates:
+      - "reports/phase10c_macro_aligned_series.csv"
+      - "reports/phase10c_macro_source_aligned_series.csv"
+      - "reports/macro_aligned_series.csv"
+    date_column_candidates: ["date", "Date", "as_of_date", "timestamp", "observation_date"]
+    long_format_series_column_candidates: ["series_id", "series", "variable", "metric", "feature_id"]
+    long_format_value_column_candidates: ["value", "raw_value", "series_value", "observation_value"]
+    required_macro_inputs:
+      DGS2:
+        aliases: ["DGS2", "dgs2", "dgs2_level", "macro_dgs2_level", "2y", "2_year"]
+      DGS10:
+        aliases: ["DGS10", "dgs10", "dgs10_level", "macro_dgs10_level", "10y", "10_year"]
+      CPIAUCSL:
+        aliases: ["CPIAUCSL", "cpi", "cpi_value", "macro_cpi", "macro_cpiaucsl", "inflation"]
+      UNRATE:
+        aliases: ["UNRATE", "unrate", "unemployment", "macro_unrate"]
+
+  diagnosis_policy:
+    min_rows_for_source_usable: 100
+    min_numeric_non_null_per_macro_input: 100
+    min_repaired_available_ratio_to_accept: 0.20
+    require_all_four_macro_inputs_for_macro_dataset: true
+    recognise_long_format_sources: true
+    macro_blocked_dataset_label: "technical_only_macro_blocked_dataset_v1"
+    repaired_dataset_label: "multi_factor_technical_macro_dataset_v1"
+
+  phase13p_boundary:
+    allowed_next_step: "Macro feature repair decision and repair spec only"
+    forbidden_next_step: "macro repair execution, dataset reassembly, target recalculation, model training, model selection, signal creation, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13p_may_write_repair_decision: true
+    phase13p_may_write_repair_spec: true
+    phase13p_may_execute_repair: false
+    phase13p_may_reassemble_dataset: false
+    phase13p_may_train_model: false
+    phase13p_may_create_signal: false
+    phase13p_may_run_backtest: false
+    phase13p_may_promote_candidate: false
+
+  gates:
+    require_phase13n_passed: true
+    require_source_reports_present: true
+    require_macro_source_checked: true
+    require_macro_guard_loaded: true
+    require_macro_repair_panel_loaded: true
+    require_column_mapping_report: true
+    require_root_cause_report: true
+    require_phase13p_boundary_decision_only: true
+    require_no_macro_repair_execution: true
+    require_no_dataset_reassembly: true
+    require_no_target_recalculation: true
+    require_no_model_training: true
+    require_no_model_selection: true
+    require_no_signal_creation: true
+    require_no_strategy_backtest: true
+    require_no_feature_importance: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_diagnostic_role: "Macro availability root-cause diagnostic only"
+phase13p_macro_feature_repair_decision_spec:
+  enabled: false
+
+  spec_role: "Macro feature repair decision and repair spec only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13O"
+  proposed_next_phase: "Phase 13Q"
+
+  allow_macro_repair_execution: false
+  allow_dataset_reassembly: false
+  allow_target_recalculation: false
+  allow_model_training: false
+  allow_model_selection: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_feature_importance: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase13m_ml_dataset_assembly_execution: false
+    phase13n_ml_dataset_quality_leakage_audit: false
+    phase13o_macro_availability_root_cause_diagnostic: true
+    phase13p_macro_feature_repair_decision_spec: true
+    relative_momentum_allocator: true
+
+  phase13o_reports:
+    source_report_check: "reports/phase13o_macro_root_cause_source_report_check.csv"
+    phase13n_result_check: "reports/phase13o_macro_root_cause_phase13n_result_check.csv"
+    macro_source_inventory: "reports/phase13o_macro_root_cause_macro_source_inventory.csv"
+    macro_source_schema_profile: "reports/phase13o_macro_root_cause_macro_source_schema_profile.csv"
+    macro_column_mapping_report: "reports/phase13o_macro_root_cause_macro_column_mapping_report.csv"
+    macro_long_format_diagnostic: "reports/phase13o_macro_root_cause_macro_long_format_diagnostic.csv"
+    existing_repair_panel_profile: "reports/phase13o_macro_root_cause_existing_repair_panel_profile.csv"
+    macro_guard_profile: "reports/phase13o_macro_root_cause_macro_guard_profile.csv"
+    root_cause_report: "reports/phase13o_macro_root_cause_root_cause_report.csv"
+    phase13p_boundary_check: "reports/phase13o_macro_root_cause_phase13p_boundary_check.csv"
+    scope_boundary_check: "reports/phase13o_macro_root_cause_scope_boundary_check.csv"
+    summary: "reports/phase13o_macro_root_cause_summary.csv"
+    gate_report: "reports/phase13o_macro_root_cause_gate_report.csv"
+    conclusion: "reports/phase13o_macro_root_cause_conclusion.csv"
+
+  decision_policy:
+    if_all_required_columns_present_and_numeric: "repair_existing_macro_loader_or_calculation_logic"
+    if_long_format_detected: "implement_long_to_wide_macro_normalisation"
+    if_source_missing_or_values_blank: "keep_macro_blocked_and_source_research_required"
+    if_repair_panel_available_ratio_zero_but_source_numeric_exists: "repair_macro_guard_repair_panel_logic"
+    dataset_label_until_repair_validated: "technical_only_macro_blocked_dataset_v1"
+    repaired_dataset_label_only_after_future_audit: "multi_factor_technical_macro_dataset_v1"
+    require_future_phase13q_repair_execution_before_macro_dataset_claim: true
+
+  repair_spec_template:
+    repair_scope: "Macro feature availability repair only"
+    required_inputs: ["DGS2", "DGS10", "CPIAUCSL", "UNRATE"]
+    required_outputs:
+      - "macro_short_rate_state"
+      - "macro_yield_curve_state"
+      - "macro_inflation_state"
+      - "macro_labour_state"
+    required_checks:
+      - "canonical macro columns detected or long-format source normalised"
+      - "numeric values parsed"
+      - "macro repair panel feature_value non-null ratio exceeds threshold"
+      - "missingness_state reflects actual feature_value availability"
+      - "macro availability ratio exceeds threshold before multi-factor label"
+      - "no signal/model/backtest/paper-trading columns created"
+    forbidden_actions:
+      - "model training"
+      - "model selection"
+      - "signal creation"
+      - "strategy backtest"
+      - "paper trading"
+      - "candidate promotion"
+
+  phase13q_boundary:
+    allowed_next_step: "Macro feature repair execution and guarded dataset reassembly only"
+    forbidden_next_step: "model training, model selection, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13q_may_execute_macro_repair: true
+    phase13q_may_reassemble_dataset_with_guard: true
+    phase13q_may_recalculate_registered_targets_if_dataset_reassembled: true
+    phase13q_may_train_model: false
+    phase13q_may_select_model: false
+    phase13q_may_create_signal: false
+    phase13q_may_run_backtest: false
+    phase13q_may_deploy_paper_trading: false
+    phase13q_may_promote_candidate: false
+
+  gates:
+    require_phase13o_reports_present: true
+    require_phase13o_conclusion_passed: true
+    require_phase13o_gate_report_passed: true
+    require_config_flags_clean_for_run: true
+    require_root_cause_report: true
+    require_repair_decision: true
+    require_repair_spec: true
+    require_dataset_label_blocked_until_repair: true
+    require_phase13q_boundary_repair_only: true
+    require_no_macro_repair_execution: true
+    require_no_dataset_reassembly: true
+    require_no_target_recalculation: true
+    require_no_model_training: true
+    require_no_model_selection: true
+    require_no_signal_creation: true
+    require_no_strategy_backtest: true
+    require_no_feature_importance: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_spec_role: "Macro feature repair decision and repair spec only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

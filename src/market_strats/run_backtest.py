@@ -332,6 +332,10 @@ from market_strats.analysis.ml_dataset_assembly_and_quality_audit import (
     save_phase13m_ml_dataset_assembly_execution,
     save_phase13n_ml_dataset_quality_leakage_audit,
 )
+from market_strats.analysis.macro_availability_root_cause_and_repair_spec import (
+    save_phase13o_macro_availability_root_cause_diagnostic,
+    save_phase13p_macro_feature_repair_decision_spec,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2148,6 +2152,16 @@ def main() -> None:
         )
 
         save_phase13n_ml_dataset_quality_leakage_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13o_macro_availability_root_cause_diagnostic(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13p_macro_feature_repair_decision_spec(
             config=config,
             reports_dir=reports_dir,
         )
