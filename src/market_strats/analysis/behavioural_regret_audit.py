@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
-
-import numpy as np
 import pandas as pd
 
 from market_strats.analysis.lookahead_signal_execution_audit import (
