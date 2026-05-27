@@ -67,7 +67,9 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
-The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec. Phase 11C completed a regime-scoring rulebook spec. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11D completed a diagnostic-panel design for future regime-scoring work. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11E completed a diagnostic-panel template implementation audit. Schema-compliant panel templates now exist, but no regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 12A/12B locked the future diagnostic score-calculation design and readiness boundary. No regime score, score value, empirical weight, signal, allocation rule, strategy test, model, new data ingestion, candidate promotion, or final-candidate change exists yet. Phase 12C/12D calculated and audited a categorical diagnostic regime score. The current diagnostic score is fragile, reflecting neutral technical evidence, neutral macro evidence, and fragile validation-risk context. This is diagnostic only and does not create a trading signal, allocation rule, strategy backtest, model, empirical weight, new data ingestion, candidate promotion, or final-candidate change. Phase 12 is closed. The project calculated, audited, interpreted, and bounded a fragile categorical diagnostic regime score. The score reflects neutral technical evidence, neutral macro evidence, and fragile validation-risk context. It remains diagnostic-only and does not create a signal, allocation rule, backtest, empirical weighting system, model, new data ingestion, candidate promotion, or final-candidate change. Any future score-to-signal work requires a separate pre-registration phase. The SPY regime-switch arc is now frozen as the baseline research framework. It produced benchmarks, validation infrastructure, friction/liveability/regret diagnostics, closeout discipline, and a fragile diagnostic score. It did not build the full intended multi-factor decision model. Phase 13A/13B therefore opened a new architecture path for technical, macro, fundamental, sentiment, dissertation-methodology, walk-forward, visual reporting, and eventual paper-trading work. Phase 13C/13D moved the multi-factor path from broad architecture into feature-source inventory and contract readiness. Technical and macro families are contract-feasible, with macro requiring strict lag/revision controls. Fundamental and sentiment are deliberately present in the roadmap but blocked until dedicated audits. No feature ingestion, feature calculation, signal, model, backtest, paper-trading deployment, candidate promotion, or final-candidate change exists yet. Phase 13E/13F moved the multi-factor path from feature-source inventory into technical/macro schema design. The project now has a defined universal feature-panel schema, technical feature schema, macro feature schema, timestamp/availability/decision-date policy, lag/revision controls, missingness policy, transform policy, ML feature-engineering safeguards, feature-state columns, and visual report templates. No feature ingestion, feature calculation, signal, backtest, model training, paper-trading deployment, candidate promotion, or final-candidate change exists yet. Phase 13G/13H moved the multi-factor path from schema readiness into calculation pre-registration and readiness. The project now has exact locked technical/macro feature formulas, raw inputs, lookbacks, thresholds, lag policies, output columns, missingness behaviour, leakage checks, visual checks, and ML feature-engineering safeguards. The next allowed phase may calculate technical/macro feature panels and visual feature reports, but still may not create signals, train models, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec. Phase 11C completed a regime-scoring rulebook spec. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11D completed a diagnostic-panel design for future regime-scoring work. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11E completed a diagnostic-panel template implementation audit. Schema-compliant panel templates now exist, but no regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 12A/12B locked the future diagnostic score-calculation design and readiness boundary. No regime score, score value, empirical weight, signal, allocation rule, strategy test, model, new data ingestion, candidate promotion, or final-candidate change exists yet. Phase 12C/12D calculated and audited a categorical diagnostic regime score. The current diagnostic score is fragile, reflecting neutral technical evidence, neutral macro evidence, and fragile validation-risk context. This is diagnostic only and does not create a trading signal, allocation rule, strategy backtest, model, empirical weight, new data ingestion, candidate promotion, or final-candidate change. Phase 12 is closed. The project calculated, audited, interpreted, and bounded a fragile categorical diagnostic regime score. The score reflects neutral technical evidence, neutral macro evidence, and fragile validation-risk context. It remains diagnostic-only and does not create a signal, allocation rule, backtest, empirical weighting system, model, new data ingestion, candidate promotion, or final-candidate change. Any future score-to-signal work requires a separate pre-registration phase. The SPY regime-switch arc is now frozen as the baseline research framework. It produced benchmarks, validation infrastructure, friction/liveability/regret diagnostics, closeout discipline, and a fragile diagnostic score. It did not build the full intended multi-factor decision model. Phase 13A/13B therefore opened a new architecture path for technical, macro, fundamental, sentiment, dissertation-methodology, walk-forward, visual reporting, and eventual paper-trading work. Phase 13C/13D moved the multi-factor path from broad architecture into feature-source inventory and contract readiness. Technical and macro families are contract-feasible, with macro requiring strict lag/revision controls. Fundamental and sentiment are deliberately present in the roadmap but blocked until dedicated audits. No feature ingestion, feature calculation, signal, model, backtest, paper-trading deployment, candidate promotion, or final-candidate change exists yet. Phase 13E/13F moved the multi-factor path from feature-source inventory into technical/macro schema design. The project now has a defined universal feature-panel schema, technical feature schema, macro feature schema, timestamp/availability/decision-date policy, lag/revision controls, missingness policy, transform policy, ML feature-engineering safeguards, feature-state columns, and visual report templates. No feature ingestion, feature calculation, signal, backtest, model training, paper-trading deployment, candidate promotion, or final-candidate change exists yet. Phase 13G/13H moved the multi-factor path from schema readiness into calculation pre-registration and readiness. The project now has exact locked technical/macro feature formulas, raw inputs, lookbacks, thresholds, lag policies, output columns, missingness behaviour, leakage checks, visual checks, and ML feature-engineering safeguards. The next allowed phase may calculate technical/macro feature panels and visual feature reports, but still may not create signals, train models, run backtests, deploy paper trading, promote a candidate, or change the final candidate. Phase 13I/13J moved the multi-factor path from calculation readiness into the first actual bounded feature-calculation stage. The project now has calculated technical and macro feature panels, feature states, availability/missingness outputs, leakage audit outputs, feature-state timelines, availability heatmaps, model-feature-matrix previews, and decision-rationale templates. Phase 13J confirmed 53,620 feature-panel rows, 8 feature IDs, 0 leakage flags, valid output schema quality, valid missingness quality, valid visual reports, and no forbidden signal/model/backtest columns.
+
+This does not mean the model path is validated. No signal, allocation rule, ML model, strategy backtest, paper-trading system, candidate promotion, or final-candidate change exists yet. The next step must interpret the feature panel and pre-register model dataset/target/split design before any model training is allowed.
 
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
@@ -4823,6 +4825,271 @@ Correct interpretation:
 
 > Phase 13H verified that feature-calculation formulas, output schema, missingness behaviour, leakage checks, visual checks, and ML locks are ready for a future feature-calculation execution phase. It did not ingest or calculate features, create signals, run backtests, train models, deploy paper trading, promote a candidate, or change the final candidate.
 
+## Phase 13I: Technical/Macro Feature Calculation Execution
+
+Phase 13I executed the first bounded technical and macro feature-calculation phase for the multi-factor model path.
+
+This phase calculated feature panels, feature states, availability/missingness outputs, leakage audit outputs, and visual feature-report tables. It did not create signals, create allocation rules, train models, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13I Summary
+
+| Metric | Result |
+|---|---:|
+| Execution role | Technical and macro feature calculation execution only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13H |
+| Proposed next phase | Phase 13J |
+| Source reports present | True |
+| Phase 13H result passed | True |
+| Input sources found | True |
+| Feature panel rows | 53,620 |
+| Feature ID count | 8 |
+| Required feature IDs present | True |
+| Output schema columns present | True |
+| Leakage flag count | 0 |
+| Visual report count | 5 |
+| No forbidden columns | True |
+| Phase 13J boundary passed | True |
+| Signal creation | False |
+| Strategy backtest | False |
+| Model training | False |
+| Paper-trading deployment | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13I Input Sources
+
+| Source type | Source | Rows | Date range | Result |
+|---|---|---:|---|---|
+| Technical price | In-memory run backtest outputs | 8,371 | 1993-01-29 to 2026-05-01 | Passed |
+| Macro aligned | `reports/phase10c_macro_aligned_series.csv` | 5,034 | 2006-04-28 to 2026-05-01 | Passed |
+
+### Phase 13I Calculated Feature Panel
+
+Phase 13I created:
+
+```text
+reports/phase13i_feature_panel.csv
+```
+
+The panel includes the locked Phase 13G output schema:
+
+```text
+as_of_date
+observation_date
+release_date
+availability_date
+decision_date
+family_id
+feature_id
+formula_id
+source_name
+source_version
+raw_inputs_available
+feature_value
+feature_state
+state_reason
+missingness_state
+leakage_flag
+contract_version
+```
+
+### Phase 13I Calculated Feature IDs
+
+| Feature | Family | Role |
+|---|---|---|
+| `technical_trend_state` | Technical | Price versus 200-day SMA state |
+| `technical_momentum_state` | Technical | 252-trading-day momentum state |
+| `technical_volatility_state` | Technical | 63-trading-day annualised volatility state |
+| `technical_drawdown_state` | Technical | Drawdown from 252-trading-day high state |
+| `macro_short_rate_state` | Macro | DGS2 short-rate regime state |
+| `macro_yield_curve_state` | Macro | DGS10 minus DGS2 yield-curve regime state |
+| `macro_inflation_state` | Macro | CPI year-on-year inflation regime state |
+| `macro_labour_state` | Macro | UNRATE level and 3-month change regime state |
+
+### Phase 13I Visual Feature Reports
+
+Phase 13I created five visual/reporting tables:
+
+| Report | Purpose |
+|---|---|
+| `phase13i_feature_state_timeline.csv` | Feature-state timeline across dates |
+| `phase13i_feature_availability_heatmap.csv` | Availability/missingness heatmap |
+| `phase13i_leakage_audit_panel.csv` | Release/availability/decision-date leakage audit |
+| `phase13i_model_feature_matrix_preview.csv` | Feature-matrix preview for future model work |
+| `phase13i_decision_rationale_template.csv` | Feature-state rationale table for future decision explanations |
+
+### Phase 13I Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13H passed | Passed |
+| Input sources were found | Passed |
+| Feature panel was created | Passed |
+| Required feature IDs are present | Passed |
+| Output schema columns are present | Passed |
+| Visual reports were created | Passed |
+| No leakage flags are present | Passed |
+| No forbidden signal/model/backtest columns exist | Passed |
+| Phase 13J boundary is quality-audit-only | Passed |
+| Scope blocks signal/model/backtest/paper-trading/promotion | Passed |
+| Execution role is correct | Passed |
+
+### Phase 13I Verdict
+
+> Phase 13I completed the feature calculation execution.
+
+Correct interpretation:
+
+> Phase 13I calculated technical and macro feature panels, feature states, availability/missingness outputs, leakage audit outputs, and visual feature reports. It did not create signals, allocation rules, models, strategy backtests, paper-trading logic, candidate promotion, or final-candidate changes.
+
+---
+
+## Phase 13J: Feature Panel Quality / Leakage Audit
+
+Phase 13J audited the Phase 13I feature panel, visual reports, missingness handling, leakage controls, schema quality, and forbidden-column boundaries.
+
+This phase did not create signals, create allocation rules, train models, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13J Summary
+
+| Metric | Result |
+|---|---:|
+| Audit role | Feature panel quality and leakage audit only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13I |
+| Proposed next phase | Phase 13K |
+| Phase 13I reports present | True |
+| Phase 13I result passed | True |
+| Config flags clean for run | True |
+| Feature panel quality passed | True |
+| Output schema quality passed | True |
+| Missingness quality passed | True |
+| Leakage quality passed | True |
+| Visual reports quality passed | True |
+| Forbidden column check passed | True |
+| Phase 13K boundary passed | True |
+| Signal creation | False |
+| Strategy backtest | False |
+| Model training | False |
+| Paper-trading deployment | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13J Report Inventory
+
+| Report | Rows | Result |
+|---|---:|---|
+| `phase13i_input_source_check.csv` | 2 | Passed |
+| `phase13i_feature_panel.csv` | 53,620 | Passed |
+| `phase13i_feature_state_timeline.csv` | 8,371 | Passed |
+| `phase13i_feature_availability_heatmap.csv` | 8,371 | Passed |
+| `phase13i_leakage_audit_panel.csv` | 53,620 | Passed |
+| `phase13i_model_feature_matrix_preview.csv` | 8,308 | Passed |
+| `phase13i_decision_rationale_template.csv` | 53,620 | Passed |
+| `phase13i_summary.csv` | 1 | Passed |
+| `phase13i_gate_report.csv` | 11 | Passed |
+| `phase13i_conclusion.csv` | 1 | Passed |
+
+### Phase 13J Feature Panel Quality
+
+| Check | Result |
+|---|---|
+| Feature panel has enough rows | Passed |
+| Feature panel has enough feature IDs | Passed |
+| Available-state ratio is acceptable | Passed |
+
+Key figures:
+
+```text
+rows = 53,620
+feature_ids = 8
+available_ratio = 0.6102
+```
+
+### Phase 13J Output Schema Quality
+
+| Check | Result |
+|---|---|
+| Required feature-panel columns present | Passed |
+| Feature states use allowed categorical states | Passed |
+| Leakage flag column is boolean-compatible | Passed |
+
+### Phase 13J Missingness Quality
+
+| Check | Result |
+|---|---|
+| Missingness states use allowed vocabulary | Passed |
+| Unavailable rows have state reasons | Passed |
+
+Observed missingness states:
+
+```text
+available
+unavailable
+```
+
+### Phase 13J Leakage Quality
+
+| Check | Result |
+|---|---|
+| Leakage flag count is acceptable | Passed |
+| Decision date is after or equal to availability date | Passed |
+
+Key figure:
+
+```text
+leakage_flags = 0
+```
+
+### Phase 13J Visual Report Quality
+
+| Report | Rows | Result |
+|---|---:|---|
+| Feature state timeline | 8,371 | Passed |
+| Feature availability heatmap | 8,371 | Passed |
+| Leakage audit panel | 53,620 | Passed |
+| Model feature matrix preview | 8,308 | Passed |
+| Decision rationale template | 53,620 | Passed |
+
+### Phase 13J Forbidden Column Check
+
+| Frame | Result |
+|---|---|
+| Feature panel | Passed |
+| Feature state timeline | Passed |
+| Feature availability heatmap | Passed |
+| Leakage audit panel | Passed |
+| Model feature matrix preview | Passed |
+| Decision rationale template | Passed |
+
+No forbidden signal, allocation, model-prediction, strategy-return, backtest-return, or paper-trading columns were found.
+
+### Phase 13J Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13I reports are present | Passed |
+| Phase 13I conclusion and gates passed | Passed |
+| Config flags are clean for run | Passed |
+| Feature panel quality passed | Passed |
+| Output schema quality passed | Passed |
+| Missingness quality passed | Passed |
+| Leakage quality passed | Passed |
+| Visual reports quality passed | Passed |
+| No forbidden signal/model/backtest columns exist | Passed |
+| Phase 13K boundary is planning-only | Passed |
+| Scope blocks signal/model/backtest/paper-trading/promotion | Passed |
+| Audit role is correct | Passed |
+
+### Phase 13J Verdict
+
+> Phase 13J completed the feature panel quality and leakage audit.
+
+Correct interpretation:
+
+> Phase 13J audited feature-panel quality, output schema, missingness, leakage, visual reports, and forbidden columns. It did not create signals, allocation rules, models, strategy backtests, paper-trading logic, candidate promotion, or final-candidate changes.
+
 ---
 
 # Methodology Notes
@@ -4999,6 +5266,9 @@ Remaining concerns include:
 - ML principles are now present at the schema/policy level, but actual feature engineering, scaling, transformations, model training, validation, and feature-importance work have not started yet.
 - Phase 13G/13H pre-registered and audited feature-calculation readiness only. No features have been calculated yet, no feature panel exists, no signal or allocation rule exists, no model has been trained, no backtest has been run, no paper-trading system exists, and no candidate has been promoted.
 - The registered feature thresholds are fixed pre-registered rules for future calculation, not validated alpha. Their usefulness must be assessed later without post-hoc tuning.
+- Phase 13I/13J calculated and audited technical/macro feature panels only. The feature pipeline now works, but the calculated features have not yet been interpreted, validated for predictive usefulness, used to create signals, used to train ML models, used in strategy backtests, deployed for paper trading, promoted into any candidate, or used to change the final candidate hierarchy.
+- The Phase 13I feature panel contains technical data from 1993-01-29 to 2026-05-01 and macro data from 2006-04-28 to 2026-05-01. Macro features are unavailable before the macro aligned sample begins; this is expected and handled through missingness/availability reporting.
+- The Phase 13I `model_feature_matrix_preview.csv` is a preview/reporting table only. It is not yet a model-training dataset, does not define a prediction target, and must not be used for modelling until dataset split, target design, and walk-forward validation rules are pre-registered.
 ---
 
 # Bugs Caught and Fixed
@@ -5902,6 +6172,46 @@ reports/phase13h_readiness_conclusion.csv
 reports/phase13h_feature_calculation_readiness_audit.md
 ```
 
+## Phase 13I Feature Calculation Execution Reports
+
+```text
+reports/phase13i_input_source_check.csv
+reports/phase13i_feature_panel.csv
+reports/phase13i_feature_state_timeline.csv
+reports/phase13i_feature_availability_heatmap.csv
+reports/phase13i_leakage_audit_panel.csv
+reports/phase13i_model_feature_matrix_preview.csv
+reports/phase13i_decision_rationale_template.csv
+reports/phase13i_source_report_check.csv
+reports/phase13i_phase13h_result_check.csv
+reports/phase13i_phase13j_boundary_check.csv
+reports/phase13i_scope_boundary_check.csv
+reports/phase13i_summary.csv
+reports/phase13i_gate_report.csv
+reports/phase13i_conclusion.csv
+reports/phase13i_feature_calculation_execution.md
+```
+
+## Phase 13J Feature Panel Quality / Leakage Audit Reports
+
+```text
+reports/phase13j_quality_report_inventory_check.csv
+reports/phase13j_quality_phase13i_result_check.csv
+reports/phase13j_quality_config_flag_check.csv
+reports/phase13j_quality_feature_panel_quality_check.csv
+reports/phase13j_quality_output_schema_quality_check.csv
+reports/phase13j_quality_missingness_quality_check.csv
+reports/phase13j_quality_leakage_quality_check.csv
+reports/phase13j_quality_visual_reports_quality_check.csv
+reports/phase13j_quality_forbidden_column_check.csv
+reports/phase13j_quality_phase13k_boundary_check.csv
+reports/phase13j_quality_scope_boundary_check.csv
+reports/phase13j_quality_summary.csv
+reports/phase13j_quality_gate_report.csv
+reports/phase13j_quality_conclusion.csv
+reports/phase13j_feature_panel_quality_leakage_audit.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -6079,6 +6389,8 @@ configs/spy_sma10.yaml
 | Phase 13F feature schema readiness / visual report template audit | Completed — readiness audit passed; schema coverage, visual templates, ML policy, config flags, and Phase 13G pre-registration-only boundary verified; no feature ingestion/calculation/signal/backtest/model/paper trading/promotion |
 | Phase 13G technical/macro feature calculation pre-registration spec | Completed — exact technical and macro feature formulas, raw inputs, lookbacks, thresholds, lag rules, output columns, missingness behaviour, leakage checks, visual checks, and ML feature-engineering locks registered; no feature calculation/signal/backtest/model/paper trading/promotion |
 | Phase 13H feature calculation readiness audit | Completed — readiness audit passed; formula registry, output schema, missingness/leakage/visual checks, ML locks, config flags, and Phase 13I feature-calculation-only boundary verified; no feature calculation/signal/backtest/model/paper trading/promotion |
+| Phase 13I technical/macro feature calculation execution | Completed — technical and macro feature panels calculated; feature states, availability/missingness outputs, leakage audit outputs, feature-state timeline, availability heatmap, model feature matrix preview, and decision-rationale template created; no signal/backtest/model/paper trading/promotion |
+| Phase 13J feature panel quality / leakage audit | Completed — feature-panel quality audit passed; 53,620 feature-panel rows, 8 feature IDs, 0 leakage flags, output schema quality passed, missingness quality passed, visual reports passed, forbidden-column check passed; no signal/backtest/model/paper trading/promotion |
 ---
 
 # What Should Happen Next

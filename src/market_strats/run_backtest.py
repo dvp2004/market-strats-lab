@@ -320,6 +320,10 @@ from market_strats.analysis.feature_calculation_prereg_and_readiness_audit impor
     save_phase13g_feature_calculation_preregistration_spec,
     save_phase13h_feature_calculation_readiness_audit,
 )
+from market_strats.analysis.feature_calculation_execution_and_quality_audit import (
+    save_phase13i_feature_calculation_execution,
+    save_phase13j_feature_panel_quality_leakage_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2102,6 +2106,18 @@ def main() -> None:
         )
 
         save_phase13h_feature_calculation_readiness_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13i_feature_calculation_execution(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+        )
+
+        save_phase13j_feature_panel_quality_leakage_audit(
             config=config,
             reports_dir=reports_dir,
         )

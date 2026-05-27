@@ -5066,7 +5066,7 @@ phase13f_feature_schema_readiness_visual_template_audit:
     require_no_final_candidate_change: true
     required_audit_role: "Feature schema readiness and visual report template audit only"
 phase13g_feature_calculation_preregistration_spec:
-  enabled: true
+  enabled: false
 
   spec_role: "Technical and macro feature calculation pre-registration spec only"
   phase_branch: "Phase 13 multi-factor model architecture planning"
@@ -5384,7 +5384,7 @@ phase13g_feature_calculation_preregistration_spec:
 
 
 phase13h_feature_calculation_readiness_audit:
-  enabled: true
+  enabled: false
 
   audit_role: "Feature calculation readiness audit only"
   phase_branch: "Phase 13 multi-factor model architecture planning"
@@ -5473,6 +5473,199 @@ phase13h_feature_calculation_readiness_audit:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_audit_role: "Feature calculation readiness audit only"
+phase13i_feature_calculation_execution:
+  enabled: false
+
+  execution_role: "Technical and macro feature calculation execution only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13H"
+  proposed_next_phase: "Phase 13J"
+
+  allow_feature_calculation: true
+  allow_feature_panel_creation: true
+  allow_visual_feature_reports: true
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13h_conclusion: "reports/phase13h_readiness_conclusion.csv"
+    phase13h_gate_report: "reports/phase13h_readiness_gate_report.csv"
+    calculation_registry: "reports/phase13g_prereg_calculation_registry.csv"
+    output_column_schema: "reports/phase13g_prereg_output_column_schema.csv"
+    missingness_behaviour: "reports/phase13g_prereg_missingness_behaviour.csv"
+    leakage_checks: "reports/phase13g_prereg_leakage_checks.csv"
+    visual_checks: "reports/phase13g_prereg_visual_checks.csv"
+    ml_feature_engineering_lock: "reports/phase13g_prereg_ml_feature_engineering_lock.csv"
+
+  input_data:
+    technical_price_candidates:
+      - "reports/spy_price_panel.csv"
+      - "reports/spy_prices.csv"
+      - "reports/price_panel.csv"
+      - "reports/ticker_price_panel.csv"
+      - "reports/final_candidate_price_panel.csv"
+      - "reports/relative_momentum_price_panel.csv"
+      - "reports/phase7b_final_candidate_signal_execution_frame.csv"
+    macro_aligned_candidates:
+      - "reports/phase10c_macro_aligned_series.csv"
+      - "reports/phase10c_macro_source_aligned_series.csv"
+      - "reports/macro_aligned_series.csv"
+
+    date_column_candidates: ["date", "Date", "as_of_date", "timestamp"]
+    close_column_candidates: ["adjusted_close", "adj_close", "Adj Close", "close", "Close", "spy_close", "SPY"]
+    macro_columns:
+      dgs2: "DGS2"
+      dgs10: "DGS10"
+      cpi: "CPIAUCSL"
+      unrate: "UNRATE"
+
+  calculation_policy:
+    contract_version: "phase13g_v1"
+    source_version: "generated_from_existing_project_reports"
+    technical_decision_lag_trading_days: 1
+    macro_decision_lag_trading_days: 1
+    max_allowed_leakage_flags: 0
+    min_registered_features: 8
+    required_families: ["technical", "macro"]
+    required_feature_ids:
+      - "technical_trend_state"
+      - "technical_momentum_state"
+      - "technical_volatility_state"
+      - "technical_drawdown_state"
+      - "macro_short_rate_state"
+      - "macro_yield_curve_state"
+      - "macro_inflation_state"
+      - "macro_labour_state"
+
+  phase13j_boundary:
+    allowed_next_step: "Feature panel quality and leakage audit only"
+    forbidden_next_step: "signal creation, allocation rule, strategy backtest, model training, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13j_may_audit_feature_panel: true
+    phase13j_may_audit_leakage: true
+    phase13j_may_audit_missingness: true
+    phase13j_may_audit_visual_reports: true
+    phase13j_may_create_signal: false
+    phase13j_may_train_model: false
+    phase13j_may_run_backtest: false
+    phase13j_may_deploy_paper_trading: false
+    phase13j_may_promote_candidate: false
+
+  gates:
+    require_phase13h_passed: true
+    require_input_sources_found: true
+    require_registered_features_present: true
+    min_registered_features: 8
+    require_feature_panel_created: true
+    require_required_feature_ids_present: true
+    require_output_schema_columns_present: true
+    require_visual_reports_created: true
+    require_no_leakage_flags: true
+    require_no_signal_columns: true
+    require_no_model_columns: true
+    require_phase13j_boundary_quality_audit_only: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_execution_role: "Technical and macro feature calculation execution only"
+
+
+phase13j_feature_panel_quality_leakage_audit:
+  enabled: false
+
+  audit_role: "Feature panel quality and leakage audit only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13I"
+  proposed_next_phase: "Phase 13K"
+
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_model_training: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase13g_feature_calculation_preregistration_spec: false
+    phase13h_feature_calculation_readiness_audit: false
+    phase13i_feature_calculation_execution: true
+    phase13j_feature_panel_quality_leakage_audit: true
+    relative_momentum_allocator: true
+
+  phase13i_reports:
+    input_source_check: "reports/phase13i_input_source_check.csv"
+    feature_panel: "reports/phase13i_feature_panel.csv"
+    feature_state_timeline: "reports/phase13i_feature_state_timeline.csv"
+    feature_availability_heatmap: "reports/phase13i_feature_availability_heatmap.csv"
+    leakage_audit_panel: "reports/phase13i_leakage_audit_panel.csv"
+    model_feature_matrix_preview: "reports/phase13i_model_feature_matrix_preview.csv"
+    decision_rationale_template: "reports/phase13i_decision_rationale_template.csv"
+    summary: "reports/phase13i_summary.csv"
+    gate_report: "reports/phase13i_gate_report.csv"
+    conclusion: "reports/phase13i_conclusion.csv"
+
+  quality_thresholds:
+    min_feature_ids: 8
+    min_panel_rows: 100
+    max_leakage_flags: 0
+    min_available_state_ratio: 0.20
+    allowed_feature_states: ["supportive", "neutral", "fragile", "unavailable", "blocked"]
+    forbidden_columns:
+      - "signal"
+      - "trade_signal"
+      - "allocation"
+      - "target_weight"
+      - "model_prediction"
+      - "predicted_return"
+      - "strategy_return"
+      - "backtest_return"
+      - "paper_trade"
+
+  phase13k_boundary:
+    allowed_next_step: "Feature panel interpretation and model-readiness planning only"
+    forbidden_next_step: "signal creation, allocation rule, strategy backtest, model training, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13k_may_interpret_features: true
+    phase13k_may_plan_model_dataset: true
+    phase13k_may_define_train_validation_split_spec: true
+    phase13k_may_create_signal: false
+    phase13k_may_train_model: false
+    phase13k_may_run_backtest: false
+    phase13k_may_deploy_paper_trading: false
+    phase13k_may_promote_candidate: false
+
+  gates:
+    require_phase13i_reports_present: true
+    require_phase13i_conclusion_passed: true
+    require_phase13i_gate_report_passed: true
+    require_config_flags_clean_for_run: true
+    require_feature_panel_quality: true
+    require_output_schema_quality: true
+    require_missingness_quality: true
+    require_leakage_quality: true
+    require_visual_reports_quality: true
+    require_no_forbidden_columns: true
+    require_phase13k_boundary_planning_only: true
+    require_no_signal_creation: true
+    require_no_allocation_rule_creation: true
+    require_no_strategy_backtest: true
+    require_no_empirical_return_weights: true
+    require_no_model_training: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_audit_role: "Feature panel quality and leakage audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
