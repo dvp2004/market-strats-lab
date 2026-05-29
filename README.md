@@ -81,6 +81,10 @@ Phase 13O/13P clarified that the macro availability problem was not missing macr
 
 The dataset remains correctly labelled `technical_only_macro_blocked_dataset_v1`. The next allowed step is macro feature repair execution and guarded dataset reassembly. The project must not call the dataset multi-factor until the long-to-wide macro normalisation is implemented, macro feature availability passes threshold, the dataset is reassembled with macro features, and a quality/leakage audit passes.
 
+Phase 13Q/13R repaired the macro availability failure and moved the project from a technical-only / macro-blocked dataset to a genuinely technical + macro ML dataset. The long-format Phase 10C macro source was normalised into wide macro columns, macro feature states were recalculated, macro availability passed at 0.9720, and the dataset was reassembled and audited as `multi_factor_technical_macro_dataset_v1`.
+
+This is a real milestone, but it must not be overstated. The project now has technical + macro feature infrastructure, not the full technical + macro + fundamental + sentiment system. No ML model has been trained, no trading signal exists, no strategy backtest has been run, no paper-trading system exists, and no candidate has been promoted.
+
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
 Market Strats Lab remains research-only. It is not production-ready, not live-tradable, not financial advice, and not a live-trading recommendation.
@@ -5762,6 +5766,260 @@ Correct interpretation:
 
 > Phase 13P decided that macro repair is feasible through long-to-wide macro normalisation, but the dataset must remain labelled `technical_only_macro_blocked_dataset_v1` until a future Phase 13Q repair execution and audit passes.
 
+## Phase 13Q: Macro Long-to-Wide Repair Execution and Guarded Dataset Reassembly
+
+Phase 13Q repaired the macro availability issue diagnosed in Phase 13O/13P by normalising the long-format macro source into a wide macro panel and reassembling the ML dataset with macro features included.
+
+The Phase 10C macro source was long-format, with observations stored under `series_id` and `value`. Phase 13Q converted this into usable macro columns for `DGS2`, `DGS10`, `CPIAUCSL`, and `UNRATE`, recalculated macro feature states, applied the macro availability guard, and reassembled the dataset.
+
+This phase did not train models, select models, create signals, create allocation rules, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13Q Summary
+
+| Metric | Result |
+|---|---:|
+| Execution role | Macro long-to-wide repair execution and guarded dataset reassembly only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13P |
+| Proposed next phase | Phase 13R |
+| Source reports present | True |
+| Phase 13P result passed | True |
+| Macro source loaded | True |
+| Long format detected | True |
+| Required macro series present | True |
+| Macro wide rows | 5,033 |
+| Macro repair panel rows | 20,132 |
+| Macro available ratio | 0.9720 |
+| Macro repair passed | True |
+| Dataset label | `multi_factor_technical_macro_dataset_v1` |
+| Dataset rows | 5,219 |
+| Target summary rows | 1 |
+| Split summary rows | 4 |
+| Leakage flag count | 0 |
+| Phase 13R boundary passed | True |
+| Model training | False |
+| Model selection | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13Q Macro Source Check
+
+| Metric | Result |
+|---|---|
+| Source path | `reports/phase10c_macro_aligned_series.csv` |
+| Rows | 20,136 |
+| Date column | `trading_date` |
+| Series column | `series_id` |
+| Value column | `value` |
+| Required macro series present | True |
+| Long format detected | True |
+
+### Phase 13Q Macro Availability Repair
+
+| Metric | Result |
+|---|---:|
+| Macro available ratio | 0.9720 |
+| Minimum macro available ratio to use | 0.2000 |
+| All feature non-null threshold passed | True |
+| Macro repair passed | True |
+| Dataset label | `multi_factor_technical_macro_dataset_v1` |
+| Feature profile rows | 4 |
+
+### Phase 13Q Family Usage
+
+| Family | Used in dataset v1 | Rows | Feature count | Available ratio |
+|---|---:|---:|---:|---:|
+| Macro | True | 20,132 | 4 | 0.9720 |
+| Technical | True | 33,484 | 4 | 0.9772 |
+
+### Phase 13Q Target Summary
+
+| Metric | Result |
+|---|---:|
+| Dataset rows | 5,219 |
+| Target available rows | 4,971 |
+| Target available ratio | 0.9525 |
+| Primary target classes | Fragile; neutral; supportive; unavailable |
+| Secondary target classes | Fragile; neutral; unavailable |
+
+### Phase 13Q Split Summary
+
+| Split | Rows | Target available rows | Date range | Target available ratio |
+|---|---:|---:|---|---:|
+| Train | 2,784 | 2,689 | 2006-04-28 to 2016-12-30 | 0.9659 |
+| Validation | 1,043 | 1,007 | 2017-01-03 to 2020-12-31 | 0.9655 |
+| Holdout | 1,391 | 1,275 | 2021-01-01 to 2026-05-01 | 0.9166 |
+| Out of split | 1 | 0 | 2017-01-02 to 2017-01-02 | 0.0000 |
+
+The single out-of-split row is not material. It reflects one date outside the registered split windows and does not invalidate the dataset.
+
+### Phase 13Q Dataset Metadata
+
+| Metric | Result |
+|---|---:|
+| Dataset ID | `phase13q_ml_feature_dataset_v1` |
+| Dataset label | `multi_factor_technical_macro_dataset_v1` |
+| Rows | 5,219 |
+| Value feature columns | 8 |
+| Macro value feature columns | 4 |
+| State feature columns | 8 |
+| Missingness feature columns | 8 |
+| Macro available ratio | 0.9720 |
+| Macro repair passed | True |
+| Model training | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Candidate promotion | False |
+
+### Phase 13Q Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13P passed | Passed |
+| Source reports are present | Passed |
+| Macro source loaded | Passed |
+| Long-to-wide repair succeeded | Passed |
+| Required macro series are present | Passed |
+| Macro repair panel was created | Passed |
+| Macro availability threshold passed | Passed |
+| Dataset was reassembled | Passed |
+| Dataset label is honest | Passed |
+| Targets were calculated | Passed |
+| Split labels were created | Passed |
+| No leakage flags are present | Passed |
+| Phase 13R boundary is quality-audit-only | Passed |
+| Scope blocks model/signal/backtest/promotion | Passed |
+| Execution role is correct | Passed |
+
+### Phase 13Q Verdict
+
+> Phase 13Q completed macro long-to-wide repair and guarded dataset reassembly.
+
+Correct interpretation:
+
+> Phase 13Q repaired the long-format macro source issue, recalculated macro features, and reassembled a technical + macro ML dataset labelled `multi_factor_technical_macro_dataset_v1`. It did not train models, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+---
+
+## Phase 13R: Repaired Macro Dataset Quality / Leakage Audit
+
+Phase 13R audited the repaired technical + macro ML dataset created in Phase 13Q.
+
+This phase checked macro repair quality, dataset quality, target quality, split quality, forbidden-column boundaries, and the Phase 13S pre-registration boundary.
+
+It did not train models, select models, create signals, create allocation rules, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13R Summary
+
+| Metric | Result |
+|---|---:|
+| Audit role | Repaired macro dataset quality and leakage audit only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13Q |
+| Proposed next phase | Phase 13S |
+| Phase 13Q reports present | True |
+| Phase 13Q result passed | True |
+| Config flags clean for run | True |
+| Macro repair quality passed | True |
+| Dataset quality passed | True |
+| Target quality passed | True |
+| Split quality passed | True |
+| Forbidden column check passed | True |
+| Phase 13S boundary passed | True |
+| Model training | False |
+| Model selection | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13R Macro Repair Quality
+
+| Check | Result |
+|---|---|
+| Macro availability ratio passed | Passed |
+| Macro value feature columns exist | Passed |
+| Dataset label is multi-factor after repair | Passed |
+
+Key figures:
+
+```text
+macro_available_ratio = 0.9720
+macro_value_feature_columns = 4
+dataset_label = multi_factor_technical_macro_dataset_v1
+```
+
+### Phase 13R Dataset Quality
+
+| Check | Result |
+|---|---|
+| Dataset has enough rows | Passed |
+| Dataset has enough value feature columns | Passed |
+| Dataset has honest label | Passed |
+
+Key figures:
+
+```text
+rows = 5,219
+value_feature_columns = 8
+```
+
+### Phase 13R Target Quality
+
+| Check | Result |
+|---|---|
+| Primary target column exists | Passed |
+| Secondary target column exists | Passed |
+| Target availability ratio passed | Passed |
+
+Key figure:
+
+```text
+target_available_ratio = 0.9525
+```
+
+### Phase 13R Split Quality
+
+| Check | Result |
+|---|---|
+| Train split has rows | Passed |
+| Validation split has rows | Passed |
+| Holdout split has rows | Passed |
+
+### Phase 13R Forbidden Column Check
+
+| Frame | Result |
+|---|---|
+| Reassembled dataset | Passed |
+
+No model-prediction, signal, allocation, strategy-return, backtest-return, paper-trading, or feature-importance columns were found.
+
+### Phase 13R Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13Q reports are present | Passed |
+| Phase 13Q conclusion and gates passed | Passed |
+| Config flags are clean for run | Passed |
+| Macro repair quality passed | Passed |
+| Dataset quality passed | Passed |
+| Target quality passed | Passed |
+| Split quality passed | Passed |
+| No forbidden model/signal/backtest columns exist | Passed |
+| Phase 13S boundary is pre-registration-only | Passed |
+| Scope blocks model/signal/backtest/promotion | Passed |
+| Audit role is correct | Passed |
+
+### Phase 13R Verdict
+
+> Phase 13R completed the repaired macro dataset quality audit.
+
+Correct interpretation:
+
+> Phase 13R confirmed that the repaired technical + macro ML dataset is structurally valid, availability-clean, target-ready, split-labelled, and leakage-audited. It did not train models, select models, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
 ---
 
 # Methodology Notes
@@ -5950,6 +6208,9 @@ Remaining concerns include:
 - Phase 13O/13P diagnosed the macro availability failure but did not execute the repair. The macro source is long-format, with series identifiers in `series_id` and numeric observations in `value`; the prior repair logic expected wide columns named `DGS2`, `DGS10`, `CPIAUCSL`, and `UNRATE`.
 - The current ML dataset remains `technical_only_macro_blocked_dataset_v1`. It must not be described as multi-factor until Phase 13Q or a later guarded repair phase successfully normalises the macro source, recalculates macro feature states, reassembles the dataset, and passes a quality/leakage audit.
 - No model has been trained, no signal has been created, no backtest has been run, no paper-trading logic exists, and no candidate has been promoted.
+- Phase 13Q/13R repaired and audited a technical + macro ML dataset, but the project still does not yet include fundamental or sentiment features. The dataset can be described as technical + macro, not as the full technical + macro + fundamental + sentiment system.
+- No ML model has been trained, no model has been selected, no feature importance has been calculated, no signal or allocation rule exists, no strategy backtest has been run, no paper-trading logic exists, and no candidate has been promoted.
+- The repaired dataset is structurally ready for model-training pre-registration, but it is not yet evidence that the technical + macro features are predictive or tradable.
 ---
 
 # Bugs Caught and Fixed
@@ -7006,6 +7267,47 @@ reports/phase13p_repair_spec_conclusion.csv
 reports/phase13p_macro_feature_repair_decision_spec.md
 ```
 
+## Phase 13Q Macro Long-to-Wide Repair / Dataset Reassembly Reports
+
+```text
+reports/phase13q_repair_source_report_check.csv
+reports/phase13q_repair_phase13p_result_check.csv
+reports/phase13q_repair_macro_source_check.csv
+reports/phase13q_repair_macro_wide_panel.csv
+reports/phase13q_repair_macro_repair_panel.csv
+reports/phase13q_repair_macro_availability_report.csv
+reports/phase13q_repair_family_usage_report.csv
+reports/phase13q_ml_feature_dataset_v1.csv
+reports/phase13q_repair_target_summary.csv
+reports/phase13q_repair_split_summary.csv
+reports/phase13q_repair_dataset_metadata.csv
+reports/phase13q_repair_phase13r_boundary_check.csv
+reports/phase13q_repair_scope_boundary_check.csv
+reports/phase13q_repair_summary.csv
+reports/phase13q_repair_gate_report.csv
+reports/phase13q_repair_conclusion.csv
+reports/phase13q_macro_long_to_wide_repair_execution.md
+```
+
+## Phase 13R Repaired Macro Dataset Quality / Leakage Audit Reports
+
+```text
+reports/phase13r_quality_report_inventory_check.csv
+reports/phase13r_quality_phase13q_result_check.csv
+reports/phase13r_quality_config_flag_check.csv
+reports/phase13r_quality_macro_repair_quality_check.csv
+reports/phase13r_quality_dataset_quality_check.csv
+reports/phase13r_quality_target_quality_check.csv
+reports/phase13r_quality_split_quality_check.csv
+reports/phase13r_quality_forbidden_column_check.csv
+reports/phase13r_quality_phase13s_boundary_check.csv
+reports/phase13r_quality_scope_boundary_check.csv
+reports/phase13r_quality_summary.csv
+reports/phase13r_quality_gate_report.csv
+reports/phase13r_quality_conclusion.csv
+reports/phase13r_repaired_macro_dataset_quality_audit.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -7191,6 +7493,8 @@ configs/spy_sma10.yaml
 | Phase 13N ML dataset quality / leakage audit | Completed — dataset quality, target quality, split quality, macro guard quality, forbidden-column check, and leakage boundaries passed; confirms dataset is technical-only / macro-blocked, not multi-factor; no model/signal/backtest/paper trading/promotion |
 | Phase 13O macro availability root-cause diagnostic | Completed — root cause diagnosed as `macro_source_long_format_not_normalised`; macro source exists with 20,136 rows and long-format columns `series_id`/`value`; long-format diagnostic detected `UNRATE`, `DGS2`, `DGS10`, and `CPIAUCSL` with 19,934 numeric non-null values; no repair/model/signal/backtest/promotion |
 | Phase 13P macro feature repair decision/spec | Completed — repair decision/spec passed; recommended action is `implement_long_to_wide_macro_normalisation`; dataset remains labelled `technical_only_macro_blocked_dataset_v1` until future repair execution and audit; no repair/model/signal/backtest/promotion |
+| Phase 13Q macro long-to-wide repair execution and guarded dataset reassembly | Completed — long-format macro source repaired through `series_id`/`value` long-to-wide normalisation; required macro series present; macro availability ratio improved to 0.9720; dataset reassembled as `multi_factor_technical_macro_dataset_v1` with 5,219 rows, 8 value feature columns, 4 macro value feature columns, registered 63D targets, and train/validation/holdout split labels; no model/signal/backtest/paper trading/promotion |
+| Phase 13R repaired macro dataset quality / leakage audit | Completed — repaired technical + macro dataset passed macro repair quality, dataset quality, target quality, split quality, forbidden-column check, and boundary checks; confirms the dataset is now genuinely technical + macro, but still not fundamental/sentiment and still no model/signal/backtest/paper trading/promotion |
 ---
 
 # What Should Happen Next

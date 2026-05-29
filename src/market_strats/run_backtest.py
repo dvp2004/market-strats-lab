@@ -336,6 +336,10 @@ from market_strats.analysis.macro_availability_root_cause_and_repair_spec import
     save_phase13o_macro_availability_root_cause_diagnostic,
     save_phase13p_macro_feature_repair_decision_spec,
 )
+from market_strats.analysis.macro_long_to_wide_repair_and_reaudit import (
+    save_phase13q_macro_long_to_wide_repair_execution,
+    save_phase13r_repaired_macro_dataset_quality_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2162,6 +2166,18 @@ def main() -> None:
         )
 
         save_phase13p_macro_feature_repair_decision_spec(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13q_macro_long_to_wide_repair_execution(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+        )
+
+        save_phase13r_repaired_macro_dataset_quality_audit(
             config=config,
             reports_dir=reports_dir,
         )
