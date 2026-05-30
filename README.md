@@ -85,6 +85,10 @@ Phase 13Q/13R repaired the macro availability failure and moved the project from
 
 This is a real milestone, but it must not be overstated. The project now has technical + macro feature infrastructure, not the full technical + macro + fundamental + sentiment system. No ML model has been trained, no trading signal exists, no strategy backtest has been run, no paper-trading system exists, and no candidate has been promoted.
 
+Phase 13S/13T moved the technical + macro ML branch from dataset repair/audit into model-training pre-registration and readiness. The project now has a repaired technical + macro dataset, registered supervised-learning targets, registered model families, train-only preprocessing rules, split usage rules, metrics, calibration/confusion-matrix templates, and leakage boundaries.
+
+This is a protocol checkpoint, not a model result. No model has been trained, no predictions exist, no feature importance exists, no signal exists, no strategy backtest exists, no paper-trading system exists, and no candidate has been promoted.
+
 SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
 
 Market Strats Lab remains research-only. It is not production-ready, not live-tradable, not financial advice, and not a live-trading recommendation.
@@ -6020,6 +6024,310 @@ Correct interpretation:
 
 > Phase 13R confirmed that the repaired technical + macro ML dataset is structurally valid, availability-clean, target-ready, split-labelled, and leakage-audited. It did not train models, select models, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
 
+## Phase 13S: ML Model Training Pre-Registration and Baseline Model Design Spec
+
+Phase 13S pre-registered the ML model-training protocol for the repaired technical + macro dataset created in Phase 13Q/13R.
+
+This phase locked the target usage, feature usage, model-family registry, preprocessing policy, split usage, metric registry, calibration/confusion-matrix requirements, report templates, and forbidden actions before any model training.
+
+This phase did not train models, select models, generate predictions, calculate feature importance, create signals, create allocation rules, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13S Summary
+
+| Metric | Result |
+|---|---:|
+| Spec role | ML model training pre-registration and baseline model design spec only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13R |
+| Proposed next phase | Phase 13T |
+| Source reports present | True |
+| Phase 13R result passed | True |
+| Dataset schema profile rows | 1 |
+| Dataset requirements passed | True |
+| Target policy rows | 2 |
+| Allowed model count | 5 |
+| Preprocessing policy rows | 1 |
+| Split usage policy rows | 1 |
+| Primary metric count | 3 |
+| Calibration metric count | 3 |
+| Report template rows | 13 |
+| Forbidden action check passed | True |
+| Phase 13T boundary passed | True |
+| Model training | False |
+| Model selection | False |
+| Prediction generation | False |
+| Feature importance | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13S Dataset Schema Profile
+
+| Metric | Result |
+|---|---:|
+| Rows | 5,219 |
+| Columns | 34 |
+| Dataset label | `multi_factor_technical_macro_dataset_v1` |
+| Value feature columns | 8 |
+| Macro value feature columns | 4 |
+| State feature columns | 8 |
+| Missingness feature columns | 8 |
+
+### Phase 13S Dataset Requirement Check
+
+| Check | Result |
+|---|---|
+| Dataset label is repaired technical + macro | Passed |
+| Dataset has enough rows | Passed |
+| Dataset has enough value feature columns | Passed |
+| Dataset has enough macro value feature columns | Passed |
+| Required target columns are present | Passed |
+| Required split labels are present | Passed |
+| No forbidden feature fragments are present | Passed |
+
+### Phase 13S Target Policy
+
+| Target | Role | Usage |
+|---|---|---|
+| `future_63d_spy_return_state` | Primary supervised-learning classification target | May be used for registered train/validation model training |
+| `future_63d_drawdown_risk_state` | Secondary diagnostic risk target | Not allowed for model selection unless separately registered |
+
+### Phase 13S Registered Model Families
+
+| Model ID | Family | Role | Selection role |
+|---|---|---|---|
+| `baseline_majority_class` | Dummy classifier | Sanity baseline | Benchmark only |
+| `baseline_stratified_dummy` | Dummy classifier | Randomised class-frequency baseline | Benchmark only |
+| `multinomial_logistic_regression` | Linear classifier | Interpretable baseline classifier | Candidate model family |
+| `random_forest_classifier` | Tree ensemble | Non-linear baseline classifier | Candidate model family |
+| `hist_gradient_boosting_classifier` | Boosted trees | Non-linear boosted baseline classifier | Candidate model family |
+
+### Phase 13S Preprocessing Policy
+
+| Item | Policy |
+|---|---|
+| Fit scope | Train split only |
+| Transform scope | Train, validation, and holdout using train-fitted transformers only |
+| Categorical encoding | One-hot encode state/missingness columns inside sklearn pipeline |
+| Numeric scaling | Standardise numeric value columns for linear models only using train-only fit |
+| Imputation | Median numeric imputation and most-frequent categorical imputation fitted on train only |
+| Class imbalance | Report class support and balanced metrics; no resampling unless separately registered |
+
+### Phase 13S Split Usage Policy
+
+| Split | Usage |
+|---|---|
+| Train | Fit preprocessing and model parameters |
+| Validation | Compare registered model families and diagnose calibration/confusion matrix |
+| Holdout | Untouched; no model selection, threshold selection, feature selection, or hyperparameter choice |
+| Out-of-split rows | Excluded from model training and validation |
+
+### Phase 13S Metric Registry
+
+Primary metrics:
+
+```text
+balanced_accuracy
+macro_f1
+macro_recall
+```
+
+Secondary metrics:
+
+```text
+accuracy
+per_class_precision
+per_class_recall
+per_class_f1
+confusion_matrix
+class_support
+```
+
+Calibration metrics:
+
+```text
+log_loss_if_predict_proba_available
+brier_score_ovr_if_predict_proba_available
+calibration_curve_template
+```
+
+Forbidden trading metrics at this stage:
+
+```text
+strategy_return
+sharpe_ratio
+calmar_ratio
+max_drawdown
+portfolio_cagr
+trade_pnl
+```
+
+### Phase 13S Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13R passed | Passed |
+| Source reports are present | Passed |
+| Dataset schema profile exists | Passed |
+| Dataset requirements passed | Passed |
+| Target policy exists | Passed |
+| Model family registry is sufficient | Passed |
+| Preprocessing policy exists | Passed |
+| Split usage policy exists | Passed |
+| Metric registry is sufficient | Passed |
+| Report templates exist | Passed |
+| Phase 13T boundary is readiness-only | Passed |
+| Scope blocks model/signal/backtest/promotion | Passed |
+| Spec role is correct | Passed |
+
+### Phase 13S Verdict
+
+> Phase 13S completed the ML model training pre-registration spec.
+
+Correct interpretation:
+
+> Phase 13S locked the ML training protocol for future registered train/validation model execution. It did not train models, select models, generate predictions, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+---
+
+## Phase 13T: ML Training Readiness / Leakage Boundary Audit
+
+Phase 13T audited the Phase 13S ML training protocol before any model execution.
+
+This phase confirmed dataset readiness, training protocol completeness, train-only preprocessing controls, holdout lockout, forbidden-output absence, and Phase 13U boundaries.
+
+This phase did not train models, select models, generate predictions, calculate feature importance, create signals, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13T Summary
+
+| Metric | Result |
+|---|---:|
+| Audit role | ML training readiness and leakage boundary audit only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13S |
+| Proposed next phase | Phase 13U |
+| Phase 13S reports present | True |
+| Phase 13S result passed | True |
+| Config flags clean for run | True |
+| Dataset readiness passed | True |
+| Training protocol passed | True |
+| Leakage boundary passed | True |
+| Forbidden outputs absent | True |
+| Phase 13U boundary passed | True |
+| Model training | False |
+| Model selection | False |
+| Prediction generation | False |
+| Feature importance | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13T Dataset Readiness
+
+| Check | Result |
+|---|---|
+| Dataset label is technical + macro | Passed |
+| Dataset has enough rows | Passed |
+| Dataset has enough value feature columns | Passed |
+
+Key figures:
+
+```text
+dataset_label = multi_factor_technical_macro_dataset_v1
+rows = 5,219
+value_feature_columns = 8
+```
+
+### Phase 13T Training Protocol Completeness
+
+| Check | Result |
+|---|---|
+| Allowed model families are sufficient | Passed |
+| Primary metrics are sufficient | Passed |
+| Calibration template exists | Passed |
+| Confusion matrix template exists | Passed |
+
+Key figures:
+
+```text
+allowed_model_count = 5
+primary_metric_count = 3
+calibration_template_count = 1
+confusion_template_count = 1
+```
+
+### Phase 13T Leakage Boundary Check
+
+| Check | Result |
+|---|---|
+| Preprocessing is train-only | Passed |
+| Holdout remains locked | Passed |
+| Walk-forward execution is not enabled now | Passed |
+
+Important boundary:
+
+```text
+holdout_split = untouched; no model selection, threshold selection, feature selection, or hyperparameter choice
+```
+
+### Phase 13T Forbidden Output Check
+
+| Forbidden output | Result |
+|---|---|
+| `reports/phase13u_model_predictions.csv` | Absent |
+| `reports/phase13u_feature_importance.csv` | Absent |
+| `reports/phase13u_signal_report.csv` | Absent |
+| `reports/phase13u_strategy_backtest.csv` | Absent |
+| `reports/phase13u_paper_trading_report.csv` | Absent |
+| `reports/phase13u_candidate_promotion.csv` | Absent |
+
+### Phase 13T Phase 13U Boundary
+
+Phase 13U is allowed to perform:
+
+```text
+registered baseline ML model training execution
+train-only preprocessing fit
+train/validation evaluation
+validation prediction generation
+```
+
+Phase 13U is not allowed to perform:
+
+```text
+holdout prediction generation
+signal creation
+strategy backtest
+paper-trading deployment
+candidate promotion
+final-candidate change
+```
+
+### Phase 13T Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13S reports are present | Passed |
+| Phase 13S conclusion and gates passed | Passed |
+| Config flags are clean for run | Passed |
+| Dataset readiness passed | Passed |
+| Training protocol completeness passed | Passed |
+| Leakage boundary passed | Passed |
+| Forbidden outputs are absent | Passed |
+| Phase 13U boundary is registered-training-only | Passed |
+| Scope blocks model/signal/backtest/promotion | Passed |
+| Audit role is correct | Passed |
+
+### Phase 13T Verdict
+
+> Phase 13T completed the ML training readiness/leakage audit.
+
+Correct interpretation:
+
+> Phase 13T confirmed that the project is ready for a registered train/validation-only ML baseline training phase. It did not train models, select models, generate predictions, calculate feature importance, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
 ---
 
 # Methodology Notes
@@ -6211,6 +6519,10 @@ Remaining concerns include:
 - Phase 13Q/13R repaired and audited a technical + macro ML dataset, but the project still does not yet include fundamental or sentiment features. The dataset can be described as technical + macro, not as the full technical + macro + fundamental + sentiment system.
 - No ML model has been trained, no model has been selected, no feature importance has been calculated, no signal or allocation rule exists, no strategy backtest has been run, no paper-trading logic exists, and no candidate has been promoted.
 - The repaired dataset is structurally ready for model-training pre-registration, but it is not yet evidence that the technical + macro features are predictive or tradable.
+- Phase 13S/13T prepared the technical + macro dataset for registered baseline ML training, but no model has been trained yet.
+- Phase 13U may train only registered baseline models and evaluate train/validation results. It must not generate holdout predictions, create signals, run strategy backtests, deploy paper trading, promote candidates, or alter the final candidate.
+- The dataset remains technical + macro only. Fundamental and sentiment features are not yet included.
+- Any validation performance from Phase 13U will be predictive-classification evidence only, not trading-strategy evidence.
 ---
 
 # Bugs Caught and Fixed
@@ -7308,6 +7620,45 @@ reports/phase13r_quality_conclusion.csv
 reports/phase13r_repaired_macro_dataset_quality_audit.md
 ```
 
+## Phase 13S ML Model Training Pre-Registration Reports
+
+```text
+reports/phase13s_prereg_source_report_check.csv
+reports/phase13s_prereg_phase13r_result_check.csv
+reports/phase13s_prereg_dataset_schema_profile.csv
+reports/phase13s_prereg_dataset_requirement_check.csv
+reports/phase13s_prereg_target_policy.csv
+reports/phase13s_prereg_model_family_registry.csv
+reports/phase13s_prereg_preprocessing_policy.csv
+reports/phase13s_prereg_split_usage_policy.csv
+reports/phase13s_prereg_metric_registry.csv
+reports/phase13s_prereg_report_template_registry.csv
+reports/phase13s_prereg_forbidden_action_check.csv
+reports/phase13s_prereg_phase13t_boundary_check.csv
+reports/phase13s_prereg_summary.csv
+reports/phase13s_prereg_gate_report.csv
+reports/phase13s_prereg_conclusion.csv
+reports/phase13s_ml_model_training_preregistration_spec.md
+```
+
+## Phase 13T ML Training Readiness / Leakage Audit Reports
+
+```text
+reports/phase13t_readiness_report_inventory_check.csv
+reports/phase13t_readiness_phase13s_result_check.csv
+reports/phase13t_readiness_config_flag_check.csv
+reports/phase13t_readiness_dataset_readiness_check.csv
+reports/phase13t_readiness_training_protocol_check.csv
+reports/phase13t_readiness_leakage_boundary_check.csv
+reports/phase13t_readiness_forbidden_output_check.csv
+reports/phase13t_readiness_phase13u_boundary_check.csv
+reports/phase13t_readiness_scope_boundary_check.csv
+reports/phase13t_readiness_summary.csv
+reports/phase13t_readiness_gate_report.csv
+reports/phase13t_readiness_conclusion.csv
+reports/phase13t_ml_training_readiness_leakage_audit.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -7495,6 +7846,8 @@ configs/spy_sma10.yaml
 | Phase 13P macro feature repair decision/spec | Completed — repair decision/spec passed; recommended action is `implement_long_to_wide_macro_normalisation`; dataset remains labelled `technical_only_macro_blocked_dataset_v1` until future repair execution and audit; no repair/model/signal/backtest/promotion |
 | Phase 13Q macro long-to-wide repair execution and guarded dataset reassembly | Completed — long-format macro source repaired through `series_id`/`value` long-to-wide normalisation; required macro series present; macro availability ratio improved to 0.9720; dataset reassembled as `multi_factor_technical_macro_dataset_v1` with 5,219 rows, 8 value feature columns, 4 macro value feature columns, registered 63D targets, and train/validation/holdout split labels; no model/signal/backtest/paper trading/promotion |
 | Phase 13R repaired macro dataset quality / leakage audit | Completed — repaired technical + macro dataset passed macro repair quality, dataset quality, target quality, split quality, forbidden-column check, and boundary checks; confirms the dataset is now genuinely technical + macro, but still not fundamental/sentiment and still no model/signal/backtest/paper trading/promotion |
+| Phase 13S ML model training pre-registration and baseline model design spec | Completed — registered primary/secondary targets, 5 allowed model families, train-only preprocessing, split usage, metrics, calibration/confusion-matrix templates, report templates, and forbidden actions; no model training, prediction generation, feature importance, signal, backtest, paper trading, or promotion |
+| Phase 13T ML training readiness / leakage boundary audit | Completed — dataset readiness, training protocol completeness, train-only preprocessing, holdout lockout, forbidden-output absence, and Phase 13U registered-training-only boundary passed; no model training, prediction generation, feature importance, signal, backtest, paper trading, or promotion |
 ---
 
 # What Should Happen Next

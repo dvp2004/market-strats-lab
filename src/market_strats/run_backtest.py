@@ -340,6 +340,10 @@ from market_strats.analysis.macro_long_to_wide_repair_and_reaudit import (
     save_phase13q_macro_long_to_wide_repair_execution,
     save_phase13r_repaired_macro_dataset_quality_audit,
 )
+from market_strats.analysis.ml_training_prereg_and_readiness_audit import (
+    save_phase13s_ml_model_training_preregistration_spec,
+    save_phase13t_ml_training_readiness_leakage_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2178,6 +2182,16 @@ def main() -> None:
         )
 
         save_phase13r_repaired_macro_dataset_quality_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13s_ml_model_training_preregistration_spec(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13t_ml_training_readiness_leakage_audit(
             config=config,
             reports_dir=reports_dir,
         )

@@ -6593,6 +6593,310 @@ phase13r_repaired_macro_dataset_quality_audit:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_audit_role: "Repaired macro dataset quality and leakage audit only"
+phase13s_ml_model_training_preregistration_spec:
+  enabled: false
+
+  spec_role: "ML model training pre-registration and baseline model design spec only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13R"
+  proposed_next_phase: "Phase 13T"
+
+  allow_model_training: false
+  allow_model_selection: false
+  allow_prediction_generation: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13r_conclusion: "reports/phase13r_quality_conclusion.csv"
+    phase13r_gate_report: "reports/phase13r_quality_gate_report.csv"
+    repaired_dataset: "reports/phase13q_ml_feature_dataset_v1.csv"
+    dataset_metadata: "reports/phase13q_repair_dataset_metadata.csv"
+    macro_availability_report: "reports/phase13q_repair_macro_availability_report.csv"
+    split_summary: "reports/phase13q_repair_split_summary.csv"
+    target_summary: "reports/phase13q_repair_target_summary.csv"
+
+  dataset_requirements:
+    required_dataset_label: "multi_factor_technical_macro_dataset_v1"
+    min_rows: 1000
+    min_value_feature_columns: 8
+    min_macro_value_feature_columns: 4
+    required_target_columns:
+      - "future_63d_spy_return_state"
+      - "future_63d_drawdown_risk_state"
+    required_split_labels: ["train", "validation", "holdout"]
+    primary_target_id: "future_63d_spy_return_state"
+    secondary_target_id: "future_63d_drawdown_risk_state"
+    allowed_feature_prefixes:
+      - "value__technical_"
+      - "value__macro_"
+      - "state__technical_"
+      - "state__macro_"
+      - "missingness__technical_"
+      - "missingness__macro_"
+    forbidden_feature_fragments:
+      - "future_return"
+      - "future_window"
+      - "target"
+      - "signal"
+      - "allocation"
+      - "model_prediction"
+      - "strategy_return"
+      - "backtest_return"
+      - "paper_trade"
+      - "feature_importance"
+
+  target_policy:
+    primary_target:
+      target_id: "future_63d_spy_return_state"
+      target_type: "classification"
+      allowed_classes: ["supportive", "neutral", "fragile"]
+      unavailable_class: "unavailable"
+      training_rows_allowed: "train split rows with target_available=True and target != unavailable"
+      validation_rows_allowed: "validation split rows with target_available=True and target != unavailable"
+      holdout_rows_allowed: "holdout split rows with target_available=True and target != unavailable"
+      optimisation_role: "primary supervised learning target only"
+    secondary_target:
+      target_id: "future_63d_drawdown_risk_state"
+      target_type: "classification"
+      allowed_classes: ["neutral", "fragile"]
+      unavailable_class: "unavailable"
+      optimisation_role: "diagnostic risk target only; not allowed for model selection unless separately registered"
+
+  model_family_registry:
+    - model_id: "baseline_majority_class"
+      family: "dummy_classifier"
+      allowed: true
+      role: "sanity baseline"
+      selection_role: "benchmark only"
+    - model_id: "baseline_stratified_dummy"
+      family: "dummy_classifier"
+      allowed: true
+      role: "randomised class-frequency baseline"
+      selection_role: "benchmark only"
+    - model_id: "multinomial_logistic_regression"
+      family: "linear_classifier"
+      allowed: true
+      role: "interpretable baseline classifier"
+      selection_role: "candidate model family"
+    - model_id: "random_forest_classifier"
+      family: "tree_ensemble"
+      allowed: true
+      role: "non-linear baseline classifier"
+      selection_role: "candidate model family"
+    - model_id: "hist_gradient_boosting_classifier"
+      family: "boosted_trees"
+      allowed: true
+      role: "non-linear boosted baseline classifier"
+      selection_role: "candidate model family"
+
+  preprocessing_policy:
+    fit_scope: "train split only"
+    transform_scope: "train, validation, and holdout using train-fitted transformers only"
+    categorical_encoding: "one-hot encode state/missingness columns inside sklearn pipeline"
+    numeric_scaling: "standardise numeric value columns for linear models only using train-only fit"
+    imputation: "median numeric imputation and most-frequent categorical imputation fitted on train only"
+    class_imbalance_policy: "report class support and balanced metrics; no resampling unless separately registered"
+    leakage_controls:
+      - "No future-return, future-drawdown, target, signal, allocation, model-prediction, strategy-return, backtest-return, paper-trading, or feature-importance columns may enter X."
+      - "Validation may guide model-family comparison only after Phase 13U, but holdout remains untouched for model selection."
+      - "Holdout may only be evaluated once under a later registered holdout-evaluation phase."
+      - "All preprocessing must be fitted inside the training split or training window only."
+
+  split_usage_policy:
+    train_split: "fit preprocessing and model parameters"
+    validation_split: "compare registered model families and diagnose calibration/confusion matrix"
+    holdout_split: "untouched; no model selection, threshold selection, feature selection, or hyperparameter choice"
+    out_of_split_rows: "excluded from model training and validation"
+    walk_forward_now: false
+    walk_forward_later_allowed_only_after_registration: true
+
+  metric_registry:
+    primary_metrics:
+      - "balanced_accuracy"
+      - "macro_f1"
+      - "macro_recall"
+    secondary_metrics:
+      - "accuracy"
+      - "per_class_precision"
+      - "per_class_recall"
+      - "per_class_f1"
+      - "confusion_matrix"
+      - "class_support"
+    calibration_metrics:
+      - "log_loss_if_predict_proba_available"
+      - "brier_score_ovr_if_predict_proba_available"
+      - "calibration_curve_template"
+    forbidden_metrics:
+      - "strategy_return"
+      - "sharpe_ratio"
+      - "calmar_ratio"
+      - "max_drawdown"
+      - "portfolio_cagr"
+      - "trade_pnl"
+
+  report_templates:
+    required_future_training_reports:
+      - "model_registry_execution_report"
+      - "preprocessing_pipeline_report"
+      - "train_validation_metric_report"
+      - "confusion_matrix_report"
+      - "calibration_report"
+      - "class_support_report"
+      - "model_selection_boundary_report"
+      - "forbidden_output_check"
+    forbidden_future_training_reports:
+      - "signal_report"
+      - "allocation_report"
+      - "strategy_backtest_report"
+      - "paper_trading_report"
+      - "candidate_promotion_report"
+
+  phase13t_boundary:
+    allowed_next_step: "ML training readiness and leakage boundary audit only"
+    forbidden_next_step: "model training execution, model selection, prediction generation, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13t_may_audit_dataset: true
+    phase13t_may_audit_training_protocol: true
+    phase13t_may_audit_leakage_controls: true
+    phase13t_may_train_model: false
+    phase13t_may_select_model: false
+    phase13t_may_generate_predictions: false
+    phase13t_may_create_signal: false
+    phase13t_may_run_backtest: false
+    phase13t_may_deploy_paper_trading: false
+    phase13t_may_promote_candidate: false
+
+  gates:
+    require_phase13r_passed: true
+    require_source_reports_present: true
+    require_dataset_schema_profile: true
+    require_dataset_requirements_passed: true
+    require_target_policy: true
+    require_model_family_registry: true
+    min_allowed_model_families: 4
+    require_preprocessing_policy: true
+    require_split_usage_policy: true
+    require_metric_registry: true
+    require_report_templates: true
+    require_phase13t_boundary_readiness_only: true
+    require_no_model_training: true
+    require_no_model_selection: true
+    require_no_prediction_generation: true
+    require_no_feature_importance: true
+    require_no_signal_creation: true
+    require_no_strategy_backtest: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_spec_role: "ML model training pre-registration and baseline model design spec only"
+
+
+phase13t_ml_training_readiness_leakage_audit:
+  enabled: false
+
+  audit_role: "ML training readiness and leakage boundary audit only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13S"
+  proposed_next_phase: "Phase 13U"
+
+  allow_model_training: false
+  allow_model_selection: false
+  allow_prediction_generation: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase13q_macro_long_to_wide_repair_execution: false
+    phase13r_repaired_macro_dataset_quality_audit: false
+    phase13s_ml_model_training_preregistration_spec: true
+    phase13t_ml_training_readiness_leakage_audit: true
+    relative_momentum_allocator: true
+
+  phase13s_reports:
+    source_report_check: "reports/phase13s_prereg_source_report_check.csv"
+    phase13r_result_check: "reports/phase13s_prereg_phase13r_result_check.csv"
+    dataset_schema_profile: "reports/phase13s_prereg_dataset_schema_profile.csv"
+    dataset_requirement_check: "reports/phase13s_prereg_dataset_requirement_check.csv"
+    target_policy: "reports/phase13s_prereg_target_policy.csv"
+    model_family_registry: "reports/phase13s_prereg_model_family_registry.csv"
+    preprocessing_policy: "reports/phase13s_prereg_preprocessing_policy.csv"
+    split_usage_policy: "reports/phase13s_prereg_split_usage_policy.csv"
+    metric_registry: "reports/phase13s_prereg_metric_registry.csv"
+    report_template_registry: "reports/phase13s_prereg_report_template_registry.csv"
+    forbidden_action_check: "reports/phase13s_prereg_forbidden_action_check.csv"
+    phase13t_boundary_check: "reports/phase13s_prereg_phase13t_boundary_check.csv"
+    summary: "reports/phase13s_prereg_summary.csv"
+    gate_report: "reports/phase13s_prereg_gate_report.csv"
+    conclusion: "reports/phase13s_prereg_conclusion.csv"
+
+  readiness_thresholds:
+    required_dataset_label: "multi_factor_technical_macro_dataset_v1"
+    min_rows: 1000
+    min_value_feature_columns: 8
+    min_allowed_model_rows: 1000
+    min_train_rows: 1000
+    min_validation_rows: 500
+    min_holdout_rows: 500
+    min_allowed_model_families: 4
+    min_primary_metrics: 3
+    require_calibration_template: true
+    require_confusion_matrix_template: true
+    require_train_only_preprocessing: true
+    require_holdout_locked: true
+
+  forbidden_output_paths:
+    - "reports/phase13u_model_predictions.csv"
+    - "reports/phase13u_feature_importance.csv"
+    - "reports/phase13u_signal_report.csv"
+    - "reports/phase13u_strategy_backtest.csv"
+    - "reports/phase13u_paper_trading_report.csv"
+    - "reports/phase13u_candidate_promotion.csv"
+
+  phase13u_boundary:
+    allowed_next_step: "Registered baseline ML model training execution and train/validation evaluation only"
+    forbidden_next_step: "trading signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, final-candidate change, or unrestricted holdout-driven model selection"
+    phase13u_may_train_registered_models: true
+    phase13u_may_fit_train_only_preprocessing: true
+    phase13u_may_evaluate_train_validation: true
+    phase13u_may_generate_validation_predictions: true
+    phase13u_may_generate_holdout_predictions: false
+    phase13u_may_create_signal: false
+    phase13u_may_run_backtest: false
+    phase13u_may_deploy_paper_trading: false
+    phase13u_may_promote_candidate: false
+
+  gates:
+    require_phase13s_reports_present: true
+    require_phase13s_conclusion_passed: true
+    require_phase13s_gate_report_passed: true
+    require_config_flags_clean_for_run: true
+    require_dataset_readiness: true
+    require_training_protocol_completeness: true
+    require_leakage_boundary_passed: true
+    require_forbidden_outputs_absent: true
+    require_phase13u_boundary_registered_training_only: true
+    require_no_model_training: true
+    require_no_model_selection: true
+    require_no_prediction_generation: true
+    require_no_feature_importance: true
+    require_no_signal_creation: true
+    require_no_strategy_backtest: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_audit_role: "ML training readiness and leakage boundary audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
