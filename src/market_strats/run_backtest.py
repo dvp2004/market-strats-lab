@@ -370,6 +370,12 @@ from market_strats.analysis.target_feature_redesign_bundle import (
     save_phase13ai_target_feature_diagnostic_panel_execution,
     save_phase13aj_target_feature_diagnostic_result_audit,
 )
+from market_strats.analysis.redesigned_model_preregistration_bundle import (
+    save_phase13ak_target_feature_redesign_interpretation_decision,
+    save_phase13al_target_feature_redesign_checkpoint_audit,
+    save_phase13am_redesigned_model_run_preregistration,
+    save_phase13an_redesigned_model_run_readiness_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2298,6 +2304,26 @@ def main() -> None:
         )
 
         save_phase13aj_target_feature_diagnostic_result_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13ak_target_feature_redesign_interpretation_decision(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13al_target_feature_redesign_checkpoint_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13am_redesigned_model_run_preregistration(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13an_redesigned_model_run_readiness_audit(
             config=config,
             reports_dir=reports_dir,
         )

@@ -123,6 +123,10 @@ Phase 13AG–13AJ completed the target-feature redesign diagnostic checkpoint. T
 
 This is not model evidence and not trading evidence. No target variant has been selected. The result only justifies a target-feature redesign interpretation phase. Model training, holdout prediction, feature importance, signal generation, backtesting, paper trading, and promotion remain blocked.
 
+Phase 13AK–13AN completed the target-selection and redesigned-model pre-registration checkpoint. The branch selected `return_drawdown_63d_composite` as the candidate target for the next train/validation-only redesigned model run. This target improves fragile-class balance materially, with train fragile ratio 20.80% and validation fragile ratio 21.19%, compared with the original target’s failed validation fragile balance.
+
+The model run is now pre-registered and readiness-audited. The next phase may execute registered train/validation model training only. Holdout remains locked, and no model selection, feature importance, signal, backtest, paper-trading output, promotion, or final-candidate change exists.
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -7344,6 +7348,236 @@ Correct interpretation:
 
 > Phase 13AJ confirms that the target-feature redesign diagnostic was clean and useful. It does not select a target variant, train a model, generate holdout predictions, calculate feature importance, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
 
+## Phase 13AK: Target-Feature Redesign Interpretation / Candidate Target Decision
+
+Phase 13AK interpreted the Phase 13AI/13AJ target-feature redesign diagnostic panel and selected a candidate target variant for a future pre-registered redesigned model run.
+
+This phase did not train models, generate holdout predictions, select a model, calculate feature importance, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13AK Candidate Target Decision
+
+| Item | Result |
+|---|---|
+| Decision | `pre_register_redesigned_model_run` |
+| Candidate target variant | `return_drawdown_63d_composite` |
+| Backup target variants | `drawdown_63d_fragile`; `return_63d_fragile_looser` |
+| Model selected | False |
+| Holdout permission | False |
+| Feature importance permission | False |
+| Signal permission | False |
+| Backtest permission | False |
+| Candidate promotion | False |
+
+Interpretation:
+
+> `return_drawdown_63d_composite` was chosen as the candidate target for the next pre-registered model run because it was viable and highest in the pre-registered preference order. This is a target-path decision, not a model selection or trading signal.
+
+### Phase 13AK Blocked Targets
+
+| Target variant | Reason |
+|---|---|
+| `original_63d_return_state` | Original target failed validation fragile-balance gate |
+| `return_21d_future_candidate` | Blocked because 21D outcome columns are unavailable |
+| `return_126d_future_candidate` | Blocked because 126D outcome columns are unavailable |
+
+### Phase 13AK Feature Family Status
+
+| Feature family | Value columns | State columns | Missingness columns | Usable currently | Required for next model run |
+|---|---:|---:|---:|---:|---:|
+| Technical | 4 | 4 | 4 | True | True |
+| Macro | 4 | 4 | 4 | True | True |
+| Fundamental | 0 | 0 | 0 | False | False |
+| Sentiment | 0 | 0 | 0 | False | False |
+| Market stress | 0 | 0 | 0 | False | False |
+
+Interpretation:
+
+> The next model run remains technical + macro only. Fundamental, sentiment, and market-stress feature families remain future work and must not be implied as part of the current dataset.
+
+### Phase 13AK Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13AJ passed | Passed |
+| Source reports present | Passed |
+| Viable target exists | Passed |
+| Candidate target decision report exists | Passed |
+| Blocked target report exists | Passed |
+| Technical and macro feature families are available | Passed |
+| Boundaries passed | Passed |
+| Scope blocks forbidden actions | Passed |
+| Decision role is correct | Passed |
+
+Correct interpretation:
+
+> Phase 13AK authorises pre-registration of a redesigned model run using `return_drawdown_63d_composite`. It does not authorise holdout prediction, signal generation, strategy testing, or paper trading.
+
+---
+
+## Phase 13AL: Target-Feature Redesign Checkpoint Audit
+
+Phase 13AL checkpointed the Phase 13AK target decision.
+
+This phase confirmed that Phase 13AK passed, config flags were clean, Phase 13AK reports were present, the candidate-target decision was clean, forbidden overclaim phrases were absent, and Phase 13AM was correctly bounded as pre-registration only.
+
+### Phase 13AL Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13AK passed | Passed |
+| Config flags clean | Passed |
+| Phase 13AK reports present | Passed |
+| Candidate target decision clean | Passed |
+| Forbidden overclaim absent | Passed |
+| Phase 13AM boundary is pre-registration only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+Correct interpretation:
+
+> Phase 13AL validates the target-decision boundary. It does not validate a model and does not make the project paper-trading ready.
+
+---
+
+## Phase 13AM: Redesigned Model Run Pre-Registration
+
+Phase 13AM pre-registered the next redesigned model run.
+
+The run is designed to use the `return_drawdown_63d_composite` target from the Phase 13AI target-assignment panel. The run remains train/validation-only. Holdout is locked.
+
+This phase did not train models, generate holdout predictions, select a model, calculate feature importance, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13AM Model Run Spec
+
+| Item | Result |
+|---|---|
+| Run ID | `phase13ao_redesigned_target_model_run_v1` |
+| Target source | Phase 13AK candidate target |
+| Target column policy | Use target-variant column from Phase 13AI assignment panel |
+| Candidate target | `return_drawdown_63d_composite` |
+| Train split | `train` |
+| Validation split | `validation` |
+| Holdout locked | True |
+| Holdout predictions allowed | False |
+
+### Phase 13AM Registered Model Families
+
+| Model ID | Family | Notes |
+|---|---|---|
+| `baseline_majority_class` | Dummy | Most-frequent baseline |
+| `baseline_stratified_dummy` | Dummy | Stratified dummy baseline |
+| `redesigned_logistic_balanced` | Logistic Regression | Balanced class weights |
+| `redesigned_random_forest_regularised` | Random Forest | Regularised forest |
+| `redesigned_histgb_constrained` | Hist Gradient Boosting | Constrained boosting |
+
+### Phase 13AM Success Gates
+
+| Gate | Threshold / Rule |
+|---|---|
+| Minimum validation balanced-accuracy delta vs majority | 0.05 |
+| Minimum validation macro-F1 delta vs majority | 0.05 |
+| Minimum validation fragile recall | 0.20 |
+| Maximum balanced-accuracy overfit gap | 0.30 |
+| Maximum macro-F1 overfit gap | 0.30 |
+| Real model must beat stratified dummy on balanced accuracy | True |
+| Holdout predictions allowed | False |
+| Feature importance allowed | False |
+| Signal/backtest allowed | False |
+
+### Phase 13AM Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13AL passed | Passed |
+| Candidate target available | Passed |
+| Target assignment column available | Passed |
+| Feature policy registered | Passed |
+| Preprocessing policy registered | Passed |
+| Model families registered | Passed |
+| Success gates registered | Passed |
+| Boundaries passed | Passed |
+| Scope blocks forbidden actions | Passed |
+| Spec role is correct | Passed |
+
+Correct interpretation:
+
+> Phase 13AM prepares the next model run. It does not execute the model run.
+
+---
+
+## Phase 13AN: Redesigned Model Run Readiness / Leakage Audit
+
+Phase 13AN audited readiness for the redesigned model run.
+
+This phase confirmed that the candidate target column is ready, train/validation rows are sufficient, fragile-class balance is materially improved, the feature matrix is ready, forbidden feature fragments are absent, holdout is locked, and the next phase is bounded as train/validation-only model training.
+
+### Phase 13AN Target Readiness
+
+| Item | Result |
+|---|---:|
+| Candidate target variant | `return_drawdown_63d_composite` |
+| Target assignment column ready | True |
+| Train rows | 2,784 |
+| Validation rows | 1,043 |
+| Train ready | True |
+| Validation ready | True |
+| Train fragile ratio | 20.80% |
+| Validation fragile ratio | 21.19% |
+| Target balance ready | True |
+
+Interpretation:
+
+> The redesigned target fixes the original fragile-sparsity problem enough to justify a train/validation-only redesigned model run.
+
+### Phase 13AN Feature Matrix Readiness
+
+| Item | Result |
+|---|---:|
+| Numeric feature columns | 8 |
+| Categorical feature columns | 16 |
+| Total feature columns | 24 |
+| Feature matrix ready | True |
+
+### Phase 13AN Leakage / Forbidden Feature Check
+
+| Forbidden fragment | Result |
+|---|---|
+| `future_return` | Passed |
+| `future_window` | Passed |
+| `target` | Passed |
+| `signal` | Passed |
+| `allocation` | Passed |
+| `model_prediction` | Passed |
+| `strategy_return` | Passed |
+| `backtest_return` | Passed |
+| `paper_trade` | Passed |
+| `feature_importance` | Passed |
+
+### Phase 13AN Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13AM passed | Passed |
+| Config flags clean | Passed |
+| Model pre-registration reports present | Passed |
+| Candidate target column ready | Passed |
+| Train/validation rows ready | Passed |
+| Target fragile balance ready | Passed |
+| Feature matrix ready | Passed |
+| Forbidden feature fragments absent | Passed |
+| Holdout locked | Passed |
+| Phase 13AO boundary is train/validation only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+### Phase 13AN Verdict
+
+> Phase 13AN completed redesigned model run readiness and leakage audit.
+
+Correct interpretation:
+
+> The project is now ready for a registered redesigned train/validation model run. It is still not ready for holdout, signal generation, backtesting, or paper trading.
+
 ---
 
 # Methodology Notes
@@ -7572,6 +7806,11 @@ Remaining concerns include:
 - The current dataset still contains only technical and macro feature families. Fundamental, sentiment, and market-stress features remain missing.
 - Feature-target separation outputs are descriptive only. They are not feature importance, feature ranking, model evidence, or signal evidence.
 - No holdout predictions, feature importance, model selection, signal, backtest, paper-trading output, candidate promotion, or final-candidate change exists.
+- Phase 13AK–13AN did not train any model and did not prove predictive improvement.
+- `return_drawdown_63d_composite` is a candidate target for the next pre-registered model run, not a promoted target and not trading evidence.
+- The next model run is still technical + macro only. Fundamental, sentiment, and market-stress features remain unavailable.
+- Holdout remains locked. No holdout predictions have been generated.
+- No model has been selected. No feature importance has been calculated. No signal, allocation rule, strategy backtest, paper-trading output, candidate promotion, or final-candidate change exists.
 ---
 
 # Bugs Caught and Fixed
@@ -8959,6 +9198,69 @@ reports/phase13aj_redesign_audit_gate_report.csv
 reports/phase13aj_redesign_audit_conclusion.csv
 ```
 
+## Phase 13AK Target-Feature Redesign Interpretation Reports
+
+```text
+reports/phase13ak_target_decision_source_report_check.csv
+reports/phase13ak_target_decision_phase13aj_result_check.csv
+reports/phase13ak_target_decision_candidate_target_decision_report.csv
+reports/phase13ak_target_decision_blocked_target_report.csv
+reports/phase13ak_target_decision_feature_family_status_report.csv
+reports/phase13ak_target_decision_boundary_check.csv
+reports/phase13ak_target_decision_scope_boundary_check.csv
+reports/phase13ak_target_decision_summary.csv
+reports/phase13ak_target_decision_gate_report.csv
+reports/phase13ak_target_decision_conclusion.csv
+```
+
+## Phase 13AL Target-Feature Redesign Checkpoint Reports
+
+```text
+reports/phase13al_target_checkpoint_config_flag_check.csv
+reports/phase13al_target_checkpoint_report_inventory_check.csv
+reports/phase13al_target_checkpoint_phase13ak_result_check.csv
+reports/phase13al_target_checkpoint_candidate_target_boundary_check.csv
+reports/phase13al_target_checkpoint_forbidden_overclaim_check.csv
+reports/phase13al_target_checkpoint_phase13am_boundary_check.csv
+reports/phase13al_target_checkpoint_scope_boundary_check.csv
+reports/phase13al_target_checkpoint_summary.csv
+reports/phase13al_target_checkpoint_gate_report.csv
+reports/phase13al_target_checkpoint_conclusion.csv
+```
+
+## Phase 13AM Redesigned Model Run Pre-Registration Reports
+
+```text
+reports/phase13am_model_prereg_source_report_check.csv
+reports/phase13am_model_prereg_phase13al_result_check.csv
+reports/phase13am_model_prereg_model_run_spec.csv
+reports/phase13am_model_prereg_feature_policy.csv
+reports/phase13am_model_prereg_preprocessing_policy.csv
+reports/phase13am_model_prereg_registered_model_families.csv
+reports/phase13am_model_prereg_validation_success_gates.csv
+reports/phase13am_model_prereg_boundary_check.csv
+reports/phase13am_model_prereg_scope_boundary_check.csv
+reports/phase13am_model_prereg_summary.csv
+reports/phase13am_model_prereg_gate_report.csv
+reports/phase13am_model_prereg_conclusion.csv
+```
+
+## Phase 13AN Redesigned Model Run Readiness Reports
+
+```text
+reports/phase13an_model_readiness_config_flag_check.csv
+reports/phase13an_model_readiness_report_inventory_check.csv
+reports/phase13an_model_readiness_phase13am_result_check.csv
+reports/phase13an_model_readiness_target_readiness_check.csv
+reports/phase13an_model_readiness_feature_matrix_readiness_check.csv
+reports/phase13an_model_readiness_forbidden_feature_fragment_check.csv
+reports/phase13an_model_readiness_phase13ao_boundary_check.csv
+reports/phase13an_model_readiness_scope_boundary_check.csv
+reports/phase13an_model_readiness_summary.csv
+reports/phase13an_model_readiness_gate_report.csv
+reports/phase13an_model_readiness_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -9164,6 +9466,10 @@ configs/spy_sma10.yaml
 | Phase 13AH target-feature redesign readiness audit | Completed — Phase 13AG passed, config flags were clean, target variants and feature families were present, and forbidden actions remained blocked |
 | Phase 13AI target-feature diagnostic panel execution | Completed — built target feasibility, assignment, distribution, class-balance, outcome-profile, feature-family availability, feature-target separation, and redesign-screen reports; three redesigned 63D target variants were viable for future interpretation; no target variant was selected |
 | Phase 13AJ target-feature diagnostic result audit | Completed — Phase 13AI reports passed, feasible target variants existed, class-balance and economic-ordering reports were present, forbidden outputs were absent, and the next boundary is interpretation-only |
+| Phase 13AK target-feature redesign interpretation / candidate target decision | Completed — selected `return_drawdown_63d_composite` as candidate target for future pre-registered model run, with `drawdown_63d_fragile` and `return_63d_fragile_looser` as backups; this was a target-path decision only, not model selection, signal creation, backtest permission, or promotion |
+| Phase 13AL target-feature redesign checkpoint audit | Completed — Phase 13AK passed, config flags were clean, reports were present, candidate-target decision was clean, forbidden overclaims were absent, and Phase 13AM boundary was pre-registration-only |
+| Phase 13AM redesigned model run pre-registration | Completed — pre-registered `phase13ao_redesigned_target_model_run_v1` using `return_drawdown_63d_composite`, technical + macro features, train-only preprocessing, dummy baselines, balanced logistic regression, regularised random forest, and constrained HistGB; holdout remains locked |
+| Phase 13AN redesigned model run readiness / leakage audit | Completed — candidate target column ready, train/validation rows ready, target fragile balance ready, 24 feature columns ready, forbidden feature fragments absent, holdout locked, and Phase 13AO boundary is train/validation-only |
 ---
 
 # What Should Happen Next
