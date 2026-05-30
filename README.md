@@ -109,6 +109,10 @@ Phase 13W/13X moved the ML branch from first validation training output into dis
 
 Therefore, the ML branch may continue, but not to holdout evaluation yet. The next serious work should repair or diagnose the modelling weakness — especially fragile-class recall and overfit control — before any future holdout pre-registration.
 
+Phase 13Y–13AB corrected the Phase 13Y boundary and executed a registered diagnostic repair attempt. The repair execution was clean and leakage-bounded, but it failed to fix the core modelling weakness. Fragile-class recall remained unacceptable across all variants, and the best validation repair did not beat the original Phase 13U Random Forest.
+
+This means the issue is probably not a shallow hyperparameter/class-weighting problem. The next serious question is whether the fragile target definition, class balance, horizon, or current technical + macro feature set is insufficient for detecting adverse regimes.
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -6787,6 +6791,191 @@ Correct interpretation:
 
 > Phase 13X confirmed that the ML branch remains bounded, report-consistent, and free from overclaiming. However, Phase 13W’s actual decision means the next substantive phase should be model diagnostic repair pre-registration, not holdout evaluation execution.
 
+## Phase 13Y: ML Diagnostic Repair Pre-Registration Spec
+
+Phase 13Y corrected the Phase 13Y boundary after Phase 13W/13X showed that direct holdout pre-registration was not justified.
+
+Phase 13W’s continuation decision was `continue_only_after_model_diagnostic_repair`, because Random Forest showed validation signal but also had severe weaknesses: all real models triggered overfit warnings and the diagnostic-leading Random Forest had 0.0 fragile-class recall.
+
+Phase 13Y therefore pre-registered a diagnostic repair path before any holdout evaluation.
+
+This phase did not execute repair models, train new models, select a model, generate holdout predictions, calculate feature importance, create signals, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13Y Registered Repair Targets
+
+| Repair target | Problem | Required direction |
+|---|---|---|
+| `fragile_class_recall` | Diagnostic-leading model had 0.0 fragile-class validation recall | Increase fragile-class recall without destroying validation balanced accuracy |
+| `overfit_control` | All real models triggered overfit warnings | Reduce train-validation metric gap |
+| `baseline_edge_preservation` | Random Forest edge exists but is not robust enough for holdout | Preserve material edge versus dummy baselines |
+
+### Phase 13Y Registered Repair Hypotheses
+
+| Repair ID | Base family | Hypothesis |
+|---|---|---|
+| `rf_repair_shallow_regularised` | Random Forest | Shallower trees and larger leaves may reduce overfit while preserving validation edge |
+| `rf_repair_fragile_weighted` | Random Forest | Fragile-class weighting may improve fragile recall |
+| `logistic_repair_high_regularisation` | Logistic Regression | Stronger regularisation may reduce linear-model overfit |
+| `histgb_repair_shallow_l2` | Hist Gradient Boosting | Shallow boosted trees with L2 regularisation may reduce severe overfit |
+
+### Phase 13Y Success Gates
+
+| Gate | Threshold |
+|---|---:|
+| Minimum validation fragile recall | 0.20 |
+| Minimum delta balanced accuracy vs majority | 0.05 |
+| Minimum delta macro F1 vs majority | 0.05 |
+| Maximum balanced-accuracy overfit gap | 0.30 |
+| Maximum macro-F1 overfit gap | 0.30 |
+| Holdout predictions allowed | False |
+| Feature importance allowed | False |
+| Signal/backtest allowed | False |
+
+### Phase 13Y Verdict
+
+> Phase 13Y completed ML diagnostic repair pre-registration.
+
+Correct interpretation:
+
+> Phase 13Y registered repair hypotheses and success gates only. It did not execute repairs, generate holdout predictions, select a model, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+---
+
+## Phase 13Z: ML Diagnostic Repair Readiness / Boundary Audit
+
+Phase 13Z audited whether the Phase 13Y repair pre-registration was ready for execution.
+
+This phase confirmed that Phase 13Y passed, config flags were clean, repair hypotheses were present, success gates were present, and forbidden actions remained blocked.
+
+This phase did not execute repair models, train models, select a model, generate holdout predictions, calculate feature importance, create signals, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13Z Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13Y passed | Passed |
+| Config flags clean | Passed |
+| Repair hypotheses present | Passed |
+| Success gates present | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+### Phase 13Z Verdict
+
+> Phase 13Z completed ML diagnostic repair readiness audit.
+
+Correct interpretation:
+
+> Phase 13Z allowed repair execution, but only under the registered train/validation-only boundary.
+
+---
+
+## Phase 13AA: Registered ML Diagnostic Repair Execution
+
+Phase 13AA executed the registered repair variants from Phase 13Y.
+
+This phase trained only the registered repair models, used train/validation evaluation only, generated validation predictions only, and produced metric, recall, overfit, and success reports.
+
+This phase did not generate holdout predictions, calculate feature importance, select a model, create signals, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13AA Repair Metrics
+
+| Repair ID | Split | Balanced accuracy | Macro F1 | Macro recall |
+|---|---|---:|---:|---:|
+| `rf_repair_shallow_regularised` | Train | 0.6528 | 0.6423 | 0.6528 |
+| `rf_repair_shallow_regularised` | Validation | 0.3968 | 0.3761 | 0.3968 |
+| `rf_repair_fragile_weighted` | Train | 0.6943 | 0.6995 | 0.6943 |
+| `rf_repair_fragile_weighted` | Validation | 0.4157 | 0.3919 | 0.4157 |
+| `logistic_repair_high_regularisation` | Train | 0.7314 | 0.7120 | 0.7314 |
+| `logistic_repair_high_regularisation` | Validation | 0.3670 | 0.3329 | 0.3670 |
+| `histgb_repair_shallow_l2` | Train | 0.8747 | 0.8709 | 0.8747 |
+| `histgb_repair_shallow_l2` | Validation | 0.3857 | 0.3606 | 0.3857 |
+
+### Phase 13AA Fragile-Class Recall
+
+| Repair ID | Fragile validation support | Fragile validation recall | Warning |
+|---|---:|---:|---|
+| `rf_repair_shallow_regularised` | 102 | 0.0000 | True |
+| `rf_repair_fragile_weighted` | 102 | 0.0000 | True |
+| `logistic_repair_high_regularisation` | 102 | 0.0000 | True |
+| `histgb_repair_shallow_l2` | 102 | 0.0098 | True |
+
+Important interpretation:
+
+> The repair attempt failed to fix the fragile-class problem. Even the fragile-weighted Random Forest still had 0.0 fragile recall.
+
+### Phase 13AA Overfit Diagnostic
+
+| Repair ID | Train balanced accuracy | Validation balanced accuracy | Balanced accuracy gap | Train macro F1 | Validation macro F1 | Macro F1 gap |
+|---|---:|---:|---:|---:|---:|---:|
+| `rf_repair_shallow_regularised` | 0.6528 | 0.3968 | 0.2559 | 0.6423 | 0.3761 | 0.2662 |
+| `rf_repair_fragile_weighted` | 0.6943 | 0.4157 | 0.2786 | 0.6995 | 0.3919 | 0.3077 |
+| `logistic_repair_high_regularisation` | 0.7314 | 0.3670 | 0.3645 | 0.7120 | 0.3329 | 0.3791 |
+| `histgb_repair_shallow_l2` | 0.8747 | 0.3857 | 0.4890 | 0.8709 | 0.3606 | 0.5103 |
+
+Interpretation:
+
+> Shallow Random Forest reduced overfit, but it did not fix fragile recall and did not preserve the original Random Forest validation strength.
+
+### Phase 13AA Success Report
+
+| Repair ID | Validation balanced accuracy | Validation macro F1 | Fragile recall | Delta balanced accuracy vs majority | Delta macro F1 vs majority | Result |
+|---|---:|---:|---:|---:|---:|---|
+| `rf_repair_shallow_regularised` | 0.3968 | 0.3761 | 0.0000 | +0.0635 | +0.1712 | Failed fragile recall |
+| `rf_repair_fragile_weighted` | 0.4157 | 0.3919 | 0.0000 | +0.0824 | +0.1869 | Failed fragile recall |
+| `logistic_repair_high_regularisation` | 0.3670 | 0.3329 | 0.0000 | +0.0336 | +0.1279 | Failed fragile recall and weak balanced-accuracy edge |
+| `histgb_repair_shallow_l2` | 0.3857 | 0.3606 | 0.0098 | +0.0524 | +0.1557 | Failed fragile recall and overfit |
+
+### Phase 13AA Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13Z passed | Passed |
+| Repair models trained | Passed |
+| Metric report exists | Passed |
+| Class recall report exists | Passed |
+| Overfit report exists | Passed |
+| Validation predictions only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Execution role is correct | Passed |
+
+### Phase 13AA Verdict
+
+> Phase 13AA completed registered ML diagnostic repair execution.
+
+Correct interpretation:
+
+> Phase 13AA executed the registered repair variants successfully, but the repair hypotheses did not solve the core fragile-class recall problem. This is a negative research result, not a model-improvement checkpoint.
+
+---
+
+## Phase 13AB: ML Diagnostic Repair Result Quality / Leakage Audit
+
+Phase 13AB audited the Phase 13AA repair execution outputs.
+
+This phase confirmed that Phase 13AA passed, result reports were present, validation predictions were validation-only, and forbidden actions remained blocked.
+
+This phase did not generate holdout predictions, select a model, calculate feature importance, create signals, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13AB Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13AA passed | Passed |
+| Result reports present | Passed |
+| Repair success report exists | Passed |
+| Validation predictions only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+### Phase 13AB Verdict
+
+> Phase 13AB completed ML diagnostic repair result quality audit.
+
+Correct interpretation:
+
+> Phase 13AB confirmed the repair execution was clean and leakage-bounded. It did not validate a repaired model, did not justify holdout evaluation, did not create trading evidence, and did not promote anything.
+
 ---
 
 # Methodology Notes
@@ -6995,6 +7184,13 @@ Remaining concerns include:
 - The fragile class remains the major unresolved ML weakness. This matters because a future market-decision model that misses fragile regimes would be dangerous and inconsistent with the project’s defensive objective.
 - No model has been selected. No holdout predictions have been generated. No feature importance has been calculated. No signal, allocation rule, backtest, paper-trading output, candidate promotion, or final-candidate change exists.
 - The current evidence remains validation-only classification evidence, not trading evidence.
+- Phase 13Y–13AB did not produce a successful repaired model. The registered repair variants failed to fix fragile-class recall.
+- The best repair by validation balanced accuracy was `rf_repair_fragile_weighted`, but it still had 0.0 fragile recall and underperformed the original Phase 13U Random Forest validation result.
+- `rf_repair_shallow_regularised` reduced overfit gap below the configured threshold, but it also weakened validation performance and still had 0.0 fragile recall.
+- `histgb_repair_shallow_l2` slightly improved fragile recall from 0.0 to 0.0098, but this is nowhere near the 0.20 success gate and the model remained heavily overfit.
+- Holdout evaluation remains blocked. No holdout predictions have been generated.
+- No model has been selected. No feature importance has been calculated. No signal, allocation rule, strategy backtest, paper-trading output, candidate promotion, or final-candidate change exists.
+- The ML branch now has a deeper problem: the technical + macro feature/target setup is not capturing fragile regimes reliably enough.
 ---
 
 # Bugs Caught and Fixed
@@ -8209,6 +8405,61 @@ reports/phase13x_checkpoint_conclusion.csv
 reports/phase13x_ml_branch_checkpoint_audit.md
 ```
 
+## Phase 13Y ML Diagnostic Repair Pre-Registration Reports
+
+```text
+reports/phase13y_repair_prereg_source_report_check.csv
+reports/phase13y_repair_prereg_phase13x_result_check.csv
+reports/phase13y_repair_prereg_repair_target_registry.csv
+reports/phase13y_repair_prereg_hypothesis_registry.csv
+reports/phase13y_repair_prereg_success_gate_registry.csv
+reports/phase13y_repair_prereg_boundary_check.csv
+reports/phase13y_repair_prereg_scope_boundary_check.csv
+reports/phase13y_repair_prereg_summary.csv
+reports/phase13y_repair_prereg_gate_report.csv
+reports/phase13y_repair_prereg_conclusion.csv
+```
+
+## Phase 13Z ML Diagnostic Repair Readiness Reports
+
+```text
+reports/phase13z_repair_readiness_report_inventory_check.csv
+reports/phase13z_repair_readiness_phase13y_result_check.csv
+reports/phase13z_repair_readiness_config_flag_check.csv
+reports/phase13z_repair_readiness_scope_boundary_check.csv
+reports/phase13z_repair_readiness_summary.csv
+reports/phase13z_repair_readiness_gate_report.csv
+reports/phase13z_repair_readiness_conclusion.csv
+```
+
+## Phase 13AA Registered ML Diagnostic Repair Execution Reports
+
+```text
+reports/phase13aa_repair_execution_phase13z_result_check.csv
+reports/phase13aa_repair_execution_model_execution_report.csv
+reports/phase13aa_repair_execution_metric_report.csv
+reports/phase13aa_repair_execution_class_recall_report.csv
+reports/phase13aa_repair_execution_overfit_report.csv
+reports/phase13aa_repair_execution_success_report.csv
+reports/phase13aa_repair_execution_validation_predictions.csv
+reports/phase13aa_repair_execution_scope_boundary_check.csv
+reports/phase13aa_repair_execution_summary.csv
+reports/phase13aa_repair_execution_gate_report.csv
+reports/phase13aa_repair_execution_conclusion.csv
+```
+
+## Phase 13AB ML Diagnostic Repair Result Audit Reports
+
+```text
+reports/phase13ab_repair_audit_report_inventory_check.csv
+reports/phase13ab_repair_audit_phase13aa_result_check.csv
+reports/phase13ab_repair_audit_prediction_boundary_check.csv
+reports/phase13ab_repair_audit_scope_boundary_check.csv
+reports/phase13ab_repair_audit_summary.csv
+reports/phase13ab_repair_audit_gate_report.csv
+reports/phase13ab_repair_audit_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -8402,6 +8653,10 @@ configs/spy_sma10.yaml
 | Phase 13V ML training result quality / leakage audit | Completed — training-output quality, metrics quality, validation-only prediction boundary, forbidden-output absence, and Phase 13W interpretation-only boundary passed; no holdout predictions, feature importance, signal, backtest, paper trading, model selection, or promotion |
 | Phase 13W ML validation result interpretation / continuation decision | Completed — validation-only evidence interpreted; Random Forest was diagnostic-leading with validation balanced accuracy 0.4253 and macro F1 0.4010, but all real models triggered overfit warnings and Random Forest fragile-class recall was 0.0; decision: `continue_only_after_model_diagnostic_repair`; no model selection, holdout prediction, feature importance, signal, backtest, paper trading, promotion, or final-candidate change |
 | Phase 13X ML branch checkpoint / report-config consistency audit | Completed — Phase 13W reports, gates, config flags, interpretation boundaries, forbidden overclaim checks, and checkpoint consistency passed; no model training, model selection, holdout prediction, feature importance, signal, backtest, paper trading, promotion, or final-candidate change |
+| Phase 13Y ML diagnostic repair pre-registration | Completed — corrected Phase 13Y boundary from holdout pre-registration to diagnostic repair pre-registration; registered fragile-recall, overfit-control, and baseline-edge-preservation repair targets plus four repair hypotheses; no repair execution, holdout prediction, model selection, feature importance, signal, backtest, paper trading, promotion, or final-candidate change |
+| Phase 13Z ML diagnostic repair readiness audit | Completed — Phase 13Y passed, config flags were clean, repair hypotheses and success gates were present, and forbidden actions remained blocked; no repair execution, holdout prediction, model selection, feature importance, signal, backtest, paper trading, promotion, or final-candidate change |
+| Phase 13AA registered ML diagnostic repair execution | Completed mechanically — four registered repair variants trained and produced train/validation-only metrics, class-recall, overfit, success, and validation-prediction reports; repair attempt failed economically because fragile recall remained 0.0 for three variants and only 0.0098 for the shallow HistGB variant; no holdout prediction, model selection, feature importance, signal, backtest, paper trading, promotion, or final-candidate change |
+| Phase 13AB ML diagnostic repair result quality audit | Completed — repair outputs were present, validation predictions were validation-only, and forbidden actions remained blocked; this audit validates execution cleanliness, not repair success |
 ---
 
 # What Should Happen Next

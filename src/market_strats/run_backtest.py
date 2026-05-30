@@ -352,6 +352,12 @@ from market_strats.analysis.ml_validation_interpretation_and_checkpoint import (
     save_phase13w_ml_validation_interpretation_decision,
     save_phase13x_ml_branch_checkpoint_audit,
 )
+from market_strats.analysis.ml_diagnostic_repair_bundle import (
+    save_phase13aa_registered_ml_diagnostic_repair_execution,
+    save_phase13ab_ml_diagnostic_repair_result_audit,
+    save_phase13y_ml_diagnostic_repair_preregistration,
+    save_phase13z_ml_diagnostic_repair_readiness_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2223,6 +2229,26 @@ def main() -> None:
             config=config,
             reports_dir=reports_dir,
         )
+
+        save_phase13y_ml_diagnostic_repair_preregistration(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13z_ml_diagnostic_repair_readiness_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    save_phase13aa_registered_ml_diagnostic_repair_execution(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+    save_phase13ab_ml_diagnostic_repair_result_audit(
+        config=config,
+        reports_dir=reports_dir,
+    )
 
     save_final_strategy_decision_report(reports_dir)
 

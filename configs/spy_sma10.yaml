@@ -7356,6 +7356,239 @@ phase13x_ml_branch_checkpoint_audit:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_audit_role: "ML branch checkpoint and report-config consistency audit only"
+phase13y_ml_diagnostic_repair_preregistration:
+  enabled: false
+  spec_role: "ML diagnostic repair pre-registration spec only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13X"
+  proposed_next_phase: "Phase 13Z"
+
+  allow_repair_execution: false
+  allow_model_training: false
+  allow_model_selection: false
+  allow_holdout_prediction_generation: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13x_conclusion: "reports/phase13x_checkpoint_conclusion.csv"
+    phase13x_gate_report: "reports/phase13x_checkpoint_gate_report.csv"
+    continuation_decision_report: "reports/phase13w_interpretation_continuation_decision_report.csv"
+    overfit_diagnostic_report: "reports/phase13w_interpretation_overfit_diagnostic_report.csv"
+    class_recall_report: "reports/phase13w_interpretation_class_recall_report.csv"
+    baseline_comparison_report: "reports/phase13w_interpretation_dummy_comparison_report.csv"
+    dataset: "reports/phase13q_ml_feature_dataset_v1.csv"
+
+  repair_targets:
+    - target_id: "fragile_class_recall"
+      problem: "diagnostic leading model had 0.0 fragile-class validation recall"
+      required_direction: "increase fragile-class recall without destroying validation balanced accuracy"
+    - target_id: "overfit_control"
+      problem: "all real models triggered overfit warnings"
+      required_direction: "reduce train-validation metric gap"
+    - target_id: "baseline_edge_preservation"
+      problem: "Random Forest edge exists but is not robust enough for holdout"
+      required_direction: "preserve material edge versus dummy baselines"
+
+  registered_repair_hypotheses:
+    - repair_id: "rf_repair_shallow_regularised"
+      base_model_family: "random_forest"
+      hypothesis: "shallower trees and larger leaves may reduce overfit while preserving validation edge"
+      allowed: true
+      max_depth: 2
+      min_samples_leaf: 50
+      n_estimators: 300
+    - repair_id: "rf_repair_fragile_weighted"
+      base_model_family: "random_forest"
+      hypothesis: "fragile-class weighting may improve fragile recall"
+      allowed: true
+      max_depth: 3
+      min_samples_leaf: 30
+      n_estimators: 300
+      class_weight:
+        supportive: 1.0
+        neutral: 1.0
+        fragile: 3.0
+    - repair_id: "logistic_repair_high_regularisation"
+      base_model_family: "logistic_regression"
+      hypothesis: "stronger regularisation may reduce linear-model overfit"
+      allowed: true
+      C: 0.25
+      max_iter: 1000
+    - repair_id: "histgb_repair_shallow_l2"
+      base_model_family: "hist_gradient_boosting"
+      hypothesis: "shallow boosted trees with L2 regularisation may reduce severe overfit"
+      allowed: true
+      max_iter: 80
+      learning_rate: 0.03
+      max_leaf_nodes: 7
+      l2_regularization: 1.0
+
+  repair_success_gates:
+    min_validation_fragile_recall: 0.20
+    min_delta_balanced_accuracy_vs_majority: 0.05
+    min_delta_macro_f1_vs_majority: 0.05
+    max_balanced_accuracy_overfit_gap: 0.30
+    max_macro_f1_overfit_gap: 0.30
+    require_no_holdout_predictions: true
+    require_no_feature_importance: true
+    require_no_signal: true
+    require_no_backtest: true
+
+  phase13z_boundary:
+    allowed_next_step: "ML diagnostic repair readiness and boundary audit only"
+    forbidden_next_step: "repair execution, holdout prediction generation, model selection, feature importance, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+
+  phase13aa_boundary:
+    allowed_future_step: "Registered ML diagnostic repair execution on train/validation only"
+    forbidden_future_step: "holdout prediction generation, model selection, feature importance, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+
+  gates:
+    require_phase13x_passed: true
+    require_continuation_decision_is_repair: true
+    require_repair_targets_registered: true
+    require_repair_hypotheses_registered: true
+    require_success_gates_registered: true
+    require_phase13z_boundary_readiness_only: true
+    require_phase13aa_boundary_train_validation_only: true
+    required_spec_role: "ML diagnostic repair pre-registration spec only"
+phase13z_ml_diagnostic_repair_readiness_audit:
+  enabled: false
+  audit_role: "ML diagnostic repair readiness and boundary audit only"
+  source_phase: "Phase 13Y"
+  proposed_next_phase: "Phase 13AA"
+
+  allow_repair_execution: false
+  allow_model_training: false
+  allow_model_selection: false
+  allow_holdout_prediction_generation: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_strategy_backtest: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase13w_ml_validation_interpretation_decision: false
+    phase13x_ml_branch_checkpoint_audit: false
+    phase13y_ml_diagnostic_repair_preregistration: true
+    phase13z_ml_diagnostic_repair_readiness_audit: true
+    phase13aa_registered_ml_diagnostic_repair_execution: true
+    phase13ab_ml_diagnostic_repair_result_audit: true
+    relative_momentum_allocator: true
+
+  phase13y_reports:
+    conclusion: "reports/phase13y_repair_prereg_conclusion.csv"
+    gate_report: "reports/phase13y_repair_prereg_gate_report.csv"
+    repair_hypothesis_registry: "reports/phase13y_repair_prereg_hypothesis_registry.csv"
+    repair_success_gate_registry: "reports/phase13y_repair_prereg_success_gate_registry.csv"
+
+  gates:
+    require_phase13y_passed: true
+    require_config_flags_clean: true
+    require_repair_hypotheses_present: true
+    require_success_gates_present: true
+    require_no_holdout_permission: true
+    require_no_signal_backtest_promotion_permission: true
+    required_audit_role: "ML diagnostic repair readiness and boundary audit only"
+phase13aa_registered_ml_diagnostic_repair_execution:
+  enabled: false
+  execution_role: "Registered ML diagnostic repair execution on train/validation only"
+  source_phase: "Phase 13Z"
+  proposed_next_phase: "Phase 13AB"
+
+  allow_repair_execution: true
+  allow_model_training: true
+  allow_train_validation_evaluation: true
+  allow_validation_prediction_generation: true
+  allow_holdout_prediction_generation: false
+  allow_model_selection: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_strategy_backtest: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13z_conclusion: "reports/phase13z_repair_readiness_conclusion.csv"
+    phase13z_gate_report: "reports/phase13z_repair_readiness_gate_report.csv"
+    dataset: "reports/phase13q_ml_feature_dataset_v1.csv"
+    baseline_comparison_report: "reports/phase13u_ml_baseline_comparison_report.csv"
+
+  dataset_policy:
+    dataset_label_required: "multi_factor_technical_macro_dataset_v1"
+    primary_target_id: "future_63d_spy_return_state"
+    target_available_column: "target_available"
+    train_split_label: "train"
+    validation_split_label: "validation"
+    allowed_target_classes: ["supportive", "neutral", "fragile"]
+    unavailable_target_class: "unavailable"
+    feature_prefixes:
+      numeric: ["value__technical_", "value__macro_"]
+      categorical: ["state__technical_", "state__macro_", "missingness__technical_", "missingness__macro_"]
+    forbidden_feature_fragments:
+      - "future_return"
+      - "future_window"
+      - "target"
+      - "signal"
+      - "allocation"
+      - "model_prediction"
+      - "strategy_return"
+      - "backtest_return"
+      - "paper_trade"
+      - "feature_importance"
+
+  gates:
+    require_phase13z_passed: true
+    require_repair_models_trained: true
+    require_validation_predictions_only: true
+    require_repair_metric_report: true
+    require_repair_class_recall_report: true
+    require_repair_overfit_report: true
+    require_no_holdout_predictions: true
+    require_no_feature_importance: true
+    require_no_signal_backtest_promotion: true
+    required_execution_role: "Registered ML diagnostic repair execution on train/validation only"
+phase13ab_ml_diagnostic_repair_result_audit:
+  enabled: false
+  audit_role: "ML diagnostic repair result quality and leakage audit only"
+  source_phase: "Phase 13AA"
+  proposed_next_phase: "Phase 13AC"
+
+  allow_holdout_prediction_generation: false
+  allow_model_selection: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_strategy_backtest: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  phase13aa_reports:
+    conclusion: "reports/phase13aa_repair_execution_conclusion.csv"
+    gate_report: "reports/phase13aa_repair_execution_gate_report.csv"
+    repair_metric_report: "reports/phase13aa_repair_execution_metric_report.csv"
+    repair_class_recall_report: "reports/phase13aa_repair_execution_class_recall_report.csv"
+    repair_overfit_report: "reports/phase13aa_repair_execution_overfit_report.csv"
+    repair_success_report: "reports/phase13aa_repair_execution_success_report.csv"
+    validation_predictions: "reports/phase13aa_repair_execution_validation_predictions.csv"
+
+  gates:
+    require_phase13aa_passed: true
+    require_result_reports_present: true
+    require_validation_predictions_only: true
+    require_no_holdout_predictions: true
+    require_no_model_selection: true
+    require_no_feature_importance: true
+    require_no_signal_backtest_promotion: true
+    required_audit_role: "ML diagnostic repair result quality and leakage audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
