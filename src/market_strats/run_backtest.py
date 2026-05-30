@@ -348,6 +348,10 @@ from market_strats.analysis.ml_registered_training_and_result_audit import (
     save_phase13u_registered_baseline_ml_training,
     save_phase13v_ml_training_result_quality_audit,
 )
+from market_strats.analysis.ml_validation_interpretation_and_checkpoint import (
+    save_phase13w_ml_validation_interpretation_decision,
+    save_phase13x_ml_branch_checkpoint_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2206,6 +2210,16 @@ def main() -> None:
         )
 
         save_phase13v_ml_training_result_quality_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13w_ml_validation_interpretation_decision(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13x_ml_branch_checkpoint_audit(
             config=config,
             reports_dir=reports_dir,
         )

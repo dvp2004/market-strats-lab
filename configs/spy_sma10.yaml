@@ -6896,7 +6896,7 @@ phase13t_ml_training_readiness_leakage_audit:
     require_no_final_candidate_change: true
     required_audit_role: "ML training readiness and leakage boundary audit only"
 phase13u_registered_baseline_ml_training:
-  enabled: true
+  enabled: false
 
   execution_role: "Registered baseline ML training execution and train/validation evaluation only"
   phase_branch: "Phase 13 multi-factor model architecture planning"
@@ -7056,10 +7056,8 @@ phase13u_registered_baseline_ml_training:
     require_no_final_candidate_change: true
     require_phase13v_boundary_quality_audit_only: true
     required_execution_role: "Registered baseline ML training execution and train/validation evaluation only"
-
-
 phase13v_ml_training_result_quality_audit:
-  enabled: true
+  enabled: false
 
   audit_role: "ML training result quality and leakage audit only"
   phase_branch: "Phase 13 multi-factor model architecture planning"
@@ -7153,6 +7151,211 @@ phase13v_ml_training_result_quality_audit:
     require_no_final_candidate_change: true
     require_phase13w_boundary_interpretation_only: true
     required_audit_role: "ML training result quality and leakage audit only"
+phase13w_ml_validation_interpretation_decision:
+  enabled: false
+
+  interpretation_role: "ML validation result interpretation and continuation decision only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13V"
+  proposed_next_phase: "Phase 13X"
+
+  allow_model_training: false
+  allow_model_selection: false
+  allow_prediction_generation: false
+  allow_holdout_prediction_generation: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13v_conclusion: "reports/phase13v_quality_conclusion.csv"
+    phase13v_gate_report: "reports/phase13v_quality_gate_report.csv"
+    metric_report: "reports/phase13u_ml_train_validation_metric_report.csv"
+    baseline_comparison_report: "reports/phase13u_ml_baseline_comparison_report.csv"
+    confusion_matrix_report: "reports/phase13u_ml_confusion_matrix_report.csv"
+    calibration_report: "reports/phase13u_ml_calibration_report.csv"
+    class_support_report: "reports/phase13u_ml_class_support_report.csv"
+    validation_predictions: "reports/phase13u_ml_validation_predictions.csv"
+    phase13u_forbidden_output_check: "reports/phase13u_ml_forbidden_output_check.csv"
+    phase13v_forbidden_output_check: "reports/phase13v_quality_forbidden_output_check.csv"
+
+  interpretation_thresholds:
+    majority_baseline_model_id: "baseline_majority_class"
+    stratified_baseline_model_id: "baseline_stratified_dummy"
+    real_model_ids:
+      - "multinomial_logistic_regression"
+      - "random_forest_classifier"
+      - "hist_gradient_boosting_classifier"
+    min_material_delta_balanced_accuracy_vs_majority: 0.05
+    min_material_delta_macro_f1_vs_majority: 0.05
+    min_delta_balanced_accuracy_vs_stratified: 0.03
+    max_overfit_gap_balanced_accuracy_warning: 0.25
+    max_overfit_gap_macro_f1_warning: 0.25
+    fragile_class_min_validation_recall_warning: 0.20
+    require_real_model_beats_majority: true
+    require_real_model_beats_stratified: true
+    require_no_holdout_predictions: true
+    require_no_forbidden_outputs: true
+
+  decision_policy:
+    if_material_edge_and_boundaries_clean: "continue_to_holdout_preregistration"
+    if_weak_edge_or_severe_class_failure: "continue_only_after_model_diagnostic_repair"
+    if_no_real_model_beats_dummy: "stop_ml_branch_or_return_to_features"
+    decision_is_not_model_selection: true
+    leading_model_is_diagnostic_only: true
+    no_model_promotion: true
+    no_signal_permission: true
+    no_backtest_permission: true
+    no_holdout_permission_until_future_prereg: true
+
+  phase13x_boundary:
+    allowed_next_step: "ML branch checkpoint and report-config consistency audit only"
+    forbidden_next_step: "new model training, model selection, holdout prediction generation, feature importance, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13x_may_audit_reports: true
+    phase13x_may_audit_config_flags: true
+    phase13x_may_audit_interpretation_boundaries: true
+    phase13x_may_train_model: false
+    phase13x_may_select_model: false
+    phase13x_may_generate_holdout_predictions: false
+    phase13x_may_create_signal: false
+    phase13x_may_run_backtest: false
+    phase13x_may_promote_candidate: false
+
+  phase13y_boundary:
+    allowed_future_step: "Holdout evaluation pre-registration spec only"
+    forbidden_future_step: "holdout prediction execution, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13y_may_preregister_holdout_evaluation: true
+    phase13y_may_generate_holdout_predictions: false
+    phase13y_may_select_model: false
+    phase13y_may_create_signal: false
+    phase13y_may_run_backtest: false
+    phase13y_may_promote_candidate: false
+
+  gates:
+    require_phase13v_passed: true
+    require_source_reports_present: true
+    require_validation_ranking_report: true
+    require_dummy_comparison_report: true
+    require_overfit_diagnostic_report: true
+    require_class_recall_report: true
+    require_continuation_decision_report: true
+    require_phase13x_boundary_checkpoint_only: true
+    require_phase13y_boundary_prereg_only: true
+    require_no_model_training: true
+    require_no_model_selection: true
+    require_no_prediction_generation: true
+    require_no_holdout_prediction_generation: true
+    require_no_feature_importance: true
+    require_no_signal_creation: true
+    require_no_strategy_backtest: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_interpretation_role: "ML validation result interpretation and continuation decision only"
+phase13x_ml_branch_checkpoint_audit:
+  enabled: false
+
+  audit_role: "ML branch checkpoint and report-config consistency audit only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13W"
+  proposed_next_phase: "Phase 13Y"
+
+  allow_model_training: false
+  allow_model_selection: false
+  allow_prediction_generation: false
+  allow_holdout_prediction_generation: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_empirical_return_weights: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase13u_registered_baseline_ml_training: false
+    phase13v_ml_training_result_quality_audit: false
+    phase13w_ml_validation_interpretation_decision: true
+    phase13x_ml_branch_checkpoint_audit: true
+    relative_momentum_allocator: true
+
+  phase13w_reports:
+    source_report_check: "reports/phase13w_interpretation_source_report_check.csv"
+    phase13v_result_check: "reports/phase13w_interpretation_phase13v_result_check.csv"
+    validation_ranking_report: "reports/phase13w_interpretation_validation_ranking_report.csv"
+    dummy_comparison_report: "reports/phase13w_interpretation_dummy_comparison_report.csv"
+    overfit_diagnostic_report: "reports/phase13w_interpretation_overfit_diagnostic_report.csv"
+    class_recall_report: "reports/phase13w_interpretation_class_recall_report.csv"
+    continuation_decision_report: "reports/phase13w_interpretation_continuation_decision_report.csv"
+    phase13x_boundary_check: "reports/phase13w_interpretation_phase13x_boundary_check.csv"
+    phase13y_boundary_check: "reports/phase13w_interpretation_phase13y_boundary_check.csv"
+    scope_boundary_check: "reports/phase13w_interpretation_scope_boundary_check.csv"
+    summary: "reports/phase13w_interpretation_summary.csv"
+    gate_report: "reports/phase13w_interpretation_gate_report.csv"
+    conclusion: "reports/phase13w_interpretation_conclusion.csv"
+
+  checkpoint_reports:
+    required_phase13_reports:
+      - "reports/phase13q_ml_feature_dataset_v1.csv"
+      - "reports/phase13r_quality_conclusion.csv"
+      - "reports/phase13s_prereg_conclusion.csv"
+      - "reports/phase13t_readiness_conclusion.csv"
+      - "reports/phase13u_ml_conclusion.csv"
+      - "reports/phase13v_quality_conclusion.csv"
+      - "reports/phase13w_interpretation_conclusion.csv"
+    required_interpretation_phrases:
+      - "classification"
+      - "validation"
+      - "no holdout"
+      - "no signal"
+      - "no backtest"
+      - "no promotion"
+    forbidden_overclaim_phrases:
+      - "profitable strategy"
+      - "validated trading strategy"
+      - "production-ready"
+      - "live-tradable"
+      - "paper trading ready"
+      - "model selected"
+      - "candidate promoted"
+      - "final candidate changed"
+
+  phase13y_boundary:
+    allowed_next_step: "Holdout evaluation pre-registration spec only"
+    forbidden_next_step: "holdout prediction execution, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+    phase13y_may_preregister_holdout_evaluation: true
+    phase13y_may_generate_holdout_predictions: false
+    phase13y_may_select_model: false
+    phase13y_may_create_signal: false
+    phase13y_may_run_backtest: false
+    phase13y_may_promote_candidate: false
+
+  gates:
+    require_phase13w_reports_present: true
+    require_phase13w_conclusion_passed: true
+    require_phase13w_gate_report_passed: true
+    require_config_flags_clean_for_run: true
+    require_checkpoint_reports_present: true
+    require_interpretation_boundary_clean: true
+    require_forbidden_overclaim_absent: true
+    require_phase13y_boundary_prereg_only: true
+    require_no_model_training: true
+    require_no_model_selection: true
+    require_no_prediction_generation: true
+    require_no_holdout_prediction_generation: true
+    require_no_feature_importance: true
+    require_no_signal_creation: true
+    require_no_strategy_backtest: true
+    require_no_paper_trading_deployment: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_audit_role: "ML branch checkpoint and report-config consistency audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

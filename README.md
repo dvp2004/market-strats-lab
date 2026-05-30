@@ -67,6 +67,18 @@ The short canonical final-candidate label is:
 
 > **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
 
+SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
+
+Market Strats Lab remains research-only. It is not production-ready, not live-tradable, not financial advice, and not a live-trading recommendation.
+
+The original Phase 3 overlay beats SPY 12-month absolute momentum on full-period and holdout risk-adjusted performance under flat 5 bps slippage.
+
+The final Phase 6C execution-realistic candidate also beats SPY 12M on the strict full-period triple gate and improves on the Phase 4 execution-realistic baseline, but it still does **not** beat SPY buy-and-hold on raw CAGR.
+
+Phase 7 strengthened the checkpoint through integrity, lookahead, data-source, bootstrap, and bootstrap-stability audits. It also exposed an important limitation: rolling-window survivability failed overall, so the candidate's liveability claim must be kept narrow.
+
+Phase 8A added a simplified tax-drag diagnostic. The candidate survived the benchmark 20% tax proxy versus SPY 12M on CAGR, Calmar, and max drawdown, but the CAGR edge was thin and disappeared under the harsher 30% proxy.
+
 The final candidate remains the best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, an explicit research-degrees-of-freedom caveat, a documented research-only/non-production boundary, diagnostic-only Phase 9A technical-regime evidence, diagnostic-only Phase 9B cluster-stability evidence, a Phase 9C pre-registered technical-rule design spec, a failed Phase 9D pre-registered technical-rule test, and a Phase 9E technical-extension closeout with no rule promotion. Phase 10A selected macro/rates/inflation as the first non-price feature family to audit, but no macro data was ingested, no model was trained, no strategy was tested, and no candidate was promoted. Phase 10B completed a macro/rates/inflation data-source leakage feasibility audit and allowed Phase 10C only as a source reliability and point-in-time alignment audit. No macro signal, strategy test, model, or candidate promotion exists yet. Phase 10C completed a macro source reliability and point-in-time alignment audit, loading and aligning UNRATE, DGS2, DGS10, and CPIAUCSL with conservative lagging. Phase 10D completed diagnostic-only macro/rates/inflation regime analysis. It found descriptive regime patterns but did not create a macro signal, allocation rule, model feature, strategy test, or candidate promotion. Phase 10E pre-registered two macro hypotheses for a possible Phase 10F test. No macro signal, allocation overlay, model feature, strategy test, or candidate promotion exists yet. Phase 10F failed: no pre-registered macro rule passed all configured gates. Macro/rates/inflation evidence remains diagnostic only; no macro signal, allocation overlay, model feature, strategy successor, or candidate promotion exists. Phase 10G closed the macro/rates/inflation extension branch without promotion. Macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 10H completed the final Phase 10 checkpoint. The macro/rates/inflation branch is closed without promotion: macro evidence was feasible and diagnostically informative, but the pre-registered macro-rule test failed and no macro successor candidate exists. Phase 11A completed an architecture review after both technical and macro rule-extension branches failed. Simple if/then overlays are no longer the preferred immediate next architecture; the next recommended step is a design-only regime-scoring architecture spec. Phase 11C completed a regime-scoring rulebook spec. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11D completed a diagnostic-panel design for future regime-scoring work. No regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 11E completed a diagnostic-panel template implementation audit. Schema-compliant panel templates now exist, but no regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, or candidate promotion exists yet. Phase 12A/12B locked the future diagnostic score-calculation design and readiness boundary. No regime score, score value, empirical weight, signal, allocation rule, strategy test, model, new data ingestion, candidate promotion, or final-candidate change exists yet. Phase 12C/12D calculated and audited a categorical diagnostic regime score. The current diagnostic score is fragile, reflecting neutral technical evidence, neutral macro evidence, and fragile validation-risk context. This is diagnostic only and does not create a trading signal, allocation rule, strategy backtest, model, empirical weight, new data ingestion, candidate promotion, or final-candidate change. Phase 12 is closed. The project calculated, audited, interpreted, and bounded a fragile categorical diagnostic regime score. The score reflects neutral technical evidence, neutral macro evidence, and fragile validation-risk context. It remains diagnostic-only and does not create a signal, allocation rule, backtest, empirical weighting system, model, new data ingestion, candidate promotion, or final-candidate change. Any future score-to-signal work requires a separate pre-registration phase. The SPY regime-switch arc is now frozen as the baseline research framework. It produced benchmarks, validation infrastructure, friction/liveability/regret diagnostics, closeout discipline, and a fragile diagnostic score. It did not build the full intended multi-factor decision model. Phase 13A/13B therefore opened a new architecture path for technical, macro, fundamental, sentiment, dissertation-methodology, walk-forward, visual reporting, and eventual paper-trading work. Phase 13C/13D moved the multi-factor path from broad architecture into feature-source inventory and contract readiness. Technical and macro families are contract-feasible, with macro requiring strict lag/revision controls. Fundamental and sentiment are deliberately present in the roadmap but blocked until dedicated audits. No feature ingestion, feature calculation, signal, model, backtest, paper-trading deployment, candidate promotion, or final-candidate change exists yet. Phase 13E/13F moved the multi-factor path from feature-source inventory into technical/macro schema design. The project now has a defined universal feature-panel schema, technical feature schema, macro feature schema, timestamp/availability/decision-date policy, lag/revision controls, missingness policy, transform policy, ML feature-engineering safeguards, feature-state columns, and visual report templates. No feature ingestion, feature calculation, signal, backtest, model training, paper-trading deployment, candidate promotion, or final-candidate change exists yet. Phase 13G/13H moved the multi-factor path from schema readiness into calculation pre-registration and readiness. The project now has exact locked technical/macro feature formulas, raw inputs, lookbacks, thresholds, lag policies, output columns, missingness behaviour, leakage checks, visual checks, and ML feature-engineering safeguards. The next allowed phase may calculate technical/macro feature panels and visual feature reports, but still may not create signals, train models, run backtests, deploy paper trading, promote a candidate, or change the final candidate. Phase 13I/13J moved the multi-factor path from calculation readiness into the first actual bounded feature-calculation stage. The project now has calculated technical and macro feature panels, feature states, availability/missingness outputs, leakage audit outputs, feature-state timelines, availability heatmaps, model-feature-matrix previews, and decision-rationale templates. Phase 13J confirmed 53,620 feature-panel rows, 8 feature IDs, 0 leakage flags, valid output schema quality, valid missingness quality, valid visual reports, and no forbidden signal/model/backtest columns.
 
 This does not mean the model path is validated. No signal, allocation rule, ML model, strategy backtest, paper-trading system, candidate promotion, or final-candidate change exists yet. The next step must interpret the feature panel and pre-register model dataset/target/split design before any model training is allowed. Phase 13K/13L moved the multi-factor path from calculated feature-panel quality control into ML dataset and target-design pre-registration. The project now has feature-state interpretation reports, availability summaries, family coverage summaries, model-readiness planning, a pre-registered primary 63-trading-day SPY return-state target, a secondary 63-trading-day drawdown-risk target, split design, walk-forward policy, and ML leakage controls.
@@ -89,17 +101,13 @@ Phase 13S/13T moved the technical + macro ML branch from dataset repair/audit in
 
 This is a protocol checkpoint, not a model result. No model has been trained, no predictions exist, no feature importance exists, no signal exists, no strategy backtest exists, no paper-trading system exists, and no candidate has been promoted.
 
-SPY Buy & Hold remains the raw wealth benchmark. SPY 12M Momentum remains the simple defensive timing benchmark.
+Phase 13U/13V executed and audited the first registered technical + macro ML training run. Five registered baseline classifiers were trained using train-only preprocessing and train/validation-only evaluation. Random Forest produced the strongest validation result, with validation balanced accuracy 0.4253 and macro F1 0.4010, beating the majority dummy baseline and stratified dummy baseline on balanced accuracy.
 
-Market Strats Lab remains research-only. It is not production-ready, not live-tradable, not financial advice, and not a live-trading recommendation.
+This is a meaningful modelling milestone, but it remains classification-only evidence. It is not a trading signal, allocation rule, strategy backtest, paper-trading system, candidate promotion, or final-candidate change. Holdout remains untouched.
 
-The original Phase 3 overlay beats SPY 12-month absolute momentum on full-period and holdout risk-adjusted performance under flat 5 bps slippage.
+Phase 13W/13X moved the ML branch from first validation training output into disciplined interpretation. The branch found a real but incomplete validation signal: Random Forest beat dummy baselines on validation balanced accuracy and macro F1, but it also showed material overfitting and failed to recall the fragile class.
 
-The final Phase 6C execution-realistic candidate also beats SPY 12M on the strict full-period triple gate and improves on the Phase 4 execution-realistic baseline, but it still does **not** beat SPY buy-and-hold on raw CAGR.
-
-Phase 7 strengthened the checkpoint through integrity, lookahead, data-source, bootstrap, and bootstrap-stability audits. It also exposed an important limitation: rolling-window survivability failed overall, so the candidate's liveability claim must be kept narrow.
-
-Phase 8A added a simplified tax-drag diagnostic. The candidate survived the benchmark 20% tax proxy versus SPY 12M on CAGR, Calmar, and max drawdown, but the CAGR edge was thin and disappeared under the harsher 30% proxy.
+Therefore, the ML branch may continue, but not to holdout evaluation yet. The next serious work should repair or diagnose the modelling weakness — especially fragile-class recall and overfit control — before any future holdout pre-registration.
 
 ### Canonical Research Checkpoint
 
@@ -6328,6 +6336,457 @@ Correct interpretation:
 
 > Phase 13T confirmed that the project is ready for a registered train/validation-only ML baseline training phase. It did not train models, select models, generate predictions, calculate feature importance, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
 
+## Phase 13U: Registered Baseline ML Training Execution and Train/Validation Evaluation
+
+Phase 13U executed the first registered baseline ML training run on the repaired technical + macro dataset.
+
+This phase trained only the pre-registered model families, fitted preprocessing on the train split only, evaluated train and validation splits only, and generated validation predictions only. It produced classification metrics, confusion matrices, calibration reports, class-support reports, and a baseline-comparison report.
+
+This phase did not generate holdout predictions, calculate feature importance, create signals, create allocation rules, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13U Summary
+
+| Metric | Result |
+|---|---:|
+| Execution role | Registered baseline ML training execution and train/validation evaluation only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13T |
+| Proposed next phase | Phase 13V |
+| Dataset rows | 5,219 |
+| Dataset label | `multi_factor_technical_macro_dataset_v1` |
+| Numeric feature columns | 8 |
+| Categorical feature columns | 16 |
+| Total feature columns | 24 |
+| Train model rows | 2,689 |
+| Validation model rows | 1,007 |
+| Holdout rows used | 0 |
+| Trained model count | 5 |
+| Metric rows | 10 |
+| Validation prediction rows | 5,035 |
+| Confusion matrix rows | 90 |
+| Calibration rows | 15 |
+| Class support rows | 30 |
+| Baseline comparison rows | 5 |
+| Holdout predictions generated | False |
+| Feature importance calculated | False |
+| Model selected | False |
+| Signal created | False |
+| Strategy backtest | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13U Dataset / Feature Matrix
+
+| Metric | Result |
+|---|---:|
+| Dataset label | `multi_factor_technical_macro_dataset_v1` |
+| Numeric feature columns | 8 |
+| Categorical feature columns | 16 |
+| Total feature columns | 24 |
+| Train model rows | 2,689 |
+| Validation model rows | 1,007 |
+| Train target classes | Fragile; neutral; supportive |
+| Validation target classes | Fragile; neutral; supportive |
+| Holdout rows used | 0 |
+
+### Phase 13U Registered Models
+
+| Model | Type | Trained | Train rows | Validation rows | Holdout rows used | Holdout predictions | Model selected |
+|---|---|---:|---:|---:|---:|---:|---:|
+| `baseline_majority_class` | Dummy most-frequent | True | 2,689 | 1,007 | 0 | False | False |
+| `baseline_stratified_dummy` | Dummy stratified | True | 2,689 | 1,007 | 0 | False | False |
+| `multinomial_logistic_regression` | Logistic regression | True | 2,689 | 1,007 | 0 | False | False |
+| `random_forest_classifier` | Random forest | True | 2,689 | 1,007 | 0 | False | False |
+| `hist_gradient_boosting_classifier` | Hist gradient boosting | True | 2,689 | 1,007 | 0 | False | False |
+
+### Phase 13U Train / Validation Metrics
+
+| Model | Split | Accuracy | Balanced accuracy | Macro F1 | Weighted F1 |
+|---|---|---:|---:|---:|---:|
+| Majority dummy | Train | 0.4455 | 0.3333 | 0.2055 | 0.2746 |
+| Majority dummy | Validation | 0.4439 | 0.3333 | 0.2050 | 0.2729 |
+| Stratified dummy | Train | 0.3916 | 0.3403 | 0.3403 | 0.3908 |
+| Stratified dummy | Validation | 0.3932 | 0.3475 | 0.3407 | 0.4007 |
+| Logistic regression | Train | 0.7062 | 0.7418 | 0.7223 | 0.7046 |
+| Logistic regression | Validation | 0.4578 | 0.3417 | 0.3105 | 0.4172 |
+| Random forest | Train | 0.7516 | 0.7708 | 0.7624 | 0.7502 |
+| Random forest | Validation | 0.5720 | 0.4253 | 0.4010 | 0.5404 |
+| Hist gradient boosting | Train | 0.9695 | 0.9748 | 0.9737 | 0.9695 |
+| Hist gradient boosting | Validation | 0.4836 | 0.3604 | 0.3299 | 0.4439 |
+
+### Phase 13U Baseline Comparison
+
+| Model | Validation balanced accuracy | Validation macro F1 | Delta balanced accuracy vs majority | Delta macro F1 vs majority |
+|---|---:|---:|---:|---:|
+| Majority dummy | 0.3333 | 0.2050 | 0.0000 | 0.0000 |
+| Stratified dummy | 0.3475 | 0.3407 | 0.0141 | 0.1358 |
+| Logistic regression | 0.3417 | 0.3105 | 0.0084 | 0.1055 |
+| Random forest | 0.4253 | 0.4010 | 0.0920 | 0.1960 |
+| Hist gradient boosting | 0.3604 | 0.3299 | 0.0271 | 0.1249 |
+
+Interpretation:
+
+> Random Forest was the strongest validation model in this first registered technical + macro ML run. It improved validation balanced accuracy by approximately 0.092 and validation macro F1 by approximately 0.196 versus the majority-class dummy baseline.
+
+Important caveat:
+
+> This is classification evidence only. It is not trading evidence, not a signal, not a backtest, and not a candidate promotion.
+
+### Phase 13U Calibration Snapshot
+
+| Model | Validation log loss |
+|---|---:|
+| Majority dummy | 20.0441 |
+| Stratified dummy | 25.8426 |
+| Logistic regression | 3.7090 |
+| Random forest | 1.2502 |
+| Hist gradient boosting | 2.9706 |
+
+Interpretation:
+
+> Random Forest also had the strongest validation log-loss profile among the registered models. However, calibration remains diagnostic only and was not used for model selection or signal creation.
+
+### Phase 13U Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13T passed | Passed |
+| Source reports are present | Passed |
+| Dataset loaded | Passed |
+| Dataset label is correct | Passed |
+| Feature matrix has train/validation rows | Passed |
+| Registered models were trained | Passed |
+| Train/validation metrics exist | Passed |
+| Validation predictions only | Passed |
+| Confusion matrices exist | Passed |
+| Calibration reports exist | Passed |
+| Class support reports exist | Passed |
+| Baseline comparison report exists | Passed |
+| No forbidden outputs were created | Passed |
+| Phase 13V boundary is quality-audit-only | Passed |
+| Scope blocks signal/backtest/promotion | Passed |
+| Execution role is correct | Passed |
+
+### Phase 13U Verdict
+
+> Phase 13U completed registered baseline ML train/validation execution.
+
+Correct interpretation:
+
+> Phase 13U trained five registered baseline ML models on the technical + macro dataset and produced train/validation classification diagnostics. It did not generate holdout predictions, calculate feature importance, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+---
+
+## Phase 13V: ML Training Result Quality / Leakage Audit
+
+Phase 13V audited the Phase 13U ML training outputs.
+
+This phase checked training-output quality, metrics quality, validation-only prediction boundaries, forbidden-output absence, and the Phase 13W interpretation-only boundary.
+
+This phase did not generate holdout predictions, calculate feature importance, select a model, create signals, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13V Summary
+
+| Metric | Result |
+|---|---:|
+| Audit role | ML training result quality and leakage audit only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13U |
+| Proposed next phase | Phase 13W |
+| Phase 13U reports present | True |
+| Phase 13U result passed | True |
+| Config flags clean for run | True |
+| Training outputs quality passed | True |
+| Metrics quality passed | True |
+| Prediction boundary passed | True |
+| Forbidden outputs absent | True |
+| Phase 13W boundary passed | True |
+| Holdout predictions generated | False |
+| Feature importance calculated | False |
+| Model selected | False |
+| Signal created | False |
+| Strategy backtest | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13V Training Output Quality
+
+| Check | Result |
+|---|---|
+| Minimum registered models trained | Passed |
+| No holdout rows used | Passed |
+| No model selected | Passed |
+
+### Phase 13V Metrics Quality
+
+| Check | Result |
+|---|---|
+| Metric rows sufficient | Passed |
+| Confusion matrix rows sufficient | Passed |
+| Class support rows sufficient | Passed |
+| Baseline comparison exists | Passed |
+
+### Phase 13V Prediction Boundary
+
+| Check | Result |
+|---|---|
+| Validation predictions exist | Passed |
+| Predictions are validation-only | Passed |
+| No holdout prediction flag | Passed |
+
+Key figure:
+
+```text
+validation_prediction_rows = 5,035
+holdout_prediction_flag = False
+```
+
+### Phase 13V Forbidden Output Check
+
+| Forbidden output | Present | Result |
+|---|---:|---|
+| `reports/phase13u_feature_importance.csv` | False | Passed |
+| `reports/phase13u_signal_report.csv` | False | Passed |
+| `reports/phase13u_allocation_report.csv` | False | Passed |
+| `reports/phase13u_strategy_backtest.csv` | False | Passed |
+| `reports/phase13u_paper_trading_report.csv` | False | Passed |
+| `reports/phase13u_candidate_promotion.csv` | False | Passed |
+| `reports/phase13u_holdout_predictions.csv` | False | Passed |
+
+### Phase 13V Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13U reports are present | Passed |
+| Phase 13U conclusion and gates passed | Passed |
+| Config flags are clean for run | Passed |
+| Training outputs quality passed | Passed |
+| Metrics quality passed | Passed |
+| Prediction boundary passed | Passed |
+| Forbidden outputs are absent | Passed |
+| Phase 13W boundary is interpretation-only | Passed |
+| Scope blocks signal/backtest/promotion | Passed |
+| Audit role is correct | Passed |
+
+### Phase 13V Verdict
+
+> Phase 13V completed the ML training result quality/leakage audit.
+
+Correct interpretation:
+
+> Phase 13V confirmed that the registered ML training outputs are valid, validation-only, and leakage-bounded. It did not generate holdout predictions, calculate feature importance, select a model, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+## Phase 13W: ML Validation Result Interpretation / Continuation Decision
+
+Phase 13W interpreted the validation-only ML evidence from Phase 13U/13V.
+
+This phase compared the registered technical + macro models against dummy baselines, diagnosed overfitting, checked class-level recall, and made a continuation decision. It did not train new models, select a model, generate holdout predictions, calculate feature importance, create signals, create allocation rules, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13W Summary
+
+| Metric | Result |
+|---|---:|
+| Interpretation role | ML validation result interpretation and continuation decision only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13V |
+| Proposed next phase | Phase 13X |
+| Source reports present | True |
+| Phase 13V result passed | True |
+| Validation ranking rows | 5 |
+| Dummy comparison rows | 1 |
+| Overfit diagnostic rows | 5 |
+| Class recall rows | 15 |
+| Continuation decision rows | 1 |
+| Diagnostic leading model | `random_forest_classifier` |
+| Continuation decision | `continue_only_after_model_diagnostic_repair` |
+| Holdout pre-registration justified | False |
+| Model training | False |
+| Model selection | False |
+| Holdout predictions generated | False |
+| Feature importance | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13W Validation Ranking
+
+| Rank | Model | Validation balanced accuracy | Validation macro F1 | Delta balanced accuracy vs majority |
+|---:|---|---:|---:|---:|
+| 1 | `random_forest_classifier` | 0.4253 | 0.4010 | +0.0920 |
+| 2 | `hist_gradient_boosting_classifier` | 0.3604 | 0.3299 | +0.0271 |
+| 3 | `baseline_stratified_dummy` | 0.3475 | 0.3407 | +0.0141 |
+| 4 | `multinomial_logistic_regression` | 0.3417 | 0.3105 | +0.0084 |
+| 5 | `baseline_majority_class` | 0.3333 | 0.2050 | 0.0000 |
+
+Interpretation:
+
+> Random Forest was the diagnostic-leading model on validation. It materially beat the majority dummy baseline and also beat the stratified dummy baseline on balanced accuracy. However, this is not model selection and not trading evidence.
+
+### Phase 13W Dummy Comparison
+
+| Metric | Result |
+|---|---:|
+| Diagnostic leading model | `random_forest_classifier` |
+| Validation balanced accuracy | 0.4253 |
+| Validation macro F1 | 0.4010 |
+| Majority balanced accuracy | 0.3333 |
+| Majority macro F1 | 0.2050 |
+| Stratified balanced accuracy | 0.3475 |
+| Stratified macro F1 | 0.3407 |
+| Delta balanced accuracy vs majority | +0.0920 |
+| Delta macro F1 vs majority | +0.1960 |
+
+### Phase 13W Overfit Diagnostic
+
+| Model | Train balanced accuracy | Validation balanced accuracy | Balanced accuracy gap | Train macro F1 | Validation macro F1 | Macro F1 gap | Overfit warning |
+|---|---:|---:|---:|---:|---:|---:|---|
+| `hist_gradient_boosting_classifier` | 0.9748 | 0.3604 | 0.6144 | 0.9737 | 0.3299 | 0.6438 | True |
+| `multinomial_logistic_regression` | 0.7418 | 0.3417 | 0.4001 | 0.7223 | 0.3105 | 0.4119 | True |
+| `random_forest_classifier` | 0.7708 | 0.4253 | 0.3455 | 0.7624 | 0.4010 | 0.3614 | True |
+| `baseline_majority_class` | 0.3333 | 0.3333 | 0.0000 | 0.2055 | 0.2050 | 0.0005 | False |
+| `baseline_stratified_dummy` | 0.3403 | 0.3475 | -0.0071 | 0.3403 | 0.3407 | -0.0004 | False |
+
+Interpretation:
+
+> All real registered models triggered overfit warnings. Random Forest was the strongest validation model, but it still showed a large train-validation gap.
+
+### Phase 13W Class Recall Diagnostic
+
+| Model | Fragile validation recall | Warning |
+|---|---:|---|
+| `baseline_majority_class` | 0.0000 | True |
+| `baseline_stratified_dummy` | 0.2157 | False |
+| `hist_gradient_boosting_classifier` | 0.0000 | True |
+| `multinomial_logistic_regression` | 0.0000 | True |
+| `random_forest_classifier` | 0.0000 | True |
+
+Important interpretation:
+
+> The diagnostic-leading Random Forest failed to recall the fragile class on validation. This is a serious weakness because the project’s eventual decision system must be especially careful around adverse/fragile regimes.
+
+### Phase 13W Continuation Decision
+
+| Item | Result |
+|---|---|
+| Decision | `continue_only_after_model_diagnostic_repair` |
+| Diagnostic leading model | `random_forest_classifier` |
+| Holdout pre-registration justified | False |
+| Model selected | False |
+| Signal permission | False |
+| Backtest permission | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+Decision reason:
+
+> Validation edge exists, but overfit or fragile-class weakness requires interpretation/repair before any holdout pre-registration.
+
+Correct interpretation:
+
+> Phase 13W supports continuing the ML branch, but only through a model diagnostic repair path. It does not justify holdout prediction, holdout evaluation, signal generation, backtesting, paper trading, or promotion.
+
+### Phase 13W Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13V passed | Passed |
+| Source reports are present | Passed |
+| Validation ranking report exists | Passed |
+| Dummy comparison report exists | Passed |
+| Overfit diagnostic report exists | Passed |
+| Class recall report exists | Passed |
+| Continuation decision report exists | Passed |
+| Phase 13X boundary is checkpoint-only | Passed |
+| Phase 13Y boundary is pre-registration-only | Passed |
+| Scope blocks model/signal/backtest/promotion | Passed |
+| Interpretation role is correct | Passed |
+
+### Phase 13W Verdict
+
+> Phase 13W completed the ML validation interpretation / continuation decision.
+
+Correct interpretation:
+
+> Phase 13W confirmed that the ML branch has enough validation signal to continue, but not enough quality to proceed directly to holdout evaluation. The next substantive work should diagnose and repair overfitting and fragile-class recall weakness before any holdout pre-registration.
+
+---
+
+## Phase 13X: ML Branch Checkpoint / Report-Config Consistency Audit
+
+Phase 13X checkpointed the ML branch after Phase 13W’s validation-only interpretation.
+
+This phase checked report presence, Phase 13W gate/conclusion consistency, config flags, interpretation boundaries, forbidden overclaim phrases, and future phase boundaries. It did not train models, select a model, generate predictions, calculate feature importance, create signals, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13X Summary
+
+| Metric | Result |
+|---|---:|
+| Audit role | ML branch checkpoint and report-config consistency audit only |
+| Phase branch | Phase 13 multi-factor model architecture planning |
+| Source phase | Phase 13W |
+| Proposed next phase | Phase 13Y |
+| Phase 13W reports present | True |
+| Phase 13W result passed | True |
+| Config flags clean for run | True |
+| Checkpoint reports present | True |
+| Interpretation boundary clean | True |
+| Forbidden overclaim absent | True |
+| Phase 13Y boundary passed | True |
+| Model training | False |
+| Model selection | False |
+| Holdout predictions generated | False |
+| Feature importance | False |
+| Signal creation | False |
+| Strategy backtest | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+### Phase 13X Interpretation Boundary Check
+
+| Check | Result |
+|---|---|
+| Decision is interpretation-only | Passed |
+| No model selected | Passed |
+| No signal permission | Passed |
+| No backtest permission | Passed |
+| No candidate promotion | Passed |
+
+### Phase 13X Forbidden Overclaim Check
+
+| Forbidden phrase | Result |
+|---|---|
+| `profitable strategy` | Passed |
+| `validated trading strategy` | Passed |
+| `production-ready` | Passed |
+| `live-tradable` | Passed |
+| `paper trading ready` | Passed |
+| `model selected` | Passed |
+| `candidate promoted` | Passed |
+| `final candidate changed` | Passed |
+
+### Phase 13X Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13W reports are present | Passed |
+| Phase 13W conclusion and gates passed | Passed |
+| Config flags are clean for run | Passed |
+| Checkpoint reports are present | Passed |
+| Interpretation boundary is clean | Passed |
+| Forbidden overclaim phrases are absent | Passed |
+| Phase 13Y boundary is pre-registration-only | Passed |
+| Scope blocks model/signal/backtest/promotion | Passed |
+| Audit role is correct | Passed |
+
+### Phase 13X Verdict
+
+> Phase 13X completed the ML branch checkpoint audit.
+
+Correct interpretation:
+
+> Phase 13X confirmed that the ML branch remains bounded, report-consistent, and free from overclaiming. However, Phase 13W’s actual decision means the next substantive phase should be model diagnostic repair pre-registration, not holdout evaluation execution.
+
 ---
 
 # Methodology Notes
@@ -6523,6 +6982,19 @@ Remaining concerns include:
 - Phase 13U may train only registered baseline models and evaluate train/validation results. It must not generate holdout predictions, create signals, run strategy backtests, deploy paper trading, promote candidates, or alter the final candidate.
 - The dataset remains technical + macro only. Fundamental and sentiment features are not yet included.
 - Any validation performance from Phase 13U will be predictive-classification evidence only, not trading-strategy evidence.
+- Phase 13U/13V produced validation-only predictive-classification evidence, not trading evidence. The results must not be described as a profitable strategy, backtest result, signal system, or paper-trading candidate.
+- Random Forest was the strongest validation model, but this does not justify signal creation. It only supports continuing to a validation-result interpretation phase.
+- Hist Gradient Boosting showed severe overfitting: train balanced accuracy 0.9748 versus validation balanced accuracy 0.3604.
+- Logistic Regression also generalised poorly: train balanced accuracy 0.7418 versus validation balanced accuracy 0.3417.
+- Holdout remains locked. No holdout predictions have been generated.
+- Feature importance, model selection, signal generation, strategy backtesting, paper-trading deployment, and candidate promotion remain forbidden.
+- The feature set is still technical + macro only. Fundamental and sentiment features are not yet included.
+- Phase 13W/13X did not justify holdout evaluation. The correct continuation decision was `continue_only_after_model_diagnostic_repair`, not direct holdout pre-registration.
+- Random Forest was the diagnostic-leading validation model, but it had a large train-validation gap and 0.0 validation recall for the fragile class.
+- All real registered models triggered overfit warnings. Hist Gradient Boosting was the most extreme overfit case.
+- The fragile class remains the major unresolved ML weakness. This matters because a future market-decision model that misses fragile regimes would be dangerous and inconsistent with the project’s defensive objective.
+- No model has been selected. No holdout predictions have been generated. No feature importance has been calculated. No signal, allocation rule, backtest, paper-trading output, candidate promotion, or final-candidate change exists.
+- The current evidence remains validation-only classification evidence, not trading evidence.
 ---
 
 # Bugs Caught and Fixed
@@ -7659,6 +8131,84 @@ reports/phase13t_readiness_conclusion.csv
 reports/phase13t_ml_training_readiness_leakage_audit.md
 ```
 
+## Phase 13U Registered Baseline ML Training Reports
+
+```text
+reports/phase13u_ml_source_report_check.csv
+reports/phase13u_ml_phase13t_result_check.csv
+reports/phase13u_ml_dataset_profile.csv
+reports/phase13u_ml_feature_matrix_profile.csv
+reports/phase13u_ml_model_registry_execution_report.csv
+reports/phase13u_ml_preprocessing_pipeline_report.csv
+reports/phase13u_ml_train_validation_metric_report.csv
+reports/phase13u_ml_confusion_matrix_report.csv
+reports/phase13u_ml_calibration_report.csv
+reports/phase13u_ml_class_support_report.csv
+reports/phase13u_ml_baseline_comparison_report.csv
+reports/phase13u_ml_validation_predictions.csv
+reports/phase13u_ml_forbidden_output_check.csv
+reports/phase13u_ml_phase13v_boundary_check.csv
+reports/phase13u_ml_scope_boundary_check.csv
+reports/phase13u_ml_summary.csv
+reports/phase13u_ml_gate_report.csv
+reports/phase13u_ml_conclusion.csv
+reports/phase13u_registered_baseline_ml_training.md
+```
+
+## Phase 13V ML Training Result Quality / Leakage Audit Reports
+
+```text
+reports/phase13v_quality_report_inventory_check.csv
+reports/phase13v_quality_phase13u_result_check.csv
+reports/phase13v_quality_config_flag_check.csv
+reports/phase13v_quality_training_output_quality_check.csv
+reports/phase13v_quality_metrics_quality_check.csv
+reports/phase13v_quality_prediction_boundary_check.csv
+reports/phase13v_quality_forbidden_output_check.csv
+reports/phase13v_quality_phase13w_boundary_check.csv
+reports/phase13v_quality_scope_boundary_check.csv
+reports/phase13v_quality_summary.csv
+reports/phase13v_quality_gate_report.csv
+reports/phase13v_quality_conclusion.csv
+reports/phase13v_ml_training_result_quality_audit.md
+```
+
+## Phase 13W ML Validation Interpretation Reports
+
+```text
+reports/phase13w_interpretation_source_report_check.csv
+reports/phase13w_interpretation_phase13v_result_check.csv
+reports/phase13w_interpretation_validation_ranking_report.csv
+reports/phase13w_interpretation_dummy_comparison_report.csv
+reports/phase13w_interpretation_overfit_diagnostic_report.csv
+reports/phase13w_interpretation_class_recall_report.csv
+reports/phase13w_interpretation_continuation_decision_report.csv
+reports/phase13w_interpretation_phase13x_boundary_check.csv
+reports/phase13w_interpretation_phase13y_boundary_check.csv
+reports/phase13w_interpretation_scope_boundary_check.csv
+reports/phase13w_interpretation_summary.csv
+reports/phase13w_interpretation_gate_report.csv
+reports/phase13w_interpretation_conclusion.csv
+reports/phase13w_ml_validation_interpretation_decision.md
+```
+
+## Phase 13X ML Branch Checkpoint Reports
+
+```text
+reports/phase13x_checkpoint_report_inventory_check.csv
+reports/phase13x_checkpoint_phase13w_result_check.csv
+reports/phase13x_checkpoint_config_flag_check.csv
+reports/phase13x_checkpoint_checkpoint_report_check.csv
+reports/phase13x_checkpoint_interpretation_boundary_check.csv
+reports/phase13x_checkpoint_forbidden_overclaim_check.csv
+reports/phase13x_checkpoint_phase13y_boundary_check.csv
+reports/phase13x_checkpoint_scope_boundary_check.csv
+reports/phase13x_checkpoint_summary.csv
+reports/phase13x_checkpoint_gate_report.csv
+reports/phase13x_checkpoint_conclusion.csv
+reports/phase13x_ml_branch_checkpoint_audit.md
+```
+
 ## Other Important Reports
 
 ```text
@@ -7848,6 +8398,10 @@ configs/spy_sma10.yaml
 | Phase 13R repaired macro dataset quality / leakage audit | Completed — repaired technical + macro dataset passed macro repair quality, dataset quality, target quality, split quality, forbidden-column check, and boundary checks; confirms the dataset is now genuinely technical + macro, but still not fundamental/sentiment and still no model/signal/backtest/paper trading/promotion |
 | Phase 13S ML model training pre-registration and baseline model design spec | Completed — registered primary/secondary targets, 5 allowed model families, train-only preprocessing, split usage, metrics, calibration/confusion-matrix templates, report templates, and forbidden actions; no model training, prediction generation, feature importance, signal, backtest, paper trading, or promotion |
 | Phase 13T ML training readiness / leakage boundary audit | Completed — dataset readiness, training protocol completeness, train-only preprocessing, holdout lockout, forbidden-output absence, and Phase 13U registered-training-only boundary passed; no model training, prediction generation, feature importance, signal, backtest, paper trading, or promotion |
+| Phase 13U registered baseline ML training execution | Completed — five pre-registered models trained using train-only preprocessing and train/validation evaluation only; validation predictions, classification metrics, confusion matrices, calibration reports, class-support reports, and baseline comparison generated; Random Forest was strongest on validation with balanced accuracy 0.4253 and macro F1 0.4010; no holdout predictions, feature importance, signal, backtest, paper trading, model selection, or promotion |
+| Phase 13V ML training result quality / leakage audit | Completed — training-output quality, metrics quality, validation-only prediction boundary, forbidden-output absence, and Phase 13W interpretation-only boundary passed; no holdout predictions, feature importance, signal, backtest, paper trading, model selection, or promotion |
+| Phase 13W ML validation result interpretation / continuation decision | Completed — validation-only evidence interpreted; Random Forest was diagnostic-leading with validation balanced accuracy 0.4253 and macro F1 0.4010, but all real models triggered overfit warnings and Random Forest fragile-class recall was 0.0; decision: `continue_only_after_model_diagnostic_repair`; no model selection, holdout prediction, feature importance, signal, backtest, paper trading, promotion, or final-candidate change |
+| Phase 13X ML branch checkpoint / report-config consistency audit | Completed — Phase 13W reports, gates, config flags, interpretation boundaries, forbidden overclaim checks, and checkpoint consistency passed; no model training, model selection, holdout prediction, feature importance, signal, backtest, paper trading, promotion, or final-candidate change |
 ---
 
 # What Should Happen Next
