@@ -7589,6 +7589,243 @@ phase13ab_ml_diagnostic_repair_result_audit:
     require_no_feature_importance: true
     require_no_signal_backtest_promotion: true
     required_audit_role: "ML diagnostic repair result quality and leakage audit only"
+phase13ac_ml_failure_attribution_diagnostic:
+  enabled: false
+  diagnostic_role: "ML failure attribution and target-feature diagnostic only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13AB"
+  proposed_next_phase: "Phase 13AD"
+
+  allow_model_training: false
+  allow_repair_execution: false
+  allow_model_selection: false
+  allow_holdout_prediction_generation: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13ab_conclusion: "reports/phase13ab_repair_audit_conclusion.csv"
+    phase13ab_gate_report: "reports/phase13ab_repair_audit_gate_report.csv"
+    repair_success_report: "reports/phase13aa_repair_execution_success_report.csv"
+    repair_metric_report: "reports/phase13aa_repair_execution_metric_report.csv"
+    repair_class_recall_report: "reports/phase13aa_repair_execution_class_recall_report.csv"
+    repair_overfit_report: "reports/phase13aa_repair_execution_overfit_report.csv"
+    original_metric_report: "reports/phase13u_ml_train_validation_metric_report.csv"
+    original_baseline_comparison_report: "reports/phase13u_ml_baseline_comparison_report.csv"
+    phase13w_decision_report: "reports/phase13w_interpretation_continuation_decision_report.csv"
+    dataset: "reports/phase13q_ml_feature_dataset_v1.csv"
+
+  diagnostic_thresholds:
+    fragile_recall_success_threshold: 0.20
+    material_delta_balanced_accuracy_vs_majority: 0.05
+    material_delta_macro_f1_vs_majority: 0.05
+    max_acceptable_overfit_gap: 0.30
+    min_fragile_support_warning_ratio: 0.15
+    original_best_model_id: "random_forest_classifier"
+    original_best_validation_balanced_accuracy: 0.4253
+    original_best_validation_macro_f1: 0.4010
+
+  attribution_families:
+    - "target_definition"
+    - "horizon_63d"
+    - "fragile_threshold"
+    - "class_imbalance"
+    - "feature_insufficiency"
+    - "model_architecture"
+    - "missing_fundamental_sentiment"
+
+  phase13ad_boundary:
+    allowed_next_step: "ML failure attribution readiness and report audit only"
+    forbidden_next_step: "model training, repair execution, holdout prediction generation, model selection, feature importance, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+
+  phase13ae_boundary:
+    allowed_future_step: "ML branch continuation and architecture pivot decision only"
+    forbidden_future_step: "model training, repair execution, holdout prediction generation, model selection, feature importance, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+
+  gates:
+    require_phase13ab_passed: true
+    require_source_reports_present: true
+    require_failure_summary_report: true
+    require_target_distribution_report: true
+    require_class_imbalance_report: true
+    require_target_outcome_profile_report: true
+    require_failure_attribution_report: true
+    require_continuation_options_report: true
+    require_phase13ad_boundary_audit_only: true
+    require_phase13ae_boundary_decision_only: true
+    require_no_model_training: true
+    require_no_repair_execution: true
+    require_no_holdout_predictions: true
+    require_no_model_selection: true
+    require_no_feature_importance: true
+    require_no_signal_backtest_promotion: true
+    required_diagnostic_role: "ML failure attribution and target-feature diagnostic only"
+phase13ad_ml_failure_attribution_readiness_audit:
+  enabled: false
+  audit_role: "ML failure attribution readiness and report audit only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13AC"
+  proposed_next_phase: "Phase 13AE"
+
+  allow_model_training: false
+  allow_repair_execution: false
+  allow_model_selection: false
+  allow_holdout_prediction_generation: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_strategy_backtest: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase13y_ml_diagnostic_repair_preregistration: false
+    phase13z_ml_diagnostic_repair_readiness_audit: false
+    phase13aa_registered_ml_diagnostic_repair_execution: false
+    phase13ab_ml_diagnostic_repair_result_audit: false
+    phase13ac_ml_failure_attribution_diagnostic: true
+    phase13ad_ml_failure_attribution_readiness_audit: true
+    phase13ae_ml_branch_continuation_architecture_pivot: true
+    phase13af_phase13_ml_branch_checkpoint_audit: true
+    relative_momentum_allocator: true
+
+  phase13ac_reports:
+    conclusion: "reports/phase13ac_failure_attribution_conclusion.csv"
+    gate_report: "reports/phase13ac_failure_attribution_gate_report.csv"
+    failure_summary_report: "reports/phase13ac_failure_attribution_failure_summary_report.csv"
+    target_distribution_report: "reports/phase13ac_failure_attribution_target_distribution_report.csv"
+    class_imbalance_report: "reports/phase13ac_failure_attribution_class_imbalance_report.csv"
+    target_outcome_profile_report: "reports/phase13ac_failure_attribution_target_outcome_profile_report.csv"
+    failure_attribution_report: "reports/phase13ac_failure_attribution_failure_attribution_report.csv"
+    continuation_options_report: "reports/phase13ac_failure_attribution_continuation_options_report.csv"
+
+  gates:
+    require_phase13ac_passed: true
+    require_config_flags_clean: true
+    require_diagnostic_reports_present: true
+    require_attribution_families_present: true
+    require_no_forbidden_permissions: true
+    required_audit_role: "ML failure attribution readiness and report audit only"
+phase13ae_ml_branch_continuation_architecture_pivot:
+  enabled: false
+  decision_role: "ML branch continuation and architecture pivot decision only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13AD"
+  proposed_next_phase: "Phase 13AF"
+
+  allow_model_training: false
+  allow_repair_execution: false
+  allow_model_selection: false
+  allow_holdout_prediction_generation: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_strategy_backtest: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13ad_conclusion: "reports/phase13ad_failure_audit_conclusion.csv"
+    phase13ad_gate_report: "reports/phase13ad_failure_audit_gate_report.csv"
+    failure_summary_report: "reports/phase13ac_failure_attribution_failure_summary_report.csv"
+    failure_attribution_report: "reports/phase13ac_failure_attribution_failure_attribution_report.csv"
+    continuation_options_report: "reports/phase13ac_failure_attribution_continuation_options_report.csv"
+
+  decision_policy:
+    if_fragile_recall_unresolved: "pivot_to_target_feature_redesign_preregistration"
+    if_feature_insufficiency_likely: "prioritise_feature_family_expansion_before_more_model_tuning"
+    if_model_architecture_only: "allow_registered_architecture_repair_preregistration"
+    if_no_viable_path: "pause_ml_branch_and_preserve_baseline_arc"
+    default_decision: "pivot_to_target_feature_redesign_preregistration"
+
+  next_phase_boundary:
+    allowed_next_step: "Target-feature redesign pre-registration only"
+    forbidden_next_step: "model training, repair execution, holdout prediction generation, model selection, feature importance, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+    may_preregister_target_feature_redesign: true
+    may_train_model: false
+    may_execute_repair: false
+    may_generate_holdout_predictions: false
+    may_select_model: false
+    may_create_signal: false
+    may_run_backtest: false
+    may_promote_candidate: false
+
+  gates:
+    require_phase13ad_passed: true
+    require_architecture_decision_report: true
+    require_holdout_blocked: true
+    require_model_selection_blocked: true
+    require_signal_backtest_promotion_blocked: true
+    require_next_boundary_redesign_prereg_only: true
+    required_decision_role: "ML branch continuation and architecture pivot decision only"
+phase13af_phase13_ml_branch_checkpoint_audit:
+  enabled: false
+  audit_role: "Phase 13 ML branch checkpoint audit only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13AE"
+  proposed_next_phase: "Phase 13AG"
+
+  allow_model_training: false
+  allow_repair_execution: false
+  allow_model_selection: false
+  allow_holdout_prediction_generation: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_strategy_backtest: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase13ac_ml_failure_attribution_diagnostic: true
+    phase13ad_ml_failure_attribution_readiness_audit: true
+    phase13ae_ml_branch_continuation_architecture_pivot: true
+    phase13af_phase13_ml_branch_checkpoint_audit: true
+    relative_momentum_allocator: true
+
+  phase13ae_reports:
+    conclusion: "reports/phase13ae_pivot_decision_conclusion.csv"
+    gate_report: "reports/phase13ae_pivot_decision_gate_report.csv"
+    architecture_decision_report: "reports/phase13ae_pivot_decision_architecture_decision_report.csv"
+
+  checkpoint_reports:
+    required_reports:
+      - "reports/phase13ac_failure_attribution_conclusion.csv"
+      - "reports/phase13ad_failure_audit_conclusion.csv"
+      - "reports/phase13ae_pivot_decision_conclusion.csv"
+    forbidden_overclaim_phrases:
+      - "holdout ready"
+      - "model selected"
+      - "validated model"
+      - "profitable strategy"
+      - "validated trading strategy"
+      - "signal created"
+      - "backtest passed"
+      - "candidate promoted"
+      - "final candidate changed"
+
+  phase13ag_boundary:
+    allowed_next_step: "Target-feature redesign pre-registration only"
+    forbidden_next_step: "model training, repair execution, holdout prediction generation, model selection, feature importance, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+
+  gates:
+    require_phase13ae_passed: true
+    require_config_flags_clean: true
+    require_checkpoint_reports_present: true
+    require_forbidden_overclaim_absent: true
+    require_phase13ag_boundary_redesign_prereg_only: true
+    require_no_model_training: true
+    require_no_repair_execution: true
+    require_no_holdout_predictions: true
+    require_no_model_selection: true
+    require_no_feature_importance: true
+    require_no_signal_backtest_promotion: true
+    required_audit_role: "Phase 13 ML branch checkpoint audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

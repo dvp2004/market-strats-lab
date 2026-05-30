@@ -358,6 +358,12 @@ from market_strats.analysis.ml_diagnostic_repair_bundle import (
     save_phase13y_ml_diagnostic_repair_preregistration,
     save_phase13z_ml_diagnostic_repair_readiness_audit,
 )
+from market_strats.analysis.ml_failure_attribution_and_pivot import (
+    save_phase13ac_ml_failure_attribution_diagnostic,
+    save_phase13ad_ml_failure_attribution_readiness_audit,
+    save_phase13ae_ml_branch_continuation_architecture_pivot,
+    save_phase13af_phase13_ml_branch_checkpoint_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2236,6 +2242,26 @@ def main() -> None:
         )
 
         save_phase13z_ml_diagnostic_repair_readiness_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13ac_ml_failure_attribution_diagnostic(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13ad_ml_failure_attribution_readiness_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13ae_ml_branch_continuation_architecture_pivot(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13af_phase13_ml_branch_checkpoint_audit(
             config=config,
             reports_dir=reports_dir,
         )

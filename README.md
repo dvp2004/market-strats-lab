@@ -113,6 +113,13 @@ Phase 13Y–13AB corrected the Phase 13Y boundary and executed a registered diag
 
 This means the issue is probably not a shallow hyperparameter/class-weighting problem. The next serious question is whether the fragile target definition, class balance, horizon, or current technical + macro feature set is insufficient for detecting adverse regimes.
 
+Phase 13AC–13AF completed the ML failure-attribution and architecture-pivot checkpoint. The branch confirmed that the failed repair result is not just a simple model-tuning problem. The best repaired model, `rf_repair_fragile_weighted`, did not beat the original Phase 13U Random Forest and still had 0.0 fragile-class recall.
+
+The failure attribution points to a deeper target-feature learnability issue. High-severity attribution was assigned to target definition, fragile threshold, class imbalance, and feature insufficiency. Fragile labels are economically meaningful, with materially negative forward returns and drawdowns, but the current technical + macro feature set does not identify fragile regimes reliably enough.
+
+The correct architecture decision is now `pivot_to_target_feature_redesign_preregistration`. Direct holdout evaluation remains blocked. Another simple model-repair bundle is also blocked. The next phase must pre-register target-feature redesign before any further model execution, holdout work, signal generation, backtesting, paper-trading logic, or candidate promotion.
+
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -6976,6 +6983,186 @@ Correct interpretation:
 
 > Phase 13AB confirmed the repair execution was clean and leakage-bounded. It did not validate a repaired model, did not justify holdout evaluation, did not create trading evidence, and did not promote anything.
 
+## Phase 13AC: ML Failure Attribution / Target-Feature Diagnostic
+
+Phase 13AC diagnosed why the registered ML repair attempt failed.
+
+The phase compared the original Phase 13U Random Forest result against the Phase 13AA repair variants, reviewed target distribution, class imbalance, target outcome profiles, failure attribution families, and continuation options.
+
+This phase did not train models, execute another repair, generate holdout predictions, select a model, calculate feature importance, create signals, run strategy backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13AC Failure Summary
+
+| Metric | Result |
+|---|---:|
+| Original best model | `random_forest_classifier` |
+| Original validation balanced accuracy | 0.4253 |
+| Original validation macro F1 | 0.4010 |
+| Best repair model | `rf_repair_fragile_weighted` |
+| Best repair validation balanced accuracy | 0.4157 |
+| Best repair validation macro F1 | 0.3919 |
+| Best repair fragile recall | 0.0000 |
+| Economic repair success | False |
+
+Interpretation:
+
+> The repair attempt did not beat the original Random Forest and did not fix fragile-class recall. Simple class weighting and shallow regularisation are not enough.
+
+### Phase 13AC Target Distribution
+
+| Split | Fragile rows | Split rows | Fragile ratio |
+|---|---:|---:|---:|
+| Train | 410 | 2,784 | 14.73% |
+| Validation | 102 | 1,043 | 9.78% |
+| Holdout | 157 | 1,391 | 11.29% |
+
+Interpretation:
+
+> Fragile cases are meaningfully under-represented, especially in validation. This makes the fragile-class recall failure more serious and makes direct holdout work unjustified.
+
+### Phase 13AC Target Outcome Profile
+
+| Class | Mean 63D return | Mean 63D max drawdown |
+|---|---:|---:|
+| Fragile | -11.22% | -18.44% |
+| Neutral | 1.34% | -6.93% |
+| Supportive | 9.03% | -4.64% |
+
+Interpretation:
+
+> The labels are economically meaningful: fragile states do correspond to materially worse forward returns and drawdowns. The problem is not that the fragile label is irrelevant; the problem is that the current feature/model setup is not detecting it reliably.
+
+### Phase 13AC Failure Attribution
+
+| Attribution family | Severity | Interpretation |
+|---|---|---|
+| `target_definition` | High | Fragile class remains unrecalled after registered repair variants |
+| `fragile_threshold` | High | Fragile recall stayed below success threshold |
+| `class_imbalance` | High | Validation fragile support is low relative to other classes |
+| `feature_insufficiency` | High | Technical + macro features failed to identify fragile regimes reliably |
+| `horizon_63d` | Medium | The 63D horizon may be too sparse or poorly aligned |
+| `model_architecture` | Medium | Simple RF/logistic/HistGB variants did not solve the defect |
+| `missing_fundamental_sentiment` | Medium | Current dataset is still technical + macro only |
+
+### Phase 13AC Continuation Options
+
+| Option | Allowed next? | Reason |
+|---|---:|---|
+| `target_feature_redesign_preregistration` | True | Highest-risk issues point to target/threshold/feature learnability |
+| `another_simple_model_repair` | False | Simple class-weighting and regularisation already failed |
+| `direct_holdout_preregistration` | False | Blocked because fragile recall remains unresolved |
+| `feature_family_expansion_after_target_audit` | True | Possible later, but only after target/label diagnosis prevents feature shopping |
+
+### Phase 13AC Verdict
+
+> Phase 13AC completed ML failure attribution and target-feature diagnostic.
+
+Correct interpretation:
+
+> The ML branch should not proceed to holdout or another random repair. The next work should pre-register target-feature redesign.
+
+---
+
+## Phase 13AD: ML Failure Attribution Readiness / Report Audit
+
+Phase 13AD audited the Phase 13AC diagnostic reports.
+
+This phase confirmed that Phase 13AC passed, config flags were clean, diagnostic reports were present, attribution families were present, and forbidden actions remained blocked.
+
+### Phase 13AD Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13AC passed | Passed |
+| Config flags clean | Passed |
+| Diagnostic reports present | Passed |
+| Attribution families present | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+### Phase 13AD Verdict
+
+> Phase 13AD completed ML failure attribution readiness audit.
+
+Correct interpretation:
+
+> Phase 13AD validates report completeness and boundaries only. It does not validate a model or authorise holdout work.
+
+---
+
+## Phase 13AE: ML Branch Continuation / Architecture Pivot Decision
+
+Phase 13AE made the continuation decision after the failure-attribution diagnostic.
+
+The phase concluded that fragile recall remains unresolved and feature insufficiency is likely. Direct holdout remains blocked.
+
+### Phase 13AE Architecture Decision
+
+| Item | Result |
+|---|---|
+| Architecture decision | `pivot_to_target_feature_redesign_preregistration` |
+| Decision reason | Fragile recall remained unresolved after registered repair execution |
+| Fragile recall unresolved | True |
+| Feature insufficiency likely | True |
+| Direct holdout blocked | True |
+
+Correct interpretation:
+
+> The ML branch should pivot to target-feature redesign pre-registration. The current technical + macro ML setup is not ready for holdout, signal generation, strategy testing, or paper trading.
+
+### Phase 13AE Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13AD passed | Passed |
+| Architecture decision exists | Passed |
+| Holdout remains blocked | Passed |
+| Next boundary is redesign pre-registration only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Decision role is correct | Passed |
+
+---
+
+## Phase 13AF: Phase 13 ML Branch Checkpoint Audit
+
+Phase 13AF checkpointed the ML branch after the architecture pivot decision.
+
+This phase confirmed that Phase 13AE passed, config flags were clean, checkpoint reports were present, forbidden overclaim phrases were absent, and Phase 13AG is correctly bounded as target-feature redesign pre-registration only.
+
+### Phase 13AF Forbidden Overclaim Check
+
+| Forbidden phrase | Result |
+|---|---|
+| `holdout ready` | Passed |
+| `model selected` | Passed |
+| `validated model` | Passed |
+| `profitable strategy` | Passed |
+| `validated trading strategy` | Passed |
+| `signal created` | Passed |
+| `backtest passed` | Passed |
+| `candidate promoted` | Passed |
+| `final candidate changed` | Passed |
+
+### Phase 13AF Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13AE passed | Passed |
+| Config flags clean | Passed |
+| Checkpoint reports present | Passed |
+| Forbidden overclaim absent | Passed |
+| Phase 13AG boundary is redesign pre-registration only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+### Phase 13AF Verdict
+
+> Phase 13AF completed Phase 13 ML branch checkpoint audit.
+
+Correct interpretation:
+
+> Phase 13AF confirms the ML branch is cleanly checkpointed, but the branch has pivoted away from immediate ML training/holdout. Next work must pre-register target-feature redesign.
+
 ---
 
 # Methodology Notes
@@ -7191,6 +7378,12 @@ Remaining concerns include:
 - Holdout evaluation remains blocked. No holdout predictions have been generated.
 - No model has been selected. No feature importance has been calculated. No signal, allocation rule, strategy backtest, paper-trading output, candidate promotion, or final-candidate change exists.
 - The ML branch now has a deeper problem: the technical + macro feature/target setup is not capturing fragile regimes reliably enough.
+- The Phase 13 ML branch is not ready for holdout evaluation. Direct holdout remains blocked.
+- The best repaired model, `rf_repair_fragile_weighted`, did not beat the original Phase 13U Random Forest and still had 0.0 fragile recall.
+- The fragile class is economically meaningful but under-represented, especially in validation, where fragile rows were 102 / 1,043, or 9.78%.
+- The current technical + macro feature set is not sufficient to identify fragile regimes reliably.
+- Further simple class-weighting or shallow-regularisation repair is blocked unless separately justified by a new pre-registration.
+- No model has been selected. No holdout predictions exist. No feature importance, signal, backtest, paper-trading output, candidate promotion, or final-candidate change exists.
 ---
 
 # Bugs Caught and Fixed
@@ -8460,6 +8653,64 @@ reports/phase13ab_repair_audit_gate_report.csv
 reports/phase13ab_repair_audit_conclusion.csv
 ```
 
+## Phase 13AC ML Failure Attribution Reports
+
+```text
+reports/phase13ac_failure_attribution_source_report_check.csv
+reports/phase13ac_failure_attribution_phase13ab_result_check.csv
+reports/phase13ac_failure_attribution_failure_summary_report.csv
+reports/phase13ac_failure_attribution_target_distribution_report.csv
+reports/phase13ac_failure_attribution_class_imbalance_report.csv
+reports/phase13ac_failure_attribution_target_outcome_profile_report.csv
+reports/phase13ac_failure_attribution_failure_attribution_report.csv
+reports/phase13ac_failure_attribution_continuation_options_report.csv
+reports/phase13ac_failure_attribution_boundary_check.csv
+reports/phase13ac_failure_attribution_scope_boundary_check.csv
+reports/phase13ac_failure_attribution_summary.csv
+reports/phase13ac_failure_attribution_gate_report.csv
+reports/phase13ac_failure_attribution_conclusion.csv
+```
+
+## Phase 13AD ML Failure Attribution Audit Reports
+
+```text
+reports/phase13ad_failure_audit_config_flag_check.csv
+reports/phase13ad_failure_audit_report_inventory_check.csv
+reports/phase13ad_failure_audit_phase13ac_result_check.csv
+reports/phase13ad_failure_audit_attribution_family_check.csv
+reports/phase13ad_failure_audit_scope_boundary_check.csv
+reports/phase13ad_failure_audit_summary.csv
+reports/phase13ad_failure_audit_gate_report.csv
+reports/phase13ad_failure_audit_conclusion.csv
+```
+
+## Phase 13AE ML Branch Architecture Pivot Reports
+
+```text
+reports/phase13ae_pivot_decision_source_report_check.csv
+reports/phase13ae_pivot_decision_phase13ad_result_check.csv
+reports/phase13ae_pivot_decision_architecture_decision_report.csv
+reports/phase13ae_pivot_decision_next_boundary_check.csv
+reports/phase13ae_pivot_decision_scope_boundary_check.csv
+reports/phase13ae_pivot_decision_summary.csv
+reports/phase13ae_pivot_decision_gate_report.csv
+reports/phase13ae_pivot_decision_conclusion.csv
+```
+
+## Phase 13AF Phase 13 ML Branch Checkpoint Reports
+
+```text
+reports/phase13af_checkpoint_phase13ae_result_check.csv
+reports/phase13af_checkpoint_config_flag_check.csv
+reports/phase13af_checkpoint_checkpoint_report_check.csv
+reports/phase13af_checkpoint_forbidden_overclaim_check.csv
+reports/phase13af_checkpoint_phase13ag_boundary_check.csv
+reports/phase13af_checkpoint_scope_boundary_check.csv
+reports/phase13af_checkpoint_summary.csv
+reports/phase13af_checkpoint_gate_report.csv
+reports/phase13af_checkpoint_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -8657,6 +8908,10 @@ configs/spy_sma10.yaml
 | Phase 13Z ML diagnostic repair readiness audit | Completed — Phase 13Y passed, config flags were clean, repair hypotheses and success gates were present, and forbidden actions remained blocked; no repair execution, holdout prediction, model selection, feature importance, signal, backtest, paper trading, promotion, or final-candidate change |
 | Phase 13AA registered ML diagnostic repair execution | Completed mechanically — four registered repair variants trained and produced train/validation-only metrics, class-recall, overfit, success, and validation-prediction reports; repair attempt failed economically because fragile recall remained 0.0 for three variants and only 0.0098 for the shallow HistGB variant; no holdout prediction, model selection, feature importance, signal, backtest, paper trading, promotion, or final-candidate change |
 | Phase 13AB ML diagnostic repair result quality audit | Completed — repair outputs were present, validation predictions were validation-only, and forbidden actions remained blocked; this audit validates execution cleanliness, not repair success |
+| Phase 13AC ML failure attribution / target-feature diagnostic | Completed — diagnosed repair failure; best repair did not beat original Random Forest and fragile recall remained unresolved; high-severity attribution assigned to target definition, fragile threshold, class imbalance, and feature insufficiency; direct holdout and another simple repair bundle blocked |
+| Phase 13AD ML failure attribution readiness / report audit | Completed — Phase 13AC reports, config flags, attribution families, and forbidden-action boundaries passed |
+| Phase 13AE ML branch continuation / architecture pivot decision | Completed — decision: `pivot_to_target_feature_redesign_preregistration`; fragile recall unresolved, feature insufficiency likely, direct holdout blocked |
+| Phase 13AF Phase 13 ML branch checkpoint audit | Completed — checkpoint reports, config flags, forbidden-overclaim checks, and Phase 13AG redesign-pre-registration boundary passed; no model training, holdout prediction, model selection, feature importance, signal, backtest, paper trading, promotion, or final-candidate change |
 ---
 
 # What Should Happen Next
