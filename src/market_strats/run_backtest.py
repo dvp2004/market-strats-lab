@@ -364,6 +364,12 @@ from market_strats.analysis.ml_failure_attribution_and_pivot import (
     save_phase13ae_ml_branch_continuation_architecture_pivot,
     save_phase13af_phase13_ml_branch_checkpoint_audit,
 )
+from market_strats.analysis.target_feature_redesign_bundle import (
+    save_phase13ag_target_feature_redesign_preregistration,
+    save_phase13ah_target_feature_redesign_readiness_audit,
+    save_phase13ai_target_feature_diagnostic_panel_execution,
+    save_phase13aj_target_feature_diagnostic_result_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2246,6 +2252,16 @@ def main() -> None:
             reports_dir=reports_dir,
         )
 
+        save_phase13aa_registered_ml_diagnostic_repair_execution(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13ab_ml_diagnostic_repair_result_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
         save_phase13ac_ml_failure_attribution_diagnostic(
             config=config,
             reports_dir=reports_dir,
@@ -2266,15 +2282,25 @@ def main() -> None:
             reports_dir=reports_dir,
         )
 
-    save_phase13aa_registered_ml_diagnostic_repair_execution(
-        config=config,
-        reports_dir=reports_dir,
-    )
+        save_phase13ag_target_feature_redesign_preregistration(
+            config=config,
+            reports_dir=reports_dir,
+        )
 
-    save_phase13ab_ml_diagnostic_repair_result_audit(
-        config=config,
-        reports_dir=reports_dir,
-    )
+        save_phase13ah_target_feature_redesign_readiness_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13ai_target_feature_diagnostic_panel_execution(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13aj_target_feature_diagnostic_result_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
 
     save_final_strategy_decision_report(reports_dir)
 

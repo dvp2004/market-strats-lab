@@ -119,6 +119,9 @@ The failure attribution points to a deeper target-feature learnability issue. Hi
 
 The correct architecture decision is now `pivot_to_target_feature_redesign_preregistration`. Direct holdout evaluation remains blocked. Another simple model-repair bundle is also blocked. The next phase must pre-register target-feature redesign before any further model execution, holdout work, signal generation, backtesting, paper-trading logic, or candidate promotion.
 
+Phase 13AG–13AJ completed the target-feature redesign diagnostic checkpoint. The branch confirmed that the original 63D return-state target was economically meaningful but had weak validation fragile-class balance. Three redesigned 63D target variants — `return_63d_fragile_looser`, `return_drawdown_63d_composite`, and `drawdown_63d_fragile` — passed the diagnostic screen for future interpretation.
+
+This is not model evidence and not trading evidence. No target variant has been selected. The result only justifies a target-feature redesign interpretation phase. Model training, holdout prediction, feature importance, signal generation, backtesting, paper trading, and promotion remain blocked.
 
 ### Canonical Research Checkpoint
 
@@ -7163,6 +7166,184 @@ Correct interpretation:
 
 > Phase 13AF confirms the ML branch is cleanly checkpointed, but the branch has pivoted away from immediate ML training/holdout. Next work must pre-register target-feature redesign.
 
+## Phase 13AG: Target-Feature Redesign Pre-Registration Spec
+
+Phase 13AG pre-registered the target-feature redesign diagnostic path after Phase 13AE/13AF concluded that the ML branch must pivot away from direct holdout and simple model repair.
+
+The phase registered alternative target definitions, target-quality policies, feature-family availability categories, and diagnostic-panel boundaries. It did not execute model training, generate holdout predictions, calculate feature importance, select a target, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13AG Registered Target Variants
+
+| Target variant | Rule type | Status |
+|---|---|---|
+| `original_63d_return_state` | Existing 63D return-state column | Baseline comparison |
+| `return_63d_fragile_looser` | Looser 63D return-threshold target | Diagnostic candidate |
+| `return_drawdown_63d_composite` | 63D return + drawdown composite target | Diagnostic candidate |
+| `drawdown_63d_fragile` | 63D drawdown-first fragile target | Diagnostic candidate |
+| `return_21d_future_candidate` | 21D future-horizon candidate | Blocked until 21D outcome columns exist |
+| `return_126d_future_candidate` | 126D future-horizon candidate | Blocked until 126D outcome columns exist |
+
+### Phase 13AG Feature Family Registry
+
+| Feature family | Status |
+|---|---|
+| Technical | Available in current dataset |
+| Macro | Available in current dataset |
+| Fundamental | Future missing |
+| Sentiment | Future missing |
+| Market stress | Future missing |
+
+Correct interpretation:
+
+> Phase 13AG registered the redesign diagnostic path only. It did not choose a target variant or authorise model training.
+
+---
+
+## Phase 13AH: Target-Feature Redesign Readiness / Boundary Audit
+
+Phase 13AH audited the Phase 13AG redesign pre-registration.
+
+### Phase 13AH Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13AG passed | Passed |
+| Config flags clean | Passed |
+| Target variants present | Passed |
+| Feature families present | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+Correct interpretation:
+
+> Phase 13AH confirmed that the target-feature redesign diagnostic was ready to execute as a panel-only diagnostic, not as model training.
+
+---
+
+## Phase 13AI: Target-Feature Diagnostic Panel Execution
+
+Phase 13AI executed the target-feature diagnostic panel.
+
+This phase built target-variant feasibility, target assignment, target distribution, class balance, target outcome profile, feature-family availability, feature-target separation, and redesign-screen reports.
+
+It did not train models, generate holdout predictions, calculate feature importance, select a target, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+### Phase 13AI Target Variant Feasibility
+
+| Target variant | Feasible | Live classes |
+|---|---:|---|
+| `original_63d_return_state` | True | Fragile; neutral; supportive |
+| `return_63d_fragile_looser` | True | Fragile; neutral; supportive |
+| `return_drawdown_63d_composite` | True | Fragile; neutral; supportive |
+| `drawdown_63d_fragile` | True | Fragile; neutral; supportive |
+| `return_21d_future_candidate` | False | Missing 21D outcome columns |
+| `return_126d_future_candidate` | False | Missing 126D outcome columns |
+
+### Phase 13AI Class Balance
+
+| Target variant | Train fragile ratio | Validation fragile ratio | Train balance | Validation balance |
+|---|---:|---:|---|---|
+| `original_63d_return_state` | 14.73% | 9.78% | Passed | Failed |
+| `return_63d_fragile_looser` | 18.46% | 13.33% | Passed | Passed |
+| `return_drawdown_63d_composite` | 20.80% | 21.19% | Passed | Passed |
+| `drawdown_63d_fragile` | 18.97% | 18.70% | Passed | Passed |
+| `return_21d_future_candidate` | 0.00% | 0.00% | Failed | Failed |
+| `return_126d_future_candidate` | 0.00% | 0.00% | Failed | Failed |
+
+Interpretation:
+
+> The original target failed the validation fragile-balance gate. Three redesigned 63D targets improved class balance enough to remain viable for future interpretation.
+
+### Phase 13AI Target Outcome Profile
+
+| Target variant | Fragile mean 63D return | Fragile mean 63D max drawdown | Interpretation |
+|---|---:|---:|---|
+| `original_63d_return_state` | -11.22% | -18.44% | Strong economic meaning, weak validation balance |
+| `return_63d_fragile_looser` | -9.39% | -16.53% | Economically meaningful and better balanced |
+| `return_drawdown_63d_composite` | -6.73% | -16.51% | More balanced, drawdown-aware fragile class |
+| `drawdown_63d_fragile` | -6.84% | -17.33% | More balanced, strongest drawdown interpretation |
+
+Interpretation:
+
+> The redesigned targets preserve economic meaning. Fragile classes still have materially worse forward returns and drawdowns than neutral/supportive classes.
+
+### Phase 13AI Feature Family Availability
+
+| Feature family | Value columns | State columns | Missingness columns | Available for current panel |
+|---|---:|---:|---:|---|
+| Technical | 4 | 4 | 4 | True |
+| Macro | 4 | 4 | 4 | True |
+| Fundamental | 0 | 0 | 0 | False |
+| Sentiment | 0 | 0 | 0 | False |
+| Market stress | 0 | 0 | 0 | False |
+
+Interpretation:
+
+> The current dataset remains technical + macro only. Fundamental, sentiment, and market-stress feature families are still missing.
+
+### Phase 13AI Redesign Screen
+
+| Target variant | Feasible | Train balance | Validation balance | Economic ordering | Fragile drawdown worse than neutral | Viable for future interpretation |
+|---|---:|---:|---:|---:|---:|---:|
+| `original_63d_return_state` | True | True | False | True | True | False |
+| `return_63d_fragile_looser` | True | True | True | True | True | True |
+| `return_drawdown_63d_composite` | True | True | True | True | True | True |
+| `drawdown_63d_fragile` | True | True | True | True | True | True |
+| `return_21d_future_candidate` | False | False | False | False | False | False |
+| `return_126d_future_candidate` | False | False | False | False | False | False |
+
+Correct interpretation:
+
+> Phase 13AI found viable redesigned target variants, but did not select one. Selection remains blocked until a separate interpretation/decision phase.
+
+### Phase 13AI Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13AH passed | Passed |
+| Dataset loaded | Passed |
+| Target variant feasibility report exists | Passed |
+| Target assignment panel exists | Passed |
+| Target distribution report exists | Passed |
+| Class balance report exists | Passed |
+| Target outcome profile exists | Passed |
+| Feature family availability report exists | Passed |
+| Feature-target separation report exists | Passed |
+| Redesign screen report exists | Passed |
+| Boundary passed | Passed |
+| Scope blocks forbidden actions | Passed |
+| Execution role is correct | Passed |
+
+---
+
+## Phase 13AJ: Target-Feature Diagnostic Result Audit
+
+Phase 13AJ audited the Phase 13AI target-feature diagnostic panel.
+
+This phase confirmed that Phase 13AI passed, result reports were present, feasible target variants existed, class-balance and economic-ordering reports existed, forbidden outputs were absent, and the next phase is interpretation-only.
+
+### Phase 13AJ Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13AI passed | Passed |
+| Result reports present | Passed |
+| Feasible target variant exists | Passed |
+| Class balance report present | Passed |
+| Economic ordering report present | Passed |
+| Forbidden outputs absent | Passed |
+| Next boundary is interpretation-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+### Phase 13AJ Verdict
+
+> Phase 13AJ completed target-feature diagnostic result audit.
+
+Correct interpretation:
+
+> Phase 13AJ confirms that the target-feature redesign diagnostic was clean and useful. It does not select a target variant, train a model, generate holdout predictions, calculate feature importance, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
 ---
 
 # Methodology Notes
@@ -7384,6 +7565,13 @@ Remaining concerns include:
 - The current technical + macro feature set is not sufficient to identify fragile regimes reliably.
 - Further simple class-weighting or shallow-regularisation repair is blocked unless separately justified by a new pre-registration.
 - No model has been selected. No holdout predictions exist. No feature importance, signal, backtest, paper-trading output, candidate promotion, or final-candidate change exists.
+- Phase 13AG–13AJ did not train any model and did not prove predictive improvement.
+- No target variant has been selected. Three redesigned targets are viable for future interpretation only.
+- The original 63D target remains economically meaningful, but it failed the validation fragile-balance gate.
+- `return_21d_future_candidate` and `return_126d_future_candidate` remain blocked because the current dataset does not contain 21D or 126D forward outcome columns.
+- The current dataset still contains only technical and macro feature families. Fundamental, sentiment, and market-stress features remain missing.
+- Feature-target separation outputs are descriptive only. They are not feature importance, feature ranking, model evidence, or signal evidence.
+- No holdout predictions, feature importance, model selection, signal, backtest, paper-trading output, candidate promotion, or final-candidate change exists.
 ---
 
 # Bugs Caught and Fixed
@@ -8711,6 +8899,66 @@ reports/phase13af_checkpoint_gate_report.csv
 reports/phase13af_checkpoint_conclusion.csv
 ```
 
+## Phase 13AG Target-Feature Redesign Pre-Registration Reports
+
+```text
+reports/phase13ag_redesign_prereg_source_report_check.csv
+reports/phase13ag_redesign_prereg_phase13af_result_check.csv
+reports/phase13ag_redesign_prereg_target_variant_registry.csv
+reports/phase13ag_redesign_prereg_target_quality_policy.csv
+reports/phase13ag_redesign_prereg_feature_family_registry.csv
+reports/phase13ag_redesign_prereg_diagnostic_panel_policy.csv
+reports/phase13ag_redesign_prereg_boundary_check.csv
+reports/phase13ag_redesign_prereg_scope_boundary_check.csv
+reports/phase13ag_redesign_prereg_summary.csv
+reports/phase13ag_redesign_prereg_gate_report.csv
+reports/phase13ag_redesign_prereg_conclusion.csv
+```
+
+## Phase 13AH Target-Feature Redesign Readiness Reports
+
+```text
+reports/phase13ah_redesign_readiness_config_flag_check.csv
+reports/phase13ah_redesign_readiness_report_inventory_check.csv
+reports/phase13ah_redesign_readiness_phase13ag_result_check.csv
+reports/phase13ah_redesign_readiness_scope_boundary_check.csv
+reports/phase13ah_redesign_readiness_summary.csv
+reports/phase13ah_redesign_readiness_gate_report.csv
+reports/phase13ah_redesign_readiness_conclusion.csv
+```
+
+## Phase 13AI Target-Feature Diagnostic Panel Reports
+
+```text
+reports/phase13ai_redesign_panel_phase13ah_result_check.csv
+reports/phase13ai_redesign_panel_target_variant_feasibility_report.csv
+reports/phase13ai_redesign_panel_target_assignment_panel.csv
+reports/phase13ai_redesign_panel_target_distribution_report.csv
+reports/phase13ai_redesign_panel_class_balance_report.csv
+reports/phase13ai_redesign_panel_target_outcome_profile_report.csv
+reports/phase13ai_redesign_panel_feature_family_availability_report.csv
+reports/phase13ai_redesign_panel_feature_target_separation_report.csv
+reports/phase13ai_redesign_panel_redesign_screen_report.csv
+reports/phase13ai_redesign_panel_boundary_check.csv
+reports/phase13ai_redesign_panel_scope_boundary_check.csv
+reports/phase13ai_redesign_panel_summary.csv
+reports/phase13ai_redesign_panel_gate_report.csv
+reports/phase13ai_redesign_panel_conclusion.csv
+```
+
+## Phase 13AJ Target-Feature Diagnostic Result Audit Reports
+
+```text
+reports/phase13aj_redesign_audit_report_inventory_check.csv
+reports/phase13aj_redesign_audit_phase13ai_result_check.csv
+reports/phase13aj_redesign_audit_forbidden_output_check.csv
+reports/phase13aj_redesign_audit_next_boundary_check.csv
+reports/phase13aj_redesign_audit_scope_boundary_check.csv
+reports/phase13aj_redesign_audit_summary.csv
+reports/phase13aj_redesign_audit_gate_report.csv
+reports/phase13aj_redesign_audit_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -8912,6 +9160,10 @@ configs/spy_sma10.yaml
 | Phase 13AD ML failure attribution readiness / report audit | Completed — Phase 13AC reports, config flags, attribution families, and forbidden-action boundaries passed |
 | Phase 13AE ML branch continuation / architecture pivot decision | Completed — decision: `pivot_to_target_feature_redesign_preregistration`; fragile recall unresolved, feature insufficiency likely, direct holdout blocked |
 | Phase 13AF Phase 13 ML branch checkpoint audit | Completed — checkpoint reports, config flags, forbidden-overclaim checks, and Phase 13AG redesign-pre-registration boundary passed; no model training, holdout prediction, model selection, feature importance, signal, backtest, paper trading, promotion, or final-candidate change |
+| Phase 13AG target-feature redesign pre-registration | Completed — registered six target variants, target-quality policy, feature-family registry, and diagnostic-panel boundaries; no model training, holdout prediction, feature importance, target selection, signal, backtest, paper trading, promotion, or final-candidate change |
+| Phase 13AH target-feature redesign readiness audit | Completed — Phase 13AG passed, config flags were clean, target variants and feature families were present, and forbidden actions remained blocked |
+| Phase 13AI target-feature diagnostic panel execution | Completed — built target feasibility, assignment, distribution, class-balance, outcome-profile, feature-family availability, feature-target separation, and redesign-screen reports; three redesigned 63D target variants were viable for future interpretation; no target variant was selected |
+| Phase 13AJ target-feature diagnostic result audit | Completed — Phase 13AI reports passed, feasible target variants existed, class-balance and economic-ordering reports were present, forbidden outputs were absent, and the next boundary is interpretation-only |
 ---
 
 # What Should Happen Next
