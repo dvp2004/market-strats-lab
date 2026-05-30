@@ -344,6 +344,10 @@ from market_strats.analysis.ml_training_prereg_and_readiness_audit import (
     save_phase13s_ml_model_training_preregistration_spec,
     save_phase13t_ml_training_readiness_leakage_audit,
 )
+from market_strats.analysis.ml_registered_training_and_result_audit import (
+    save_phase13u_registered_baseline_ml_training,
+    save_phase13v_ml_training_result_quality_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2192,6 +2196,16 @@ def main() -> None:
         )
 
         save_phase13t_ml_training_readiness_leakage_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13u_registered_baseline_ml_training(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13v_ml_training_result_quality_audit(
             config=config,
             reports_dir=reports_dir,
         )
