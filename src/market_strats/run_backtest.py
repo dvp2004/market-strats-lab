@@ -376,6 +376,11 @@ from market_strats.analysis.redesigned_model_preregistration_bundle import (
     save_phase13am_redesigned_model_run_preregistration,
     save_phase13an_redesigned_model_run_readiness_audit,
 )
+from market_strats.analysis.redesigned_model_training_bundle import (
+    save_phase13ao_registered_redesigned_model_training,
+    save_phase13ap_redesigned_model_training_result_audit,
+    save_phase13aq_validation_to_holdout_decision,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2324,6 +2329,21 @@ def main() -> None:
         )
 
         save_phase13an_redesigned_model_run_readiness_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13ao_registered_redesigned_model_training(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13ap_redesigned_model_training_result_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13aq_validation_to_holdout_decision(
             config=config,
             reports_dir=reports_dir,
         )

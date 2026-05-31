@@ -8489,6 +8489,211 @@ phase13an_redesigned_model_run_readiness_audit:
     require_no_feature_importance: true
     require_no_signal_backtest_promotion: true
     required_audit_role: "Redesigned model run readiness and leakage audit only"
+phase13ao_registered_redesigned_model_training:
+  enabled: true
+  execution_role: "Registered redesigned model training on train/validation only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13AN"
+  proposed_next_phase: "Phase 13AP"
+
+  allow_model_training: true
+  allow_train_validation_evaluation: true
+  allow_validation_prediction_generation: true
+  allow_holdout_prediction_generation: false
+  allow_model_selection: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13an_conclusion: "reports/phase13an_model_readiness_conclusion.csv"
+    phase13an_gate_report: "reports/phase13an_model_readiness_gate_report.csv"
+    model_run_spec: "reports/phase13am_model_prereg_model_run_spec.csv"
+    feature_policy: "reports/phase13am_model_prereg_feature_policy.csv"
+    preprocessing_policy: "reports/phase13am_model_prereg_preprocessing_policy.csv"
+    registered_model_families: "reports/phase13am_model_prereg_registered_model_families.csv"
+    validation_success_gates: "reports/phase13am_model_prereg_validation_success_gates.csv"
+    candidate_target_decision_report: "reports/phase13ak_target_decision_candidate_target_decision_report.csv"
+    target_assignment_panel: "reports/phase13ai_redesign_panel_target_assignment_panel.csv"
+    dataset: "reports/phase13q_ml_feature_dataset_v1.csv"
+
+  model_training_policy:
+    fit_preprocessing_on_train_only: true
+    evaluate_train_split: true
+    evaluate_validation_split: true
+    generate_validation_predictions_only: true
+    generate_holdout_predictions: false
+    calculate_feature_importance: false
+    select_model: false
+    create_signal: false
+    run_backtest: false
+    promote_candidate: false
+    allowed_target_classes: ["supportive", "neutral", "fragile"]
+    unavailable_target_class: "unavailable"
+
+  output_policy:
+    write_metric_report: true
+    write_baseline_comparison_report: true
+    write_confusion_matrix_report: true
+    write_class_recall_report: true
+    write_calibration_report: true
+    write_overfit_report: true
+    write_success_report: true
+    write_validation_predictions: true
+    write_holdout_predictions: false
+    write_feature_importance: false
+
+  phase13ap_boundary:
+    allowed_next_step: "Redesigned model training result and leakage audit only"
+    forbidden_next_step: "holdout prediction generation, model selection, feature importance, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+
+  phase13aq_boundary:
+    allowed_future_step: "Validation-to-holdout decision only"
+    forbidden_future_step: "holdout prediction generation, model selection, feature importance, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+
+  gates:
+    require_phase13an_passed: true
+    require_registered_models_trained: true
+    require_train_validation_metrics: true
+    require_validation_predictions_only: true
+    require_baseline_comparison_report: true
+    require_class_recall_report: true
+    require_overfit_report: true
+    require_success_report: true
+    require_no_holdout_predictions: true
+    require_no_feature_importance: true
+    require_no_model_selection: true
+    require_no_signal_backtest_promotion: true
+    required_execution_role: "Registered redesigned model training on train/validation only"
+
+
+phase13ap_redesigned_model_training_result_audit:
+  enabled: true
+  audit_role: "Redesigned model training result and leakage audit only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13AO"
+  proposed_next_phase: "Phase 13AQ"
+
+  allow_model_training: false
+  allow_holdout_prediction_generation: false
+  allow_model_selection: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_strategy_backtest: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase13ak_target_feature_redesign_interpretation_decision: false
+    phase13al_target_feature_redesign_checkpoint_audit: false
+    phase13am_redesigned_model_run_preregistration: false
+    phase13an_redesigned_model_run_readiness_audit: false
+    phase13ao_registered_redesigned_model_training: true
+    phase13ap_redesigned_model_training_result_audit: true
+    phase13aq_validation_to_holdout_decision: true
+    relative_momentum_allocator: true
+
+  phase13ao_reports:
+    conclusion: "reports/phase13ao_model_training_conclusion.csv"
+    gate_report: "reports/phase13ao_model_training_gate_report.csv"
+    model_execution_report: "reports/phase13ao_model_training_model_execution_report.csv"
+    metric_report: "reports/phase13ao_model_training_metric_report.csv"
+    baseline_comparison_report: "reports/phase13ao_model_training_baseline_comparison_report.csv"
+    confusion_matrix_report: "reports/phase13ao_model_training_confusion_matrix_report.csv"
+    class_recall_report: "reports/phase13ao_model_training_class_recall_report.csv"
+    calibration_report: "reports/phase13ao_model_training_calibration_report.csv"
+    overfit_report: "reports/phase13ao_model_training_overfit_report.csv"
+    success_report: "reports/phase13ao_model_training_success_report.csv"
+    validation_predictions: "reports/phase13ao_model_training_validation_predictions.csv"
+
+  forbidden_output_paths:
+    - "reports/phase13ao_model_training_holdout_predictions.csv"
+    - "reports/phase13ao_model_training_feature_importance.csv"
+    - "reports/phase13ao_model_training_signal_report.csv"
+    - "reports/phase13ao_model_training_strategy_backtest.csv"
+    - "reports/phase13ao_model_training_candidate_promotion.csv"
+
+  phase13aq_boundary:
+    allowed_next_step: "Validation-to-holdout decision only"
+    forbidden_next_step: "holdout prediction generation, model selection, feature importance, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+
+  gates:
+    require_phase13ao_passed: true
+    require_config_flags_clean: true
+    require_result_reports_present: true
+    require_validation_predictions_only: true
+    require_success_report_present: true
+    require_baseline_comparison_present: true
+    require_class_recall_present: true
+    require_forbidden_outputs_absent: true
+    require_phase13aq_boundary_decision_only: true
+    require_no_holdout_predictions: true
+    require_no_model_selection: true
+    require_no_feature_importance: true
+    require_no_signal_backtest_promotion: true
+    required_audit_role: "Redesigned model training result and leakage audit only"
+
+
+phase13aq_validation_to_holdout_decision:
+  enabled: true
+  decision_role: "Validation-to-holdout decision only"
+  phase_branch: "Phase 13 multi-factor model architecture planning"
+  source_phase: "Phase 13AP"
+  proposed_next_phase: "Phase 13AR if justified, otherwise branch pause or redesign"
+
+  allow_model_training: false
+  allow_holdout_prediction_generation: false
+  allow_model_selection: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_strategy_backtest: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13ap_conclusion: "reports/phase13ap_model_audit_conclusion.csv"
+    phase13ap_gate_report: "reports/phase13ap_model_audit_gate_report.csv"
+    metric_report: "reports/phase13ao_model_training_metric_report.csv"
+    baseline_comparison_report: "reports/phase13ao_model_training_baseline_comparison_report.csv"
+    class_recall_report: "reports/phase13ao_model_training_class_recall_report.csv"
+    overfit_report: "reports/phase13ao_model_training_overfit_report.csv"
+    success_report: "reports/phase13ao_model_training_success_report.csv"
+
+  decision_policy:
+    if_any_real_model_passes_all_validation_gates: "justify_holdout_preregistration"
+    if_no_real_model_passes_all_validation_gates: "do_not_proceed_to_holdout"
+    require_real_model: true
+    require_success_gates_passed: true
+    require_validation_edge_vs_majority: true
+    require_fragile_recall_gate: true
+    require_overfit_gate: true
+    no_model_selection: true
+    no_holdout_predictions: true
+    no_signal_permission: true
+    no_backtest_permission: true
+    no_candidate_promotion: true
+
+  phase13ar_boundary:
+    allowed_next_step_if_passed: "Holdout evaluation pre-registration only"
+    allowed_next_step_if_failed: "Kill, pause, or redesign branch decision only"
+    forbidden_next_step: "holdout prediction generation, model selection, feature importance, signal creation, allocation rule, strategy backtest, paper-trading deployment, candidate promotion, or final-candidate change"
+
+  gates:
+    require_phase13ap_passed: true
+    require_success_report_present: true
+    require_decision_report: true
+    require_no_holdout_predictions: true
+    require_no_model_selection: true
+    require_no_feature_importance: true
+    require_no_signal_backtest_promotion: true
+    require_phase13ar_boundary_prereg_only_if_passed: true
+    required_decision_role: "Validation-to-holdout decision only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
