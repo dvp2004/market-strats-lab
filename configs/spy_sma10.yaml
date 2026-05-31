@@ -9202,6 +9202,213 @@ phase14d_non_ml_visual_backtest_result_audit:
     require_no_candidate_promotion: true
     require_no_paper_trading_ready_claim: true
     required_audit_role: "Non-ML visual backtest result audit only"
+phase14e_visual_backtest_interpretation_source_identity_audit:
+  enabled: false
+  audit_role: "Visual backtest interpretation and candidate source identity audit only"
+  implementation_classification: "B - protects against building paper-trading prep on the wrong candidate stream"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 14D"
+  proposed_next_phase: "Phase 14F"
+
+  intended_candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+  selected_route_id: "route_3_non_ml_overlay_visual_backtest_paper_readiness"
+
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_paper_trading_workflow_preregistration: false
+  allow_paper_trading_deployment: false
+  allow_paper_trading_ready_claim: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_feature_importance: false
+  allow_strategy_backtest_rerun: false
+
+  source_reports:
+    phase14d_conclusion: "reports/phase14d_visual_audit_conclusion.csv"
+    phase14d_gate_report: "reports/phase14d_visual_audit_gate_report.csv"
+    phase14c_source_resolution: "reports/phase14c_visual_backtest_candidate_source_resolution_report.csv"
+    phase14c_benchmark_comparison: "reports/phase14c_visual_backtest_benchmark_comparison.csv"
+    phase14c_money_made_lost: "reports/phase14c_visual_backtest_money_made_lost_table.csv"
+    phase14c_trade_log: "reports/phase14c_visual_backtest_trade_log.csv"
+    phase14c_switch_event_log: "reports/phase14c_visual_backtest_switch_event_log.csv"
+    phase14c_signal_template_preview: "reports/phase14c_visual_backtest_signal_template_preview.csv"
+    phase13aw_route_selection: "reports/phase13aw_route_selection_route_selection_report.csv"
+
+  source_identity_policy:
+    expected_candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+    required_source_name_fragments:
+      - "phase6b"
+      - "loose"
+      - "relief"
+    suspicious_source_name_fragments:
+      - "Top 3 Equal Weight Relative Momentum Allocator"
+      - "allocator_result"
+      - "relative_momentum_outputs"
+    source_identity_pass_requires_expected_fragment: true
+    source_identity_fails_if_suspicious_allocator_without_expected_candidate: true
+
+  canonical_metric_reconciliation:
+    tolerance:
+      cagr_abs_tolerance: 0.005
+      calmar_abs_tolerance: 0.025
+      max_drawdown_abs_tolerance: 0.025
+      final_value_relative_tolerance: 0.05
+
+    canonical_systems:
+      - system_id: "spy_buy_hold"
+        label: "SPY Buy & Hold"
+        expected_cagr: 0.1090
+        expected_calmar: 0.197
+        expected_max_drawdown: -0.5519
+        required_in_side_by_side: true
+
+      - system_id: "spy_12m_momentum"
+        label: "SPY 12M Momentum"
+        expected_cagr: 0.0968
+        expected_calmar: 0.287
+        expected_max_drawdown: -0.3372
+        required_in_side_by_side: true
+
+      - system_id: "phase4_deep_drawdown_guard_execution_realistic"
+        label: "Phase 4 deep_drawdown_guard execution-realistic baseline"
+        expected_cagr: 0.0993
+        expected_calmar: 0.412
+        expected_max_drawdown: -0.2412
+        required_in_side_by_side: true
+
+      - system_id: "phase6b_loose_relief_execution_realistic_overlay"
+        label: "Phase 6B/6C loose_relief execution-realistic candidate"
+        expected_cagr: 0.1035
+        expected_calmar: 0.429
+        expected_max_drawdown: -0.2412
+        expected_final_value: 71779.16
+        required_in_side_by_side: true
+        compare_to_phase14c_candidate: true
+
+  current_signal_state_policy:
+    require_latest_decision_date: true
+    require_current_mode: true
+    require_current_exposure: true
+    require_current_action_template: true
+    require_preview_only_status: true
+    require_no_paper_trading_permission: true
+    warn_if_signal_cannot_be_determined: true
+
+  interpretation_policy:
+    interpret_drawdown_vs_wealth_only_if_source_identity_passes: true
+    block_paper_workflow_if_source_identity_fails: true
+    block_paper_workflow_if_metric_reconciliation_fails: true
+    require_side_by_side_comparison_report: true
+
+  phase14f_boundary:
+    allowed_next_step_if_failed: "Candidate source correction and visual backtest re-run pre-registration only"
+    allowed_next_step_if_passed: "Paper-trading workflow pre-registration only"
+    forbidden_next_step: "live trading, real-money deployment, paper-trading deployment, paper-trading-ready claim, candidate promotion, final-candidate change, unregistered ML, or feature importance"
+
+  gates:
+    require_phase14d_passed: true
+    require_source_identity_report: true
+    require_metric_reconciliation_report: true
+    require_side_by_side_comparison_report: true
+    require_current_signal_state_report: true
+    require_interpretation_decision_report: true
+    require_phase14f_boundary_conditional_only: true
+    require_no_live_trading: true
+    require_no_real_money_deployment: true
+    require_no_paper_trading_ready_claim: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_audit_role: "Visual backtest interpretation and candidate source identity audit only"
+phase14f_candidate_source_correction_or_workflow_prereg_decision:
+  enabled: false
+  decision_role: "Candidate source correction or paper-trading workflow pre-registration decision only"
+  implementation_classification: "A/B - corrects/re-runs visual source or moves towards paper-trading workflow only if identity passes"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 14E"
+  proposed_next_phase: "Phase 14G"
+
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_paper_trading_deployment: false
+  allow_paper_trading_ready_claim: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_feature_importance: false
+  allow_strategy_backtest_rerun_execution: false
+
+  expected_runtime_flags:
+    phase14a_non_ml_visual_backtest_preregistration: false
+    phase14b_non_ml_visual_backtest_readiness_audit: false
+    phase14c_non_ml_visual_backtest_report_execution: false
+    phase14d_non_ml_visual_backtest_result_audit: false
+    phase14e_visual_backtest_interpretation_source_identity_audit: true
+    phase14f_candidate_source_correction_or_workflow_prereg_decision: true
+    relative_momentum_allocator: true
+
+  source_reports:
+    phase14e_conclusion: "reports/phase14e_source_identity_conclusion.csv"
+    phase14e_gate_report: "reports/phase14e_source_identity_gate_report.csv"
+    phase14e_source_identity_report: "reports/phase14e_source_identity_source_identity_report.csv"
+    phase14e_metric_reconciliation_report: "reports/phase14e_source_identity_metric_reconciliation_report.csv"
+    phase14e_interpretation_decision_report: "reports/phase14e_source_identity_interpretation_decision_report.csv"
+    phase14e_current_signal_state_report: "reports/phase14e_source_identity_current_signal_state_report.csv"
+
+  correction_policy:
+    decision_if_source_identity_failed: "pre_register_candidate_source_correction_and_visual_rerun"
+    decision_if_metric_reconciliation_failed: "pre_register_candidate_source_correction_and_visual_rerun"
+    decision_if_all_identity_checks_pass: "pre_register_paper_trading_workflow_requirements"
+    intended_candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+    required_corrected_source_fragments:
+      - "phase6b"
+      - "loose"
+      - "relief"
+      - "execution"
+      - "realistic"
+    corrected_visual_rerun_required_reports:
+      - "equity_curve_vs_spy_buy_hold"
+      - "drawdown_curve"
+      - "exposure_regime_timeline"
+      - "trade_log"
+      - "switch_event_log"
+      - "money_made_lost_table"
+      - "benchmark_comparison"
+      - "rolling_relative_performance"
+      - "signal_template_preview"
+
+  paper_workflow_prereg_policy:
+    allowed_only_if_source_identity_passes: true
+    allowed_only_if_metric_reconciliation_passes: true
+    still_no_deployment: true
+    required_future_workflow_reports:
+      - "daily_signal_file_schema"
+      - "paper_broker_manual_entry_template"
+      - "monitoring_dashboard_schema"
+      - "execution_checklist"
+      - "stop_conditions"
+      - "paper_trading_journal_template"
+
+  phase14g_boundary:
+    allowed_next_step_if_failed: "Candidate source correction implementation and visual backtest re-run only"
+    allowed_next_step_if_passed: "Paper-trading workflow pre-registration only"
+    forbidden_next_step: "live trading, real-money deployment, paper-trading deployment, paper-trading-ready claim, candidate promotion, final-candidate change, unregistered ML, or feature importance"
+
+  gates:
+    require_phase14e_passed: true
+    require_config_flags_clean: true
+    require_decision_report: true
+    require_correction_spec_if_source_failed: true
+    require_no_paper_workflow_if_source_failed: true
+    require_phase14g_boundary_conditional_only: true
+    require_no_live_trading: true
+    require_no_real_money_deployment: true
+    require_no_paper_trading_ready_claim: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_decision_role: "Candidate source correction or paper-trading workflow pre-registration decision only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

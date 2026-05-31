@@ -139,6 +139,12 @@ The artefact pipeline passed cleanly. However, the candidate did not beat SPY Bu
 
 The correct interpretation is that the candidate is defensive and risk-controlled, not a raw-return winner. Phase 14D does not make the system paper-trading ready. Phase 14E must interpret whether the drawdown reduction is worth the opportunity cost and must verify candidate-source identity before any paper-trading workflow is pre-registered.
 
+Phase 14E–14F completed the candidate-source identity checkpoint after the first non-ML visual backtest. The result blocks paper-trading workflow preparation.
+
+Phase 14E found that the Phase 14C visual backtest source did not clearly match the intended `phase6b_loose_relief_execution_realistic_overlay` candidate. The resolver selected `relative_momentum_outputs.Top 3 Equal Weight Relative Momentum Allocator.allocator_result`. Metric reconciliation also failed: the Phase 14C candidate showed 8.94% CAGR, 0.250 Calmar, -35.74% max drawdown, and final value around 55,325, while the canonical Phase 6B/6C loose-relief checkpoint expected roughly 10.35% CAGR, 0.429 Calmar, -24.12% max drawdown, and final value around 71,779.
+
+Phase 14F therefore selected `pre_register_candidate_source_correction_and_visual_rerun`. Correction is required, visual re-run is required, and paper-trading workflow pre-registration is blocked. The next phase must explicitly resolve the intended Phase 6B/6C loose-relief execution-realistic overlay stream and regenerate the visual backtest artefacts from that source only.
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -7762,6 +7768,7 @@ Correct interpretation:
 
 > The fastest responsible route is now the non-ML overlay visual-backtest and paper-readiness path. Technical + macro ML v1 is paused/killed for now, and multi-asset expansion remains blocked until the SPY paper-trading candidate path is inspected properly.
 
+# Phase 14
 ## Phase 14A: Non-ML Paper-Trading Candidate Visual Backtest / Signal-Mapping Pre-Registration
 
 Phase 14A pre-registered the non-ML visual backtest and signal-mapping preview path after Phase 13AW selected the non-ML overlay route as the fastest responsible path towards paper-trading readiness.
@@ -7976,6 +7983,213 @@ This phase confirmed that all required reports were present, chart files existed
 Correct interpretation:
 
 > Phase 14D confirms that the practical visual backtest artefacts were generated and audited cleanly. It does not make the candidate paper-trading ready. The next phase must interpret whether the lower drawdown justifies the lower return, and must verify candidate-source identity before any paper-trading workflow is pre-registered.
+
+## Phase 14E: Visual Backtest Interpretation / Candidate Source Identity Audit
+
+Phase 14E interpreted the Phase 14A–14D visual backtest outputs and audited whether the Phase 14C visual artefacts were generated from the intended candidate stream.
+
+The intended candidate was:
+
+> `phase6b_loose_relief_execution_realistic_overlay`
+
+The Phase 14C resolver selected:
+
+> `relative_momentum_outputs.Top 3 Equal Weight Relative Momentum Allocator.allocator_result`
+
+This source did not clearly match the intended Phase 6B/6C loose-relief execution-realistic overlay candidate. The Phase 14C candidate metrics also failed reconciliation against the canonical Phase 6B/6C loose-relief checkpoint metrics.
+
+This phase did not run live trading, deploy real money, pre-register paper trading, deploy paper trading, train models, calculate feature importance, promote a candidate, or change the final candidate.
+
+### Phase 14E Source Identity Audit
+
+| Item | Result |
+|---|---|
+| Intended candidate system ID | `phase6b_loose_relief_execution_realistic_overlay` |
+| Selected candidate system ID from route | `phase6b_loose_relief_execution_realistic_overlay` |
+| Resolved Phase 14C source | `relative_momentum_outputs.Top 3 Equal Weight Relative Momentum Allocator.allocator_result` |
+| Expected candidate fragment found in source name | Failed |
+| Suspicious allocator source detected | True |
+| Source identity passed | False |
+| Source identity failed | True |
+
+Interpretation:
+
+> The selected route was correct, but the visual source resolver did not clearly resolve the intended Phase 6B/6C loose-relief candidate stream. The visual backtest cannot be used for paper-trading workflow preparation until this is corrected.
+
+### Phase 14E Metric Reconciliation
+
+| System | Expected CAGR | Observed CAGR | Expected Calmar | Observed Calmar | Expected Max DD | Observed Max DD | Reconciled |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| SPY Buy & Hold | 10.90% | — | 0.197 | — | -55.19% | — | Reference only |
+| SPY 12M Momentum | 9.68% | — | 0.287 | — | -33.72% | — | Reference only |
+| Phase 4 deep_drawdown_guard execution-realistic baseline | 9.93% | — | 0.412 | — | -24.12% | — | Reference only |
+| Phase 6B/6C loose_relief execution-realistic candidate | 10.35% | 8.94% | 0.429 | 0.250 | -24.12% | -35.74% | Failed |
+
+Interpretation:
+
+> The Phase 14C visualised candidate does not reconcile with the canonical Phase 6B/6C loose-relief candidate. The gap is too large to ignore.
+
+### Phase 14E Side-by-Side Comparison
+
+| System | Source | CAGR | Calmar | Max Drawdown | Final Value |
+|---|---|---:|---:|---:|---:|
+| SPY Buy & Hold | Canonical checkpoint | 10.90% | 0.197 | -55.19% | — |
+| SPY 12M Momentum | Canonical checkpoint | 9.68% | 0.287 | -33.72% | — |
+| Phase 4 deep_drawdown_guard execution-realistic baseline | Canonical checkpoint | 9.93% | 0.412 | -24.12% | — |
+| Phase 6B/6C loose_relief execution-realistic candidate | Canonical checkpoint | 10.35% | 0.429 | -24.12% | 71,779.16 |
+| Phase 14C visualised candidate | Phase 14C visual backtest | 8.94% | 0.250 | -35.74% | 55,325.08 |
+
+Interpretation:
+
+> The Phase 14C visualised candidate behaves more like a weaker/raw allocator stream than the remembered Phase 6B/6C loose-relief execution-realistic candidate.
+
+### Phase 14E Current Signal State
+
+| Item | Result |
+|---|---|
+| Signal determined | True |
+| Latest decision date | 2026-05-01 |
+| Current mode | `1.0` |
+| Current exposure | `0.0` |
+| Current candidate action | `cash_or_defensive_preview` |
+| Preview only | True |
+| Paper trading allowed | False |
+| Live trading allowed | False |
+| Real money allowed | False |
+| Data source | `phase14c_visual_backtest_signal_template_preview.csv` |
+
+Interpretation:
+
+> A current preview signal was available, but it came from the questionable Phase 14C visual source. It must not be treated as a paper-trading instruction.
+
+### Phase 14E Interpretation Decision
+
+| Item | Result |
+|---|---|
+| Decision | `source_identity_failed_block_paper_workflow` |
+| Next action | `candidate_source_correction_and_visual_rerun_required` |
+| Source identity failed | True |
+| Metric reconciliation failed | True |
+| Signal determined | True |
+| Paper-trading workflow pre-registration allowed | False |
+| Paper-trading deployment allowed | False |
+| Paper-trading ready | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+Decision reason:
+
+> Phase 14C visual source does not clearly match the intended Phase 6B/6C loose-relief candidate.
+
+### Phase 14E Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 14D passed | Passed |
+| Source identity report exists | Passed |
+| Metric reconciliation report exists | Passed |
+| Side-by-side comparison report exists | Passed |
+| Current signal state report exists | Passed |
+| Interpretation decision report exists | Passed |
+| Phase 14F boundary is conditional-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+Correct interpretation:
+
+> Phase 14E blocks paper-trading workflow preparation because source identity and metric reconciliation failed. The next step must correct the candidate source and re-run the visual backtest.
+
+---
+
+## Phase 14F: Candidate Source Correction / Re-Run Decision
+
+Phase 14F converted the Phase 14E source-identity failure into a corrected next-step decision.
+
+Because Phase 14E found that the Phase 14C visual source did not clearly match the intended Phase 6B/6C loose-relief execution-realistic candidate, Phase 14F blocked paper-trading workflow pre-registration and required candidate-source correction plus visual backtest re-run.
+
+This phase did not execute the re-run. It only registered the decision and correction requirement.
+
+### Phase 14F Correction Decision
+
+| Item | Result |
+|---|---|
+| Decision | `pre_register_candidate_source_correction_and_visual_rerun` |
+| Next phase | Phase 14G — Candidate source correction implementation and visual backtest re-run |
+| Source identity failed | True |
+| Metric reconciliation failed | True |
+| Correction required | True |
+| Visual re-run required | True |
+| Paper-trading workflow pre-registration allowed | False |
+| Paper-trading deployment allowed | False |
+| Paper-trading ready | False |
+| Live trading allowed | False |
+| Real money allowed | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+Interpretation:
+
+> The project must now explicitly resolve the intended Phase 6B/6C loose-relief stream and regenerate the visual backtest artefacts from that source only.
+
+### Phase 14F Correction Spec
+
+| Item | Result |
+|---|---|
+| Correction required | True |
+| Intended candidate system ID | `phase6b_loose_relief_execution_realistic_overlay` |
+| Required corrected source fragments | `phase6b`; `loose`; `relief`; `execution`; `realistic` |
+| Re-run execution allowed in Phase 14F | False |
+| Paper workflow pre-registration allowed | False |
+
+Required corrected visual re-run reports:
+
+| Required report |
+|---|
+| Equity curve vs SPY Buy & Hold |
+| Drawdown curve |
+| Exposure / regime timeline |
+| Trade log |
+| Switch / event log |
+| Money-made/lost table |
+| Benchmark comparison |
+| Rolling relative performance |
+| Signal-template preview |
+
+### Phase 14F Paper Workflow Requirements
+
+| Workflow requirement | Registered now | Deployment allowed | Paper trading ready |
+|---|---:|---:|---:|
+| Daily signal file schema | False | False | False |
+| Paper broker manual-entry template | False | False | False |
+| Monitoring dashboard schema | False | False | False |
+| Execution checklist | False | False | False |
+| Stop conditions | False | False | False |
+| Paper-trading journal template | False | False | False |
+
+Interpretation:
+
+> Paper-trading workflow requirements remain blocked because the visual backtest source identity failed.
+
+### Phase 14F Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 14E passed | Passed |
+| Config flags clean | Passed |
+| Decision report exists | Passed |
+| Correction spec exists if source failed | Passed |
+| No paper workflow if source failed | Passed |
+| Phase 14G boundary is conditional-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Decision role is correct | Passed |
+
+### Phase 14F Verdict
+
+> Phase 14F completed the candidate source correction / workflow pre-registration decision.
+
+Correct interpretation:
+
+> The next phase is not paper-trading workflow pre-registration. The next phase is candidate source correction and visual backtest re-run.
 
 ---
 
@@ -8223,6 +8437,12 @@ Remaining concerns include:
 - Candidate-source identity needs Phase 14E interpretation because the visual resolver selected `relative_momentum_outputs.Top 3 Equal Weight Relative Momentum Allocator.allocator_result`, not an obviously named `phase6b_loose_relief_execution_realistic_overlay` output.
 - The signal-template preview is preview-only and not a deployment signal.
 - No live trading, real-money deployment, model training, feature importance, candidate promotion, final-candidate change, or paper-trading-ready claim occurred.
+- Phase 14C visual artefacts are not reliable for paper-trading workflow preparation because Phase 14E found source identity failure.
+- The Phase 14C resolver selected `relative_momentum_outputs.Top 3 Equal Weight Relative Momentum Allocator.allocator_result`, not an explicitly identified Phase 6B/6C loose-relief execution-realistic overlay stream.
+- Phase 14C candidate metrics did not reconcile with canonical Phase 6B/6C metrics. Observed CAGR was 8.94% versus expected 10.35%, observed Calmar was 0.250 versus expected 0.429, observed max drawdown was -35.74% versus expected -24.12%, and observed final value was about 55,325 versus expected about 71,779.
+- Paper-trading workflow pre-registration is blocked until the intended candidate stream is explicitly resolved and the visual backtest is re-run.
+- The current signal state report is preview-only and comes from the questionable Phase 14C source, so it must not be treated as a paper-trading instruction.
+- No live trading, real-money deployment, paper-trading deployment, paper-trading-ready claim, candidate promotion, final-candidate change, unregistered ML, or feature importance occurred.
 ---
 
 # Bugs Caught and Fixed
@@ -9775,6 +9995,41 @@ reports/phase14d_visual_audit_gate_report.csv
 reports/phase14d_visual_audit_conclusion.csv
 ```
 
+## Phase 14E Visual Source Identity Reports
+
+```text
+reports/phase14e_source_identity_source_report_check.csv
+reports/phase14e_source_identity_phase14d_result_check.csv
+reports/phase14e_source_identity_source_identity_report.csv
+reports/phase14e_source_identity_metric_reconciliation_report.csv
+reports/phase14e_source_identity_side_by_side_comparison_report.csv
+reports/phase14e_source_identity_current_signal_state_report.csv
+reports/phase14e_source_identity_interpretation_decision_report.csv
+reports/phase14e_source_identity_phase14f_boundary_check.csv
+reports/phase14e_source_identity_scope_boundary_check.csv
+reports/phase14e_source_identity_summary.csv
+reports/phase14e_source_identity_gate_report.csv
+reports/phase14e_source_identity_conclusion.csv
+```
+
+## Phase 14F Candidate Source Correction / Workflow Decision Reports
+
+```text
+reports/phase14f_source_correction_config_flag_check.csv
+reports/phase14f_source_correction_source_report_check.csv
+reports/phase14f_source_correction_phase14e_result_check.csv
+reports/phase14f_source_correction_source_identity_input_check.csv
+reports/phase14f_source_correction_metric_reconciliation_input_check.csv
+reports/phase14f_source_correction_correction_spec_report.csv
+reports/phase14f_source_correction_paper_workflow_requirement_report.csv
+reports/phase14f_source_correction_decision_report.csv
+reports/phase14f_source_correction_phase14g_boundary_check.csv
+reports/phase14f_source_correction_scope_boundary_check.csv
+reports/phase14f_source_correction_summary.csv
+reports/phase14f_source_correction_gate_report.csv
+reports/phase14f_source_correction_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -9990,6 +10245,8 @@ configs/spy_sma10.yaml
 | Phase 14B non-ML visual backtest readiness audit | Completed — candidate source resolved with 5,034 rows from 2006-04-28 to 2026-05-01, candidate and benchmark returns available, exposure and mode available, and visual artefact registry ready; source identity requires Phase 14E interpretation |
 | Phase 14C non-ML visual backtest report execution | Completed — generated equity curve, drawdown curve, exposure timeline, trade log, switch event log, money-made/lost table, benchmark comparison, rolling relative performance, signal-template preview, and chart files |
 | Phase 14D non-ML visual backtest result audit | Completed — all required reports and chart files were present, report rows were non-empty, signal preview was preview-only, forbidden claims were absent, and Phase 14E boundary is interpretation-only |
+| Phase 14E visual backtest interpretation / candidate source identity audit | Completed — source identity failed because the Phase 14C visual source resolved to `relative_momentum_outputs.Top 3 Equal Weight Relative Momentum Allocator.allocator_result`, which did not clearly match the intended `phase6b_loose_relief_execution_realistic_overlay`; metric reconciliation also failed against canonical Phase 6B/6C loose-relief metrics |
+| Phase 14F candidate source correction / workflow pre-registration decision | Completed — decision: `pre_register_candidate_source_correction_and_visual_rerun`; correction required, visual re-run required, paper-trading workflow pre-registration blocked |
 ---
 
 # What Should Happen Next

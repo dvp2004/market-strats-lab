@@ -391,6 +391,10 @@ from market_strats.analysis.non_ml_visual_backtest_bundle import (
     save_phase14c_non_ml_visual_backtest_report_execution,
     save_phase14d_non_ml_visual_backtest_result_audit,
 )
+from market_strats.analysis.visual_source_identity_decision_bundle import (
+    save_phase14e_visual_backtest_interpretation_source_identity_audit,
+    save_phase14f_candidate_source_correction_or_workflow_prereg_decision,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2388,6 +2392,16 @@ def main() -> None:
         )
 
         save_phase14d_non_ml_visual_backtest_result_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase14e_visual_backtest_interpretation_source_identity_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase14f_candidate_source_correction_or_workflow_prereg_decision(
             config=config,
             reports_dir=reports_dir,
         )
