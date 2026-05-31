@@ -385,6 +385,12 @@ from market_strats.analysis.commercial_route_decision_bundle import (
     save_phase13av_ml_branch_commercial_decision,
     save_phase13aw_paper_trading_candidate_route_selection,
 )
+from market_strats.analysis.non_ml_visual_backtest_bundle import (
+    save_phase14a_non_ml_visual_backtest_preregistration,
+    save_phase14b_non_ml_visual_backtest_readiness_audit,
+    save_phase14c_non_ml_visual_backtest_report_execution,
+    save_phase14d_non_ml_visual_backtest_result_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2358,6 +2364,30 @@ def main() -> None:
         )
 
         save_phase13aw_paper_trading_candidate_route_selection(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase14a_non_ml_visual_backtest_preregistration(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase14b_non_ml_visual_backtest_readiness_audit(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+        )
+
+        save_phase14c_non_ml_visual_backtest_report_execution(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+        )
+
+        save_phase14d_non_ml_visual_backtest_result_audit(
             config=config,
             reports_dir=reports_dir,
         )

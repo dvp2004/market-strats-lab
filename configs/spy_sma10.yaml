@@ -8865,6 +8865,343 @@ phase13aw_paper_trading_candidate_route_selection:
     require_no_feature_importance: true
     require_no_signal_backtest_paper_trading_promotion: true
     required_decision_role: "Paper-trading candidate route selection only"
+phase14a_non_ml_visual_backtest_preregistration:
+  enabled: false
+  spec_role: "Non-ML paper-trading candidate visual backtest and signal-mapping pre-registration only"
+  implementation_classification: "A/B - moves towards paper-trading visuals while preventing unregistered overclaim"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 13AW"
+  proposed_next_phase: "Phase 14B"
+
+  candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+  candidate_route_id: "route_3_non_ml_overlay_visual_backtest_paper_readiness"
+  benchmark_id: "SPY Buy & Hold"
+  initial_capital: 10000.0
+  rolling_window_days: 63
+
+  allow_visual_backtest_generation: false
+  allow_signal_mapping_preview: false
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_holdout_prediction_generation: false
+  allow_feature_importance: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_paper_trading_ready_claim: false
+
+  source_reports:
+    phase13aw_conclusion: "reports/phase13aw_route_selection_conclusion.csv"
+    phase13aw_gate_report: "reports/phase13aw_route_selection_gate_report.csv"
+    phase13aw_route_selection_report: "reports/phase13aw_route_selection_route_selection_report.csv"
+
+  visual_source_policy:
+    preferred_candidate_id: "phase6b_loose_relief_execution_realistic_overlay"
+    candidate_return_columns:
+      - "strategy_return"
+      - "strategy_return_net"
+      - "overlay_return"
+      - "candidate_return"
+      - "portfolio_return"
+      - "system_return"
+      - "daily_return"
+      - "return"
+    benchmark_return_columns:
+      - "benchmark_return"
+      - "spy_buy_hold_return"
+      - "spy_return"
+      - "buy_hold_return"
+      - "buy_and_hold_return"
+    candidate_equity_columns:
+      - "strategy_equity"
+      - "overlay_equity"
+      - "candidate_equity"
+      - "portfolio_value"
+      - "equity"
+    benchmark_equity_columns:
+      - "benchmark_equity"
+      - "spy_buy_hold_equity"
+      - "spy_equity"
+      - "buy_hold_equity"
+    price_columns:
+      - "spy_close"
+      - "SPY_close"
+      - "close"
+      - "Close"
+    exposure_columns:
+      - "exposure"
+      - "candidate_exposure"
+      - "target_exposure"
+      - "spy_weight"
+      - "risk_on_weight"
+      - "allocation"
+    mode_columns:
+      - "mode"
+      - "regime"
+      - "position"
+      - "state"
+      - "signal_state"
+    date_columns:
+      - "decision_date"
+      - "date"
+      - "Date"
+      - "timestamp"
+
+  artefact_registry:
+    - artefact_key: "equity_curve"
+      required: true
+      csv_path: "reports/phase14c_visual_backtest_equity_curve.csv"
+      chart_path: "reports/phase14c_visual_backtest_equity_curve.png"
+    - artefact_key: "drawdown_curve"
+      required: true
+      csv_path: "reports/phase14c_visual_backtest_drawdown_curve.csv"
+      chart_path: "reports/phase14c_visual_backtest_drawdown_curve.png"
+    - artefact_key: "exposure_timeline"
+      required: true
+      csv_path: "reports/phase14c_visual_backtest_exposure_timeline.csv"
+      chart_path: "reports/phase14c_visual_backtest_exposure_timeline.png"
+    - artefact_key: "trade_log"
+      required: true
+      csv_path: "reports/phase14c_visual_backtest_trade_log.csv"
+      chart_path: ""
+    - artefact_key: "switch_event_log"
+      required: true
+      csv_path: "reports/phase14c_visual_backtest_switch_event_log.csv"
+      chart_path: ""
+    - artefact_key: "money_made_lost"
+      required: true
+      csv_path: "reports/phase14c_visual_backtest_money_made_lost_table.csv"
+      chart_path: ""
+    - artefact_key: "benchmark_comparison"
+      required: true
+      csv_path: "reports/phase14c_visual_backtest_benchmark_comparison.csv"
+      chart_path: ""
+    - artefact_key: "rolling_relative_performance"
+      required: true
+      csv_path: "reports/phase14c_visual_backtest_rolling_relative_performance.csv"
+      chart_path: "reports/phase14c_visual_backtest_rolling_relative_performance.png"
+    - artefact_key: "paper_trading_signal_template_preview"
+      required: true
+      csv_path: "reports/phase14c_visual_backtest_signal_template_preview.csv"
+      chart_path: ""
+
+  signal_mapping_preview_policy:
+    preview_only: true
+    current_signal_source: "non_ml_overlay_mode_and_exposure"
+    allowed_signal_actions:
+      - "maintain_current_exposure"
+      - "risk_on_preview"
+      - "risk_off_preview"
+      - "cash_or_defensive_preview"
+    blocked_claims:
+      - "paper_trading_ready"
+      - "live_trading_ready"
+      - "real_money_ready"
+      - "candidate_promoted"
+
+  phase14b_boundary:
+    allowed_next_step: "Non-ML visual backtest readiness audit only"
+    forbidden_next_step: "visual backtest generation, live trading, real-money deployment, unregistered ML, feature importance, candidate promotion, final-candidate change, or paper-trading-ready claim"
+
+  phase14c_boundary:
+    allowed_future_step: "Non-ML visual backtest report execution only"
+    forbidden_future_step: "live trading, real-money deployment, unregistered ML, feature importance, candidate promotion, final-candidate change, or paper-trading-ready claim"
+
+  gates:
+    require_phase13aw_passed: true
+    require_selected_route_is_non_ml_overlay: true
+    require_artefact_registry: true
+    require_signal_mapping_preview_policy: true
+    require_phase14b_boundary_readiness_only: true
+    require_phase14c_boundary_execution_only: true
+    require_no_live_trading: true
+    require_no_real_money_deployment: true
+    require_no_model_training: true
+    require_no_feature_importance: true
+    require_no_candidate_promotion: true
+    require_no_paper_trading_ready_claim: true
+    required_spec_role: "Non-ML paper-trading candidate visual backtest and signal-mapping pre-registration only"
+phase14b_non_ml_visual_backtest_readiness_audit:
+  enabled: false
+  audit_role: "Non-ML visual backtest readiness audit only"
+  implementation_classification: "B - confirms input/report readiness"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 14A"
+  proposed_next_phase: "Phase 14C"
+
+  allow_visual_backtest_generation: false
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_feature_importance: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_paper_trading_ready_claim: false
+
+  expected_runtime_flags:
+    phase13av_ml_branch_commercial_decision: false
+    phase13aw_paper_trading_candidate_route_selection: false
+    phase14a_non_ml_visual_backtest_preregistration: true
+    phase14b_non_ml_visual_backtest_readiness_audit: true
+    phase14c_non_ml_visual_backtest_report_execution: true
+    phase14d_non_ml_visual_backtest_result_audit: true
+    relative_momentum_allocator: true
+
+  phase14a_reports:
+    conclusion: "reports/phase14a_visual_prereg_conclusion.csv"
+    gate_report: "reports/phase14a_visual_prereg_gate_report.csv"
+    artefact_registry: "reports/phase14a_visual_prereg_artefact_registry.csv"
+    signal_mapping_preview_policy: "reports/phase14a_visual_prereg_signal_mapping_preview_policy.csv"
+    visual_source_policy: "reports/phase14a_visual_prereg_visual_source_policy.csv"
+
+  readiness_thresholds:
+    min_rows: 1000
+    require_candidate_return_series: true
+    require_benchmark_return_series: true
+    require_exposure_or_mode_series: false
+    require_date_column: true
+
+  phase14c_boundary:
+    allowed_next_step: "Non-ML visual backtest report execution only"
+    forbidden_next_step: "live trading, real-money deployment, unregistered ML, feature importance, candidate promotion, final-candidate change, or paper-trading-ready claim"
+
+  gates:
+    require_phase14a_passed: true
+    require_config_flags_clean: true
+    require_phase14a_reports_present: true
+    require_candidate_source_resolved: true
+    require_candidate_source_min_rows: true
+    require_candidate_and_benchmark_returns: true
+    require_artefact_registry_complete: true
+    require_phase14c_boundary_execution_only: true
+    require_no_live_trading: true
+    require_no_real_money_deployment: true
+    require_no_model_training: true
+    require_no_feature_importance: true
+    require_no_candidate_promotion: true
+    require_no_paper_trading_ready_claim: true
+    required_audit_role: "Non-ML visual backtest readiness audit only"
+phase14c_non_ml_visual_backtest_report_execution:
+  enabled: false
+  execution_role: "Non-ML visual backtest report execution only"
+  implementation_classification: "A - generates practical visual outputs"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 14B"
+  proposed_next_phase: "Phase 14D"
+
+  allow_visual_backtest_generation: true
+  allow_signal_mapping_preview: true
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_feature_importance: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_paper_trading_ready_claim: false
+
+  source_reports:
+    phase14b_conclusion: "reports/phase14b_visual_readiness_conclusion.csv"
+    phase14b_gate_report: "reports/phase14b_visual_readiness_gate_report.csv"
+    artefact_registry: "reports/phase14a_visual_prereg_artefact_registry.csv"
+    visual_source_policy: "reports/phase14a_visual_prereg_visual_source_policy.csv"
+
+  report_policy:
+    initial_capital: 10000.0
+    rolling_window_days: 63
+    annualisation_days: 252
+    preview_signal_rows: 25
+    chart_dpi: 140
+    chart_width: 10
+    chart_height: 5
+
+  phase14d_boundary:
+    allowed_next_step: "Non-ML visual backtest result audit only"
+    forbidden_next_step: "live trading, real-money deployment, unregistered ML, feature importance, candidate promotion, final-candidate change, or paper-trading-ready claim"
+
+  gates:
+    require_phase14b_passed: true
+    require_equity_curve: true
+    require_drawdown_curve: true
+    require_exposure_timeline: true
+    require_trade_log: true
+    require_switch_event_log: true
+    require_money_made_lost_table: true
+    require_benchmark_comparison: true
+    require_rolling_relative_performance: true
+    require_signal_template_preview: true
+    require_chart_files: true
+    require_no_live_trading: true
+    require_no_real_money_deployment: true
+    require_no_model_training: true
+    require_no_feature_importance: true
+    require_no_candidate_promotion: true
+    require_no_paper_trading_ready_claim: true
+    required_execution_role: "Non-ML visual backtest report execution only"
+phase14d_non_ml_visual_backtest_result_audit:
+  enabled: false
+  audit_role: "Non-ML visual backtest result audit only"
+  implementation_classification: "B - audits report quality and blocks false paper-trading claims"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 14C"
+  proposed_next_phase: "Phase 14E"
+
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_feature_importance: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_paper_trading_ready_claim: false
+
+  phase14c_reports:
+    conclusion: "reports/phase14c_visual_backtest_conclusion.csv"
+    gate_report: "reports/phase14c_visual_backtest_gate_report.csv"
+    equity_curve: "reports/phase14c_visual_backtest_equity_curve.csv"
+    drawdown_curve: "reports/phase14c_visual_backtest_drawdown_curve.csv"
+    exposure_timeline: "reports/phase14c_visual_backtest_exposure_timeline.csv"
+    trade_log: "reports/phase14c_visual_backtest_trade_log.csv"
+    switch_event_log: "reports/phase14c_visual_backtest_switch_event_log.csv"
+    money_made_lost: "reports/phase14c_visual_backtest_money_made_lost_table.csv"
+    benchmark_comparison: "reports/phase14c_visual_backtest_benchmark_comparison.csv"
+    rolling_relative_performance: "reports/phase14c_visual_backtest_rolling_relative_performance.csv"
+    signal_template_preview: "reports/phase14c_visual_backtest_signal_template_preview.csv"
+
+  chart_files:
+    - "reports/phase14c_visual_backtest_equity_curve.png"
+    - "reports/phase14c_visual_backtest_drawdown_curve.png"
+    - "reports/phase14c_visual_backtest_exposure_timeline.png"
+    - "reports/phase14c_visual_backtest_rolling_relative_performance.png"
+
+  forbidden_claims:
+    - "paper_trading_ready"
+    - "live_trading_ready"
+    - "real_money_ready"
+    - "candidate_promoted"
+    - "final_candidate_changed"
+
+  phase14e_boundary:
+    allowed_next_step: "Visual backtest interpretation and paper-trading readiness decision only"
+    forbidden_next_step: "live trading, real-money deployment, unregistered ML, feature importance, candidate promotion, final-candidate change, or paper-trading-ready claim before inspection"
+
+  gates:
+    require_phase14c_passed: true
+    require_all_required_reports_present: true
+    require_chart_files_present: true
+    require_report_rows_non_empty: true
+    require_signal_template_preview_is_preview_only: true
+    require_forbidden_claims_absent: true
+    require_phase14e_boundary_interpretation_only: true
+    require_no_live_trading: true
+    require_no_real_money_deployment: true
+    require_no_model_training: true
+    require_no_feature_importance: true
+    require_no_candidate_promotion: true
+    require_no_paper_trading_ready_claim: true
+    required_audit_role: "Non-ML visual backtest result audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

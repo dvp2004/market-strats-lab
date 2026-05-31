@@ -133,6 +133,12 @@ The selected route is `route_3_non_ml_overlay_visual_backtest_paper_readiness`. 
 
 This is a route-selection result only. No signal, visual backtest, paper-trading deployment, live trading, candidate promotion, or final-candidate change has occurred.
 
+Phase 14A–14D completed the first practical non-ML visual backtest checkpoint. The branch generated and audited the key artefacts needed for eventual paper-trading evaluation: equity curve versus SPY Buy & Hold, drawdown curve, exposure timeline, trade log, switch/event log, money-made/lost table, benchmark comparison, rolling relative performance, chart files, and a paper-trading signal-template preview.
+
+The artefact pipeline passed cleanly. However, the candidate did not beat SPY Buy & Hold on raw wealth or CAGR. Starting from 10,000, the candidate ended at 55,325.08 versus SPY Buy & Hold at 79,306.62. Candidate CAGR was 8.94% versus SPY at 10.92%. The candidate did improve risk control, with max drawdown -35.74% versus SPY -55.19%, and Calmar 0.250 versus SPY 0.198.
+
+The correct interpretation is that the candidate is defensive and risk-controlled, not a raw-return winner. Phase 14D does not make the system paper-trading ready. Phase 14E must interpret whether the drawdown reduction is worth the opportunity cost and must verify candidate-source identity before any paper-trading workflow is pre-registered.
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -7756,6 +7762,221 @@ Correct interpretation:
 
 > The fastest responsible route is now the non-ML overlay visual-backtest and paper-readiness path. Technical + macro ML v1 is paused/killed for now, and multi-asset expansion remains blocked until the SPY paper-trading candidate path is inspected properly.
 
+## Phase 14A: Non-ML Paper-Trading Candidate Visual Backtest / Signal-Mapping Pre-Registration
+
+Phase 14A pre-registered the non-ML visual backtest and signal-mapping preview path after Phase 13AW selected the non-ML overlay route as the fastest responsible path towards paper-trading readiness.
+
+This phase did not generate visual backtest reports, create live signals, deploy paper trading, run live trading, use real money, train models, calculate feature importance, promote a candidate, or change the final candidate.
+
+### Phase 14A Registered Artefacts
+
+| Artefact | Required |
+|---|---:|
+| Equity curve vs SPY Buy & Hold | True |
+| Drawdown curve | True |
+| Exposure / regime timeline | True |
+| Trade log | True |
+| Switch / event log | True |
+| Money-made/lost table | True |
+| Benchmark comparison | True |
+| Rolling relative performance | True |
+| Paper-trading signal-template preview | True |
+
+### Phase 14A Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13AW passed | Passed |
+| Selected route is non-ML overlay | Passed |
+| Artefact registry exists | Passed |
+| Signal mapping preview policy exists | Passed |
+| Boundaries passed | Passed |
+| Scope blocks forbidden actions | Passed |
+| Spec role is correct | Passed |
+
+Correct interpretation:
+
+> Phase 14A registered the visual-backtest and signal-preview path only. It did not make the system paper-trading ready.
+
+---
+
+## Phase 14B: Non-ML Visual Backtest Readiness Audit
+
+Phase 14B audited whether the candidate source and required report structure were ready for visual backtest generation.
+
+### Phase 14B Candidate Source Resolution
+
+| Item | Result |
+|---|---|
+| Source resolved | True |
+| Source name | `relative_momentum_outputs.Top 3 Equal Weight Relative Momentum Allocator.allocator_result` |
+| Rows | 5,034 |
+| Date column | `date` |
+| Candidate return column | `strategy_return` |
+| Benchmark return column | `SPY_return` |
+| Candidate equity column | `equity` |
+| Candidate and benchmark returns available | True |
+| Has exposure | True |
+| Has mode | True |
+| First decision date | 2006-04-28 |
+| Last decision date | 2026-05-01 |
+
+Important caveat:
+
+> The resolver selected a relative-momentum allocator output. Phase 14E must verify whether this is the intended `phase6b_loose_relief_execution_realistic_overlay` candidate source before any paper-trading workflow is considered.
+
+### Phase 14B Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 14A passed | Passed |
+| Config flags clean | Passed |
+| Phase 14A reports present | Passed |
+| Candidate source resolved | Passed |
+| Candidate source has enough rows | Passed |
+| Candidate and benchmark returns available | Passed |
+| Artefact registry complete | Passed |
+| Phase 14C boundary is execution-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+Correct interpretation:
+
+> Phase 14B confirmed the visual-backtest pipeline could execute, but source identity still needs interpretation before paper-trading readiness.
+
+---
+
+## Phase 14C: Non-ML Visual Backtest Report Execution
+
+Phase 14C generated the practical visual backtest artefacts.
+
+This phase produced equity, drawdown, exposure, trade-log, switch-log, money-made/lost, benchmark-comparison, rolling-relative-performance, and signal-template-preview reports. It also generated chart files for equity, drawdown, exposure, and rolling relative performance.
+
+This phase did not run live trading, deploy real money, train models, calculate feature importance, promote a candidate, change the final candidate, or claim paper-trading readiness.
+
+### Phase 14C Benchmark Comparison
+
+| Series | End value | Total return | CAGR | Max drawdown | Calmar |
+|---|---:|---:|---:|---:|---:|
+| Candidate | 55,325.08 | 453.25% | 8.94% | -35.74% | 0.250 |
+| SPY Buy & Hold | 79,306.62 | 693.07% | 10.92% | -55.19% | 0.198 |
+| Candidate minus benchmark | -23,981.54 | -239.82% | -1.98 pp | +19.45 pp drawdown improvement | +0.052 |
+
+Interpretation:
+
+> The candidate underperformed SPY Buy & Hold on raw wealth and CAGR, but improved max drawdown and Calmar. This is a defensive candidate, not a raw-return winner.
+
+### Phase 14C Money Made / Lost
+
+| Metric | Value |
+|---|---:|
+| Candidate total PnL | 45,325.08 |
+| Benchmark total PnL | 69,306.62 |
+| Candidate minus benchmark PnL | -23,981.54 |
+| Winning trade segments | 29 |
+| Losing trade segments | 15 |
+| Best trade segment PnL | 20,436.67 |
+| Worst trade segment PnL | -3,753.74 |
+
+Interpretation:
+
+> The system made money in absolute terms but materially underperformed SPY Buy & Hold. The risk-control improvement must be weighed against the opportunity cost.
+
+### Phase 14C Trade and Switch Artefacts
+
+| Artefact | Rows |
+|---|---:|
+| Equity curve | 5,034 |
+| Drawdown curve | 5,034 |
+| Exposure timeline | 5,034 |
+| Trade log | 44 |
+| Switch event log | 43 |
+| Rolling relative performance | 5,034 |
+| Signal template preview | 25 |
+
+### Phase 14C Signal Template Preview
+
+The signal-template preview ended with repeated `cash_or_defensive_preview` actions in late March to May 2026, with `live_trading_allowed = False` and `real_money_allowed = False`.
+
+Correct interpretation:
+
+> The signal template is a preview only. It is not a paper-trading deployment, live signal, broker instruction, or real-money trading system.
+
+### Phase 14C Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 14B passed | Passed |
+| Equity curve exists | Passed |
+| Drawdown curve exists | Passed |
+| Exposure timeline exists | Passed |
+| Trade log exists | Passed |
+| Switch event log exists | Passed |
+| Money made/lost table exists | Passed |
+| Benchmark comparison exists | Passed |
+| Rolling relative performance exists | Passed |
+| Signal template preview exists | Passed |
+| Chart files exist | Passed |
+| Scope blocks forbidden actions | Passed |
+| Execution role is correct | Passed |
+
+Correct interpretation:
+
+> Phase 14C successfully generated the practical visual backtest artefacts, but the result is not automatically good enough for paper trading.
+
+---
+
+## Phase 14D: Non-ML Visual Backtest Result Audit
+
+Phase 14D audited the Phase 14C visual backtest outputs.
+
+This phase confirmed that all required reports were present, chart files existed, report rows were non-empty, the signal template was preview-only, forbidden claims were absent, and the Phase 14E boundary is interpretation-only.
+
+### Phase 14D Report Inventory
+
+| Report | Rows | Result |
+|---|---:|---|
+| Equity curve | 5,034 | Passed |
+| Drawdown curve | 5,034 | Passed |
+| Exposure timeline | 5,034 | Passed |
+| Trade log | 44 | Passed |
+| Switch event log | 43 | Passed |
+| Money made/lost table | 7 | Passed |
+| Benchmark comparison | 3 | Passed |
+| Rolling relative performance | 5,034 | Passed |
+| Signal template preview | 25 | Passed |
+
+### Phase 14D Chart Inventory
+
+| Chart | Result |
+|---|---|
+| Equity curve chart | Passed |
+| Drawdown curve chart | Passed |
+| Exposure timeline chart | Passed |
+| Rolling relative performance chart | Passed |
+
+### Phase 14D Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 14C passed | Passed |
+| All required reports present | Passed |
+| Chart files present | Passed |
+| Report rows non-empty | Passed |
+| Signal preview is preview-only | Passed |
+| Forbidden claims absent | Passed |
+| Phase 14E boundary is interpretation-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+### Phase 14D Verdict
+
+> Phase 14D completed non-ML visual backtest result audit.
+
+Correct interpretation:
+
+> Phase 14D confirms that the practical visual backtest artefacts were generated and audited cleanly. It does not make the candidate paper-trading ready. The next phase must interpret whether the lower drawdown justifies the lower return, and must verify candidate-source identity before any paper-trading workflow is pre-registered.
+
 ---
 
 # Methodology Notes
@@ -7995,6 +8216,13 @@ Remaining concerns include:
 - Multi-asset expansion remains blocked until the SPY paper-trading candidate path is inspected properly.
 - Phase 13AW selected a route, not a live strategy. No signal mapping, visual backtest, paper-trading deployment, real-money deployment, candidate promotion, or final-candidate change occurred.
 - The selected next route relies on the existing non-ML overlay candidate. It still needs visual backtest, signal-mapping, trade-log, drawdown, exposure, money-made/lost, and paper-readiness checks before any paper-trading workflow can be considered.
+- Phase 14A–14D generated and audited practical visual backtest artefacts, but did not make the system paper-trading ready.
+- The candidate underperformed SPY Buy & Hold on raw wealth and CAGR: final value 55,325.08 versus 79,306.62, and CAGR 8.94% versus 10.92%.
+- The candidate improved drawdown and Calmar: max drawdown -35.74% versus SPY -55.19%, and Calmar 0.250 versus 0.198.
+- The result is defensive rather than wealth-maximising. The opportunity cost versus SPY Buy & Hold is material.
+- Candidate-source identity needs Phase 14E interpretation because the visual resolver selected `relative_momentum_outputs.Top 3 Equal Weight Relative Momentum Allocator.allocator_result`, not an obviously named `phase6b_loose_relief_execution_realistic_overlay` output.
+- The signal-template preview is preview-only and not a deployment signal.
+- No live trading, real-money deployment, model training, feature importance, candidate promotion, final-candidate change, or paper-trading-ready claim occurred.
 ---
 
 # Bugs Caught and Fixed
@@ -9476,6 +9704,77 @@ reports/phase13aw_route_selection_gate_report.csv
 reports/phase13aw_route_selection_conclusion.csv
 ```
 
+## Phase 14A Non-ML Visual Backtest Pre-Registration Reports
+
+```text
+reports/phase14a_visual_prereg_source_report_check.csv
+reports/phase14a_visual_prereg_phase13aw_result_check.csv
+reports/phase14a_visual_prereg_artefact_registry.csv
+reports/phase14a_visual_prereg_visual_source_policy.csv
+reports/phase14a_visual_prereg_signal_mapping_preview_policy.csv
+reports/phase14a_visual_prereg_boundary_check.csv
+reports/phase14a_visual_prereg_scope_boundary_check.csv
+reports/phase14a_visual_prereg_summary.csv
+reports/phase14a_visual_prereg_gate_report.csv
+reports/phase14a_visual_prereg_conclusion.csv
+```
+
+## Phase 14B Non-ML Visual Backtest Readiness Reports
+
+```text
+reports/phase14b_visual_readiness_config_flag_check.csv
+reports/phase14b_visual_readiness_report_inventory_check.csv
+reports/phase14b_visual_readiness_phase14a_result_check.csv
+reports/phase14b_visual_readiness_candidate_source_resolution_report.csv
+reports/phase14b_visual_readiness_candidate_source_preview.csv
+reports/phase14b_visual_readiness_readiness_check.csv
+reports/phase14b_visual_readiness_boundary_check.csv
+reports/phase14b_visual_readiness_scope_boundary_check.csv
+reports/phase14b_visual_readiness_summary.csv
+reports/phase14b_visual_readiness_gate_report.csv
+reports/phase14b_visual_readiness_conclusion.csv
+```
+
+## Phase 14C Non-ML Visual Backtest Reports
+
+```text
+reports/phase14c_visual_backtest_candidate_source_resolution_report.csv
+reports/phase14c_visual_backtest_equity_curve.csv
+reports/phase14c_visual_backtest_equity_curve.png
+reports/phase14c_visual_backtest_drawdown_curve.csv
+reports/phase14c_visual_backtest_drawdown_curve.png
+reports/phase14c_visual_backtest_exposure_timeline.csv
+reports/phase14c_visual_backtest_exposure_timeline.png
+reports/phase14c_visual_backtest_trade_log.csv
+reports/phase14c_visual_backtest_switch_event_log.csv
+reports/phase14c_visual_backtest_money_made_lost_table.csv
+reports/phase14c_visual_backtest_benchmark_comparison.csv
+reports/phase14c_visual_backtest_rolling_relative_performance.csv
+reports/phase14c_visual_backtest_rolling_relative_performance.png
+reports/phase14c_visual_backtest_signal_template_preview.csv
+reports/phase14c_visual_backtest_phase14b_result_check.csv
+reports/phase14c_visual_backtest_boundary_check.csv
+reports/phase14c_visual_backtest_scope_boundary_check.csv
+reports/phase14c_visual_backtest_summary.csv
+reports/phase14c_visual_backtest_gate_report.csv
+reports/phase14c_visual_backtest_conclusion.csv
+```
+
+## Phase 14D Non-ML Visual Backtest Audit Reports
+
+```text
+reports/phase14d_visual_audit_report_inventory_check.csv
+reports/phase14d_visual_audit_phase14c_result_check.csv
+reports/phase14d_visual_audit_chart_inventory_check.csv
+reports/phase14d_visual_audit_forbidden_claim_check.csv
+reports/phase14d_visual_audit_signal_preview_boundary_check.csv
+reports/phase14d_visual_audit_phase14e_boundary_check.csv
+reports/phase14d_visual_audit_scope_boundary_check.csv
+reports/phase14d_visual_audit_summary.csv
+reports/phase14d_visual_audit_gate_report.csv
+reports/phase14d_visual_audit_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -9687,6 +9986,10 @@ configs/spy_sma10.yaml
 | Phase 13AN redesigned model run readiness / leakage audit | Completed — candidate target column ready, train/validation rows ready, target fragile balance ready, 24 feature columns ready, forbidden feature fragments absent, holdout locked, and Phase 13AO boundary is train/validation-only |
 | Phase 13AV ML branch commercial decision / kill-or-pivot spec | Completed — technical + macro ML v1 was paused/killed commercially after Phase 13AQ failed validation-to-holdout; minor ML tuning, direct ML holdout, ML signal mapping, ML backtest, and premature multi-asset expansion were blocked |
 | Phase 13AW paper-trading candidate route selection | Completed — selected `route_3_non_ml_overlay_visual_backtest_paper_readiness`, using the existing `phase6b_loose_relief_execution_realistic_overlay` candidate as the fastest responsible route towards visual backtest, signal mapping, and paper-trading readiness |
+| Phase 14A non-ML visual backtest / signal-mapping pre-registration | Completed — registered equity, drawdown, exposure, trade-log, switch-log, money-made/lost, benchmark-comparison, rolling-relative-performance, and signal-preview artefacts; no live trading, real-money deployment, ML, feature importance, candidate promotion, final-candidate change, or paper-trading-ready claim |
+| Phase 14B non-ML visual backtest readiness audit | Completed — candidate source resolved with 5,034 rows from 2006-04-28 to 2026-05-01, candidate and benchmark returns available, exposure and mode available, and visual artefact registry ready; source identity requires Phase 14E interpretation |
+| Phase 14C non-ML visual backtest report execution | Completed — generated equity curve, drawdown curve, exposure timeline, trade log, switch event log, money-made/lost table, benchmark comparison, rolling relative performance, signal-template preview, and chart files |
+| Phase 14D non-ML visual backtest result audit | Completed — all required reports and chart files were present, report rows were non-empty, signal preview was preview-only, forbidden claims were absent, and Phase 14E boundary is interpretation-only |
 ---
 
 # What Should Happen Next
