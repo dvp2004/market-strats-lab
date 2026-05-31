@@ -8490,7 +8490,7 @@ phase13an_redesigned_model_run_readiness_audit:
     require_no_signal_backtest_promotion: true
     required_audit_role: "Redesigned model run readiness and leakage audit only"
 phase13ao_registered_redesigned_model_training:
-  enabled: true
+  enabled: false
   execution_role: "Registered redesigned model training on train/validation only"
   phase_branch: "Phase 13 multi-factor model architecture planning"
   source_phase: "Phase 13AN"
@@ -8569,10 +8569,8 @@ phase13ao_registered_redesigned_model_training:
     require_no_model_selection: true
     require_no_signal_backtest_promotion: true
     required_execution_role: "Registered redesigned model training on train/validation only"
-
-
 phase13ap_redesigned_model_training_result_audit:
-  enabled: true
+  enabled: false
   audit_role: "Redesigned model training result and leakage audit only"
   phase_branch: "Phase 13 multi-factor model architecture planning"
   source_phase: "Phase 13AO"
@@ -8637,10 +8635,8 @@ phase13ap_redesigned_model_training_result_audit:
     require_no_feature_importance: true
     require_no_signal_backtest_promotion: true
     required_audit_role: "Redesigned model training result and leakage audit only"
-
-
 phase13aq_validation_to_holdout_decision:
-  enabled: true
+  enabled: false
   decision_role: "Validation-to-holdout decision only"
   phase_branch: "Phase 13 multi-factor model architecture planning"
   source_phase: "Phase 13AP"
@@ -8694,6 +8690,181 @@ phase13aq_validation_to_holdout_decision:
     require_no_signal_backtest_promotion: true
     require_phase13ar_boundary_prereg_only_if_passed: true
     required_decision_role: "Validation-to-holdout decision only"
+phase13av_ml_branch_commercial_decision:
+  enabled: false
+  decision_role: "ML branch commercial kill-or-pivot decision only"
+  implementation_classification: "B - protects from wasting time on a failed ML candidate"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 13AQ"
+  proposed_next_phase: "Phase 13AW"
+
+  allow_model_training: false
+  allow_model_repair_execution: false
+  allow_holdout_prediction_generation: false
+  allow_model_selection: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_visual_backtest_generation: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  source_reports:
+    phase13aq_conclusion: "reports/phase13aq_holdout_decision_conclusion.csv"
+    phase13aq_gate_report: "reports/phase13aq_holdout_decision_gate_report.csv"
+    phase13aq_decision_report: "reports/phase13aq_holdout_decision_decision_report.csv"
+    phase13aq_validation_ranking_report: "reports/phase13aq_holdout_decision_validation_ranking_report.csv"
+    phase13ao_metric_report: "reports/phase13ao_model_training_metric_report.csv"
+    phase13ao_class_recall_report: "reports/phase13ao_model_training_class_recall_report.csv"
+    phase13ao_overfit_report: "reports/phase13ao_model_training_overfit_report.csv"
+    phase13ao_success_report: "reports/phase13ao_model_training_success_report.csv"
+
+  commercial_thresholds:
+    require_holdout_preregistration_justified: false
+    min_fragile_recall_for_live_path: 0.20
+    max_overfit_gap_for_live_path: 0.30
+    min_validation_balanced_accuracy_for_continued_ml: 0.45
+    current_branch_max_extra_minor_repairs_allowed: 0
+    allow_future_ml_only_with_new_feature_families: true
+
+  branch_policy:
+    ml_v1_status_if_holdout_not_justified: "pause_or_kill_current_technical_macro_ml_v1"
+    minor_model_tuning_allowed_after_failure: false
+    route_selection_required: true
+    preferred_routes:
+      - "route_3_non_ml_overlay_visual_backtest_paper_readiness"
+      - "route_1_pause_ml_move_validated_overlay_paper_prep"
+      - "route_2_bounded_ml_redesign_only_with_new_feature_families"
+    blocked_next_steps:
+      - "technical_macro_ml_minor_repair"
+      - "technical_macro_ml_direct_holdout"
+      - "technical_macro_ml_signal_mapping"
+      - "technical_macro_ml_backtest"
+      - "multi_asset_expansion_before_spy_candidate_decision"
+
+  phase13aw_boundary:
+    allowed_next_step: "Paper-trading candidate route selection only"
+    forbidden_next_step: "model training, model repair execution, holdout prediction generation, model selection, feature importance, signal creation, allocation rule creation, strategy backtest, visual backtest generation, paper-trading deployment, candidate promotion, or final-candidate change"
+
+  gates:
+    require_phase13aq_passed: true
+    require_holdout_not_justified: true
+    require_failure_summary_report: true
+    require_commercial_decision_report: true
+    require_blocked_next_steps_report: true
+    require_phase13aw_boundary_route_selection_only: true
+    require_no_model_training: true
+    require_no_holdout_prediction: true
+    require_no_model_selection: true
+    require_no_feature_importance: true
+    require_no_signal_backtest_paper_trading_promotion: true
+    required_decision_role: "ML branch commercial kill-or-pivot decision only"
+phase13aw_paper_trading_candidate_route_selection:
+  enabled: false
+  decision_role: "Paper-trading candidate route selection only"
+  implementation_classification: "A - moves towards choosing the fastest paper-trading route"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 13AV"
+  proposed_next_phase: "Phase 14A"
+
+  allow_model_training: false
+  allow_model_repair_execution: false
+  allow_holdout_prediction_generation: false
+  allow_model_selection: false
+  allow_feature_importance: false
+  allow_signal_creation: false
+  allow_allocation_rule_creation: false
+  allow_strategy_backtest: false
+  allow_visual_backtest_generation: false
+  allow_paper_trading_deployment: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+
+  expected_runtime_flags:
+    phase13ao_registered_redesigned_model_training: false
+    phase13ap_redesigned_model_training_result_audit: false
+    phase13aq_validation_to_holdout_decision: false
+    phase13av_ml_branch_commercial_decision: true
+    phase13aw_paper_trading_candidate_route_selection: true
+    relative_momentum_allocator: true
+
+  source_reports:
+    phase13av_conclusion: "reports/phase13av_commercial_decision_conclusion.csv"
+    phase13av_gate_report: "reports/phase13av_commercial_decision_gate_report.csv"
+    phase13av_commercial_decision_report: "reports/phase13av_commercial_decision_commercial_decision_report.csv"
+    phase13av_blocked_next_steps_report: "reports/phase13av_commercial_decision_blocked_next_steps_report.csv"
+
+  route_registry:
+    - route_id: "route_1_pause_ml_move_validated_overlay_paper_prep"
+      route_label: "Pause technical + macro ML v1 and prepare validated overlay for paper-trading workflow"
+      classification: "A/B"
+      paper_trading_speed_rank: 2
+      validation_strength_rank: 1
+      scope_risk_rank: 1
+      requires_new_data: false
+      requires_new_model_training: false
+      uses_existing_validated_non_ml_candidate: true
+      candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+      route_status: "allowed"
+      interpretation: "Fast and conservative route using the best existing non-ML candidate."
+
+    - route_id: "route_2_bounded_ml_redesign_only_with_new_feature_families"
+      route_label: "One final bounded ML redesign only after genuinely new feature families exist"
+      classification: "B"
+      paper_trading_speed_rank: 3
+      validation_strength_rank: 3
+      scope_risk_rank: 3
+      requires_new_data: true
+      requires_new_model_training: true
+      uses_existing_validated_non_ml_candidate: false
+      candidate_system_id: "none_currently"
+      route_status: "defer"
+      interpretation: "Allowed later only if fundamental, sentiment, or market-stress features are added."
+
+    - route_id: "route_3_non_ml_overlay_visual_backtest_paper_readiness"
+      route_label: "Pause ML v1 and move best non-ML overlay into visual backtest and paper-trading readiness path"
+      classification: "A"
+      paper_trading_speed_rank: 1
+      validation_strength_rank: 1
+      scope_risk_rank: 1
+      requires_new_data: false
+      requires_new_model_training: false
+      uses_existing_validated_non_ml_candidate: true
+      candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+      route_status: "preferred"
+      interpretation: "Fastest responsible route towards visual backtest, signal mapping, and paper-trading readiness."
+
+  route_selection_policy:
+    primary_selection_rule: "prefer fastest allowed route that uses existing validated non-ML candidate and avoids new ML training"
+    selected_route_id: "route_3_non_ml_overlay_visual_backtest_paper_readiness"
+    backup_route_id: "route_1_pause_ml_move_validated_overlay_paper_prep"
+    deferred_route_id: "route_2_bounded_ml_redesign_only_with_new_feature_families"
+    next_phase_if_selected: "Phase 14A - Non-ML paper-trading candidate visual backtest pre-registration"
+    no_model_training: true
+    no_signal_creation_in_this_phase: true
+    no_backtest_generation_in_this_phase: true
+    no_paper_trading_deployment_in_this_phase: true
+    no_candidate_promotion: true
+
+  phase14a_boundary:
+    allowed_next_step: "Non-ML paper-trading candidate visual backtest and signal-mapping pre-registration only"
+    forbidden_next_step: "live trading, real-money deployment, unregistered model training, holdout prediction generation, feature importance, candidate promotion, or final-candidate change"
+
+  gates:
+    require_phase13av_passed: true
+    require_config_flags_clean: true
+    require_route_registry: true
+    require_route_selection_report: true
+    require_selected_route_allowed: true
+    require_ml_v1_not_reopened_without_new_feature_families: true
+    require_phase14a_boundary_visual_backtest_prereg_only: true
+    require_no_model_training: true
+    require_no_holdout_prediction: true
+    require_no_feature_importance: true
+    require_no_signal_backtest_paper_trading_promotion: true
+    required_decision_role: "Paper-trading candidate route selection only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

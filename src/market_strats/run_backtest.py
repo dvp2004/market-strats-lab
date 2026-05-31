@@ -381,6 +381,10 @@ from market_strats.analysis.redesigned_model_training_bundle import (
     save_phase13ap_redesigned_model_training_result_audit,
     save_phase13aq_validation_to_holdout_decision,
 )
+from market_strats.analysis.commercial_route_decision_bundle import (
+    save_phase13av_ml_branch_commercial_decision,
+    save_phase13aw_paper_trading_candidate_route_selection,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2344,6 +2348,16 @@ def main() -> None:
         )
 
         save_phase13aq_validation_to_holdout_decision(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13av_ml_branch_commercial_decision(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase13aw_paper_trading_candidate_route_selection(
             config=config,
             reports_dir=reports_dir,
         )

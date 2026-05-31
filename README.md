@@ -127,6 +127,12 @@ Phase 13AK–13AN completed the target-selection and redesigned-model pre-regist
 
 The model run is now pre-registered and readiness-audited. The next phase may execute registered train/validation model training only. Holdout remains locked, and no model selection, feature importance, signal, backtest, paper-trading output, promotion, or final-candidate change exists.
 
+Phase 13AV–13AW completed the commercial/trading-path decision checkpoint after the failed technical + macro ML validation-to-holdout result. The project now pauses/kills technical + macro ML v1 commercially. More minor ML tuning is blocked, direct ML holdout is blocked, ML signal mapping is blocked, ML backtesting is blocked, and premature multi-asset expansion is blocked.
+
+The selected route is `route_3_non_ml_overlay_visual_backtest_paper_readiness`. This moves the project towards the existing `phase6b_loose_relief_execution_realistic_overlay` candidate, which is the fastest responsible route towards visual backtest, signal mapping, trade-log inspection, money-made/lost reporting, benchmark comparison, and eventual paper-trading readiness.
+
+This is a route-selection result only. No signal, visual backtest, paper-trading deployment, live trading, candidate promotion, or final-candidate change has occurred.
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -7578,6 +7584,178 @@ Correct interpretation:
 
 > The project is now ready for a registered redesigned train/validation model run. It is still not ready for holdout, signal generation, backtesting, or paper trading.
 
+## Phase 13AV: ML Branch Commercial Decision / Kill-or-Pivot Spec
+
+Phase 13AV converted the failed Phase 13AQ validation-to-holdout result into a commercial/trading-path decision.
+
+The purpose of this phase was not to run more ML, repair models, generate signals, or produce a backtest. Its purpose was to decide whether the current SPY technical + macro ML v1 branch deserved more time under the project’s revised priority: the shortest responsible path towards a paper-trading system.
+
+Phase 13AQ concluded that the redesigned technical + macro ML branch did not earn holdout testing. The diagnostic-leading model, `redesigned_random_forest_regularised`, had validation balanced accuracy 0.3942, macro F1 0.3517, and fragile recall only 0.0090. No real model passed all validation gates.
+
+Phase 13AV therefore paused/killed the current technical + macro ML v1 path commercially.
+
+### Phase 13AV Failure Summary
+
+| Item | Result |
+|---|---|
+| ML branch | `technical_macro_ml_v1` |
+| Holdout pre-registration justified | False |
+| Diagnostic-leading model | `redesigned_random_forest_regularised` |
+| Best validation balanced accuracy | 0.3942 |
+| Best validation macro F1 | 0.3517 |
+| Best validation fragile recall | 0.0090 |
+| Commercial failure | True |
+
+Interpretation:
+
+> The redesigned target fixed fragile-class balance, but the technical + macro model still failed to detect fragile regimes. This branch is not holdout-worthy and should not receive another minor model-tuning cycle.
+
+### Phase 13AV Commercial Decision
+
+| Item | Result |
+|---|---|
+| Decision | `pause_current_technical_macro_ml_v1` |
+| ML v1 status | `pause_or_kill_current_technical_macro_ml_v1` |
+| Minor model tuning allowed | False |
+| Future ML allowed only with new feature families | True |
+| Holdout predictions generated | False |
+| Model selected | False |
+| Feature importance permission | False |
+| Signal permission | False |
+| Backtest permission | False |
+| Paper-trading permission | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+Interpretation:
+
+> Technical + macro ML v1 is paused/killed for now. It may only be reconsidered later if genuinely new feature families are added, such as fundamental, sentiment, or market-stress features. More tuning of the same technical + macro setup is blocked.
+
+### Phase 13AV Blocked Next Steps
+
+| Blocked next step | Reason |
+|---|---|
+| `technical_macro_ml_minor_repair` | Blocked because simple redesign and registered model training failed validation gates |
+| `technical_macro_ml_direct_holdout` | Blocked because Phase 13AQ did not justify holdout pre-registration |
+| `technical_macro_ml_signal_mapping` | Blocked because no ML model earned holdout |
+| `technical_macro_ml_backtest` | Blocked because no ML signal exists |
+| `multi_asset_expansion_before_spy_candidate_decision` | Blocked because scope expansion would delay the fastest SPY paper-trading path |
+
+Interpretation:
+
+> The project should not expand sideways into more assets or more ML repair work before moving the best existing SPY candidate towards visual backtest and paper-trading readiness.
+
+### Phase 13AV Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13AQ passed | Passed |
+| Holdout was not justified | Passed |
+| Failure summary report exists | Passed |
+| Commercial decision report exists | Passed |
+| Blocked next steps report exists | Passed |
+| Phase 13AW boundary is route-selection only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Decision role is correct | Passed |
+
+### Phase 13AV Verdict
+
+> Phase 13AV completed the ML branch commercial kill-or-pivot decision.
+
+Correct interpretation:
+
+> Phase 13AV protects the project from wasting more time on a failed technical + macro ML candidate. It does not train models, generate holdout predictions, select a model, calculate feature importance, create signals, run backtests, deploy paper trading, promote a candidate, or change the final candidate.
+
+---
+
+## Phase 13AW: Paper-Trading Candidate Route Selection
+
+Phase 13AW selected the fastest responsible route towards a paper-trading candidate after the commercial failure of technical + macro ML v1.
+
+The phase compared three routes:
+
+1. Pause ML and prepare the existing validated overlay for paper-trading workflow.
+2. Defer ML until genuinely new feature families exist.
+3. Move the best non-ML overlay into visual backtest and paper-trading readiness.
+
+The selected route was:
+
+> `route_3_non_ml_overlay_visual_backtest_paper_readiness`
+
+This phase did not generate signals, run a visual backtest, deploy paper trading, train models, generate holdout predictions, calculate feature importance, promote a candidate, or change the final candidate.
+
+### Phase 13AW Route Comparison
+
+| Route | Classification | Speed rank | Validation strength rank | Scope risk rank | Status |
+|---|---:|---:|---:|---:|---|
+| `route_3_non_ml_overlay_visual_backtest_paper_readiness` | A | 1 | 1 | 1 | Preferred |
+| `route_1_pause_ml_move_validated_overlay_paper_prep` | A/B | 2 | 1 | 1 | Allowed |
+| `route_2_bounded_ml_redesign_only_with_new_feature_families` | B | 3 | 3 | 3 | Deferred |
+
+Interpretation:
+
+> Route 3 is the fastest responsible path because it uses the existing validated non-ML overlay candidate and avoids more ML training, new data, or multi-asset scope expansion.
+
+### Phase 13AW Selected Route
+
+| Item | Result |
+|---|---|
+| Selected route | `route_3_non_ml_overlay_visual_backtest_paper_readiness` |
+| Selected route label | Pause ML v1 and move best non-ML overlay into visual backtest and paper-trading readiness path |
+| Selected | True |
+| Selection reason | Prefer fastest allowed route that uses existing validated non-ML candidate and avoids new ML training |
+| Candidate system ID | `phase6b_loose_relief_execution_realistic_overlay` |
+| Backup route | `route_1_pause_ml_move_validated_overlay_paper_prep` |
+| Deferred route | `route_2_bounded_ml_redesign_only_with_new_feature_families` |
+| Next phase | Phase 14A — Non-ML paper-trading candidate visual backtest pre-registration |
+| ML v1 reopened | False |
+| Model training permission | False |
+| Holdout prediction permission | False |
+| Feature importance permission | False |
+| Signal creation permission | False |
+| Backtest generation permission | False |
+| Paper-trading permission | False |
+| Candidate promotion | False |
+
+Interpretation:
+
+> The project now pivots to the best non-ML overlay candidate, specifically the Phase 6B loose-relief execution-realistic overlay, for visual backtest and signal-mapping pre-registration.
+
+### Phase 13AW Phase 14A Boundary
+
+| Check | Result |
+|---|---|
+| Phase 14A boundary is visual-backtest pre-registration only | Passed |
+| Phase 14A boundary blocks live or unregistered actions | Passed |
+
+Phase 14A is allowed to pre-register the next practical paper-trading route:
+
+> Non-ML paper-trading candidate visual backtest and signal-mapping pre-registration only.
+
+Phase 14A must not perform live trading, real-money deployment, unregistered model training, holdout prediction generation, feature importance, candidate promotion, or final-candidate change.
+
+### Phase 13AW Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 13AV passed | Passed |
+| Config flags clean | Passed |
+| Route registry exists | Passed |
+| Route selection report exists | Passed |
+| Selected route is allowed | Passed |
+| ML v1 not reopened without new feature families | Passed |
+| Phase 14A boundary is visual-backtest pre-registration only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Decision role is correct | Passed |
+
+### Phase 13AW Verdict
+
+> Phase 13AW completed paper-trading candidate route selection.
+
+Correct interpretation:
+
+> The fastest responsible route is now the non-ML overlay visual-backtest and paper-readiness path. Technical + macro ML v1 is paused/killed for now, and multi-asset expansion remains blocked until the SPY paper-trading candidate path is inspected properly.
+
 ---
 
 # Methodology Notes
@@ -7811,6 +7989,12 @@ Remaining concerns include:
 - The next model run is still technical + macro only. Fundamental, sentiment, and market-stress features remain unavailable.
 - Holdout remains locked. No holdout predictions have been generated.
 - No model has been selected. No feature importance has been calculated. No signal, allocation rule, strategy backtest, paper-trading output, candidate promotion, or final-candidate change exists.
+- Technical + macro ML v1 is paused/killed for now. It did not earn holdout testing.
+- No further minor ML repair is allowed for the current technical + macro ML setup.
+- Future ML work is only justified if genuinely new feature families are added, such as fundamental, sentiment, or market-stress features.
+- Multi-asset expansion remains blocked until the SPY paper-trading candidate path is inspected properly.
+- Phase 13AW selected a route, not a live strategy. No signal mapping, visual backtest, paper-trading deployment, real-money deployment, candidate promotion, or final-candidate change occurred.
+- The selected next route relies on the existing non-ML overlay candidate. It still needs visual backtest, signal-mapping, trade-log, drawdown, exposure, money-made/lost, and paper-readiness checks before any paper-trading workflow can be considered.
 ---
 
 # Bugs Caught and Fixed
@@ -9261,6 +9445,37 @@ reports/phase13an_model_readiness_gate_report.csv
 reports/phase13an_model_readiness_conclusion.csv
 ```
 
+## Phase 13AV ML Branch Commercial Decision Reports
+
+```text
+reports/phase13av_commercial_decision_source_report_check.csv
+reports/phase13av_commercial_decision_phase13aq_result_check.csv
+reports/phase13av_commercial_decision_failure_summary_report.csv
+reports/phase13av_commercial_decision_commercial_decision_report.csv
+reports/phase13av_commercial_decision_blocked_next_steps_report.csv
+reports/phase13av_commercial_decision_phase13aw_boundary_check.csv
+reports/phase13av_commercial_decision_scope_boundary_check.csv
+reports/phase13av_commercial_decision_summary.csv
+reports/phase13av_commercial_decision_gate_report.csv
+reports/phase13av_commercial_decision_conclusion.csv
+```
+
+## Phase 13AW Paper-Trading Candidate Route Selection Reports
+
+```text
+reports/phase13aw_route_selection_source_report_check.csv
+reports/phase13aw_route_selection_phase13av_result_check.csv
+reports/phase13aw_route_selection_config_flag_check.csv
+reports/phase13aw_route_selection_route_registry_report.csv
+reports/phase13aw_route_selection_route_comparison_report.csv
+reports/phase13aw_route_selection_route_selection_report.csv
+reports/phase13aw_route_selection_phase14a_boundary_check.csv
+reports/phase13aw_route_selection_scope_boundary_check.csv
+reports/phase13aw_route_selection_summary.csv
+reports/phase13aw_route_selection_gate_report.csv
+reports/phase13aw_route_selection_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -9470,6 +9685,8 @@ configs/spy_sma10.yaml
 | Phase 13AL target-feature redesign checkpoint audit | Completed — Phase 13AK passed, config flags were clean, reports were present, candidate-target decision was clean, forbidden overclaims were absent, and Phase 13AM boundary was pre-registration-only |
 | Phase 13AM redesigned model run pre-registration | Completed — pre-registered `phase13ao_redesigned_target_model_run_v1` using `return_drawdown_63d_composite`, technical + macro features, train-only preprocessing, dummy baselines, balanced logistic regression, regularised random forest, and constrained HistGB; holdout remains locked |
 | Phase 13AN redesigned model run readiness / leakage audit | Completed — candidate target column ready, train/validation rows ready, target fragile balance ready, 24 feature columns ready, forbidden feature fragments absent, holdout locked, and Phase 13AO boundary is train/validation-only |
+| Phase 13AV ML branch commercial decision / kill-or-pivot spec | Completed — technical + macro ML v1 was paused/killed commercially after Phase 13AQ failed validation-to-holdout; minor ML tuning, direct ML holdout, ML signal mapping, ML backtest, and premature multi-asset expansion were blocked |
+| Phase 13AW paper-trading candidate route selection | Completed — selected `route_3_non_ml_overlay_visual_backtest_paper_readiness`, using the existing `phase6b_loose_relief_execution_realistic_overlay` candidate as the fastest responsible route towards visual backtest, signal mapping, and paper-trading readiness |
 ---
 
 # What Should Happen Next
