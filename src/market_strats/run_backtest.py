@@ -403,6 +403,10 @@ from market_strats.analysis.phase6b_candidate_stream_export import (
     save_phase14i_phase6b_candidate_daily_stream_export,
     save_phase14j_phase6b_candidate_export_audit,
 )
+from market_strats.analysis.paper_trading_workflow_preregistration import (
+    save_phase15a_paper_trading_workflow_preregistration,
+    save_phase15b_paper_trading_workflow_readiness_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2434,6 +2438,16 @@ def main() -> None:
         )
 
         save_phase14h_corrected_visual_backtest_audit_reconciliation_decision(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase15a_paper_trading_workflow_preregistration(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase15b_paper_trading_workflow_readiness_audit(
             config=config,
             reports_dir=reports_dir,
         )

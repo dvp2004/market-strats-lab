@@ -145,6 +145,14 @@ Phase 14E found that the Phase 14C visual backtest source did not clearly match 
 
 Phase 14F therefore selected `pre_register_candidate_source_correction_and_visual_rerun`. Correction is required, visual re-run is required, and paper-trading workflow pre-registration is blocked. The next phase must explicitly resolve the intended Phase 6B/6C loose-relief execution-realistic overlay stream and regenerate the visual backtest artefacts from that source only.
 
+Phase 15A/15B completed the paper-trading workflow pre-registration and readiness-audit checkpoint.
+
+Phase 15A successfully registered the workflow contract for eventual paper-trading evaluation, including the daily signal file schema, current signal fields, operational switch policy, endpoint freshness policy, manual paper-broker entry template, monitoring dashboard schema, execution checklist, paper-trading journal template, stop conditions, benchmark update rules, and failure conditions.
+
+Phase 15B correctly blocked paper-trading readiness. The system is not paper-trading-ready because operational switch mechanics are unresolved, the latest signal is stale relative to the audit date, and registered failure conditions are triggered. The readiness decision is `paper_trading_readiness_blocked_operational_repairs_required`.
+
+This is the right checkpoint result. The corrected Phase 6B/6C financial stream is usable for workflow design, but not yet for paper-trading execution. The next phase must repair operational switch/signal reconstruction and current-signal freshness before any dry-run or paper-trading readiness claim is considered.
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -8448,6 +8456,195 @@ Correct interpretation:
 
 > Paper-workflow pre-registration is now allowed as the next step, but paper trading itself remains blocked. The next phase must define the workflow, signal schema, monitoring rules, execution checklist, and stop conditions before any paper-trading readiness claim.
 
+## Phase 15A: Paper-Trading Workflow Pre-Registration
+
+Phase 15A pre-registered the paper-trading workflow requirements after the corrected Phase 14H visual audit allowed paper-workflow pre-registration as the next bounded step.
+
+This phase did not deploy paper trading, integrate with a broker/API, run live trading, use real money, claim paper-trading readiness, promote a candidate, change the final candidate, train models, calculate feature importance, or introduce unregistered ML.
+
+Phase 15A exists to define the workflow contract before any dry-run or paper-trading execution can be considered.
+
+### Phase 15A Operational Switch Policy
+
+| Item | Result |
+|---|---:|
+| Expected canonical switch count | 36 |
+| Exported switch count observed | 0 |
+| Switch count reconciled | False |
+| Switch reconstruction required before readiness | True |
+| Switch event log required before readiness | True |
+| Explainable trade segments required before readiness | True |
+
+Interpretation:
+
+> The corrected financial return stream reconciles with canonical Phase 6B/6C metrics, but the operational switch mechanics are not yet reconstructed. Paper-trading readiness must remain blocked until the expected switch logic can be reconstructed or otherwise validated.
+
+### Phase 15A Endpoint Freshness Policy
+
+| Item | Result |
+|---|---:|
+| Audit current date | 2026-06-02 |
+| Canonical backtest endpoint | 2026-05-01 |
+| Latest signal date | 2026-05-01 |
+| Signal staleness | 32 days |
+| Maximum allowed staleness for readiness | 3 days |
+| Signal stale for readiness | True |
+| Canonical endpoint issue | True |
+| Blocks paper-trading readiness | True |
+
+Interpretation:
+
+> The current signal preview is based on the canonical backtest endpoint, not a fresh current-market signal. A paper-trading workflow cannot be considered ready until the signal can be generated from current data.
+
+### Phase 15A Daily Signal File Schema
+
+The registered daily signal file requires:
+
+| Field |
+|---|
+| `signal_date` |
+| `data_as_of_date` |
+| `candidate_system_id` |
+| `signal_source_file` |
+| `current_mode` |
+| `current_exposure` |
+| `target_action` |
+| `previous_mode` |
+| `previous_exposure` |
+| `switch_triggered` |
+| `switch_reason` |
+| `paper_trading_allowed` |
+| `paper_readiness_status` |
+| `blocking_warnings` |
+| `benchmark_spy_close_or_return_source` |
+| `generated_at_utc` |
+
+Correct interpretation:
+
+> The daily signal schema is now defined, but it has not yet been generated as an audited current signal file.
+
+### Phase 15A Execution Checklist
+
+| Required check |
+|---|
+| Confirm signal file generated today |
+| Confirm data-as-of date is current |
+| Confirm switch reconstruction available |
+| Confirm no live or real-money order |
+| Confirm paper account only |
+| Confirm current signal is not preview-only |
+| Confirm stop conditions are not triggered |
+| Confirm manual entry is logged |
+| Confirm benchmark snapshot is updated |
+
+### Phase 15A Stop Conditions
+
+| Stop condition |
+|---|
+| Signal file missing or stale |
+| Switch reconstruction missing |
+| Exposure or mode missing |
+| Data source changed without review |
+| Drawdown exceeds predefined threshold |
+| Strategy deviates from expected candidate stream |
+| Manual execution error |
+| Broker or paper-platform mismatch |
+| Unexpected live-money risk |
+
+### Phase 15A Failure Conditions
+
+| Failure condition | Triggered now | Blocks readiness | Required repair |
+|---|---:|---:|---|
+| Operational switch mechanics unresolved | True | True | Reconstruct/validate expected operational switches before paper trading |
+| Latest signal not current | True | True | Generate current signal from fresh data, not only canonical endpoint |
+| Signal preview only | True | True | Create audited paper signal file after workflow readiness passes |
+
+### Phase 15A Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 14H allows workflow pre-registration | Passed |
+| Daily signal file schema exists | Passed |
+| Current signal state fields exist | Passed |
+| Operational switch policy exists | Passed |
+| Endpoint freshness policy exists | Passed |
+| Manual paper broker template exists | Passed |
+| Monitoring dashboard schema exists | Passed |
+| Execution checklist exists | Passed |
+| Journal template exists | Passed |
+| Stop conditions exist | Passed |
+| Benchmark update rules exist | Passed |
+| Phase 15B boundary is readiness-audit-only | Passed |
+| Scope blocks deployment/live trading/readiness claim | Passed |
+| Pre-registration role is correct | Passed |
+
+### Phase 15A Verdict
+
+> Phase 15A completed paper-trading workflow pre-registration.
+
+Correct interpretation:
+
+> The workflow has been pre-registered. Paper trading is still not ready, deployed, or authorised.
+
+---
+
+## Phase 15B: Paper-Trading Workflow Readiness Audit
+
+Phase 15B audited the pre-registered paper-trading workflow and decided whether the system was ready for paper-trading execution.
+
+The correct decision was to block readiness.
+
+### Phase 15B Operational Blockers
+
+| Blocker | Present | Blocks readiness | Result |
+|---|---:|---:|---|
+| Operational switch mechanics unresolved | True | True | Blocking |
+| Endpoint signal not current | True | True | Blocking |
+| Failure conditions triggered | True | True | Blocking |
+
+Interpretation:
+
+> The system is not paper-trading-ready. The blockers are real and operational, not cosmetic.
+
+### Phase 15B Readiness Decision
+
+| Item | Result |
+|---|---|
+| Decision | `paper_trading_readiness_blocked_operational_repairs_required` |
+| Paper trading ready | False |
+| Paper-trading deployment allowed | False |
+| Broker/API integration allowed | False |
+| Live trading allowed | False |
+| Real money allowed | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+Correct interpretation:
+
+> Phase 15B allows the project to continue towards operational repair work. It does not allow paper trading, broker integration, or live deployment.
+
+### Phase 15B Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 15A passed | Passed |
+| Config flags clean | Passed |
+| All workflow reports present | Passed |
+| Operational blockers identified | Passed |
+| Readiness decision report exists | Passed |
+| Readiness false when blockers exist | Passed |
+| Phase 15C boundary is conditional-only | Passed |
+| Scope blocks deployment/live trading/promotion | Passed |
+| Audit role is correct | Passed |
+
+### Phase 15B Verdict
+
+> Phase 15B completed the paper-trading workflow readiness audit with readiness blocked.
+
+Correct interpretation:
+
+> The project has a workflow design, but paper trading remains blocked until operational switch mechanics and current-signal freshness are repaired.
+
 ---
 
 # Methodology Notes
@@ -8707,6 +8904,12 @@ Remaining concerns include:
 - The corrected visual output has one trade segment and zero switch events. This means the next workflow phase must define or reconstruct operational signal/switch mechanics before any paper-trading readiness claim.
 - The current signal state is preview-only: `offensive_spy`, exposure 1.0, `risk_on_preview`. It is not a broker instruction, live signal, or paper-trading deployment.
 - No live trading, real-money deployment, paper-trading deployment, paper-trading-ready claim, candidate promotion, final-candidate change, unregistered ML, or feature importance occurred.
+- Phase 15A/15B pre-registered and audited the paper-trading workflow, but did not make the system paper-trading ready.
+- Paper-trading readiness is explicitly blocked.
+- Operational switch mechanics remain unresolved: expected canonical switch count is 36, while the exported stream currently exposes 0 switches.
+- The latest signal is stale for readiness: audit date 2026-06-02 versus latest signal date 2026-05-01, a 32-day gap against a maximum allowed readiness staleness of 3 days.
+- The current signal is still preview-only and cannot be treated as an executable paper-trading instruction.
+- Paper-trading deployment, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, unregistered ML, and feature importance remain blocked.
 ---
 
 # Bugs Caught and Fixed
@@ -10369,6 +10572,44 @@ reports/phase14h_corrected_visual_audit_gate_report.csv
 reports/phase14h_corrected_visual_audit_conclusion.csv
 ```
 
+## Phase 15A Paper-Trading Workflow Pre-Registration Reports
+
+```text
+reports/phase15a_paper_workflow_source_report_check.csv
+reports/phase15a_paper_workflow_phase14h_result_check.csv
+reports/phase15a_paper_workflow_daily_signal_file_schema.csv
+reports/phase15a_paper_workflow_current_signal_state_schema.csv
+reports/phase15a_paper_workflow_operational_switch_policy.csv
+reports/phase15a_paper_workflow_endpoint_freshness_policy.csv
+reports/phase15a_paper_workflow_manual_paper_broker_entry_template.csv
+reports/phase15a_paper_workflow_monitoring_dashboard_schema.csv
+reports/phase15a_paper_workflow_execution_checklist.csv
+reports/phase15a_paper_workflow_paper_trading_journal_template.csv
+reports/phase15a_paper_workflow_stop_conditions.csv
+reports/phase15a_paper_workflow_benchmark_update_rules.csv
+reports/phase15a_paper_workflow_failure_conditions.csv
+reports/phase15a_paper_workflow_phase15b_boundary_check.csv
+reports/phase15a_paper_workflow_scope_boundary_check.csv
+reports/phase15a_paper_workflow_summary.csv
+reports/phase15a_paper_workflow_gate_report.csv
+reports/phase15a_paper_workflow_conclusion.csv
+```
+
+## Phase 15B Paper-Trading Workflow Readiness Audit Reports
+
+```text
+reports/phase15b_paper_workflow_readiness_config_flag_check.csv
+reports/phase15b_paper_workflow_readiness_report_inventory_check.csv
+reports/phase15b_paper_workflow_readiness_phase15a_result_check.csv
+reports/phase15b_paper_workflow_readiness_operational_blocker_report.csv
+reports/phase15b_paper_workflow_readiness_readiness_decision_report.csv
+reports/phase15b_paper_workflow_readiness_phase15c_boundary_check.csv
+reports/phase15b_paper_workflow_readiness_scope_boundary_check.csv
+reports/phase15b_paper_workflow_readiness_summary.csv
+reports/phase15b_paper_workflow_readiness_gate_report.csv
+reports/phase15b_paper_workflow_readiness_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -10590,6 +10831,8 @@ configs/spy_sma10.yaml
 | Phase 14J Phase 6B/6C exported candidate stream audit | Completed — export file present, required columns present, financial metrics reconciled, switch count treated as operational diagnostic, and corrected visual re-run boundary passed |
 | Phase 14G corrected visual backtest re-run | Completed — strict source resolved to the exported Phase 6B/6C loose-relief daily stream; corrected visual reports generated; corrected benchmark comparison, current signal state, and visual output inventory produced |
 | Phase 14H corrected visual backtest audit / reconciliation decision | Completed — corrected source identity passed, metric reconciliation passed, current signal state was determined, and paper-workflow pre-registration is allowed next; paper trading itself remains blocked |
+| Phase 15A paper-trading workflow pre-registration | Completed — workflow/schema pre-registration passed; daily signal file schema, current signal fields, switch policy, endpoint freshness policy, broker-entry template, monitoring schema, execution checklist, journal template, stop conditions, benchmark update rules, and failure conditions were registered; no deployment or readiness claim |
+| Phase 15B paper-trading workflow readiness audit | Completed — readiness audit passed with readiness blocked; operational switch mechanics unresolved, endpoint signal not current, and registered failure conditions triggered; paper trading, broker/API integration, live trading, real money, promotion, and final-candidate changes remain blocked |
 ---
 
 # What Should Happen Next
