@@ -407,6 +407,10 @@ from market_strats.analysis.paper_trading_workflow_preregistration import (
     save_phase15a_paper_trading_workflow_preregistration,
     save_phase15b_paper_trading_workflow_readiness_audit,
 )
+from market_strats.analysis.operational_signal_reconstruction import (
+    save_phase15c_operational_switch_signal_reconstruction,
+    save_phase15d_current_signal_freshness_switch_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2448,6 +2452,16 @@ def main() -> None:
         )
 
         save_phase15b_paper_trading_workflow_readiness_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase15c_operational_switch_signal_reconstruction(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase15d_current_signal_freshness_switch_audit(
             config=config,
             reports_dir=reports_dir,
         )

@@ -153,6 +153,14 @@ Phase 15B correctly blocked paper-trading readiness. The system is not paper-tra
 
 This is the right checkpoint result. The corrected Phase 6B/6C financial stream is usable for workflow design, but not yet for paper-trading execution. The next phase must repair operational switch/signal reconstruction and current-signal freshness before any dry-run or paper-trading readiness claim is considered.
 
+Phase 15C/15D completed the first operational switch/current-signal reconstruction attempt.
+
+The implementation generated the required switch-event log, switch reconstruction summary, current signal file, and freshness summary. The audit confirmed all required schemas and reports existed. However, the readiness decision correctly blocked dry-run pre-registration with `blocked_both_switch_and_signal_failed`.
+
+The switch reconstruction failed because the system reconstructed 0 switches against the expected canonical 36. The exported Phase 6B/6C financial stream remains financially valid, but it still does not expose the operational decision/switch layer required for paper trading. Current signal freshness also failed: the generated signal is based on data as of 2026-05-01, which is the canonical backtest endpoint and 32 days stale relative to the 2026-06-02 audit date.
+
+The next phase must not move to paper dry-run, broker integration, or live deployment. The correct next step is operational repair: locate/reconstruct the true final 36-switch signal history and update the candidate stream with fresh post-2026-05-01 market data before any paper dry-run pre-registration can be considered.
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -8645,6 +8653,144 @@ Correct interpretation:
 
 > The project has a workflow design, but paper trading remains blocked until operational switch mechanics and current-signal freshness are repaired.
 
+## Phase 15C: Operational Switch / Signal Reconstruction Implementation
+
+Phase 15C attempted to resolve the operational blockers identified by Phase 15B: unresolved switch mechanics, stale endpoint signal, and triggered readiness failure conditions.
+
+This phase generated the required operational switch reconstruction files and current signal files, but it did not solve the blockers. It did not deploy paper trading, integrate with a broker/API, run live trading, use real money, claim paper-trading readiness, promote a candidate, change the final candidate, train models, optimise parameters, or expand to new assets.
+
+### Phase 15C Switch Source Inventory
+
+| Source | Candidate rows | Distance to expected 36 switches | Selected |
+|---|---:|---:|---:|
+| Exported daily stream mode/exposure changes | 0 | 36 | True |
+| `reports/regime_switch_overlay_offensive_relief_changed_switch_audit.csv` | 94 | 58 | False |
+| `reports/phase14g_corrected_visual_switch_event_log.csv` | 0 | 36 | False |
+| `reports/regime_switch_overlay_guarded_switch_event_summary.csv` | 0 | 36 | False |
+| `reports/regime_switch_overlay_offensive_relief_event_summary.csv` | 0 | 36 | False |
+
+Interpretation:
+
+> The operational 36-switch layer was not reconstructed. The exported daily stream is financially correct, but it does not expose the historical operational switch events needed for paper trading.
+
+### Phase 15C Switch Reconstruction Summary
+
+| Item | Result |
+|---|---:|
+| Expected switch count | 36 |
+| Reconstructed switch count | 0 |
+| Switch-count tolerance | 2 |
+| Switch count reconciled | False |
+| Switch signal validity passed | False |
+
+Correct interpretation:
+
+> Switch reconstruction failed. Paper dry-run and paper trading remain blocked.
+
+### Phase 15C Current Signal File
+
+| Item | Result |
+|---|---|
+| Signal date | 2026-06-02 |
+| Data as-of date | 2026-05-01 |
+| Candidate system ID | `phase6b_loose_relief_execution_realistic_overlay` |
+| Current mode | `offensive_spy` |
+| Data source | `reports/phase6b_loose_relief_execution_realistic_overlay_daily.csv` |
+
+### Phase 15C Current Signal Freshness
+
+| Item | Result |
+|---|---:|
+| Audit current date | 2026-06-02 |
+| Data as-of date | 2026-05-01 |
+| Canonical backtest endpoint | 2026-05-01 |
+| Signal staleness | 32 days |
+| Maximum allowed staleness | 3 days |
+| Data beyond canonical endpoint | False |
+| Signal freshness passed | False |
+
+Correct interpretation:
+
+> The current signal file was generated, but it is not a fresh current-market signal. It is still based on the pinned research endpoint.
+
+### Phase 15C Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 15B passed | Passed |
+| Exported daily file present | Passed |
+| Switch event log output exists | Passed |
+| Switch summary output exists | Passed |
+| Current signal file output exists | Passed |
+| Current signal required columns present | Passed |
+| Switch required columns present | Passed |
+| Phase 15D boundary is audit-only | Passed |
+| Scope blocks deployment/live trading/real money | Passed |
+| Execution role is correct | Passed |
+
+### Phase 15C Verdict
+
+> Phase 15C completed operational switch/current signal reconstruction outputs, but switch reconstruction and current signal freshness both failed.
+
+Correct interpretation:
+
+> Phase 15C generated the required outputs but did not clear readiness blockers.
+
+---
+
+## Phase 15D: Current Signal Freshness + Switch Mechanics Audit
+
+Phase 15D audited the Phase 15C operational switch and current-signal outputs.
+
+The audit process passed, but the readiness decision blocked dry-run pre-registration.
+
+### Phase 15D Readiness Decision
+
+| Item | Result |
+|---|---|
+| Decision | `blocked_both_switch_and_signal_failed` |
+| Switch reconstruction passed | False |
+| Current signal freshness passed | False |
+| Current signal validity passed | False |
+| Current signal file flags passed | False |
+| Paper dry-run pre-registration allowed next | False |
+| Paper trading ready | False |
+| Paper-trading deployment allowed | False |
+| Broker/API integration allowed | False |
+| Live trading allowed | False |
+| Real money allowed | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+Interpretation:
+
+> Both required operational blockers remain unresolved. The project cannot move to paper dry-run pre-registration yet.
+
+### Phase 15D Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 15C passed | Passed |
+| Config flags clean | Passed |
+| Switch event log exists | Passed |
+| Switch summary exists | Passed |
+| Switch required columns present | Passed |
+| Current signal file exists | Passed |
+| Current signal required columns present | Passed |
+| Readiness decision output exists | Passed |
+| No paper-ready claim unless both pass | Passed |
+| Phase 15E boundary is conditional-only | Passed |
+| Scope blocks broker/live/real-money/promotion | Passed |
+| Audit role is correct | Passed |
+
+### Phase 15D Verdict
+
+> Phase 15D completed the current-signal freshness and switch-mechanics audit, with dry-run pre-registration blocked.
+
+Correct interpretation:
+
+> The audit passed because it correctly identified failure. It did not approve paper trading, paper dry-run, broker integration, live trading, real-money deployment, candidate promotion, or final-candidate change.
+
 ---
 
 # Methodology Notes
@@ -8910,6 +9056,13 @@ Remaining concerns include:
 - The latest signal is stale for readiness: audit date 2026-06-02 versus latest signal date 2026-05-01, a 32-day gap against a maximum allowed readiness staleness of 3 days.
 - The current signal is still preview-only and cannot be treated as an executable paper-trading instruction.
 - Paper-trading deployment, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, unregistered ML, and feature importance remain blocked.
+- Phase 15C/15D did not clear paper-trading readiness blockers.
+- Operational switch reconstruction failed: expected 36 switches, reconstructed 0, tolerance 2, switch count reconciled False.
+- The exported daily financial stream remains useful for performance analysis but does not expose the operational 36-switch decision layer.
+- The candidate external switch source `regime_switch_overlay_offensive_relief_changed_switch_audit.csv` has 94 rows, but this does not reconcile to the expected 36 final operational switches and was not selected.
+- Current signal freshness failed: signal date 2026-06-02 was generated from data-as-of 2026-05-01, which is the canonical backtest endpoint and 32 days stale relative to the 2026-06-02 audit date.
+- Paper dry-run pre-registration is not allowed next.
+- Paper trading, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
 ---
 
 # Bugs Caught and Fixed
@@ -10610,6 +10763,40 @@ reports/phase15b_paper_workflow_readiness_gate_report.csv
 reports/phase15b_paper_workflow_readiness_conclusion.csv
 ```
 
+## Phase 15C Operational Switch / Signal Reconstruction Reports
+
+```text
+reports/phase15c_operational_signal_phase15b_result_check.csv
+reports/phase15c_operational_signal_switch_source_inventory.csv
+reports/phase15c_operational_switch_event_log.csv
+reports/phase15c_switch_reconstruction_summary.csv
+reports/phase15c_operational_signal_switch_required_column_check.csv
+reports/phase15c_current_signal_file.csv
+reports/phase15c_current_signal_generation_summary.csv
+reports/phase15c_operational_signal_current_signal_required_column_check.csv
+reports/phase15c_operational_signal_phase15d_boundary_check.csv
+reports/phase15c_operational_signal_scope_boundary_check.csv
+reports/phase15c_operational_signal_summary.csv
+reports/phase15c_operational_signal_gate_report.csv
+reports/phase15c_operational_signal_conclusion.csv
+```
+
+## Phase 15D Current Signal Freshness + Switch Mechanics Audit Reports
+
+```text
+reports/phase15d_signal_switch_audit_config_flag_check.csv
+reports/phase15d_signal_switch_audit_report_inventory_check.csv
+reports/phase15d_signal_switch_audit_phase15c_result_check.csv
+reports/phase15d_signal_switch_audit_switch_required_column_check.csv
+reports/phase15d_signal_switch_audit_current_signal_required_column_check.csv
+reports/phase15d_signal_switch_audit_readiness_decision_report.csv
+reports/phase15d_signal_switch_audit_phase15e_boundary_check.csv
+reports/phase15d_signal_switch_audit_scope_boundary_check.csv
+reports/phase15d_signal_switch_audit_summary.csv
+reports/phase15d_signal_switch_audit_gate_report.csv
+reports/phase15d_signal_switch_audit_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -10833,6 +11020,8 @@ configs/spy_sma10.yaml
 | Phase 14H corrected visual backtest audit / reconciliation decision | Completed — corrected source identity passed, metric reconciliation passed, current signal state was determined, and paper-workflow pre-registration is allowed next; paper trading itself remains blocked |
 | Phase 15A paper-trading workflow pre-registration | Completed — workflow/schema pre-registration passed; daily signal file schema, current signal fields, switch policy, endpoint freshness policy, broker-entry template, monitoring schema, execution checklist, journal template, stop conditions, benchmark update rules, and failure conditions were registered; no deployment or readiness claim |
 | Phase 15B paper-trading workflow readiness audit | Completed — readiness audit passed with readiness blocked; operational switch mechanics unresolved, endpoint signal not current, and registered failure conditions triggered; paper trading, broker/API integration, live trading, real money, promotion, and final-candidate changes remain blocked |
+| Phase 15C operational switch / signal reconstruction implementation | Completed — required switch-event and current-signal outputs were generated, but switch reconstruction failed: expected 36 switches, reconstructed 0, switch count reconciled False; current signal file was generated but remains stale at the 2026-05-01 canonical endpoint |
+| Phase 15D current signal freshness + switch mechanics audit | Completed — audit gates passed, but readiness decision blocked dry-run pre-registration with `blocked_both_switch_and_signal_failed`; switch reconstruction, signal freshness, signal validity, and current signal file flags all failed |
 ---
 
 # What Should Happen Next
