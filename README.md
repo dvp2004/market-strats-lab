@@ -161,6 +161,14 @@ The switch reconstruction failed because the system reconstructed 0 switches aga
 
 The next phase must not move to paper dry-run, broker integration, or live deployment. The correct next step is operational repair: locate/reconstruct the true final 36-switch signal history and update the candidate stream with fresh post-2026-05-01 market data before any paper dry-run pre-registration can be considered.
 
+Phase 15E/15F completed the operational switch-source attribution and fresh-data extension pre-registration checkpoint.
+
+Phase 15E confirmed that the true final 36-switch operational event history is not currently exported. The daily Phase 6B/6C financial stream has 5,034 rows and remains financially valid, but it is not the final switch log. The 94-row `regime_switch_overlay_offensive_relief_changed_switch_audit.csv` is classified as an intermediate changed-switch diagnostic, not executable switch history. Empty generated switch logs and summary files also failed to reconcile. The decision is `true_36_switch_source_not_found_patch_required`.
+
+Phase 15F pre-registered the safe fresh-data extension contract. Fresh data must be added beyond the pinned 2026-05-01 research endpoint without mutating canonical backtest reports or Phase 6B/6C metrics. Future current-signal output must be labelled as an out-of-sample extension, include data source timestamps, include pinned-endpoint comparison, enforce a 3-day staleness limit, and write a blocked signal file if fresh data or benchmark updates are missing.
+
+The next implementation must not move to paper dry-run or broker integration. It should patch/export the true final operational 36-switch log and only then generate a fresh current signal under the Phase 15F rules. Paper trading remains blocked.
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -8791,6 +8799,231 @@ Correct interpretation:
 
 > The audit passed because it correctly identified failure. It did not approve paper trading, paper dry-run, broker integration, live trading, real-money deployment, candidate promotion, or final-candidate change.
 
+## Phase 15E: Operational Switch Source Attribution / True 36-Switch Reconstruction Spec
+
+Phase 15E investigated whether the true final 36-switch operational event history for the Phase 6B/6C loose-relief execution-realistic overlay was already exported or recoverable from existing reports.
+
+This phase did not reconstruct the switch log, patch the runner, deploy paper trading, integrate with a broker/API, run live trading, use real money, claim paper-trading readiness, promote a candidate, change the final candidate, train new ML, optimise parameters, or expand to new assets.
+
+### Phase 15E Candidate Switch Source Inventory
+
+| Source | Present | Rows | Expected Switch Count | Distance to Expected | Count Reconciled | Classification |
+|---|---:|---:|---:|---:|---:|---|
+| `reports/phase6b_loose_relief_execution_realistic_overlay_daily.csv` | True | 5,034 | 36 | 36 | False | Financial daily stream, not final switch log |
+| `reports/regime_switch_overlay_offensive_relief_changed_switch_audit.csv` | True | 94 | 36 | 58 | False | Intermediate changed-switch diagnostic, not final operational log |
+| `reports/regime_switch_overlay_offensive_relief_event_summary.csv` | True | 4 | 36 | 32 | False | Summary file, not final switch log |
+| `reports/regime_switch_overlay_guarded_switch_event_summary.csv` | True | 4 | 36 | 32 | False | Summary file, not final switch log |
+| `reports/phase14g_corrected_visual_switch_event_log.csv` | True | 0 | 36 | 36 | False | Empty generated switch log |
+| `reports/phase15c_operational_switch_event_log.csv` | True | 0 | 36 | 36 | False | Empty generated switch log |
+
+Interpretation:
+
+> The true final 36-switch event history is not currently exported. The 94-row changed-switch audit is not accepted as the final executable switch log because it does not reconcile to the expected 36 switches.
+
+### Phase 15E True 36-Switch Source Status
+
+| Item | Result |
+|---|---:|
+| Expected final switch count | 36 |
+| Switch-count tolerance | 2 |
+| True 36-switch source found | False |
+| Source-code patch required | True |
+| Paper readiness blocked | True |
+| Reason | `true_36_switch_source_not_found_patch_required` |
+
+### Phase 15E Attribution Decision
+
+| Item | Result |
+|---|---|
+| Decision | `true_36_switch_source_not_found_patch_required` |
+| Next action | `patch_final_candidate_reconstruction_to_emit_true_operational_switch_log` |
+| True 36-switch source found | False |
+| Changed-switch audit rows | 94 |
+| Changed-switch audit classified as intermediate | True |
+| Source-code patch required | True |
+| Paper dry-run allowed | False |
+| Paper trading ready | False |
+| Broker/API integration allowed | False |
+| Live trading allowed | False |
+| Real money allowed | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+Correct interpretation:
+
+> The next switch-related implementation must patch the final candidate reconstruction path to emit the true final operational switch log. It must not reuse the 94-row diagnostic file as if it were executable switch history.
+
+### Phase 15E Reconstruction Patch Spec
+
+Required future export file:
+
+```text
+reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv
+```
+
+Preferred patch targets:
+
+```text
+src/market_strats/analysis/regime_switch_overlay_final_candidate_decision.py
+src/market_strats/analysis/bid_ask_market_impact_diagnostic.py
+src/market_strats/run_backtest.py
+```
+
+Required future export source:
+
+```text
+same reconstruction path as Phase 6B/6C final candidate daily stream export
+```
+
+Patch requirements:
+
+| Requirement | Result |
+|---|---:|
+| Export final, not intermediate, switches | Required |
+| Reconcile to expected 36 switches | Required |
+| Phase 15E execution allowed to patch code | False |
+
+### Phase 15E Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 15D passed | Passed |
+| Candidate source inventory exists | Passed |
+| Attribution decision exists | Passed |
+| True 36-switch source status exists | Passed |
+| Changed switch audit classified | Passed |
+| Patch spec exists if true source not found | Passed |
+| Phase 15F boundary is spec-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Attribution role is correct | Passed |
+
+### Phase 15E Verdict
+
+> Phase 15E completed operational switch source attribution.
+
+Correct interpretation:
+
+> The true 36-switch source was not found. Paper dry-run and paper trading remain blocked until the final operational switch log is exported and reconciled.
+
+---
+
+## Phase 15F: Fresh Data Extension Pre-Registration / Current Signal Update Spec
+
+Phase 15F pre-registered how fresh data should be added beyond the pinned research endpoint without mutating the canonical Phase 6B/6C baseline.
+
+This phase did not execute a data pull, generate a current signal, deploy paper trading, integrate with a broker/API, run live trading, use real money, claim paper-trading readiness, promote a candidate, change the final candidate, train new ML, optimise parameters, or expand to new assets.
+
+### Phase 15F Baseline Protection Policy
+
+| Policy | Result |
+|---|---|
+| Preserve pinned research reports | True |
+| Preserve Phase 6B canonical metrics | True |
+| No mutation of historical backtest outputs | True |
+| Fresh data output prefix | `phase15g_current_signal` |
+| Fresh data labelled out-of-sample extension | True |
+
+Interpretation:
+
+> Fresh signal work must be separated from the canonical backtest. The Phase 6B/6C research baseline must remain unchanged.
+
+### Phase 15F Fresh Data Source Policy
+
+| Policy | Result |
+|---|---|
+| Allowed primary source | `existing_project_market_data_pipeline` |
+| Allowed fallback source | `manual_fresh_spy_ohlcv_file` |
+| Minimum required fields | `date`; `SPY_close`; `SPY_return` |
+| Require data beyond pinned endpoint | True |
+| Require data-as-of date field | True |
+| Require source timestamp field | True |
+| No silent forward-fill beyond latest real date | True |
+
+### Phase 15F Current Signal Update Policy
+
+| Policy | Result |
+|---|---|
+| Output file | `reports/phase15g_current_signal_file.csv` |
+| Audit file | `reports/phase15h_current_signal_freshness_audit.csv` |
+| Maximum signal staleness | 3 days |
+| Generation frequency | `daily_on_market_days` |
+| Weekend/holiday policy | Use latest completed market session if within staleness limit |
+| Failed data pull policy | Write blocked signal file with failure reason |
+| Signal must include switch context | True |
+| Signal must include data source | True |
+| Signal must include pinned endpoint comparison | True |
+
+### Phase 15F Current Signal Output Schema
+
+The future current signal file must include:
+
+| Column |
+|---|
+| `signal_date` |
+| `data_as_of_date` |
+| `generated_at_utc` |
+| `candidate_system_id` |
+| `data_source` |
+| `data_source_timestamp` |
+| `pinned_research_endpoint` |
+| `is_out_of_sample_extension` |
+| `current_mode` |
+| `previous_mode` |
+| `current_exposure` |
+| `previous_exposure` |
+| `target_action` |
+| `switch_triggered` |
+| `switch_reason` |
+| `signal_validity_flag` |
+| `data_freshness_flag` |
+| `paper_dry_run_allowed` |
+| `paper_trading_allowed` |
+| `paper_readiness_status` |
+| `blocking_warnings` |
+| `benchmark_spy_close_or_return_source` |
+
+### Phase 15F Cadence Policy
+
+| Policy | Result |
+|---|---|
+| Preferred frequency | `daily_on_market_days` |
+| Acceptable manual frequency until automation | `weekly_review_with_daily_data_when_available` |
+| Block if latest market data older than | 3 days |
+| Block if signal generation not run after data update | True |
+
+### Phase 15F Failure Handling Policy
+
+| Failure | Required behaviour |
+|---|---|
+| Latest data missing | Block signal and write failure reason |
+| Data source schema changed | Block signal and require schema review |
+| Switch history missing | Block dry-run even if signal is fresh |
+| Current signal conflicts with reconstructed switch logic | Block signal and require manual audit |
+| Benchmark update missing | Block signal and write failure reason |
+
+### Phase 15F Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 15E passed | Passed |
+| Baseline protection policy exists | Passed |
+| Fresh data source policy exists | Passed |
+| Current signal update policy exists | Passed |
+| Current signal output schema exists | Passed |
+| Cadence policy exists | Passed |
+| Failure handling policy exists | Passed |
+| Phase 15G boundary is current-signal-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Pre-registration role is correct | Passed |
+
+### Phase 15F Verdict
+
+> Phase 15F completed fresh data extension pre-registration.
+
+Correct interpretation:
+
+> Current signal generation is allowed next as a bounded implementation, but paper dry-run, broker/API integration, paper deployment, live trading, real money, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
+
 ---
 
 # Methodology Notes
@@ -9063,6 +9296,15 @@ Remaining concerns include:
 - Current signal freshness failed: signal date 2026-06-02 was generated from data-as-of 2026-05-01, which is the canonical backtest endpoint and 32 days stale relative to the 2026-06-02 audit date.
 - Paper dry-run pre-registration is not allowed next.
 - Paper trading, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
+- The true final 36-switch operational event history is still not exported.
+- Phase 15E did not find any existing source that reconciles to the expected 36 final switches within tolerance.
+- The 94-row `regime_switch_overlay_offensive_relief_changed_switch_audit.csv` is classified as an intermediate changed-switch diagnostic, not the final executable switch log.
+- The Phase 6B/6C daily financial stream remains financially valid, but it is not sufficient for paper trading because it does not expose the final operational switch layer.
+- A source-code patch is required to export `reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv`.
+- Phase 15F only pre-registered fresh-data extension; it did not pull fresh data or generate a current signal.
+- Future current-signal generation must use out-of-sample data beyond the pinned 2026-05-01 endpoint and must preserve the canonical research baseline.
+- If fresh data is unavailable, stale, schema-invalid, or missing a benchmark update, the system must write a blocked signal file rather than pretending a valid current signal exists.
+- Paper dry-run, broker/API integration, paper deployment, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
 ---
 
 # Bugs Caught and Fixed
@@ -10797,6 +11039,40 @@ reports/phase15d_signal_switch_audit_gate_report.csv
 reports/phase15d_signal_switch_audit_conclusion.csv
 ```
 
+## Phase 15E Operational Switch Source Attribution Reports
+
+```text
+reports/phase15e_switch_source_attribution_source_report_check.csv
+reports/phase15e_switch_source_attribution_phase15d_result_check.csv
+reports/phase15e_switch_source_attribution_candidate_source_inventory.csv
+reports/phase15e_switch_source_attribution_true_36_switch_source_status.csv
+reports/phase15e_switch_source_attribution_attribution_decision.csv
+reports/phase15e_switch_source_attribution_reconstruction_patch_spec.csv
+reports/phase15e_switch_source_attribution_phase15f_boundary_check.csv
+reports/phase15e_switch_source_attribution_scope_boundary_check.csv
+reports/phase15e_switch_source_attribution_summary.csv
+reports/phase15e_switch_source_attribution_gate_report.csv
+reports/phase15e_switch_source_attribution_conclusion.csv
+```
+
+## Phase 15F Fresh Data Extension Pre-Registration Reports
+
+```text
+reports/phase15f_fresh_data_extension_source_report_check.csv
+reports/phase15f_fresh_data_extension_phase15e_result_check.csv
+reports/phase15f_fresh_data_extension_baseline_protection_policy.csv
+reports/phase15f_fresh_data_extension_fresh_data_source_policy.csv
+reports/phase15f_fresh_data_extension_current_signal_update_policy.csv
+reports/phase15f_fresh_data_extension_current_signal_output_schema.csv
+reports/phase15f_fresh_data_extension_cadence_policy.csv
+reports/phase15f_fresh_data_extension_failure_handling_policy.csv
+reports/phase15f_fresh_data_extension_phase15g_boundary_check.csv
+reports/phase15f_fresh_data_extension_scope_boundary_check.csv
+reports/phase15f_fresh_data_extension_summary.csv
+reports/phase15f_fresh_data_extension_gate_report.csv
+reports/phase15f_fresh_data_extension_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -11022,6 +11298,8 @@ configs/spy_sma10.yaml
 | Phase 15B paper-trading workflow readiness audit | Completed — readiness audit passed with readiness blocked; operational switch mechanics unresolved, endpoint signal not current, and registered failure conditions triggered; paper trading, broker/API integration, live trading, real money, promotion, and final-candidate changes remain blocked |
 | Phase 15C operational switch / signal reconstruction implementation | Completed — required switch-event and current-signal outputs were generated, but switch reconstruction failed: expected 36 switches, reconstructed 0, switch count reconciled False; current signal file was generated but remains stale at the 2026-05-01 canonical endpoint |
 | Phase 15D current signal freshness + switch mechanics audit | Completed — audit gates passed, but readiness decision blocked dry-run pre-registration with `blocked_both_switch_and_signal_failed`; switch reconstruction, signal freshness, signal validity, and current signal file flags all failed |
+| Phase 15E operational switch source attribution / true 36-switch reconstruction spec | Completed — true final 36-switch source was not found; daily financial stream, 94-row changed-switch audit, summary files, and empty generated switch logs all failed to reconcile to the expected 36 final operational switches; source-code patch required to emit `phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv` |
+| Phase 15F fresh data extension pre-registration / current signal update spec | Completed — baseline protection, fresh data source policy, current signal output schema, cadence policy, and failure handling were registered; current signal generation is allowed next as a bounded implementation, but data pull, signal generation, paper dry-run, broker/API integration, deployment, and readiness claims did not occur |
 ---
 
 # What Should Happen Next
