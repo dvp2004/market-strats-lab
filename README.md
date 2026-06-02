@@ -8191,6 +8191,263 @@ Correct interpretation:
 
 > The next phase is not paper-trading workflow pre-registration. The next phase is candidate source correction and visual backtest re-run.
 
+## Phase 14I: Phase 6B/6C Candidate Daily Stream Export
+
+Phase 14I exported the intended Phase 6B/6C loose-relief execution-realistic candidate as a reusable daily stream for corrected visual backtest and future paper-workflow preparation.
+
+The exported file is:
+
+> `reports/phase6b_loose_relief_execution_realistic_overlay_daily.csv`
+
+This phase was necessary because Phase 14C originally visualised a questionable raw allocator stream rather than the intended final candidate stream. Phase 14I used the existing final-candidate reconstruction path and exported the daily stream under a strict discoverable source name.
+
+This phase did not generate paper-trading workflow, deploy paper trading, run live trading, use real money, train models, calculate feature importance, promote a candidate, or change the final candidate.
+
+### Phase 14I Exported Stream
+
+| Item | Result |
+|---|---:|
+| Export file | `reports/phase6b_loose_relief_execution_realistic_overlay_daily.csv` |
+| Rows | 5,034 |
+| Start date | 2006-04-28 |
+| End date | 2026-05-01 |
+| Required columns present | True |
+| Export status | Passed |
+
+Required exported columns included:
+
+| Column |
+|---|
+| `decision_date` |
+| `strategy_return` |
+| `SPY_return` |
+| `candidate_equity` |
+| `benchmark_equity` |
+| `exposure` |
+| `mode` |
+| `turnover` |
+| `applied_overlay_slippage_bps` |
+| `overlay_slippage_cost_pct` |
+
+### Phase 14I Export Metrics
+
+| Metric | Observed |
+|---|---:|
+| End value | 71,779.1604 |
+| CAGR | 10.37% |
+| Calmar | 0.4298 |
+| Max drawdown | -24.12% |
+| Volatility | 13.54% |
+| Overlay switch count diagnostic | 0 |
+
+### Phase 14I Metric Reconciliation
+
+| Metric | Expected | Observed | Result |
+|---|---:|---:|---|
+| End value | 71,779.16 | 71,779.1604 | Passed |
+| CAGR | 10.35% | 10.37% | Passed |
+| Calmar | 0.429 | 0.4298 | Passed |
+| Max drawdown | -24.12% | -24.12% | Passed |
+| Overlay switch count | 36 | 0 | Operational diagnostic mismatch |
+
+Interpretation:
+
+> Financial reconciliation passed. The exported return stream matches the canonical Phase 6B/6C loose-relief candidate. The switch-count mismatch is treated as an operational diagnostic, not as a financial source-identity failure, because the exported daily return stream does not currently expose the full switch/event mechanics.
+
+### Phase 14I Verdict
+
+> Phase 14I successfully exported the intended Phase 6B/6C loose-relief execution-realistic daily candidate stream.
+
+Correct interpretation:
+
+> The intended financial candidate stream is now available for corrected visual backtest. This does not make the strategy paper-trading ready.
+
+---
+
+## Phase 14J: Phase 6B/6C Exported Candidate Stream Audit
+
+Phase 14J audited the exported Phase 6B/6C loose-relief daily stream before allowing the corrected visual re-run to use it.
+
+This phase confirmed that the export file existed, required columns were present, financial metrics reconciled with canonical Phase 6B/6C metrics, runtime flags were clean, and forbidden actions remained blocked.
+
+This phase did not generate visual backtest outputs, pre-register paper trading, deploy paper trading, run live trading, use real money, promote a candidate, or change the final candidate.
+
+### Phase 14J Gate Result
+
+| Gate | Result |
+|---|---|
+| Export file present | Passed |
+| Required columns present | Passed |
+| Financial metrics reconciled | Passed |
+| Switch count checked as operational diagnostic | Passed |
+| Config flags clean | Passed |
+| Phase 14G boundary is corrected-visual-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+### Phase 14J Verdict
+
+> Phase 14J completed the exported candidate stream audit.
+
+Correct interpretation:
+
+> The exported Phase 6B/6C candidate stream is suitable for corrected visual backtest generation. The operational switch-count mismatch remains a paper-workflow design caveat, not a financial reconciliation failure.
+
+---
+
+## Phase 14G: Candidate Source Correction Implementation / Corrected Visual Backtest Re-Run
+
+Phase 14G re-ran the visual backtest using the corrected exported Phase 6B/6C loose-relief execution-realistic stream.
+
+The corrected source was:
+
+> `reports/phase6b_loose_relief_execution_realistic_overlay_daily.csv`
+
+This fixed the Phase 14C source problem. Phase 14G no longer used the raw relative-momentum allocator stream.
+
+### Phase 14G Corrected Source Resolution
+
+| Item | Result |
+|---|---|
+| Corrected source resolved | True |
+| Source name | `reports\phase6b_loose_relief_execution_realistic_overlay_daily.csv` |
+| Rows | 5,034 |
+| Corrected source identity passed | True |
+| Reason | Strict source matched required candidate fragments and required return/date columns |
+
+### Phase 14G Corrected Visual Output Inventory
+
+| Report | Rows | Result |
+|---|---:|---|
+| Equity curve | 5,034 | Passed |
+| Drawdown curve | 5,034 | Passed |
+| Exposure timeline | 5,034 | Passed |
+| Trade log | 1 | Passed |
+| Switch event log | 0 | Passed |
+| Money-made/lost table | 7 | Passed |
+| Benchmark comparison | 3 | Passed |
+| Rolling relative performance | 5,034 | Passed |
+| Signal-template preview | 25 | Passed |
+| Current signal state report | 1 | Passed |
+
+Important caveat:
+
+> The corrected visual backtest now uses the right financial candidate stream. However, the exported stream currently produces only one trade segment and zero switch events. This means the paper-workflow phase must still solve operational signal/switch reconstruction before any deployment claim.
+
+### Phase 14G Corrected Benchmark Comparison
+
+| Series | End value | CAGR | Max drawdown | Calmar |
+|---|---:|---:|---:|---:|
+| Corrected candidate | 71,779.16 | 10.37% | -24.12% | 0.4298 |
+| SPY Buy & Hold | 79,572.94 | 10.92% | -55.19% | 0.1979 |
+| Corrected candidate minus benchmark | -7,793.78 | -0.55 pp | +31.06 pp drawdown improvement | +0.2319 |
+
+Interpretation:
+
+> The corrected candidate still does not beat SPY Buy & Hold on final wealth or CAGR, but it materially improves drawdown and Calmar. It is a defensive/risk-controlled candidate, not a raw wealth maximiser.
+
+### Phase 14G Current Signal State
+
+| Item | Result |
+|---|---|
+| Signal determined | True |
+| Latest decision date | 2026-05-01 |
+| Current mode | `offensive_spy` |
+| Current exposure | 1.0 |
+| Current candidate action | `risk_on_preview` |
+| Preview only | True |
+| Paper trading allowed | False |
+| Live trading allowed | False |
+| Real money allowed | False |
+
+Correct interpretation:
+
+> The current signal is preview-only and not a paper-trading instruction. The signal state comes from the corrected exported stream, but operational signal mechanics still need formal paper-workflow pre-registration.
+
+### Phase 14G Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 14F passed | Passed |
+| Correction required from Phase 14F | Passed |
+| Strict source resolution report exists | Passed |
+| Corrected source identity passed | Passed |
+| Corrected visual reports generated | Passed |
+| Current signal state report exists | Passed |
+| Side-by-side comparison report exists | Passed |
+| Phase 14H boundary is audit-only | Passed |
+| No paper workflow/live trading/promotion | Passed |
+| Execution role is correct | Passed |
+
+### Phase 14G Verdict
+
+> Phase 14G completed the corrected visual backtest re-run.
+
+Correct interpretation:
+
+> The corrected visual backtest now uses the intended Phase 6B/6C loose-relief stream. It does not make the system paper-trading ready.
+
+---
+
+## Phase 14H: Corrected Visual Backtest Audit / Reconciliation Decision
+
+Phase 14H audited the corrected visual backtest outputs and made the corrected reconciliation decision.
+
+Phase 14H confirmed that:
+
+- Phase 14G passed;
+- all corrected reports were present;
+- chart files were present;
+- corrected source identity passed;
+- metric reconciliation passed;
+- current signal state was determined;
+- forbidden actions remained blocked.
+
+### Phase 14H Reconciliation Decision
+
+| Item | Result |
+|---|---|
+| Decision | `allow_paper_workflow_preregistration_next` |
+| Corrected source identity passed | True |
+| Metric reconciliation passed | True |
+| Current signal state determined | True |
+| Paper-workflow pre-registration allowed | True |
+| Paper-trading deployment allowed | False |
+| Paper trading ready | False |
+| Live trading allowed | False |
+| Real money allowed | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+Interpretation:
+
+> The corrected source and corrected visual outputs are now good enough to pre-register a paper-trading workflow. This does not mean the strategy is paper-trading ready or deployable.
+
+### Phase 14H Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 14G passed | Passed |
+| Config flags clean | Passed |
+| All corrected reports present | Passed |
+| Chart files present | Passed |
+| Corrected source identity passed | Passed |
+| Metric reconciliation report exists | Passed |
+| Reconciliation decision report exists | Passed |
+| Current signal state report exists | Passed |
+| No paper workflow if failed | Passed |
+| Phase 14I boundary is conditional-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+### Phase 14H Verdict
+
+> Phase 14H completed the corrected visual backtest audit and reconciliation decision.
+
+Correct interpretation:
+
+> Paper-workflow pre-registration is now allowed as the next step, but paper trading itself remains blocked. The next phase must define the workflow, signal schema, monitoring rules, execution checklist, and stop conditions before any paper-trading readiness claim.
+
 ---
 
 # Methodology Notes
@@ -8442,6 +8699,13 @@ Remaining concerns include:
 - Phase 14C candidate metrics did not reconcile with canonical Phase 6B/6C metrics. Observed CAGR was 8.94% versus expected 10.35%, observed Calmar was 0.250 versus expected 0.429, observed max drawdown was -35.74% versus expected -24.12%, and observed final value was about 55,325 versus expected about 71,779.
 - Paper-trading workflow pre-registration is blocked until the intended candidate stream is explicitly resolved and the visual backtest is re-run.
 - The current signal state report is preview-only and comes from the questionable Phase 14C source, so it must not be treated as a paper-trading instruction.
+- No live trading, real-money deployment, paper-trading deployment, paper-trading-ready claim, candidate promotion, final-candidate change, unregistered ML, or feature importance occurred.
+- Phase 14I–14H corrected the source problem, but did not make the system paper-trading ready.
+- The corrected Phase 6B/6C candidate still underperforms SPY Buy & Hold on raw final wealth and CAGR: corrected candidate final value 71,779.16 versus SPY Buy & Hold 79,572.94, and CAGR 10.37% versus 10.92%.
+- The corrected candidate materially improves risk control: max drawdown -24.12% versus SPY -55.19%, and Calmar 0.4298 versus SPY 0.1979.
+- The exported financial stream reconciles with canonical Phase 6B/6C metrics, but operational switch-count reconstruction remains incomplete: overlay switch count diagnostic shows 0 versus the canonical expected 36.
+- The corrected visual output has one trade segment and zero switch events. This means the next workflow phase must define or reconstruct operational signal/switch mechanics before any paper-trading readiness claim.
+- The current signal state is preview-only: `offensive_spy`, exposure 1.0, `risk_on_preview`. It is not a broker instruction, live signal, or paper-trading deployment.
 - No live trading, real-money deployment, paper-trading deployment, paper-trading-ready claim, candidate promotion, final-candidate change, unregistered ML, or feature importance occurred.
 ---
 
@@ -10030,6 +10294,81 @@ reports/phase14f_source_correction_gate_report.csv
 reports/phase14f_source_correction_conclusion.csv
 ```
 
+## Phase 14I Phase 6B/6C Candidate Daily Stream Export Reports
+
+```text
+reports/phase6b_loose_relief_execution_realistic_overlay_daily.csv
+reports/phase14i_phase6b_export_export_inventory.csv
+reports/phase14i_phase6b_export_export_metrics.csv
+reports/phase14i_phase6b_export_metric_reconciliation_report.csv
+reports/phase14i_phase6b_export_phase14j_boundary_check.csv
+reports/phase14i_phase6b_export_scope_boundary_check.csv
+reports/phase14i_phase6b_export_summary.csv
+reports/phase14i_phase6b_export_gate_report.csv
+reports/phase14i_phase6b_export_conclusion.csv
+```
+
+## Phase 14J Phase 6B/6C Exported Candidate Stream Audit Reports
+
+```text
+reports/phase14j_phase6b_export_audit_config_flag_check.csv
+reports/phase14j_phase6b_export_audit_export_file_check.csv
+reports/phase14j_phase6b_export_audit_export_metrics.csv
+reports/phase14j_phase6b_export_audit_metric_reconciliation_report.csv
+reports/phase14j_phase6b_export_audit_phase14g_rerun_boundary_check.csv
+reports/phase14j_phase6b_export_audit_scope_boundary_check.csv
+reports/phase14j_phase6b_export_audit_summary.csv
+reports/phase14j_phase6b_export_audit_gate_report.csv
+reports/phase14j_phase6b_export_audit_conclusion.csv
+```
+
+## Phase 14G Corrected Visual Backtest Reports
+
+```text
+reports/phase14g_corrected_visual_source_report_check.csv
+reports/phase14g_corrected_visual_phase14f_result_check.csv
+reports/phase14g_corrected_visual_correction_spec_input_check.csv
+reports/phase14g_corrected_visual_strict_source_resolution_report.csv
+reports/phase14g_corrected_visual_rejected_source_report.csv
+reports/phase14g_corrected_visual_visual_output_inventory.csv
+reports/phase14g_corrected_visual_equity_curve.csv
+reports/phase14g_corrected_visual_equity_curve.png
+reports/phase14g_corrected_visual_drawdown_curve.csv
+reports/phase14g_corrected_visual_drawdown_curve.png
+reports/phase14g_corrected_visual_exposure_timeline.csv
+reports/phase14g_corrected_visual_exposure_timeline.png
+reports/phase14g_corrected_visual_trade_log.csv
+reports/phase14g_corrected_visual_switch_event_log.csv
+reports/phase14g_corrected_visual_money_made_lost_table.csv
+reports/phase14g_corrected_visual_benchmark_comparison.csv
+reports/phase14g_corrected_visual_rolling_relative_performance.csv
+reports/phase14g_corrected_visual_rolling_relative_performance.png
+reports/phase14g_corrected_visual_signal_template_preview.csv
+reports/phase14g_corrected_visual_current_signal_state_report.csv
+reports/phase14g_corrected_visual_metric_reconciliation_report.csv
+reports/phase14g_corrected_visual_side_by_side_comparison_report.csv
+reports/phase14g_corrected_visual_boundary_check.csv
+reports/phase14g_corrected_visual_scope_boundary_check.csv
+reports/phase14g_corrected_visual_summary.csv
+reports/phase14g_corrected_visual_gate_report.csv
+reports/phase14g_corrected_visual_conclusion.csv
+```
+
+## Phase 14H Corrected Visual Backtest Audit Reports
+
+```text
+reports/phase14h_corrected_visual_audit_config_flag_check.csv
+reports/phase14h_corrected_visual_audit_report_inventory_check.csv
+reports/phase14h_corrected_visual_audit_phase14g_result_check.csv
+reports/phase14h_corrected_visual_audit_chart_inventory_check.csv
+reports/phase14h_corrected_visual_audit_reconciliation_decision_report.csv
+reports/phase14h_corrected_visual_audit_phase14i_boundary_check.csv
+reports/phase14h_corrected_visual_audit_scope_boundary_check.csv
+reports/phase14h_corrected_visual_audit_summary.csv
+reports/phase14h_corrected_visual_audit_gate_report.csv
+reports/phase14h_corrected_visual_audit_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -10247,6 +10586,10 @@ configs/spy_sma10.yaml
 | Phase 14D non-ML visual backtest result audit | Completed — all required reports and chart files were present, report rows were non-empty, signal preview was preview-only, forbidden claims were absent, and Phase 14E boundary is interpretation-only |
 | Phase 14E visual backtest interpretation / candidate source identity audit | Completed — source identity failed because the Phase 14C visual source resolved to `relative_momentum_outputs.Top 3 Equal Weight Relative Momentum Allocator.allocator_result`, which did not clearly match the intended `phase6b_loose_relief_execution_realistic_overlay`; metric reconciliation also failed against canonical Phase 6B/6C loose-relief metrics |
 | Phase 14F candidate source correction / workflow pre-registration decision | Completed — decision: `pre_register_candidate_source_correction_and_visual_rerun`; correction required, visual re-run required, paper-trading workflow pre-registration blocked |
+| Phase 14I Phase 6B/6C candidate daily stream export | Completed — exported `reports/phase6b_loose_relief_execution_realistic_overlay_daily.csv` with 5,034 rows; financial metrics reconciled with canonical Phase 6B/6C loose-relief metrics; no paper workflow, deployment, promotion, or final-candidate change |
+| Phase 14J Phase 6B/6C exported candidate stream audit | Completed — export file present, required columns present, financial metrics reconciled, switch count treated as operational diagnostic, and corrected visual re-run boundary passed |
+| Phase 14G corrected visual backtest re-run | Completed — strict source resolved to the exported Phase 6B/6C loose-relief daily stream; corrected visual reports generated; corrected benchmark comparison, current signal state, and visual output inventory produced |
+| Phase 14H corrected visual backtest audit / reconciliation decision | Completed — corrected source identity passed, metric reconciliation passed, current signal state was determined, and paper-workflow pre-registration is allowed next; paper trading itself remains blocked |
 ---
 
 # What Should Happen Next

@@ -395,6 +395,14 @@ from market_strats.analysis.visual_source_identity_decision_bundle import (
     save_phase14e_visual_backtest_interpretation_source_identity_audit,
     save_phase14f_candidate_source_correction_or_workflow_prereg_decision,
 )
+from market_strats.analysis.corrected_visual_source_rerun_bundle import (
+    save_phase14g_candidate_source_correction_visual_rerun,
+    save_phase14h_corrected_visual_backtest_audit_reconciliation_decision,
+)
+from market_strats.analysis.phase6b_candidate_stream_export import (
+    save_phase14i_phase6b_candidate_daily_stream_export,
+    save_phase14j_phase6b_candidate_export_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2402,6 +2410,30 @@ def main() -> None:
         )
 
         save_phase14f_candidate_source_correction_or_workflow_prereg_decision(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase14i_phase6b_candidate_daily_stream_export(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+        )
+
+        save_phase14j_phase6b_candidate_export_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase14g_candidate_source_correction_visual_rerun(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+        )
+
+        save_phase14h_corrected_visual_backtest_audit_reconciliation_decision(
             config=config,
             reports_dir=reports_dir,
         )
