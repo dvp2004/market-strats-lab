@@ -203,6 +203,14 @@ Phase 15N correctly blocked paper dry-run pre-registration. The decision is `blo
 
 The next implementation must focus on creating or loading a valid post-endpoint candidate stream. Paper dry-run, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
 
+Phase 15Q/15R completed the real post-endpoint source creation and validation checkpoint.
+
+Phase 15Q attempted to create or load a genuine post-endpoint candidate source while preserving the pinned 2026-05-01 canonical research endpoint. It wrote the required output file and maintained the required schema, but no source was available. The creation summary shows post_endpoint_rows = 0, source_type = `no_source_available`, candidate_stream_valid = False, and handoff_file_written = False.
+
+Phase 15R validated the Phase 15Q output and correctly blocked progression. The decision is `blocked_real_post_endpoint_source_invalid`. Phase 15O/15P rerun is not allowed, Phase 15M/15N rerun is not allowed, and paper dry-run pre-registration remains blocked.
+
+This confirms the current blocker is not switch logic, signal schema, or audit mechanics. The blocker is the absence of a genuine post-endpoint candidate stream. The next implementation must generate `target_offensive_weight` after 2026-05-01 using the same Phase 6B/6C rule logic as the canonical candidate. Raw SPY data alone is insufficient and must not be treated as a valid paper-trading source.
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -9685,6 +9693,162 @@ Correct interpretation:
 
 > The audit passed because it correctly blocked paper dry-run. The system is structurally ready to generate fresh signals, but it still lacks post-endpoint candidate data.
 
+## Phase 15Q: Manual / Fresh Post-Endpoint Data Source Creation
+
+Phase 15Q attempted to create or load a genuine post-endpoint candidate source for the Phase 6B/6C loose-relief execution-realistic overlay.
+
+This phase did not mutate canonical Phase 6B/6C reports, change README metrics, alter the pinned 2026-05-01 research endpoint, modify the reconstructed switch log, generate a current signal, rerun Phase 15O/15P, pre-register a paper dry-run, integrate with a broker/API, deploy paper trading, run live trading, use real money, train new ML, optimise parameters, expand to new assets, promote a candidate, or change the final candidate.
+
+The intended output files were:
+
+```text
+reports/phase15q_post_endpoint_candidate_stream.csv
+data/fresh/phase15o_manual_candidate_stream.csv
+```
+
+The handoff file for Phase 15O was not written because no valid real post-endpoint source was available.
+
+### Phase 15Q Creation Summary
+
+| Item | Result |
+|---|---|
+| Post-endpoint rows | 0 |
+| Source type | `no_source_available` |
+| Source path | Missing |
+| Benchmark update passed | False |
+| Target weight source passed | False |
+| Stream row validity passed | False |
+| Out-of-sample label passed | False |
+| Candidate stream valid | False |
+| Canonical report mutation | False |
+| Handoff file written | False |
+
+Correct interpretation:
+
+> Phase 15Q passed mechanically because it wrote the required blocked output and preserved the canonical baseline. It did not create a valid post-endpoint candidate source.
+
+### Phase 15Q Required Column Check
+
+The blocked output retained the required schema, including:
+
+```text
+date
+SPY_close
+SPY_return
+target_offensive_weight
+current_mode
+current_exposure
+previous_mode
+previous_exposure
+switch_triggered
+data_source
+data_source_timestamp
+target_weight_source
+target_weight_source_valid_flag
+pinned_research_endpoint
+is_out_of_sample_extension
+benchmark_update_flag
+stream_row_validity_flag
+blocking_warnings
+```
+
+Correct interpretation:
+
+> The schema is ready, but the stream has no valid rows. This is a source-availability failure, not a schema failure.
+
+### Phase 15Q Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 15P passed | Passed |
+| Output file written | Passed |
+| Required columns present | Passed |
+| Pinned endpoint preserved | Passed |
+| No canonical report mutation | Passed |
+| Blocked stream written if invalid | Passed |
+| Phase 15R boundary is validation-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Execution role is correct | Passed |
+
+### Phase 15Q Verdict
+
+> Phase 15Q completed post-endpoint data source creation output writing.
+
+Correct interpretation:
+
+> Phase 15Q did not solve the data blocker. It confirmed that no valid post-endpoint source is currently available.
+
+---
+
+## Phase 15R: Real Post-Endpoint Candidate Stream Validation + 15O/15P Rerun Preparation
+
+Phase 15R validated the Phase 15Q source output and decided whether Phase 15O/15P could be rerun.
+
+The audit process passed, but rerun eligibility was blocked.
+
+### Phase 15R Real Source Validation Audit
+
+| Check | Result |
+|---|---:|
+| Post-endpoint rows | 0 |
+| Post-endpoint rows passed | False |
+| All dates after endpoint passed | False |
+| Benchmark update passed | False |
+| Target weight source passed | False |
+| Target exposure present passed | False |
+| Target exposure range passed | False |
+
+Correct interpretation:
+
+> There is still no real post-endpoint candidate source. The strategy cannot generate a valid fresh signal until a rule-generated or verified project-generated candidate stream is supplied.
+
+### Phase 15R Decision
+
+| Item | Result |
+|---|---|
+| Decision | `blocked_real_post_endpoint_source_invalid` |
+| Phase 15O/15P rerun allowed next | False |
+| Phase 15M/15N rerun allowed next | False |
+| Paper dry-run pre-registration allowed next | False |
+| Paper trading ready | False |
+| Broker/API integration allowed | False |
+| Paper-trading deployment allowed | False |
+| Live trading allowed | False |
+| Real money allowed | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+Correct interpretation:
+
+> Do not rerun Phase 15O/15P yet. Do not rerun Phase 15M/15N. Do not move to paper dry-run. The next step must generate a genuine post-endpoint candidate source using the Phase 6B/6C rule logic.
+
+### Phase 15R Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 15Q passed | Passed |
+| Config flags clean | Passed |
+| Candidate stream file existence audited | Passed |
+| Required columns present | Passed |
+| Post-endpoint rows audited | Passed |
+| Benchmark update audited | Passed |
+| Target weight source audited | Passed |
+| Target exposure audited | Passed |
+| Out-of-sample label audited | Passed |
+| Decision output exists | Passed |
+| No paper-ready claim | Passed |
+| Phase 15O rerun boundary is conditional-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+### Phase 15R Verdict
+
+> Phase 15R completed real post-endpoint candidate stream validation.
+
+Correct interpretation:
+
+> The audit passed because it correctly blocked progression. The missing item is not another audit. The missing item is a real post-endpoint rule-generated candidate stream.
+
 ---
 
 # Methodology Notes
@@ -9999,6 +10163,15 @@ turnover was still too close to the switch trigger logic, even though turnover s
 - Paper dry-run pre-registration is not allowed next.
 - Paper trading, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
 - The next blocker is data extension, not strategy logic: the project needs a valid post-endpoint candidate stream or fresh market-data pipeline output.
+- Phase 15Q/15R did not create a valid post-endpoint candidate source.
+- The canonical 2026-05-01 endpoint remains valid for historical research, metric reconciliation, switch-log reconstruction, README numbers, and checkpoint consistency.
+- No `data/fresh/phase15o_manual_candidate_stream.csv` handoff file was written because no valid Phase 6B/6C rule-generated source was available.
+- Phase 15O/15P rerun is not allowed next.
+- Phase 15M/15N rerun is not allowed next.
+- Paper dry-run pre-registration is not allowed next.
+- Paper trading, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
+- The next blocker is practical data engineering: generate a real post-endpoint candidate stream using the same Phase 6B/6C rule logic that produced the canonical `target_offensive_weight`.
+- Raw SPY OHLCV alone is not enough. The stream must include a verified `target_offensive_weight` and a valid `target_weight_source`, such as `phase6b_rule_engine`, `phase6b_loose_relief_rule_replay`, `project_rule_replay`, or `verified_project_generated`.
 ---
 
 # Bugs Caught and Fixed
@@ -11887,6 +12060,36 @@ reports/phase15n_fresh_signal_audit_gate_report.csv
 reports/phase15n_fresh_signal_audit_conclusion.csv
 ```
 
+## Phase 15Q Real Post-Endpoint Source Creation Reports
+
+```text
+reports/phase15q_post_endpoint_candidate_stream.csv
+reports/phase15q_data_source_creation_summary.csv
+reports/phase15q_data_source_required_column_check.csv
+reports/phase15q_data_source_phase15p_result_check.csv
+reports/phase15q_data_source_phase15r_boundary_check.csv
+reports/phase15q_data_source_scope_boundary_check.csv
+reports/phase15q_data_source_summary.csv
+reports/phase15q_data_source_gate_report.csv
+reports/phase15q_data_source_conclusion.csv
+```
+
+## Phase 15R Real Post-Endpoint Source Validation Reports
+
+```text
+reports/phase15r_real_source_config_flag_check.csv
+reports/phase15r_real_source_report_inventory_check.csv
+reports/phase15r_real_source_phase15q_result_check.csv
+reports/phase15r_real_source_required_column_check.csv
+reports/phase15r_real_source_real_source_validation_audit.csv
+reports/phase15r_real_source_decision_report.csv
+reports/phase15r_real_source_phase15o_rerun_boundary_check.csv
+reports/phase15r_real_source_scope_boundary_check.csv
+reports/phase15r_real_source_summary.csv
+reports/phase15r_real_source_gate_report.csv
+reports/phase15r_real_source_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -12122,6 +12325,8 @@ configs/spy_sma10.yaml
 | Phase 15L fresh data extension / current signal generation pre-implementation check | Completed — fresh current-signal generation is allowed next as a bounded post-endpoint/out-of-sample extension; schema now includes `benchmark_update_flag`, all pre-implementation gates passed, and no data pull, current signal generation, paper dry-run, broker/API integration, paper trading, or live deployment occurred |
 | Phase 15M fresh current signal generation | Completed — current-signal output file was written as a post-endpoint/out-of-sample extension without mutating the canonical 2026-05-01 research baseline; however, no valid fresh signal was produced because post-endpoint rows were 0, so signal validity, data freshness, and benchmark update checks failed |
 | Phase 15N fresh signal audit / paper dry-run eligibility decision | Completed — audit gates passed and correctly blocked paper dry-run pre-registration with `blocked_fresh_signal_audit_failed`; post-endpoint data, signal validity, data freshness, and benchmark update all failed, while switch context was present |
+| Phase 15Q manual / fresh post-endpoint data source creation | Completed — required post-endpoint source output was written without mutating the canonical 2026-05-01 endpoint, Phase 6B/6C metrics, README numbers, or switch log; however, no source was available, post-endpoint rows remained 0, candidate_stream_valid was False, and no Phase 15O handoff file was written |
+| Phase 15R real post-endpoint candidate stream validation + 15O/15P rerun preparation | Completed — audit gates passed and correctly blocked Phase 15O/15P rerun with `blocked_real_post_endpoint_source_invalid`; post-endpoint rows, benchmark update, target weight source, target exposure presence, and target exposure range all failed because no real source was available |
 ---
 
 # What Should Happen Next

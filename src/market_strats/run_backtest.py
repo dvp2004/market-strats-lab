@@ -435,6 +435,10 @@ from market_strats.analysis.post_endpoint_candidate_stream import (
     save_phase15o_post_endpoint_candidate_stream_extension,
     save_phase15p_extended_candidate_stream_audit,
 )
+from market_strats.analysis.real_post_endpoint_source import (
+    save_phase15q_post_endpoint_data_source_creation,
+    save_phase15r_real_post_endpoint_stream_validation,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2556,6 +2560,16 @@ def main() -> None:
         )
 
         save_phase15p_extended_candidate_stream_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase15q_post_endpoint_data_source_creation(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase15r_real_post_endpoint_stream_validation(
             config=config,
             reports_dir=reports_dir,
         )
