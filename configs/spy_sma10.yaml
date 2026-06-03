@@ -11423,6 +11423,219 @@ phase15n_fresh_signal_audit_paper_dry_run_eligibility:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_audit_role: "Fresh signal audit and paper dry-run eligibility decision only"
+phase15o_post_endpoint_candidate_stream_extension:
+  enabled: true
+  execution_role: "Post-endpoint candidate stream data extension implementation only"
+  implementation_classification: "A/B - creates or loads a valid post-endpoint candidate stream while preserving pinned research baseline"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 15N"
+  proposed_next_phase: "Phase 15P"
+
+  candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+  pinned_research_endpoint: "2026-05-01"
+  audit_current_date: "2026-06-02"
+
+  output_file: "reports/phase15o_post_endpoint_candidate_stream.csv"
+
+  source_reports:
+    phase15n_conclusion: "reports/phase15n_fresh_signal_audit_conclusion.csv"
+    phase15n_gate_report: "reports/phase15n_fresh_signal_audit_gate_report.csv"
+    phase15n_decision_report: "reports/phase15n_fresh_signal_audit_decision_report.csv"
+    pinned_endpoint_signal: "reports/phase15k_pinned_endpoint_signal_file.csv"
+    switch_log: "reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
+    selected_switch_definition: "reports/phase15i_column_semantics_selected_switch_definition.csv"
+
+  candidate_stream_sources:
+    preferred_manual_candidate_stream_file: "data/fresh/phase15o_manual_candidate_stream.csv"
+    preferred_existing_fresh_candidate_stream_file: "data/fresh/phase15m_fresh_candidate_stream.csv"
+    allow_in_memory_final_candidate_frame_if_post_endpoint_rows_exist: true
+    require_post_endpoint_rows: true
+
+  selected_exposure_fallback_priority:
+    - "target_offensive_weight"
+    - "target_spy_weight"
+    - "target_exposure"
+    - "candidate_exposure"
+    - "overlay_exposure"
+    - "final_exposure"
+    - "offensive_weight"
+    - "spy_weight"
+    - "risk_on_weight"
+    - "exposure"
+
+  benchmark_policy:
+    acceptable_close_columns:
+      - "SPY_close"
+      - "spy_close"
+      - "adj_close"
+      - "close"
+
+    acceptable_return_columns:
+      - "SPY_return"
+      - "spy_return"
+      - "benchmark_return"
+      - "return"
+
+  required_extended_candidate_stream_columns:
+    - "date"
+    - "SPY_close"
+    - "SPY_return"
+    - "target_offensive_weight"
+    - "current_mode"
+    - "current_exposure"
+    - "previous_mode"
+    - "previous_exposure"
+    - "switch_triggered"
+    - "data_source"
+    - "data_source_timestamp"
+    - "pinned_research_endpoint"
+    - "is_out_of_sample_extension"
+    - "benchmark_update_flag"
+    - "stream_row_validity_flag"
+    - "blocking_warnings"
+
+  extension_policy:
+    preserve_pinned_research_endpoint: true
+    no_mutation_of_canonical_reports: true
+    no_mutation_of_phase6b_metrics: true
+    no_mutation_of_readme_numbers: true
+    no_mutation_of_switch_log: true
+    require_out_of_sample_label: true
+    write_blocked_extension_report_if_unavailable: true
+
+  allow_post_endpoint_candidate_stream_write: true
+  allow_fresh_data_pull_execution: false
+  allow_canonical_report_mutation: false
+  allow_current_signal_generation: false
+  allow_paper_dry_run_preregistration: false
+  allow_broker_api_integration: false
+  allow_paper_trading_deployment: false
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_paper_trading_ready_claim: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_optimisation: false
+  allow_multi_asset_expansion: false
+  allow_feature_importance: false
+
+  phase15p_boundary:
+    allowed_next_step: "Extended candidate stream audit and fresh signal rerun eligibility only"
+    forbidden_next_step: "paper dry-run, broker/API integration, paper-trading deployment, live trading, real-money deployment, paper-trading-ready claim, candidate promotion, final-candidate change, new ML, optimisation, or multi-asset expansion"
+
+  gates:
+    require_phase15n_passed: true
+    require_candidate_stream_file_written: true
+    require_required_columns_present: true
+    require_pinned_endpoint_preserved: true
+    require_out_of_sample_label: true
+    require_no_canonical_report_mutation: true
+    require_phase15p_boundary_audit_only: true
+    require_no_data_pull_execution: true
+    require_no_current_signal_generation: true
+    require_no_paper_dry_run: true
+    require_no_broker_api: true
+    require_no_live_trading: true
+    require_no_real_money: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_execution_role: "Post-endpoint candidate stream data extension implementation only"
+phase15p_extended_candidate_stream_audit:
+  enabled: true
+  audit_role: "Extended candidate stream audit and fresh signal rerun eligibility only"
+  implementation_classification: "B - audits post-endpoint rows, schema, benchmark availability, target exposure continuity, and rerun eligibility"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 15O"
+  proposed_next_phase: "Phase 15M rerun"
+
+  candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+  pinned_research_endpoint: "2026-05-01"
+
+  expected_runtime_flags:
+    phase15m_fresh_current_signal_generation: false
+    phase15n_fresh_signal_audit_paper_dry_run_eligibility: false
+    phase15o_post_endpoint_candidate_stream_extension: true
+    phase15p_extended_candidate_stream_audit: true
+    relative_momentum_allocator: true
+
+  phase15o_reports:
+    conclusion: "reports/phase15o_candidate_stream_conclusion.csv"
+    gate_report: "reports/phase15o_candidate_stream_gate_report.csv"
+    candidate_stream: "reports/phase15o_post_endpoint_candidate_stream.csv"
+    extension_summary: "reports/phase15o_candidate_stream_extension_summary.csv"
+    required_column_check: "reports/phase15o_candidate_stream_required_column_check.csv"
+
+  required_extended_candidate_stream_columns:
+    - "date"
+    - "SPY_close"
+    - "SPY_return"
+    - "target_offensive_weight"
+    - "current_mode"
+    - "current_exposure"
+    - "previous_mode"
+    - "previous_exposure"
+    - "switch_triggered"
+    - "data_source"
+    - "data_source_timestamp"
+    - "pinned_research_endpoint"
+    - "is_out_of_sample_extension"
+    - "benchmark_update_flag"
+    - "stream_row_validity_flag"
+    - "blocking_warnings"
+
+  audit_thresholds:
+    min_post_endpoint_rows: 1
+    require_all_rows_after_pinned_endpoint: true
+    require_benchmark_update_pass: true
+    require_target_exposure_present: true
+    require_exposure_range_0_to_1: true
+    require_out_of_sample_label: true
+    require_no_canonical_mutation: true
+
+  decision_policy:
+    decision_if_stream_valid: "fresh_signal_rerun_allowed_next"
+    decision_if_stream_invalid: "blocked_extended_candidate_stream_invalid"
+
+  phase15m_rerun_boundary:
+    allowed_next_step_if_passed: "Rerun Phase 15M and Phase 15N with post-endpoint candidate stream"
+    allowed_next_step_if_blocked: "Post-endpoint candidate stream repair only"
+    forbidden_next_step: "paper dry-run, broker/API integration, paper-trading deployment, live trading, real-money deployment, paper-trading-ready claim, candidate promotion, final-candidate change, new ML, optimisation, or multi-asset expansion"
+
+  allow_phase15m_rerun_if_passed: true
+  allow_paper_dry_run_preregistration: false
+  allow_broker_api_integration: false
+  allow_paper_trading_deployment: false
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_paper_trading_ready_claim: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_optimisation: false
+  allow_multi_asset_expansion: false
+  allow_feature_importance: false
+
+  gates:
+    require_phase15o_passed: true
+    require_config_flags_clean: true
+    require_candidate_stream_exists: true
+    require_required_columns_present: true
+    require_post_endpoint_rows: true
+    require_benchmark_update_passed: true
+    require_target_exposure_continuity: true
+    require_out_of_sample_label: true
+    require_decision_output: true
+    require_no_paper_ready_claim: true
+    require_phase15m_rerun_boundary_conditional_only: true
+    require_no_broker_api: true
+    require_no_live_trading: true
+    require_no_real_money: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_audit_role: "Extended candidate stream audit and fresh signal rerun eligibility only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
