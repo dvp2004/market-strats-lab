@@ -423,6 +423,10 @@ from market_strats.analysis.refined_switch_reconstruction import (
     save_phase15i_final_candidate_column_semantics_diagnostic,
     save_phase15j_refined_switch_reconstruction_audit,
 )
+from market_strats.analysis.pinned_endpoint_fresh_signal_precheck import (
+    save_phase15k_pinned_endpoint_signal_consistency_audit,
+    save_phase15l_fresh_data_current_signal_preimplementation_check,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2512,6 +2516,16 @@ def main() -> None:
             reports_dir=reports_dir,
             relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
+        )
+
+        save_phase15k_pinned_endpoint_signal_consistency_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase15l_fresh_data_current_signal_preimplementation_check(
+            config=config,
+            reports_dir=reports_dir,
         )
 
     save_final_strategy_decision_report(reports_dir)

@@ -187,6 +187,14 @@ Phase 15J reconstructed and exported the true final operational 36-switch log to
 
 The decision is `refined_canonical_switch_log_reconciled_fresh_signal_phase_allowed_next`. This means the canonical switch-engine blocker is cleared and the next phase may address fresh/current signal generation. It does not mean paper dry-run or paper trading is ready. Paper dry-run, broker/API integration, live trading, real money, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
 
+Phase 15K/15L completed the pinned-endpoint signal consistency and fresh current-signal pre-implementation checkpoint.
+
+Phase 15K confirmed that the pinned 2026-05-01 endpoint signal is internally consistent with the reconstructed Phase 6B/6C operational switch history. The latest switch before the endpoint was on 2026-04-13, moving from `defensive_or_cash` to `offensive_spy`. Therefore, the pinned endpoint state is `offensive_spy` with exposure 1.0. This signal is preview-only, and paper dry-run/paper trading remain blocked.
+
+Phase 15L confirmed that the project is ready to run the next bounded fresh current-signal generation phase. The future signal schema now includes `benchmark_update_flag`, ensuring benchmark data must be updated alongside any fresh signal. The decision is `fresh_current_signal_generation_allowed_next`.
+
+This does not change the canonical research endpoint. 2026-05-01 remains the fixed historical validation/checkpoint endpoint. Fresh signal generation must be treated as a separate post-endpoint, out-of-sample current-signal extension. No data pull, current signal generation, paper dry-run, broker/API integration, live trading, real-money deployment, candidate promotion, or final-candidate change occurred in Phase 15K/15L.
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -9399,6 +9407,129 @@ Correct interpretation:
 
 > The true final operational 36-switch log is now reconstructed and reconciled through `target_offensive_weight`. This unlocks the next fresh-signal phase, but it does not authorise paper dry-run, paper trading, broker/API integration, live trading, real money, candidate promotion, or final-candidate changes.
 
+## Phase 15K: Pinned-Endpoint Operational Signal Consistency Audit
+
+Phase 15K audited whether the pinned 2026-05-01 endpoint signal agrees with the reconstructed Phase 6B/6C loose-relief operational switch log.
+
+This phase did not extend fresh data, generate a current signal, pre-register a paper dry-run, integrate with a broker/API, deploy paper trading, run live trading, use real money, train new ML, optimise parameters, expand to new assets, promote a candidate, or change the final candidate.
+
+The purpose of this phase was to confirm that the canonical endpoint state is internally consistent before any post-endpoint current-signal extension.
+
+### Phase 15K Pinned Endpoint Signal
+
+| Item | Result |
+|---|---|
+| Endpoint date | 2026-05-01 |
+| Candidate system ID | `phase6b_loose_relief_execution_realistic_overlay` |
+| Latest reconstructed switch date | 2026-04-13 |
+| Latest switch previous mode | `defensive_or_cash` |
+| Latest switch current mode | `offensive_spy` |
+| Latest switch previous exposure | 0.0 |
+| Latest switch current exposure | 1.0 |
+| Endpoint mode | `offensive_spy` |
+| Endpoint exposure | 1.0 |
+| Preview-only | True |
+| Paper dry-run allowed | False |
+| Paper trading allowed | False |
+| Signal consistency passed | True |
+
+Correct interpretation:
+
+> The 2026-05-01 pinned endpoint signal is internally consistent with the reconstructed 36-switch operational history. The latest switch before the endpoint was the 2026-04-13 transition from `defensive_or_cash` to `offensive_spy`, leaving the endpoint state as `offensive_spy` with exposure 1.0.
+
+Important endpoint distinction:
+
+> 2026-05-01 remains the fixed canonical research/backtest endpoint for historical validation, metric reconciliation, switch-log reconstruction, README numbers, and checkpoint consistency. It is not a flaw in the research baseline. It simply must not be treated as a current executable paper-trading signal.
+
+### Phase 15K Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 15J passed | Passed |
+| Switch log present | Passed |
+| Latest switch matches expected | Passed |
+| Endpoint signal consistent | Passed |
+| Endpoint signal file output exists | Passed |
+| Required columns present | Passed |
+| Endpoint signal is preview-only | Passed |
+| Paper dry-run blocked | Passed |
+| Paper trading blocked | Passed |
+| Phase 15L boundary is pre-implementation-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+### Phase 15K Verdict
+
+> Phase 15K completed the pinned-endpoint operational signal consistency audit.
+
+Correct interpretation:
+
+> The canonical endpoint signal is consistent and preview-only. This permits the project to prepare post-endpoint current-signal generation, but it does not authorise paper dry-run or paper trading.
+
+---
+
+## Phase 15L: Fresh Data Extension / Current Signal Generation Pre-Implementation Check
+
+Phase 15L checked whether the project is ready to run a bounded fresh current-signal generation phase while preserving the canonical research baseline.
+
+This phase did not execute a fresh data pull, generate a current signal, pre-register a paper dry-run, integrate with a broker/API, deploy paper trading, run live trading, use real money, train new ML, optimise parameters, expand to new assets, promote a candidate, or change the final candidate.
+
+### Phase 15L Schema Fix
+
+The future current-signal schema now includes `benchmark_update_flag`.
+
+| Item | Result |
+|---|---:|
+| Required columns | 23 |
+| Present columns | 23 |
+| Missing columns | None |
+| Current signal schema ready | True |
+
+Correct interpretation:
+
+> The future current-signal file is now required to prove that benchmark data was updated. This prevents a fake “fresh” signal from being generated without a corresponding benchmark update.
+
+### Phase 15L Fresh Signal Pre-Implementation Decision
+
+| Item | Result |
+|---|---|
+| Decision | `fresh_current_signal_generation_allowed_next` |
+| Fresh current-signal generation allowed next | True |
+| Data pull executed | False |
+| Current signal generated | False |
+| Paper dry-run allowed | False |
+| Paper trading ready | False |
+| Broker/API integration allowed | False |
+
+Correct interpretation:
+
+> The next implementation may generate a post-endpoint out-of-sample current-signal file. It may not start paper dry-run, broker/API integration, paper trading, live trading, or real-money deployment.
+
+### Phase 15L Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 15K passed | Passed |
+| Config flags clean | Passed |
+| Baseline protection ready | Passed |
+| Fresh data policy ready | Passed |
+| Current signal schema ready | Passed |
+| Cadence policy ready | Passed |
+| Failure handling ready | Passed |
+| Switch log available | Passed |
+| Pinned endpoint signal available | Passed |
+| Phase 15M boundary is signal-generation-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Check role is correct | Passed |
+
+### Phase 15L Verdict
+
+> Phase 15L completed the fresh current-signal pre-implementation check.
+
+Correct interpretation:
+
+> Fresh current-signal generation is allowed next as a separate post-endpoint / out-of-sample extension. The pinned research endpoint and Phase 6B/6C canonical metrics must remain untouched.
+
 ---
 
 # Methodology Notes
@@ -9698,6 +9829,13 @@ turnover was still too close to the switch trigger logic, even though turnover s
 - Paper trading, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
 - The correct switch definition is now `target_offensive_weight`; future phases should not fall back to `position`, `cash_position`, turnover-only logic, the 0-switch daily stream, or the 94-row changed-switch diagnostic as final operational switch history.
 - `overlay_slippage_cost_pct` is still missing from the final candidate frame, although slippage bps are available and switch-level slippage fields are coherent under the current audit.
+- The 2026-05-01 endpoint remains the fixed canonical research/backtest endpoint and should not be treated as a flaw in the research baseline.
+- The 2026-05-01 endpoint signal is valid for historical validation and checkpoint consistency, but it is not a current executable paper-trading signal.
+- Fresh/current signal generation beyond 2026-05-01 has not yet occurred.
+- Phase 15L only approved the next bounded current-signal generation phase; it did not generate a current signal.
+- Future fresh-signal outputs must be labelled as post-endpoint / out-of-sample current-signal extensions.
+- Canonical historical reports, Phase 6B/6C metrics, and pinned README numbers must not be mutated by fresh-signal generation.
+- Paper dry-run, broker/API integration, paper deployment, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
 ---
 
 # Bugs Caught and Fixed
@@ -11522,6 +11660,40 @@ reports/phase15j_refined_switch_gate_report.csv
 reports/phase15j_refined_switch_conclusion.csv
 ```
 
+## Phase 15K Pinned-Endpoint Operational Signal Consistency Reports
+
+```text
+reports/phase15k_source_report_check.csv
+reports/phase15k_endpoint_signal_phase15j_result_check.csv
+reports/phase15k_pinned_endpoint_signal_file.csv
+reports/phase15k_endpoint_signal_required_column_check.csv
+reports/phase15k_endpoint_signal_phase15l_boundary_check.csv
+reports/phase15k_endpoint_signal_scope_boundary_check.csv
+reports/phase15k_endpoint_signal_summary.csv
+reports/phase15k_endpoint_signal_gate_report.csv
+reports/phase15k_endpoint_signal_conclusion.csv
+```
+
+## Phase 15L Fresh Signal Pre-Implementation Reports
+
+```text
+reports/phase15l_fresh_signal_precheck_source_report_check.csv
+reports/phase15l_fresh_signal_precheck_phase15k_result_check.csv
+reports/phase15l_fresh_signal_precheck_config_flag_check.csv
+reports/phase15l_fresh_signal_precheck_baseline_protection_readiness.csv
+reports/phase15l_fresh_signal_precheck_fresh_data_policy_readiness.csv
+reports/phase15l_fresh_signal_precheck_current_signal_policy_readiness.csv
+reports/phase15l_fresh_signal_precheck_current_signal_schema_readiness.csv
+reports/phase15l_fresh_signal_precheck_cadence_policy_readiness.csv
+reports/phase15l_fresh_signal_precheck_failure_handling_readiness.csv
+reports/phase15l_fresh_signal_precheck_decision_report.csv
+reports/phase15l_fresh_signal_precheck_phase15m_boundary_check.csv
+reports/phase15l_fresh_signal_precheck_scope_boundary_check.csv
+reports/phase15l_fresh_signal_precheck_summary.csv
+reports/phase15l_fresh_signal_precheck_gate_report.csv
+reports/phase15l_fresh_signal_precheck_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -11753,6 +11925,8 @@ configs/spy_sma10.yaml
 | Phase 15H switch log reconciliation / fresh signal eligibility audit | Completed — audit gates passed, but reconciliation failed and decision was blocked_true_switch_log_export_failed; fresh signal generation, paper dry-run, broker/API integration, deployment, live trading, real money, promotion, and final-candidate changes remained blocked |
 | Phase 15I final-candidate column semantics / switch definition diagnostic | Completed — diagnosed final-candidate columns and selected `target_offensive_weight` as the executable final target allocation definition; `position` and `cash_position` were rejected as noisy/non-reconciled because they generated 54 switches rather than the expected 36 |
 | Phase 15J refined 36-switch reconstruction implementation + audit | Completed — reconstructed and exported the true final operational 36-switch log to `reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv`; switch count reconciled to expected 36, decision dates populated, exposure changes meaningful, no dates after 2026-05-01, and fresh signal generation is allowed next; paper dry-run and paper trading remain blocked |
+| Phase 15K pinned-endpoint operational signal consistency audit | Completed — confirmed the pinned 2026-05-01 endpoint signal is consistent with the reconstructed 36-switch operational log; latest switch was 2026-04-13 from `defensive_or_cash` to `offensive_spy`, endpoint mode is `offensive_spy`, endpoint exposure is 1.0, signal is preview-only, and paper dry-run/paper trading remain blocked |
+| Phase 15L fresh data extension / current signal generation pre-implementation check | Completed — fresh current-signal generation is allowed next as a bounded post-endpoint/out-of-sample extension; schema now includes `benchmark_update_flag`, all pre-implementation gates passed, and no data pull, current signal generation, paper dry-run, broker/API integration, paper trading, or live deployment occurred |
 ---
 
 # What Should Happen Next
