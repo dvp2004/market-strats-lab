@@ -10489,6 +10489,504 @@ phase15f_fresh_data_extension_preregistration:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_preregistration_role: "Fresh data extension pre-registration and current signal update spec only"
+phase15g_true_final_switch_log_export:
+  enabled: false
+  execution_role: "True final 36-switch operational log export implementation only"
+  implementation_classification: "A/B - exports true operational switch layer while protecting against intermediate diagnostic switches"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 15F"
+  proposed_next_phase: "Phase 15H"
+
+  candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+  canonical_endpoint: "2026-05-01"
+  exported_switch_log_file: "reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
+
+  source_reports:
+    phase15f_conclusion: "reports/phase15f_fresh_data_extension_conclusion.csv"
+    phase15f_gate_report: "reports/phase15f_fresh_data_extension_gate_report.csv"
+    phase15e_attribution_decision: "reports/phase15e_switch_source_attribution_attribution_decision.csv"
+
+  switch_reconstruction_policy:
+    expected_switch_count: 36
+    switch_count_abs_tolerance: 2
+    use_final_candidate_reconstruction_path_only: true
+    reject_changed_switch_audit_as_final_source: true
+    reject_zero_switch_daily_stream_as_final_source: true
+    max_allowed_decision_date: "2026-05-01"
+    require_no_dates_after_canonical_endpoint: true
+
+  required_switch_event_columns:
+    - "switch_event_id"
+    - "decision_date"
+    - "previous_mode"
+    - "current_mode"
+    - "previous_exposure"
+    - "current_exposure"
+    - "switch_triggered"
+    - "transition_type"
+    - "switch_reason"
+    - "raw_signal"
+    - "confirmed_signal"
+    - "deep_drawdown_guard_state"
+    - "loose_relief_state"
+    - "turnover"
+    - "applied_overlay_slippage_bps"
+    - "overlay_slippage_cost_pct"
+    - "source_candidate_system_id"
+    - "signal_validity_flag"
+
+  candidate_column_policy:
+    date_columns:
+      - "date"
+      - "decision_date"
+
+    mode_columns:
+      - "final_mode"
+      - "overlay_mode"
+      - "candidate_mode"
+      - "strategy_mode"
+      - "mode"
+      - "regime"
+      - "position"
+      - "state"
+      - "signal_state"
+
+    exposure_columns:
+      - "final_exposure"
+      - "target_exposure"
+      - "candidate_exposure"
+      - "overlay_exposure"
+      - "exposure"
+      - "spy_weight"
+      - "risk_on_weight"
+      - "allocation"
+
+    raw_signal_columns:
+      - "raw_signal"
+      - "raw_mode"
+      - "raw_regime"
+      - "raw_signal_state"
+      - "base_signal"
+      - "unguarded_signal"
+
+    confirmed_signal_columns:
+      - "confirmed_signal"
+      - "confirmed_mode"
+      - "guarded_signal"
+      - "final_signal"
+      - "final_mode"
+      - "overlay_mode"
+
+    deep_drawdown_guard_columns:
+      - "deep_drawdown_guard_state"
+      - "guard_state"
+      - "drawdown_guard_state"
+
+    loose_relief_columns:
+      - "loose_relief_state"
+      - "relief_state"
+      - "offensive_relief_state"
+
+    turnover_columns:
+      - "turnover"
+      - "strategy_turnover"
+      - "overlay_turnover"
+
+    slippage_bps_columns:
+      - "applied_overlay_slippage_bps"
+      - "overlay_slippage_bps"
+      - "applied_slippage_bps"
+      - "slippage_bps"
+
+    slippage_cost_columns:
+      - "overlay_slippage_cost_pct"
+      - "slippage_cost_pct"
+      - "transaction_cost_pct"
+      - "cost_pct"
+
+  allow_switch_log_export: true
+  allow_fresh_data_extension: false
+  allow_current_signal_generation: false
+  allow_paper_dry_run_preregistration: false
+  allow_broker_api_integration: false
+  allow_paper_trading_deployment: false
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_paper_trading_ready_claim: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_optimisation: false
+  allow_multi_asset_expansion: false
+  allow_feature_importance: false
+
+  phase15h_boundary:
+    allowed_next_step: "Switch log reconciliation and fresh signal eligibility audit only"
+    forbidden_next_step: "fresh data extension execution, current signal generation, paper dry-run, broker/API integration, paper-trading deployment, live trading, real-money deployment, paper-trading-ready claim, candidate promotion, final-candidate change, new ML, optimisation, or multi-asset expansion"
+
+  gates:
+    require_phase15f_passed: true
+    require_final_candidate_reconstruction_attempted: true
+    require_switch_log_file_written: true
+    require_required_columns_present: true
+    require_switch_summary_output: true
+    require_no_dates_after_canonical_endpoint: true
+    require_reject_intermediate_diagnostic_sources: true
+    require_phase15h_boundary_audit_only: true
+    require_no_fresh_data_extension: true
+    require_no_current_signal_generation: true
+    require_no_paper_dry_run: true
+    require_no_broker_api: true
+    require_no_live_trading: true
+    require_no_real_money: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_execution_role: "True final 36-switch operational log export implementation only"
+phase15h_switch_log_reconciliation_audit:
+  enabled: false
+  audit_role: "Switch log reconciliation and fresh signal eligibility audit only"
+  implementation_classification: "B - blocks fresh signal and dry-run progression unless exported switch log reconciles to expected 36 switches"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 15G"
+  proposed_next_phase: "Phase 15I"
+
+  expected_runtime_flags:
+    phase15e_operational_switch_source_attribution: false
+    phase15f_fresh_data_extension_preregistration: false
+    phase15g_true_final_switch_log_export: true
+    phase15h_switch_log_reconciliation_audit: true
+    relative_momentum_allocator: true
+
+  phase15g_reports:
+    conclusion: "reports/phase15g_true_switch_log_export_conclusion.csv"
+    gate_report: "reports/phase15g_true_switch_log_export_gate_report.csv"
+    switch_log: "reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
+    switch_summary: "reports/phase15g_true_switch_log_export_switch_summary.csv"
+    column_selection_report: "reports/phase15g_true_switch_log_export_column_selection_report.csv"
+
+  expected_switch_count: 36
+  switch_count_abs_tolerance: 2
+  canonical_endpoint: "2026-05-01"
+
+  required_switch_event_columns:
+    - "switch_event_id"
+    - "decision_date"
+    - "previous_mode"
+    - "current_mode"
+    - "previous_exposure"
+    - "current_exposure"
+    - "switch_triggered"
+    - "transition_type"
+    - "switch_reason"
+    - "raw_signal"
+    - "confirmed_signal"
+    - "deep_drawdown_guard_state"
+    - "loose_relief_state"
+    - "turnover"
+    - "applied_overlay_slippage_bps"
+    - "overlay_slippage_cost_pct"
+    - "source_candidate_system_id"
+    - "signal_validity_flag"
+
+  decision_policy:
+    decision_if_reconciled: "canonical_switch_log_reconciled_fresh_signal_phase_allowed_next"
+    decision_if_failed: "blocked_true_switch_log_export_failed"
+
+  phase15i_boundary:
+    allowed_next_step_if_reconciled: "Fresh data extension implementation and current signal generation only"
+    allowed_next_step_if_failed: "True switch log export repair only"
+    forbidden_next_step: "paper dry-run, broker/API integration, paper-trading deployment, live trading, real-money deployment, paper-trading-ready claim, candidate promotion, final-candidate change, new ML, optimisation, or multi-asset expansion"
+
+  allow_fresh_signal_phase_if_reconciled: true
+  allow_paper_dry_run_preregistration: false
+  allow_broker_api_integration: false
+  allow_paper_trading_deployment: false
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_paper_trading_ready_claim: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_optimisation: false
+  allow_multi_asset_expansion: false
+  allow_feature_importance: false
+
+  gates:
+    require_phase15g_passed: true
+    require_config_flags_clean: true
+    require_switch_file_exists: true
+    require_required_columns_present: true
+    require_switch_summary_exists: true
+    require_reconciliation_decision_output: true
+    require_no_dates_after_canonical_endpoint: true
+    require_no_paper_ready_claim_unless_reconciled: true
+    require_phase15i_boundary_conditional_only: true
+    require_no_paper_dry_run: true
+    require_no_broker_api: true
+    require_no_live_trading: true
+    require_no_real_money: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_audit_role: "Switch log reconciliation and fresh signal eligibility audit only"
+phase15i_final_candidate_column_semantics_diagnostic:
+  enabled: true
+  diagnostic_role: "Final candidate column semantics and switch definition diagnostic only"
+  implementation_classification: "B - identifies executable target exposure columns versus noisy diagnostic state"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 15H"
+  proposed_next_phase: "Phase 15J"
+
+  candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+  canonical_endpoint: "2026-05-01"
+
+  source_reports:
+    phase15h_conclusion: "reports/phase15h_switch_log_reconciliation_conclusion.csv"
+    phase15h_gate_report: "reports/phase15h_switch_log_reconciliation_gate_report.csv"
+    phase15h_decision: "reports/phase15h_switch_log_reconciliation_reconciliation_decision_report.csv"
+
+  expected_switch_count: 36
+  switch_count_abs_tolerance: 2
+
+  inspected_columns:
+    - "position"
+    - "cash_position"
+    - "offensive_weight"
+    - "defensive_weight"
+    - "target_offensive_weight"
+    - "target_defensive_weight"
+    - "turnover"
+    - "applied_overlay_slippage_bps"
+    - "overlay_slippage_cost_pct"
+
+  executable_exposure_candidate_columns:
+    direct:
+      - "target_offensive_weight"
+      - "target_spy_weight"
+      - "target_exposure"
+      - "candidate_exposure"
+      - "overlay_exposure"
+      - "final_exposure"
+      - "offensive_weight"
+      - "spy_weight"
+      - "risk_on_weight"
+      - "exposure"
+
+    inverse:
+      - "target_defensive_weight"
+      - "defensive_weight"
+      - "cash_position"
+
+    fallback_mode_like:
+      - "position"
+      - "mode"
+      - "regime"
+      - "state"
+      - "signal_state"
+
+  selection_priority:
+    - "target_offensive_weight"
+    - "target_spy_weight"
+    - "target_exposure"
+    - "candidate_exposure"
+    - "overlay_exposure"
+    - "final_exposure"
+    - "offensive_weight"
+    - "spy_weight"
+    - "risk_on_weight"
+    - "exposure"
+    - "target_defensive_weight"
+    - "defensive_weight"
+    - "cash_position"
+    - "position"
+
+  allow_column_diagnostic: true
+  allow_switch_log_export: false
+  allow_fresh_data_extension: false
+  allow_current_signal_generation: false
+  allow_paper_dry_run_preregistration: false
+  allow_broker_api_integration: false
+  allow_paper_trading_deployment: false
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_paper_trading_ready_claim: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_optimisation: false
+  allow_multi_asset_expansion: false
+  allow_feature_importance: false
+
+  phase15j_boundary:
+    allowed_next_step: "Refined switch reconstruction implementation and audit only"
+    forbidden_next_step: "fresh data extension execution, current signal generation, paper dry-run, broker/API integration, paper-trading deployment, live trading, real-money deployment, paper-trading-ready claim, candidate promotion, final-candidate change, new ML, optimisation, or multi-asset expansion"
+
+  gates:
+    require_phase15h_passed: true
+    require_final_candidate_frame_loaded: true
+    require_inspected_column_profile: true
+    require_candidate_switch_definition_report: true
+    require_selected_switch_definition_report: true
+    require_phase15j_boundary_audit_only: true
+    require_no_switch_log_export: true
+    require_no_fresh_data_extension: true
+    require_no_current_signal_generation: true
+    require_no_paper_dry_run: true
+    require_no_broker_api: true
+    require_no_live_trading: true
+    require_no_real_money: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_diagnostic_role: "Final candidate column semantics and switch definition diagnostic only"
+
+
+phase15j_refined_switch_reconstruction_audit:
+  enabled: true
+  execution_role: "Refined 36-switch reconstruction implementation and audit only"
+  implementation_classification: "A/B - reconstructs switches using final target allocation changes and blocks progression if count still fails"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 15I"
+  proposed_next_phase: "Phase 15K"
+
+  candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+  canonical_endpoint: "2026-05-01"
+  exported_switch_log_file: "reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
+
+  source_reports:
+    phase15i_conclusion: "reports/phase15i_column_semantics_conclusion.csv"
+    phase15i_gate_report: "reports/phase15i_column_semantics_gate_report.csv"
+    selected_switch_definition: "reports/phase15i_column_semantics_selected_switch_definition.csv"
+
+  expected_switch_count: 36
+  switch_count_abs_tolerance: 2
+
+  required_switch_event_columns:
+    - "switch_event_id"
+    - "decision_date"
+    - "previous_mode"
+    - "current_mode"
+    - "previous_exposure"
+    - "current_exposure"
+    - "switch_triggered"
+    - "transition_type"
+    - "switch_reason"
+    - "raw_signal"
+    - "confirmed_signal"
+    - "deep_drawdown_guard_state"
+    - "loose_relief_state"
+    - "turnover"
+    - "applied_overlay_slippage_bps"
+    - "overlay_slippage_cost_pct"
+    - "source_candidate_system_id"
+    - "signal_validity_flag"
+
+  auxiliary_column_policy:
+    date_columns:
+      - "date"
+      - "decision_date"
+
+    raw_signal_columns:
+      - "raw_signal"
+      - "raw_mode"
+      - "raw_regime"
+      - "raw_signal_state"
+      - "base_signal"
+      - "unguarded_signal"
+
+    confirmed_signal_columns:
+      - "confirmed_signal"
+      - "confirmed_mode"
+      - "guarded_signal"
+      - "final_signal"
+      - "final_mode"
+      - "overlay_mode"
+
+    deep_drawdown_guard_columns:
+      - "deep_drawdown_guard_state"
+      - "guard_state"
+      - "drawdown_guard_state"
+
+    loose_relief_columns:
+      - "loose_relief_state"
+      - "relief_state"
+      - "offensive_relief_state"
+
+    turnover_columns:
+      - "turnover"
+      - "strategy_turnover"
+      - "overlay_turnover"
+
+    slippage_bps_columns:
+      - "applied_overlay_slippage_bps"
+      - "overlay_slippage_bps"
+      - "applied_slippage_bps"
+      - "slippage_bps"
+
+    slippage_cost_columns:
+      - "overlay_slippage_cost_pct"
+      - "slippage_cost_pct"
+      - "transaction_cost_pct"
+      - "cost_pct"
+
+  refined_switch_policy:
+    use_selected_final_target_exposure_only: true
+    remove_turnover_as_switch_trigger: true
+    turnover_is_attribute_not_trigger: true
+    require_populated_decision_date: true
+    require_meaningful_previous_current_exposure: true
+    require_transition_type: true
+    reject_zero_switch_stream: true
+    reject_94_row_changed_switch_audit: true
+    reject_92_row_noisy_position_turnover_reconstruction: true
+    max_allowed_decision_date: "2026-05-01"
+
+  decision_policy:
+    decision_if_reconciled: "refined_canonical_switch_log_reconciled_fresh_signal_phase_allowed_next"
+    decision_if_failed: "blocked_refined_switch_reconstruction_failed"
+
+  phase15k_boundary:
+    allowed_next_step_if_reconciled: "Pinned-endpoint signal consistency audit or fresh current-signal preparation only"
+    allowed_next_step_if_failed: "Final switch definition repair only"
+    forbidden_next_step: "paper dry-run, broker/API integration, paper-trading deployment, live trading, real-money deployment, paper-trading-ready claim, candidate promotion, final-candidate change, new ML, optimisation, or multi-asset expansion"
+
+  allow_switch_log_export: true
+  allow_fresh_data_extension: false
+  allow_current_signal_generation: false
+  allow_paper_dry_run_preregistration: false
+  allow_broker_api_integration: false
+  allow_paper_trading_deployment: false
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_paper_trading_ready_claim: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_optimisation: false
+  allow_multi_asset_expansion: false
+  allow_feature_importance: false
+
+  gates:
+    require_phase15i_passed: true
+    require_selected_switch_definition_loaded: true
+    require_refined_switch_log_written: true
+    require_required_columns_present: true
+    require_refined_switch_summary_exists: true
+    require_decision_output: true
+    require_no_dates_after_canonical_endpoint: true
+    require_no_turnover_trigger: true
+    require_phase15k_boundary_conditional_only: true
+    require_no_fresh_data_extension: true
+    require_no_current_signal_generation: true
+    require_no_paper_dry_run: true
+    require_no_broker_api: true
+    require_no_live_trading: true
+    require_no_real_money: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_execution_role: "Refined 36-switch reconstruction implementation and audit only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

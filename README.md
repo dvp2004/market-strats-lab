@@ -169,6 +169,24 @@ Phase 15F pre-registered the safe fresh-data extension contract. Fresh data must
 
 The next implementation must not move to paper dry-run or broker integration. It should patch/export the true final operational 36-switch log and only then generate a fresh current signal under the Phase 15F rules. Paper trading remains blocked.
 
+Phase 15G/15H completed the first true-switch-log export attempt and reconciliation audit.
+
+The implementation successfully generated a switch-log-shaped file with required columns, and the audit process passed. However, the actual switch reconstruction objective failed. The exported log reconstructed 92 switches instead of the expected final 36 switches, so switch_count_reconciled = False.
+
+The failure exposed a column-semantics problem. Phase 15G selected position as the mode column and failed to select a meaningful exposure column. It also treated turnover too strongly in the switch-detection logic. This produced noisy switch events rather than the final executable operational switch history.
+
+Phase 15H correctly blocked progression with blocked_true_switch_log_export_failed. Fresh signal generation was not allowed next, and paper dry-run, paper trading, broker/API integration, live trading, real money, candidate promotion, and final-candidate changes remained blocked.
+
+The next repair must identify the actual final executable allocation column and reconstruct switches from final target allocation changes only, not from noisy position, raw turnover, the 0-switch daily stream, or the 94-row changed-switch diagnostic.
+
+Phase 15I/15J completed the refined final-candidate switch reconstruction checkpoint.
+
+Phase 15I diagnosed the final candidate frame and identified `target_offensive_weight` as the correct executable final target allocation column. This fixed the earlier Phase 15G/15H issue where `position` and turnover semantics generated a noisy 92-row reconstruction. `position` and `cash_position` are now rejected for final switch reconstruction because they produce 54 switches and do not reconcile to the expected final 36-switch operational history.
+
+Phase 15J reconstructed and exported the true final operational 36-switch log to `reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv`. The reconstruction now passes the key operational checks: expected switch count 36, reconstructed switch count 36, populated decision dates, first switch 2007-08-17, last switch 2026-04-13, no dates after the 2026-05-01 canonical endpoint, meaningful previous/current exposures, populated transition types, coherent turnover/slippage fields, and passing signal validity flags.
+
+The decision is `refined_canonical_switch_log_reconciled_fresh_signal_phase_allowed_next`. This means the canonical switch-engine blocker is cleared and the next phase may address fresh/current signal generation. It does not mean paper dry-run or paper trading is ready. Paper dry-run, broker/API integration, live trading, real money, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -8472,6 +8490,7 @@ Correct interpretation:
 
 > Paper-workflow pre-registration is now allowed as the next step, but paper trading itself remains blocked. The next phase must define the workflow, signal schema, monitoring rules, execution checklist, and stop conditions before any paper-trading readiness claim.
 
+# Phase 15
 ## Phase 15A: Paper-Trading Workflow Pre-Registration
 
 Phase 15A pre-registered the paper-trading workflow requirements after the corrected Phase 14H visual audit allowed paper-workflow pre-registration as the next bounded step.
@@ -9024,6 +9043,362 @@ Correct interpretation:
 
 > Current signal generation is allowed next as a bounded implementation, but paper dry-run, broker/API integration, paper deployment, live trading, real money, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
 
+## Phase 15G: True Final 36-Switch Log Export Implementation
+
+Phase 15G attempted to export the true final operational switch log for the Phase 6B/6C loose-relief execution-realistic overlay.
+
+This phase patched the final-candidate reconstruction path to generate:
+
+```text
+reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv
+```
+
+However, the export did not reconstruct the true final 36-switch operational event history. It produced a switch-log-shaped file, but the reconstructed event count was 92 rather than the expected 36.
+
+This phase did not generate fresh data, generate a current signal, pre-register a paper dry-run, integrate with a broker/API, deploy paper trading, run live trading, use real money, train new ML, optimise parameters, expand to new assets, promote a candidate, or change the final candidate.
+
+### Phase 15G Column Selection
+
+| Column role                | Selected column                |
+| -------------------------- | ------------------------------ |
+| Date column                | `date`                         |
+| Mode column                | `position`                     |
+| Exposure column            | Missing                        |
+| Turnover column            | `turnover`                     |
+| Slippage bps column        | `applied_overlay_slippage_bps` |
+| Slippage cost column       | Missing                        |
+| Raw signal column          | Missing                        |
+| Confirmed signal column    | Missing                        |
+| Deep drawdown guard column | Missing                        |
+| Loose relief column        | Missing                        |
+
+Interpretation:
+
+> Phase 15G selected `position` and `turnover`, but did not identify a proper executable exposure column. This produced noisy switch reconstruction. Turnover was treated too strongly in the switch logic, even though turnover should be an execution attribute of a switch, not the definition of a switch.
+
+### Phase 15G Exported Switch Log
+
+The exported file had the required switch-log schema, but it was not the true final switch history.
+
+| Item                              | Result |
+| --------------------------------- | -----: |
+| Expected switch count             |     36 |
+| Reconstructed switch count        |     92 |
+| Switch-count tolerance            |      2 |
+| Switch count reconciled           |  False |
+| Source file written               |   True |
+| Required columns present          |   True |
+| No dates after canonical endpoint |   True |
+| Paper dry-run allowed             |  False |
+| Paper trading ready               |  False |
+
+Correct interpretation:
+
+> The switch export was mechanically generated, but it failed the operational objective. A 92-row reconstruction is not the final executable 36-switch history.
+
+### Phase 15G Failure Pattern
+
+The reconstructed switch rows were not operationally reliable because the export selected `position` as the mode column and did not select a meaningful exposure column. The displayed rows had `previous_exposure = 0.0` and `current_exposure = 0.0`, while still marking switches as triggered.
+
+This is not an executable paper-trading switch log.
+
+### Phase 15G Source Rejection
+
+| Source                                                                    | Accepted as final switch log | Reason                                                                                                            |
+| ------------------------------------------------------------------------- | ---------------------------: | ----------------------------------------------------------------------------------------------------------------- |
+| `reports/regime_switch_overlay_offensive_relief_changed_switch_audit.csv` |                        False | 94-row changed-switch audit is an intermediate diagnostic and does not reconcile to expected final 36 switches    |
+| `reports/phase6b_loose_relief_execution_realistic_overlay_daily.csv`      |                        False | Financial daily stream is not sufficient unless final operational mode/exposure/turnover switches reconcile to 36 |
+
+Correct interpretation:
+
+> The 94-row changed-switch audit remained rejected. The 0-switch daily stream remained rejected. Phase 15G also showed that a 92-row noisy `position`/`turnover` reconstruction must be rejected.
+
+### Phase 15G Gate Result
+
+| Gate                                     | Result |
+| ---------------------------------------- | ------ |
+| Phase 15F passed                         | Passed |
+| Final candidate reconstruction attempted | Passed |
+| Switch log file written                  | Passed |
+| Required columns present                 | Passed |
+| Switch summary output exists             | Passed |
+| No dates after canonical endpoint        | Passed |
+| Intermediate diagnostic sources rejected | Passed |
+| Phase 15H boundary is audit-only         | Passed |
+| Scope blocks forbidden actions           | Passed |
+| Execution role is correct                | Passed |
+
+### Phase 15G Verdict
+
+> Phase 15G completed the switch-log export implementation mechanically, but did not reconstruct the true final 36-switch operational history.
+
+Correct interpretation:
+
+> The export attempt was useful because it exposed the column-semantics problem, but the switch reconstruction objective remained failed.
+
+---
+
+## Phase 15H: Switch Log Reconciliation / Fresh Signal Eligibility Audit
+
+Phase 15H audited the Phase 15G exported switch log and decided whether the project could proceed to fresh signal generation.
+
+The audit process passed, but the decision correctly blocked progression.
+
+### Phase 15H Reconciliation Decision
+
+| Item                                   | Result                                  |
+| -------------------------------------- | --------------------------------------- |
+| Decision                               | `blocked_true_switch_log_export_failed` |
+| Switch log reconciled                  | False                                   |
+| Fresh signal generation allowed next   | False                                   |
+| Paper dry-run pre-registration allowed | False                                   |
+| Paper trading ready                    | False                                   |
+| Broker/API integration allowed         | False                                   |
+| Paper-trading deployment allowed       | False                                   |
+| Live trading allowed                   | False                                   |
+| Real money allowed                     | False                                   |
+| Candidate promotion                    | False                                   |
+| Final candidate changed                | False                                   |
+
+Interpretation:
+
+> Phase 15H correctly blocked fresh signal generation because the switch log did not reconcile to the expected final 36-switch history.
+
+### Phase 15H Audit Findings
+
+| Audit check                                 | Result |
+| ------------------------------------------- | ------ |
+| Switch file exists                          | Passed |
+| Required columns present                    | Passed |
+| Switch summary exists                       | Passed |
+| Reconciliation decision output exists       | Passed |
+| Paper-ready claim blocked unless reconciled | Passed |
+| Phase 15I boundary conditional-only         | Passed |
+| Scope blocks forbidden actions              | Passed |
+| Audit role correct                          | Passed |
+
+Correct interpretation:
+
+> The audit passed because it correctly identified failure. It did not approve fresh signal generation, paper dry-run, paper trading, broker integration, or live deployment.
+
+### Phase 15H Operational Meaning
+
+Phase 15H confirmed that the true operational switch layer was still unresolved after Phase 15G.
+
+The key failure was not missing files or missing schema. The key failure was semantic:
+
+```text
+expected_switch_count = 36
+reconstructed_switch_count = 92
+switch_count_reconciled = False
+```
+
+The selected switch definition was wrong because it relied on noisy `position`/`turnover` semantics instead of the final executable target allocation decision.
+
+### Phase 15H Verdict
+
+> Phase 15H completed the switch-log reconciliation audit and blocked progression.
+
+Correct interpretation:
+
+> The project must not proceed to fresh current-signal generation until the final executable allocation column is identified and the switch log reconciles to 36 switches.
+
+## Phase 15I: Final Candidate Column Semantics / Switch Definition Diagnostic
+
+Phase 15I diagnosed the final-candidate frame to identify which columns represent the executable allocation decision for the Phase 6B/6C loose-relief execution-realistic overlay.
+
+This phase was necessary because Phase 15G/15H produced a 92-row switch-shaped file by selecting `position` and using noisy turnover/position semantics. That output was not the true final 36-switch operational event history.
+
+Phase 15I did not export a switch log, generate fresh data, generate a current signal, pre-register a paper dry-run, integrate with a broker/API, deploy paper trading, run live trading, use real money, train new ML, optimise parameters, expand to new assets, promote a candidate, or change the final candidate.
+
+### Phase 15I Column Profile
+
+| Column | Present | Semantic interpretation | Unique values | Min | Max |
+|---|---:|---|---:|---:|---:|
+| `position` | True | Mode/position-state candidate but potentially noisy | 9 | 0.0 | 1.0 |
+| `cash_position` | True | Allocation-weight candidate | 9 | 0.0 | 1.0 |
+| `offensive_weight` | True | Allocation-weight candidate | 2 | 0.0 | 1.0 |
+| `defensive_weight` | True | Allocation-weight candidate | 2 | 0.0 | 1.0 |
+| `target_offensive_weight` | True | Likely final target allocation candidate | 2 | 0.0 | 1.0 |
+| `target_defensive_weight` | True | Likely final target allocation candidate | 2 | 0.0 | 1.0 |
+| `turnover` | True | Execution attribute, not switch definition | 9 | 0.0 | 2.0 |
+| `applied_overlay_slippage_bps` | True | Execution-cost attribute, not switch definition | 4 | 5.0 | 50.0 |
+| `overlay_slippage_cost_pct` | False | Missing | 0 |  |  |
+
+Interpretation:
+
+> `turnover`, slippage fields, and noisy `position` states are not reliable switch definitions. The final operational switch definition must be based on final target allocation/exposure changes.
+
+### Phase 15I Candidate Switch Definition Report
+
+| Candidate column | Transform | Candidate switch count | Count reconciled | Valid exposure range |
+|---|---|---:|---:|---:|
+| `target_offensive_weight` | direct | 36 | True | True |
+| `offensive_weight` | direct | 36 | True | True |
+| `target_defensive_weight` | inverse | 36 | True | True |
+| `defensive_weight` | inverse | 36 | True | True |
+| `cash_position` | inverse | 54 | False | True |
+| `position` | fallback mode-like | 54 | False | True |
+
+Correct interpretation:
+
+> `target_offensive_weight` is the preferred final executable switch-definition column. `position` and `cash_position` are rejected because they generate 54 switches and do not reconcile to the expected final 36-switch operational history.
+
+### Phase 15I Selected Switch Definition
+
+| Item | Result |
+|---|---|
+| Selected | True |
+| Selected column | `target_offensive_weight` |
+| Transform | direct |
+| Candidate switch count | 36 |
+| Count reconciled | True |
+| Selection reason | `eligible_reconciled_final_target_exposure_definition` |
+
+### Phase 15I Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 15H passed | Passed |
+| Final candidate frame loaded | Passed |
+| Inspected column profile exists | Passed |
+| Candidate switch definition report exists | Passed |
+| Selected switch definition report exists | Passed |
+| Phase 15J boundary is audit-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Diagnostic role is correct | Passed |
+
+### Phase 15I Verdict
+
+> Phase 15I completed the final-candidate column semantics diagnostic.
+
+Correct interpretation:
+
+> The correct final executable allocation definition is `target_offensive_weight`. The project should no longer use noisy `position`, `cash_position`, raw turnover, or the 94-row changed-switch diagnostic as the final switch source.
+
+---
+
+## Phase 15J: Refined 36-Switch Reconstruction Implementation + Audit
+
+Phase 15J reconstructed the final operational switch log using the Phase 15I-selected switch definition: direct changes in `target_offensive_weight`.
+
+This phase exported the corrected switch event log:
+
+```text
+reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv
+```
+
+Phase 15J did not generate fresh data, generate a current signal, pre-register a paper dry-run, integrate with a broker/API, deploy paper trading, run live trading, use real money, train new ML, optimise parameters, expand to new assets, promote a candidate, or change the final candidate.
+
+### Phase 15J Refined Switch Reconstruction Method
+
+| Item | Result |
+|---|---|
+| Date column | `date` |
+| Final target exposure column | `target_offensive_weight` |
+| Final target exposure transform | direct |
+| Turnover column | `turnover` |
+| Slippage bps column | `applied_overlay_slippage_bps` |
+| Switch trigger | Final target allocation change only |
+| Turnover used as switch trigger | False |
+
+Interpretation:
+
+> Turnover is now correctly treated as an execution attribute of a switch, not the switch definition.
+
+### Phase 15J Reconstructed Switch Log
+
+The exported switch log contains 36 events. The first and last events are:
+
+| Item | Result |
+|---|---|
+| First switch date | 2007-08-17 |
+| Last switch date | 2026-04-13 |
+| Dates after canonical endpoint | 0 |
+| Canonical endpoint | 2026-05-01 |
+
+The switch log alternates correctly between:
+
+| Transition | Meaning |
+|---|---|
+| `offensive_spy` → `defensive_or_cash` | Risk decrease |
+| `defensive_or_cash` → `offensive_spy` | Risk increase |
+
+The last two switches before the pinned endpoint were:
+
+| Switch event | Date | Previous mode | Current mode | Transition |
+|---:|---|---|---|---|
+| 35 | 2026-03-25 | `offensive_spy` | `defensive_or_cash` | Risk decrease |
+| 36 | 2026-04-13 | `defensive_or_cash` | `offensive_spy` | Risk increase |
+
+Correct interpretation:
+
+> As of the pinned endpoint, the reconstructed operational state is back in `offensive_spy` after the 2026-04-13 risk-increase switch.
+
+### Phase 15J Refined Switch Summary
+
+| Item | Result |
+|---|---:|
+| Expected switch count | 36 |
+| Reconstructed switch count | 36 |
+| Switch-count tolerance | 2 |
+| Switch count reconciled | True |
+| Decision dates populated | True |
+| Dates after canonical endpoint | 0 |
+| Previous/current exposure meaningful | True |
+| Transition types populated | True |
+| Turnover fields coherent | True |
+| Slippage fields coherent | True |
+| Signal validity passed | True |
+| Refined switch log reconciled and usable | True |
+| Fresh signal phase allowed next | True |
+| Paper dry-run allowed | False |
+| Paper trading ready | False |
+
+### Phase 15J Reconciliation Decision
+
+| Item | Result |
+|---|---|
+| Decision | `refined_canonical_switch_log_reconciled_fresh_signal_phase_allowed_next` |
+| Refined switch log reconciled | True |
+| Fresh signal generation allowed next | True |
+| Paper dry-run pre-registration allowed | False |
+| Paper trading ready | False |
+| Broker/API integration allowed | False |
+| Paper-trading deployment allowed | False |
+| Live trading allowed | False |
+| Real money allowed | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+Correct interpretation:
+
+> The canonical endpoint switch-engine blocker is cleared. The next valid phase may address fresh/current signal generation, but paper dry-run and paper trading remain blocked.
+
+### Phase 15J Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 15I passed | Passed |
+| Selected switch definition loaded | Passed |
+| Refined switch log written | Passed |
+| Required columns present | Passed |
+| Refined switch summary exists | Passed |
+| Decision output exists | Passed |
+| No dates after canonical endpoint | Passed |
+| No turnover trigger used | Passed |
+| Phase 15K boundary is conditional-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Execution role is correct | Passed |
+
+### Phase 15J Verdict
+
+> Phase 15J completed the refined 36-switch reconstruction audit.
+
+Correct interpretation:
+
+> The true final operational 36-switch log is now reconstructed and reconciled through `target_offensive_weight`. This unlocks the next fresh-signal phase, but it does not authorise paper dry-run, paper trading, broker/API integration, live trading, real money, candidate promotion, or final-candidate changes.
+
 ---
 
 # Methodology Notes
@@ -9305,6 +9680,24 @@ Remaining concerns include:
 - Future current-signal generation must use out-of-sample data beyond the pinned 2026-05-01 endpoint and must preserve the canonical research baseline.
 - If fresh data is unavailable, stale, schema-invalid, or missing a benchmark update, the system must write a blocked signal file rather than pretending a valid current signal exists.
 - Paper dry-run, broker/API integration, paper deployment, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
+- Phase 15G/15H did not solve the true final 36-switch operational event history.
+- Phase 15G exported a switch-log-shaped file, but it reconstructed 92 switches instead of the expected 36.
+- The exported Phase 15G switch file had required columns, but the switch definition was wrong.
+- The Phase 15G export selected position as the mode column and did not select a meaningful exposure column.
+turnover was still too close to the switch trigger logic, even though turnover should be an execution attribute, not a switch definition.
+- The displayed switch rows were not operationally valid because previous_exposure and current_exposure were both 0.0 while switches were still triggered.
+- The 94-row regime_switch_overlay_offensive_relief_changed_switch_audit.csv remains rejected as an intermediate diagnostic, not the final executable switch log.
+- The 0-switch daily financial stream remains rejected as a final operational switch source.
+- Fresh signal generation is not allowed next from Phase 15H.
+- Paper dry-run pre-registration remains blocked.
+- Paper trading, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
+- Phase 15I/15J solved the canonical endpoint switch-log reconstruction problem, but did not make the system paper-trading ready.
+- The reconstructed switch log is valid only up to the pinned research endpoint of 2026-05-01.
+- Fresh/current signal generation beyond 2026-05-01 has not yet occurred.
+- Paper dry-run pre-registration is still not allowed.
+- Paper trading, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
+- The correct switch definition is now `target_offensive_weight`; future phases should not fall back to `position`, `cash_position`, turnover-only logic, the 0-switch daily stream, or the 94-row changed-switch diagnostic as final operational switch history.
+- `overlay_slippage_cost_pct` is still missing from the final candidate frame, although slippage bps are available and switch-level slippage fields are coherent under the current audit.
 ---
 
 # Bugs Caught and Fixed
@@ -11073,6 +11466,62 @@ reports/phase15f_fresh_data_extension_gate_report.csv
 reports/phase15f_fresh_data_extension_conclusion.csv
 ```
 
+## Phase 15G True Final Switch Log Export Reports
+reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv
+reports/phase15g_true_switch_log_export_phase15f_result_check.csv
+reports/phase15g_true_switch_log_export_column_selection_report.csv
+reports/phase15g_true_switch_log_export_source_rejection_report.csv
+reports/phase15g_true_switch_log_export_switch_summary.csv
+reports/phase15g_true_switch_log_export_required_column_check.csv
+reports/phase15g_true_switch_log_export_phase15h_boundary_check.csv
+reports/phase15g_true_switch_log_export_scope_boundary_check.csv
+reports/phase15g_true_switch_log_export_summary.csv
+reports/phase15g_true_switch_log_export_gate_report.csv
+reports/phase15g_true_switch_log_export_conclusion.csv
+
+## Phase 15H Switch Log Reconciliation Audit Reports
+reports/phase15h_switch_log_reconciliation_config_flag_check.csv
+reports/phase15h_switch_log_reconciliation_report_inventory_check.csv
+reports/phase15h_switch_log_reconciliation_phase15g_result_check.csv
+reports/phase15h_switch_log_reconciliation_required_column_check.csv
+reports/phase15h_switch_log_reconciliation_reconciliation_decision_report.csv
+reports/phase15h_switch_log_reconciliation_phase15i_boundary_check.csv
+reports/phase15h_switch_log_reconciliation_scope_boundary_check.csv
+reports/phase15h_switch_log_reconciliation_summary.csv
+reports/phase15h_switch_log_reconciliation_gate_report.csv
+reports/phase15h_switch_log_reconciliation_conclusion.csv
+
+## Phase 15I Final Candidate Column Semantics Reports
+
+```text
+reports/phase15i_column_semantics_phase15h_result_check.csv
+reports/phase15i_column_semantics_column_profile.csv
+reports/phase15i_column_semantics_candidate_switch_definition_report.csv
+reports/phase15i_column_semantics_selected_switch_definition.csv
+reports/phase15i_column_semantics_phase15j_boundary_check.csv
+reports/phase15i_column_semantics_scope_boundary_check.csv
+reports/phase15i_column_semantics_summary.csv
+reports/phase15i_column_semantics_gate_report.csv
+reports/phase15i_column_semantics_conclusion.csv
+```
+
+## Phase 15J Refined Switch Reconstruction Reports
+
+```text
+reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv
+reports/phase15j_refined_switch_phase15i_result_check.csv
+reports/phase15j_refined_switch_selected_switch_definition_input.csv
+reports/phase15j_refined_switch_auxiliary_column_report.csv
+reports/phase15j_refined_switch_refined_switch_summary.csv
+reports/phase15j_refined_switch_required_column_check.csv
+reports/phase15j_refined_switch_decision_report.csv
+reports/phase15j_refined_switch_phase15k_boundary_check.csv
+reports/phase15j_refined_switch_scope_boundary_check.csv
+reports/phase15j_refined_switch_summary.csv
+reports/phase15j_refined_switch_gate_report.csv
+reports/phase15j_refined_switch_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -11300,6 +11749,10 @@ configs/spy_sma10.yaml
 | Phase 15D current signal freshness + switch mechanics audit | Completed — audit gates passed, but readiness decision blocked dry-run pre-registration with `blocked_both_switch_and_signal_failed`; switch reconstruction, signal freshness, signal validity, and current signal file flags all failed |
 | Phase 15E operational switch source attribution / true 36-switch reconstruction spec | Completed — true final 36-switch source was not found; daily financial stream, 94-row changed-switch audit, summary files, and empty generated switch logs all failed to reconcile to the expected 36 final operational switches; source-code patch required to emit `phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv` |
 | Phase 15F fresh data extension pre-registration / current signal update spec | Completed — baseline protection, fresh data source policy, current signal output schema, cadence policy, and failure handling were registered; current signal generation is allowed next as a bounded implementation, but data pull, signal generation, paper dry-run, broker/API integration, deployment, and readiness claims did not occur |
+| Phase 15G true final 36-switch log export implementation | Completed mechanically — switch-log file was exported with required columns, but the objective failed: reconstructed switch count was 92 versus expected 36, switch count reconciled False, and the result was not the true final operational switch history |
+| Phase 15H switch log reconciliation / fresh signal eligibility audit | Completed — audit gates passed, but reconciliation failed and decision was blocked_true_switch_log_export_failed; fresh signal generation, paper dry-run, broker/API integration, deployment, live trading, real money, promotion, and final-candidate changes remained blocked |
+| Phase 15I final-candidate column semantics / switch definition diagnostic | Completed — diagnosed final-candidate columns and selected `target_offensive_weight` as the executable final target allocation definition; `position` and `cash_position` were rejected as noisy/non-reconciled because they generated 54 switches rather than the expected 36 |
+| Phase 15J refined 36-switch reconstruction implementation + audit | Completed — reconstructed and exported the true final operational 36-switch log to `reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv`; switch count reconciled to expected 36, decision dates populated, exposure changes meaningful, no dates after 2026-05-01, and fresh signal generation is allowed next; paper dry-run and paper trading remain blocked |
 ---
 
 # What Should Happen Next

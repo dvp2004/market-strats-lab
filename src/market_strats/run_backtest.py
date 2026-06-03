@@ -415,6 +415,14 @@ from market_strats.analysis.switch_source_attribution_fresh_data_prereg import (
     save_phase15e_operational_switch_source_attribution,
     save_phase15f_fresh_data_extension_preregistration,
 )
+from market_strats.analysis.true_switch_log_export import (
+    save_phase15g_true_final_switch_log_export,
+    save_phase15h_switch_log_reconciliation_audit,
+)
+from market_strats.analysis.refined_switch_reconstruction import (
+    save_phase15i_final_candidate_column_semantics_diagnostic,
+    save_phase15j_refined_switch_reconstruction_audit,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2478,6 +2486,32 @@ def main() -> None:
         save_phase15f_fresh_data_extension_preregistration(
             config=config,
             reports_dir=reports_dir,
+        )
+
+        save_phase15g_true_final_switch_log_export(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+        )
+
+        save_phase15h_switch_log_reconciliation_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase15i_final_candidate_column_semantics_diagnostic(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+        )
+
+        save_phase15j_refined_switch_reconstruction_audit(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
         )
 
     save_final_strategy_decision_report(reports_dir)
