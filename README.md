@@ -195,6 +195,14 @@ Phase 15L confirmed that the project is ready to run the next bounded fresh curr
 
 This does not change the canonical research endpoint. 2026-05-01 remains the fixed historical validation/checkpoint endpoint. Fresh signal generation must be treated as a separate post-endpoint, out-of-sample current-signal extension. No data pull, current signal generation, paper dry-run, broker/API integration, live trading, real-money deployment, candidate promotion, or final-candidate change occurred in Phase 15K/15L.
 
+Phase 15M/15N completed the first fresh current-signal generation and audit checkpoint.
+
+Phase 15M successfully wrote a current-signal output file as a separate post-endpoint/out-of-sample extension while preserving the pinned 2026-05-01 canonical research endpoint. The canonical Phase 6B/6C reports and README metrics were not mutated. However, the generated signal is blocked because the in-memory final candidate frame contains 0 post-endpoint rows. As a result, signal validity, data freshness, and benchmark update checks failed.
+
+Phase 15N correctly blocked paper dry-run pre-registration. The decision is `blocked_fresh_signal_audit_failed`. Post-endpoint data, signal validity, data freshness, and benchmark update all failed, while switch context was present. This means the operational switch engine is available, but the current-signal data extension is not.
+
+The next implementation must focus on creating or loading a valid post-endpoint candidate stream. Paper dry-run, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -9530,6 +9538,153 @@ Correct interpretation:
 
 > Fresh current-signal generation is allowed next as a separate post-endpoint / out-of-sample extension. The pinned research endpoint and Phase 6B/6C canonical metrics must remain untouched.
 
+## Phase 15M: Fresh Current Signal Generation
+
+Phase 15M attempted to generate a post-endpoint out-of-sample current signal while preserving the pinned canonical research baseline.
+
+This phase did not mutate canonical Phase 6B/6C reports, change README metrics, pre-register a paper dry-run, integrate with a broker/API, deploy paper trading, run live trading, use real money, train new ML, optimise parameters, expand to new assets, promote a candidate, or change the final candidate.
+
+The fixed canonical research endpoint remains:
+
+```text
+2026-05-01
+```
+
+Fresh/current signal generation is treated separately as a post-endpoint / out-of-sample extension.
+
+### Phase 15M Current Signal File
+
+| Item | Result |
+|---|---|
+| Signal date | 2026-06-02 |
+| Data as-of date | Missing |
+| Candidate system ID | `phase6b_loose_relief_execution_realistic_overlay` |
+| Data source | `in_memory_final_candidate_frame` |
+| Pinned research endpoint | 2026-05-01 |
+| Output file written | True |
+| Canonical endpoint preserved | True |
+| Out-of-sample label present | True |
+| Canonical report mutation | False |
+
+Correct interpretation:
+
+> Phase 15M generated a current-signal-shaped file, but it did not generate a valid fresh signal because no post-endpoint candidate rows were available.
+
+### Phase 15M Generation Summary
+
+| Item | Result |
+|---|---:|
+| Post-endpoint rows | 0 |
+| Selected exposure column | `target_offensive_weight` |
+| Selected exposure transform | direct |
+| Signal file generated | True |
+| Is out-of-sample extension | True |
+| Signal validity passed | False |
+| Data freshness passed | False |
+| Benchmark update passed | False |
+| Paper dry-run allowed | False |
+| Paper trading ready | False |
+
+Correct interpretation:
+
+> The selected switch/exposure definition remains correct, but the current in-memory candidate frame does not contain rows after the pinned 2026-05-01 endpoint. Therefore, there is no valid post-endpoint signal to audit.
+
+### Phase 15M Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 15L passed | Passed |
+| Signal file written | Passed |
+| Required columns present | Passed |
+| Canonical endpoint preserved | Passed |
+| Out-of-sample label present | Passed |
+| No canonical report mutation | Passed |
+| Phase 15N boundary is audit-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Execution role is correct | Passed |
+
+### Phase 15M Verdict
+
+> Phase 15M completed fresh current signal generation output writing.
+
+Correct interpretation:
+
+> The output-generation mechanics passed, but the generated signal is blocked because no post-endpoint candidate rows were available.
+
+---
+
+## Phase 15N: Fresh Signal Audit / Paper Dry-Run Eligibility Decision
+
+Phase 15N audited the Phase 15M current-signal output and decided whether paper dry-run pre-registration could be allowed next.
+
+The correct decision was to block paper dry-run pre-registration.
+
+### Phase 15N Fresh Signal Audit
+
+| Check | Result |
+|---|---:|
+| Post-endpoint data passed | False |
+| Signal validity passed | False |
+| Data freshness passed | False |
+| Benchmark update passed | False |
+| Switch context present | True |
+| All current-signal gates passed | False |
+
+Failure reason:
+
+```text
+not_post_endpoint_data;signal_validity_failed;data_freshness_failed;benchmark_update_failed
+```
+
+Interpretation:
+
+> The system has the reconstructed switch context, but it does not yet have a valid post-endpoint candidate stream or benchmark update.
+
+### Phase 15N Decision
+
+| Item | Result |
+|---|---|
+| Decision | `blocked_fresh_signal_audit_failed` |
+| Paper dry-run pre-registration allowed next | False |
+| Paper trading ready | False |
+| Broker/API integration allowed | False |
+| Paper-trading deployment allowed | False |
+| Live trading allowed | False |
+| Real money allowed | False |
+| Candidate promotion | False |
+| Final candidate changed | False |
+
+Correct interpretation:
+
+> Paper dry-run is not allowed. The next step is post-endpoint candidate-stream/data-extension repair, not paper trading.
+
+### Phase 15N Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 15M passed | Passed |
+| Config flags clean | Passed |
+| Current signal file exists | Passed |
+| Required columns present | Passed |
+| Post-endpoint data audited | Passed |
+| Signal validity audited | Passed |
+| Data freshness audited | Passed |
+| Benchmark update audited | Passed |
+| Switch context audited | Passed |
+| Decision output exists | Passed |
+| No paper-ready claim | Passed |
+| Phase 15O boundary is conditional-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Audit role is correct | Passed |
+
+### Phase 15N Verdict
+
+> Phase 15N completed the fresh signal audit and paper dry-run eligibility decision.
+
+Correct interpretation:
+
+> The audit passed because it correctly blocked paper dry-run. The system is structurally ready to generate fresh signals, but it still lacks post-endpoint candidate data.
+
 ---
 
 # Methodology Notes
@@ -9836,6 +9991,14 @@ turnover was still too close to the switch trigger logic, even though turnover s
 - Future fresh-signal outputs must be labelled as post-endpoint / out-of-sample current-signal extensions.
 - Canonical historical reports, Phase 6B/6C metrics, and pinned README numbers must not be mutated by fresh-signal generation.
 - Paper dry-run, broker/API integration, paper deployment, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
+- Phase 15M/15N did not produce a valid fresh current signal.
+- The canonical 2026-05-01 endpoint remains valid for historical research, metric reconciliation, switch-log reconstruction, and README checkpoint consistency.
+- The current in-memory candidate frame contains no rows after 2026-05-01, so post-endpoint current-signal generation is blocked.
+- The selected exposure definition remains `target_offensive_weight`, but it cannot generate a fresh signal without post-endpoint candidate rows.
+- Benchmark update failed because no valid post-endpoint benchmark row was available.
+- Paper dry-run pre-registration is not allowed next.
+- Paper trading, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
+- The next blocker is data extension, not strategy logic: the project needs a valid post-endpoint candidate stream or fresh market-data pipeline output.
 ---
 
 # Bugs Caught and Fixed
@@ -11694,6 +11857,36 @@ reports/phase15l_fresh_signal_precheck_gate_report.csv
 reports/phase15l_fresh_signal_precheck_conclusion.csv
 ```
 
+## Phase 15M Fresh Current Signal Generation Reports
+
+```text
+reports/phase15m_current_signal_file.csv
+reports/phase15m_current_signal_generation_summary.csv
+reports/phase15m_current_signal_required_column_check.csv
+reports/phase15m_current_signal_phase15l_result_check.csv
+reports/phase15m_current_signal_phase15n_boundary_check.csv
+reports/phase15m_current_signal_scope_boundary_check.csv
+reports/phase15m_current_signal_summary.csv
+reports/phase15m_current_signal_gate_report.csv
+reports/phase15m_current_signal_conclusion.csv
+```
+
+## Phase 15N Fresh Signal Audit / Paper Dry-Run Eligibility Reports
+
+```text
+reports/phase15n_fresh_signal_audit_config_flag_check.csv
+reports/phase15n_fresh_signal_audit_report_inventory_check.csv
+reports/phase15n_fresh_signal_audit_phase15m_result_check.csv
+reports/phase15n_fresh_signal_audit_required_column_check.csv
+reports/phase15n_fresh_signal_audit_fresh_signal_audit.csv
+reports/phase15n_fresh_signal_audit_decision_report.csv
+reports/phase15n_fresh_signal_audit_phase15o_boundary_check.csv
+reports/phase15n_fresh_signal_audit_scope_boundary_check.csv
+reports/phase15n_fresh_signal_audit_summary.csv
+reports/phase15n_fresh_signal_audit_gate_report.csv
+reports/phase15n_fresh_signal_audit_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -11927,6 +12120,8 @@ configs/spy_sma10.yaml
 | Phase 15J refined 36-switch reconstruction implementation + audit | Completed — reconstructed and exported the true final operational 36-switch log to `reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv`; switch count reconciled to expected 36, decision dates populated, exposure changes meaningful, no dates after 2026-05-01, and fresh signal generation is allowed next; paper dry-run and paper trading remain blocked |
 | Phase 15K pinned-endpoint operational signal consistency audit | Completed — confirmed the pinned 2026-05-01 endpoint signal is consistent with the reconstructed 36-switch operational log; latest switch was 2026-04-13 from `defensive_or_cash` to `offensive_spy`, endpoint mode is `offensive_spy`, endpoint exposure is 1.0, signal is preview-only, and paper dry-run/paper trading remain blocked |
 | Phase 15L fresh data extension / current signal generation pre-implementation check | Completed — fresh current-signal generation is allowed next as a bounded post-endpoint/out-of-sample extension; schema now includes `benchmark_update_flag`, all pre-implementation gates passed, and no data pull, current signal generation, paper dry-run, broker/API integration, paper trading, or live deployment occurred |
+| Phase 15M fresh current signal generation | Completed — current-signal output file was written as a post-endpoint/out-of-sample extension without mutating the canonical 2026-05-01 research baseline; however, no valid fresh signal was produced because post-endpoint rows were 0, so signal validity, data freshness, and benchmark update checks failed |
+| Phase 15N fresh signal audit / paper dry-run eligibility decision | Completed — audit gates passed and correctly blocked paper dry-run pre-registration with `blocked_fresh_signal_audit_failed`; post-endpoint data, signal validity, data freshness, and benchmark update all failed, while switch context was present |
 ---
 
 # What Should Happen Next

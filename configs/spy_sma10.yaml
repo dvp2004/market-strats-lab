@@ -11209,6 +11209,220 @@ phase15l_fresh_data_current_signal_preimplementation_check:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_check_role: "Fresh data extension and current signal generation pre-implementation check only"
+phase15m_fresh_current_signal_generation:
+  enabled: false
+  execution_role: "Fresh current signal generation only"
+  implementation_classification: "A/B - generates a post-endpoint out-of-sample current signal while preserving pinned research baseline"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 15L"
+  proposed_next_phase: "Phase 15N"
+
+  candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+  pinned_research_endpoint: "2026-05-01"
+  audit_current_date: "2026-06-02"
+  max_signal_staleness_days: 3
+
+  output_file: "reports/phase15m_current_signal_file.csv"
+
+  source_reports:
+    phase15l_conclusion: "reports/phase15l_fresh_signal_precheck_conclusion.csv"
+    phase15l_gate_report: "reports/phase15l_fresh_signal_precheck_gate_report.csv"
+    phase15l_decision_report: "reports/phase15l_fresh_signal_precheck_decision_report.csv"
+    phase15k_endpoint_signal: "reports/phase15k_pinned_endpoint_signal_file.csv"
+    switch_log: "reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
+    selected_switch_definition: "reports/phase15i_column_semantics_selected_switch_definition.csv"
+
+  fresh_candidate_stream_policy:
+    preferred_fresh_candidate_stream_file: "data/fresh/phase15m_fresh_candidate_stream.csv"
+    allow_in_memory_final_candidate_frame_if_post_endpoint_rows_exist: true
+    require_post_endpoint_rows: true
+    require_no_mutation_of_canonical_reports: true
+    require_out_of_sample_extension_label: true
+
+  selected_exposure_fallback_priority:
+    - "target_offensive_weight"
+    - "target_spy_weight"
+    - "target_exposure"
+    - "candidate_exposure"
+    - "overlay_exposure"
+    - "final_exposure"
+    - "offensive_weight"
+    - "spy_weight"
+    - "risk_on_weight"
+    - "exposure"
+
+  required_current_signal_columns:
+    - "signal_date"
+    - "data_as_of_date"
+    - "generated_at_utc"
+    - "candidate_system_id"
+    - "data_source"
+    - "data_source_timestamp"
+    - "pinned_research_endpoint"
+    - "is_out_of_sample_extension"
+    - "current_mode"
+    - "previous_mode"
+    - "current_exposure"
+    - "previous_exposure"
+    - "target_action"
+    - "switch_triggered"
+    - "switch_reason"
+    - "signal_validity_flag"
+    - "data_freshness_flag"
+    - "benchmark_update_flag"
+    - "paper_dry_run_allowed"
+    - "paper_trading_allowed"
+    - "paper_readiness_status"
+    - "blocking_warnings"
+    - "benchmark_spy_close_or_return_source"
+
+  benchmark_policy:
+    acceptable_benchmark_columns:
+      - "SPY_close"
+      - "spy_close"
+      - "adj_close"
+      - "SPY_return"
+      - "spy_return"
+      - "benchmark_return"
+
+  decision_policy:
+    signal_status_if_valid: "fresh_signal_generated_pending_audit"
+    signal_status_if_blocked: "blocked_fresh_signal_unavailable_or_invalid"
+
+  allow_current_signal_generation: true
+  allow_fresh_data_pull_execution: false
+  allow_canonical_report_mutation: false
+  allow_paper_dry_run_preregistration: false
+  allow_broker_api_integration: false
+  allow_paper_trading_deployment: false
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_paper_trading_ready_claim: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_optimisation: false
+  allow_multi_asset_expansion: false
+  allow_feature_importance: false
+
+  phase15n_boundary:
+    allowed_next_step: "Fresh signal audit and paper dry-run eligibility decision only"
+    forbidden_next_step: "broker/API integration, paper-trading deployment, live trading, real-money deployment, paper-trading-ready claim without audit pass, candidate promotion, final-candidate change, new ML, optimisation, or multi-asset expansion"
+
+  gates:
+    require_phase15l_passed: true
+    require_signal_file_written: true
+    require_required_columns_present: true
+    require_canonical_endpoint_preserved: true
+    require_out_of_sample_label: true
+    require_no_canonical_report_mutation: true
+    require_phase15n_boundary_audit_only: true
+    require_no_data_pull_execution: true
+    require_no_paper_dry_run: true
+    require_no_broker_api: true
+    require_no_live_trading: true
+    require_no_real_money: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_execution_role: "Fresh current signal generation only"
+phase15n_fresh_signal_audit_paper_dry_run_eligibility:
+  enabled: false
+  audit_role: "Fresh signal audit and paper dry-run eligibility decision only"
+  implementation_classification: "B - audits freshness, schema, benchmark update, switch consistency, and blocks paper dry-run unless all current-signal gates pass"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 15M"
+  proposed_next_phase: "Phase 15O"
+
+  candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+  pinned_research_endpoint: "2026-05-01"
+  max_signal_staleness_days: 3
+
+  expected_runtime_flags:
+    phase15k_pinned_endpoint_signal_consistency_audit: false
+    phase15l_fresh_data_current_signal_preimplementation_check: false
+    phase15m_fresh_current_signal_generation: true
+    phase15n_fresh_signal_audit_paper_dry_run_eligibility: true
+    relative_momentum_allocator: true
+
+  phase15m_reports:
+    conclusion: "reports/phase15m_current_signal_conclusion.csv"
+    gate_report: "reports/phase15m_current_signal_gate_report.csv"
+    current_signal_file: "reports/phase15m_current_signal_file.csv"
+    generation_summary: "reports/phase15m_current_signal_generation_summary.csv"
+    required_column_check: "reports/phase15m_current_signal_required_column_check.csv"
+
+  source_reports:
+    switch_log: "reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
+    pinned_endpoint_signal: "reports/phase15k_pinned_endpoint_signal_file.csv"
+
+  required_current_signal_columns:
+    - "signal_date"
+    - "data_as_of_date"
+    - "generated_at_utc"
+    - "candidate_system_id"
+    - "data_source"
+    - "data_source_timestamp"
+    - "pinned_research_endpoint"
+    - "is_out_of_sample_extension"
+    - "current_mode"
+    - "previous_mode"
+    - "current_exposure"
+    - "previous_exposure"
+    - "target_action"
+    - "switch_triggered"
+    - "switch_reason"
+    - "signal_validity_flag"
+    - "data_freshness_flag"
+    - "benchmark_update_flag"
+    - "paper_dry_run_allowed"
+    - "paper_trading_allowed"
+    - "paper_readiness_status"
+    - "blocking_warnings"
+    - "benchmark_spy_close_or_return_source"
+
+  decision_policy:
+    decision_if_all_current_signal_gates_pass: "paper_dry_run_preregistration_allowed_next"
+    decision_if_any_current_signal_gate_fails: "blocked_fresh_signal_audit_failed"
+
+  phase15o_boundary:
+    allowed_next_step_if_passed: "Paper dry-run pre-registration only"
+    allowed_next_step_if_blocked: "Fresh current-signal repair only"
+    forbidden_next_step: "broker/API integration, paper-trading deployment, live trading, real-money deployment, paper-trading-ready claim, candidate promotion, final-candidate change, new ML, optimisation, or multi-asset expansion"
+
+  allow_paper_dry_run_preregistration_if_passed: true
+  allow_broker_api_integration: false
+  allow_paper_trading_deployment: false
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_paper_trading_ready_claim: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_optimisation: false
+  allow_multi_asset_expansion: false
+  allow_feature_importance: false
+
+  gates:
+    require_phase15m_passed: true
+    require_config_flags_clean: true
+    require_current_signal_file_exists: true
+    require_required_columns_present: true
+    require_post_endpoint_data: true
+    require_signal_validity_flag_passed: true
+    require_data_freshness_flag_passed: true
+    require_benchmark_update_flag_passed: true
+    require_switch_context_present: true
+    require_decision_output: true
+    require_no_paper_ready_claim: true
+    require_phase15o_boundary_conditional_only: true
+    require_no_broker_api: true
+    require_no_live_trading: true
+    require_no_real_money: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_audit_role: "Fresh signal audit and paper dry-run eligibility decision only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

@@ -427,6 +427,10 @@ from market_strats.analysis.pinned_endpoint_fresh_signal_precheck import (
     save_phase15k_pinned_endpoint_signal_consistency_audit,
     save_phase15l_fresh_data_current_signal_preimplementation_check,
 )
+from market_strats.analysis.fresh_current_signal_generation import (
+    save_phase15m_fresh_current_signal_generation,
+    save_phase15n_fresh_signal_audit_paper_dry_run_eligibility,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2524,6 +2528,18 @@ def main() -> None:
         )
 
         save_phase15l_fresh_data_current_signal_preimplementation_check(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        save_phase15m_fresh_current_signal_generation(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+        )
+
+        save_phase15n_fresh_signal_audit_paper_dry_run_eligibility(
             config=config,
             reports_dir=reports_dir,
         )
