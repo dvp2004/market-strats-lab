@@ -439,6 +439,10 @@ from market_strats.analysis.real_post_endpoint_source import (
     save_phase15q_post_endpoint_data_source_creation,
     save_phase15r_real_post_endpoint_stream_validation,
 )
+from market_strats.analysis.phase6b_rule_replay_export import (
+    save_phase15s_phase6b_rule_replay_source_discovery,
+    save_phase15t_rule_generated_candidate_stream_export,
+)
 
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
@@ -2572,6 +2576,20 @@ def main() -> None:
         save_phase15r_real_post_endpoint_stream_validation(
             config=config,
             reports_dir=reports_dir,
+        )
+
+        save_phase15s_phase6b_rule_replay_source_discovery(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+        )
+
+        save_phase15t_rule_generated_candidate_stream_export(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
         )
 
     save_final_strategy_decision_report(reports_dir)

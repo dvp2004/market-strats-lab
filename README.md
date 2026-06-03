@@ -211,6 +211,14 @@ Phase 15R validated the Phase 15Q output and correctly blocked progression. The 
 
 This confirms the current blocker is not switch logic, signal schema, or audit mechanics. The blocker is the absence of a genuine post-endpoint candidate stream. The next implementation must generate `target_offensive_weight` after 2026-05-01 using the same Phase 6B/6C rule logic as the canonical candidate. Raw SPY data alone is insufficient and must not be treated as a valid paper-trading source.
 
+Phase 15S/15T completed the Phase 6B/6C rule-replay discovery and export-attempt checkpoint.
+
+Phase 15S confirmed that `target_offensive_weight` is present in the canonical final candidate frame and identified relevant code paths, including the regime-switch overlay strategy and Phase 6B candidate-stream/export modules. The final candidate frame is loaded successfully with 5,034 rows from 2006-04-28 to 2026-05-01, but it has 0 post-endpoint rows. Therefore, `_find_final_candidate_frame` is currently an extractor for the pinned historical candidate output, not a fresh post-endpoint replay engine.
+
+Phase 15T attempted to export a rule-generated post-endpoint candidate stream, but correctly blocked because the project output still has no rows after 2026-05-01. The decision is `blocked_rule_generated_stream_unavailable_or_invalid`. No handoff file was produced for Phase 15Q/15R, and downstream reruns remain blocked.
+
+The next implementation must expose or reuse the actual Phase 6B/6C loose-relief rule logic so that `target_offensive_weight` can be calculated on post-endpoint market data. Another audit-only phase would be wasted effort.
+
 ### Canonical Research Checkpoint
 
 The canonical project endpoint is explicitly pinned:
@@ -9849,6 +9857,165 @@ Correct interpretation:
 
 > The audit passed because it correctly blocked progression. The missing item is not another audit. The missing item is a real post-endpoint rule-generated candidate stream.
 
+## Phase 15S: Phase 6B/6C Rule Replay Source Discovery
+
+Phase 15S searched the codebase and final candidate output to identify the source path needed to compute `target_offensive_weight` after the pinned 2026-05-01 research endpoint.
+
+This phase did not export a candidate stream, generate a current signal, rerun Phase 15Q/15R, rerun Phase 15O/15P, pre-register a paper dry-run, integrate with a broker/API, deploy paper trading, run live trading, use real money, train new ML, optimise parameters, expand to new assets, promote a candidate, or change the final candidate.
+
+### Phase 15S Code Path Discovery
+
+The code-path inventory identified 159 pattern matches. Relevant source candidates included:
+
+```text
+src\market_strats\strategies\regime_switch_overlay.py
+src\market_strats\analysis\phase6b_candidate_stream_export.py
+src\market_strats\analysis\regime_switch_overlay_offensive_relief_validation.py
+src\market_strats\analysis\bid_ask_market_impact_diagnostic.py
+src\market_strats\analysis\true_switch_log_export.py
+src\market_strats\analysis\refined_switch_reconstruction.py
+src\market_strats\run_backtest.py
+```
+
+The most important distinction is:
+
+> `_find_final_candidate_frame` exposes the existing final candidate output, but it does not by itself create post-endpoint rows or replay the Phase 6B/6C rule logic on fresh data.
+
+### Phase 15S Final Candidate Profile
+
+| Item | Result |
+|---|---:|
+| Frame loaded | True |
+| Rows | 5,034 |
+| Date column | `date` |
+| Min date | 2006-04-28 |
+| Max date | 2026-05-01 |
+| Post-endpoint rows | 0 |
+| `target_offensive_weight` present | True |
+| Benchmark column | `adj_close` |
+| Benchmark column present | True |
+
+Correct interpretation:
+
+> The canonical final candidate frame contains the correct historical `target_offensive_weight`, but it remains capped at the 2026-05-01 pinned research endpoint.
+
+### Phase 15S Target Column Discovery
+
+| Target column | Present in final candidate frame | Code paths with column |
+|---|---:|---:|
+| `target_offensive_weight` | True | 5 |
+| `target_defensive_weight` | True | 5 |
+| `offensive_weight` | True | 6 |
+| `defensive_weight` | True | 6 |
+
+Correct interpretation:
+
+> The final candidate output contains the target allocation columns needed for historical reconstruction. The missing piece is not the column definition; it is post-endpoint rule replay.
+
+### Phase 15S Replay Requirement Report
+
+Phase 15S concluded that:
+
+| Question | Answer |
+|---|---|
+| Which function exposes `target_offensive_weight`? | `_find_final_candidate_frame` output exposes `target_offensive_weight` |
+| Does replay require only SPY data? | False |
+| Does replay require full relative momentum outputs? | True |
+| Can replay run without mutating the pinned baseline? | True |
+| Post-endpoint rows available now | 0 |
+| Replay path discovered | True |
+
+Correct interpretation:
+
+> The project can locate the historical rule output path, but post-endpoint replay still requires fresh relative-momentum/final-candidate outputs beyond the pinned endpoint.
+
+### Phase 15S Decision
+
+| Item | Result |
+|---|---|
+| Decision | `rule_replay_path_discovered_export_attempt_allowed_next` |
+| Rule replay path discovered | True |
+| Post-endpoint rows available now | 0 |
+| Phase 15T export attempt allowed next | True |
+| Phase 15Q/15R rerun allowed next | False |
+| Paper dry-run pre-registration allowed next | False |
+| Paper trading ready | False |
+
+Correct interpretation:
+
+> Phase 15T was allowed to attempt export, but the project was not yet allowed to rerun Phase 15Q/15R, generate a fresh current signal, or prepare paper dry-run.
+
+---
+
+## Phase 15T: Post-Endpoint Rule-Generated Candidate Stream Export
+
+Phase 15T attempted to export a post-endpoint rule-generated candidate stream using the discovered final candidate output path.
+
+This phase did not generate a current signal, rerun Phase 15Q/15R, rerun Phase 15O/15P, pre-register a paper dry-run, integrate with a broker/API, deploy paper trading, run live trading, use real money, train new ML, optimise parameters, expand to new assets, promote a candidate, or change the final candidate.
+
+The intended output files were:
+
+```text
+reports/phase15t_rule_generated_candidate_stream.csv
+data/fresh/phase15q_rule_generated_candidate_stream.csv
+```
+
+The handoff file was not written because no valid post-endpoint rows existed.
+
+### Phase 15T Export Summary
+
+| Item | Result |
+|---|---:|
+| Post-endpoint rows | 0 |
+| Candidate loader | `_find_final_candidate_frame` |
+| Benchmark update passed | False |
+| Stream row validity passed | False |
+| Target weight source passed | False |
+| Out-of-sample label passed | False |
+| Rule-generated stream valid | False |
+| Canonical report mutation | False |
+
+Correct interpretation:
+
+> Phase 15T passed mechanically as an export attempt, but it could not export a valid post-endpoint stream because the final candidate frame still ends at 2026-05-01.
+
+### Phase 15T Decision
+
+| Item | Result |
+|---|---|
+| Decision | `blocked_rule_generated_stream_unavailable_or_invalid` |
+| Phase 15Q/15R rerun allowed next | False |
+| Phase 15O/15P rerun allowed next | False |
+| Phase 15M/15N rerun allowed next | False |
+| Paper dry-run pre-registration allowed next | False |
+| Paper trading ready | False |
+
+Correct interpretation:
+
+> The project still lacks a real post-endpoint rule-generated stream. Do not rerun downstream fresh-signal phases yet.
+
+### Phase 15T Gate Result
+
+| Gate | Result |
+|---|---|
+| Phase 15S passed | Passed |
+| Export file written | Passed |
+| Required columns present | Passed |
+| Pinned endpoint preserved | Passed |
+| No canonical report mutation | Passed |
+| Decision output exists | Passed |
+| Phase 15Q rerun boundary is conditional-only | Passed |
+| Scope blocks forbidden actions | Passed |
+| Execution role is correct | Passed |
+
+### Phase 15T Verdict
+
+> Phase 15T completed the rule-generated candidate stream export attempt and correctly blocked progression.
+
+Correct interpretation:
+
+> The project has discovered the historical rule-output path, but it has not yet exposed a true post-endpoint replay engine. The next implementation must reuse or extract the Phase 6B/6C rule logic and run it on fresh post-endpoint market data.
+
 ---
 
 # Methodology Notes
@@ -10172,6 +10339,16 @@ turnover was still too close to the switch trigger logic, even though turnover s
 - Paper trading, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
 - The next blocker is practical data engineering: generate a real post-endpoint candidate stream using the same Phase 6B/6C rule logic that produced the canonical `target_offensive_weight`.
 - Raw SPY OHLCV alone is not enough. The stream must include a verified `target_offensive_weight` and a valid `target_weight_source`, such as `phase6b_rule_engine`, `phase6b_loose_relief_rule_replay`, `project_rule_replay`, or `verified_project_generated`.
+- Phase 15S/15T did not create a valid post-endpoint rule-generated stream.
+- The canonical 2026-05-01 endpoint remains valid for historical research, metric reconciliation, switch-log reconstruction, README numbers, and checkpoint consistency.
+- `_find_final_candidate_frame` exposes the pinned historical final candidate output; it does not currently replay the Phase 6B/6C rule logic beyond 2026-05-01.
+- The final candidate frame contains `target_offensive_weight`, but has 0 post-endpoint rows.
+- Phase 15Q/15R rerun is not allowed next.
+- Phase 15O/15P rerun is not allowed next.
+- Phase 15M/15N rerun is not allowed next.
+- Paper dry-run pre-registration is not allowed next.
+- Paper trading, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked.
+- The next blocker is implementation, not audit: expose or reuse the true Phase 6B/6C loose-relief rule replay path so it can calculate `target_offensive_weight` on post-endpoint market data.
 ---
 
 # Bugs Caught and Fixed
@@ -12090,6 +12267,37 @@ reports/phase15r_real_source_gate_report.csv
 reports/phase15r_real_source_conclusion.csv
 ```
 
+## Phase 15S Rule Replay Source Discovery Reports
+
+```text
+reports/phase15s_rule_replay_discovery_phase15r_result_check.csv
+reports/phase15s_rule_replay_discovery_code_path_inventory.csv
+reports/phase15s_rule_replay_discovery_final_candidate_profile.csv
+reports/phase15s_rule_replay_discovery_target_column_discovery.csv
+reports/phase15s_rule_replay_discovery_replay_requirement_report.csv
+reports/phase15s_rule_replay_discovery_decision_report.csv
+reports/phase15s_rule_replay_discovery_phase15t_boundary_check.csv
+reports/phase15s_rule_replay_discovery_scope_boundary_check.csv
+reports/phase15s_rule_replay_discovery_summary.csv
+reports/phase15s_rule_replay_discovery_gate_report.csv
+reports/phase15s_rule_replay_discovery_conclusion.csv
+```
+
+## Phase 15T Rule-Generated Candidate Stream Export Reports
+
+```text
+reports/phase15t_rule_generated_candidate_stream.csv
+reports/phase15t_rule_export_export_summary.csv
+reports/phase15t_rule_export_required_column_check.csv
+reports/phase15t_rule_export_phase15s_result_check.csv
+reports/phase15t_rule_export_decision_report.csv
+reports/phase15t_rule_export_phase15q_rerun_boundary_check.csv
+reports/phase15t_rule_export_scope_boundary_check.csv
+reports/phase15t_rule_export_summary.csv
+reports/phase15t_rule_export_gate_report.csv
+reports/phase15t_rule_export_conclusion.csv
+```
+
 ## Other Important Reports
 
 ```text
@@ -12327,6 +12535,8 @@ configs/spy_sma10.yaml
 | Phase 15N fresh signal audit / paper dry-run eligibility decision | Completed — audit gates passed and correctly blocked paper dry-run pre-registration with `blocked_fresh_signal_audit_failed`; post-endpoint data, signal validity, data freshness, and benchmark update all failed, while switch context was present |
 | Phase 15Q manual / fresh post-endpoint data source creation | Completed — required post-endpoint source output was written without mutating the canonical 2026-05-01 endpoint, Phase 6B/6C metrics, README numbers, or switch log; however, no source was available, post-endpoint rows remained 0, candidate_stream_valid was False, and no Phase 15O handoff file was written |
 | Phase 15R real post-endpoint candidate stream validation + 15O/15P rerun preparation | Completed — audit gates passed and correctly blocked Phase 15O/15P rerun with `blocked_real_post_endpoint_source_invalid`; post-endpoint rows, benchmark update, target weight source, target exposure presence, and target exposure range all failed because no real source was available |
+| Phase 15S Phase 6B/6C rule replay source discovery | Completed — code-path inventory and final-candidate profiling passed; `target_offensive_weight` exists in the final candidate frame and relevant source-code paths were identified, but the frame remains capped at 2026-05-01 with 0 post-endpoint rows |
+| Phase 15T post-endpoint rule-generated candidate stream export | Completed — export attempt wrote the required output structure without mutating the canonical baseline, but no valid stream was exported because post-endpoint rows remained 0; decision was `blocked_rule_generated_stream_unavailable_or_invalid` |
 ---
 
 # What Should Happen Next

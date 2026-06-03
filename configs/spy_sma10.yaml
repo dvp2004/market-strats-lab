@@ -11865,6 +11865,213 @@ phase15r_real_post_endpoint_stream_validation:
     require_no_candidate_promotion: true
     require_no_final_candidate_change: true
     required_audit_role: "Real post-endpoint candidate stream validation and 15O/15P rerun preparation only"
+phase15s_phase6b_rule_replay_source_discovery:
+  enabled: false
+  discovery_role: "Phase 6B/6C rule replay source discovery only"
+  implementation_classification: "B - identifies the rule-replay path needed to compute target_offensive_weight after the pinned endpoint"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 15R"
+  proposed_next_phase: "Phase 15T"
+
+  candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+  pinned_research_endpoint: "2026-05-01"
+  audit_current_date: "2026-06-02"
+
+  source_reports:
+    phase15r_conclusion: "reports/phase15r_real_source_conclusion.csv"
+    phase15r_gate_report: "reports/phase15r_real_source_gate_report.csv"
+    phase15r_decision_report: "reports/phase15r_real_source_decision_report.csv"
+    selected_switch_definition: "reports/phase15i_column_semantics_selected_switch_definition.csv"
+
+  source_scan_paths:
+    - "src/market_strats"
+
+  discovery_patterns:
+    target_column:
+      - "target_offensive_weight"
+      - "target_defensive_weight"
+      - "offensive_weight"
+      - "defensive_weight"
+
+    candidate_logic:
+      - "loose_relief"
+      - "offensive_relief"
+      - "deep_drawdown_guard"
+      - "phase6b"
+      - "phase6c"
+      - "target_offensive_weight"
+      - "guarded"
+
+    export_logic:
+      - "phase6b_loose_relief_execution_realistic_overlay"
+      - "regime_switch_overlay_offensive_relief"
+      - "final_candidate"
+      - "_find_final_candidate_frame"
+
+  final_candidate_frame_requirements:
+    require_target_offensive_weight_column: true
+    require_date_column: true
+    require_benchmark_column: true
+    allow_no_post_endpoint_rows_at_discovery_stage: true
+
+  replay_path_decision_policy:
+    decision_if_replay_path_discovered: "rule_replay_path_discovered_export_attempt_allowed_next"
+    decision_if_not_discovered: "blocked_rule_replay_path_not_discovered"
+
+  allow_source_discovery: true
+  allow_candidate_stream_export: false
+  allow_current_signal_generation: false
+  allow_phase15q_15r_rerun: false
+  allow_phase15o_15p_rerun: false
+  allow_paper_dry_run_preregistration: false
+  allow_broker_api_integration: false
+  allow_paper_trading_deployment: false
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_paper_trading_ready_claim: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_optimisation: false
+  allow_multi_asset_expansion: false
+  allow_feature_importance: false
+
+  phase15t_boundary:
+    allowed_next_step: "Post-endpoint rule-generated candidate stream export only"
+    forbidden_next_step: "paper dry-run, broker/API integration, paper-trading deployment, live trading, real-money deployment, paper-trading-ready claim, candidate promotion, final-candidate change, new ML, optimisation, or multi-asset expansion"
+
+  gates:
+    require_phase15r_passed: true
+    require_code_path_inventory_output: true
+    require_target_column_discovery_output: true
+    require_replay_requirement_report_output: true
+    require_discovery_decision_output: true
+    require_phase15t_boundary_export_only: true
+    require_no_candidate_stream_export: true
+    require_no_current_signal_generation: true
+    require_no_phase15q_15r_rerun: true
+    require_no_phase15o_15p_rerun: true
+    require_no_paper_dry_run: true
+    require_no_broker_api: true
+    require_no_live_trading: true
+    require_no_real_money: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_discovery_role: "Phase 6B/6C rule replay source discovery only"
+phase15t_rule_generated_candidate_stream_export:
+  enabled: false
+  execution_role: "Post-endpoint rule-generated candidate stream export only"
+  implementation_classification: "A/B - exports a real post-endpoint candidate stream using discovered Phase 6B/6C rule output while preserving pinned research baseline"
+  phase_branch: "Shortest responsible path to paper-trading candidate"
+  source_phase: "Phase 15S"
+  proposed_next_phase: "Phase 15Q rerun"
+
+  candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+  pinned_research_endpoint: "2026-05-01"
+  audit_current_date: "2026-06-02"
+
+  output_file: "reports/phase15t_rule_generated_candidate_stream.csv"
+  handoff_file_for_phase15q: "data/fresh/phase15q_rule_generated_candidate_stream.csv"
+
+  source_reports:
+    phase15s_conclusion: "reports/phase15s_rule_replay_discovery_conclusion.csv"
+    phase15s_gate_report: "reports/phase15s_rule_replay_discovery_gate_report.csv"
+    phase15s_decision_report: "reports/phase15s_rule_replay_discovery_decision_report.csv"
+    phase15s_target_column_discovery: "reports/phase15s_rule_replay_discovery_target_column_discovery.csv"
+    pinned_endpoint_signal: "reports/phase15k_pinned_endpoint_signal_file.csv"
+
+  final_candidate_source_policy:
+    use_existing_project_final_candidate_frame: true
+    require_target_offensive_weight_from_project_output: true
+    reject_manual_fill: true
+    reject_carry_forward_only: true
+    reject_raw_spy_only: true
+    allow_blocked_export_if_no_post_endpoint_rows: true
+
+  accepted_target_weight_source: "verified_project_generated"
+
+  benchmark_policy:
+    acceptable_close_columns:
+      - "SPY_close"
+      - "spy_close"
+      - "adj_close"
+      - "close"
+
+    acceptable_return_columns:
+      - "SPY_return"
+      - "spy_return"
+      - "benchmark_return"
+      - "return"
+
+  required_export_columns:
+    - "date"
+    - "SPY_close"
+    - "SPY_return"
+    - "target_offensive_weight"
+    - "target_weight_source"
+    - "data_source_timestamp"
+    - "pinned_research_endpoint"
+    - "is_out_of_sample_extension"
+    - "benchmark_update_flag"
+    - "stream_row_validity_flag"
+    - "blocking_warnings"
+
+  export_policy:
+    preserve_pinned_research_endpoint: true
+    no_mutation_of_canonical_reports: true
+    no_mutation_of_phase6b_metrics: true
+    no_mutation_of_readme_numbers: true
+    no_mutation_of_switch_log: true
+    require_all_rows_after_pinned_endpoint: true
+    require_verified_project_generated_target_weight: true
+    write_blocked_export_if_unavailable_or_invalid: true
+
+  decision_policy:
+    decision_if_export_valid: "phase15q_15r_rerun_allowed_next"
+    decision_if_export_blocked: "blocked_rule_generated_stream_unavailable_or_invalid"
+
+  phase15q_rerun_boundary:
+    allowed_next_step_if_passed: "Rerun Phase 15Q and Phase 15R using rule-generated candidate stream"
+    allowed_next_step_if_blocked: "Expose or repair Phase 6B/6C rule replay path only"
+    forbidden_next_step: "paper dry-run, broker/API integration, paper-trading deployment, live trading, real-money deployment, paper-trading-ready claim, candidate promotion, final-candidate change, new ML, optimisation, or multi-asset expansion"
+
+  allow_rule_generated_stream_export: true
+  allow_current_signal_generation: false
+  allow_phase15q_15r_rerun: false
+  allow_phase15o_15p_rerun: false
+  allow_paper_dry_run_preregistration: false
+  allow_broker_api_integration: false
+  allow_paper_trading_deployment: false
+  allow_live_trading: false
+  allow_real_money_deployment: false
+  allow_paper_trading_ready_claim: false
+  allow_candidate_promotion: false
+  allow_final_candidate_change: false
+  allow_model_training: false
+  allow_unregistered_ml: false
+  allow_optimisation: false
+  allow_multi_asset_expansion: false
+  allow_feature_importance: false
+
+  gates:
+    require_phase15s_passed: true
+    require_export_file_written: true
+    require_required_columns_present: true
+    require_pinned_endpoint_preserved: true
+    require_no_canonical_report_mutation: true
+    require_decision_output: true
+    require_phase15q_rerun_boundary_conditional_only: true
+    require_no_current_signal_generation: true
+    require_no_phase15q_15r_rerun: true
+    require_no_phase15o_15p_rerun: true
+    require_no_paper_dry_run: true
+    require_no_broker_api: true
+    require_no_live_trading: true
+    require_no_real_money: true
+    require_no_candidate_promotion: true
+    require_no_final_candidate_change: true
+    required_execution_role: "Post-endpoint rule-generated candidate stream export only"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
