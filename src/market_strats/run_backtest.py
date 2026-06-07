@@ -234,6 +234,9 @@ from market_strats.analysis.real_post_endpoint_source import (
 from market_strats.analysis.paper_dry_run_preregistration import (
     save_phase16a_paper_dry_run_preregistration,
 )
+from market_strats.analysis.paper_dry_run_dashboard import (
+    save_phase16b_paper_dry_run_dashboard,
+)
 
 
 def _apply_research_period_filter_to_result(
@@ -1714,6 +1717,12 @@ def _run_phase15_downstream_fresh_signal_chain(
 
     if _phase_enabled(config, "phase16a_paper_dry_run_preregistration"):
         outputs["phase16a"] = save_phase16a_paper_dry_run_preregistration(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    if _phase_enabled(config, "phase16b_paper_dry_run_dashboard"):
+        outputs["phase16b"] = save_phase16b_paper_dry_run_dashboard(
             config=config,
             reports_dir=reports_dir,
         )

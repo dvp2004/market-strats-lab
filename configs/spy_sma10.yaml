@@ -12308,6 +12308,28 @@ phase16a_paper_dry_run_preregistration:
     current_signal_file: "reports/phase15m_current_signal_file.csv"
     generation_summary: "reports/phase15m_current_signal_generation_summary.csv"
     conclusion: "reports/phase15m_current_signal_conclusion.csv"
+phase16b_paper_dry_run_dashboard:
+  enabled: true
+  output_dir: "reports/paper_trading"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  paper_notional_usd: 10000
+  use_latest_available_signal_date_when_audit_date_missing: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+
+  source_files:
+    latest_signal: "reports/paper_trading/latest_signal.csv"
+    paper_orders_preview: "reports/paper_trading/paper_orders_preview.csv"
+    paper_trading_readiness_status: "reports/paper_trading/paper_trading_readiness_status.csv"
+    wxyz_fresh_handoff: "data/fresh/phase15q_rule_generated_candidate_stream.csv"
+    switch_event_log: "reports/phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
+
+  visual_artifacts:
+    equity_curve: "reports/phase14g_corrected_visual_equity_curve.csv"
+    drawdown_curve: "reports/phase14g_corrected_visual_drawdown_curve.csv"
+    exposure_timeline: "reports/phase14g_corrected_visual_exposure_timeline.csv"
+    rolling_relative_performance: "reports/phase14g_corrected_visual_rolling_relative_performance.csv"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

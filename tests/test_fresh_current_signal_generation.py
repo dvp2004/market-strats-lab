@@ -308,3 +308,35 @@ def test_phase15m_prefers_rule_generated_handoff_when_wxyz_enabled(tmp_path):
     assert signal["data_as_of_date"] == "2026-06-02"
     assert signal["current_mode"] == "defensive_or_cash"
     assert signal["data_freshness_flag"] == "pass"
+
+
+def test_phase15m_uses_latest_available_row_when_audit_date_missing(tmp_path, monkeypatch):
+    _write_source_reports(tmp_path)
+    config = _config(tmp_path)
+    config["phase15m_fresh_current_signal_generation"].pop("audit_current_date")
+
+    monkeypatch.setattr(
+        fresh_signal,
+        "_find_final_candidate_frame",
+        lambda relative_momentum_outputs, ticker_outputs, config: pd.DataFrame(
+            {
+                "date": ["2026-06-02", "2026-06-05"],
+                "target_offensive_weight": [1.0, 1.0],
+                "SPY_return": [0.001, 0.002],
+                "SPY_close": [600.0, 603.0],
+                "strategy_return": [0.001, 0.002],
+            }
+        ),
+    )
+
+    out_m = save_phase15m_fresh_current_signal_generation(
+        config=config,
+        reports_dir=tmp_path,
+        relative_momentum_outputs={},
+        ticker_outputs={},
+    )
+
+    signal = out_m["current_signal_file"].iloc[0]
+    assert signal["signal_date"] == "2026-06-05"
+    assert signal["data_as_of_date"] == "2026-06-05"
+    assert signal["data_freshness_flag"] == "pass"

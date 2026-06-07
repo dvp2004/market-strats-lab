@@ -31,6 +31,7 @@ PHASE15WXYZ_FUNCTIONS = [
 ]
 
 PHASE16A_FUNCTION = "save_phase16a_paper_dry_run_preregistration"
+PHASE16B_FUNCTION = "save_phase16b_paper_dry_run_dashboard"
 
 
 def _phase_config(enabled: bool) -> dict:
@@ -59,6 +60,10 @@ def test_run_backtest_imports_phase15wxyz_save_functions():
 
 def test_run_backtest_imports_phase16a_save_function():
     assert hasattr(run_backtest, PHASE16A_FUNCTION)
+
+
+def test_run_backtest_imports_phase16b_save_function():
+    assert hasattr(run_backtest, PHASE16B_FUNCTION)
 
 
 def test_phase15_downstream_chain_calls_functions_in_required_order():
@@ -188,6 +193,42 @@ def test_phase16a_runs_after_phase15n_when_enabled(monkeypatch):
         "phase15n",
         "phase16a",
     ]
+    assert calls[-1][1]["reports_dir"] == reports_dir
+
+
+def test_phase16b_runs_after_phase16a_when_enabled(monkeypatch):
+    calls: list[tuple[str, dict]] = []
+    _patch_phase15_functions(monkeypatch, calls)
+
+    def phase16a_recorder(**kwargs):
+        calls.append((PHASE16A_FUNCTION, kwargs))
+        return {"summary": pd.DataFrame({"function_name": [PHASE16A_FUNCTION]})}
+
+    def phase16b_recorder(**kwargs):
+        calls.append((PHASE16B_FUNCTION, kwargs))
+        return {"summary": pd.DataFrame({"function_name": [PHASE16B_FUNCTION]})}
+
+    monkeypatch.setattr(run_backtest, PHASE16A_FUNCTION, phase16a_recorder)
+    monkeypatch.setattr(run_backtest, PHASE16B_FUNCTION, phase16b_recorder)
+
+    config = _phase_config(enabled=True)
+    config["phase16a_paper_dry_run_preregistration"] = {"enabled": True}
+    config["phase16b_paper_dry_run_dashboard"] = {"enabled": True}
+    reports_dir = Path("reports")
+
+    outputs = run_backtest._run_phase15_downstream_fresh_signal_chain(
+        config=config,
+        reports_dir=reports_dir,
+        relative_momentum_outputs={},
+        ticker_outputs={},
+    )
+
+    assert [name for name, _kwargs in calls] == [
+        *PHASE15_FUNCTIONS,
+        PHASE16A_FUNCTION,
+        PHASE16B_FUNCTION,
+    ]
+    assert list(outputs)[-2:] == ["phase16a", "phase16b"]
     assert calls[-1][1]["reports_dir"] == reports_dir
 
 

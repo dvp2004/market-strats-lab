@@ -524,13 +524,15 @@ def _build_current_signal(
     previous_mode = _mode_from_exposure(previous_exposure)
 
     data_as_of_date = latest["signal_date_internal"]
+    signal_reference_date = audit_date if pd.notna(audit_date) else data_as_of_date
     staleness_days = (
-        int((audit_date.normalize() - data_as_of_date.normalize()).days)
-        if pd.notna(audit_date)
+        int((signal_reference_date.normalize() - data_as_of_date.normalize()).days)
+        if pd.notna(signal_reference_date)
         else None
     )
     freshness_passed = bool(
         staleness_days is not None
+        and staleness_days >= 0
         and staleness_days <= max_staleness
         and pd.notna(pinned_endpoint)
         and data_as_of_date > pinned_endpoint
@@ -562,7 +564,11 @@ def _build_current_signal(
     signal = pd.DataFrame(
         [
             {
-                "signal_date": audit_date.strftime("%Y-%m-%d") if pd.notna(audit_date) else "",
+                "signal_date": (
+                    signal_reference_date.strftime("%Y-%m-%d")
+                    if pd.notna(signal_reference_date)
+                    else ""
+                ),
                 "data_as_of_date": data_as_of_date.strftime("%Y-%m-%d"),
                 "generated_at_utc": datetime.now(timezone.utc).isoformat(),
                 "candidate_system_id": section.get("candidate_system_id", ""),
