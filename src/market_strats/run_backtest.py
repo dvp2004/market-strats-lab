@@ -214,6 +214,18 @@ from market_strats.analysis.tax_drag_diagnostic import (
 from market_strats.analysis.bid_ask_market_impact_diagnostic import (
     save_phase8b_bid_ask_market_impact_diagnostic,
 )
+from market_strats.analysis.fresh_current_signal_generation import (
+    save_phase15m_fresh_current_signal_generation,
+    save_phase15n_fresh_signal_audit_paper_dry_run_eligibility,
+)
+from market_strats.analysis.post_endpoint_candidate_stream import (
+    save_phase15o_post_endpoint_candidate_stream_extension,
+    save_phase15p_extended_candidate_stream_audit,
+)
+from market_strats.analysis.real_post_endpoint_source import (
+    save_phase15q_post_endpoint_data_source_creation,
+    save_phase15r_real_post_endpoint_stream_validation,
+)
 
 
 def _apply_research_period_filter_to_result(
@@ -1541,6 +1553,62 @@ def run_dual_momentum_pair(
     }
 
 
+def _phase_enabled(config: dict, section_name: str) -> bool:
+    return bool(config.get(section_name, {}).get("enabled", False))
+
+
+def _run_phase15_downstream_fresh_signal_chain(
+    *,
+    config: dict,
+    reports_dir: Path,
+    relative_momentum_outputs: dict,
+    ticker_outputs: dict[str, dict[str, pd.DataFrame]],
+) -> dict[str, dict[str, pd.DataFrame]]:
+    outputs: dict[str, dict[str, pd.DataFrame]] = {}
+
+    if _phase_enabled(config, "phase15q_post_endpoint_data_source_creation"):
+        outputs["phase15q"] = save_phase15q_post_endpoint_data_source_creation(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    if _phase_enabled(config, "phase15r_real_post_endpoint_stream_validation"):
+        outputs["phase15r"] = save_phase15r_real_post_endpoint_stream_validation(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    if _phase_enabled(config, "phase15o_post_endpoint_candidate_stream_extension"):
+        outputs["phase15o"] = save_phase15o_post_endpoint_candidate_stream_extension(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+        )
+
+    if _phase_enabled(config, "phase15p_extended_candidate_stream_audit"):
+        outputs["phase15p"] = save_phase15p_extended_candidate_stream_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    if _phase_enabled(config, "phase15m_fresh_current_signal_generation"):
+        outputs["phase15m"] = save_phase15m_fresh_current_signal_generation(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
+        )
+
+    if _phase_enabled(config, "phase15n_fresh_signal_audit_paper_dry_run_eligibility"):
+        outputs["phase15n"] = save_phase15n_fresh_signal_audit_paper_dry_run_eligibility(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    return outputs
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, help="Path to YAML config file")
@@ -1784,6 +1852,13 @@ def main() -> None:
             ticker_outputs=ticker_outputs,
             config=config,
             reports_dir=reports_dir,
+        )
+
+        _run_phase15_downstream_fresh_signal_chain(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs=relative_momentum_outputs,
+            ticker_outputs=ticker_outputs,
         )
 
     save_final_strategy_decision_report(reports_dir)
