@@ -175,26 +175,29 @@ The project has started moving from research into operational paper-trading prep
 
 Completed operational progress:
 
-| Area                                      | Status            |
-| ----------------------------------------- | ----------------- |
-| Correct Phase 6B/6C candidate source      | Fixed             |
-| Correct visual backtest reports           | Generated         |
-| Correct 36-switch operational log         | Reconstructed     |
-| Endpoint signal consistency               | Passed            |
-| Fresh-signal schema                       | Prepared          |
-| Paper-trading workflow contract           | Pre-registered    |
-| Fresh current signal                      | Blocked           |
-| Post-endpoint candidate stream            | Missing           |
-| Reusable post-endpoint rule replay engine | Not yet extracted |
-| Paper dry-run                             | Blocked           |
-| Broker/API integration                    | Blocked           |
-| Real-money deployment                     | Blocked           |
+| Area                                 | Status                                                               |
+| ------------------------------------ | -------------------------------------------------------------------- |
+| Correct Phase 6B/6C candidate source | Fixed                                                                |
+| Correct visual backtest reports      | Generated                                                            |
+| Correct 36-switch operational log    | Reconstructed                                                        |
+| Endpoint signal consistency          | Passed                                                               |
+| Fresh-signal schema                  | Prepared                                                             |
+| Paper-trading workflow contract      | Pre-registered                                                       |
+| Post-endpoint candidate stream       | Generated through Phase 15WXYZ                                       |
+| Fresh handoff file                   | Written to `data/fresh/phase15q_rule_generated_candidate_stream.csv` |
+| Fresh current signal                 | Still blocked pending downstream audit                               |
+| Phase 15Q/15R/15O/15P/15M/15N rerun  | Pending inspection                                                   |
+| Paper dry-run                        | Blocked                                                              |
+| Broker/API integration               | Blocked                                                              |
+| Real-money deployment                | Blocked                                                              |
 
-The latest operational blocker is not strategy logic. It is implementation:
+The latest operational blocker is no longer the historical switch logic or the absence of any post-endpoint stream.
 
-> The project can read the pinned historical final candidate, but it cannot yet replay the Phase 6B/6C rule logic after 2026-05-01 to generate fresh `target_offensive_weight` rows.
+The current blocker is downstream consumption and audit:
 
-Until that reusable replay engine exists, there can be no valid fresh signal, no paper dry-run, and no paper trading.
+> The project has generated a valid post-endpoint candidate stream, but Phase 15Q/15R/15O/15P/15M/15N must still consume and audit that stream before any paper-dry-run pre-registration can be considered.
+
+Until that downstream fresh-signal chain passes, there can be no valid paper dry-run, no broker/API integration, no paper trading, and no real-money deployment.
 
 ---
 
@@ -202,11 +205,17 @@ Until that reusable replay engine exists, there can be no valid fresh signal, no
 
 The immediate next engineering task is:
 
-> Expose or reuse the true Phase 6B/6C loose-relief rule logic so `target_offensive_weight` can be calculated on post-endpoint market data.
+> Run and inspect the downstream Phase 15Q/15R/15O/15P/15M/15N chain using the valid Phase 15WXYZ post-endpoint candidate stream.
 
-The project must not accept fake target weights.
+The project must verify that downstream phases consume the fresh handoff file rather than falling back to the pinned in-memory final-candidate frame.
 
-Valid future target-weight sources include:
+The valid handoff file is:
+
+```text
+data/fresh/phase15q_rule_generated_candidate_stream.csv
+```
+
+Valid target-weight sources include:
 
 ```text
 phase6b_rule_engine
@@ -224,7 +233,11 @@ carry_forward_only
 unknown
 ```
 
-The next useful milestone is not another audit-only phase. The next useful milestone is a genuine post-endpoint rule-generated candidate stream.
+The next useful milestone is not another strategy variant and not another broad audit loop.
+
+The next useful milestone is:
+
+> A downstream fresh-signal audit showing whether the post-endpoint candidate stream can produce a valid, non-stale, benchmark-updated current signal.
 
 ---
 
@@ -264,7 +277,7 @@ The technical + macro ML v1 branch was paused/killed commercially after failing 
 
 ### 9. Operational paper-trading work is still incomplete
 
-The project has reconstructed the canonical historical switch log, but it still lacks post-endpoint rule replay and a valid fresh current signal.
+The project has reconstructed the canonical historical switch log and generated a valid post-endpoint candidate stream through the Phase 15WXYZ rule-replay extension. However, the downstream Phase 15Q/15R/15O/15P/15M/15N chain still has to consume, validate, and audit that stream before the project can claim a valid fresh current signal or begin any paper dry-run.
 
 ---
 
@@ -348,12 +361,14 @@ The current final candidate is worth continued operational testing, but only und
 * do not mutate canonical reports;
 * do not fake fresh signals;
 * do not manually fill target weights;
-* do not claim paper-trading readiness before a reusable post-endpoint rule replay engine works;
+* do not claim paper-trading readiness before downstream fresh-signal audits pass;
 * do not use real money.
 
 The next real milestone is:
 
-> Generate a genuine post-endpoint rule-based candidate stream using the same Phase 6B/6C logic that produced the canonical `target_offensive_weight`.
+> Confirm that the valid Phase 15WXYZ post-endpoint candidate stream is consumed correctly by Phase 15Q/15R/15O/15P/15M/15N and determine whether it can produce an audited fresh current signal.
+
+Paper dry-run, broker/API integration, live trading, and real-money deployment remain blocked.
 
 ---
 
@@ -780,7 +795,7 @@ It also beat SPY Buy & Hold on major risk-adjusted metrics, while trailing it on
 | 3D overlay passes strict SPY 12M triple gate in holdout       | Survived           | Higher CAGR, higher Calmar, better max DD                       |
 | 3D overlay passes strict SPY 12M triple gate in reference     | Failed / near miss | Slightly worse max DD than SPY 12M                              |
 | 3D overlay beats SPY Buy & Hold on raw wealth                 | Failed             | SPY Buy & Hold still has higher raw CAGR                        |
-| 3D overlay is current best overall risk-adjusted candidate    | Survived           | Strongest current balance of CAGR, drawdown, Calmar, volatility |
+| 3D overlay became the best risk-adjusted candidate at the Phase 3 checkpoint | Survived | It became the strongest candidate at that stage, before later execution-realistic guard and relief tests |
 | More parameter testing is justified immediately               | Not yet            | Overfitting risk after strong result                            |
 | Next step should be final documentation and repository polish | Survived           | Current branch reached a validated checkpoint                   |
 
@@ -880,6 +895,8 @@ Base universe
 vs
 Base + Oil
 ```
+
+These Phase 3B figures come from the controlled asset-expansion diagnostic setup and should not be read as a replacement for the canonical Phase 3 headline results.
 
 ### USO Allocator Impact
 
@@ -1002,7 +1019,7 @@ Phase 4A tested whether the 3D confirmed overlay survived a stress-aware executi
 | SPY drawdown below -10% |           25 bps |
 | SPY drawdown below -20% |           50 bps |
 
-Costs are applied only on overlay switch days.
+Costs were applied only on overlay switch days.
 
 ### Result
 
@@ -1011,11 +1028,11 @@ Costs are applied only on overlay switch days.
 | Flat 5 bps baseline     | 10.22% |  0.429 |      -23.84% |
 | Dynamic stress slippage |  9.49% |  0.393 |      -24.12% |
 
-Conclusion:
+Phase 4A conclusion:
 
 > Dynamic stress slippage reduced full-period CAGR by 0.73 percentage points and Calmar by 0.036. The defensive profile survived, but the wealth-growth edge weakened.
 
-The dynamic model preserved a better drawdown profile than SPY 12M, but failed the strict full-period SPY 12M triple gate because CAGR fell below SPY 12M's pinned 9.68%.
+The dynamic model preserved a better drawdown profile than SPY 12M Momentum, but failed the strict full-period SPY 12M triple gate because CAGR fell below SPY 12M's pinned 9.68%.
 
 ---
 
@@ -1033,13 +1050,13 @@ Phase 4B tested whether individual regime switches added value versus the counte
 | 25 bps switches |           13 |     46.154% |         -0.158 pts |
 | 50 bps switches |            7 |     28.571% |         -0.864 pts |
 
-Conclusion:
+Phase 4B conclusion:
 
 > Switch quality was weak/mixed. The aggregate overlay remained defensively useful, but individual switch timing did not show a reliable event-level edge.
 
 Final Phase 4B verdict:
 
-> The system's aggregate defensive value is stronger than its event-level switch timing quality.
+> The system's aggregate defensive value was stronger than its event-level switch timing quality.
 
 ---
 
@@ -1063,7 +1080,7 @@ Switches were grouped by:
 | Mild drawdown -5% to -10% |           19 |     63.158% |         +0.719 pts |
 | Near highs 0% to -5%      |           13 |     38.462% |         -0.341 pts |
 
-Conclusion:
+Phase 4C conclusion:
 
 > Switch failures were concentrated in high-friction / deep-drawdown switches.
 
@@ -1092,7 +1109,7 @@ The main candidate was:
 | near_high_whipsaw_guard   | 9.43% |  0.391 |      -24.12% |           52 |
 | combined guard            | 9.87% |  0.409 |      -24.12% |           46 |
 
-Conclusion:
+Phase 4D conclusion:
 
 > The deep_drawdown_guard was the best guarded-switch variant. It improved CAGR, improved Calmar, reduced switch count, and did not worsen max drawdown.
 
@@ -1110,7 +1127,7 @@ Phase 4E tested whether `deep_drawdown_guard` improved results for the right rea
 | -------------------: | -----------: | ---------------: | -----------------: | ----------: | ------------------: | -----------: |
 |                    6 |       50 bps |         -25.461% |         -1.082 pts |     16.667% |          -2.891 pts |      16.667% |
 
-Conclusion:
+Phase 4E conclusion:
 
 > The removed switches were genuinely harmful. They occurred in deep drawdowns, carried high execution cost, and had strongly negative average value added.
 
@@ -1152,7 +1169,7 @@ Phase 4F tested whether `deep_drawdown_guard` was robust enough to become the ex
 
 ### Final Phase 4F Verdict
 
-> deep_drawdown_guard is validated as the execution-realistic overlay candidate.
+> deep_drawdown_guard was validated as the execution-realistic overlay candidate.
 
 Important distinction:
 
@@ -1175,7 +1192,7 @@ The guarded version should **not** silently replace the original Phase 3 system.
 
 Final Phase 4 conclusion:
 
-> The original 3D overlay remains the Phase 3 canonical system. The `deep_drawdown_guard` variant is validated as the best execution-realistic overlay candidate.
+> The original 3D overlay remains the Phase 3 canonical system. The `deep_drawdown_guard` variant was validated as the best execution-realistic overlay candidate at the Phase 4 checkpoint.
 
 ---
 
@@ -1249,7 +1266,7 @@ Best breadth result:
 
 Final Phase 5 verdict:
 
-> Breadth confirmation is rejected for promotion. The improvement was too small to justify added complexity.
+> Breadth confirmation was rejected for promotion. The improvement was too small to justify added complexity.
 
 ---
 
@@ -1276,7 +1293,7 @@ Tested stress inputs:
 | Defensive trend-distance stress | 9.84% |  0.408 |      -24.12% | Rejected / not useful |
 | Defensive composite stress      | 9.81% |  0.407 |      -24.12% | Rejected / not useful |
 
-Conclusion:
+Phase 6A conclusion:
 
 > Defensive stress filters generally worsened performance and sometimes materially worsened drawdown.
 
@@ -1288,7 +1305,7 @@ Conclusion:
 
 Phase 6A conclusion:
 
-> Defensive stress confirmation is rejected. Offensive relief looked promising, but failed initial validation because it damaged the post-crisis 2011–2015 episode and reduced switch count too aggressively.
+> Defensive stress confirmation was rejected. Offensive relief looked promising, but failed initial validation because it damaged the post-crisis 2011–2015 episode and reduced switch count too aggressively.
 
 ---
 
@@ -1315,7 +1332,7 @@ The initial Phase 6B gate logic incorrectly selected the highest headline-score 
 
 Corrected conclusion:
 
-> `baseline_relief` remains rejected despite stronger headline CAGR because it damaged the post-crisis episode and reduced switches too aggressively. `loose_relief` passed all Phase 6B validation gates.
+> `baseline_relief` remained rejected despite stronger headline CAGR because it damaged the post-crisis episode and reduced switches too aggressively. `loose_relief` passed all Phase 6B validation gates.
 
 ---
 
@@ -1333,7 +1350,7 @@ Phase 6C compared the final candidate set.
 
 ### Full-Period Final Comparison
 
-| Candidate                             |       CAGR |    Calmar | Max Drawdown |      End Value |                                Trade Count |
+| Candidate                             |       CAGR |    Calmar | Max Drawdown |      End Value |                       Trade / Switch Count |
 | ------------------------------------- | ---------: | --------: | -----------: | -------------: | -----------------------------------------: |
 | SPY Buy & Hold                        |     10.90% |     0.197 |      -55.19% |     $79,306.62 |                                          1 |
 | SPY 12M Momentum                      |      9.68% |     0.287 |      -33.72% |     $63,497.30 |                                         17 |
@@ -1365,7 +1382,7 @@ Phase 6C compared the final candidate set.
 
 Final Phase 6C verdict:
 
-> Phase 6B `loose_relief` is promoted as the best execution-realistic candidate.
+> Phase 6B `loose_relief` was promoted as the best execution-realistic candidate.
 
 Important distinction:
 
@@ -1377,7 +1394,7 @@ Important distinction:
 
 Phases 2–6 transformed the project from simple ETF timing into a disciplined regime-switch framework.
 
-The final hierarchy after Phase 6 is:
+The final hierarchy after Phase 6 was:
 
 | Role                                   | System                                                            |
 | -------------------------------------- | ----------------------------------------------------------------- |
@@ -1429,22 +1446,22 @@ Phase 7A checked whether the final Phase 6C checkpoint was internally consistent
 
 Phase 7A caught an important ambiguity.
 
-| Concept              | Value | Meaning                                                           |
-| -------------------- | ----: | ----------------------------------------------------------------- |
-| Metric trade count   |    66 | Trade count reported by the final metrics framework               |
-| Overlay switch count |    36 | Number of overlay regime switches in the `loose_relief` candidate |
+| Concept              | Value | Meaning                                             |
+| -------------------- | ----: | --------------------------------------------------- |
+| Metric trade count   |    66 | Trade count reported by the final metrics framework |
+| Overlay switch count |    36 | Number of overlay regime switches in `loose_relief` |
 
-These are not the same thing. The audit now checks them separately.
+These are not the same thing. The audit checks them separately.
 
 Phase 7A verdict:
 
-> Final checkpoint integrity passed. The Phase 6C candidate metrics, endpoint pin, report existence, and README story are internally consistent.
+> Final checkpoint integrity passed. The Phase 6C candidate metrics, endpoint pin, report existence, and README story were internally consistent.
 
 ---
 
 ## Phase 7B: Lookahead / Signal-Execution Audit
 
-Phase 7B audited whether the final candidate’s signal and execution path could be reconstructed without obvious lookahead leakage.
+Phase 7B audited whether the final candidate's signal and execution path could be reconstructed without obvious lookahead leakage.
 
 | Check                                                              | Result |
 | ------------------------------------------------------------------ | ------ |
@@ -1485,7 +1502,7 @@ slippage_without_turnover_rows = 0
 
 Phase 7B verdict:
 
-> No obvious lookahead issue was found in the audited final candidate. This materially strengthens the checkpoint, but it does not make the system production-ready.
+> No obvious lookahead issue was found in the audited final candidate. This materially strengthened the checkpoint, but it did not make the system production-ready.
 
 ---
 
@@ -1574,7 +1591,7 @@ The main suspicion was:
 
 Final Phase 7C verdict:
 
-> Secondary data-source reliability survived with caveat. Stooq confirms broad source agreement, but Stooq close is not a perfect validator of yfinance adjusted-close total-return data.
+> Secondary data-source reliability survived with caveat. Stooq confirmed broad source agreement, but Stooq close was not a perfect validator of yfinance adjusted-close total-return data.
 
 Important limitation:
 
@@ -2117,7 +2134,7 @@ Phase 8F verdict:
 
 Correct interpretation:
 
-> The project documented why the final candidate remains research-only and not production-ready. This is a boundary-control pass, not production approval.
+> The project documented why the final candidate remains research-only and not production-ready. This was a boundary-control pass, not production approval.
 
 ---
 
@@ -2146,7 +2163,7 @@ Phase 8G verdict:
 
 Correct interpretation:
 
-> Phase 8G confirmed that Phase 8 is internally consistent as a research checkpoint. This closes Phase 8 documentation/config consistency, but it is not production approval and does not change the strategy hierarchy.
+> Phase 8G confirmed that Phase 8 was internally consistent as a research checkpoint. This closed Phase 8 documentation/config consistency, but it was not production approval and did not change the strategy hierarchy.
 
 ---
 
@@ -3435,7 +3452,7 @@ It did not calculate regime scores, assign weights, create signals, create alloc
 | Audit role                    | Regime-scoring diagnostic-panel content audit only |
 | Source phase                  |                                          Phase 11E |
 | Source templates present      |                                               True |
-| Source template count         |                                                  9 |
+| Source template count         |                                                  6 |
 | Phase 11E result passed       |                                               True |
 | Component content passed      |                                               True |
 | Direction content passed      |                                               True |
@@ -3972,7 +3989,7 @@ Correct interpretation:
 
 Final Phase 12 interpretation:
 
-> The diagnostic score correctly synthesised the existing evidence as fragile. This did not create a trading system. It made the caveat stack explicit and closed the SPY regime-switch research arc as a disciplined baseline framework.
+> The diagnostic score synthesised the existing evidence as fragile under the pre-registered Phase 12 grammar. This did not create a trading system. It made the caveat stack explicit and closed the SPY regime-switch research arc as a disciplined baseline framework.
 
 # Phase 13: Multi-Factor Model Path and Paper-Trading Route Decision
 
@@ -3982,7 +3999,7 @@ Phase 13 pivoted the project from the frozen SPY regime-switch research arc towa
 
 This phase also forced an important reality check.
 
-The first technical + macro ML branch did **not** produce a holdout-worthy model. After that failure, Phase 13 redirected the project toward the fastest responsible paper-trading route:
+The first technical + macro ML branch did **not** produce a model strong enough to justify holdout evaluation. After that failure, Phase 13 redirected the project toward the fastest responsible paper-trading route:
 
 > Move the best existing non-ML overlay candidate into visual backtest, signal-mapping, and paper-trading readiness work.
 
@@ -5276,7 +5293,7 @@ Phase 13AV verdict:
 
 Correct interpretation:
 
-> Technical + macro ML v1 is paused/killed for now. It may only be reconsidered later if genuinely new feature families are added, such as fundamental, sentiment, or market-stress features. More tuning of the same technical + macro setup is blocked.
+> Technical + macro ML v1 is commercially paused for now. It may only be reconsidered later if genuinely new feature families are added, such as fundamental, sentiment, or market-stress features. More tuning of the same technical + macro setup is blocked.
 
 ---
 
@@ -5974,6 +5991,8 @@ Phase 14H verdict:
 
 > Phase 14H completed the corrected visual backtest audit and allowed paper-workflow pre-registration as the next bounded step.
 
+Note: Phase labels follow the actual implementation/checkpoint history. Phase 14I/14J were added to export and audit the corrected candidate stream before the corrected Phase 14G/14H visual re-run was finalised.
+
 ---
 
 # Phase 15: Paper-Trading Workflow and Operational Readiness
@@ -5989,9 +6008,9 @@ The key operational questions became:
 3. Can post-endpoint candidate rows be generated using the actual Phase 6B/6C rule logic?
 4. Can paper-trading workflow be started without faking readiness?
 
-Final Phase 15 status as of Phase 15T:
+Final Phase 15 status after the Phase 15T blocker and later Phase 15WXYZ repair:
 
-> The historical 36-switch operational log is solved. The fresh post-endpoint rule-replay stream is still missing. Paper dry-run and paper trading remain blocked.
+> The historical 36-switch operational log is solved. Phase 15T correctly found that the historical final-candidate frame could not itself generate post-endpoint rows. Later, Phase 15WXYZ repaired this by rerunning the existing Phase 6B/6C rule engine on an extended fresh-data clone while preserving the canonical 2026-05-01 research endpoint. A valid 8-row post-endpoint candidate stream was generated and handed off, but downstream Phase 15Q/15R/15O/15P/15M/15N consumption and audit still require inspection. Paper dry-run and paper trading remain blocked.
 
 ---
 
@@ -6249,15 +6268,15 @@ Phase 15F pre-registered how fresh data should be added beyond the pinned endpoi
 
 ### Fresh Data Source Policy
 
-| Policy | Result |
-|---|
-| Allowed primary source: `existing_project_market_data_pipeline` |
-| Allowed fallback source: `manual_fresh_spy_ohlcv_file` |
-| Minimum required fields: `date`, `SPY_close`, `SPY_return` |
-| Require data beyond pinned endpoint |
-| Require data-as-of date field |
-| Require source timestamp field |
-| No silent forward-fill beyond latest real date |
+| Policy                     | Result                                   |
+| -------------------------- | ---------------------------------------- |
+| Allowed primary source     | `existing_project_market_data_pipeline`  |
+| Allowed fallback source    | `manual_fresh_spy_ohlcv_file`            |
+| Minimum required fields    | `date`, `SPY_close`, `SPY_return`        |
+| Require data beyond endpoint | True                                   |
+| Require data-as-of date field | True                                  |
+| Require source timestamp field | True                                 |
+| Silent forward-fill beyond latest real date | Forbidden               |
 
 ### Future Current Signal Schema
 
@@ -6821,56 +6840,153 @@ Phase 15T verdict:
 
 ---
 
+---
+
+## Phase 15WXYZ: Fresh Extension Rule-Replay Breakthrough
+
+Phase 15WXYZ resolved the blocker identified in Phase 15T.
+
+The key discovery was that the true Phase 6B/6C target-weight engine was not a static mapper from the pinned historical final-candidate frame. The actual replay logic lives in:
+
+```text
+src/market_strats/strategies/regime_switch_overlay.py
+```
+
+The key function is:
+
+```text
+run_spy_trend_regime_switch_overlay(...)
+```
+
+This function computes the executable target allocation through:
+
+```text
+target_use_defensive = signal_use_defensive.shift(1)
+target_defensive_weight = target_use_defensive.astype(float)
+target_offensive_weight = 1.0 - target_defensive_weight
+```
+
+Correct interpretation:
+
+> `_find_final_candidate_frame` exposes the pinned historical final candidate, but the fresh extension must rerun the actual project rule engine on extended data.
+
+### Fresh Extension Method
+
+Phase 15WXYZ used the correct bounded replay route:
+
+```text
+1. Clone the config.
+2. Preserve the canonical 2026-05-01 endpoint in the original config.
+3. Remove or extend research_period.end_date only inside the fresh clone.
+4. Rerun the existing project pipeline on extended data in a separate fresh reports folder.
+5. Extract the fresh final candidate through the existing final-candidate discovery path.
+6. Export only rows after the pinned 2026-05-01 endpoint.
+```
+
+This preserved the canonical research baseline while creating a separate post-endpoint extension.
+
+### Fresh Extension Result
+
+| Item                           | Result                                                    |
+| ------------------------------ | --------------------------------------------------------- |
+| Post-endpoint rows             | 8                                                         |
+| Fresh final candidate max date | 2026-05-13                                                |
+| Rule-generated stream valid    | True                                                      |
+| Handoff file written           | True                                                      |
+| Decision                       | `phase15q_15r_rerun_allowed_next`                         |
+| Handoff file                   | `data/fresh/phase15q_rule_generated_candidate_stream.csv` |
+
+The exported fresh stream covered:
+
+```text
+2026-05-04 to 2026-05-13
+```
+
+### Signal Price Correction
+
+The first fresh export had a semantic bug: `SPY_close` values were around `71,000` because the overlay output's `adj_close` column represented strategy equity rather than SPY price.
+
+This was corrected so the export uses:
+
+```text
+signal_price
+```
+
+as the SPY/proxy price field.
+
+Corrected SPY/proxy values were around:
+
+```text
+718–742
+```
+
+### Phase 15WXYZ Verdict
+
+> Phase 15WXYZ solved the fresh-extension generation blocker. A real rule-generated post-endpoint candidate stream now exists.
+
+Important limitation:
+
+> This does not make the project paper-trading ready. The downstream Phase 15Q/15R/15O/15P/15M/15N chain still has to consume, validate, and audit the fresh handoff file before any paper dry-run can be considered.
+
+---
+
 ## Phase 15 Current Bottom Line
 
-As of Phase 15T, the project has solved several major operational blockers:
+Phase 15 solved several major operational blockers:
 
-| Area                                                  | Status                            |
-| ----------------------------------------------------- | --------------------------------- |
-| Correct Phase 6B/6C financial candidate stream        | Solved                            |
-| Correct visual backtest source                        | Solved                            |
-| Correct visual reports                                | Solved                            |
-| Canonical 36-switch historical operational log        | Solved                            |
-| Correct switch-definition column                      | Solved: `target_offensive_weight` |
-| Pinned endpoint signal consistency                    | Solved                            |
-| Fresh current-signal schema                           | Solved                            |
-| Paper workflow contract                               | Pre-registered                    |
-| Fresh post-endpoint candidate rows                    | Missing                           |
-| Reusable Phase 6B/6C post-endpoint rule replay engine | Missing                           |
-| Valid fresh current signal                            | Blocked                           |
-| Paper dry-run                                         | Blocked                           |
-| Paper trading                                         | Blocked                           |
-| Broker/API integration                                | Blocked                           |
-| Real-money deployment                                 | Blocked                           |
+| Area                                                 | Status                                                             |
+| ---------------------------------------------------- | ------------------------------------------------------------------ |
+| Correct Phase 6B/6C financial candidate stream       | Solved                                                             |
+| Correct visual backtest source                       | Solved                                                             |
+| Correct visual reports                               | Solved                                                             |
+| Canonical 36-switch historical operational log       | Solved                                                             |
+| Correct switch-definition column                     | Solved: `target_offensive_weight`                                  |
+| Pinned endpoint signal consistency                   | Solved                                                             |
+| Fresh current-signal schema                          | Solved                                                             |
+| Paper workflow contract                              | Pre-registered                                                     |
+| Phase 15T historical final-frame replay blocker      | Diagnosed                                                          |
+| Phase 15WXYZ fresh rule-engine replay                | Solved                                                             |
+| Fresh post-endpoint candidate rows                   | Generated: 8 rows                                                  |
+| Fresh handoff file                                   | Written: `data/fresh/phase15q_rule_generated_candidate_stream.csv` |
+| Downstream Phase 15Q/15R/15O/15P/15M/15N consumption | Pending inspection                                                 |
+| Valid audited fresh current signal                   | Still blocked pending downstream audit                             |
+| Paper dry-run                                        | Blocked                                                            |
+| Paper trading                                        | Blocked                                                            |
+| Broker/API integration                               | Blocked                                                            |
+| Real-money deployment                                | Blocked                                                            |
 
-The repeated failure is now clear:
+The repeated historical failure was:
 
 ```text
 post_endpoint_rows = 0
 ```
 
-The project can read the historical final candidate. It cannot yet generate fresh post-endpoint candidate rows.
+That blocker was correctly diagnosed through Phase 15T.
+
+The later Phase 15WXYZ repair changed the state:
+
+```text
+post_endpoint_rows = 8
+rule_generated_stream_valid = True
+handoff_file_written = True
+```
 
 Current blocker:
 
-> `_find_final_candidate_frame` exposes the pinned historical candidate output. It does not replay the Phase 6B/6C `loose_relief` rule logic after 2026-05-01.
+> The project now has a valid rule-generated post-endpoint candidate stream, but the downstream Phase 15Q/15R/15O/15P/15M/15N chain must still consume and audit that stream before a fresh current signal or paper dry-run can be considered.
 
-Next required implementation:
+Until that downstream chain passes:
 
-> Extract or expose a reusable Phase 6B/6C rule-replay engine that can compute `target_offensive_weight` on post-endpoint market and allocator data without mutating the canonical 2026-05-01 research baseline.
-
-Until that exists:
-
-* no valid fresh signal;
+* no valid audited fresh signal;
 * no paper dry-run;
 * no paper trading;
 * no broker/API integration;
 * no live trading;
 * no real-money deployment.
 
-Final Phase 15T interpretation:
+Final Phase 15 interpretation:
 
-> The project is no longer blocked by research strategy design. It is blocked by implementation architecture: the final candidate must be made replayable beyond the pinned research endpoint.
+> The project is no longer blocked by historical switch reconstruction or absence of a post-endpoint candidate stream. It is now blocked by downstream fresh-signal consumption, validation, and audit.
 
 ---
 
@@ -7219,7 +7335,7 @@ No score-to-signal conversion exists.
 
 ## ML / Multi-Factor Model Limitations
 
-The Phase 13 technical + macro ML v1 branch did not produce a holdout-worthy model.
+The Phase 13 technical + macro ML v1 branch did not produce a model strong enough to justify holdout evaluation.
 
 Important ML boundaries:
 
@@ -7256,17 +7372,21 @@ Completed operational progress includes:
 * corrected Phase 6B/6C source identity;
 * corrected visual backtest reports;
 * canonical 36-switch operational reconstruction;
+* correct executable switch-definition column: `target_offensive_weight`;
 * endpoint signal consistency audit;
 * paper-trading workflow contract pre-registration;
-* fresh-signal schema preparation.
+* fresh-signal schema preparation;
+* Phase 15WXYZ fresh-extension pipeline;
+* generation of 8 valid post-endpoint candidate rows through `2026-05-13`;
+* fresh handoff file written to `data/fresh/phase15q_rule_generated_candidate_stream.csv`.
 
 Remaining operational concerns include:
 
-* fresh/current signal generation;
-* post-endpoint candidate stream validation;
-* operational source-priority correctness;
+* downstream Phase 15Q/15R/15O/15P/15M/15N consumption and audit;
+* confirming that downstream phases consume the fresh handoff file rather than falling back to `in_memory_final_candidate_frame`;
 * benchmark update checks;
 * signal freshness checks;
+* current-signal validity checks;
 * paper-dry-run eligibility;
 * monitoring/reporting readiness.
 
@@ -7319,6 +7439,15 @@ The project has caught and fixed multiple implementation and research-process is
 * Phase 7C fixed Stooq CSV authentication handling and API-key environment-variable support;
 * Phase 7C.2 attributed Stooq/yfinance differences to price-basis/distribution treatment rather than leaving them as unresolved source failures;
 * Phase 8A tax-drag test switched to approximate float assertions after floating-point precision caused an exact equality test failure.
+* Phase 14 visual backtest initially used the wrong source, selecting a relative-momentum allocator stream instead of the intended Phase 6B/6C `loose_relief` candidate;
+* Phase 14 source-identity and metric-reconciliation audit blocked paper-workflow progression until the correct Phase 6B/6C stream was exported;
+* Phase 14 corrected stream export reconciled financial metrics but exposed an operational switch-count mismatch;
+* Phase 15 switch reconstruction initially used noisy `position`, `cash_position`, and turnover semantics, producing incorrect switch counts;
+* Phase 15I/15J fixed the operational switch definition by identifying `target_offensive_weight` as the executable final allocation column and reconstructing the correct 36-switch history;
+* Phase 15 fresh-signal attempts initially wrote signal-shaped files without real post-endpoint candidate rows, correctly blocking paper dry-run progression;
+* Phase 15T revealed that `_find_final_candidate_frame` exposed the pinned historical candidate frame but did not replay Phase 6B/6C logic beyond the endpoint;
+* Phase 15WXYZ fixed the fresh-extension architecture by rerunning the existing project pipeline on an extended fresh-data clone while preserving the canonical `2026-05-01` baseline;
+* Phase 15WXYZ initial export used strategy equity-like values as `SPY_close`; this was corrected to use `signal_price` as the SPY/proxy price field.
 
 ---
 
@@ -7388,7 +7517,7 @@ Get-Content .env | ForEach-Object { if ($_ -match "^\s*([^#][^=]+)=(.*)$") { [En
 
 ---
 
-# Key Reports Generated
+# Key Reports and Artefacts
 
 The framework writes generated artefacts to:
 
@@ -7442,7 +7571,9 @@ reports/phase15h_switch_log_reconciliation_gate_report.csv
 reports/phase15h_switch_log_reconciliation_conclusion.csv
 ```
 
-## Phase 15O Post-Endpoint Candidate Stream Extension Reports
+## Expected Phase 15Q/15R/15O/15P Downstream Reports
+
+The following reports are expected after the downstream Phase 15Q/15R/15O/15P rerun consumes the Phase 15WXYZ fresh handoff file. They should not be treated as completed checkpoint artefacts until they exist locally and their conclusion reports have been inspected.
 
 ```text
 reports/phase15o_post_endpoint_candidate_stream.csv
@@ -7452,11 +7583,6 @@ reports/phase15o_candidate_stream_extension_required_column_check.csv
 reports/phase15o_candidate_stream_extension_summary.csv
 reports/phase15o_candidate_stream_extension_gate_report.csv
 reports/phase15o_candidate_stream_extension_conclusion.csv
-```
-
-## Phase 15P Extended Candidate Stream Audit Reports
-
-```text
 reports/phase15p_extended_stream_config_flag_check.csv
 reports/phase15p_extended_stream_report_inventory_check.csv
 reports/phase15p_extended_stream_phase15o_result_check.csv
@@ -7468,11 +7594,6 @@ reports/phase15p_extended_stream_scope_boundary_check.csv
 reports/phase15p_extended_stream_summary.csv
 reports/phase15p_extended_stream_gate_report.csv
 reports/phase15p_extended_stream_conclusion.csv
-```
-
-## Phase 15Q Real Post-Endpoint Source Creation Reports
-
-```text
 reports/phase15q_post_endpoint_candidate_stream.csv
 reports/phase15q_data_source_creation_summary.csv
 reports/phase15q_data_source_required_column_check.csv
@@ -7482,11 +7603,6 @@ reports/phase15q_data_source_scope_boundary_check.csv
 reports/phase15q_data_source_summary.csv
 reports/phase15q_data_source_gate_report.csv
 reports/phase15q_data_source_conclusion.csv
-```
-
-## Phase 15R Real Post-Endpoint Source Validation Reports
-
-```text
 reports/phase15r_real_source_config_flag_check.csv
 reports/phase15r_real_source_report_inventory_check.csv
 reports/phase15r_real_source_phase15q_result_check.csv

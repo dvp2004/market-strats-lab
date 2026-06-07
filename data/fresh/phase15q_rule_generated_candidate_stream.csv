@@ -1,0 +1,9 @@
+date,SPY_close,SPY_return,target_offensive_weight,target_weight_source,data_source_timestamp,pinned_research_endpoint,is_out_of_sample_extension,benchmark_update_flag,stream_row_validity_flag,blocking_warnings
+2026-05-04,718.010009765625,0.0,1.0,verified_project_generated,2026-05-04,2026-05-01,True,pass,pass,
+2026-05-05,723.77001953125,0.008022185884992261,1.0,verified_project_generated,2026-05-05,2026-05-01,True,pass,pass,
+2026-05-06,733.8300170898438,0.013899439445017592,1.0,verified_project_generated,2026-05-06,2026-05-01,True,pass,pass,
+2026-05-07,731.5800170898438,-0.0030661051573263043,1.0,verified_project_generated,2026-05-07,2026-05-01,True,pass,pass,
+2026-05-08,737.6199951171875,0.008256073001242203,1.0,verified_project_generated,2026-05-08,2026-05-01,True,pass,pass,
+2026-05-11,739.2999877929688,0.002277585595431564,1.0,verified_project_generated,2026-05-11,2026-05-01,True,pass,pass,
+2026-05-12,738.1799926757812,-0.0015149399914519135,1.0,verified_project_generated,2026-05-12,2026-05-01,True,pass,pass,
+2026-05-13,742.3099975585938,0.005594848036780231,1.0,verified_project_generated,2026-05-13,2026-05-01,True,pass,pass,

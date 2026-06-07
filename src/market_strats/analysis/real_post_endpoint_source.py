@@ -11,9 +11,9 @@ def _bool_value(value: Any) -> bool:
         return value
 
     clean = str(value).strip().lower()
-    if clean in {"true", "1", "yes", "y"}:
+    if clean in {"true", "1", "yes", "y", "pass", "passed"}:
         return True
-    if clean in {"false", "0", "no", "n", "", "nan", "none"}:
+    if clean in {"false", "0", "no", "n", "", "nan", "none", "fail", "failed"}:
         return False
     return bool(value)
 
@@ -23,8 +23,11 @@ def _section(config: dict[str, Any], key: str) -> dict[str, Any]:
 
 
 def _read_csv_if_exists(path: str | Path) -> pd.DataFrame:
+    if path is None or str(path).strip() == "":
+        return pd.DataFrame()
+
     p = Path(path)
-    if not p.exists():
+    if not p.exists() or not p.is_file():
         return pd.DataFrame()
     return pd.read_csv(p)
 
@@ -192,7 +195,15 @@ def _config_flag_check(config: dict[str, Any], expected: dict[str, bool]) -> pd.
             }
         )
 
-    out = pd.DataFrame(rows)
+    out = pd.DataFrame(
+        rows,
+        columns=[
+            "config_key",
+            "expected_enabled",
+            "actual_enabled",
+            "passed",
+        ],
+    )
     out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
     return out
 
@@ -216,9 +227,17 @@ def _load_source(section: dict[str, Any]) -> tuple[pd.DataFrame, str, str]:
     ]
 
     for source_type, path in ordered:
+        if path is None or str(path).strip() == "":
+            continue
+
         p = Path(path)
-        if p.exists():
+        if not p.exists() or not p.is_file():
+            continue
+
+        try:
             return pd.read_csv(p), source_type, str(p)
+        except (OSError, pd.errors.EmptyDataError, pd.errors.ParserError):
+            continue
 
     return pd.DataFrame(), "no_source_available", ""
 
@@ -514,19 +533,44 @@ def save_phase15q_post_endpoint_data_source_creation(
     reports_path = Path(reports_dir)
     reports_path.mkdir(parents=True, exist_ok=True)
 
-    phase15p_check = _phase_result_check(
-        section.get("source_reports", {}).get("phase15p_conclusion", ""),
-        section.get("source_reports", {}).get("phase15p_gate_report", ""),
-        "Phase 15P",
+    source_reports = section.get("source_reports", {})
+
+    # Phase 15Q originally depended on old Phase 15P.
+    # After Phase 15W/15X/15Y/15Z, the correct upstream source is Phase 15Z.
+    # Keep Phase 15P as fallback so older tests/configs do not break.
+    upstream_label = "Phase 15Z" if source_reports.get("phase15z_conclusion") else "Phase 15P"
+    upstream_conclusion = source_reports.get("phase15z_conclusion") or source_reports.get(
+        "phase15p_conclusion",
+        "",
+    )
+    upstream_gate_report = source_reports.get("phase15z_gate_report") or source_reports.get(
+        "phase15p_gate_report",
+        "",
+    )
+
+    upstream_check = _phase_result_check(
+        upstream_conclusion,
+        upstream_gate_report,
+        upstream_label,
     )
 
     candidate_stream, creation_summary = _build_phase15q_stream(section)
 
-    output_file = Path(section.get("output_file", "reports/phase15q_post_endpoint_candidate_stream.csv"))
+    output_file = Path(
+        section.get(
+            "output_file",
+            "reports/phase15q_post_endpoint_candidate_stream.csv",
+        )
+    )
     output_file.parent.mkdir(parents=True, exist_ok=True)
     candidate_stream.to_csv(output_file, index=False)
 
-    handoff_file = Path(section.get("handoff_file_for_phase15o", "data/fresh/phase15o_manual_candidate_stream.csv"))
+    handoff_file = Path(
+        section.get(
+            "handoff_file_for_phase15o",
+            "data/fresh/phase15o_manual_candidate_stream.csv",
+        )
+    )
     handoff_file.parent.mkdir(parents=True, exist_ok=True)
 
     if _bool_value(creation_summary.iloc[0]["candidate_stream_valid"]):
@@ -546,20 +590,34 @@ def save_phase15q_post_endpoint_data_source_creation(
     boundary = _boundary_check(section, "phase15r_boundary")
     scope = _scope_check(section)
 
+    upstream_passed = bool(upstream_check["passed"].all())
+
     summary = pd.DataFrame(
         [
             {
                 "execution_role": section.get("execution_role", ""),
-                "implementation_classification": section.get("implementation_classification", ""),
-                "phase15p_passed": bool(phase15p_check["passed"].all()),
+                "implementation_classification": section.get(
+                    "implementation_classification",
+                    "",
+                ),
+                "upstream_phase_label": upstream_label,
+                "upstream_phase_passed": upstream_passed,
                 "output_file_written": output_file.exists(),
                 "handoff_file_for_phase15o": str(handoff_file),
                 "handoff_file_written": handoff_written,
                 "post_endpoint_rows": int(creation_summary.iloc[0]["post_endpoint_rows"]),
-                "candidate_stream_valid": _bool_value(creation_summary.iloc[0]["candidate_stream_valid"]),
-                "benchmark_update_passed": _bool_value(creation_summary.iloc[0]["benchmark_update_passed"]),
-                "target_weight_source_passed": _bool_value(creation_summary.iloc[0]["target_weight_source_passed"]),
-                "stream_row_validity_passed": _bool_value(creation_summary.iloc[0]["stream_row_validity_passed"]),
+                "candidate_stream_valid": _bool_value(
+                    creation_summary.iloc[0]["candidate_stream_valid"]
+                ),
+                "benchmark_update_passed": _bool_value(
+                    creation_summary.iloc[0]["benchmark_update_passed"]
+                ),
+                "target_weight_source_passed": _bool_value(
+                    creation_summary.iloc[0]["target_weight_source_passed"]
+                ),
+                "stream_row_validity_passed": _bool_value(
+                    creation_summary.iloc[0]["stream_row_validity_passed"]
+                ),
                 "canonical_report_mutation": False,
                 "current_signal_generation": False,
                 "phase15o_rerun": False,
@@ -578,14 +636,42 @@ def save_phase15q_post_endpoint_data_source_creation(
 
     gate_report = pd.DataFrame(
         [
-            _gate_row("Phase 15P passed", bool(phase15p_check["passed"].all()), "phase15p"),
+            _gate_row(
+                f"{upstream_label} passed",
+                upstream_passed,
+                upstream_label,
+            ),
             _gate_row("Output file written", output_file.exists(), str(output_file)),
-            _gate_row("Required columns present", bool(required_col_check["present"].all()), "schema"),
-            _gate_row("Pinned endpoint preserved", True, section.get("pinned_research_endpoint", "")),
-            _gate_row("No canonical report mutation", True, "separate data/fresh handoff only if valid"),
-            _gate_row("Blocked stream written if invalid", True, creation_summary.iloc[0]["failure_reason"]),
-            _gate_row("Phase 15R boundary is validation-only", bool(boundary["passed"].all()), "phase15r"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "Required columns present",
+                bool(required_col_check["present"].all()),
+                "schema",
+            ),
+            _gate_row(
+                "Pinned endpoint preserved",
+                True,
+                section.get("pinned_research_endpoint", ""),
+            ),
+            _gate_row(
+                "No canonical report mutation",
+                True,
+                "separate data/fresh handoff only if valid",
+            ),
+            _gate_row(
+                "Blocked stream written if invalid",
+                True,
+                creation_summary.iloc[0]["failure_reason"],
+            ),
+            _gate_row(
+                "Phase 15R boundary is validation-only",
+                bool(boundary["passed"].all()),
+                "phase15r",
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Execution role is correct",
                 section.get("execution_role")
@@ -607,7 +693,11 @@ def save_phase15q_post_endpoint_data_source_creation(
                     else "Failed post-endpoint data source creation"
                 ),
                 "all_gates_passed": bool(gate_report["passed"].all()),
-                "candidate_stream_valid": _bool_value(creation_summary.iloc[0]["candidate_stream_valid"]),
+                "upstream_phase_label": upstream_label,
+                "upstream_phase_passed": upstream_passed,
+                "candidate_stream_valid": _bool_value(
+                    creation_summary.iloc[0]["candidate_stream_valid"]
+                ),
                 "handoff_file_written": handoff_written,
                 "post_endpoint_rows": int(creation_summary.iloc[0]["post_endpoint_rows"]),
                 "paper_dry_run_allowed": False,
@@ -625,13 +715,18 @@ def save_phase15q_post_endpoint_data_source_creation(
         "post_endpoint_candidate_stream": candidate_stream,
         "creation_summary": creation_summary,
         "required_column_check": required_col_check,
-        "phase15p_result_check": phase15p_check,
+        "upstream_result_check": upstream_check,
         "phase15r_boundary_check": boundary,
         "scope_boundary_check": scope,
         "summary": summary,
         "gate_report": gate_report,
         "conclusion": conclusion,
     }
+
+    if upstream_label == "Phase 15Z":
+        outputs["phase15z_result_check"] = upstream_check
+    else:
+        outputs["phase15p_result_check"] = upstream_check
 
     for name, frame in outputs.items():
         if name == "post_endpoint_candidate_stream":
@@ -645,16 +740,17 @@ def save_phase15q_post_endpoint_data_source_creation(
 def _report_inventory(paths: dict[str, str]) -> pd.DataFrame:
     rows = []
     for key, path in paths.items():
-        p = Path(path)
-        frame = _read_csv_if_exists(p)
+        p = Path(path) if path is not None and str(path).strip() else Path("__missing__")
+        frame = _read_csv_if_exists(path)
+        present = p.exists() and p.is_file()
         rows.append(
             {
                 "report_key": key,
-                "path": str(p),
-                "present": p.exists(),
+                "path": "" if str(p) == "__missing__" else str(p),
+                "present": present,
                 "rows": len(frame),
-                "passed": p.exists(),
-                "result": "Passed" if p.exists() else "Failed",
+                "passed": present,
+                "result": "Passed" if present else "Failed",
             }
         )
     return pd.DataFrame(rows)
@@ -664,7 +760,19 @@ def _validation_audit(stream: pd.DataFrame, section: dict[str, Any]) -> pd.DataF
     pinned = pd.to_datetime(section.get("pinned_research_endpoint", ""), errors="coerce")
     policy = section.get("validation_policy", {})
 
-    if stream.empty:
+    required_for_audit = [
+        "date",
+        "target_offensive_weight",
+        "benchmark_update_flag",
+        "target_weight_source_valid_flag",
+        "is_out_of_sample_extension",
+    ]
+    missing_for_audit = [col for col in required_for_audit if col not in stream.columns]
+
+    if stream.empty or missing_for_audit:
+        failure_reason = "candidate_stream_empty" if stream.empty else (
+            "missing_audit_columns:" + ",".join(missing_for_audit)
+        )
         return pd.DataFrame(
             [
                 {
@@ -677,7 +785,7 @@ def _validation_audit(stream: pd.DataFrame, section: dict[str, Any]) -> pd.DataF
                     "target_exposure_range_passed": False,
                     "out_of_sample_label_passed": False,
                     "all_validation_gates_passed": False,
-                    "failure_reason": "candidate_stream_empty",
+                    "failure_reason": failure_reason,
                 }
             ]
         )
@@ -690,9 +798,15 @@ def _validation_audit(stream: pd.DataFrame, section: dict[str, Any]) -> pd.DataF
 
     post_endpoint_rows_passed = rows >= min_rows
     all_dates_after_endpoint_passed = bool(dates.notna().all() and (dates > pinned).all())
-    benchmark_update_passed = bool(stream["benchmark_update_flag"].astype(str).str.lower().eq("pass").all())
+    benchmark_update_passed = bool(
+        stream["benchmark_update_flag"].astype(str).str.lower().eq("pass").all()
+    )
     target_weight_source_passed = bool(
-        stream["target_weight_source_valid_flag"].astype(str).str.lower().eq("pass").all()
+        stream["target_weight_source_valid_flag"]
+        .astype(str)
+        .str.lower()
+        .eq("pass")
+        .all()
     )
     target_exposure_present_passed = bool(target.notna().all())
     target_exposure_range_passed = bool(target.between(0.0, 1.0).all())
@@ -732,7 +846,6 @@ def _validation_audit(stream: pd.DataFrame, section: dict[str, Any]) -> pd.DataF
             }
         ]
     )
-
 
 def save_phase15r_real_post_endpoint_stream_validation(
     *,

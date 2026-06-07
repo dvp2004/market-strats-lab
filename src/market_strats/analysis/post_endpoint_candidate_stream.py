@@ -27,10 +27,17 @@ def _section(config: dict[str, Any], key: str) -> dict[str, Any]:
 
 
 def _read_csv_if_exists(path: str | Path) -> pd.DataFrame:
-    p = Path(path)
-    if not p.exists():
+    if path is None or str(path).strip() == "":
         return pd.DataFrame()
-    return pd.read_csv(p)
+
+    p = Path(path)
+    if not p.exists() or p.is_dir():
+        return pd.DataFrame()
+
+    try:
+        return pd.read_csv(p)
+    except pd.errors.EmptyDataError:
+        return pd.DataFrame()
 
 
 def _gate_row(gate: str, passed: bool, detail: str) -> dict[str, Any]:
@@ -194,8 +201,19 @@ def _config_flag_check(config: dict[str, Any], expected: dict[str, bool]) -> pd.
             }
         )
 
-    out = pd.DataFrame(rows)
-    out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
+    out = pd.DataFrame(
+        rows,
+        columns=[
+            "config_key",
+            "expected_enabled",
+            "actual_enabled",
+            "passed",
+        ],
+    )
+    if out.empty:
+        out["result"] = pd.Series(dtype="object")
+    else:
+        out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
     return out
 
 
@@ -207,6 +225,39 @@ def _mode_from_exposure(exposure: float) -> str:
     return "partial_risk"
 
 
+def _post_endpoint_row_count(frame: pd.DataFrame, pinned_endpoint: str) -> int:
+    if frame.empty:
+        return 0
+
+    date_col = _first_existing_col(frame, ["date", "decision_date"])
+    if date_col is None:
+        return 0
+
+    pinned = pd.to_datetime(pinned_endpoint, errors="coerce")
+    if pd.isna(pinned):
+        return 0
+
+    dates = pd.to_datetime(frame[date_col], errors="coerce")
+    return int((dates > pinned).sum())
+
+
+def _read_candidate_source(path: str | Path, pinned_endpoint: str) -> tuple[pd.DataFrame, int]:
+    if path is None or str(path).strip() == "":
+        return pd.DataFrame(), 0
+
+    p = Path(path)
+    if not p.exists() or p.is_dir():
+        return pd.DataFrame(), 0
+
+    try:
+        frame = pd.read_csv(p)
+    except pd.errors.EmptyDataError:
+        return pd.DataFrame(), 0
+
+    post_endpoint_rows = _post_endpoint_row_count(frame, pinned_endpoint)
+    return frame, post_endpoint_rows
+
+
 def _load_source_frame(
     *,
     section: dict[str, Any],
@@ -215,25 +266,38 @@ def _load_source_frame(
     config: dict[str, Any],
 ) -> tuple[pd.DataFrame, str]:
     sources = section.get("candidate_stream_sources", {})
+    pinned_endpoint = str(section.get("pinned_research_endpoint", "2026-05-01"))
 
+    # File-based fresh handoffs must be tried before the in-memory final
+    # candidate frame. The in-memory frame is usually the pinned historical
+    # output and can silently erase valid post-endpoint rows if it is selected
+    # too early.
     for key in [
         "preferred_manual_candidate_stream_file",
+        "preferred_rule_generated_candidate_stream_file",
         "preferred_existing_fresh_candidate_stream_file",
     ]:
-        path = Path(sources.get(key, ""))
-        if path.exists():
-            return pd.read_csv(path), str(path)
+        frame, post_endpoint_rows = _read_candidate_source(
+            sources.get(key, ""),
+            pinned_endpoint,
+        )
+        if post_endpoint_rows > 0:
+            return frame, str(Path(sources.get(key, "")))
 
-    if _bool_value(sources.get("allow_in_memory_final_candidate_frame_if_post_endpoint_rows_exist", False)):
+    if _bool_value(
+        sources.get(
+            "allow_in_memory_final_candidate_frame_if_post_endpoint_rows_exist",
+            False,
+        )
+    ):
         try:
-            return (
-                _find_final_candidate_frame(
-                    relative_momentum_outputs=relative_momentum_outputs,
-                    ticker_outputs=ticker_outputs,
-                    config=config,
-                ),
-                "in_memory_final_candidate_frame",
+            frame = _find_final_candidate_frame(
+                relative_momentum_outputs=relative_momentum_outputs,
+                ticker_outputs=ticker_outputs,
+                config=config,
             )
+            if _post_endpoint_row_count(frame, pinned_endpoint) > 0:
+                return frame, "in_memory_final_candidate_frame"
         except Exception as exc:  # pragma: no cover - runtime guard
             return pd.DataFrame({"load_error": [str(exc)]}), "candidate_frame_load_failed"
 
@@ -528,11 +592,23 @@ def save_phase15o_post_endpoint_candidate_stream_extension(
     reports_path = Path(reports_dir)
     reports_path.mkdir(parents=True, exist_ok=True)
 
-    phase15n_check = _phase_result_check(
-        section.get("source_reports", {}).get("phase15n_conclusion", ""),
-        section.get("source_reports", {}).get("phase15n_gate_report", ""),
-        "Phase 15N",
+    source_reports = section.get("source_reports", {})
+    upstream_label = "Phase 15R" if source_reports.get("phase15r_conclusion") else "Phase 15N"
+    upstream_conclusion = source_reports.get("phase15r_conclusion") or source_reports.get(
+        "phase15n_conclusion",
+        "",
     )
+    upstream_gate_report = source_reports.get("phase15r_gate_report") or source_reports.get(
+        "phase15n_gate_report",
+        "",
+    )
+
+    upstream_check = _phase_result_check(
+        upstream_conclusion,
+        upstream_gate_report,
+        upstream_label,
+    )
+    upstream_passed = bool(upstream_check["passed"].all())
 
     candidate_stream, extension_summary = _build_extended_stream(
         section=section,
@@ -559,7 +635,9 @@ def save_phase15o_post_endpoint_candidate_stream_extension(
             {
                 "execution_role": section.get("execution_role", ""),
                 "implementation_classification": section.get("implementation_classification", ""),
-                "phase15n_passed": bool(phase15n_check["passed"].all()),
+                "upstream_phase_label": upstream_label,
+                "upstream_phase_passed": upstream_passed,
+                "phase15n_passed": upstream_passed,
                 "candidate_stream_file_written": output_file.exists(),
                 "post_endpoint_rows": int(extension_summary.iloc[0]["post_endpoint_rows"]),
                 "candidate_stream_valid": _bool_value(extension_summary.iloc[0]["candidate_stream_valid"]),
@@ -588,7 +666,7 @@ def save_phase15o_post_endpoint_candidate_stream_extension(
 
     gate_report = pd.DataFrame(
         [
-            _gate_row("Phase 15N passed", bool(phase15n_check["passed"].all()), "phase15n"),
+            _gate_row(f"{upstream_label} passed", upstream_passed, upstream_label),
             _gate_row("Candidate stream file written", output_file.exists(), str(output_file)),
             _gate_row("Required columns present", bool(required_col_check["present"].all()), "schema"),
             _gate_row("Pinned endpoint preserved", True, section.get("pinned_research_endpoint", "")),
@@ -617,6 +695,8 @@ def save_phase15o_post_endpoint_candidate_stream_extension(
                     else "Failed post-endpoint candidate stream extension"
                 ),
                 "all_gates_passed": bool(gate_report["passed"].all()),
+                "upstream_phase_label": upstream_label,
+                "upstream_phase_passed": upstream_passed,
                 "candidate_stream_valid": _bool_value(extension_summary.iloc[0]["candidate_stream_valid"]),
                 "post_endpoint_rows": int(extension_summary.iloc[0]["post_endpoint_rows"]),
                 "paper_dry_run_allowed": False,
@@ -634,7 +714,9 @@ def save_phase15o_post_endpoint_candidate_stream_extension(
         "post_endpoint_candidate_stream": candidate_stream,
         "extension_summary": extension_summary,
         "required_column_check": required_col_check,
-        "phase15n_result_check": phase15n_check,
+        "upstream_result_check": upstream_check,
+        "phase15r_result_check": upstream_check,
+        "phase15n_result_check": upstream_check,
         "phase15p_boundary_check": boundary,
         "scope_boundary_check": scope,
         "summary": summary,

@@ -475,7 +475,6 @@ def save_phase13ac_ml_failure_attribution_diagnostic(
     )
 
     repair_success = _read_csv_if_exists(source_reports["repair_success_report"])
-    repair_metric = _read_csv_if_exists(source_reports["repair_metric_report"])
     repair_class_recall = _read_csv_if_exists(source_reports["repair_class_recall_report"])
     repair_overfit = _read_csv_if_exists(source_reports["repair_overfit_report"])
     original_metrics = _read_csv_if_exists(source_reports["original_metric_report"])
@@ -935,7 +934,6 @@ def save_phase13af_phase13_ml_branch_checkpoint_audit(
     config_check["result"] = config_check["passed"].map({True: "Passed", False: "Failed"})
 
     ae_reports = section.get("phase13ae_reports", {})
-    ae_inventory = _source_report_check(ae_reports)
     ae_check = _phase_result_check(ae_reports["conclusion"], ae_reports["gate_report"], "Phase 13AE")
 
     checkpoint_paths = section.get("checkpoint_reports", {}).get("required_reports", [])

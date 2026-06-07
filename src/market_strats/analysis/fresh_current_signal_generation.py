@@ -16,9 +16,9 @@ def _bool_value(value: Any) -> bool:
         return value
 
     clean = str(value).strip().lower()
-    if clean in {"true", "1", "yes", "y"}:
+    if clean in {"true", "1", "yes", "y", "pass"}:
         return True
-    if clean in {"false", "0", "no", "n", "", "nan", "none"}:
+    if clean in {"false", "0", "no", "n", "", "nan", "none", "fail"}:
         return False
     return bool(value)
 
@@ -27,11 +27,23 @@ def _section(config: dict[str, Any], key: str) -> dict[str, Any]:
     return config.get(key, {}) or {}
 
 
-def _read_csv_if_exists(path: str | Path) -> pd.DataFrame:
-    p = Path(path)
-    if not p.exists():
+def _safe_path(path: str | Path | None) -> Path | None:
+    if path is None:
+        return None
+    clean = str(path).strip()
+    if not clean:
+        return None
+    return Path(clean)
+
+
+def _read_csv_if_exists(path: str | Path | None) -> pd.DataFrame:
+    p = _safe_path(path)
+    if p is None or not p.exists() or p.is_dir():
         return pd.DataFrame()
-    return pd.read_csv(p)
+    try:
+        return pd.read_csv(p)
+    except pd.errors.EmptyDataError:
+        return pd.DataFrame()
 
 
 def _gate_row(gate: str, passed: bool, detail: str) -> dict[str, Any]:
@@ -137,9 +149,11 @@ def _scope_check(section: dict[str, Any]) -> pd.DataFrame:
             }
         )
 
-    out = pd.DataFrame(rows)
+    out = pd.DataFrame(rows, columns=["scope_item", "value", "passed"])
     if not out.empty:
         out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
+    else:
+        out["result"] = []
     return out
 
 
@@ -194,8 +208,14 @@ def _config_flag_check(config: dict[str, Any], expected: dict[str, bool]) -> pd.
             }
         )
 
-    out = pd.DataFrame(rows)
-    out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
+    out = pd.DataFrame(
+        rows,
+        columns=["config_key", "expected_enabled", "actual_enabled", "passed"],
+    )
+    if not out.empty:
+        out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
+    else:
+        out["result"] = []
     return out
 
 
@@ -242,6 +262,28 @@ def _normalise_exposure(frame: pd.DataFrame, column: str, transform: str) -> pd.
     return exposure.ffill()
 
 
+def _post_endpoint_row_count(frame: pd.DataFrame, pinned_endpoint: str | None) -> int:
+    if frame.empty:
+        return 0
+    date_col = _first_existing_col(frame, ["date", "decision_date", "signal_date"])
+    if date_col is None:
+        return 0
+    pinned = pd.to_datetime(pinned_endpoint or "", errors="coerce")
+    if pd.isna(pinned):
+        return 0
+    dates = pd.to_datetime(frame[date_col], errors="coerce")
+    return int((dates > pinned).sum())
+
+
+def _load_candidate_from_file(path: Path, pinned_endpoint: str | None) -> tuple[pd.DataFrame, bool]:
+    if not path.exists() or path.is_dir():
+        return pd.DataFrame(), False
+    candidate = _read_csv_if_exists(path)
+    if candidate.empty:
+        return candidate, False
+    return candidate, _post_endpoint_row_count(candidate, pinned_endpoint) > 0
+
+
 def _load_candidate_frame(
     *,
     section: dict[str, Any],
@@ -249,33 +291,83 @@ def _load_candidate_frame(
     ticker_outputs: dict[str, Any] | None,
     config: dict[str, Any],
 ) -> tuple[pd.DataFrame, str]:
-    fresh_file = Path(
-        section.get("fresh_candidate_stream_policy", {}).get(
+    pinned_endpoint = section.get("pinned_research_endpoint", "2026-05-01")
+    sources = section.get("candidate_stream_sources", {}) or {}
+    legacy_policy = section.get("fresh_candidate_stream_policy", {}) or {}
+
+    # Primary source order for the current rerun: consume Phase 15O / Phase 15Q handoffs
+    # before considering any in-memory pinned final-candidate frame.
+    file_candidates: list[tuple[str, str]] = [
+        (
+            "preferred_manual_candidate_stream_file",
+            str(sources.get("preferred_manual_candidate_stream_file", "")),
+        ),
+        (
+            "preferred_rule_generated_candidate_stream_file",
+            str(sources.get("preferred_rule_generated_candidate_stream_file", "")),
+        ),
+        (
+            "preferred_phase15o_stream_file",
+            str(sources.get("preferred_phase15o_stream_file", "")),
+        ),
+        (
+            "preferred_existing_fresh_candidate_stream_file",
+            str(sources.get("preferred_existing_fresh_candidate_stream_file", "")),
+        ),
+        (
             "preferred_fresh_candidate_stream_file",
-            "",
+            str(legacy_policy.get("preferred_fresh_candidate_stream_file", "")),
+        ),
+    ]
+
+    for _key, raw_path in file_candidates:
+        path = _safe_path(raw_path)
+        if path is None:
+            continue
+        candidate, has_post_endpoint_rows = _load_candidate_from_file(path, pinned_endpoint)
+        if has_post_endpoint_rows:
+            return candidate, str(path)
+
+    allow_in_memory = _bool_value(
+        sources.get(
+            "allow_in_memory_final_candidate_frame_if_post_endpoint_rows_exist",
+            legacy_policy.get("allow_in_memory_final_candidate_frame_if_post_endpoint_rows_exist", False),
         )
     )
+    if allow_in_memory:
+        try:
+            frame = _find_final_candidate_frame(
+                relative_momentum_outputs=relative_momentum_outputs,
+                ticker_outputs=ticker_outputs,
+                config=config,
+            )
+            if _post_endpoint_row_count(frame, pinned_endpoint) > 0:
+                return frame, "in_memory_final_candidate_frame"
+            return pd.DataFrame(), "in_memory_final_candidate_frame_has_no_post_endpoint_rows"
+        except Exception as exc:  # pragma: no cover - defensive runtime guard
+            return pd.DataFrame({"load_error": [str(exc)]}), "candidate_frame_load_failed"
 
-    if fresh_file.exists():
-        return pd.read_csv(fresh_file), str(fresh_file)
-
-    try:
-        frame = _find_final_candidate_frame(
-            relative_momentum_outputs=relative_momentum_outputs,
-            ticker_outputs=ticker_outputs,
-            config=config,
-        )
-        return frame, "in_memory_final_candidate_frame"
-    except Exception as exc:  # pragma: no cover - defensive runtime guard
-        return pd.DataFrame({"load_error": [str(exc)]}), "candidate_frame_load_failed"
+    return pd.DataFrame(), "no_post_endpoint_candidate_stream_source_available"
 
 
 def _has_benchmark_update(frame: pd.DataFrame, benchmark_columns: list[str]) -> tuple[bool, str]:
-    col = _first_existing_col(frame, benchmark_columns)
+    candidates = benchmark_columns or [
+        "SPY_close",
+        "SPY_return",
+        "spy_close",
+        "spy_return",
+        "benchmark_return",
+        "benchmark_update_flag",
+    ]
+    col = _first_existing_col(frame, candidates)
     if col is None:
         return False, ""
 
-    valid = frame[col].notna().any()
+    series = frame[col]
+    if "flag" in col.lower():
+        valid = series.astype(str).str.lower().isin({"pass", "true", "1", "yes"}).any()
+    else:
+        valid = series.notna().any()
     return bool(valid), col
 
 
@@ -348,7 +440,7 @@ def _build_current_signal(
             reason="fresh_candidate_frame_missing_or_date_column_missing",
             data_source=data_source,
         )
-        return signal, _generation_summary(signal, 0, selected_col, transform)
+        return signal, _generation_summary(signal, 0, selected_col, transform, data_source)
 
     if selected_col not in frame.columns:
         signal = _blocked_signal_row(
@@ -356,7 +448,7 @@ def _build_current_signal(
             reason=f"selected_exposure_column_missing:{selected_col}",
             data_source=data_source,
         )
-        return signal, _generation_summary(signal, len(frame), selected_col, transform)
+        return signal, _generation_summary(signal, len(frame), selected_col, transform, data_source)
 
     work = frame.copy()
     work["signal_date_internal"] = pd.to_datetime(work[date_col], errors="coerce")
@@ -376,7 +468,7 @@ def _build_current_signal(
             reason="no_post_endpoint_candidate_rows_available",
             data_source=data_source,
         )
-        return signal, _generation_summary(signal, 0, selected_col, transform)
+        return signal, _generation_summary(signal, 0, selected_col, transform, data_source)
 
     work["fresh_exposure"] = _normalise_exposure(work, selected_col, transform)
 
@@ -386,7 +478,7 @@ def _build_current_signal(
             reason="fresh_exposure_values_missing_or_invalid",
             data_source=data_source,
         )
-        return signal, _generation_summary(signal, len(work), selected_col, transform)
+        return signal, _generation_summary(signal, len(work), selected_col, transform, data_source)
 
     latest = work.iloc[-1]
     previous = work.iloc[-2] if len(work) > 1 else None
@@ -419,7 +511,9 @@ def _build_current_signal(
         and data_as_of_date > pinned_endpoint
     )
 
-    benchmark_columns = list(section.get("benchmark_policy", {}).get("acceptable_benchmark_columns", []))
+    benchmark_columns = list(
+        section.get("benchmark_policy", {}).get("acceptable_benchmark_columns", [])
+    )
     benchmark_ok, benchmark_col = _has_benchmark_update(work.tail(1), benchmark_columns)
 
     signal_validity_passed = bool(pd.notna(current_exposure) and pd.notna(previous_exposure))
@@ -435,6 +529,11 @@ def _build_current_signal(
 
     all_signal_checks_passed = bool(freshness_passed and benchmark_ok and signal_validity_passed)
 
+    timestamp_col = _first_existing_col(work, ["data_source_timestamp", "source_timestamp", "updated_at"])
+    data_source_timestamp = (
+        str(latest[timestamp_col]) if timestamp_col and pd.notna(latest[timestamp_col]) else data_as_of_date.strftime("%Y-%m-%d")
+    )
+
     signal = pd.DataFrame(
         [
             {
@@ -443,7 +542,7 @@ def _build_current_signal(
                 "generated_at_utc": datetime.now(timezone.utc).isoformat(),
                 "candidate_system_id": section.get("candidate_system_id", ""),
                 "data_source": data_source,
-                "data_source_timestamp": data_as_of_date.strftime("%Y-%m-%d"),
+                "data_source_timestamp": data_source_timestamp,
                 "pinned_research_endpoint": section.get("pinned_research_endpoint", ""),
                 "is_out_of_sample_extension": True,
                 "current_mode": current_mode,
@@ -477,7 +576,7 @@ def _build_current_signal(
         ]
     )
 
-    return signal, _generation_summary(signal, len(work), selected_col, transform)
+    return signal, _generation_summary(signal, len(work), selected_col, transform, data_source)
 
 
 def _generation_summary(
@@ -485,6 +584,7 @@ def _generation_summary(
     post_endpoint_rows: int,
     selected_col: str,
     transform: str,
+    data_source: str,
 ) -> pd.DataFrame:
     row = signal.iloc[0]
 
@@ -492,6 +592,7 @@ def _generation_summary(
         [
             {
                 "post_endpoint_rows": post_endpoint_rows,
+                "data_source": data_source,
                 "selected_exposure_column": selected_col,
                 "selected_exposure_transform": transform,
                 "signal_file_generated": True,
@@ -506,6 +607,20 @@ def _generation_summary(
             }
         ]
     )
+
+
+def _upstream_result_check(section: dict[str, Any]) -> tuple[str, pd.DataFrame]:
+    source_reports = section.get("source_reports", {})
+    upstream_label = "Phase 15P" if source_reports.get("phase15p_conclusion") else "Phase 15L"
+    upstream_conclusion = source_reports.get("phase15p_conclusion") or source_reports.get(
+        "phase15l_conclusion",
+        "",
+    )
+    upstream_gate_report = source_reports.get("phase15p_gate_report") or source_reports.get(
+        "phase15l_gate_report",
+        "",
+    )
+    return upstream_label, _phase_result_check(upstream_conclusion, upstream_gate_report, upstream_label)
 
 
 def save_phase15m_fresh_current_signal_generation(
@@ -523,11 +638,8 @@ def save_phase15m_fresh_current_signal_generation(
     reports_path = Path(reports_dir)
     reports_path.mkdir(parents=True, exist_ok=True)
 
-    phase15l_check = _phase_result_check(
-        section.get("source_reports", {}).get("phase15l_conclusion", ""),
-        section.get("source_reports", {}).get("phase15l_gate_report", ""),
-        "Phase 15L",
-    )
+    upstream_label, upstream_check = _upstream_result_check(section)
+    upstream_passed = bool(upstream_check["passed"].all())
 
     current_signal, generation_summary = _build_current_signal(
         section=section,
@@ -554,8 +666,13 @@ def save_phase15m_fresh_current_signal_generation(
             {
                 "execution_role": section.get("execution_role", ""),
                 "implementation_classification": section.get("implementation_classification", ""),
-                "phase15l_passed": bool(phase15l_check["passed"].all()),
+                "upstream_phase_label": upstream_label,
+                "upstream_phase_passed": upstream_passed,
+                "phase15p_passed": upstream_passed if upstream_label == "Phase 15P" else False,
+                "phase15l_passed": upstream_passed if upstream_label == "Phase 15L" else False,
                 "signal_file_written": output_file.exists(),
+                "post_endpoint_rows": int(generation_summary.iloc[0]["post_endpoint_rows"]),
+                "data_source": generation_summary.iloc[0]["data_source"],
                 "signal_validity_passed": _bool_value(generation_summary.iloc[0]["signal_validity_passed"]),
                 "data_freshness_passed": _bool_value(generation_summary.iloc[0]["data_freshness_passed"]),
                 "benchmark_update_passed": _bool_value(generation_summary.iloc[0]["benchmark_update_passed"]),
@@ -579,7 +696,7 @@ def save_phase15m_fresh_current_signal_generation(
 
     gate_report = pd.DataFrame(
         [
-            _gate_row("Phase 15L passed", bool(phase15l_check["passed"].all()), "phase15l"),
+            _gate_row(f"{upstream_label} passed", upstream_passed, upstream_label),
             _gate_row("Signal file written", output_file.exists(), str(output_file)),
             _gate_row("Required columns present", bool(required_col_check["present"].all()), "schema"),
             _gate_row("Canonical endpoint preserved", True, section.get("pinned_research_endpoint", "")),
@@ -607,6 +724,8 @@ def save_phase15m_fresh_current_signal_generation(
                     else "Failed fresh current signal generation"
                 ),
                 "all_gates_passed": bool(gate_report["passed"].all()),
+                "upstream_phase_label": upstream_label,
+                "upstream_phase_passed": upstream_passed,
                 "signal_validity_passed": _bool_value(generation_summary.iloc[0]["signal_validity_passed"]),
                 "data_freshness_passed": _bool_value(generation_summary.iloc[0]["data_freshness_passed"]),
                 "benchmark_update_passed": _bool_value(generation_summary.iloc[0]["benchmark_update_passed"]),
@@ -625,7 +744,9 @@ def save_phase15m_fresh_current_signal_generation(
         "current_signal_file": current_signal,
         "generation_summary": generation_summary,
         "required_column_check": required_col_check,
-        "phase15l_result_check": phase15l_check,
+        "upstream_result_check": upstream_check,
+        "phase15p_result_check": upstream_check,
+        "phase15l_result_check": upstream_check,
         "phase15n_boundary_check": boundary,
         "scope_boundary_check": scope,
         "summary": summary,
@@ -646,16 +767,17 @@ def _report_inventory(paths: dict[str, str]) -> pd.DataFrame:
     rows = []
 
     for key, path in paths.items():
-        p = Path(path)
+        p = _safe_path(path)
         frame = _read_csv_if_exists(p)
+        present = bool(p is not None and p.exists() and not p.is_dir())
         rows.append(
             {
                 "report_key": key,
-                "path": str(p),
-                "present": p.exists(),
+                "path": str(p) if p is not None else "",
+                "present": present,
                 "rows": len(frame),
-                "passed": p.exists() and len(frame) > 0,
-                "result": "Passed" if p.exists() and len(frame) > 0 else "Failed",
+                "passed": present and len(frame) > 0,
+                "result": "Passed" if present and len(frame) > 0 else "Failed",
             }
         )
 
