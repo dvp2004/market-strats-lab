@@ -83,6 +83,32 @@ def _write_valid_rule_generated_source(tmp_path: Path):
     ).to_csv(fresh_dir / "phase15q_rule_generated_candidate_stream.csv", index=False)
 
 
+def _write_valid_wxyz_rule_generated_source(tmp_path: Path):
+    fresh_dir = tmp_path / "data" / "fresh"
+    fresh_dir.mkdir(parents=True, exist_ok=True)
+
+    pd.DataFrame(
+        [
+            {
+                "date": "2026-05-29",
+                "SPY_close": 600.0,
+                "SPY_return": 0.001,
+                "target_offensive_weight": 1.0,
+                "target_weight_source": "verified_project_generated",
+                "data_source_timestamp": "2026-05-29",
+            },
+            {
+                "date": "2026-06-02",
+                "SPY_close": 603.0,
+                "SPY_return": 0.003,
+                "target_offensive_weight": 0.0,
+                "target_weight_source": "verified_project_generated",
+                "data_source_timestamp": "2026-06-02",
+            },
+        ]
+    ).to_csv(fresh_dir / "phase15q_rule_generated_candidate_stream.csv", index=False)
+
+
 def _write_invalid_raw_spy_only_source(tmp_path: Path):
     fresh_dir = tmp_path / "data" / "fresh"
     fresh_dir.mkdir(parents=True, exist_ok=True)
@@ -268,6 +294,30 @@ def test_phase15q_to_15r_validates_rule_generated_fresh_source(tmp_path):
 
     r_decision = out_r["decision_report"].iloc[0]
     assert r_decision["decision"] == "phase15o_15p_rerun_allowed_next"
+
+
+def test_phase15q_to_15r_consumes_wxyz_verified_project_generated_handoff(tmp_path):
+    _write_source_reports(tmp_path)
+    _write_valid_wxyz_rule_generated_source(tmp_path)
+    config = _config(tmp_path)
+
+    reports_dir = tmp_path / "reports"
+
+    out_q = save_phase15q_post_endpoint_data_source_creation(
+        config=config,
+        reports_dir=reports_dir,
+    )
+    out_r = save_phase15r_real_post_endpoint_stream_validation(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+    stream = out_q["post_endpoint_candidate_stream"]
+    assert stream["target_weight_source"].eq("verified_project_generated").all()
+    assert stream["target_weight_source_valid_flag"].eq("pass").all()
+    assert bool(out_q["conclusion"].iloc[0]["all_gates_passed"])
+    assert bool(out_r["conclusion"].iloc[0]["all_gates_passed"])
+    r_decision = out_r["decision_report"].iloc[0]
     assert bool(r_decision["phase15o_15p_rerun_allowed_next"])
     assert not bool(r_decision["phase15m_15n_rerun_allowed_next"])
     assert not bool(r_decision["paper_trading_ready"])

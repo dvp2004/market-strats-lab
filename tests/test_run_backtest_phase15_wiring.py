@@ -25,6 +25,11 @@ PHASE15_KEYS = [
     "phase15n_fresh_signal_audit_paper_dry_run_eligibility",
 ]
 
+PHASE15WXYZ_FUNCTIONS = [
+    "build_phase15w_fresh_extension_config",
+    "save_phase15wxyz_reports",
+]
+
 
 def _phase_config(enabled: bool) -> dict:
     return {key: {"enabled": enabled} for key in PHASE15_KEYS}
@@ -42,6 +47,11 @@ def _patch_phase15_functions(monkeypatch, calls: list[tuple[str, dict]]) -> None
 
 def test_run_backtest_imports_phase15_downstream_save_functions():
     for function_name in PHASE15_FUNCTIONS:
+        assert hasattr(run_backtest, function_name)
+
+
+def test_run_backtest_imports_phase15wxyz_save_functions():
+    for function_name in PHASE15WXYZ_FUNCTIONS:
         assert hasattr(run_backtest, function_name)
 
 
@@ -74,6 +84,30 @@ def test_phase15_downstream_chain_does_not_call_disabled_sections(monkeypatch):
 
     assert calls == []
     assert outputs == {}
+
+
+def test_phase15wxyz_helper_does_not_run_when_disabled():
+    outputs = run_backtest._run_phase15wxyz_fresh_extension_pipeline(
+        config={"phase15wxyz_fresh_extension_pipeline": {"enabled": False}},
+        reports_dir=Path("reports"),
+    )
+
+    assert outputs == {}
+
+
+def test_phase15_fresh_extension_uses_separate_processed_data_dir():
+    assert run_backtest._processed_data_dir({}) == Path("data/processed")
+    assert run_backtest._processed_data_dir(
+        {"_phase15_fresh_extension_mode": True}
+    ) == Path("data/fresh/processed")
+    assert run_backtest._processed_data_dir(
+        {
+            "_phase15_fresh_extension_mode": True,
+            "phase15wxyz_fresh_extension_pipeline": {
+                "fresh_processed_data_dir": "custom/fresh/cache"
+            },
+        }
+    ) == Path("custom/fresh/cache")
 
 
 def test_phase15_downstream_chain_executes_enabled_sections_with_expected_arguments(
@@ -124,9 +158,28 @@ def test_phase15_downstream_chain_is_inserted_after_phase8b_bid_ask_diagnostic()
         "save_phase8b_bid_ask_market_impact_diagnostic(\n"
         "            relative_momentum_outputs=relative_momentum_outputs,"
     )
-    phase15_call = source.index(
+    phase15_call = source.rindex(
         "_run_phase15_downstream_fresh_signal_chain(\n"
         "            config=config,"
     )
 
     assert phase8b_call < phase15_call
+
+
+def test_phase15wxyz_chain_is_inserted_before_downstream_phase15_chain():
+    source = Path(run_backtest.__file__).read_text(encoding="utf-8")
+
+    phase8b_call = source.index(
+        "save_phase8b_bid_ask_market_impact_diagnostic(\n"
+        "            relative_momentum_outputs=relative_momentum_outputs,"
+    )
+    phase15wxyz_call = source.rindex(
+        "_run_phase15wxyz_fresh_extension_pipeline(\n"
+        "            config=config,"
+    )
+    phase15_downstream_call = source.rindex(
+        "_run_phase15_downstream_fresh_signal_chain(\n"
+        "            config=config,"
+    )
+
+    assert phase8b_call < phase15wxyz_call < phase15_downstream_call

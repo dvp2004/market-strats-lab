@@ -267,16 +267,28 @@ def _load_source_frame(
 ) -> tuple[pd.DataFrame, str]:
     sources = section.get("candidate_stream_sources", {})
     pinned_endpoint = str(section.get("pinned_research_endpoint", "2026-05-01"))
+    prefer_rule_generated = bool(
+        config.get("phase15wxyz_fresh_extension_pipeline", {}).get("enabled", False)
+    )
+    source_priority = (
+        [
+            "preferred_rule_generated_candidate_stream_file",
+            "preferred_manual_candidate_stream_file",
+            "preferred_existing_fresh_candidate_stream_file",
+        ]
+        if prefer_rule_generated
+        else [
+            "preferred_manual_candidate_stream_file",
+            "preferred_rule_generated_candidate_stream_file",
+            "preferred_existing_fresh_candidate_stream_file",
+        ]
+    )
 
     # File-based fresh handoffs must be tried before the in-memory final
     # candidate frame. The in-memory frame is usually the pinned historical
     # output and can silently erase valid post-endpoint rows if it is selected
     # too early.
-    for key in [
-        "preferred_manual_candidate_stream_file",
-        "preferred_rule_generated_candidate_stream_file",
-        "preferred_existing_fresh_candidate_stream_file",
-    ]:
+    for key in source_priority:
         frame, post_endpoint_rows = _read_candidate_source(
             sources.get(key, ""),
             pinned_endpoint,

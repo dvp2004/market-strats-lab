@@ -195,6 +195,54 @@ def _create_overlay_for_variant(
     )
 
 
+def create_phase6b_loose_relief_final_candidate(
+    *,
+    relative_momentum_outputs: dict[str, dict[str, pd.DataFrame]],
+    ticker_outputs: dict[str, dict[str, pd.DataFrame]],
+    config: dict,
+) -> pd.DataFrame:
+    """Build the registered Phase 6B final-candidate daily frame.
+
+    This exposes the existing loose-relief overlay construction for Phase 15WXYZ
+    fresh-extension export. It does not add a new strategy variant or change the
+    Phase 6B selection logic.
+    """
+
+    phase15_config = config.get("phase15wxyz_fresh_extension_pipeline", {}) or {}
+    final_decision_config = config.get("phase6_final_candidate_decision", {}) or {}
+    phase6_config = config.get("phase6_offensive_relief_validation", {}) or {}
+
+    variant_name = str(
+        phase15_config.get(
+            "fresh_final_candidate_variant",
+            final_decision_config.get("final_candidate_variant", "loose_relief"),
+        )
+    )
+
+    relief_profile = None
+    for profile in phase6_config.get("relief_profiles", []):
+        if str(profile.get("name", "")) == variant_name:
+            relief_profile = profile
+            break
+
+    if relief_profile is None:
+        raise ValueError(f"Fresh final-candidate relief profile not found: {variant_name}")
+
+    offensive_result, defensive_result = _build_overlay_inputs(
+        relative_momentum_outputs=relative_momentum_outputs,
+        ticker_outputs=ticker_outputs,
+        config=config,
+    )
+
+    return _create_overlay_for_variant(
+        offensive_result=offensive_result,
+        defensive_result=defensive_result,
+        config=config,
+        variant_name=variant_name,
+        relief_profile=relief_profile,
+    )
+
+
 def _calculate_segment_metrics(
     result: pd.DataFrame,
     variant_name: str,

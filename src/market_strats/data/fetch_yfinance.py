@@ -6,6 +6,12 @@ import pandas as pd
 import yfinance as yf
 
 
+CACHE_DIR = Path("data/.yfinance_cache")
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
+if hasattr(yf, "set_tz_cache_location"):
+    yf.set_tz_cache_location(str(CACHE_DIR))
+
+
 COLUMN_MAP = {
     "Date": "date",
     "Open": "open",

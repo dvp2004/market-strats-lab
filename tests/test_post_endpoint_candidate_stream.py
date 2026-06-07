@@ -86,6 +86,26 @@ def _mock_final_candidate():
     )
 
 
+def _write_candidate_stream(path: Path, date: str, exposure: float) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(
+        [
+            {
+                "date": date,
+                "SPY_close": 600.0,
+                "SPY_return": 0.001,
+                "target_offensive_weight": exposure,
+                "data_source_timestamp": date,
+                "pinned_research_endpoint": "2026-05-01",
+                "is_out_of_sample_extension": True,
+                "benchmark_update_flag": "pass",
+                "stream_row_validity_flag": "pass",
+                "blocking_warnings": "",
+            }
+        ]
+    ).to_csv(path, index=False)
+
+
 def _config(tmp_path: Path):
     required_cols = [
         "date",
@@ -248,6 +268,37 @@ def test_phase15o_to_15p_builds_and_audits_extended_candidate_stream(tmp_path, m
     assert bool(decision["fresh_signal_rerun_allowed_next"])
     assert not bool(decision["paper_dry_run_preregistration_allowed_next"])
     assert not bool(decision["paper_trading_ready"])
+
+
+def test_phase15o_prefers_rule_generated_handoff_when_wxyz_enabled(tmp_path):
+    _write_source_reports(tmp_path)
+    config = _config(tmp_path)
+    manual_path = tmp_path / "manual.csv"
+    rule_path = tmp_path / "rule.csv"
+    _write_candidate_stream(manual_path, "2026-05-13", 1.0)
+    _write_candidate_stream(rule_path, "2026-06-02", 0.0)
+
+    config["phase15wxyz_fresh_extension_pipeline"] = {"enabled": True}
+    config["phase15o_post_endpoint_candidate_stream_extension"]["candidate_stream_sources"][
+        "preferred_manual_candidate_stream_file"
+    ] = str(manual_path)
+    config["phase15o_post_endpoint_candidate_stream_extension"]["candidate_stream_sources"][
+        "preferred_rule_generated_candidate_stream_file"
+    ] = str(rule_path)
+
+    out_o = save_phase15o_post_endpoint_candidate_stream_extension(
+        config=config,
+        reports_dir=tmp_path,
+        relative_momentum_outputs={},
+        ticker_outputs={},
+    )
+
+    summary = out_o["extension_summary"].iloc[0]
+    stream = out_o["post_endpoint_candidate_stream"]
+    assert summary["data_source"] == str(rule_path)
+    assert stream.iloc[-1]["date"] == "2026-06-02"
+    assert stream.iloc[-1]["current_exposure"] == 0.0
+
 
 def test_phase15p_passes_audit_mechanically_but_blocks_empty_stream(tmp_path, monkeypatch):
     _write_source_reports(tmp_path)

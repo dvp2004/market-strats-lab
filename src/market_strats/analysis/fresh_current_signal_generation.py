@@ -294,18 +294,42 @@ def _load_candidate_frame(
     pinned_endpoint = section.get("pinned_research_endpoint", "2026-05-01")
     sources = section.get("candidate_stream_sources", {}) or {}
     legacy_policy = section.get("fresh_candidate_stream_policy", {}) or {}
+    prefer_rule_generated = bool(
+        config.get("phase15wxyz_fresh_extension_pipeline", {}).get("enabled", False)
+    )
 
     # Primary source order for the current rerun: consume Phase 15O / Phase 15Q handoffs
     # before considering any in-memory pinned final-candidate frame.
-    file_candidates: list[tuple[str, str]] = [
-        (
-            "preferred_manual_candidate_stream_file",
-            str(sources.get("preferred_manual_candidate_stream_file", "")),
-        ),
-        (
-            "preferred_rule_generated_candidate_stream_file",
-            str(sources.get("preferred_rule_generated_candidate_stream_file", "")),
-        ),
+    file_candidates: list[tuple[str, str]] = []
+    if prefer_rule_generated:
+        file_candidates.extend(
+            [
+                (
+                    "preferred_rule_generated_candidate_stream_file",
+                    str(sources.get("preferred_rule_generated_candidate_stream_file", "")),
+                ),
+                (
+                    "preferred_manual_candidate_stream_file",
+                    str(sources.get("preferred_manual_candidate_stream_file", "")),
+                ),
+            ]
+        )
+    else:
+        file_candidates.extend(
+            [
+                (
+                    "preferred_manual_candidate_stream_file",
+                    str(sources.get("preferred_manual_candidate_stream_file", "")),
+                ),
+                (
+                    "preferred_rule_generated_candidate_stream_file",
+                    str(sources.get("preferred_rule_generated_candidate_stream_file", "")),
+                ),
+            ]
+        )
+
+    file_candidates.extend(
+        [
         (
             "preferred_phase15o_stream_file",
             str(sources.get("preferred_phase15o_stream_file", "")),
@@ -318,7 +342,8 @@ def _load_candidate_frame(
             "preferred_fresh_candidate_stream_file",
             str(legacy_policy.get("preferred_fresh_candidate_stream_file", "")),
         ),
-    ]
+        ]
+    )
 
     for _key, raw_path in file_candidates:
         path = _safe_path(raw_path)

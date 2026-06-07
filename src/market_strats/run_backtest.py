@@ -182,6 +182,7 @@ from market_strats.analysis.regime_switch_overlay_stress_confirmation import (
     save_regime_switch_overlay_stress_confirmation,
 )
 from market_strats.analysis.regime_switch_overlay_offensive_relief_validation import (
+    create_phase6b_loose_relief_final_candidate,
     save_regime_switch_overlay_offensive_relief_validation,
 )
 from market_strats.analysis.regime_switch_overlay_final_candidate_decision import (
@@ -213,6 +214,10 @@ from market_strats.analysis.tax_drag_diagnostic import (
 )
 from market_strats.analysis.bid_ask_market_impact_diagnostic import (
     save_phase8b_bid_ask_market_impact_diagnostic,
+)
+from market_strats.analysis.fresh_extension_pipeline import (
+    build_phase15w_fresh_extension_config,
+    save_phase15wxyz_reports,
 )
 from market_strats.analysis.fresh_current_signal_generation import (
     save_phase15m_fresh_current_signal_generation,
@@ -379,6 +384,18 @@ def get_dual_momentum_pairs(config: dict) -> list[dict]:
     return validated_pairs
 
 
+def _is_phase15_fresh_extension_mode(config: dict) -> bool:
+    return bool(config.get("_phase15_fresh_extension_mode", False))
+
+
+def _processed_data_dir(config: dict) -> Path:
+    if not _is_phase15_fresh_extension_mode(config):
+        return Path("data/processed")
+
+    phase_config = config.get("phase15wxyz_fresh_extension_pipeline", {}) or {}
+    return Path(phase_config.get("fresh_processed_data_dir", "data/fresh/processed"))
+
+
 def get_core_satellite_config(config: dict) -> dict | None:
     core_satellite_config = config.get("core_satellite")
 
@@ -419,14 +436,16 @@ def make_safe_filename(value: str) -> str:
 
 def get_or_fetch_prices(ticker: str, config: dict) -> pd.DataFrame:
     ticker = ticker.upper()
-    processed_dir = Path("data/processed")
+    processed_dir = _processed_data_dir(config)
     price_path = processed_dir / f"{ticker}.parquet"
+    force_refresh = _is_phase15_fresh_extension_mode(config)
 
-    if price_path.exists():
+    if price_path.exists() and not force_refresh:
         print(f"Loading existing data from {price_path}")
         prices = load_prices_from_parquet(ticker, processed_dir)
     else:
-        print(f"Fetching {ticker} data from yfinance")
+        refresh_note = "fresh extension refresh" if force_refresh else "cache miss"
+        print(f"Fetching {ticker} data from yfinance ({refresh_note})")
         prices = fetch_daily_prices(
             ticker=ticker,
             start_date=config["start_date"],
@@ -446,15 +465,17 @@ def get_or_fetch_cash_returns(config: dict, price_dates: pd.Series) -> pd.Series
         return pd.Series(0.0, index=pd.to_datetime(price_dates), name="cash_return")
 
     cash_ticker = config["cash_ticker"]
-    processed_dir = Path("data/processed")
+    processed_dir = _processed_data_dir(config)
     safe_ticker = cash_ticker.replace("^", "")
     cash_path = processed_dir / f"{safe_ticker.upper()}_cash_rates.parquet"
+    force_refresh = _is_phase15_fresh_extension_mode(config)
 
-    if cash_path.exists():
+    if cash_path.exists() and not force_refresh:
         print(f"Loading existing cash yield data from {cash_path}")
         cash_rates = load_cash_rates_from_parquet(cash_ticker, processed_dir)
     else:
-        print(f"Fetching cash yield data from yfinance: {cash_ticker}")
+        refresh_note = "fresh extension refresh" if force_refresh else "cache miss"
+        print(f"Fetching cash yield data from yfinance: {cash_ticker} ({refresh_note})")
         cash_rates = fetch_cash_yield_rates(
             ticker=cash_ticker,
             start_date=config["start_date"],
@@ -1557,6 +1578,88 @@ def _phase_enabled(config: dict, section_name: str) -> bool:
     return bool(config.get(section_name, {}).get("enabled", False))
 
 
+def _run_phase15wxyz_fresh_extension_pipeline(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(config, "phase15wxyz_fresh_extension_pipeline"):
+        return {}
+
+    phase_config = config.get("phase15wxyz_fresh_extension_pipeline", {}) or {}
+    fresh_config, fresh_config_report = build_phase15w_fresh_extension_config(
+        config=config,
+        phase_config=phase_config,
+    )
+
+    fresh_reports_dir = Path(
+        phase_config.get("fresh_reports_dir", reports_dir / "fresh_extension")
+    )
+    fresh_reports_dir.mkdir(parents=True, exist_ok=True)
+
+    fresh_ticker_outputs: dict[str, dict[str, pd.DataFrame]] = {}
+    for ticker in get_tickers(fresh_config):
+        fresh_ticker_outputs[ticker] = run_backtest_for_ticker(
+            ticker=ticker,
+            config=fresh_config,
+            reports_dir=fresh_reports_dir,
+        )
+
+    fresh_relative_momentum_outputs = run_relative_momentum_allocator_report(
+        ticker_outputs=fresh_ticker_outputs,
+        config=fresh_config,
+        reports_dir=fresh_reports_dir,
+    )
+
+    final_candidate = create_phase6b_loose_relief_final_candidate(
+        relative_momentum_outputs=fresh_relative_momentum_outputs,
+        ticker_outputs=fresh_ticker_outputs,
+        config=fresh_config,
+    )
+
+    final_candidate_dates = pd.to_datetime(
+        final_candidate.get("date", pd.Series(dtype="datetime64[ns]")),
+        errors="coerce",
+    )
+    fresh_pipeline_report = pd.DataFrame(
+        [
+            {
+                "phase": "Phase 15X",
+                "fresh_reports_dir": str(fresh_reports_dir),
+                "fresh_processed_data_dir": str(_processed_data_dir(fresh_config)),
+                "fresh_data_cache_refresh": True,
+                "fresh_ticker_count": len(fresh_ticker_outputs),
+                "fresh_relative_momentum_output_keys": ";".join(
+                    fresh_relative_momentum_outputs.keys()
+                ),
+                "fresh_final_candidate_rows": len(final_candidate),
+                "fresh_final_candidate_min_date": (
+                    final_candidate_dates.min().strftime("%Y-%m-%d")
+                    if final_candidate_dates.notna().any()
+                    else ""
+                ),
+                "fresh_final_candidate_max_date": (
+                    final_candidate_dates.max().strftime("%Y-%m-%d")
+                    if final_candidate_dates.notna().any()
+                    else ""
+                ),
+                "target_offensive_weight_present": (
+                    "target_offensive_weight" in final_candidate.columns
+                ),
+                "canonical_report_mutation": False,
+            }
+        ]
+    )
+
+    return save_phase15wxyz_reports(
+        config=config,
+        reports_dir=reports_dir,
+        fresh_config_report=fresh_config_report,
+        fresh_pipeline_report=fresh_pipeline_report,
+        final_candidate=final_candidate,
+    )
+
+
 def _run_phase15_downstream_fresh_signal_chain(
     *,
     config: dict,
@@ -1612,13 +1715,39 @@ def _run_phase15_downstream_fresh_signal_chain(
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, help="Path to YAML config file")
+    parser.add_argument(
+        "--enable-phase15wxyz",
+        action="store_true",
+        help="Enable Phase 15WXYZ fresh-extension regeneration for this run only.",
+    )
+    parser.add_argument(
+        "--phase15wxyz-only",
+        action="store_true",
+        help="Run only Phase 15WXYZ regeneration and downstream Phase 15Q/R/O/P/M/N.",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)
+    if args.enable_phase15wxyz or args.phase15wxyz_only:
+        config.setdefault("phase15wxyz_fresh_extension_pipeline", {})["enabled"] = True
+
     tickers = get_tickers(config)
 
     reports_dir = Path("reports")
     reports_dir.mkdir(parents=True, exist_ok=True)
+
+    if args.phase15wxyz_only:
+        _run_phase15wxyz_fresh_extension_pipeline(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        _run_phase15_downstream_fresh_signal_chain(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs={},
+            ticker_outputs={},
+        )
+        return
 
     ticker_outputs: dict[str, dict[str, pd.DataFrame]] = {}
 
@@ -1850,6 +1979,11 @@ def main() -> None:
         save_phase8b_bid_ask_market_impact_diagnostic(
             relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        _run_phase15wxyz_fresh_extension_pipeline(
             config=config,
             reports_dir=reports_dir,
         )

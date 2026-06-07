@@ -89,6 +89,26 @@ def _mock_final_candidate():
     )
 
 
+def _write_candidate_stream(path: Path, date: str, exposure: float) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(
+        [
+            {
+                "date": date,
+                "SPY_close": 600.0,
+                "SPY_return": 0.001,
+                "target_offensive_weight": exposure,
+                "data_source_timestamp": date,
+                "pinned_research_endpoint": "2026-05-01",
+                "is_out_of_sample_extension": True,
+                "benchmark_update_flag": "pass",
+                "stream_row_validity_flag": "pass",
+                "blocking_warnings": "",
+            }
+        ]
+    ).to_csv(path, index=False)
+
+
 def _config(tmp_path: Path):
     required_cols = [
         "signal_date",
@@ -258,3 +278,33 @@ def test_phase15m_to_15n_generates_and_audits_fresh_signal(tmp_path, monkeypatch
     assert decision["decision"] == "paper_dry_run_preregistration_allowed_next"
     assert bool(decision["paper_dry_run_preregistration_allowed_next"])
     assert not bool(decision["paper_trading_ready"])
+
+
+def test_phase15m_prefers_rule_generated_handoff_when_wxyz_enabled(tmp_path):
+    _write_source_reports(tmp_path)
+    config = _config(tmp_path)
+    manual_path = tmp_path / "manual.csv"
+    rule_path = tmp_path / "rule.csv"
+    _write_candidate_stream(manual_path, "2026-05-13", 1.0)
+    _write_candidate_stream(rule_path, "2026-06-02", 0.0)
+
+    config["phase15wxyz_fresh_extension_pipeline"] = {"enabled": True}
+    config["phase15m_fresh_current_signal_generation"]["candidate_stream_sources"] = {
+        "preferred_manual_candidate_stream_file": str(manual_path),
+        "preferred_rule_generated_candidate_stream_file": str(rule_path),
+        "allow_in_memory_final_candidate_frame_if_post_endpoint_rows_exist": True,
+    }
+
+    out_m = save_phase15m_fresh_current_signal_generation(
+        config=config,
+        reports_dir=tmp_path,
+        relative_momentum_outputs={},
+        ticker_outputs={},
+    )
+
+    summary = out_m["generation_summary"].iloc[0]
+    signal = out_m["current_signal_file"].iloc[0]
+    assert summary["data_source"] == str(rule_path)
+    assert signal["data_as_of_date"] == "2026-06-02"
+    assert signal["current_mode"] == "defensive_or_cash"
+    assert signal["data_freshness_flag"] == "pass"
