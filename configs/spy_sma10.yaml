@@ -12287,6 +12287,27 @@ phase15wxyz_fresh_extension_pipeline:
   allow_optimisation: false
   allow_multi_asset_expansion: false
   allow_feature_importance: false
+phase16a_paper_dry_run_preregistration:
+  enabled: true
+  candidate_system_id: "phase6b_loose_relief_execution_realistic_overlay"
+  required_upstream_decision: "paper_dry_run_preregistration_allowed_next"
+  paper_account_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  paper_notional_usd: 10000
+  output_dir: "reports/paper_trading"
+  dashboard_dir: "reports/paper_trading/dashboard"
+
+  phase15n_reports:
+    decision_report: "reports/phase15n_fresh_signal_audit_decision_report.csv"
+    conclusion: "reports/phase15n_fresh_signal_audit_conclusion.csv"
+    fresh_signal_audit: "reports/phase15n_fresh_signal_audit_fresh_signal_audit.csv"
+
+  phase15m_reports:
+    current_signal_file: "reports/phase15m_current_signal_file.csv"
+    generation_summary: "reports/phase15m_current_signal_generation_summary.csv"
+    conclusion: "reports/phase15m_current_signal_conclusion.csv"
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
