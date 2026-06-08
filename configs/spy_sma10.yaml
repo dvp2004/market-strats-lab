@@ -12351,6 +12351,40 @@ phase17a_strategy_factory:
   live_trading_allowed: false
   real_money_allowed: false
   broker_api_integration_allowed: false
+phase17b_strategy_factory_robustness:
+  enabled: true
+  output_dir: "reports/strategy_factory"
+  chart_dir: "reports/strategy_factory/charts"
+  dashboard_dir: "reports/strategy_factory/dashboard"
+  friction_scenarios:
+    no_extra_cost:
+      bps_per_turnover: 0
+    low:
+      bps_per_turnover: 5
+    moderate:
+      bps_per_turnover: 15
+    realistic_stress:
+      bps_per_turnover: 25
+    stress:
+      bps_per_turnover: 50
+  btc_specific_extra_bps:
+    low: 10
+    moderate: 25
+    realistic_stress: 50
+    stress: 75
+  rolling_windows_trading_days:
+    - 252
+    - 756
+  subperiods:
+    covid_inflation:
+      start: "2020-01-01"
+      end: "2023-12-31"
+    post_2021:
+      start: "2021-01-01"
+      end: null
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

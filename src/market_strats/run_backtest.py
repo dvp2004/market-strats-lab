@@ -240,6 +240,9 @@ from market_strats.analysis.paper_dry_run_dashboard import (
 from market_strats.analysis.strategy_factory_report import (
     save_phase17a_strategy_factory_report,
 )
+from market_strats.analysis.strategy_factory_robustness import (
+    save_phase17b_strategy_factory_robustness,
+)
 
 
 def _apply_research_period_filter_to_result(
@@ -1732,6 +1735,12 @@ def _run_phase15_downstream_fresh_signal_chain(
 
     if _phase_enabled(config, "phase17a_strategy_factory"):
         outputs["phase17a"] = save_phase17a_strategy_factory_report(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    if _phase_enabled(config, "phase17b_strategy_factory_robustness"):
+        outputs["phase17b"] = save_phase17b_strategy_factory_robustness(
             config=config,
             reports_dir=reports_dir,
         )
