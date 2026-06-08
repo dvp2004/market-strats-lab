@@ -12385,6 +12385,17 @@ phase17b_strategy_factory_robustness:
   live_trading_allowed: false
   real_money_allowed: false
   broker_api_integration_allowed: false
+phase17c_strategy_factory_watchlist_dashboard:
+  enabled: true
+  output_dir: "reports/strategy_factory/watchlist"
+  dashboard_dir: "reports/strategy_factory/watchlist/dashboard"
+  source_shortlist_file: "reports/strategy_factory/phase17b_shortlist_decision.csv"
+  source_metrics_file: "reports/strategy_factory/phase17b_friction_metrics.csv"
+  source_rolling_file: "reports/strategy_factory/phase17b_rolling_relative_summary.csv"
+  source_btc_gap_file: "reports/strategy_factory/phase17b_btc_weekend_gap_diagnostic.csv"
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

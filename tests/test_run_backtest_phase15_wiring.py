@@ -34,6 +34,7 @@ PHASE16A_FUNCTION = "save_phase16a_paper_dry_run_preregistration"
 PHASE16B_FUNCTION = "save_phase16b_paper_dry_run_dashboard"
 PHASE17A_FUNCTION = "save_phase17a_strategy_factory_report"
 PHASE17B_FUNCTION = "save_phase17b_strategy_factory_robustness"
+PHASE17C_FUNCTION = "save_phase17c_strategy_factory_watchlist_dashboard"
 
 
 def _phase_config(enabled: bool) -> dict:
@@ -74,6 +75,10 @@ def test_run_backtest_imports_phase17a_save_function():
 
 def test_run_backtest_imports_phase17b_save_function():
     assert hasattr(run_backtest, PHASE17B_FUNCTION)
+
+
+def test_run_backtest_imports_phase17c_save_function():
+    assert hasattr(run_backtest, PHASE17C_FUNCTION)
 
 
 def test_phase15_downstream_chain_calls_functions_in_required_order():
@@ -332,6 +337,69 @@ def test_phase17b_runs_after_phase17a_when_enabled(monkeypatch):
         PHASE17B_FUNCTION,
     ]
     assert list(outputs)[-4:] == ["phase16a", "phase16b", "phase17a", "phase17b"]
+    assert calls[-1][1]["reports_dir"] == reports_dir
+
+
+def test_phase17c_runs_after_phase17b_when_enabled(monkeypatch):
+    calls: list[tuple[str, dict]] = []
+    _patch_phase15_functions(monkeypatch, calls)
+
+    def phase16a_recorder(**kwargs):
+        calls.append((PHASE16A_FUNCTION, kwargs))
+        return {"summary": pd.DataFrame({"function_name": [PHASE16A_FUNCTION]})}
+
+    def phase16b_recorder(**kwargs):
+        calls.append((PHASE16B_FUNCTION, kwargs))
+        return {"summary": pd.DataFrame({"function_name": [PHASE16B_FUNCTION]})}
+
+    def phase17a_recorder(**kwargs):
+        calls.append((PHASE17A_FUNCTION, kwargs))
+        return {"summary": pd.DataFrame({"function_name": [PHASE17A_FUNCTION]})}
+
+    def phase17b_recorder(**kwargs):
+        calls.append((PHASE17B_FUNCTION, kwargs))
+        return {"summary": pd.DataFrame({"function_name": [PHASE17B_FUNCTION]})}
+
+    def phase17c_recorder(**kwargs):
+        calls.append((PHASE17C_FUNCTION, kwargs))
+        return {"summary": pd.DataFrame({"function_name": [PHASE17C_FUNCTION]})}
+
+    monkeypatch.setattr(run_backtest, PHASE16A_FUNCTION, phase16a_recorder)
+    monkeypatch.setattr(run_backtest, PHASE16B_FUNCTION, phase16b_recorder)
+    monkeypatch.setattr(run_backtest, PHASE17A_FUNCTION, phase17a_recorder)
+    monkeypatch.setattr(run_backtest, PHASE17B_FUNCTION, phase17b_recorder)
+    monkeypatch.setattr(run_backtest, PHASE17C_FUNCTION, phase17c_recorder)
+
+    config = _phase_config(enabled=True)
+    config["phase16a_paper_dry_run_preregistration"] = {"enabled": True}
+    config["phase16b_paper_dry_run_dashboard"] = {"enabled": True}
+    config["phase17a_strategy_factory"] = {"enabled": True}
+    config["phase17b_strategy_factory_robustness"] = {"enabled": True}
+    config["phase17c_strategy_factory_watchlist_dashboard"] = {"enabled": True}
+    reports_dir = Path("reports")
+
+    outputs = run_backtest._run_phase15_downstream_fresh_signal_chain(
+        config=config,
+        reports_dir=reports_dir,
+        relative_momentum_outputs={},
+        ticker_outputs={},
+    )
+
+    assert [name for name, _kwargs in calls] == [
+        *PHASE15_FUNCTIONS,
+        PHASE16A_FUNCTION,
+        PHASE16B_FUNCTION,
+        PHASE17A_FUNCTION,
+        PHASE17B_FUNCTION,
+        PHASE17C_FUNCTION,
+    ]
+    assert list(outputs)[-5:] == [
+        "phase16a",
+        "phase16b",
+        "phase17a",
+        "phase17b",
+        "phase17c",
+    ]
     assert calls[-1][1]["reports_dir"] == reports_dir
 
 
