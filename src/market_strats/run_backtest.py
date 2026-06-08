@@ -237,6 +237,9 @@ from market_strats.analysis.paper_dry_run_preregistration import (
 from market_strats.analysis.paper_dry_run_dashboard import (
     save_phase16b_paper_dry_run_dashboard,
 )
+from market_strats.analysis.strategy_factory_report import (
+    save_phase17a_strategy_factory_report,
+)
 
 
 def _apply_research_period_filter_to_result(
@@ -1723,6 +1726,12 @@ def _run_phase15_downstream_fresh_signal_chain(
 
     if _phase_enabled(config, "phase16b_paper_dry_run_dashboard"):
         outputs["phase16b"] = save_phase16b_paper_dry_run_dashboard(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    if _phase_enabled(config, "phase17a_strategy_factory"):
+        outputs["phase17a"] = save_phase17a_strategy_factory_report(
             config=config,
             reports_dir=reports_dir,
         )

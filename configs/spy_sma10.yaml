@@ -12330,6 +12330,27 @@ phase16b_paper_dry_run_dashboard:
     drawdown_curve: "reports/phase14g_corrected_visual_drawdown_curve.csv"
     exposure_timeline: "reports/phase14g_corrected_visual_exposure_timeline.csv"
     rolling_relative_performance: "reports/phase14g_corrected_visual_rolling_relative_performance.csv"
+phase17a_strategy_factory:
+  enabled: true
+  output_dir: "reports/strategy_factory"
+  chart_dir: "reports/strategy_factory/charts"
+  dashboard_dir: "reports/strategy_factory/dashboard"
+  initial_capital: 10000
+  universe:
+    - SPY
+    - QQQ
+    - GLD
+    - TLT
+    - BTC-USD
+  include_cash: true
+  btc_max_weight: 0.10
+  qqq_satellite_max_weight: 0.40
+  rebalance_frequency: "M"
+  momentum_lookback_days: 126
+  trend_lookback_days: 200
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
