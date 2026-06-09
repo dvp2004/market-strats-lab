@@ -12421,6 +12421,18 @@ phase18a_paper_signal_operational_hardening:
   live_trading_allowed: false
   real_money_allowed: false
   broker_api_integration_allowed: false
+phase18b_paper_cycle_tracker:
+  enabled: true
+  output_dir: "reports/paper_trading/cycle_tracker"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  source_operational_hardening_dir: "reports/paper_trading/operational_hardening"
+  required_consecutive_clean_cycles: 10
+  allow_warning_cycles_for_readiness: false
+  require_manual_journal_entries: false
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

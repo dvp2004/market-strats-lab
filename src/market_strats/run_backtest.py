@@ -249,6 +249,9 @@ from market_strats.analysis.strategy_factory_watchlist_dashboard import (
 from market_strats.analysis.paper_signal_operational_hardening import (
     save_phase18a_paper_signal_operational_hardening,
 )
+from market_strats.analysis.paper_cycle_tracker import (
+    save_phase18b_paper_cycle_tracker,
+)
 
 
 def _apply_research_period_filter_to_result(
@@ -1759,6 +1762,12 @@ def _run_phase15_downstream_fresh_signal_chain(
 
     if _phase_enabled(config, "phase18a_paper_signal_operational_hardening"):
         outputs["phase18a"] = save_phase18a_paper_signal_operational_hardening(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    if _phase_enabled(config, "phase18b_paper_cycle_tracker"):
+        outputs["phase18b"] = save_phase18b_paper_cycle_tracker(
             config=config,
             reports_dir=reports_dir,
         )
