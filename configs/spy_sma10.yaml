@@ -12433,6 +12433,99 @@ phase18b_paper_cycle_tracker:
   live_trading_allowed: false
   real_money_allowed: false
   broker_api_integration_allowed: false
+phase19a_strategy_factory_multiverse:
+  enabled: true
+  output_dir: "reports/strategy_factory/multiverse"
+  dashboard_dir: "reports/strategy_factory/multiverse/dashboard"
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  initial_capital: 10000
+  rebalance_frequency: "M"
+  universes:
+    core_us_growth:
+      symbols:
+        - "SPY"
+        - "QQQ"
+        - "CASH"
+      allow_btc: false
+    defensive_multi_asset:
+      symbols:
+        - "SPY"
+        - "QQQ"
+        - "GLD"
+        - "TLT"
+        - "CASH"
+      allow_btc: false
+    btc_capped_growth:
+      symbols:
+        - "SPY"
+        - "QQQ"
+        - "BTC-USD"
+        - "CASH"
+      allow_btc: true
+      btc_caps:
+        - 0.05
+        - 0.10
+    expanded_liquid_etf:
+      symbols:
+        - "SPY"
+        - "QQQ"
+        - "IWM"
+        - "EFA"
+        - "EEM"
+        - "GLD"
+        - "TLT"
+        - "AGG"
+        - "VNQ"
+        - "DBC"
+        - "CASH"
+      allow_btc: false
+    expanded_liquid_etf_with_btc:
+      symbols:
+        - "SPY"
+        - "QQQ"
+        - "IWM"
+        - "EFA"
+        - "EEM"
+        - "GLD"
+        - "TLT"
+        - "AGG"
+        - "VNQ"
+        - "DBC"
+        - "BTC-USD"
+        - "CASH"
+      allow_btc: true
+      btc_caps:
+        - 0.05
+        - 0.10
+  evaluation_periods:
+    full_common:
+      start: null
+      end: null
+    post_2008:
+      start: "2008-01-01"
+      end: null
+    post_2014_btc_common:
+      start: "2014-09-17"
+      end: null
+    covid_inflation:
+      start: "2020-01-01"
+      end: "2023-12-31"
+    post_2021:
+      start: "2021-01-01"
+      end: null
+  objective_weights:
+    cagr_weight: 0.40
+    calmar_weight: 0.30
+    max_drawdown_weight: 0.20
+    turnover_penalty_weight: 0.10
+  finalist_rules:
+    require_positive_cagr_edge_vs_spy: true
+    max_drawdown_worse_than_spy_allowed_pp: 5
+    min_rolling_3y_beat_spy_pct: 60
+    require_no_live_flags: true
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
