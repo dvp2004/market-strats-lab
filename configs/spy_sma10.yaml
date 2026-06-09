@@ -12396,6 +12396,31 @@ phase17c_strategy_factory_watchlist_dashboard:
   live_trading_allowed: false
   real_money_allowed: false
   broker_api_integration_allowed: false
+phase18a_paper_signal_operational_hardening:
+  enabled: true
+  output_dir: "reports/paper_trading/operational_hardening"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  use_latest_available_when_audit_date_missing: true
+  allow_audit_date_override: true
+  data_quality:
+    etf_warning_abs_daily_return_pct: 10
+    etf_block_abs_daily_return_pct: 15
+    btc_warning_abs_daily_return_pct: 20
+    btc_block_abs_daily_return_pct: 40
+    require_positive_prices: true
+    require_no_duplicate_dates: true
+    require_latest_row_non_null: true
+    require_high_low_volume_when_available: true
+  watchlist_preview:
+    enabled: true
+    paper_notional_usd: 10000
+    include_candidates:
+      - "sf_spy_qqq_60_40_monthly_rebalanced"
+      - "sf_spy_core_phase6_overlay_satellite_qqq"
+      - "sf_spy_qqq_btc_capped_offensive"
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

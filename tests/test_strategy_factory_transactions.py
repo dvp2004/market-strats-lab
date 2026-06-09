@@ -1,8 +1,13 @@
+import json
 from pathlib import Path
 
 import pandas as pd
 
-from scripts.build_strategy_factory_transaction_notebook import build_notebook
+from scripts.build_strategy_factory_transaction_notebook import (
+    WATCHLIST_DISPLAY_COLUMNS,
+    build_notebook,
+    normalise_watchlist_for_display,
+)
 from market_strats.analysis.strategy_factory_transactions import (
     create_drift_rebalance_ledger,
     create_transaction_ledger,
@@ -252,3 +257,87 @@ def test_notebook_builder_writes_valid_ipynb(tmp_path: Path):
     text = notebook_path.read_text(encoding="utf-8")
     assert '"nbformat": 4' in text
     assert "Target-weight changes vs actual rebalance trades" in text
+    assert "watchlist_enriched[WATCHLIST_DISPLAY_COLUMNS]" in text
+    assert "normalise_watchlist_for_display" in text
+    assert "rolling_3y_candidate_beats_spy_pct" in text
+
+    notebook = json.loads(text)
+    code = "\n".join(
+        "".join(cell["source"])
+        for cell in notebook["cells"]
+        if cell["cell_type"] == "code"
+    )
+    assert 'watchlist[\n    [\n        "candidate_id"' not in code
+
+
+def test_watchlist_display_handles_missing_optional_rolling_columns():
+    watchlist = pd.DataFrame(
+        [
+            {
+                "candidate_id": "sf_spy_qqq_60_40_monthly_rebalanced",
+                "watchlist_role": "clean_growth_watchlist",
+                "low_friction_cagr_pct": 15.0,
+                "realistic_stress_cagr_pct": 14.9,
+                "max_drawdown_pct": -30.0,
+                "btc_cap_dependency_flag": False,
+                "promotion_allowed": False,
+                "paper_watchlist_only": True,
+            }
+        ]
+    )
+
+    enriched, missing = normalise_watchlist_for_display(watchlist)
+
+    assert "rolling_3y_candidate_beats_spy_pct" in enriched.columns
+    assert pd.isna(enriched.iloc[0]["rolling_3y_candidate_beats_spy_pct"])
+    assert "median_3y_active_cagr" in missing
+    enriched[WATCHLIST_DISPLAY_COLUMNS]
+
+
+def test_watchlist_display_merges_rolling_snapshot_and_phase17b_fields():
+    watchlist = pd.DataFrame(
+        [
+            {
+                "candidate_id": "sf_spy_qqq_60_40_monthly_rebalanced",
+                "watchlist_role": "clean_growth_watchlist",
+                "low_friction_cagr_pct": 15.0,
+                "realistic_stress_cagr_pct": 14.9,
+                "max_drawdown_pct": -30.0,
+                "btc_cap_dependency_flag": False,
+                "promotion_allowed": False,
+                "paper_watchlist_only": True,
+            }
+        ]
+    )
+    watchlist_rolling = pd.DataFrame(
+        [
+            {
+                "candidate_id": "sf_spy_qqq_60_40_monthly_rebalanced",
+                "rolling_3y_beat_spy_pct": 93.7,
+                "worst_3y_active_cagr": -0.45,
+                "latest_3y_active_cagr": 2.18,
+            }
+        ]
+    )
+    phase17b_rolling = pd.DataFrame(
+        [
+            {
+                "strategy": "sf_spy_qqq_60_40_monthly_rebalanced",
+                "rolling_3y_candidate_beats_spy_pct": 94.0,
+                "median_3y_active_cagr": 2.27,
+            }
+        ]
+    )
+
+    enriched, missing = normalise_watchlist_for_display(
+        watchlist,
+        watchlist_rolling=watchlist_rolling,
+        phase17b_rolling=phase17b_rolling,
+    )
+
+    row = enriched.iloc[0]
+    assert row["rolling_3y_candidate_beats_spy_pct"] == 93.7
+    assert row["worst_3y_active_cagr"] == -0.45
+    assert row["median_3y_active_cagr"] == 2.27
+    assert row["latest_3y_active_cagr"] == 2.18
+    assert not missing

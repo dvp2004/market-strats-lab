@@ -6,6 +6,8 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Any
 
+import pandas as pd
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
@@ -18,6 +20,108 @@ from market_strats.analysis.strategy_factory_transactions import (  # noqa: E402
 
 
 NOTEBOOK_PATH = ROOT / "notebooks" / "phase17c_strategy_factory_transaction_visuals.ipynb"
+WATCHLIST_DISPLAY_COLUMNS = [
+    "candidate_id",
+    "watchlist_role",
+    "low_friction_cagr_pct",
+    "realistic_stress_cagr_pct",
+    "max_drawdown_pct",
+    "rolling_3y_candidate_beats_spy_pct",
+    "worst_3y_active_cagr",
+    "median_3y_active_cagr",
+    "latest_3y_active_cagr",
+    "btc_cap_dependency_flag",
+    "promotion_allowed",
+    "paper_watchlist_only",
+]
+ROLLING_COLUMN_ALIASES = {
+    "rolling_3y_candidate_beats_spy_pct": [
+        "rolling_3y_candidate_beats_spy_pct",
+        "rolling_3y_beat_spy_pct",
+        "rolling_3y_active_cagr_beats_spy_pct",
+    ],
+    "worst_3y_active_cagr": ["worst_3y_active_cagr"],
+    "median_3y_active_cagr": ["median_3y_active_cagr"],
+    "latest_3y_active_cagr": ["latest_3y_active_cagr"],
+}
+
+
+def _candidate_id_column(frame: pd.DataFrame) -> str | None:
+    if "candidate_id" in frame.columns:
+        return "candidate_id"
+    if "strategy" in frame.columns:
+        return "strategy"
+    if "strategy_id" in frame.columns:
+        return "strategy_id"
+    return None
+
+
+def _canonical_rolling_frame(frame: pd.DataFrame) -> pd.DataFrame:
+    if frame.empty:
+        return pd.DataFrame(columns=["candidate_id", *ROLLING_COLUMN_ALIASES])
+    id_col = _candidate_id_column(frame)
+    if id_col is None:
+        return pd.DataFrame(columns=["candidate_id", *ROLLING_COLUMN_ALIASES])
+
+    out = pd.DataFrame({"candidate_id": frame[id_col].astype(str)})
+    for canonical, aliases in ROLLING_COLUMN_ALIASES.items():
+        for alias in aliases:
+            if alias in frame.columns:
+                out[canonical] = frame[alias]
+                break
+    return out.drop_duplicates("candidate_id", keep="last")
+
+
+def normalise_watchlist_for_display(
+    watchlist: pd.DataFrame,
+    watchlist_rolling: pd.DataFrame | None = None,
+    phase17b_rolling: pd.DataFrame | None = None,
+) -> tuple[pd.DataFrame, list[str]]:
+    if watchlist.empty:
+        out = pd.DataFrame(columns=WATCHLIST_DISPLAY_COLUMNS)
+        return out, WATCHLIST_DISPLAY_COLUMNS.copy()
+
+    id_col = _candidate_id_column(watchlist)
+    if id_col is None:
+        out = watchlist.copy()
+        out["candidate_id"] = pd.NA
+    else:
+        out = watchlist.rename(columns={id_col: "candidate_id"}).copy()
+        out["candidate_id"] = out["candidate_id"].astype(str)
+
+    own_rolling = _canonical_rolling_frame(out)
+    sources = [
+        own_rolling,
+        _canonical_rolling_frame(
+            watchlist_rolling if watchlist_rolling is not None else pd.DataFrame()
+        ),
+        _canonical_rolling_frame(
+            phase17b_rolling if phase17b_rolling is not None else pd.DataFrame()
+        ),
+    ]
+
+    for canonical in ROLLING_COLUMN_ALIASES:
+        if canonical not in out.columns:
+            out[canonical] = pd.NA
+
+    for source in sources:
+        if source.empty:
+            continue
+        out = out.merge(source, on="candidate_id", how="left", suffixes=("", "__source"))
+        for canonical in ROLLING_COLUMN_ALIASES:
+            source_col = f"{canonical}__source"
+            if source_col in out.columns:
+                out[canonical] = out[canonical].combine_first(out[source_col])
+                out = out.drop(columns=[source_col])
+
+    missing = []
+    for column in WATCHLIST_DISPLAY_COLUMNS:
+        if column not in out.columns:
+            out[column] = pd.NA
+            missing.append(column)
+        elif out[column].isna().all():
+            missing.append(column)
+    return out, missing
 
 
 def _markdown(source: str) -> dict[str, Any]:
@@ -66,6 +170,7 @@ def _notebook() -> dict[str, Any]:
             _code(
                 """
                 from pathlib import Path
+                import sys
 
                 import matplotlib
                 matplotlib.use("Agg")
@@ -76,6 +181,15 @@ def _notebook() -> dict[str, Any]:
 
                 cwd = Path.cwd().resolve()
                 root = cwd if (cwd / "reports").exists() else cwd.parent
+                if str(root) not in sys.path:
+                    sys.path.insert(0, str(root))
+
+                from scripts.build_strategy_factory_transaction_notebook import (  # noqa: E402
+                    WATCHLIST_DISPLAY_COLUMNS,
+                    normalise_watchlist_for_display,
+                )
+                ROLLING_3Y_BEAT_RATE_FIELD = "rolling_3y_candidate_beats_spy_pct"
+
                 strategy_dir = root / "reports" / "strategy_factory"
                 transaction_dir = strategy_dir / "transactions"
                 chart_dir = transaction_dir / "charts"
@@ -84,7 +198,11 @@ def _notebook() -> dict[str, Any]:
                     "phase17a_metrics": strategy_dir / "phase17a_strategy_factory_metrics.csv",
                     "phase17b_friction": strategy_dir / "phase17b_friction_metrics.csv",
                     "phase17b_btc_gap": strategy_dir / "phase17b_btc_weekend_gap_diagnostic.csv",
+                    "phase17b_rolling": strategy_dir / "phase17b_rolling_relative_summary.csv",
                     "phase17c_watchlist": strategy_dir / "watchlist" / "phase17c_watchlist_candidates.csv",
+                    "watchlist_rolling_snapshot": (
+                        strategy_dir / "watchlist" / "dashboard" / "watchlist_rolling_snapshot.csv"
+                    ),
                     "transaction_ledger": transaction_dir / "strategy_transaction_ledger.csv",
                     "drift_ledger": transaction_dir / "strategy_drift_rebalance_ledger.csv",
                     "drift_summary": transaction_dir / "strategy_drift_rebalance_summary.csv",
@@ -105,6 +223,16 @@ def _notebook() -> dict[str, Any]:
                 friction = pd.read_csv(files["phase17b_friction"])
                 btc_gap = pd.read_csv(files["phase17b_btc_gap"])
                 watchlist = pd.read_csv(files["phase17c_watchlist"])
+                watchlist_rolling = (
+                    pd.read_csv(files["watchlist_rolling_snapshot"])
+                    if files["watchlist_rolling_snapshot"].exists()
+                    else pd.DataFrame()
+                )
+                phase17b_rolling = (
+                    pd.read_csv(files["phase17b_rolling"])
+                    if files["phase17b_rolling"].exists()
+                    else pd.DataFrame()
+                )
                 ledger = pd.read_csv(files["transaction_ledger"])
                 drift_ledger = pd.read_csv(files["drift_ledger"])
                 drift_summary = pd.read_csv(files["drift_summary"])
@@ -115,6 +243,11 @@ def _notebook() -> dict[str, Any]:
                 latest_allocations = pd.read_csv(files["latest_allocations"])
 
                 watchlist_ids = watchlist["candidate_id"].astype(str).tolist()
+                watchlist_enriched, missing_watchlist_display_cols = normalise_watchlist_for_display(
+                    watchlist,
+                    watchlist_rolling=watchlist_rolling,
+                    phase17b_rolling=phase17b_rolling,
+                )
                 all_strategy_ids = sorted(allocation["strategy_id"].astype(str).unique())
                 watchlist_ids
                 """
@@ -365,19 +498,15 @@ def _notebook() -> dict[str, Any]:
             ),
             _code(
                 """
-                watchlist[
-                    [
-                        "candidate_id",
-                        "watchlist_role",
-                        "low_friction_cagr_pct",
-                        "realistic_stress_cagr_pct",
-                        "max_drawdown_pct",
-                        "rolling_3y_candidate_beats_spy_pct",
-                        "btc_cap_dependency_flag",
-                        "promotion_allowed",
-                        "paper_watchlist_only",
-                    ]
-                ]
+                if missing_watchlist_display_cols:
+                    print(
+                        "Optional watchlist display columns unavailable; showing NA placeholders:",
+                        missing_watchlist_display_cols,
+                    )
+                    print("Available Phase 17C watchlist columns:", list(watchlist.columns))
+
+                print("Canonical rolling 3Y beat-rate field:", ROLLING_3Y_BEAT_RATE_FIELD)
+                watchlist_enriched[WATCHLIST_DISPLAY_COLUMNS]
                 """
             ),
             _markdown(
