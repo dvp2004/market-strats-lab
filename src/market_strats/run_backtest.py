@@ -255,6 +255,9 @@ from market_strats.analysis.paper_cycle_tracker import (
 from market_strats.analysis.strategy_factory_multiverse import (
     save_phase19a_strategy_factory_multiverse,
 )
+from market_strats.analysis.strategy_factory_finalist_validation import (
+    save_phase19b_strategy_factory_finalist_validation,
+)
 
 
 def _apply_research_period_filter_to_result(
@@ -1777,6 +1780,12 @@ def _run_phase15_downstream_fresh_signal_chain(
 
     if _phase_enabled(config, "phase19a_strategy_factory_multiverse"):
         outputs["phase19a"] = save_phase19a_strategy_factory_multiverse(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    if _phase_enabled(config, "phase19b_strategy_factory_finalist_validation"):
+        outputs["phase19b"] = save_phase19b_strategy_factory_finalist_validation(
             config=config,
             reports_dir=reports_dir,
         )

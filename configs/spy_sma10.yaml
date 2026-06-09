@@ -12526,6 +12526,39 @@ phase19a_strategy_factory_multiverse:
     max_drawdown_worse_than_spy_allowed_pp: 5
     min_rolling_3y_beat_spy_pct: 60
     require_no_live_flags: true
+phase19b_strategy_factory_finalist_validation:
+  enabled: true
+  output_dir: "reports/strategy_factory/finalist_validation"
+  dashboard_dir: "reports/strategy_factory/finalist_validation/dashboard"
+  source_multiverse_dir: "reports/strategy_factory/multiverse"
+  initial_capital: 10000
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  max_paper_candidates: 4
+  include_benchmark_baseline: true
+  stress_tests:
+    friction_bps:
+      - 0
+      - 5
+      - 15
+      - 25
+      - 50
+    btc_weekend_gap_penalty_enabled: true
+    btc_gap_penalty_pct: 2.0
+    drawdown_stress_thresholds:
+      - 0.20
+      - 0.30
+      - 0.40
+    turnover_penalty_enabled: true
+  selection_policy:
+    require_no_live_flags: true
+    require_positive_mean_cagr_edge_vs_spy: true
+    require_rolling_3y_beat_spy_pct: 60
+    max_drawdown_worse_than_spy_allowed_pp: 5
+    prefer_simple_candidates: true
+    prefer_no_btc_for_primary_candidate: true
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
