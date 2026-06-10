@@ -12621,6 +12621,22 @@ phase20d_manual_paper_session_ingestion:
   live_trading_allowed: false
   real_money_allowed: false
   broker_api_integration_allowed: false
+phase20e_manual_paper_discipline_tracker:
+  enabled: true
+  output_dir: "reports/paper_trading/manual_sessions"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  source_manual_session_dir: "reports/paper_trading/manual_sessions"
+  source_cycle_tracker_dir: "reports/paper_trading/cycle_tracker"
+  source_finalist_tracking_dir: "reports/paper_trading/finalist_tracking"
+  required_discipline_cycles: 10
+  required_clean_signal_cycles: 10
+  allow_warning_skip_as_valid_discipline_cycle: true
+  require_btc_ack_when_btc_weight_positive: true
+  require_no_unexplained_overrides: true
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

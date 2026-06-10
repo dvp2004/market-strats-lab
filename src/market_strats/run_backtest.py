@@ -270,6 +270,9 @@ from market_strats.analysis.manual_paper_session import (
 from market_strats.analysis.manual_paper_session_ingestion import (
     save_phase20d_manual_paper_session_ingestion,
 )
+from market_strats.analysis.manual_paper_discipline_tracker import (
+    save_phase20e_manual_paper_discipline_tracker,
+)
 
 
 def _apply_research_period_filter_to_result(
@@ -1822,6 +1825,12 @@ def _run_phase15_downstream_fresh_signal_chain(
 
     if _phase_enabled(config, "phase20d_manual_paper_session_ingestion"):
         outputs["phase20d"] = save_phase20d_manual_paper_session_ingestion(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    if _phase_enabled(config, "phase20e_manual_paper_discipline_tracker"):
+        outputs["phase20e"] = save_phase20e_manual_paper_discipline_tracker(
             config=config,
             reports_dir=reports_dir,
         )
