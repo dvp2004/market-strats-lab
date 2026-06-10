@@ -12712,6 +12712,41 @@ phase21a_historical_regime_stress_lab:
     include_gls_tlt_reference_where_available: true
   min_regime_trading_days: 20
   require_no_lookahead: true
+phase21b_regime_candidate_reconciliation:
+  enabled: true
+  output_dir: "reports/strategy_factory/regime_reconciliation"
+  dashboard_dir: "reports/strategy_factory/regime_reconciliation/dashboard"
+  source_regime_stress_dir: "reports/strategy_factory/regime_stress"
+  source_finalist_validation_dir: "reports/strategy_factory/finalist_validation"
+  source_paper_tracking_dir: "reports/paper_trading/finalist_tracking"
+  max_recommended_paper_candidates: 4
+  max_core_candidates: 2
+  max_high_caveat_candidates: 2
+  keep_existing_paper_candidates_as_reference: true
+  require_no_promotion: true
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+phase21c_regime_informed_paper_tracking:
+  enabled: true
+  output_dir: "reports/paper_trading/regime_informed_tracking"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  source_regime_reconciliation_dir: "reports/strategy_factory/regime_reconciliation"
+  source_regime_stress_dir: "reports/strategy_factory/regime_stress"
+  source_finalist_tracking_dir: "reports/paper_trading/finalist_tracking"
+  source_operational_hardening_dir: "reports/paper_trading/operational_hardening"
+  source_dynamic_allocation_dir: "reports/paper_trading/finalist_tracking"
+  source_fresh_data_quality_report: "reports/paper_trading/operational_hardening/fresh_data_quality_report.csv"
+  paper_notional_usd: 10000
+  max_candidates: 4
+  include_reference_only_candidate: true
+  require_manual_adoption_before_replacing_phase20: true
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

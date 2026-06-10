@@ -46,6 +46,7 @@ PHASE20D_FUNCTION = "save_phase20d_manual_paper_session_ingestion"
 PHASE20E_FUNCTION = "save_phase20e_manual_paper_discipline_tracker"
 PHASE20F_FUNCTION = "save_phase20f_manual_paper_session_rollover"
 PHASE21A_FUNCTION = "save_phase21a_historical_regime_stress_lab"
+PHASE21B_FUNCTION = "save_phase21b_regime_candidate_reconciliation"
 
 
 def _phase_config(enabled: bool) -> dict:
@@ -134,6 +135,10 @@ def test_run_backtest_imports_phase20f_save_function():
 
 def test_run_backtest_imports_phase21a_save_function():
     assert hasattr(run_backtest, PHASE21A_FUNCTION)
+
+
+def test_run_backtest_imports_phase21b_save_function():
+    assert hasattr(run_backtest, PHASE21B_FUNCTION)
 
 
 def test_phase15_downstream_chain_calls_functions_in_required_order():
@@ -993,3 +998,29 @@ def test_phase21a_only_cli_flag_is_available():
 
     assert "--phase21a-only" in source
     assert "_run_phase21a_historical_regime_stress_lab(" in source
+
+
+def test_phase21b_runner_helper_calls_phase_when_enabled(monkeypatch):
+    calls: list[dict] = []
+
+    def phase21b_recorder(**kwargs):
+        calls.append(kwargs)
+        return {"summary": Path("reports/strategy_factory/regime_reconciliation/phase21b_summary.csv")}
+
+    monkeypatch.setattr(run_backtest, PHASE21B_FUNCTION, phase21b_recorder)
+    reports_dir = Path("reports")
+
+    outputs = run_backtest._run_phase21b_regime_candidate_reconciliation(
+        config={"phase21b_regime_candidate_reconciliation": {"enabled": True}},
+        reports_dir=reports_dir,
+    )
+
+    assert outputs
+    assert calls[0]["reports_dir"] == reports_dir
+
+
+def test_phase21b_only_cli_flag_is_available():
+    source = Path(run_backtest.__file__).read_text(encoding="utf-8")
+
+    assert "--phase21b-only" in source
+    assert "_run_phase21b_regime_candidate_reconciliation(" in source

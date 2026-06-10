@@ -279,6 +279,12 @@ from market_strats.analysis.manual_paper_session_rollover import (
 from market_strats.analysis.historical_regime_stress_lab import (
     save_phase21a_historical_regime_stress_lab,
 )
+from market_strats.analysis.regime_candidate_reconciliation import (
+    save_phase21b_regime_candidate_reconciliation,
+)
+from market_strats.analysis.regime_informed_paper_tracking import (
+    save_phase21c_regime_informed_paper_tracking,
+)
 
 
 def _apply_research_period_filter_to_result(
@@ -1863,6 +1869,32 @@ def _run_phase21a_historical_regime_stress_lab(
     )
 
 
+def _run_phase21b_regime_candidate_reconciliation(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, Path]:
+    if not _phase_enabled(config, "phase21b_regime_candidate_reconciliation"):
+        return {}
+    return save_phase21b_regime_candidate_reconciliation(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
+def _run_phase21c_regime_informed_paper_tracking(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, Path]:
+    if not _phase_enabled(config, "phase21c_regime_informed_paper_tracking"):
+        return {}
+    return save_phase21c_regime_informed_paper_tracking(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, help="Path to YAML config file")
@@ -1881,6 +1913,16 @@ def main() -> None:
         action="store_true",
         help="Run only the Phase 21A Historical Regime Stress Lab.",
     )
+    parser.add_argument(
+        "--phase21b-only",
+        action="store_true",
+        help="Run only the Phase 21B Regime Candidate Reconciliation report.",
+    )
+    parser.add_argument(
+        "--phase21c-only",
+        action="store_true",
+        help="Run only the Phase 21C Regime-Informed Paper Tracking shortlist.",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -1894,6 +1936,20 @@ def main() -> None:
 
     if args.phase21a_only:
         _run_phase21a_historical_regime_stress_lab(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase21b_only:
+        _run_phase21b_regime_candidate_reconciliation(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase21c_only:
+        _run_phase21c_regime_informed_paper_tracking(
             config=config,
             reports_dir=reports_dir,
         )
@@ -2159,6 +2215,16 @@ def main() -> None:
         )
 
         _run_phase21a_historical_regime_stress_lab(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        _run_phase21b_regime_candidate_reconciliation(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        _run_phase21c_regime_informed_paper_tracking(
             config=config,
             reports_dir=reports_dir,
         )
