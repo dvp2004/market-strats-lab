@@ -12559,6 +12559,41 @@ phase19b_strategy_factory_finalist_validation:
     max_drawdown_worse_than_spy_allowed_pp: 5
     prefer_simple_candidates: true
     prefer_no_btc_for_primary_candidate: true
+phase20a_paper_finalist_tracking:
+  enabled: true
+  output_dir: "reports/paper_trading/finalist_tracking"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  source_finalist_validation_dir: "reports/strategy_factory/finalist_validation"
+  source_operational_hardening_dir: "reports/paper_trading/operational_hardening"
+  source_cycle_tracker_dir: "reports/paper_trading/cycle_tracker"
+  paper_notional_usd: 10000
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  include_candidates:
+    - "canonical_spy_qqq_60_40"
+    - "canonical_inverse_vol_63d_btc_usd_qqq_spy"
+phase20b_finalist_dynamic_allocation:
+  enabled: true
+  output_dir: "reports/paper_trading/finalist_tracking"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  source_fresh_processed_dir: "data/fresh/processed"
+  paper_notional_usd: 10000
+  inverse_vol_candidates:
+    canonical_inverse_vol_63d_btc_usd_qqq_spy:
+      lookback_days: 63
+      assets:
+        - "SPY"
+        - "QQQ"
+        - "BTC-USD"
+      max_asset_weight: 0.50
+      btc_max_weight: 0.05
+      require_all_assets: true
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

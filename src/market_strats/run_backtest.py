@@ -258,6 +258,12 @@ from market_strats.analysis.strategy_factory_multiverse import (
 from market_strats.analysis.strategy_factory_finalist_validation import (
     save_phase19b_strategy_factory_finalist_validation,
 )
+from market_strats.analysis.finalist_dynamic_allocation import (
+    save_phase20b_finalist_dynamic_allocation,
+)
+from market_strats.analysis.paper_finalist_tracking import (
+    save_phase20a_paper_finalist_tracking,
+)
 
 
 def _apply_research_period_filter_to_result(
@@ -1786,6 +1792,18 @@ def _run_phase15_downstream_fresh_signal_chain(
 
     if _phase_enabled(config, "phase19b_strategy_factory_finalist_validation"):
         outputs["phase19b"] = save_phase19b_strategy_factory_finalist_validation(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    if _phase_enabled(config, "phase20b_finalist_dynamic_allocation"):
+        outputs["phase20b"] = save_phase20b_finalist_dynamic_allocation(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    if _phase_enabled(config, "phase20a_paper_finalist_tracking"):
+        outputs["phase20a"] = save_phase20a_paper_finalist_tracking(
             config=config,
             reports_dir=reports_dir,
         )
