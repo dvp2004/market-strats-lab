@@ -42,6 +42,7 @@ PHASE19B_FUNCTION = "save_phase19b_strategy_factory_finalist_validation"
 PHASE20A_FUNCTION = "save_phase20a_paper_finalist_tracking"
 PHASE20B_FUNCTION = "save_phase20b_finalist_dynamic_allocation"
 PHASE20C_FUNCTION = "save_phase20c_manual_paper_session"
+PHASE20D_FUNCTION = "save_phase20d_manual_paper_session_ingestion"
 
 
 def _phase_config(enabled: bool) -> dict:
@@ -114,6 +115,10 @@ def test_run_backtest_imports_phase20b_save_function():
 
 def test_run_backtest_imports_phase20c_save_function():
     assert hasattr(run_backtest, PHASE20C_FUNCTION)
+
+
+def test_run_backtest_imports_phase20d_save_function():
+    assert hasattr(run_backtest, PHASE20D_FUNCTION)
 
 
 def test_phase15_downstream_chain_calls_functions_in_required_order():
@@ -770,7 +775,7 @@ def test_phase19b_runs_after_phase19a_when_enabled(monkeypatch):
     assert calls[-1][1]["reports_dir"] == reports_dir
 
 
-def test_phase20b_runs_before_phase20a_and_phase20c_runs_after_phase20a_when_enabled(
+def test_phase20b_phase20a_phase20c_phase20d_run_in_required_order_when_enabled(
     monkeypatch,
 ):
     calls: list[tuple[str, dict]] = []
@@ -824,6 +829,10 @@ def test_phase20b_runs_before_phase20a_and_phase20c_runs_after_phase20a_when_ena
         calls.append((PHASE20C_FUNCTION, kwargs))
         return {"summary": pd.DataFrame({"function_name": [PHASE20C_FUNCTION]})}
 
+    def phase20d_recorder(**kwargs):
+        calls.append((PHASE20D_FUNCTION, kwargs))
+        return {"summary": pd.DataFrame({"function_name": [PHASE20D_FUNCTION]})}
+
     monkeypatch.setattr(run_backtest, PHASE16A_FUNCTION, phase16a_recorder)
     monkeypatch.setattr(run_backtest, PHASE16B_FUNCTION, phase16b_recorder)
     monkeypatch.setattr(run_backtest, PHASE17A_FUNCTION, phase17a_recorder)
@@ -836,6 +845,7 @@ def test_phase20b_runs_before_phase20a_and_phase20c_runs_after_phase20a_when_ena
     monkeypatch.setattr(run_backtest, PHASE20B_FUNCTION, phase20b_recorder)
     monkeypatch.setattr(run_backtest, PHASE20A_FUNCTION, phase20a_recorder)
     monkeypatch.setattr(run_backtest, PHASE20C_FUNCTION, phase20c_recorder)
+    monkeypatch.setattr(run_backtest, PHASE20D_FUNCTION, phase20d_recorder)
 
     config = _phase_config(enabled=True)
     config["phase16a_paper_dry_run_preregistration"] = {"enabled": True}
@@ -850,6 +860,7 @@ def test_phase20b_runs_before_phase20a_and_phase20c_runs_after_phase20a_when_ena
     config["phase20b_finalist_dynamic_allocation"] = {"enabled": True}
     config["phase20a_paper_finalist_tracking"] = {"enabled": True}
     config["phase20c_manual_paper_session"] = {"enabled": True}
+    config["phase20d_manual_paper_session_ingestion"] = {"enabled": True}
     reports_dir = Path("reports")
 
     outputs = run_backtest._run_phase15_downstream_fresh_signal_chain(
@@ -873,8 +884,9 @@ def test_phase20b_runs_before_phase20a_and_phase20c_runs_after_phase20a_when_ena
         PHASE20B_FUNCTION,
         PHASE20A_FUNCTION,
         PHASE20C_FUNCTION,
+        PHASE20D_FUNCTION,
     ]
-    assert list(outputs)[-12:] == [
+    assert list(outputs)[-13:] == [
         "phase16a",
         "phase16b",
         "phase17a",
@@ -887,6 +899,7 @@ def test_phase20b_runs_before_phase20a_and_phase20c_runs_after_phase20a_when_ena
         "phase20b",
         "phase20a",
         "phase20c",
+        "phase20d",
     ]
     assert calls[-1][1]["reports_dir"] == reports_dir
 

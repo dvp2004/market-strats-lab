@@ -267,6 +267,9 @@ from market_strats.analysis.paper_finalist_tracking import (
 from market_strats.analysis.manual_paper_session import (
     save_phase20c_manual_paper_session,
 )
+from market_strats.analysis.manual_paper_session_ingestion import (
+    save_phase20d_manual_paper_session_ingestion,
+)
 
 
 def _apply_research_period_filter_to_result(
@@ -1813,6 +1816,12 @@ def _run_phase15_downstream_fresh_signal_chain(
 
     if _phase_enabled(config, "phase20c_manual_paper_session"):
         outputs["phase20c"] = save_phase20c_manual_paper_session(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    if _phase_enabled(config, "phase20d_manual_paper_session_ingestion"):
+        outputs["phase20d"] = save_phase20d_manual_paper_session_ingestion(
             config=config,
             reports_dir=reports_dir,
         )

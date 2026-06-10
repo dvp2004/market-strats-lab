@@ -12609,6 +12609,18 @@ phase20c_manual_paper_session:
   require_btc_acknowledgement_when_btc_weight_positive: true
   require_manual_decision: true
   require_fill_fields_only_if_entered: true
+phase20d_manual_paper_session_ingestion:
+  enabled: true
+  output_dir: "reports/paper_trading/manual_sessions"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  source_manual_session_dir: "reports/paper_trading/manual_sessions"
+  source_finalist_tracking_dir: "reports/paper_trading/finalist_tracking"
+  filled_session_filename: "manual_paper_session_filled.csv"
+  ledger_filename: "manual_paper_session_ledger.csv"
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
