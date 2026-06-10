@@ -524,6 +524,16 @@ def update_manual_session_ledger(
     return ledger
 
 
+def _phase20f_stale_filled_file_blocked(rollover_status: pd.DataFrame) -> bool:
+    if rollover_status.empty:
+        return False
+    row = rollover_status.iloc[0]
+    return bool(
+        _bool_value(row.get("filled_session_stale", False))
+        and _text_value(row.get("rollover_action", "")) == "stale_file_blocked"
+    )
+
+
 def _gate_row(gate_id: str, passed: bool, detail: str = "") -> dict[str, Any]:
     return {
         "gate_id": gate_id,
@@ -560,8 +570,12 @@ def save_phase20d_manual_paper_session_ingestion(
         section.get("source_finalist_tracking_dir"),
         reports_path / "paper_trading" / "finalist_tracking",
     )
-    filled_filename = str(section.get("filled_session_filename", "manual_paper_session_filled.csv"))
-    ledger_filename = str(section.get("ledger_filename", "manual_paper_session_ledger.csv"))
+    filled_filename = str(
+        section.get("filled_session_filename", "manual_paper_session_filled.csv")
+    )
+    ledger_filename = str(
+        section.get("ledger_filename", "manual_paper_session_ledger.csv")
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
     dashboard_dir.mkdir(parents=True, exist_ok=True)
 
@@ -571,6 +585,9 @@ def save_phase20d_manual_paper_session_ingestion(
     tear_sheet_path = source_finalist_tracking_dir / "finalist_daily_tracking_tear_sheet.csv"
     tracking_status_path = dashboard_dir / "finalist_tracking_status.csv"
     ledger_path = output_dir / ledger_filename
+    rollover_status_path = (
+        source_manual_session_dir / "manual_paper_session_rollover_status.csv"
+    )
     result_path = output_dir / "manual_paper_session_ingestion_result.csv"
     row_validation_path = output_dir / "manual_paper_session_row_validation.csv"
     dashboard_path = dashboard_dir / "manual_paper_session_ingestion_status.csv"
@@ -585,8 +602,10 @@ def save_phase20d_manual_paper_session_ingestion(
     orders = _read_csv(orders_path)
     tear_sheet = _read_csv(tear_sheet_path)
     finalist_tracking_status = _read_csv(tracking_status_path)
+    rollover_status = _read_csv(rollover_status_path)
     filled_present = filled_path.exists() and filled_path.is_file()
     filled_session = _read_csv(filled_path) if filled_present else pd.DataFrame()
+    stale_filled_file_blocked = _phase20f_stale_filled_file_blocked(rollover_status)
     warnings_present = _warnings_present(
         finalist_tracking_status=finalist_tracking_status,
         tear_sheet=tear_sheet,
@@ -607,12 +626,37 @@ def save_phase20d_manual_paper_session_ingestion(
         blocking_reasons.append("real_money_flag_true")
     if broker_api_integration_allowed:
         blocking_reasons.append("broker_api_flag_true")
+    if filled_present and stale_filled_file_blocked:
+        blocking_reasons.append("stale_filled_file_blocked_by_phase20f")
 
-    if filled_present and not template.empty:
+    if filled_present and not template.empty and not stale_filled_file_blocked:
         row_validation = validate_filled_manual_session(
             filled_session=filled_session,
             template=template,
             warnings_present=warnings_present,
+        )
+    elif filled_present and stale_filled_file_blocked:
+        row_validation = pd.DataFrame(
+            [
+                {
+                    "session_date": row.get("session_date", ""),
+                    "selected_signal_date": row.get("selected_signal_date", ""),
+                    "canonical_candidate_id": row.get("canonical_candidate_id", ""),
+                    "asset": row.get("asset", ""),
+                    "row_valid": False,
+                    "row_blocking_reasons": "stale_filled_file_blocked_by_phase20f",
+                    "manual_decision": row.get("manual_decision", ""),
+                    "manual_execution_status": row.get("manual_execution_status", ""),
+                    "target_notional_usd": row.get("target_notional_usd", ""),
+                    "paper_fill_price": row.get("paper_fill_price", ""),
+                    "paper_fill_quantity": row.get("paper_fill_quantity", ""),
+                    "actual_notional_usd": "",
+                    "deviation_from_preview_usd": "",
+                    "deviation_from_preview_pct": "",
+                }
+                for _index, row in filled_session.iterrows()
+            ],
+            columns=ROW_VALIDATION_COLUMNS,
         )
     else:
         row_validation = pd.DataFrame(columns=ROW_VALIDATION_COLUMNS)

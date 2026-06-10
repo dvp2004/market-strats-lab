@@ -12637,6 +12637,81 @@ phase20e_manual_paper_discipline_tracker:
   live_trading_allowed: false
   real_money_allowed: false
   broker_api_integration_allowed: false
+phase20f_manual_paper_session_rollover:
+  enabled: true
+  output_dir: "reports/paper_trading/manual_sessions"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  source_manual_session_dir: "reports/paper_trading/manual_sessions"
+  filled_session_filename: "manual_paper_session_filled.csv"
+  template_filename: "manual_paper_session_template.csv"
+  archive_dir: "reports/paper_trading/manual_sessions/archive"
+  archive_completed_valid_sessions: true
+  stale_filled_file_policy: "block_current_ingestion"
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+phase21a_historical_regime_stress_lab:
+  enabled: true
+  output_dir: "reports/strategy_factory/regime_stress"
+  dashboard_dir: "reports/strategy_factory/regime_stress/dashboard"
+  source_strategy_factory_dir: "reports/strategy_factory"
+  source_multiverse_dir: "reports/strategy_factory/multiverse"
+  source_finalist_validation_dir: "reports/strategy_factory/finalist_validation"
+  phase6_baseline_daily_path: "reports/phase6b_loose_relief_execution_realistic_overlay_daily.csv"
+  data_dir: "data/fresh/processed"
+  initial_capital: 10000
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  regime_windows:
+    dot_com_crash:
+      start: "2000-03-10"
+      end: "2002-10-09"
+      description: "Dot-com crash / early-2000s equity bear market"
+    post_dot_com_recovery:
+      start: "2002-10-10"
+      end: "2007-10-09"
+      description: "Post-dot-com recovery before GFC"
+    global_financial_crisis:
+      start: "2007-10-09"
+      end: "2009-03-09"
+      description: "Global Financial Crisis"
+    post_gfc_bull_market:
+      start: "2009-03-10"
+      end: "2020-02-19"
+      description: "Post-GFC bull market"
+    covid_crash:
+      start: "2020-02-19"
+      end: "2020-03-23"
+      description: "COVID crash"
+    covid_rebound:
+      start: "2020-03-24"
+      end: "2021-12-31"
+      description: "COVID rebound / liquidity boom"
+    inflation_rate_shock:
+      start: "2022-01-03"
+      end: "2022-10-14"
+      description: "2022 inflation and rate shock"
+    post_2022_recovery:
+      start: "2022-10-15"
+      end: "2026-05-01"
+      description: "Post-2022 recovery to canonical endpoint"
+    full_canonical:
+      start: "2006-04-28"
+      end: "2026-05-01"
+      description: "Canonical Phase 2+ research window"
+  candidate_groups:
+    include_phase19b_recommended: true
+    include_phase19a_finalists: true
+    include_spy_benchmark: true
+    include_phase6_loose_relief_baseline: true
+    include_spy_qqq_static_variants: true
+    include_btc_candidates_where_available: true
+    include_gls_tlt_reference_where_available: true
+  min_regime_trading_days: 20
+  require_no_lookahead: true
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

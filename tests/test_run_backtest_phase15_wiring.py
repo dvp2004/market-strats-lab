@@ -44,6 +44,8 @@ PHASE20B_FUNCTION = "save_phase20b_finalist_dynamic_allocation"
 PHASE20C_FUNCTION = "save_phase20c_manual_paper_session"
 PHASE20D_FUNCTION = "save_phase20d_manual_paper_session_ingestion"
 PHASE20E_FUNCTION = "save_phase20e_manual_paper_discipline_tracker"
+PHASE20F_FUNCTION = "save_phase20f_manual_paper_session_rollover"
+PHASE21A_FUNCTION = "save_phase21a_historical_regime_stress_lab"
 
 
 def _phase_config(enabled: bool) -> dict:
@@ -124,6 +126,14 @@ def test_run_backtest_imports_phase20d_save_function():
 
 def test_run_backtest_imports_phase20e_save_function():
     assert hasattr(run_backtest, PHASE20E_FUNCTION)
+
+
+def test_run_backtest_imports_phase20f_save_function():
+    assert hasattr(run_backtest, PHASE20F_FUNCTION)
+
+
+def test_run_backtest_imports_phase21a_save_function():
+    assert hasattr(run_backtest, PHASE21A_FUNCTION)
 
 
 def test_phase15_downstream_chain_calls_functions_in_required_order():
@@ -780,7 +790,7 @@ def test_phase19b_runs_after_phase19a_when_enabled(monkeypatch):
     assert calls[-1][1]["reports_dir"] == reports_dir
 
 
-def test_phase20b_to_phase20e_run_in_required_order_when_enabled(
+def test_phase20b_to_phase20f_run_in_required_order_when_enabled(
     monkeypatch,
 ):
     calls: list[tuple[str, dict]] = []
@@ -842,6 +852,10 @@ def test_phase20b_to_phase20e_run_in_required_order_when_enabled(
         calls.append((PHASE20E_FUNCTION, kwargs))
         return {"summary": pd.DataFrame({"function_name": [PHASE20E_FUNCTION]})}
 
+    def phase20f_recorder(**kwargs):
+        calls.append((PHASE20F_FUNCTION, kwargs))
+        return {"summary": pd.DataFrame({"function_name": [PHASE20F_FUNCTION]})}
+
     monkeypatch.setattr(run_backtest, PHASE16A_FUNCTION, phase16a_recorder)
     monkeypatch.setattr(run_backtest, PHASE16B_FUNCTION, phase16b_recorder)
     monkeypatch.setattr(run_backtest, PHASE17A_FUNCTION, phase17a_recorder)
@@ -854,6 +868,7 @@ def test_phase20b_to_phase20e_run_in_required_order_when_enabled(
     monkeypatch.setattr(run_backtest, PHASE20B_FUNCTION, phase20b_recorder)
     monkeypatch.setattr(run_backtest, PHASE20A_FUNCTION, phase20a_recorder)
     monkeypatch.setattr(run_backtest, PHASE20C_FUNCTION, phase20c_recorder)
+    monkeypatch.setattr(run_backtest, PHASE20F_FUNCTION, phase20f_recorder)
     monkeypatch.setattr(run_backtest, PHASE20D_FUNCTION, phase20d_recorder)
     monkeypatch.setattr(run_backtest, PHASE20E_FUNCTION, phase20e_recorder)
 
@@ -870,6 +885,7 @@ def test_phase20b_to_phase20e_run_in_required_order_when_enabled(
     config["phase20b_finalist_dynamic_allocation"] = {"enabled": True}
     config["phase20a_paper_finalist_tracking"] = {"enabled": True}
     config["phase20c_manual_paper_session"] = {"enabled": True}
+    config["phase20f_manual_paper_session_rollover"] = {"enabled": True}
     config["phase20d_manual_paper_session_ingestion"] = {"enabled": True}
     config["phase20e_manual_paper_discipline_tracker"] = {"enabled": True}
     reports_dir = Path("reports")
@@ -895,10 +911,11 @@ def test_phase20b_to_phase20e_run_in_required_order_when_enabled(
         PHASE20B_FUNCTION,
         PHASE20A_FUNCTION,
         PHASE20C_FUNCTION,
+        PHASE20F_FUNCTION,
         PHASE20D_FUNCTION,
         PHASE20E_FUNCTION,
     ]
-    assert list(outputs)[-14:] == [
+    assert list(outputs)[-15:] == [
         "phase16a",
         "phase16b",
         "phase17a",
@@ -911,6 +928,7 @@ def test_phase20b_to_phase20e_run_in_required_order_when_enabled(
         "phase20b",
         "phase20a",
         "phase20c",
+        "phase20f",
         "phase20d",
         "phase20e",
     ]
@@ -949,3 +967,29 @@ def test_phase15wxyz_chain_is_inserted_before_downstream_phase15_chain():
     )
 
     assert phase8b_call < phase15wxyz_call < phase15_downstream_call
+
+
+def test_phase21a_runner_helper_calls_phase_when_enabled(monkeypatch):
+    calls: list[dict] = []
+
+    def phase21a_recorder(**kwargs):
+        calls.append(kwargs)
+        return {"summary": Path("reports/strategy_factory/regime_stress/phase21a_summary.csv")}
+
+    monkeypatch.setattr(run_backtest, PHASE21A_FUNCTION, phase21a_recorder)
+    reports_dir = Path("reports")
+
+    outputs = run_backtest._run_phase21a_historical_regime_stress_lab(
+        config={"phase21a_historical_regime_stress_lab": {"enabled": True}},
+        reports_dir=reports_dir,
+    )
+
+    assert outputs
+    assert calls[0]["reports_dir"] == reports_dir
+
+
+def test_phase21a_only_cli_flag_is_available():
+    source = Path(run_backtest.__file__).read_text(encoding="utf-8")
+
+    assert "--phase21a-only" in source
+    assert "_run_phase21a_historical_regime_stress_lab(" in source

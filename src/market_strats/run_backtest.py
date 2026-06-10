@@ -273,6 +273,12 @@ from market_strats.analysis.manual_paper_session_ingestion import (
 from market_strats.analysis.manual_paper_discipline_tracker import (
     save_phase20e_manual_paper_discipline_tracker,
 )
+from market_strats.analysis.manual_paper_session_rollover import (
+    save_phase20f_manual_paper_session_rollover,
+)
+from market_strats.analysis.historical_regime_stress_lab import (
+    save_phase21a_historical_regime_stress_lab,
+)
 
 
 def _apply_research_period_filter_to_result(
@@ -1823,6 +1829,12 @@ def _run_phase15_downstream_fresh_signal_chain(
             reports_dir=reports_dir,
         )
 
+    if _phase_enabled(config, "phase20f_manual_paper_session_rollover"):
+        outputs["phase20f"] = save_phase20f_manual_paper_session_rollover(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
     if _phase_enabled(config, "phase20d_manual_paper_session_ingestion"):
         outputs["phase20d"] = save_phase20d_manual_paper_session_ingestion(
             config=config,
@@ -1838,6 +1850,19 @@ def _run_phase15_downstream_fresh_signal_chain(
     return outputs
 
 
+def _run_phase21a_historical_regime_stress_lab(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, Path]:
+    if not _phase_enabled(config, "phase21a_historical_regime_stress_lab"):
+        return {}
+    return save_phase21a_historical_regime_stress_lab(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, help="Path to YAML config file")
@@ -1851,6 +1876,11 @@ def main() -> None:
         action="store_true",
         help="Run only Phase 15WXYZ regeneration and downstream Phase 15Q/R/O/P/M/N.",
     )
+    parser.add_argument(
+        "--phase21a-only",
+        action="store_true",
+        help="Run only the Phase 21A Historical Regime Stress Lab.",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -1861,6 +1891,13 @@ def main() -> None:
 
     reports_dir = Path("reports")
     reports_dir.mkdir(parents=True, exist_ok=True)
+
+    if args.phase21a_only:
+        _run_phase21a_historical_regime_stress_lab(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
 
     if args.phase15wxyz_only:
         _run_phase15wxyz_fresh_extension_pipeline(
@@ -2119,6 +2156,11 @@ def main() -> None:
             reports_dir=reports_dir,
             relative_momentum_outputs=relative_momentum_outputs,
             ticker_outputs=ticker_outputs,
+        )
+
+        _run_phase21a_historical_regime_stress_lab(
+            config=config,
+            reports_dir=reports_dir,
         )
 
     save_final_strategy_decision_report(reports_dir)

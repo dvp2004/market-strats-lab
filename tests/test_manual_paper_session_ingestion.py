@@ -391,3 +391,38 @@ def test_dashboard_status_is_written_and_safety_flags_remain_false(tmp_path):
     assert not bool(dashboard.iloc[0]["live_trading_allowed"])
     assert not bool(dashboard.iloc[0]["real_money_allowed"])
     assert not bool(dashboard.iloc[0]["broker_api_integration_allowed"])
+
+
+def test_phase20f_stale_file_guard_blocks_current_ingestion(tmp_path):
+    reports_dir = tmp_path / "reports"
+    _write_required_sources(reports_dir)
+    manual_dir = reports_dir / "paper_trading" / "manual_sessions"
+    stale_filled = _filled_skip_session()
+    stale_filled["session_date"] = "2026-06-09"
+    stale_filled.to_csv(manual_dir / "manual_paper_session_filled.csv", index=False)
+    pd.DataFrame(
+        [
+            {
+                "filled_session_file_present": True,
+                "filled_session_stale": True,
+                "rollover_action": "stale_file_blocked",
+            }
+        ]
+    ).to_csv(manual_dir / "manual_paper_session_rollover_status.csv", index=False)
+
+    outputs = save_phase20d_manual_paper_session_ingestion(
+        config=_config(reports_dir),
+        reports_dir=reports_dir,
+    )
+
+    result = outputs["manual_paper_session_ingestion_result"].iloc[0]
+    blockers = ";".join(
+        outputs["manual_paper_session_row_validation"][
+            "row_blocking_reasons"
+        ].astype(str)
+    )
+    assert result["session_ingestion_status"] == "invalid_manual_review_required"
+    assert not bool(result["session_valid"])
+    assert "stale_filled_file_blocked_by_phase20f" in str(result["blocking_reasons"])
+    assert "stale_filled_file_blocked_by_phase20f" in blockers
+    assert outputs["manual_paper_session_ledger"].empty

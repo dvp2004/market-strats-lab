@@ -110,16 +110,21 @@ def _first_available(frame: pd.DataFrame, column: str, fallback: str = "") -> st
 
 
 def _ledger_contains_filled_session(*, ledger: pd.DataFrame, filled: pd.DataFrame) -> bool:
-    required = {"session_date", "selected_signal_date", "canonical_candidate_id", "asset"}
-    if ledger.empty or filled.empty or not required.issubset(ledger.columns):
+    required = [
+        "session_date",
+        "selected_signal_date",
+        "canonical_candidate_id",
+        "asset",
+    ]
+    if ledger.empty or filled.empty or not set(required).issubset(ledger.columns):
         return False
-    if not required.issubset(filled.columns):
+    if not set(required).issubset(filled.columns):
         return False
     ledger_keys = set(
-        ledger[list(required)].fillna("").astype(str).itertuples(index=False, name=None)
+        ledger[required].fillna("").astype(str).itertuples(index=False, name=None)
     )
     filled_keys = set(
-        filled[list(required)].fillna("").astype(str).itertuples(index=False, name=None)
+        filled[required].fillna("").astype(str).itertuples(index=False, name=None)
     )
     return bool(filled_keys) and filled_keys.issubset(ledger_keys)
 
@@ -229,8 +234,12 @@ def save_phase20f_manual_paper_session_rollover(
         section.get("archive_dir"),
         reports_path / "paper_trading" / "manual_sessions" / "archive",
     )
-    filled_filename = str(section.get("filled_session_filename", "manual_paper_session_filled.csv"))
-    template_filename = str(section.get("template_filename", "manual_paper_session_template.csv"))
+    filled_filename = str(
+        section.get("filled_session_filename", "manual_paper_session_filled.csv")
+    )
+    template_filename = str(
+        section.get("template_filename", "manual_paper_session_template.csv")
+    )
     archive_completed = _bool_value(section.get("archive_completed_valid_sessions", True))
     stale_policy = str(section.get("stale_filled_file_policy", "block_current_ingestion"))
     live_trading_allowed = _bool_value(section.get("live_trading_allowed", False))
