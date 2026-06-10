@@ -246,6 +246,76 @@ def test_order_preview_blocks_candidate_when_dynamic_allocation_missing():
     ).all()
 
 
+def test_phase20a_consumes_phase20b_dynamic_allocation_when_available(tmp_path):
+    _write_sources(tmp_path, warning=True, block=False)
+    out_dir = tmp_path / "reports" / "paper_trading" / "finalist_tracking"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(
+        [
+            {
+                "canonical_candidate_id": DYNAMIC_BTC_CANDIDATE,
+                "asset": "SPY",
+                "target_weight": 0.50,
+                "final_weight": 0.50,
+                "allocation_status": "dynamic_allocation_resolved",
+                "allocation_source": "phase20b_inverse_vol_dynamic_allocation",
+                "paper_preview_allowed": True,
+            },
+            {
+                "canonical_candidate_id": DYNAMIC_BTC_CANDIDATE,
+                "asset": "QQQ",
+                "target_weight": 0.45,
+                "final_weight": 0.45,
+                "allocation_status": "dynamic_allocation_resolved",
+                "allocation_source": "phase20b_inverse_vol_dynamic_allocation",
+                "paper_preview_allowed": True,
+            },
+            {
+                "canonical_candidate_id": DYNAMIC_BTC_CANDIDATE,
+                "asset": "BTC-USD",
+                "target_weight": 0.05,
+                "final_weight": 0.05,
+                "allocation_status": "dynamic_allocation_resolved",
+                "allocation_source": "phase20b_inverse_vol_dynamic_allocation",
+                "paper_preview_allowed": True,
+            },
+        ]
+    ).to_csv(out_dir / "finalist_dynamic_allocations.csv", index=False)
+
+    outputs = save_phase20a_paper_finalist_tracking(
+        config=_config(tmp_path),
+        reports_dir=tmp_path / "reports",
+    )
+    targets = outputs["finalist_paper_targets"]
+    dynamic = targets.loc[targets["canonical_candidate_id"] == DYNAMIC_BTC_CANDIDATE]
+
+    assert set(dynamic["allocation_status"]) == {"dynamic_allocation_resolved"}
+    assert set(dynamic["allocation_source"]) == {
+        "phase20b_inverse_vol_dynamic_allocation"
+    }
+    assert dynamic["paper_preview_allowed"].all()
+    assert dynamic["btc_capable_candidate"].all()
+    assert dynamic["persistent_btc_caveat"].all()
+    assert dynamic["active_btc_allocation_warning"].all()
+    assert set(dynamic["current_btc_weight"].astype(float).round(2)) == {0.05}
+
+
+def test_btc_capable_candidate_has_persistent_caveat_when_dynamic_file_missing():
+    targets = build_finalist_paper_targets(
+        recommended_tracking_set=_recommended_tracking_set(),
+        include_candidates=[DYNAMIC_BTC_CANDIDATE],
+        dynamic_allocations=pd.DataFrame(),
+        selected_signal_date="2026-06-08",
+        tracking_date="2026-06-09",
+        paper_notional_usd=10000,
+        data_quality_blocked=False,
+    )
+
+    assert targets["btc_capable_candidate"].all()
+    assert targets["persistent_btc_caveat"].all()
+    assert not targets["active_btc_allocation_warning"].any()
+
+
 def test_order_preview_blocks_all_candidates_when_data_quality_blocks():
     targets = build_finalist_paper_targets(
         recommended_tracking_set=_recommended_tracking_set(),

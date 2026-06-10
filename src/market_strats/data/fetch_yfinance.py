@@ -23,6 +23,30 @@ COLUMN_MAP = {
 }
 
 
+def _drop_trailing_incomplete_rows(df: pd.DataFrame, ticker: str) -> pd.DataFrame:
+    required_non_null = ["open", "high", "low", "close", "adj_close", "volume"]
+    incomplete = df[required_non_null].isna().any(axis=1)
+    if not incomplete.any():
+        return df
+
+    complete_positions = [idx for idx, is_complete in enumerate(~incomplete) if is_complete]
+    if not complete_positions:
+        raise ValueError(f"{ticker}: no complete OHLCV rows returned")
+
+    last_complete_position = complete_positions[-1]
+    incomplete_before_last_complete = incomplete.iloc[: last_complete_position + 1]
+    if incomplete_before_last_complete.any():
+        bad_dates = (
+            df.iloc[: last_complete_position + 1]
+            .loc[incomplete_before_last_complete, "date"]
+            .astype(str)
+            .tolist()
+        )
+        raise ValueError(f"{ticker}: incomplete non-trailing OHLCV rows: {bad_dates}")
+
+    return df.iloc[: last_complete_position + 1].copy()
+
+
 def fetch_daily_prices(ticker: str, start_date: str, end_date: str | None = None) -> pd.DataFrame:
     """
     Fetch daily OHLCV data from Yahoo Finance through yfinance.
@@ -56,6 +80,7 @@ def fetch_daily_prices(ticker: str, start_date: str, end_date: str | None = None
     df = df[required].copy()
     df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None)
     df = df.sort_values("date").reset_index(drop=True)
+    df = _drop_trailing_incomplete_rows(df, ticker).reset_index(drop=True)
 
     return df
 
