@@ -12594,6 +12594,21 @@ phase20b_finalist_dynamic_allocation:
   live_trading_allowed: false
   real_money_allowed: false
   broker_api_integration_allowed: false
+phase20c_manual_paper_session:
+  enabled: true
+  output_dir: "reports/paper_trading/manual_sessions"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  source_finalist_tracking_dir: "reports/paper_trading/finalist_tracking"
+  source_cycle_tracker_dir: "reports/paper_trading/cycle_tracker"
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  require_tear_sheet_review_acknowledgement: true
+  require_warning_acknowledgement: true
+  require_btc_acknowledgement_when_btc_weight_positive: true
+  require_manual_decision: true
+  require_fill_fields_only_if_entered: true
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

@@ -264,6 +264,9 @@ from market_strats.analysis.finalist_dynamic_allocation import (
 from market_strats.analysis.paper_finalist_tracking import (
     save_phase20a_paper_finalist_tracking,
 )
+from market_strats.analysis.manual_paper_session import (
+    save_phase20c_manual_paper_session,
+)
 
 
 def _apply_research_period_filter_to_result(
@@ -1804,6 +1807,12 @@ def _run_phase15_downstream_fresh_signal_chain(
 
     if _phase_enabled(config, "phase20a_paper_finalist_tracking"):
         outputs["phase20a"] = save_phase20a_paper_finalist_tracking(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+    if _phase_enabled(config, "phase20c_manual_paper_session"):
+        outputs["phase20c"] = save_phase20c_manual_paper_session(
             config=config,
             reports_dir=reports_dir,
         )
