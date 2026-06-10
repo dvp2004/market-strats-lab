@@ -285,6 +285,9 @@ from market_strats.analysis.regime_candidate_reconciliation import (
 from market_strats.analysis.regime_informed_paper_tracking import (
     save_phase21c_regime_informed_paper_tracking,
 )
+from market_strats.analysis.regime_informed_adoption import (
+    save_phase21d_regime_informed_adoption,
+)
 
 
 def _apply_research_period_filter_to_result(
@@ -1895,6 +1898,19 @@ def _run_phase21c_regime_informed_paper_tracking(
     )
 
 
+def _run_phase21d_regime_informed_adoption(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, Path]:
+    if not _phase_enabled(config, "phase21d_regime_informed_adoption"):
+        return {}
+    return save_phase21d_regime_informed_adoption(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, help="Path to YAML config file")
@@ -1923,6 +1939,11 @@ def main() -> None:
         action="store_true",
         help="Run only the Phase 21C Regime-Informed Paper Tracking shortlist.",
     )
+    parser.add_argument(
+        "--phase21d-only",
+        action="store_true",
+        help="Run only the Phase 21D Regime-Informed Adoption gate.",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -1950,6 +1971,13 @@ def main() -> None:
 
     if args.phase21c_only:
         _run_phase21c_regime_informed_paper_tracking(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase21d_only:
+        _run_phase21d_regime_informed_adoption(
             config=config,
             reports_dir=reports_dir,
         )
@@ -2225,6 +2253,11 @@ def main() -> None:
         )
 
         _run_phase21c_regime_informed_paper_tracking(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        _run_phase21d_regime_informed_adoption(
             config=config,
             reports_dir=reports_dir,
         )

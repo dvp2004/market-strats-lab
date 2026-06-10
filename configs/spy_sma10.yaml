@@ -12747,6 +12747,22 @@ phase21c_regime_informed_paper_tracking:
   real_money_allowed: false
   broker_api_integration_allowed: false
   promotion_allowed: false
+phase21d_regime_informed_adoption:
+  enabled: true
+  output_dir: "reports/paper_trading/regime_informed_tracking"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  source_regime_informed_tracking_dir: "reports/paper_trading/regime_informed_tracking"
+  adoption_decision_filename: "regime_informed_adoption_decision.csv"
+  adoption_template_filename: "regime_informed_adoption_decision_template.csv"
+  manual_session_template_filename: "regime_informed_manual_session_template.csv"
+  manual_session_checklist_filename: "regime_informed_manual_session_checklist.md"
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false
+  require_manual_adoption: true
+  require_adoption_reason: true
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
