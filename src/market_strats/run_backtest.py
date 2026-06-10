@@ -290,6 +290,22 @@ from market_strats.analysis.regime_informed_adoption import (
 )
 
 
+def save_phase15o_current_signal_preregistration(**kwargs):
+    return save_phase15o_post_endpoint_candidate_stream_extension(**kwargs)
+
+
+def save_phase15p_current_signal_dry_run(**kwargs):
+    return save_phase15p_extended_candidate_stream_audit(**kwargs)
+
+
+def save_phase15m_current_signal_export(**kwargs):
+    return save_phase15m_fresh_current_signal_generation(**kwargs)
+
+
+def save_phase15n_paper_dry_run_eligibility(**kwargs):
+    return save_phase15n_fresh_signal_audit_paper_dry_run_eligibility(**kwargs)
+
+
 def _apply_research_period_filter_to_result(
     result: pd.DataFrame,
     config: dict,
@@ -1739,7 +1755,7 @@ def _run_phase15_downstream_fresh_signal_chain(
         )
 
     if _phase_enabled(config, "phase15o_post_endpoint_candidate_stream_extension"):
-        outputs["phase15o"] = save_phase15o_post_endpoint_candidate_stream_extension(
+        outputs["phase15o"] = save_phase15o_current_signal_preregistration(
             config=config,
             reports_dir=reports_dir,
             relative_momentum_outputs=relative_momentum_outputs,
@@ -1747,13 +1763,13 @@ def _run_phase15_downstream_fresh_signal_chain(
         )
 
     if _phase_enabled(config, "phase15p_extended_candidate_stream_audit"):
-        outputs["phase15p"] = save_phase15p_extended_candidate_stream_audit(
+        outputs["phase15p"] = save_phase15p_current_signal_dry_run(
             config=config,
             reports_dir=reports_dir,
         )
 
     if _phase_enabled(config, "phase15m_fresh_current_signal_generation"):
-        outputs["phase15m"] = save_phase15m_fresh_current_signal_generation(
+        outputs["phase15m"] = save_phase15m_current_signal_export(
             config=config,
             reports_dir=reports_dir,
             relative_momentum_outputs=relative_momentum_outputs,
@@ -1761,7 +1777,7 @@ def _run_phase15_downstream_fresh_signal_chain(
         )
 
     if _phase_enabled(config, "phase15n_fresh_signal_audit_paper_dry_run_eligibility"):
-        outputs["phase15n"] = save_phase15n_fresh_signal_audit_paper_dry_run_eligibility(
+        outputs["phase15n"] = save_phase15n_paper_dry_run_eligibility(
             config=config,
             reports_dir=reports_dir,
         )

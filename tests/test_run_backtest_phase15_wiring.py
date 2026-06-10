@@ -10,10 +10,10 @@ import market_strats.run_backtest as run_backtest
 PHASE15_FUNCTIONS = [
     "save_phase15q_post_endpoint_data_source_creation",
     "save_phase15r_real_post_endpoint_stream_validation",
-    "save_phase15o_post_endpoint_candidate_stream_extension",
-    "save_phase15p_extended_candidate_stream_audit",
-    "save_phase15m_fresh_current_signal_generation",
-    "save_phase15n_fresh_signal_audit_paper_dry_run_eligibility",
+    "save_phase15o_current_signal_preregistration",
+    "save_phase15p_current_signal_dry_run",
+    "save_phase15m_current_signal_export",
+    "save_phase15n_paper_dry_run_eligibility",
 ]
 
 PHASE15_KEYS = [
@@ -237,8 +237,8 @@ def test_phase15_downstream_chain_executes_enabled_sections_with_expected_argume
         assert "config" in kwargs
 
         if function_name in {
-            "save_phase15o_post_endpoint_candidate_stream_extension",
-            "save_phase15m_fresh_current_signal_generation",
+            "save_phase15o_current_signal_preregistration",
+            "save_phase15m_current_signal_export",
         }:
             assert kwargs["relative_momentum_outputs"] is relative_momentum_outputs
             assert kwargs["ticker_outputs"] is ticker_outputs
