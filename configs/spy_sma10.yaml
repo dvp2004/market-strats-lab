@@ -12782,6 +12782,25 @@ phase21e_regime_informed_session_ingestion:
   real_money_allowed: false
   broker_api_integration_allowed: false
   promotion_allowed: false
+daily_paper_runner:
+  enabled: true
+  output_dir: "reports/paper_trading/dashboard"
+  regime_informed_tracking_dir: "reports/paper_trading/regime_informed_tracking"
+  run_heavy_research_modules: false
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false
+regime_informed_results_notebook:
+  enabled: true
+  output_notebook: "notebooks/regime_informed_results_dashboard.ipynb"
+  visuals_dir: "reports/paper_trading/regime_informed_tracking/visuals"
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

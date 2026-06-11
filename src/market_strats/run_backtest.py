@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -1943,6 +1945,241 @@ def _run_phase21e_regime_informed_session_ingestion(
     )
 
 
+def _run_daily_phase15_operational_chain(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, dict[str, pd.DataFrame]]:
+    outputs: dict[str, dict[str, pd.DataFrame]] = {}
+    if _phase_enabled(config, "phase15q_post_endpoint_data_source_creation"):
+        outputs["phase15q"] = save_phase15q_post_endpoint_data_source_creation(
+            config=config,
+            reports_dir=reports_dir,
+        )
+    if _phase_enabled(config, "phase15r_real_post_endpoint_stream_validation"):
+        outputs["phase15r"] = save_phase15r_real_post_endpoint_stream_validation(
+            config=config,
+            reports_dir=reports_dir,
+        )
+    if _phase_enabled(config, "phase15o_post_endpoint_candidate_stream_extension"):
+        outputs["phase15o"] = save_phase15o_current_signal_preregistration(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs={},
+            ticker_outputs={},
+        )
+    if _phase_enabled(config, "phase15p_extended_candidate_stream_audit"):
+        outputs["phase15p"] = save_phase15p_current_signal_dry_run(
+            config=config,
+            reports_dir=reports_dir,
+        )
+    if _phase_enabled(config, "phase15m_fresh_current_signal_generation"):
+        outputs["phase15m"] = save_phase15m_current_signal_export(
+            config=config,
+            reports_dir=reports_dir,
+            relative_momentum_outputs={},
+            ticker_outputs={},
+        )
+    if _phase_enabled(config, "phase15n_fresh_signal_audit_paper_dry_run_eligibility"):
+        outputs["phase15n"] = save_phase15n_paper_dry_run_eligibility(
+            config=config,
+            reports_dir=reports_dir,
+        )
+    return outputs
+
+
+def _read_status_csv(path: Path) -> pd.DataFrame:
+    if not path.exists() or path.is_dir():
+        return pd.DataFrame()
+    try:
+        return pd.read_csv(path)
+    except pd.errors.EmptyDataError:
+        return pd.DataFrame()
+
+
+def _status_text(frame: pd.DataFrame, column: str, default: str = "") -> str:
+    if frame.empty or column not in frame.columns:
+        return default
+    value = frame.iloc[0].get(column, default)
+    if pd.isna(value):
+        return default
+    return str(value)
+
+
+def _status_bool(frame: pd.DataFrame, column: str) -> bool:
+    text = _status_text(frame, column, "False").strip().lower()
+    return text in {"true", "1", "yes", "y"}
+
+
+def _tear_sheet_value(tear_sheet: pd.DataFrame, key: str, default: str = "") -> str:
+    if tear_sheet.empty or not {"key", "value"}.issubset(tear_sheet.columns):
+        return default
+    rows = tear_sheet.loc[tear_sheet["key"].astype(str) == key, "value"]
+    if rows.empty:
+        return default
+    value = rows.iloc[0]
+    return default if pd.isna(value) else str(value)
+
+
+def _write_daily_runtime_status(
+    *,
+    config: dict,
+    reports_dir: Path,
+    modules_run: list[str],
+    modules_skipped: list[str],
+    runtime_seconds: float,
+) -> dict[str, Path]:
+    section = config.get("daily_paper_runner", {}) or {}
+    output_dir = Path(section.get("output_dir", reports_dir / "paper_trading" / "dashboard"))
+    tracking_dir = Path(
+        section.get(
+            "regime_informed_tracking_dir",
+            reports_dir / "paper_trading" / "regime_informed_tracking",
+        )
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    targets_path = tracking_dir / "regime_informed_paper_targets.csv"
+    tear_sheet = _read_status_csv(tracking_dir / "regime_informed_daily_tracking_tear_sheet.csv")
+    active = _read_status_csv(tracking_dir / "regime_informed_active_tracking_status.csv")
+    session_validation = _read_status_csv(tracking_dir / "regime_informed_session_validation.csv")
+    session_dashboard = _read_status_csv(
+        output_dir / "regime_informed_session_ingestion_status.csv"
+    )
+    ledger = _read_status_csv(tracking_dir / "regime_informed_manual_session_ledger.csv")
+    selected_signal_date = (
+        _tear_sheet_value(tear_sheet, "selected_signal_date")
+        or _status_text(session_validation, "selected_signal_date")
+        or _status_text(active, "selected_signal_date")
+    )
+    warnings_present = _tear_sheet_value(tear_sheet, "warnings_present", "False")
+    blocking_symbols = _tear_sheet_value(tear_sheet, "blocking_symbols", "none")
+    required_missing = []
+    for name, path in {
+        "regime_informed_targets": targets_path,
+        "regime_informed_adoption_status": tracking_dir
+        / "regime_informed_active_tracking_status.csv",
+        "regime_informed_session_validation": tracking_dir
+        / "regime_informed_session_validation.csv",
+    }.items():
+        if not path.exists():
+            required_missing.append(name)
+    status = (
+        "daily_paper_workflow_failed_missing_regime_informed_sources"
+        if required_missing
+        else "daily_paper_workflow_completed_manual_paper_only"
+    )
+    row = {
+        "run_date": datetime.now(timezone.utc).date().isoformat(),
+        "selected_signal_date": selected_signal_date,
+        "daily_paper_only": True,
+        "modules_run": ";".join(modules_run),
+        "modules_skipped": ";".join(modules_skipped),
+        "runtime_seconds": round(float(runtime_seconds), 3),
+        "fresh_signal_available": bool(selected_signal_date),
+        "regime_informed_targets_written": targets_path.exists(),
+        "adoption_status": _status_text(active, "adoption_status", "not_available"),
+        "session_ingestion_status": _status_text(
+            session_validation,
+            "validation_status",
+            _status_text(session_dashboard, "phase21e_decision", "not_available"),
+        ),
+        "ledger_row_count": len(ledger),
+        "warnings_present": warnings_present,
+        "blocking_symbols": blocking_symbols,
+        "promotion_allowed": False,
+        "live_trading_allowed": False,
+        "real_money_allowed": False,
+        "broker_api_integration_allowed": False,
+        "daily_paper_status": status,
+        "notes": (
+            "missing required regime-informed files: " + ",".join(required_missing)
+            if required_missing
+            else status
+        ),
+    }
+    csv_path = output_dir / "daily_paper_runtime_status.csv"
+    md_path = output_dir / "daily_paper_runtime_status.md"
+    pd.DataFrame([row]).to_csv(csv_path, index=False)
+    md_lines = [
+        "# Daily Paper Runtime Status",
+        "",
+        "NO LIVE TRADING",
+        "NO REAL MONEY",
+        "NO BROKER/API",
+        "NO STRATEGY PROMOTION",
+        "DAILY PAPER WORKFLOW ONLY",
+        "",
+        f"- Status: `{row['daily_paper_status']}`",
+        f"- Run date: `{row['run_date']}`",
+        f"- Selected signal date: `{row['selected_signal_date']}`",
+        f"- Runtime seconds: `{row['runtime_seconds']}`",
+        f"- Modules run: `{row['modules_run']}`",
+        f"- Modules skipped: `{row['modules_skipped']}`",
+        f"- Adoption status: `{row['adoption_status']}`",
+        f"- Session ingestion status: `{row['session_ingestion_status']}`",
+        f"- Ledger row count: `{row['ledger_row_count']}`",
+        f"- Warnings present: `{row['warnings_present']}`",
+        f"- Blocking symbols: `{row['blocking_symbols']}`",
+    ]
+    md_path.write_text("\n".join(md_lines) + "\n", encoding="utf-8")
+    return {"runtime_status_csv": csv_path, "runtime_status_md": md_path}
+
+
+def _run_daily_paper_workflow(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, Path]:
+    section = config.get("daily_paper_runner", {}) or {}
+    if not section.get("enabled", False):
+        return {}
+    start = time.perf_counter()
+    modules_run: list[str] = []
+    modules_skipped = [
+        "phase17_strategy_factory",
+        "phase17b_robustness",
+        "phase17c_watchlist",
+        "phase19a_multiverse",
+        "phase19b_finalist_validation",
+        "phase21a_regime_stress",
+        "phase21b_reconciliation",
+        "future_macro_factor_research",
+    ]
+    if _phase_enabled(config, "phase15wxyz_fresh_extension_pipeline"):
+        _run_phase15wxyz_fresh_extension_pipeline(config=config, reports_dir=reports_dir)
+        modules_run.append("phase15wxyz")
+    phase15_outputs = _run_daily_phase15_operational_chain(
+        config=config,
+        reports_dir=reports_dir,
+    )
+    modules_run.extend(phase15_outputs.keys())
+    if _phase_enabled(config, "phase18a_paper_signal_operational_hardening"):
+        save_phase18a_paper_signal_operational_hardening(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        modules_run.append("phase18a")
+    if _phase_enabled(config, "phase20b_finalist_dynamic_allocation"):
+        save_phase20b_finalist_dynamic_allocation(config=config, reports_dir=reports_dir)
+        modules_run.append("phase20b")
+    if _phase_enabled(config, "phase21c_regime_informed_paper_tracking"):
+        _run_phase21c_regime_informed_paper_tracking(config=config, reports_dir=reports_dir)
+        modules_run.append("phase21c")
+    if _phase_enabled(config, "phase21d_regime_informed_adoption"):
+        _run_phase21d_regime_informed_adoption(config=config, reports_dir=reports_dir)
+        modules_run.append("phase21d")
+    if _phase_enabled(config, "phase21e_regime_informed_session_ingestion"):
+        _run_phase21e_regime_informed_session_ingestion(config=config, reports_dir=reports_dir)
+        modules_run.append("phase21e")
+    return _write_daily_runtime_status(
+        config=config,
+        reports_dir=reports_dir,
+        modules_run=modules_run,
+        modules_skipped=modules_skipped,
+        runtime_seconds=time.perf_counter() - start,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, help="Path to YAML config file")
@@ -1981,6 +2218,11 @@ def main() -> None:
         action="store_true",
         help="Run only the Phase 21E Regime-Informed Session Ingestion.",
     )
+    parser.add_argument(
+        "--daily-paper-only",
+        action="store_true",
+        help="Run only the lightweight daily paper workflow.",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -1991,6 +2233,10 @@ def main() -> None:
 
     reports_dir = Path("reports")
     reports_dir.mkdir(parents=True, exist_ok=True)
+
+    if args.daily_paper_only:
+        _run_daily_paper_workflow(config=config, reports_dir=reports_dir)
+        return
 
     if args.phase21a_only:
         _run_phase21a_historical_regime_stress_lab(
