@@ -49,6 +49,7 @@ PHASE21A_FUNCTION = "save_phase21a_historical_regime_stress_lab"
 PHASE21B_FUNCTION = "save_phase21b_regime_candidate_reconciliation"
 PHASE21C_FUNCTION = "save_phase21c_regime_informed_paper_tracking"
 PHASE21D_FUNCTION = "save_phase21d_regime_informed_adoption"
+PHASE21E_FUNCTION = "save_phase21e_regime_informed_session_ingestion"
 
 
 def _phase_config(enabled: bool) -> dict:
@@ -149,6 +150,10 @@ def test_run_backtest_imports_phase21c_save_function():
 
 def test_run_backtest_imports_phase21d_save_function():
     assert hasattr(run_backtest, PHASE21D_FUNCTION)
+
+
+def test_run_backtest_imports_phase21e_save_function():
+    assert hasattr(run_backtest, PHASE21E_FUNCTION)
 
 
 def test_phase15_downstream_chain_calls_functions_in_required_order():
@@ -1090,3 +1095,31 @@ def test_phase21d_only_cli_flag_is_available():
 
     assert "--phase21d-only" in source
     assert "_run_phase21d_regime_informed_adoption(" in source
+
+
+def test_phase21e_runner_helper_calls_phase_when_enabled(monkeypatch):
+    calls: list[dict] = []
+
+    def phase21e_recorder(**kwargs):
+        calls.append(kwargs)
+        return {
+            "summary": pd.DataFrame({"phase21e_decision": ["pending_user_entries"]})
+        }
+
+    monkeypatch.setattr(run_backtest, PHASE21E_FUNCTION, phase21e_recorder)
+    reports_dir = Path("reports")
+
+    outputs = run_backtest._run_phase21e_regime_informed_session_ingestion(
+        config={"phase21e_regime_informed_session_ingestion": {"enabled": True}},
+        reports_dir=reports_dir,
+    )
+
+    assert outputs
+    assert calls[0]["reports_dir"] == reports_dir
+
+
+def test_phase21e_only_cli_flag_is_available():
+    source = Path(run_backtest.__file__).read_text(encoding="utf-8")
+
+    assert "--phase21e-only" in source
+    assert "_run_phase21e_regime_informed_session_ingestion(" in source

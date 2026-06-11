@@ -288,6 +288,9 @@ from market_strats.analysis.regime_informed_paper_tracking import (
 from market_strats.analysis.regime_informed_adoption import (
     save_phase21d_regime_informed_adoption,
 )
+from market_strats.analysis.regime_informed_session_ingestion import (
+    save_phase21e_regime_informed_session_ingestion,
+)
 
 
 def save_phase15o_current_signal_preregistration(**kwargs):
@@ -1927,6 +1930,19 @@ def _run_phase21d_regime_informed_adoption(
     )
 
 
+def _run_phase21e_regime_informed_session_ingestion(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(config, "phase21e_regime_informed_session_ingestion"):
+        return {}
+    return save_phase21e_regime_informed_session_ingestion(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, help="Path to YAML config file")
@@ -1959,6 +1975,11 @@ def main() -> None:
         "--phase21d-only",
         action="store_true",
         help="Run only the Phase 21D Regime-Informed Adoption gate.",
+    )
+    parser.add_argument(
+        "--phase21e-only",
+        action="store_true",
+        help="Run only the Phase 21E Regime-Informed Session Ingestion.",
     )
     args = parser.parse_args()
 
@@ -1994,6 +2015,13 @@ def main() -> None:
 
     if args.phase21d_only:
         _run_phase21d_regime_informed_adoption(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase21e_only:
+        _run_phase21e_regime_informed_session_ingestion(
             config=config,
             reports_dir=reports_dir,
         )
@@ -2274,6 +2302,11 @@ def main() -> None:
         )
 
         _run_phase21d_regime_informed_adoption(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        _run_phase21e_regime_informed_session_ingestion(
             config=config,
             reports_dir=reports_dir,
         )

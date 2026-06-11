@@ -12763,6 +12763,25 @@ phase21d_regime_informed_adoption:
   promotion_allowed: false
   require_manual_adoption: true
   require_adoption_reason: true
+phase21e_regime_informed_session_ingestion:
+  enabled: true
+  output_dir: "reports/paper_trading/regime_informed_tracking"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  template_filename: "regime_informed_manual_session_template.csv"
+  filled_filename: "regime_informed_manual_session_filled.csv"
+  ledger_filename: "regime_informed_manual_session_ledger.csv"
+  require_adoption_valid: true
+  require_tear_sheet_review: true
+  require_warning_acknowledgement: true
+  require_btc_ack_when_btc_weight_positive: true
+  require_reference_ack_for_reference_only: true
+  require_inception_ack_for_inception_limited: true
+  require_reason_for_skipped_or_blocked: true
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base
