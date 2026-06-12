@@ -616,6 +616,9 @@ def _build_trade_blotter(ledger: pd.DataFrame) -> pd.DataFrame:
         elif status == "blocked":
             action = "BLOCKED"
             cash_effect = 0.0
+        elif status == "cash_residual":
+            action = "CASH RESIDUAL"
+            cash_effect = 0.0
         elif status == "entered":
             actual_notional = (
                 float(fill_price) * float(fill_quantity)

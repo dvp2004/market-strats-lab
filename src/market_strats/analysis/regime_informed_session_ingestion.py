@@ -15,7 +15,7 @@ ALLOWED_MANUAL_DECISIONS = {
     "skip_due_block",
     "skip_user_choice",
 }
-ALLOWED_EXECUTION_STATUSES = {"entered", "skipped", "blocked"}
+ALLOWED_EXECUTION_STATUSES = {"entered", "skipped", "blocked", "cash_residual"}
 FILLED_REQUIRED_COLUMNS = [
     "session_date",
     "selected_signal_date",
@@ -417,6 +417,8 @@ def validate_regime_informed_filled_session(
         elif status not in ALLOWED_EXECUTION_STATUSES:
             blockers.append("manual_execution_status_invalid")
         if status == "entered":
+            if asset == "CASH":
+                blockers.append("cash_row_must_use_cash_residual_status")
             if not np.isfinite(fill_price) or fill_price <= 0:
                 blockers.append("paper_fill_price_missing_or_non_positive")
             if not np.isfinite(fill_qty) or fill_qty <= 0:
@@ -427,6 +429,12 @@ def validate_regime_informed_filled_session(
                     deviation_usd = round(actual_notional - target_notional, 2)
                     if abs(target_notional) > 1e-12:
                         deviation_pct = round(deviation_usd / target_notional * 100.0, 4)
+        if status == "cash_residual":
+            if asset != "CASH":
+                blockers.append("cash_residual_status_requires_cash_asset")
+            actual_notional = round(target_notional, 2) if np.isfinite(target_notional) else 0.0
+            deviation_usd = 0.0
+            deviation_pct = 0.0
         if status in {"skipped", "blocked"} and require_reason_for_skipped_or_blocked:
             reason = _text_value(row.get("override_reason", ""))
             notes = _text_value(row.get("notes", ""))
