@@ -166,7 +166,7 @@ def test_notebook_contains_required_sections_and_local_only_content(tmp_path):
     builder = _load_builder_module()
     _write_notebook_source_data(tmp_path)
     output_notebook = tmp_path / "notebooks" / "regime_informed_results_dashboard.ipynb"
-    visuals_dir = tmp_path / "visuals"
+    visuals_dir = tmp_path / "reports" / "paper_trading" / "regime_informed_tracking" / "visuals"
 
     builder.build_notebook(
         root=tmp_path,
@@ -189,3 +189,5 @@ def test_notebook_contains_required_sections_and_local_only_content(tmp_path):
     assert "NO REAL MONEY" in joined
     assert "NO BROKER/API" in joined
     assert "NO STRATEGY PROMOTION" in joined
+    assert "../reports/" in joined
+    assert "Missing image" in joined

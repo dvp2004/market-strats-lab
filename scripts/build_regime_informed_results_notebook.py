@@ -362,10 +362,16 @@ def _code_cell(source: str) -> dict[str, Any]:
 
 
 def _image_markdown(root: Path, image_path: Path) -> str:
+    notebook_dir = root / "notebooks"
     try:
-        rel = image_path.relative_to(root)
+        rel = image_path.relative_to(notebook_dir)
     except ValueError:
-        rel = image_path
+        try:
+            rel = Path("..") / image_path.relative_to(root)
+        except ValueError:
+            rel = image_path
+    if not image_path.exists():
+        return f"**Missing image:** `{rel.as_posix()}`"
     return f"![{image_path.stem}]({rel.as_posix()})"
 
 
@@ -377,8 +383,12 @@ def _notebook_json(root: Path, visuals: dict[str, Path]) -> dict[str, Any]:
             "NO REAL MONEY\n\n"
             "NO BROKER/API\n\n"
             "NO STRATEGY PROMOTION\n\n"
-            "This notebook reads local CSV reports only and summarizes the current "
-            "manual paper workflow."
+            "This notebook reads local CSV reports only and summarizes research "
+            "selection, regime reconciliation, and shortlist context. The separate "
+            "regime_informed_portfolio_performance_dashboard.ipynb is the "
+            "portfolio/performance dashboard.\n\n"
+            "If a PNG is missing, the affected section displays `Missing image: ...` "
+            "instead of silently rendering a broken image."
         ),
         _code_cell(
             "from pathlib import Path\n"

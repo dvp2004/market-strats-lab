@@ -12782,6 +12782,21 @@ phase21e_regime_informed_session_ingestion:
   real_money_allowed: false
   broker_api_integration_allowed: false
   promotion_allowed: false
+phase21g_regime_informed_session_rollover:
+  enabled: true
+  output_dir: "reports/paper_trading/regime_informed_tracking"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  archive_dir: "reports/paper_trading/regime_informed_tracking/archive"
+  template_filename: "regime_informed_manual_session_template.csv"
+  filled_filename: "regime_informed_manual_session_filled.csv"
+  ledger_filename: "regime_informed_manual_session_ledger.csv"
+  archive_completed_valid_sessions: true
+  stale_filled_file_policy: "block_current_ingestion"
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false
 daily_paper_runner:
   enabled: true
   output_dir: "reports/paper_trading/dashboard"
@@ -12796,6 +12811,37 @@ regime_informed_results_notebook:
   enabled: true
   output_notebook: "notebooks/regime_informed_results_dashboard.ipynb"
   visuals_dir: "reports/paper_trading/regime_informed_tracking/visuals"
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false
+phase22a_dynamic_multi_asset_opportunity_engine:
+  enabled: true
+  output_dir: "reports/strategy_factory/dynamic_opportunity_engine"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  starting_cash: 10000
+  rebalance_frequency: "M"
+  transaction_cost_bps_cases: [0, 10, 25]
+  max_single_asset_weight: 0.50
+  max_btc_weight: 0.05
+  max_oil_weight: 0.10
+  max_commodity_weight: 0.20
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false
+phase22b_dynamic_opportunity_diagnostics:
+  enabled: true
+  input_dir: "reports/strategy_factory/dynamic_opportunity_engine"
+  output_dir: "reports/strategy_factory/dynamic_opportunity_engine_diagnostics"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  starting_cash: 10000
+  transaction_cost_bps_cases: [0, 10, 25]
+  max_btc_weight: 0.05
+  max_oil_weight: 0.10
+  max_commodity_weight: 0.20
   paper_only: true
   live_trading_allowed: false
   real_money_allowed: false

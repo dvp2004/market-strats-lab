@@ -293,6 +293,15 @@ from market_strats.analysis.regime_informed_adoption import (
 from market_strats.analysis.regime_informed_session_ingestion import (
     save_phase21e_regime_informed_session_ingestion,
 )
+from market_strats.analysis.regime_informed_session_rollover import (
+    save_phase21g_regime_informed_session_rollover,
+)
+from market_strats.analysis.dynamic_multi_asset_opportunity_engine import (
+    save_phase22a_dynamic_multi_asset_opportunity_engine,
+)
+from market_strats.analysis.dynamic_opportunity_diagnostics import (
+    save_phase22b_dynamic_opportunity_diagnostics,
+)
 
 
 def save_phase15o_current_signal_preregistration(**kwargs):
@@ -1945,6 +1954,45 @@ def _run_phase21e_regime_informed_session_ingestion(
     )
 
 
+def _run_phase21g_regime_informed_session_rollover(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(config, "phase21g_regime_informed_session_rollover"):
+        return {}
+    return save_phase21g_regime_informed_session_rollover(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
+def _run_phase22a_dynamic_multi_asset_opportunity_engine(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(config, "phase22a_dynamic_multi_asset_opportunity_engine"):
+        return {}
+    return save_phase22a_dynamic_multi_asset_opportunity_engine(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
+def _run_phase22b_dynamic_opportunity_diagnostics(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(config, "phase22b_dynamic_opportunity_diagnostics"):
+        return {}
+    return save_phase22b_dynamic_opportunity_diagnostics(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
 def _run_daily_phase15_operational_chain(
     *,
     config: dict,
@@ -2168,6 +2216,9 @@ def _run_daily_paper_workflow(
     if _phase_enabled(config, "phase21d_regime_informed_adoption"):
         _run_phase21d_regime_informed_adoption(config=config, reports_dir=reports_dir)
         modules_run.append("phase21d")
+    if _phase_enabled(config, "phase21g_regime_informed_session_rollover"):
+        _run_phase21g_regime_informed_session_rollover(config=config, reports_dir=reports_dir)
+        modules_run.append("phase21g")
     if _phase_enabled(config, "phase21e_regime_informed_session_ingestion"):
         _run_phase21e_regime_informed_session_ingestion(config=config, reports_dir=reports_dir)
         modules_run.append("phase21e")
@@ -2219,6 +2270,21 @@ def main() -> None:
         help="Run only the Phase 21E Regime-Informed Session Ingestion.",
     )
     parser.add_argument(
+        "--phase21g-only",
+        action="store_true",
+        help="Run only the Phase 21G Regime-Informed Session Rollover guard.",
+    )
+    parser.add_argument(
+        "--phase22a-only",
+        action="store_true",
+        help="Run only the Phase 22A Dynamic Multi-Asset Opportunity Engine.",
+    )
+    parser.add_argument(
+        "--phase22b-only",
+        action="store_true",
+        help="Run only the Phase 22B Dynamic Opportunity Diagnostics report.",
+    )
+    parser.add_argument(
         "--daily-paper-only",
         action="store_true",
         help="Run only the lightweight daily paper workflow.",
@@ -2268,6 +2334,27 @@ def main() -> None:
 
     if args.phase21e_only:
         _run_phase21e_regime_informed_session_ingestion(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase21g_only:
+        _run_phase21g_regime_informed_session_rollover(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase22a_only:
+        _run_phase22a_dynamic_multi_asset_opportunity_engine(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase22b_only:
+        _run_phase22b_dynamic_opportunity_diagnostics(
             config=config,
             reports_dir=reports_dir,
         )
@@ -2548,6 +2635,11 @@ def main() -> None:
         )
 
         _run_phase21d_regime_informed_adoption(
+            config=config,
+            reports_dir=reports_dir,
+        )
+
+        _run_phase21g_regime_informed_session_rollover(
             config=config,
             reports_dir=reports_dir,
         )

@@ -1120,14 +1120,18 @@ def save_phase17b_strategy_factory_robustness(
         }
 
     phase17a_section = _phase17a_config(config)
-    output_dir = Path(section.get("output_dir", "reports/strategy_factory"))
+    reports_path = Path(reports_dir)
+
+    # Prefer the caller's reports_dir for tests and focused runs.  Older
+    # configs may provide an explicit output_dir; when they do, respect it.
+    # The extra mkdir immediately before writes below is intentional defensive
+    # hardening against tests that use fresh tmp_path report roots.
+    output_dir = Path(section.get("output_dir", reports_path / "strategy_factory"))
     chart_dir = Path(section.get("chart_dir", output_dir / "charts"))
     dashboard_dir = Path(section.get("dashboard_dir", output_dir / "dashboard"))
     output_dir.mkdir(parents=True, exist_ok=True)
     chart_dir.mkdir(parents=True, exist_ok=True)
     dashboard_dir.mkdir(parents=True, exist_ok=True)
-
-    reports_path = Path(reports_dir)
     if price_data is None:
         price_data, cash_returns, data_dir = _load_price_data(
             config=config,
@@ -1266,6 +1270,10 @@ def save_phase17b_strategy_factory_robustness(
             }
         ]
     )
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    chart_dir.mkdir(parents=True, exist_ok=True)
+    dashboard_dir.mkdir(parents=True, exist_ok=True)
 
     summary.to_csv(output_dir / "phase17b_strategy_factory_robustness_summary.csv", index=False)
     friction_metrics.to_csv(output_dir / "phase17b_friction_metrics.csv", index=False)

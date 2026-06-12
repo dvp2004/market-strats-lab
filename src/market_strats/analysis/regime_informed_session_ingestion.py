@@ -748,6 +748,7 @@ def save_phase21e_regime_informed_session_ingestion(
     row_validation_path = output_dir / "regime_informed_session_row_validation.csv"
     discipline_path = output_dir / "regime_informed_session_discipline_summary.csv"
     dashboard_path = dashboard_dir / "regime_informed_session_ingestion_status.csv"
+    rollover_status_path = output_dir / "regime_informed_session_rollover_status.csv"
 
     live = _bool_value(section.get("live_trading_allowed", False))
     real = _bool_value(section.get("real_money_allowed", False))
@@ -759,6 +760,7 @@ def save_phase21e_regime_informed_session_ingestion(
     template = _read_csv(template_path)
     tear_sheet = _read_csv(tear_sheet_path)
     orders = _read_csv(orders_path)
+    rollover_status = _read_csv(rollover_status_path)
     filled_present = filled_path.exists() and filled_path.is_file()
     filled_session = _read_csv(filled_path) if filled_present else pd.DataFrame()
     source_blockers = _validate_required_sources(
@@ -779,6 +781,12 @@ def save_phase21e_regime_informed_session_ingestion(
         source_blockers.append("broker_api_flag_true")
     if promotion:
         source_blockers.append("promotion_flag_true")
+    if (
+        not rollover_status.empty
+        and "filled_session_stale" in rollover_status.columns
+        and _bool_value(rollover_status.iloc[0].get("filled_session_stale", False))
+    ):
+        source_blockers.append("stale_filled_file_blocked_by_phase21g")
 
     warnings_present = _warnings_present(tear_sheet)
     if filled_present and not template.empty:
