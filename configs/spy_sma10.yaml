@@ -13324,3 +13324,25 @@ phase23a_individual_equity_decision_architecture:
   allow_real_money: false
   allow_broker_api: false
   allow_promotion: false
+
+phase23b_point_in_time_universe_source_audit:
+  enabled: true
+  output_dir: "reports/individual_equity_decision_system/phase23b_point_in_time_universe_source_audit"
+  dashboard_status_path: "reports/paper_trading/dashboard/phase23b_point_in_time_universe_source_audit_status.csv"
+  audit_as_of_date: "2026-06-13"
+  required_start_date: "2006-04-28"
+  required_end_date: "2026-05-01"
+  target_universes:
+    - "SP500_POINT_IN_TIME"
+    - "NASDAQ100_POINT_IN_TIME"
+  phase_decision: "phase23b_source_path_identified_acquisition_pending"
+  allow_data_download: false
+  allow_membership_reconstruction: false
+  allow_feature_calculation: false
+  allow_model_training: false
+  allow_backtest: false
+  allow_paper_orders: false
+  allow_live_trading: false
+  allow_real_money: false
+  allow_broker_api: false
+  allow_promotion: false
