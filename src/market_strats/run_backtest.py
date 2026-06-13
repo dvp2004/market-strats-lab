@@ -317,6 +317,9 @@ from market_strats.analysis.fundamental_data_source_audit import (
 from market_strats.analysis.sentiment_news_source_audit import (
     save_phase23d_sentiment_news_source_audit,
 )
+from market_strats.analysis.individual_equity_feature_panel_contract import (
+    save_phase23e_combined_feature_panel_contract,
+)
 
 
 def save_phase15o_current_signal_preregistration(**kwargs):
@@ -2073,6 +2076,19 @@ def _run_phase23d_sentiment_news_source_audit(
     )
 
 
+def _run_phase23e_combined_feature_panel_contract(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(config, "phase23e_combined_feature_panel_contract"):
+        return {}
+    return save_phase23e_combined_feature_panel_contract(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
 def _run_daily_phase15_operational_chain(
     *,
     config: dict,
@@ -2395,6 +2411,14 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--phase23e-only",
+        action="store_true",
+        help=(
+            "Run only the Phase 23E Combined Individual-Stock Feature Panel "
+            "Contract report."
+        ),
+    )
+    parser.add_argument(
         "--daily-paper-only",
         action="store_true",
         help="Run only the lightweight daily paper workflow.",
@@ -2500,6 +2524,13 @@ def main() -> None:
 
     if args.phase23d_only:
         _run_phase23d_sentiment_news_source_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase23e_only:
+        _run_phase23e_combined_feature_panel_contract(
             config=config,
             reports_dir=reports_dir,
         )

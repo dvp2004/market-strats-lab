@@ -13390,3 +13390,35 @@ phase23d_sentiment_news_source_audit:
   allow_real_money: false
   allow_broker_api: false
   allow_promotion: false
+
+phase23e_combined_feature_panel_contract:
+  enabled: true
+  output_dir: "reports/individual_equity_decision_system/phase23e_combined_feature_panel_contract"
+  dashboard_status_path: "reports/paper_trading/dashboard/phase23e_combined_feature_panel_contract_status.csv"
+  audit_as_of_date: "2026-06-13"
+  required_start_date: "2006-04-28"
+  required_end_date: "2026-05-01"
+  decision_cadence: "weekly_after_close"
+  execution_policy: "next_trading_day_after_signal"
+  primary_target: "forward_20d_excess_return_vs_universe"
+  secondary_targets:
+    - "forward_1d_excess_return_vs_universe"
+    - "forward_5d_excess_return_vs_universe"
+    - "forward_63d_excess_return_vs_universe"
+    - "forward_20d_positive_alpha_probability"
+  maximum_target_horizon_trading_days: 63
+  purge_window_trading_days: 63
+  embargo_window_trading_days: 63
+  minimum_eligible_cross_section: 50
+  phase_decision: "phase23e_combined_feature_panel_contract_ready_pilot_pending"
+  allow_data_download: false
+  allow_panel_build: false
+  allow_feature_calculation: false
+  allow_target_calculation: false
+  allow_model_training: false
+  allow_backtest: false
+  allow_paper_orders: false
+  allow_live_trading: false
+  allow_real_money: false
+  allow_broker_api: false
+  allow_promotion: false
