@@ -13441,7 +13441,7 @@ phase23f_pilot_individual_equity_feature_calculation:
   minimum_average_dollar_volume: 1000000.0
   feature_set_version: "phase23f_technical_pilot_v1"
   target_set_version: "phase23f_targets_v1"
-  phase_decision_ready: "phase23f_pilot_panel_built_validation_pending"
+  phase_decision_ready: "phase23f_pilot_panel_validated_ready_for_phase23g"
   phase_decision_pending: "phase23f_feature_engine_ready_local_inputs_pending"
   allow_data_download: false
   allow_local_input_ingestion: true
@@ -13454,6 +13454,31 @@ phase23f_pilot_individual_equity_feature_calculation:
   allow_real_money: false
   allow_broker_api: false
   allow_promotion: false
+
+phase23g_interpretable_stock_ranker:
+  enabled: true
+  output_dir: "reports/individual_equity_decision_system/phase23g_interpretable_stock_ranker"
+  dashboard_status_path: "reports/paper_trading/dashboard/phase23g_interpretable_stock_ranker_status.csv"
+  source_phase23f_dir: "reports/individual_equity_decision_system/phase23f_pilot_feature_calculation"
+  primary_target: "forward_20d_excess_return_vs_universe"
+  model_version: "phase23g_ridge_ranker_v1"
+  minimum_training_decision_dates: 26
+  minimum_training_rows: 200
+  minimum_test_dates: 8
+  top_k: 3
+  ridge_alpha: 1.0
+  ridge_alpha_grid: [0.1, 1.0, 10.0]
+  purge_window_trading_days: 63
+  embargo_window_trading_days: 63
+  paper_only: true
+  research_pilot_only: true
+  allow_model_training: true
+  allow_backtest: false
+  allow_paper_orders: false
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false
 
 phase23f_pilot_individual_equity_input_bootstrap:
   enabled: true

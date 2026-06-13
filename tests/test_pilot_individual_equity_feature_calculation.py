@@ -122,15 +122,34 @@ def test_end_to_end_pilot_builder_calculates_panel_targets_and_leak_safe_clocks(
     assert not targets.empty
     assert len(inventory) == 3
     assert panel["permanent_security_id"].nunique() == 3
+    assert "ticker" in panel.columns
+    assert panel["ticker"].astype(str).str.strip().ne("").all()
+    assert panel["ticker"].astype(str).eq(panel["ticker_asof"].astype(str)).all()
     assert set(CORE_FEATURE_COLUMNS).issubset(panel.columns)
+    assert not any(
+        column.startswith("forward_") or column.startswith("target_")
+        for column in panel.columns
+    )
     assert "forward_20d_excess_return_vs_universe" in set(targets["target_name"])
     assert "forward_20d_positive_alpha_probability" in set(targets["target_name"])
+    assert not targets.duplicated(["panel_row_id", "target_name"]).any()
     assert (
         pd.to_datetime(panel["feature_max_available_timestamp_utc"], utc=True)
         <= pd.to_datetime(panel["model_cutoff_timestamp_utc"], utc=True)
     ).all()
     validation = validate_pilot_panel(panel, targets)
     assert validation["passed"].all()
+    expected_gates = {
+        "nonblank_ticker_and_identifiers",
+        "ticker_matches_ticker_asof",
+        "one_stock_row_per_decision_timestamp",
+        "target_unique_per_panel_row_and_name",
+        "no_target_columns_in_predictor_panel",
+        "feature_values_finite",
+        "cross_sectional_breadth_and_dispersion_consistent",
+        "no_model_or_order_outputs",
+    }
+    assert expected_gates.issubset(set(validation["gate"]))
 
 
 def test_pilot_validator_rejects_future_feature_availability():
@@ -225,6 +244,14 @@ def test_phase23f_with_local_inputs_writes_panel_and_targets(tmp_path: Path):
     assert bool(summary["pilot_input_data_ready"])
     assert bool(summary["pilot_panel_built"])
     assert bool(summary["pilot_panel_validation_passed"])
+    assert (
+        summary["phase23f_decision"]
+        == "phase23f_pilot_panel_validated_ready_for_phase23g"
+    )
+    assert (
+        summary["next_phase"]
+        == "Phase 23G first interpretable cross-sectional stock-ranking model"
+    )
     assert int(summary["pilot_security_count"]) == 3
     output_dir = tmp_path / "reports" / "phase23f"
     assert (output_dir / "phase23f_pilot_feature_panel.csv").exists()

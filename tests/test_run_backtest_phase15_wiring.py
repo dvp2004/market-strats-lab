@@ -50,6 +50,7 @@ PHASE21B_FUNCTION = "save_phase21b_regime_candidate_reconciliation"
 PHASE21C_FUNCTION = "save_phase21c_regime_informed_paper_tracking"
 PHASE21D_FUNCTION = "save_phase21d_regime_informed_adoption"
 PHASE21E_FUNCTION = "save_phase21e_regime_informed_session_ingestion"
+PHASE23G_FUNCTION = "save_phase23g_interpretable_stock_ranker"
 
 
 def _phase_config(enabled: bool) -> dict:
@@ -1123,3 +1124,34 @@ def test_phase21e_only_cli_flag_is_available():
 
     assert "--phase21e-only" in source
     assert "_run_phase21e_regime_informed_session_ingestion(" in source
+
+
+def test_phase23g_runner_helper_calls_phase_when_enabled(monkeypatch):
+    calls: list[dict] = []
+
+    def phase23g_recorder(**kwargs):
+        calls.append(kwargs)
+        return {
+            "summary": pd.DataFrame(
+                {"phase23g_decision": ["phase23g_interpretable_ranker_completed_research_only"]}
+            )
+        }
+
+    monkeypatch.setattr(run_backtest, PHASE23G_FUNCTION, phase23g_recorder)
+    reports_dir = Path("reports")
+
+    outputs = run_backtest._run_phase23g_interpretable_stock_ranker(
+        config={"phase23g_interpretable_stock_ranker": {"enabled": True}},
+        reports_dir=reports_dir,
+    )
+
+    assert calls == [{"config": {"phase23g_interpretable_stock_ranker": {"enabled": True}}, "reports_dir": reports_dir}]
+    assert "summary" in outputs
+
+
+def test_phase23g_only_cli_flag_is_available():
+    source = Path(run_backtest.__file__).read_text(encoding="utf-8")
+
+    assert "--phase23g-only" in source
+    assert "_run_phase23f_pilot_individual_equity_feature_calculation(" in source
+    assert "_run_phase23g_interpretable_stock_ranker(" in source

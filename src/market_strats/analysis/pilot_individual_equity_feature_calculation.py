@@ -34,7 +34,7 @@ DEFAULT_PHASE23F_CONFIG: dict[str, Any] = {
     "minimum_average_dollar_volume": 1_000_000.0,
     "feature_set_version": "phase23f_technical_pilot_v1",
     "target_set_version": "phase23f_targets_v1",
-    "phase_decision_ready": "phase23f_pilot_panel_built_validation_pending",
+    "phase_decision_ready": "phase23f_pilot_panel_validated_ready_for_phase23g",
     "phase_decision_pending": "phase23f_feature_engine_ready_local_inputs_pending",
     "allow_data_download": False,
     "allow_local_input_ingestion": True,
@@ -593,6 +593,7 @@ def build_pilot_panel_and_targets(
         frame = calculated[str(row.permanent_security_id)].copy()
         frame["permanent_security_id"] = str(row.permanent_security_id)
         frame["permanent_company_id"] = str(row.permanent_company_id)
+        frame["ticker"] = str(row.ticker)
         frame["ticker_asof"] = str(row.ticker)
         frame["sector_asof"] = str(row.sector)
         frame["industry_asof"] = str(row.industry)
@@ -732,6 +733,7 @@ def build_pilot_panel_and_targets(
         "universe_id",
         "permanent_security_id",
         "permanent_company_id",
+        "ticker",
         "ticker_asof",
         "sector_asof",
         "industry_asof",
@@ -773,6 +775,72 @@ def validate_pilot_panel(panel: pd.DataFrame, targets: pd.DataFrame) -> pd.DataF
 
     unique = not bool(panel["panel_row_id"].duplicated().any())
     rows.append(_gate("panel_row_ids_unique", unique, f"rows={len(panel)}"))
+    identifier_columns = [
+        "ticker",
+        "permanent_security_id",
+        "permanent_company_id",
+        "universe_id",
+    ]
+    identifier_columns_present = set(identifier_columns).issubset(panel.columns)
+    identifiers_nonblank = False
+    if identifier_columns_present:
+        identifiers_nonblank = bool(
+            panel[identifier_columns]
+            .astype("string")
+            .apply(lambda column: column.notna() & column.str.strip().ne(""))
+            .all()
+            .all()
+        )
+    rows.append(
+        _gate(
+            "nonblank_ticker_and_identifiers",
+            identifier_columns_present and identifiers_nonblank,
+            "ticker, permanent security ID, permanent company ID, and universe ID required",
+        )
+    )
+    ticker_alias_valid = bool(
+        {"ticker", "ticker_asof"}.issubset(panel.columns)
+        and panel["ticker"].astype(str).eq(panel["ticker_asof"].astype(str)).all()
+    )
+    rows.append(_gate("ticker_matches_ticker_asof", ticker_alias_valid, "point-in-time ticker alias"))
+    one_row_per_security_date = not bool(
+        panel.duplicated(["decision_timestamp_utc", "permanent_security_id"]).any()
+    )
+    rows.append(
+        _gate(
+            "one_stock_row_per_decision_timestamp",
+            one_row_per_security_date,
+            "no duplicate stock rows per decision timestamp",
+        )
+    )
+    if {"decision_timestamp_utc", "permanent_security_id"}.issubset(panel.columns):
+        counts = panel.groupby("decision_timestamp_utc")["permanent_security_id"].nunique()
+        expected_count = int(counts.mode().iloc[0]) if not counts.empty else 0
+        missing_dates = counts.loc[counts.ne(expected_count)].index.astype(str).tolist()
+        expected_count_valid = bool(not counts.empty and counts.min() == expected_count)
+    else:
+        expected_count = 0
+        missing_dates = []
+        expected_count_valid = False
+    rows.append(
+        _gate(
+            "expected_security_count_per_decision_timestamp",
+            expected_count_valid,
+            f"expected={expected_count};missing_dates={';'.join(missing_dates[:10])}",
+        )
+    )
+    accidental_benchmark = (
+        panel["ticker"].astype(str).str.upper().eq("SPY").any()
+        if "ticker" in panel.columns
+        else True
+    )
+    rows.append(
+        _gate(
+            "no_accidental_benchmark_row",
+            not accidental_benchmark,
+            "stock-selection panel must not contain SPY benchmark row",
+        )
+    )
     cutoff = pd.to_datetime(panel["model_cutoff_timestamp_utc"], utc=True, errors="coerce")
     maximum = pd.to_datetime(panel["feature_max_available_timestamp_utc"], utc=True, errors="coerce")
     rows.append(
@@ -795,16 +863,100 @@ def validate_pilot_panel(panel: pd.DataFrame, targets: pd.DataFrame) -> pd.DataF
     target_ids_valid = bool(targets["panel_row_id"].isin(set(panel["panel_row_id"])).all()) if not targets.empty else False
     rows.append(_gate("targets_join_to_panel", target_ids_valid, f"targets={len(targets)}"))
     if not targets.empty:
+        target_unique = not bool(targets.duplicated(["panel_row_id", "target_name"]).any())
+        rows.append(
+            _gate(
+                "target_unique_per_panel_row_and_name",
+                target_unique,
+                "no duplicated target for the same panel row and target name",
+            )
+        )
+        horizon_from_name = targets["target_name"].astype(str).str.extract(r"forward_(\d+)d")[0]
+        horizon_name_valid = bool(
+            horizon_from_name.notna().all()
+            and horizon_from_name.astype(int).eq(targets["target_horizon_trading_days"].astype(int)).all()
+        )
+        rows.append(
+            _gate(
+                "target_horizon_matches_target_name",
+                horizon_name_valid,
+                "target horizon agrees with target name",
+            )
+        )
+        signal = pd.to_datetime(targets["signal_date"], utc=True, errors="coerce")
         end = pd.to_datetime(targets["target_period_end_date"], utc=True, errors="coerce")
         available = pd.to_datetime(
             targets["target_available_timestamp_utc"], utc=True, errors="coerce"
+        )
+        end_after_signal = bool(signal.notna().all() and end.notna().all() and (end > signal).all())
+        rows.append(
+            _gate(
+                "target_period_end_after_signal_date",
+                end_after_signal,
+                "forward target period end must be after signal date",
+            )
         )
         target_clock_valid = bool(
             end.notna().all() and available.notna().all() and (available > end).all()
         )
     else:
+        rows.append(_gate("target_unique_per_panel_row_and_name", False, "no targets"))
+        rows.append(_gate("target_horizon_matches_target_name", False, "no targets"))
+        rows.append(_gate("target_period_end_after_signal_date", False, "no targets"))
         target_clock_valid = False
     rows.append(_gate("targets_available_after_period_end", target_clock_valid, "label clock"))
+    target_columns_in_panel = [
+        column for column in panel.columns if column.startswith("forward_") or column.startswith("target_")
+    ]
+    rows.append(
+        _gate(
+            "no_target_columns_in_predictor_panel",
+            not target_columns_in_panel,
+            "target columns in panel=" + ";".join(target_columns_in_panel),
+        )
+    )
+    numeric_features = panel[CORE_FEATURE_COLUMNS].apply(pd.to_numeric, errors="coerce")
+    finite_or_missing = bool(
+        (
+            np.isfinite(numeric_features.to_numpy(dtype=float))
+            | numeric_features.isna().to_numpy()
+        ).all()
+    )
+    eligible = panel["training_eligible"].map(
+        lambda value: str(value).strip().lower() in {"true", "1", "yes", "y"}
+    )
+    eligible_features_finite = bool(
+        numeric_features.loc[eligible].notna().all().all()
+        if eligible.any()
+        else False
+    )
+    feature_values_finite = finite_or_missing and eligible_features_finite
+    finite_features = numeric_features.replace([np.inf, -np.inf], np.nan)
+    finite_rate = (
+        float(finite_features.loc[eligible].notna().mean().min())
+        if eligible.any() and not finite_features.empty
+        else 0.0
+    )
+    rows.append(
+        _gate(
+            "feature_values_finite",
+            feature_values_finite,
+            f"minimum_finite_rate={finite_rate:.4f}",
+        )
+    )
+    if {"decision_timestamp_utc", "market_breadth_200d", "cross_sectional_dispersion_21d"}.issubset(panel.columns):
+        breadth_unique = panel.groupby("decision_timestamp_utc")["market_breadth_200d"].nunique(dropna=False).max()
+        dispersion_unique = panel.groupby("decision_timestamp_utc")["cross_sectional_dispersion_21d"].nunique(dropna=False).max()
+        cross_sectional_consistent = bool(breadth_unique == 1 and dispersion_unique == 1)
+    else:
+        cross_sectional_consistent = False
+    rows.append(
+        _gate(
+            "cross_sectional_breadth_and_dispersion_consistent",
+            cross_sectional_consistent,
+            "breadth and dispersion are identical within each decision timestamp",
+        )
+    )
     rows.append(
         _gate(
             "no_model_or_order_outputs",
@@ -995,7 +1147,9 @@ def save_phase23f_pilot_individual_equity_feature_calculation(
                 "model_training_allowed": False,
                 "backtest_allowed": False,
                 "next_phase": (
-                    "Phase 23F input completion and validation; then Phase 23G first "
+                    "Phase 23G first interpretable cross-sectional stock-ranking model"
+                    if panel_built and validation_passed
+                    else "Phase 23F input completion and validation; then Phase 23G first "
                     "interpretable cross-sectional stock-ranking model"
                 ),
                 "paper_only": True,
