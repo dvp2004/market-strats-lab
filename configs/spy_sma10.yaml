@@ -13285,3 +13285,42 @@ core_satellite:
   satellite_weight: 0.4
   satellite_strategy: 12_month_absolute_momentum
   rebalance_mode: independent_sleeves
+
+phase23a_individual_equity_decision_architecture:
+  enabled: true
+  output_dir: "reports/individual_equity_decision_system/phase23a_architecture"
+  dashboard_status_path: "reports/paper_trading/dashboard/phase23a_individual_equity_decision_architecture_status.csv"
+  phase_role: "Individual-equity autonomous decision architecture and point-in-time research contract only"
+  ultimate_goal: "Build a leak-safe autonomous research and paper-trading system that can select individual equities from point-in-time S&P 500 and Nasdaq-100 universes using technical, fundamental, sentiment, macro, cross-asset, market-stress, and risk information."
+  primary_universes:
+    - "SP500_POINT_IN_TIME"
+    - "NASDAQ100_POINT_IN_TIME"
+  decision_cadence: "weekly_after_close"
+  monitoring_cadence: "daily_after_close"
+  execution_policy: "next_trading_day_after_signal"
+  primary_target: "forward_20d_excess_return_vs_universe"
+  secondary_targets:
+    - "forward_1d_excess_return_vs_universe"
+    - "forward_5d_excess_return_vs_universe"
+    - "forward_63d_excess_return_vs_universe"
+    - "forward_20d_positive_alpha_probability"
+  initial_model_family: "interpretable_cross_sectional_ranking_baseline"
+  future_model_families:
+    - "regularized_linear_ranker"
+    - "gradient_boosted_tree_ranker"
+    - "probability_calibrated_ensemble"
+  initial_portfolio_size: 20
+  max_single_stock_weight: 0.05
+  max_sector_weight: 0.25
+  max_turnover_per_rebalance: 0.30
+  minimum_cash_weight: 0.00
+  maximum_cash_weight: 0.50
+  allow_data_download: false
+  allow_feature_calculation: false
+  allow_model_training: false
+  allow_backtest: false
+  allow_paper_orders: false
+  allow_live_trading: false
+  allow_real_money: false
+  allow_broker_api: false
+  allow_promotion: false

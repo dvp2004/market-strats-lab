@@ -305,6 +305,9 @@ from market_strats.analysis.dynamic_opportunity_diagnostics import (
 from market_strats.analysis.dynamic_opportunity_return_enhancement import (
     save_phase22c_dynamic_opportunity_return_enhancement,
 )
+from market_strats.analysis.individual_equity_decision_architecture import (
+    save_phase23a_individual_equity_decision_architecture,
+)
 
 
 def save_phase15o_current_signal_preregistration(**kwargs):
@@ -2009,6 +2012,19 @@ def _run_phase22c_dynamic_opportunity_return_enhancement(
     )
 
 
+def _run_phase23a_individual_equity_decision_architecture(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(config, "phase23a_individual_equity_decision_architecture"):
+        return {}
+    return save_phase23a_individual_equity_decision_architecture(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
 def _run_daily_phase15_operational_chain(
     *,
     config: dict,
@@ -2306,6 +2322,11 @@ def main() -> None:
         help="Run only the Phase 22C Dynamic Opportunity v2 Return Enhancement report.",
     )
     parser.add_argument(
+        "--phase23a-only",
+        action="store_true",
+        help="Run only the Phase 23A Individual-Equity Decision Architecture report.",
+    )
+    parser.add_argument(
         "--daily-paper-only",
         action="store_true",
         help="Run only the lightweight daily paper workflow.",
@@ -2383,6 +2404,13 @@ def main() -> None:
 
     if args.phase22c_only:
         _run_phase22c_dynamic_opportunity_return_enhancement(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase23a_only:
+        _run_phase23a_individual_equity_decision_architecture(
             config=config,
             reports_dir=reports_dir,
         )
