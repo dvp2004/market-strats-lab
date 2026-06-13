@@ -323,6 +323,9 @@ from market_strats.analysis.individual_equity_feature_panel_contract import (
 from market_strats.analysis.pilot_individual_equity_feature_calculation import (
     save_phase23f_pilot_individual_equity_feature_calculation,
 )
+from market_strats.analysis.pilot_individual_equity_input_bootstrap import (
+    save_phase23f_pilot_individual_equity_input_bootstrap,
+)
 
 
 def save_phase15o_current_signal_preregistration(**kwargs):
@@ -2092,6 +2095,21 @@ def _run_phase23e_combined_feature_panel_contract(
     )
 
 
+def _run_phase23f_pilot_individual_equity_input_bootstrap(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(
+        config, "phase23f_pilot_individual_equity_input_bootstrap"
+    ):
+        return {}
+    return save_phase23f_pilot_individual_equity_input_bootstrap(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
 def _run_phase23f_pilot_individual_equity_feature_calculation(
     *,
     config: dict,
@@ -2437,6 +2455,14 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--phase23f-inputs-only",
+        action="store_true",
+        help=(
+            "Run only the controlled noncanonical Phase 23F pilot input "
+            "bootstrap."
+        ),
+    )
+    parser.add_argument(
         "--phase23f-only",
         action="store_true",
         help=(
@@ -2557,6 +2583,13 @@ def main() -> None:
 
     if args.phase23e_only:
         _run_phase23e_combined_feature_panel_contract(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase23f_inputs_only:
+        _run_phase23f_pilot_individual_equity_input_bootstrap(
             config=config,
             reports_dir=reports_dir,
         )

@@ -13454,3 +13454,35 @@ phase23f_pilot_individual_equity_feature_calculation:
   allow_real_money: false
   allow_broker_api: false
   allow_promotion: false
+
+phase23f_pilot_individual_equity_input_bootstrap:
+  enabled: true
+  output_dir: "reports/individual_equity_decision_system/phase23f_pilot_input_bootstrap"
+  dashboard_status_path: "reports/paper_trading/dashboard/phase23f_pilot_input_bootstrap_status.csv"
+  input_dir: "data/individual_equity_pilot"
+  membership_manifest_path: "data/individual_equity_pilot/pilot_membership_manifest.csv"
+  benchmark_ticker: "SPY"
+  benchmark_filename: "benchmark_SPY.csv"
+  download_start_date: "2021-12-01"
+  download_end_date_inclusive: "2026-05-01"
+  pilot_membership_start_date: "2023-01-03"
+  pilot_membership_known_timestamp_utc: "2023-01-03T00:00:00Z"
+  pilot_universe_id: "SP500_PILOT_NONCANONICAL"
+  minimum_price_rows: 700
+  minimum_securities: 12
+  retry_attempts: 3
+  retry_delay_seconds: 2.0
+  inter_symbol_delay_seconds: 0.25
+  reuse_existing_valid_files: true
+  allow_overwrite_existing: false
+  phase_decision_ready: "phase23f_pilot_inputs_ready_for_feature_calculation"
+  phase_decision_pending: "phase23f_pilot_input_bootstrap_incomplete"
+  allow_network_download: true
+  allow_manifest_write: true
+  allow_model_training: false
+  allow_backtest: false
+  allow_paper_orders: false
+  allow_live_trading: false
+  allow_real_money: false
+  allow_broker_api: false
+  allow_promotion: false
