@@ -13521,6 +13521,86 @@ phase23h_interpretable_ranker_robustness:
   broker_api_integration_allowed: false
   promotion_allowed: false
 
+phase23i_frozen_cost_aware_portfolio:
+  enabled: true
+  output_dir: "reports/individual_equity_decision_system/phase23i_frozen_cost_aware_portfolio"
+  dashboard_status_path: "reports/paper_trading/dashboard/phase23i_frozen_cost_aware_portfolio_status.csv"
+  source_phase23f_dir: "reports/individual_equity_decision_system/phase23f_pilot_feature_calculation"
+  source_phase23g_dir: "reports/individual_equity_decision_system/phase23g_interpretable_stock_ranker"
+  source_phase23h_dir: "reports/individual_equity_decision_system/phase23h_interpretable_ranker_robustness"
+  pilot_input_dir: "data/individual_equity_pilot"
+  initial_capital: 100000
+  primary_portfolio_id: "ridge_top5_equal_weight"
+  model_version: "phase23g_ridge_ranker_v1"
+  canonical_research_endpoint: "2026-05-01"
+  weekly_rebalance: true
+  execution_price: "next_open"
+  max_single_stock_weight: 0.20
+  max_top5_sector_security_count: 2
+  max_sector_weight: 0.40
+  min_order_notional: 25
+  minimum_holding_buffer_weight: 0.0
+  no_trade_band_weight: 0.0
+  fixed_commission: 0.0
+  spread_slippage_bps: 0.0
+  hard_turnover_limit: 2.0
+  portfolio_specs:
+    - "ridge_top5_equal_weight"
+    - "ridge_top5_score_weighted"
+    - "ridge_top8_equal_weight"
+    - "technical_composite_top5_baseline"
+    - "equal_weight_all16_pilot_baseline"
+    - "spy_benchmark"
+  cost_scenarios:
+    zero_cost:
+      bps_per_one_way_notional: 0
+    cost_10bps:
+      bps_per_one_way_notional: 10
+    cost_25bps:
+      bps_per_one_way_notional: 25
+    stress_50bps:
+      bps_per_one_way_notional: 50
+  paper_only: true
+  research_pilot_only: true
+  membership_canonical: false
+  market_data_canonical: false
+  generalization_claim_allowed: false
+  investable_performance_claim_allowed: false
+  model_training_allowed: false
+  paper_trading_allowed: false
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false
+
+phase23i_prospective_shadow_runner:
+  enabled: true
+  output_dir: "reports/individual_equity_shadow/phase23i_prospective_shadow"
+  dashboard_status_path: "reports/paper_trading/dashboard/phase23i_shadow_status.csv"
+  source_phase23i_dir: "reports/individual_equity_decision_system/phase23i_frozen_cost_aware_portfolio"
+  source_phase23f_dir: "reports/individual_equity_decision_system/phase23f_pilot_feature_calculation"
+  source_phase23g_dir: "reports/individual_equity_decision_system/phase23g_interpretable_stock_ranker"
+  pilot_input_dir: "data/individual_equity_pilot"
+  canonical_research_endpoint: "2026-05-01"
+  portfolio_id: "ridge_top5_equal_weight"
+  starting_cash: 100000
+  filled_session_filename: "shadow_manual_session_filled.csv"
+  archive_dir: "reports/individual_equity_shadow/phase23i_prospective_shadow/archive"
+  emergency_shadow_kill_switch: false
+  paper_only: true
+  research_pilot_only: true
+  membership_canonical: false
+  market_data_canonical: false
+  generalization_claim_allowed: false
+  investable_performance_claim_allowed: false
+  model_training_allowed: false
+  automated_broker_paper_trading_allowed: false
+  paper_trading_allowed: false
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false
+
 phase23f_pilot_individual_equity_input_bootstrap:
   enabled: true
   output_dir: "reports/individual_equity_decision_system/phase23f_pilot_input_bootstrap"

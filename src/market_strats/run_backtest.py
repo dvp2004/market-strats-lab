@@ -332,6 +332,10 @@ from market_strats.analysis.interpretable_stock_ranker import (
 from market_strats.analysis.interpretable_ranker_robustness import (
     save_phase23h_interpretable_ranker_robustness,
 )
+from market_strats.analysis.frozen_cost_aware_portfolio import (
+    save_phase23i_frozen_cost_aware_portfolio,
+    save_phase23i_prospective_shadow_runner,
+)
 
 
 def save_phase15o_current_signal_preregistration(**kwargs):
@@ -2157,6 +2161,32 @@ def _run_phase23h_interpretable_ranker_robustness(
     )
 
 
+def _run_phase23i_frozen_cost_aware_portfolio(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(config, "phase23i_frozen_cost_aware_portfolio"):
+        return {}
+    return save_phase23i_frozen_cost_aware_portfolio(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
+def _run_phase23i_prospective_shadow_runner(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(config, "phase23i_prospective_shadow_runner"):
+        return {}
+    return save_phase23i_prospective_shadow_runner(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
 def _run_daily_phase15_operational_chain(
     *,
     config: dict,
@@ -2519,6 +2549,22 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--phase23i-only",
+        action="store_true",
+        help=(
+            "Run only the Phase 23I frozen cost-aware individual-equity "
+            "portfolio diagnostics."
+        ),
+    )
+    parser.add_argument(
+        "--phase23i-shadow-only",
+        action="store_true",
+        help=(
+            "Run only the Phase 23I research-only prospective shadow-paper "
+            "session writer."
+        ),
+    )
+    parser.add_argument(
         "--daily-paper-only",
         action="store_true",
         help="Run only the lightweight daily paper workflow.",
@@ -2663,6 +2709,20 @@ def main() -> None:
 
     if args.phase23h_only:
         _run_phase23h_interpretable_ranker_robustness(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase23i_only:
+        _run_phase23i_frozen_cost_aware_portfolio(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase23i_shadow_only:
+        _run_phase23i_prospective_shadow_runner(
             config=config,
             reports_dir=reports_dir,
         )

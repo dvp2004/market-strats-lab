@@ -52,6 +52,8 @@ PHASE21D_FUNCTION = "save_phase21d_regime_informed_adoption"
 PHASE21E_FUNCTION = "save_phase21e_regime_informed_session_ingestion"
 PHASE23G_FUNCTION = "save_phase23g_interpretable_stock_ranker"
 PHASE23H_FUNCTION = "save_phase23h_interpretable_ranker_robustness"
+PHASE23I_FUNCTION = "save_phase23i_frozen_cost_aware_portfolio"
+PHASE23I_SHADOW_FUNCTION = "save_phase23i_prospective_shadow_runner"
 
 
 def _phase_config(enabled: bool) -> dict:
@@ -1195,3 +1197,80 @@ def test_phase23h_only_cli_flag_is_available():
 
     assert "--phase23h-only" in source
     assert "_run_phase23h_interpretable_ranker_robustness(" in source
+
+
+def test_phase23i_runner_helper_calls_phase_when_enabled(monkeypatch):
+    calls: list[dict] = []
+
+    def phase23i_recorder(**kwargs):
+        calls.append(kwargs)
+        return {
+            "summary": pd.DataFrame(
+                {
+                    "phase23i_decision": [
+                        "phase23i_cost_aware_portfolio_diagnostics_completed_research_only"
+                    ]
+                }
+            )
+        }
+
+    monkeypatch.setattr(run_backtest, PHASE23I_FUNCTION, phase23i_recorder)
+    reports_dir = Path("reports")
+
+    outputs = run_backtest._run_phase23i_frozen_cost_aware_portfolio(
+        config={"phase23i_frozen_cost_aware_portfolio": {"enabled": True}},
+        reports_dir=reports_dir,
+    )
+
+    assert calls == [
+        {
+            "config": {"phase23i_frozen_cost_aware_portfolio": {"enabled": True}},
+            "reports_dir": reports_dir,
+        }
+    ]
+    assert "summary" in outputs
+
+
+def test_phase23i_shadow_runner_helper_calls_phase_when_enabled(monkeypatch):
+    calls: list[dict] = []
+
+    def phase23i_shadow_recorder(**kwargs):
+        calls.append(kwargs)
+        return {
+            "summary": pd.DataFrame(
+                {
+                    "phase23i_shadow_decision": [
+                        "phase23i_shadow_session_written_but_blocked"
+                    ]
+                }
+            )
+        }
+
+    monkeypatch.setattr(
+        run_backtest,
+        PHASE23I_SHADOW_FUNCTION,
+        phase23i_shadow_recorder,
+    )
+    reports_dir = Path("reports")
+
+    outputs = run_backtest._run_phase23i_prospective_shadow_runner(
+        config={"phase23i_prospective_shadow_runner": {"enabled": True}},
+        reports_dir=reports_dir,
+    )
+
+    assert calls == [
+        {
+            "config": {"phase23i_prospective_shadow_runner": {"enabled": True}},
+            "reports_dir": reports_dir,
+        }
+    ]
+    assert "summary" in outputs
+
+
+def test_phase23i_cli_flags_are_available():
+    source = Path(run_backtest.__file__).read_text(encoding="utf-8")
+
+    assert "--phase23i-only" in source
+    assert "--phase23i-shadow-only" in source
+    assert "_run_phase23i_frozen_cost_aware_portfolio(" in source
+    assert "_run_phase23i_prospective_shadow_runner(" in source
