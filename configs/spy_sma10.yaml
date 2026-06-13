@@ -12847,6 +12847,27 @@ phase22b_dynamic_opportunity_diagnostics:
   real_money_allowed: false
   broker_api_integration_allowed: false
   promotion_allowed: false
+phase22c_dynamic_opportunity_return_enhancement:
+  enabled: true
+  phase22a_input_dir: "reports/strategy_factory/dynamic_opportunity_engine"
+  phase22b_input_dir: "reports/strategy_factory/dynamic_opportunity_engine_diagnostics"
+  output_dir: "reports/strategy_factory/dynamic_opportunity_return_enhancement"
+  dashboard_dir: "reports/paper_trading/dashboard"
+  starting_cash: 10000
+  transaction_cost_bps_cases: [0, 10, 25]
+  max_single_asset_weight: 0.50
+  max_btc_weight: 0.05
+  max_oil_weight: 0.10
+  max_commodity_weight: 0.20
+  min_cagr_improvement_vs_v1_pp: 0.25
+  max_drawdown_worsening_vs_spy_pp: 5.0
+  max_25bps_cagr_drag_pp: 1.0
+  min_rolling_3y_win_rate_vs_spy: 45.0
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false
 eth_quarantine_diagnostic:
   enabled: false
   baseline_universe_name: Base

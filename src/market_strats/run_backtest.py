@@ -302,6 +302,9 @@ from market_strats.analysis.dynamic_multi_asset_opportunity_engine import (
 from market_strats.analysis.dynamic_opportunity_diagnostics import (
     save_phase22b_dynamic_opportunity_diagnostics,
 )
+from market_strats.analysis.dynamic_opportunity_return_enhancement import (
+    save_phase22c_dynamic_opportunity_return_enhancement,
+)
 
 
 def save_phase15o_current_signal_preregistration(**kwargs):
@@ -1993,6 +1996,19 @@ def _run_phase22b_dynamic_opportunity_diagnostics(
     )
 
 
+def _run_phase22c_dynamic_opportunity_return_enhancement(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(config, "phase22c_dynamic_opportunity_return_enhancement"):
+        return {}
+    return save_phase22c_dynamic_opportunity_return_enhancement(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
 def _run_daily_phase15_operational_chain(
     *,
     config: dict,
@@ -2285,6 +2301,11 @@ def main() -> None:
         help="Run only the Phase 22B Dynamic Opportunity Diagnostics report.",
     )
     parser.add_argument(
+        "--phase22c-only",
+        action="store_true",
+        help="Run only the Phase 22C Dynamic Opportunity v2 Return Enhancement report.",
+    )
+    parser.add_argument(
         "--daily-paper-only",
         action="store_true",
         help="Run only the lightweight daily paper workflow.",
@@ -2355,6 +2376,13 @@ def main() -> None:
 
     if args.phase22b_only:
         _run_phase22b_dynamic_opportunity_diagnostics(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase22c_only:
+        _run_phase22c_dynamic_opportunity_return_enhancement(
             config=config,
             reports_dir=reports_dir,
         )
