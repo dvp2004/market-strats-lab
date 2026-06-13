@@ -311,6 +311,9 @@ from market_strats.analysis.individual_equity_decision_architecture import (
 from market_strats.analysis.point_in_time_universe_source_audit import (
     save_phase23b_point_in_time_universe_source_audit,
 )
+from market_strats.analysis.fundamental_data_source_audit import (
+    save_phase23c_fundamental_data_source_audit,
+)
 
 
 def save_phase15o_current_signal_preregistration(**kwargs):
@@ -2041,6 +2044,19 @@ def _run_phase23b_point_in_time_universe_source_audit(
     )
 
 
+def _run_phase23c_fundamental_data_source_audit(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(config, "phase23c_fundamental_data_source_audit"):
+        return {}
+    return save_phase23c_fundamental_data_source_audit(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
 def _run_daily_phase15_operational_chain(
     *,
     config: dict,
@@ -2348,6 +2364,14 @@ def main() -> None:
         help="Run only the Phase 23B Point-in-Time Universe Source Audit report.",
     )
     parser.add_argument(
+        "--phase23c-only",
+        action="store_true",
+        help=(
+            "Run only the Phase 23C Fundamental Data Source, Filing-Lag, "
+            "and Restatement Audit report."
+        ),
+    )
+    parser.add_argument(
         "--daily-paper-only",
         action="store_true",
         help="Run only the lightweight daily paper workflow.",
@@ -2439,6 +2463,13 @@ def main() -> None:
 
     if args.phase23b_only:
         _run_phase23b_point_in_time_universe_source_audit(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase23c_only:
+        _run_phase23c_fundamental_data_source_audit(
             config=config,
             reports_dir=reports_dir,
         )
