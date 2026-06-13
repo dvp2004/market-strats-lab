@@ -329,6 +329,9 @@ from market_strats.analysis.pilot_individual_equity_input_bootstrap import (
 from market_strats.analysis.interpretable_stock_ranker import (
     save_phase23g_interpretable_stock_ranker,
 )
+from market_strats.analysis.interpretable_ranker_robustness import (
+    save_phase23h_interpretable_ranker_robustness,
+)
 
 
 def save_phase15o_current_signal_preregistration(**kwargs):
@@ -2141,6 +2144,19 @@ def _run_phase23g_interpretable_stock_ranker(
     )
 
 
+def _run_phase23h_interpretable_ranker_robustness(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(config, "phase23h_interpretable_ranker_robustness"):
+        return {}
+    return save_phase23h_interpretable_ranker_robustness(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
 def _run_daily_phase15_operational_chain(
     *,
     config: dict,
@@ -2495,6 +2511,14 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--phase23h-only",
+        action="store_true",
+        help=(
+            "Run only the Phase 23H interpretable ranker robustness and "
+            "failure-mode analysis."
+        ),
+    )
+    parser.add_argument(
         "--daily-paper-only",
         action="store_true",
         help="Run only the lightweight daily paper workflow.",
@@ -2632,6 +2656,13 @@ def main() -> None:
             reports_dir=reports_dir,
         )
         _run_phase23g_interpretable_stock_ranker(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase23h_only:
+        _run_phase23h_interpretable_ranker_robustness(
             config=config,
             reports_dir=reports_dir,
         )

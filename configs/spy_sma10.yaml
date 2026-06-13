@@ -13480,6 +13480,47 @@ phase23g_interpretable_stock_ranker:
   broker_api_integration_allowed: false
   promotion_allowed: false
 
+phase23h_interpretable_ranker_robustness:
+  enabled: true
+  output_dir: "reports/individual_equity_decision_system/phase23h_interpretable_ranker_robustness"
+  dashboard_status_path: "reports/paper_trading/dashboard/phase23h_interpretable_ranker_robustness_status.csv"
+  source_phase23g_dir: "reports/individual_equity_decision_system/phase23g_interpretable_stock_ranker"
+  source_phase23f_dir: "reports/individual_equity_decision_system/phase23f_pilot_feature_calculation"
+  model_version: "phase23g_ridge_ranker_v1"
+  primary_target: "forward_20d_excess_return_vs_universe"
+  top_k: 3
+  bootstrap_seed: 2308
+  bootstrap_samples: 200
+  bootstrap_block_length_dates: 4
+  permutation_seed: 2311
+  permutation_count: 100
+  minimum_test_dates: 8
+  minimum_security_count: 3
+  minimum_future_observation_count: 52
+  rolling_training_windows: [26, 52]
+  phase23g_config:
+    primary_target: "forward_20d_excess_return_vs_universe"
+    model_version: "phase23g_ridge_ranker_v1"
+    minimum_training_decision_dates: 26
+    minimum_training_rows: 200
+    minimum_test_dates: 8
+    top_k: 3
+    ridge_alpha: 1.0
+    ridge_alpha_grid: [0.1, 1.0, 10.0]
+    purge_window_trading_days: 63
+    embargo_window_trading_days: 63
+  membership_canonical: false
+  market_data_canonical: false
+  research_pilot_only: true
+  generalization_claim_allowed: false
+  investable_performance_claim_allowed: false
+  model_training_allowed: false
+  paper_trading_allowed: false
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false
+
 phase23f_pilot_individual_equity_input_bootstrap:
   enabled: true
   output_dir: "reports/individual_equity_decision_system/phase23f_pilot_input_bootstrap"
