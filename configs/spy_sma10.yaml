@@ -13368,3 +13368,25 @@ phase23c_fundamental_data_source_audit:
   allow_real_money: false
   allow_broker_api: false
   allow_promotion: false
+
+phase23d_sentiment_news_source_audit:
+  enabled: true
+  output_dir: "reports/individual_equity_decision_system/phase23d_sentiment_news_source_audit"
+  dashboard_status_path: "reports/paper_trading/dashboard/phase23d_sentiment_news_source_audit_status.csv"
+  audit_as_of_date: "2026-06-13"
+  required_start_date: "2006-04-28"
+  required_end_date: "2026-05-01"
+  gdelt2_start_date: "2015-02-19"
+  phase_decision: "phase23d_timestamp_contract_ready_acquisition_pending"
+  conservative_processing_delay_minutes: 5
+  allow_data_download: false
+  allow_text_panel_build: false
+  allow_sentiment_calculation: false
+  allow_feature_calculation: false
+  allow_model_training: false
+  allow_backtest: false
+  allow_paper_orders: false
+  allow_live_trading: false
+  allow_real_money: false
+  allow_broker_api: false
+  allow_promotion: false
