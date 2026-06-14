@@ -1,12 +1,15 @@
 # Market Strats Lab
 
-A reproducible systematic-trading research lab for testing long-term market strategies honestly.
+A reproducible systematic-trading research lab for testing long-term market strategies, dynamic asset allocation, and individual-equity ranking systems under strict lookahead, robustness, and operational controls.
 
-This project investigates whether simple, explainable, systematic strategies can improve the **return / drawdown / liveability** trade-off versus buy-and-hold across major markets.
+The project investigates whether transparent systematic methods can improve the **return / drawdown / liveability** trade-off versus passive benchmarks across two connected research tracks:
 
-It is not built to find a magic trading rule. It is built to answer a harder question:
+1. **ETF and multi-asset strategy research**
+2. **Individual-equity ranking and shadow-portfolio research**
 
-> Can a systematic strategy improve the path of long-term returns without destroying compounding, overfitting the past, or creating a system an investor would abandon in real life?
+It is not designed to discover a magic trading rule. It is designed to answer a more difficult question:
+
+> Can a systematic process improve the path of long-term returns without destroying compounding, overfitting historical data, or creating a system that an investor would abandon in practice?
 
 ---
 
@@ -14,101 +17,174 @@ It is not built to find a magic trading rule. It is built to answer a harder que
 
 This project is for **research and education only**.
 
-It is **not** financial advice, investment advice, or a recommendation to buy or sell any asset. Historical backtests can be misleading, especially when many strategies, assets, parameters, and rules have been tested.
+It is **not** financial advice, investment advice, or a recommendation to buy or sell any security. Historical backtests and model diagnostics can be misleading, particularly when many strategies, assets, parameters, features, and rules have been tested.
 
-Real-world results can differ because of:
+Real-world results can differ materially because of:
 
-* data quality issues;
-* taxes;
-* execution costs;
+* data quality and survivorship bias;
+* lookahead and timestamp errors;
+* transaction costs;
 * bid-ask spreads;
 * market impact;
+* taxes;
 * liquidity;
-* regime changes;
+* order rejection and partial execution;
+* corporate actions;
+* changing market regimes;
 * behavioural difficulty;
-* future market conditions;
-* implementation errors.
+* model drift;
+* implementation errors;
+* future market conditions.
 
-**Current status:** research-grade framework and paper-trading preparation work.
-**Not production-ready. Not live-tradable. Not ready for real-money deployment.**
+**Current status:** research-grade framework with active manual paper and shadow-trading infrastructure.
+
+The ETF/multi-asset branch has recorded a valid manual paper session. The individual-equity branch has generated its first genuine post-endpoint ranking, target portfolio, and proposed shadow orders, but the first simulated entries remain pending valid next-open execution prices.
+
+**Not production-ready. Not connected to a broker. Not live-tradable. Not approved for real-money deployment.**
 
 ---
 
 ## Executive Summary
 
-Market Strats Lab started as a simple ETF trend-following project and evolved into a structured systematic strategy research framework.
+Market Strats Lab began as a simple ETF trend-following project and evolved into a broader systematic research and operational-testing framework.
 
-The project has built and stress-tested a family of long-term SPY and multi-asset ETF strategies, including:
+### ETF and Multi-Asset Branch
+
+The project has built and stress-tested:
 
 * buy-and-hold benchmarks;
-* 10-month / 12-month trend-following systems;
+* 10-month and 12-month trend-following systems;
 * tactical relative-momentum allocators;
 * SPY regime-switch overlays;
-* execution-cost diagnostics;
+* execution-cost and market-impact diagnostics;
 * tax-drag diagnostics;
 * walk-forward validation;
 * bootstrap robustness;
 * behavioural-regret analysis;
 * technical and macro extension tests;
 * diagnostic regime scoring;
-* ML target/feature experiments;
 * visual backtest reporting;
 * operational switch-log reconstruction;
-* early paper-trading workflow design.
+* manual paper-session generation, ingestion, archival, holdings, cash, and performance tracking.
 
-The main research conclusion is:
+The main ETF research conclusion remains:
 
 > No tested strategy dominates SPY Buy & Hold on raw wealth while also improving every risk and liveability metric.
 
-However, the project found a strong defensive/risk-adjusted candidate:
+However, the project identified a strong defensive and risk-adjusted candidate:
 
-> **SPY 3D confirmed overlay + deep_drawdown_guard + loose_relief**
+> **SPY 3D Confirmed Overlay + deep_drawdown_guard + loose_relief**
 
-This candidate does **not** beat SPY Buy & Hold on raw terminal wealth. SPY Buy & Hold remains the raw wealth benchmark.
+This candidate does **not** beat SPY Buy & Hold on raw terminal wealth. SPY Buy & Hold remains the primary raw-wealth benchmark.
 
 Its value is different:
 
-> It gives up some raw upside versus SPY Buy & Hold in exchange for materially lower drawdown and stronger risk-adjusted performance.
+> It gives up some upside participation in exchange for materially lower drawdown and stronger risk-adjusted performance.
+
+### Individual-Equity Branch
+
+The project has also built the foundations of an autonomous individual-stock research system:
+
+* point-in-time universe, identity, and membership contracts;
+* SEC filing-time, amendment, and restatement controls;
+* news, filing-text, transcript, analyst, macro, and sentiment timestamp contracts;
+* a leak-safe combined feature-panel schema;
+* a controlled 16-stock research-only pilot universe;
+* technical, liquidity, and market-stress feature calculation;
+* forward-return target generation;
+* a deterministic Ridge cross-sectional stock ranker;
+* purged and embargoed walk-forward evaluation;
+* robustness, bootstrap, permutation, ablation, sector, security, and regime diagnostics;
+* a frozen model specification and deterministic model hash;
+* cost-aware portfolio construction;
+* a separate prospective individual-equity shadow namespace;
+* post-endpoint data acquisition and validation;
+* prospective rankings, target weights, and proposed simulated orders.
+
+The initial stock-ranking evidence is encouraging, but it remains a small, noncanonical, survivorship-biased pilot and is not evidence of investable performance.
 
 ---
 
 ## Current Canonical Checkpoint
 
-The canonical research endpoint is pinned at:
+The historical research endpoint is pinned at:
 
 ```text
 2026-05-01
 ```
 
-This endpoint is deliberately fixed for historical validation, metric reconciliation, switch-log reconstruction, README numbers, and checkpoint consistency.
+This endpoint is deliberately fixed for:
 
-Later post-endpoint work must be treated as a separate **out-of-sample / fresh-signal extension**. The pinned endpoint itself is not a flaw. It simply cannot be treated as a current executable paper-trading signal.
+* historical validation;
+* metric reconciliation;
+* switch-log reconstruction;
+* model training and robustness analysis;
+* README checkpoint numbers;
+* reproducibility.
 
-Canonical comparison period:
+Any data after this endpoint must be stored and evaluated separately as:
+
+```text
+post_endpoint_prospective_shadow
+```
+
+The pinned historical endpoint is not a flaw. It prevents refreshed market data from silently changing previously validated results.
+
+It must not be treated as a current executable signal.
+
+Canonical ETF comparison period:
 
 ```text
 2006-04-28 to 2026-05-01
 ```
 
+Controlled individual-equity pilot period:
+
+```text
+2023-01-03 to 2026-05-01
+```
+
+Post-endpoint individual-equity shadow period:
+
+```text
+After 2026-05-01
+```
+
 ---
 
-## Current Strategy Hierarchy
+## Current Research Tracks
 
-| Rank | Role                                            | System                                                                 |
-| ---: | ----------------------------------------------- | ---------------------------------------------------------------------- |
-|    1 | Raw wealth benchmark                            | SPY Buy & Hold                                                         |
-|    2 | Simple defensive benchmark                      | SPY 12M Absolute Momentum                                              |
-|    3 | Original canonical risk-adjusted system         | SPY Trend Regime Switch Overlay 3D Confirmed under flat 5 bps slippage |
-|    4 | Validated execution-realistic baseline          | SPY 3D Confirmed Overlay + deep_drawdown_guard                         |
-|    5 | Best execution-realistic candidate built so far | SPY 3D Confirmed Overlay + deep_drawdown_guard + loose_relief          |
+| Track                                     | Current State                                         | Main Limitation                                          |
+| ----------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
+| ETF and multi-asset historical research   | Mature historical framework with validated candidates | No candidate dominates SPY Buy & Hold on every dimension |
+| ETF and multi-asset manual paper tracking | First valid entered paper session recorded            | Still manual and research-only                           |
+| Individual-equity feature engineering     | Pilot panel built and validated                       | Only 16 noncanonical surviving stocks                    |
+| Individual-equity ranking model           | Interpretable Ridge ranker completed                  | Technical, liquidity, and stress features only           |
+| Individual-equity robustness              | Encouraging IC evidence with material caveats         | Rank spread uncertainty remains weaker                   |
+| Individual-equity portfolio simulation    | Cost-aware historical diagnostics completed           | Noncanonical pilot; not investable performance           |
+| Individual-equity prospective shadow      | First ranking and target portfolio generated          | First next-open simulated execution still pending        |
+| Broker integration                        | Blocked                                               | No broker or sandbox integration approved                |
+| Live trading                              | Blocked                                               | No real-money readiness claim                            |
+
+---
+
+## Current ETF Strategy Hierarchy
+
+| Rank | Role                                                | System                                                                 |
+| ---: | --------------------------------------------------- | ---------------------------------------------------------------------- |
+|    1 | Raw wealth benchmark                                | SPY Buy & Hold                                                         |
+|    2 | Simple defensive benchmark                          | SPY 12M Absolute Momentum                                              |
+|    3 | Original canonical risk-adjusted system             | SPY Trend Regime Switch Overlay 3D Confirmed under flat 5 bps slippage |
+|    4 | Validated execution-realistic baseline              | SPY 3D Confirmed Overlay + deep_drawdown_guard                         |
+|    5 | Best execution-realistic ETF candidate built so far | SPY 3D Confirmed Overlay + deep_drawdown_guard + loose_relief          |
 
 Important distinction:
 
-> The final candidate is the best execution-realistic **risk-adjusted** candidate built so far. It is not the raw wealth winner.
+> The final ETF candidate is the best execution-realistic **risk-adjusted** candidate built so far. It is not the raw-wealth winner.
 
 ---
 
-## Headline Results
+## ETF Headline Results
 
 ### Full-Period Comparison
 
@@ -146,138 +222,315 @@ Holdout period:
 
 Holdout conclusion:
 
-> The final execution-realistic candidate improved on the Phase 4 baseline in the holdout, increasing CAGR from 11.62% to 12.05% and Calmar from 0.482 to 0.500, while leaving max drawdown unchanged at -24.12%.
+> The final execution-realistic candidate improved on the Phase 4 baseline in the holdout, increasing CAGR from 11.62% to 12.05% and Calmar from 0.482 to 0.500, while leaving maximum drawdown unchanged at -24.12%.
 
-SPY Buy & Hold still won raw CAGR, but with materially worse drawdown.
+SPY Buy & Hold still won on raw CAGR, but with materially worse drawdown.
 
 ---
 
-## Current Final-Candidate Description
+## Individual-Equity Pilot Results
 
-The final candidate should be described narrowly:
+### Pilot Scope
 
-> **Best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, and no real-money readiness claim.**
+The controlled pilot contains:
 
-Do **not** describe it as:
+```text
+AAPL, MSFT, NVDA, AMZN, GOOGL, META, JPM, BRK-B,
+XOM, JNJ, UNH, PG, COST, CAT, NEE, TSLA
+```
 
+SPY is used as the benchmark.
+
+The pilot is explicitly:
+
+```text
+NONCANONICAL
+SURVIVORSHIP-BIASED
+RESEARCH-ONLY
+NOT A HISTORICAL S&P 500 RECONSTRUCTION
+NOT VALID FOR GENERALISATION OR INVESTABLE-PERFORMANCE CLAIMS
+```
+
+### Feature and Target Panel
+
+| Item                     |                                             Result |
+| ------------------------ | -------------------------------------------------: |
+| Pilot securities         |                                                 16 |
+| Feature-panel rows       |                                              2,784 |
+| Forward-target rows      |                                             24,384 |
+| Training-eligible rows   |                                              2,784 |
+| Calculated feature count |                                                 10 |
+| Registered target count  |                                                  9 |
+| Primary target           | 20-trading-day excess return versus pilot universe |
+| Decision cadence         |                                             Weekly |
+| Purge window             |                                    63 trading days |
+| Embargo window           |                                    63 trading days |
+
+### Interpretable Ridge Ranker
+
+Phase 23G produced strictly out-of-sample predictions using a chronological, purged, and embargoed walk-forward process.
+
+| Metric                             |  Result |
+| ---------------------------------- | ------: |
+| Unique stock-date observations     |   2,112 |
+| Test dates                         |     132 |
+| Securities                         |      16 |
+| Mean Spearman IC                   |  0.1225 |
+| Median Spearman IC                 |  0.1485 |
+| Positive-IC date fraction          |   62.9% |
+| Top-k average 20-day excess return | 1.2166% |
+| Top-minus-bottom rank spread       | 2.8345% |
+| Prediction coverage                |    100% |
+
+The reported 10,560 prediction rows represent:
+
+```text
+132 test dates × 16 securities × 5 models or baselines
+```
+
+They are not 10,560 independent stock-date observations.
+
+### Robustness Results
+
+Phase 23H found:
+
+| Diagnostic                                     |            Result |
+| ---------------------------------------------- | ----------------: |
+| Moving-block-bootstrap 95% IC interval         |  0.0069 to 0.2420 |
+| Bootstrap probability that mean IC is positive |              0.98 |
+| Within-date permutation IC p-value             |            0.0099 |
+| Rank-spread 95% interval                       | -0.0031 to 0.0576 |
+
+Interpretation:
+
+> Rank-correlation evidence is encouraging for further research, but the rank-spread interval crosses slightly below zero. The signal is not yet established as an investable trading edge.
+
+### Cost-Aware Historical Portfolio Diagnostic
+
+The preregistered primary portfolio was:
+
+```text
+ridge_top5_equal_weight
+```
+
+| Cost Assumption | End Value |   CAGR | Max Drawdown | Total Costs |
+| --------------- | --------: | -----: | -----------: | ----------: |
+| Zero cost       |  $273,954 | 25.65% |      -29.19% |          $0 |
+| 10 bps          |  $265,089 | 24.72% |      -29.47% |      $5,797 |
+| 25 bps          |  $252,104 | 23.31% |      -29.88% |     $14,086 |
+| 50 bps stress   |  $231,963 | 21.00% |      -30.58% |     $26,882 |
+
+These results survived the configured cost assumptions within the pilot, but they must be labelled:
+
+```text
+NONCANONICAL PILOT DIAGNOSTIC — NOT INVESTABLE PERFORMANCE
+```
+
+The result may be materially overstated by the hand-selected surviving-stock universe, limited history, and absence of canonical fundamentals and news features.
+
+---
+
+## Current Final-Candidate Descriptions
+
+### ETF Candidate
+
+The final ETF candidate should be described narrowly:
+
+> **Best execution-realistic ETF risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread and market-impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, and no real-money readiness claim.**
+
+### Individual-Equity Model
+
+The individual-equity model should be described narrowly:
+
+> **A frozen, interpretable, research-only cross-sectional Ridge ranker that produced encouraging out-of-sample rank-correlation evidence in a controlled 16-stock pilot, but has not established canonical generalisation, investable performance, or live-trading readiness.**
+
+Do **not** describe either branch as:
+
+* a guaranteed edge;
 * a production system;
 * a live-trading system;
-* a guaranteed edge;
-* a strategy that beats SPY Buy & Hold on raw wealth;
-* paper-trading-ready;
-* real-money-ready.
+* real-money-ready;
+* broker-integrated;
+* generally validated across the historical S&P 500 or Nasdaq-100.
 
 ---
 
-## Current Paper-Trading Status
+## Current Paper and Shadow-Trading Status
 
-The project has started moving from research into operational paper-trading preparation, but it is **not paper-trading ready yet**.
+### ETF and Multi-Asset Paper Track
 
-Completed operational progress:
+The ETF/multi-asset branch has progressed beyond preparation:
 
-| Area                                 | Status                                                               |
-| ------------------------------------ | -------------------------------------------------------------------- |
-| Correct Phase 6B/6C candidate source | Fixed                                                                |
-| Correct visual backtest reports      | Generated                                                            |
-| Correct 36-switch operational log    | Reconstructed                                                        |
-| Endpoint signal consistency          | Passed                                                               |
-| Fresh-signal schema                  | Prepared                                                             |
-| Paper-trading workflow contract      | Pre-registered                                                       |
-| Post-endpoint candidate stream       | Generated through Phase 15WXYZ                                       |
-| Fresh handoff file                   | Written to `data/fresh/phase15q_rule_generated_candidate_stream.csv` |
-| Fresh current signal                 | Still blocked pending downstream audit                               |
-| Phase 15Q/15R/15O/15P/15M/15N rerun  | Pending inspection                                                   |
-| Paper dry-run                        | Blocked                                                              |
-| Broker/API integration               | Blocked                                                              |
-| Real-money deployment                | Blocked                                                              |
+| Area                                      | Status                      |
+| ----------------------------------------- | --------------------------- |
+| Historical switch logic                   | Reconstructed and validated |
+| Fresh-signal and candidate infrastructure | Implemented                 |
+| Manual session validation                 | Implemented                 |
+| Session rollover and archival             | Implemented                 |
+| Holdings and cash accounting              | Implemented                 |
+| Performance dashboard                     | Implemented                 |
+| Valid entered paper session               | Completed                   |
+| Broker/API integration                    | Blocked                     |
+| Live trading                              | Blocked                     |
+| Real-money deployment                     | Blocked                     |
 
-The latest operational blocker is no longer the historical switch logic or the absence of any post-endpoint stream.
+### Individual-Equity Shadow Track
 
-The current blocker is downstream consumption and audit:
+As of the latest operational checkpoint:
 
-> The project has generated a valid post-endpoint candidate stream, but Phase 15Q/15R/15O/15P/15M/15N must still consume and audit that stream before any paper-dry-run pre-registration can be considered.
+| Area                                     | Status    |
+| ---------------------------------------- | --------- |
+| Frozen model specification               | Completed |
+| Deterministic model hash                 | Completed |
+| Cost-aware portfolio construction        | Completed |
+| Separate post-endpoint data directory    | Completed |
+| Historical overlap validation            | Passed    |
+| Post-endpoint data for SPY and 16 stocks | Validated |
+| Prospective features                     | Generated |
+| Prospective ranking                      | Generated |
+| Target portfolio                         | Generated |
+| Proposed simulated orders                | Generated |
+| Valid next-open execution prices         | Pending   |
+| First entered shadow session             | Pending   |
+| Automated broker paper trading           | Blocked   |
+| Live trading                             | Blocked   |
+| Real-money deployment                    | Blocked   |
 
-Until that downstream fresh-signal chain passes, there can be no valid paper dry-run, no broker/API integration, no paper trading, and no real-money deployment.
+The latest genuine post-endpoint signal date is:
+
+```text
+2026-06-12
+```
+
+The latest frozen-model ranking selected:
+
+```text
+TSLA
+META
+CAT
+AMZN
+NVDA
+```
+
+The research target portfolio assigned 20% to each selected stock before share rounding and execution-price validation.
+
+These are model outputs from a noncanonical research pilot. They are **not investment recommendations**.
+
+The first simulated shadow entries were correctly blocked because valid next-open execution prices were not yet available:
+
+```text
+blocking_reason: execution_open_price_pending
+```
+
+The fill helper correctly refused to fabricate or backfill execution prices.
 
 ---
 
 ## Current Development Priority
 
-The immediate next engineering task is:
+The immediate operational task is:
 
-> Run and inspect the downstream Phase 15Q/15R/15O/15P/15M/15N chain using the valid Phase 15WXYZ post-endpoint candidate stream.
+> Obtain the next eligible market-session opening prices, regenerate the Phase 23J extension, validate the Phase 23I shadow order plan, and explicitly enter the first simulated individual-equity shadow session.
 
-The project must verify that downstream phases consume the fresh handoff file rather than falling back to the pinned in-memory final-candidate frame.
-
-The valid handoff file is:
+Required sequence:
 
 ```text
-data/fresh/phase15q_rule_generated_candidate_stream.csv
+1. Refresh Phase 23J post-endpoint market data.
+2. Confirm the next-open execution date and prices.
+3. Regenerate the Phase 23I shadow session.
+4. Confirm all proposed orders are unblocked.
+5. Explicitly create simulated fills.
+6. Validate and ingest the filled session.
+7. Archive the completed session.
+8. Begin weekly shadow valuation and rebalance tracking.
 ```
 
-Valid target-weight sources include:
+After the first entered session, the next engineering milestone is:
 
-```text
-phase6b_rule_engine
-phase6b_loose_relief_rule_replay
-project_rule_replay
-verified_project_generated
-```
+> **Phase 23K — Prospective Shadow Monitoring, Drift, and Operational Controls**
 
-Invalid sources include:
+That phase should monitor:
 
-```text
-manual_fill
-guessed
-carry_forward_only
-unknown
-```
-
-The next useful milestone is not another strategy variant and not another broad audit loop.
-
-The next useful milestone is:
-
-> A downstream fresh-signal audit showing whether the post-endpoint candidate stream can produce a valid, non-stale, benchmark-updated current signal.
+* ranking stability;
+* prediction outcomes as forward labels mature;
+* portfolio returns and drawdowns;
+* transaction costs and turnover;
+* feature-distribution drift;
+* model-score drift;
+* security and sector concentration;
+* stale or missing data;
+* model-hash consistency;
+* proposed versus entered orders;
+* skipped and blocked sessions;
+* operational failures.
 
 ---
 
 ## Key Caveats
 
-### 1. SPY Buy & Hold remains the raw wealth winner
+### 1. SPY Buy & Hold remains the ETF raw-wealth winner
 
-The final candidate improves drawdown and Calmar, but it does not beat SPY Buy & Hold on raw terminal wealth.
+The final ETF candidate improves drawdown and Calmar but does not beat SPY Buy & Hold on raw terminal wealth.
 
-### 2. The candidate is sensitive to real-world friction
+### 2. The ETF candidate is sensitive to real-world friction
 
-Phase 8B showed that bid-ask / market-impact stress can erase the candidate’s CAGR edge versus SPY 12M Momentum, even if drawdown and Calmar remain better.
+Bid-ask spread and market-impact stress can erase the candidate’s CAGR advantage versus SPY 12M Momentum, even when drawdown and Calmar remain better.
 
-### 3. Rolling-window liveability is mixed
+### 3. Rolling-window ETF liveability is mixed
 
-Phase 7F failed overall. The system looks better over some 3Y and 5Y windows, but 1Y rolling risk/liveability remains a serious caveat.
+The system performs better over several three- and five-year windows, but short-window relative performance and liveability remain important caveats.
 
 ### 4. Behavioural regret is material
 
-Phase 8D showed that relative underperformance versus Buy & Hold can be psychologically difficult. This matters because a system is useless if an investor abandons it.
+Relative underperformance against Buy & Hold can remain psychologically difficult for extended periods.
 
-### 5. The strategy is not tax-proof
+### 5. The ETF strategy is not tax-proof
 
-Phase 8A showed the candidate survived a simplified 20% tax proxy, but its CAGR edge versus SPY 12M disappeared at a harsher 30% proxy.
+The candidate survived a simplified 20% tax proxy, but its CAGR edge versus SPY 12M disappeared under a harsher 30% proxy.
 
-### 6. Technical and macro extensions failed as rule upgrades
+### 6. Technical and macro ETF extensions failed as validated rule upgrades
 
-Technical and macro diagnostics were informative, but pre-registered rule extensions did not produce a validated successor strategy.
+The diagnostics were informative, but the preregistered rule extensions did not produce a validated successor to the final ETF candidate.
 
-### 7. The diagnostic regime score is fragile
+### 7. The diagnostic ETF regime score is fragile
 
-Phase 12 produced a categorical diagnostic regime score of **fragile**. This score is diagnostic only and does not create a trading signal.
+The categorical regime score remains diagnostic only and does not create an independent trading signal.
 
-### 8. The ML branch failed commercially
+### 8. The earlier technical-plus-macro ML branch failed commercially
 
-The technical + macro ML v1 branch was paused/killed commercially after failing validation-to-holdout. It did not produce a signal, backtest, paper-trading candidate, or promoted model.
+That branch failed validation-to-holdout and did not produce a promoted signal, paper-trading candidate, or accepted model.
 
-### 9. Operational paper-trading work is still incomplete
+### 9. The individual-equity pilot is noncanonical
 
-The project has reconstructed the canonical historical switch log and generated a valid post-endpoint candidate stream through the Phase 15WXYZ rule-replay extension. However, the downstream Phase 15Q/15R/15O/15P/15M/15N chain still has to consume, validate, and audit that stream before the project can claim a valid fresh current signal or begin any paper dry-run.
+The 16-stock universe is hand-selected, survivorship-biased, and materially smaller than the S&P 500 or Nasdaq-100.
+
+It cannot establish broad historical generalisation.
+
+### 10. The individual-equity feature set is incomplete
+
+The current model uses technical, liquidity, and market-stress features.
+
+Point-in-time fundamental, news, transcript, analyst, and sentiment data contracts exist, but the historical datasets have not yet been acquired and integrated.
+
+### 11. The individual-equity labels overlap
+
+Weekly decisions are evaluated against 20-trading-day targets, so adjacent outcomes overlap.
+
+Phase 23H uses block bootstrap and within-date permutation tests rather than treating all rows as independent.
+
+### 12. The historical stock-portfolio results are not investable results
+
+The high historical CAGR produced by the 16-stock pilot may reflect survivorship bias, concentration, selected-period effects, and limited universe breadth.
+
+### 13. Prospective evidence is still minimal
+
+The system has generated its first genuine prospective proposal but has not yet recorded its first entered individual-equity shadow session.
+
+A few weeks of results would be an operational test, not evidence of a durable edge.
+
+### 14. No broker or live-money path is enabled
+
+All broker integration, automated execution, live trading, real money, and promotion flags remain disabled.
 
 ---
 
@@ -285,65 +538,92 @@ The project has reconstructed the canonical historical switch log and generated 
 
 The project asks:
 
-> Can simple systematic rules improve long-term outcomes versus buy-and-hold without destroying compounding?
+> Can transparent systematic rules and models improve long-term outcomes versus passive benchmarks without destroying compounding, robustness, or practical liveability?
 
-Strategies are evaluated on:
+Strategies and models are evaluated on:
 
-| Metric                                 | Why It Matters                                                                           |
-| -------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Terminal wealth / CAGR                 | Raw compounding power                                                                    |
-| Max drawdown                           | Worst-case investor pain                                                                 |
-| Calmar ratio                           | Return per unit of maximum drawdown                                                      |
-| Volatility                             | Path smoothness                                                                          |
-| Sharpe / Sortino                       | Risk-adjusted efficiency                                                                 |
-| Worst 3Y / 5Y CAGR                     | Bad-window survivability                                                                 |
-| Exposure time                          | How often the strategy is invested                                                       |
-| Trade count / turnover                 | Friction and tax efficiency                                                              |
-| Time underwater                        | Duration of loss periods                                                                 |
-| Regime performance                     | How behaviour changes across market environments                                         |
-| Holdout validation                     | Whether results survive outside the reference period                                     |
-| Endpoint integrity                     | Whether reports are pinned to the official research date                                 |
-| Signal-execution audit                 | Whether signal state can be reconstructed without lookahead                              |
-| Secondary-source reliability           | Whether data-source disagreements are explained rather than ignored                      |
-| Bootstrap robustness                   | Whether conclusions survive return resampling                                            |
-| Rolling-window survivability           | Whether the strategy remains liveable across different windows                           |
-| Tax-drag sensitivity                   | Whether turnover-based tax drag destroys the edge                                        |
-| Bid-ask / market-impact sensitivity    | Whether spread and impact assumptions destroy the edge                                   |
-| Walk-forward evidence                  | Whether behaviour survives sequential forward windows                                    |
-| Behavioural / tracking-error regret    | Whether the strategy remains tolerable versus benchmarks                                 |
-| Research-degrees-of-freedom discipline | Whether claims are narrowed after many tested branches                                   |
-| Operational replay readiness           | Whether the strategy can generate fresh signals without relying on hidden backtest state |
+| Metric or Control                      | Why It Matters                                            |
+| -------------------------------------- | --------------------------------------------------------- |
+| Terminal wealth and CAGR               | Raw compounding power                                     |
+| Maximum drawdown                       | Worst historical investor pain                            |
+| Calmar ratio                           | Return per unit of maximum drawdown                       |
+| Volatility                             | Path smoothness                                           |
+| Sharpe and Sortino                     | Risk-adjusted efficiency                                  |
+| Worst three- and five-year CAGR        | Bad-window survivability                                  |
+| Exposure and cash weight               | Capital utilisation                                       |
+| Trade count and turnover               | Friction and tax efficiency                               |
+| Time underwater                        | Duration of loss periods                                  |
+| Regime performance                     | Behaviour under different market environments             |
+| Holdout validation                     | Performance outside the reference period                  |
+| Endpoint integrity                     | Protection against silent historical drift                |
+| Signal-execution separation            | Prevention of same-close or lookahead execution           |
+| Point-in-time data availability        | Prevention of future-information leakage                  |
+| Bootstrap robustness                   | Sensitivity to resampling and overlapping labels          |
+| Walk-forward evidence                  | Sequential out-of-sample behaviour                        |
+| Information coefficient                | Cross-sectional ranking quality                           |
+| Rank spread                            | Separation between high- and low-ranked stocks            |
+| Feature and coefficient stability      | Model interpretability and drift                          |
+| Transaction-cost survival              | Whether realistic friction destroys the result            |
+| Behavioural regret                     | Tolerability relative to passive benchmarks               |
+| Operational replay readiness           | Ability to reproduce decisions without hidden state       |
+| Paper and shadow reconciliation        | Whether proposed trades, fills, cash, and positions agree |
+| Research-degrees-of-freedom discipline | Whether claims remain narrow after many experiments       |
 
 The goal is not only to ask:
 
 > Did it make more money?
 
-but also:
+It is also to ask:
 
-> Was the path liveable, executable, and something an investor could realistically stick with?
+> Was the result reproducible, point-in-time valid, cost-aware, operationally executable, and something an investor could realistically follow?
 
 ---
 
 ## Tested Market Universe
 
-| Ticker    | Market / Asset Class            | Role in Research                                    |
-| --------- | ------------------------------- | --------------------------------------------------- |
-| `SPY`     | US large-cap equities / S&P 500 | Main benchmark and core compounding engine          |
-| `QQQ`     | Nasdaq-100 / US growth equities | High-beta equity crash-protection test              |
-| `IWM`     | US small caps                   | Small-cap trend behaviour test                      |
-| `EFA`     | Developed ex-US equities        | International developed equity test                 |
-| `EEM`     | Emerging markets                | Higher-volatility international equity test         |
-| `GLD`     | Gold                            | Non-equity crisis / real-rate-sensitive asset       |
-| `SLV`     | Silver                          | High-volatility commodity / precious-metal exposure |
-| `DBC`     | Broad commodities               | Commodity-cycle exposure                            |
-| `USO`     | Oil proxy                       | Controlled oil-expansion diagnostic                 |
-| `TLT`     | Long-duration US Treasuries     | Duration-heavy bond / defensive asset               |
-| `AGG`     | Aggregate US bonds              | Broad defensive bond sleeve                         |
-| `VNQ`     | US REITs                        | Real-estate equity / credit-sensitive asset         |
-| `BTC-USD` | Bitcoin                         | Quarantined separate research branch                |
-| `ETH-USD` | Ethereum                        | Quarantined crypto diagnostic                       |
+### ETF and Multi-Asset Universe
 
-Bitcoin and Ethereum are deliberately treated as **separate/quarantined research branches** because their histories are shorter, extreme, structurally different, and subject to strong selection bias. They are not part of the main validated ETF allocator.
+| Ticker    | Market or Asset Class           | Role in Research                                |
+| --------- | ------------------------------- | ----------------------------------------------- |
+| `SPY`     | US large-cap equities / S&P 500 | Main benchmark and core compounding engine      |
+| `QQQ`     | Nasdaq-100 / US growth equities | High-beta equity and offensive allocation test  |
+| `IWM`     | US small caps                   | Small-cap trend behaviour                       |
+| `EFA`     | Developed ex-US equities        | International developed-equity exposure         |
+| `EEM`     | Emerging markets                | Higher-volatility international-equity exposure |
+| `GLD`     | Gold                            | Crisis and real-rate-sensitive asset            |
+| `SLV`     | Silver                          | High-volatility precious-metal exposure         |
+| `DBC`     | Broad commodities               | Commodity-cycle exposure                        |
+| `USO`     | Oil proxy                       | Controlled oil-expansion diagnostic             |
+| `TLT`     | Long-duration US Treasuries     | Duration-heavy defensive asset                  |
+| `AGG`     | Aggregate US bonds              | Broad defensive bond sleeve                     |
+| `VNQ`     | US REITs                        | Real-estate and credit-sensitive equity         |
+| `BTC-USD` | Bitcoin                         | Quarantined separate research branch            |
+| `ETH-USD` | Ethereum                        | Quarantined crypto diagnostic                   |
+
+Bitcoin and Ethereum remain separate or quarantined research branches because their histories are shorter, structurally different, and highly sensitive to selection bias.
+
+### Controlled Individual-Equity Pilot
+
+| Ticker  | Sector                 |
+| ------- | ---------------------- |
+| `AAPL`  | Information Technology |
+| `MSFT`  | Information Technology |
+| `NVDA`  | Information Technology |
+| `AMZN`  | Consumer Discretionary |
+| `GOOGL` | Communication Services |
+| `META`  | Communication Services |
+| `JPM`   | Financials             |
+| `BRK-B` | Financials             |
+| `XOM`   | Energy                 |
+| `JNJ`   | Health Care            |
+| `UNH`   | Health Care            |
+| `PG`    | Consumer Staples       |
+| `COST`  | Consumer Staples       |
+| `CAT`   | Industrials            |
+| `NEE`   | Utilities              |
+| `TSLA`  | Consumer Discretionary |
+
+This pilot is an engineering and research sample, not a canonical historical index universe.
 
 ---
 
@@ -351,24 +631,38 @@ Bitcoin and Ethereum are deliberately treated as **separate/quarantined research
 
 The project has not found a magic strategy.
 
-It has found something more realistic:
+It has produced two serious but still limited research tracks.
 
-> A defensive, execution-realistic SPY regime-switch candidate that improves drawdown and risk-adjusted performance versus simple benchmarks, but does not beat SPY Buy & Hold on raw wealth and is not yet operationally paper-trading ready.
+### ETF and Multi-Asset Track
 
-The current final candidate is worth continued operational testing, but only under strict boundaries:
+> A defensive, execution-realistic SPY regime-switch candidate that materially improves drawdown and risk-adjusted performance versus simple defensive benchmarks, while still trailing SPY Buy & Hold on raw wealth.
 
-* preserve the pinned research endpoint;
-* do not mutate canonical reports;
-* do not fake fresh signals;
-* do not manually fill target weights;
-* do not claim paper-trading readiness before downstream fresh-signal audits pass;
-* do not use real money.
+That candidate has progressed into a functioning manual paper-trading workflow.
 
-The next real milestone is:
+### Individual-Equity Track
 
-> Confirm that the valid Phase 15WXYZ post-endpoint candidate stream is consumed correctly by Phase 15Q/15R/15O/15P/15M/15N and determine whether it can produce an audited fresh current signal.
+> A frozen, interpretable stock-ranking model with encouraging out-of-sample rank-correlation evidence, cost-aware historical portfolio diagnostics, and a functioning prospective shadow-order workflow.
 
-Paper dry-run, broker/API integration, live trading, and real-money deployment remain blocked.
+However, the stock model remains based on a small noncanonical pilot. It has not established investable performance, broad index-level generalisation, or real-money readiness.
+
+The immediate milestone is:
+
+> Enter, validate, and archive the first genuine individual-equity simulated shadow session using actual next-open execution prices.
+
+The next research milestone is:
+
+> Build prospective monitoring, drift detection, and operational controls across at least 12 weekly shadow sessions, with 26 weeks preferred before considering broker-sandbox automation.
+
+The project must continue to:
+
+* preserve the pinned historical endpoint;
+* keep post-endpoint data separate;
+* prevent same-close or fabricated execution;
+* preserve frozen model specifications;
+* retain complete session and order lineage;
+* distinguish proposed orders from entered positions;
+* avoid investable-performance claims from the noncanonical pilot;
+* keep broker integration, live trading, and real money disabled until independently justified.
 
 ---
 
@@ -376,24 +670,24 @@ Paper dry-run, broker/API integration, live trading, and real-money deployment r
 
 ## Phase 2 Goal
 
-Phase 2 tested whether the framework could dynamically allocate across broad investable assets and improve the **return / drawdown / liveability** trade-off versus both:
+Phase 2 tested whether the framework could dynamically allocate across broad investable assets and improve the **return / drawdown / liveability** trade-off relative to both:
 
 * SPY Buy & Hold;
 * SPY 12M Absolute Momentum.
 
-The long-term ambition was to eventually build towards a richer decision framework using technical, fundamental, sentiment, macro, geopolitical, and cross-asset information.
+The longer-term ambition was to evolve towards a richer decision framework incorporating technical, fundamental, sentiment, macroeconomic, geopolitical, and cross-asset information.
 
-However, the project deliberately did **not** jump straight into macro data, sentiment, machine learning, BTC, or individual stocks.
+However, the project deliberately did **not** begin with macro data, sentiment, machine learning, cryptocurrency, or individual-stock selection.
 
-The disciplined sequence was:
+Instead, it followed a disciplined sequence:
 
 ```text
-1. Build a price/risk allocator.
-2. Diagnose whether it works.
+1. Build a price- and risk-based allocator.
+2. Diagnose where it works and fails.
 3. Add portfolio constraints.
-4. Validate.
-5. Diagnose regime behaviour.
-6. Only then consider more complex information.
+4. Validate the resulting system.
+5. Analyse behaviour across market regimes.
+6. Only then consider more complex information sources.
 ```
 
 ---
@@ -785,19 +1079,20 @@ It also beat SPY Buy & Hold on major risk-adjusted metrics, while trailing it on
 
 ## Regime-Switch Overlay Validation Conclusion
 
-| Claim                                                         | Status             | Interpretation                                                  |
-| ------------------------------------------------------------- | ------------------ | --------------------------------------------------------------- |
-| Raw SPY 200D binary overlay is sufficient                     | Failed             | Too whipsaw-prone                                               |
-| Raw SPY 200D overlay failed mainly because of whipsaw         | Survived           | Audit confirmed excessive boundary switching                    |
-| 3D confirmation reduced whipsaw damage                        | Survived           | Switches and whipsaws fell materially                           |
-| 3D overlay beats SPY 12M full-period                          | Survived           | Beat on return and risk metrics                                 |
-| 3D overlay beats SPY 12M in holdout                           | Survived           | Beat on CAGR, Calmar, max DD, volatility, Sharpe, Sortino       |
-| 3D overlay passes strict SPY 12M triple gate in holdout       | Survived           | Higher CAGR, higher Calmar, better max DD                       |
-| 3D overlay passes strict SPY 12M triple gate in reference     | Failed / near miss | Slightly worse max DD than SPY 12M                              |
-| 3D overlay beats SPY Buy & Hold on raw wealth                 | Failed             | SPY Buy & Hold still has higher raw CAGR                        |
-| 3D overlay became the best risk-adjusted candidate at the Phase 3 checkpoint | Survived | It became the strongest candidate at that stage, before later execution-realistic guard and relief tests |
-| More parameter testing is justified immediately               | Not yet            | Overfitting risk after strong result                            |
-| Next step should be final documentation and repository polish | Survived           | Current branch reached a validated checkpoint                   |
+| Claim                                                                        | Status                      | Interpretation                                                                                             |
+| ---------------------------------------------------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Raw SPY 200D binary overlay is sufficient                                    | Failed                      | Excessive boundary whipsaw made the raw rule unsuitable                                                    |
+| Raw SPY 200D overlay failed mainly because of whipsaw                        | Survived                    | The audit confirmed excessive switching around the trend boundary                                          |
+| 3D confirmation reduced whipsaw damage                                       | Survived                    | Switches and short-lived reversals fell materially                                                         |
+| 3D overlay beats SPY 12M full-period                                         | Survived                    | It improved both return and risk metrics                                                                   |
+| 3D overlay beats SPY 12M in holdout                                          | Survived                    | It improved CAGR, Calmar, max drawdown, volatility, Sharpe, and Sortino                                    |
+| 3D overlay passes the strict SPY 12M triple gate in holdout                  | Survived                    | Higher CAGR, higher Calmar, and better max drawdown                                                        |
+| 3D overlay passes the strict SPY 12M triple gate in reference                | Failed / near miss          | Its reference-period max drawdown was slightly worse than SPY 12M                                          |
+| 3D overlay beats SPY Buy & Hold on raw wealth                                | Failed                      | SPY Buy & Hold retained the higher raw CAGR                                                                |
+| 3D overlay became the best risk-adjusted candidate at the Phase 3 checkpoint | Survived                    | It became the strongest candidate at that stage, before later execution-realistic guard and relief testing |
+| Immediate broad parameter expansion is justified                             | Rejected at this checkpoint | The strength of the result increased the risk of overfitting                                               |
+| The branch had reached a documented validation checkpoint                    | Survived                    | The system was ready for robustness and execution-realism testing                                          |
+
 
 ---
 
@@ -861,14 +1156,14 @@ Conclusion:
 
 ## Phase 3A Conclusion
 
-| Claim                                                     | Status               | Interpretation                                          |
-| --------------------------------------------------------- | -------------------- | ------------------------------------------------------- |
-| The 3D overlay survives low/moderate slippage             | Survived             | 10 bps passed with 9.93% CAGR and 0.415 Calmar          |
-| The 3D overlay is friction-proof                          | Failed               | 25 bps weakened the result; 50 bps failed wealth-growth |
-| High execution friction is the main current vulnerability | Survived             | Slippage sensitivity produced the largest degradation   |
-| The 3D overlay depends heavily on cash yield              | Failed               | 0% cash yield still passed                              |
-| The 3D overlay survives raw-close signal sensitivity      | Survived with caveat | Raw-close full-period result remained viable            |
-| Immediate macro/sentiment/ML expansion is justified       | Not yet              | Documentation and checkpoint discipline came first      |
+| Claim                                                                  | Status                      | Interpretation                                                                        |
+| ---------------------------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------- |
+| The 3D overlay survives low-to-moderate slippage                       | Survived                    | The 10 bps scenario retained a 9.93% CAGR and 0.415 Calmar                            |
+| The 3D overlay is friction-proof                                       | Failed                      | The result weakened materially at 25 bps and failed as a wealth-growth case at 50 bps |
+| High execution friction is the main identified vulnerability           | Survived                    | Slippage sensitivity produced the largest deterioration                               |
+| The 3D overlay depends heavily on cash yield                           | Failed                      | The 0% cash-yield scenario remained viable                                            |
+| The 3D overlay survives raw-close signal sensitivity                   | Survived with caveat        | The raw-close version remained viable but produced weaker full-period CAGR and Calmar |
+| Immediate macro, sentiment, or machine-learning expansion is justified | Rejected at this checkpoint | Execution robustness and checkpoint discipline remained the priority                  |
 
 ---
 
@@ -1392,41 +1687,55 @@ Important distinction:
 
 ## Phase 2–6 Bottom Line
 
-Phases 2–6 transformed the project from simple ETF timing into a disciplined regime-switch framework.
+Phases 2–6 transformed the project from a collection of simple ETF timing rules into a disciplined tactical-allocation and regime-switch framework.
 
-The final hierarchy after Phase 6 was:
+The hierarchy established by the end of Phase 6 was:
 
 | Role                                   | System                                                            |
 | -------------------------------------- | ----------------------------------------------------------------- |
 | Raw wealth benchmark                   | SPY Buy & Hold                                                    |
-| Simple defensive benchmark             | SPY 12M Momentum                                                  |
+| Simple defensive benchmark             | SPY 12M Absolute Momentum                                         |
 | Best standalone balanced allocator     | Top 3 Equal Weight Trend-Confirmed Relative Momentum              |
 | Best standalone defensive allocator    | Top 3 Equal Weight Trend-Confirmed Constrained Relative Momentum  |
 | Original canonical overlay             | SPY 3D Confirmed Overlay under flat 5 bps slippage                |
 | Validated execution-realistic baseline | SPY 3D Confirmed Overlay + `deep_drawdown_guard`                  |
 | Best execution-realistic candidate     | SPY 3D Confirmed Overlay + `deep_drawdown_guard` + `loose_relief` |
 
-Core lesson:
+The core conclusion was:
 
-> The project did not find a raw wealth champion that beats SPY Buy & Hold. It found a defensive, risk-adjusted SPY regime-switch candidate that materially improves drawdown and Calmar while preserving much of SPY's long-term compounding.
+> The project did not find a raw-wealth strategy that consistently beat SPY Buy & Hold. It identified a defensive, execution-realistic SPY regime-switch candidate that materially improved maximum drawdown and Calmar while retaining much of SPY’s long-term compounding.
+
+The progression also produced several broader lessons:
+
+* tactical relative momentum was most valuable during severe equity stress;
+* ordinary corrections and transition regimes were more difficult than deep bear markets;
+* confirmation reduced, but did not eliminate, trend-boundary whipsaw;
+* execution friction was the system’s most important practical vulnerability;
+* deep-drawdown defensive switches were often too late and too expensive;
+* the `deep_drawdown_guard` improved results by removing demonstrably harmful switches;
+* defensive breadth and stress filters generally added complexity without sufficient benefit;
+* looser offensive-relief confirmation improved re-entry without causing the damage associated with stricter variants;
+* SPY Buy & Hold remained the correct benchmark for raw terminal wealth.
+
+Later phases expanded robustness, operational replay, paper tracking, dynamic opportunity research, and individual-equity modelling. Those later developments do not retroactively change the conclusions reached in Phases 2–6.
 
 ---
 
 # Phase 7: Final Validation, Data Reliability, Bootstrap Robustness, and Rolling Survivability
 
-Phase 7 did **not** add another strategy variant.
+Phase 7 did **not** introduce another strategy variant.
 
-Its job was to audit whether the Phase 6C checkpoint could be trusted as a research result.
+Its purpose was to determine whether the Phase 6C checkpoint could be trusted as a reproducible research result.
 
-The focus was:
+The phase focused on:
 
 1. checkpoint integrity;
-2. signal/execution timing;
+2. signal and execution timing;
 3. secondary data-source reliability;
-4. bootstrap/statistical robustness;
+4. bootstrap and statistical robustness;
 5. rolling-window survivability.
 
-Phase 7 deliberately avoided further optimisation. Its purpose was to narrow claims, expose weaknesses, and decide whether the Phase 6C candidate deserved to be documented as the final research checkpoint.
+Phase 7 deliberately avoided further optimisation. Its role was to narrow the project’s claims, expose weaknesses, and determine whether the Phase 6C candidate deserved to remain the final ETF research checkpoint.
 
 ---
 
@@ -1506,7 +1815,7 @@ Phase 7B verdict:
 
 ---
 
-## Phase 7C / 7C.2: Secondary Data-Source Reliability Audit
+## Phase 7C and 7C.2: Secondary Data-Source Reliability Audit
 
 Phase 7C compared the primary yfinance adjusted-close data against Stooq daily close data.
 
@@ -1579,23 +1888,26 @@ The main suspicion was:
 | TLT    | Review difference     | Likely distribution / price-basis difference |
 | VNQ    | Potential data issue  | Likely distribution / price-basis difference |
 
-### Phase 7C Final Verdict
+## Phase 7 Final Verdict
 
-| Claim                                                                    | Status   | Interpretation                                                                                                      |
-| ------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| Secondary-source differences were attributed rather than ignored         | Survived | Clean matches, likely price-basis differences, and unresolved issues were separated                                 |
-| Distribution-heavy ETF differences are likely explained by price basis   | Survived | EFA, AGG, TLT, and VNQ were classified as likely distribution/price-basis differences                               |
-| No unresolved secondary-source data issues remain                        | Survived | No unresolved potential issues remained after attribution                                                           |
-| Stooq close can fully validate yfinance adjusted-close total-return data | Failed   | A close-price source cannot fully validate adjusted-close total-return data without matching adjustment methodology |
-| The next step should be more strategy optimisation                       | Not yet  | Data reliability and statistical robustness remained higher-priority than new signals                               |
+Phase 7 strengthened the integrity of the Phase 6C checkpoint while materially narrowing the claim that could be made about it.
 
-Final Phase 7C verdict:
+| Area                                 | Result               | Interpretation                                                                                                      |
+| ------------------------------------ | -------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Checkpoint integrity                 | Passed               | Metrics, dates, reports, and documentation reconciled                                                               |
+| Lookahead and signal-execution audit | Passed               | No obvious future-information leakage was found                                                                     |
+| Secondary-source reliability         | Survived with caveat | Broad agreement was established, but Stooq close could not fully validate adjusted total-return data                |
+| Bootstrap robustness                 | Passed               | The risk-adjusted advantage survived the primary resampling design                                                  |
+| Bootstrap stability                  | Passed               | The conclusion remained stable across tested block lengths and random seeds                                         |
+| Rolling-window survivability         | Failed overall       | Medium- and long-window evidence was useful, but short-window liveability and rolling superiority were inconsistent |
 
-> Secondary data-source reliability survived with caveat. Stooq confirmed broad source agreement, but Stooq close was not a perfect validator of yfinance adjusted-close total-return data.
+Final Phase 7 interpretation:
 
-Important limitation:
+> The Phase 6C candidate survived checkpoint, timing, data-reliability, and bootstrap audits strongly enough to remain a credible ETF research checkpoint. However, it was not consistently superior across rolling windows and should not be described as a universally dominant, statistically proven, or production-ready trading system.
 
-> Stooq close is useful as a broad sanity check. It does **not** fully validate distribution-adjusted total-return backtests.
+The correct claim after Phase 7 was therefore narrower:
+
+> The candidate had meaningful full-period and risk-adjusted evidence, but mixed short-window liveability and no guarantee that its historical advantages would persist.
 
 ---
 
@@ -1772,21 +2084,23 @@ Final Phase 7 interpretation:
 
 ---
 
-# Phase 8: Real-World Friction Diagnostics
+# Phase 8: Real-World Friction and Research-Boundary Diagnostics
 
-Phase 8 moved beyond backtest-path validation and tested whether the final candidate remained credible under real-world friction, sequential validation, behavioural regret, research-degrees-of-freedom, and non-production boundary audits.
+Phase 8 moved beyond backtest-path validation and tested whether the final ETF candidate remained credible after accounting for additional real-world and research-process risks.
+
+It examined:
+
+* simplified tax drag;
+* bid-ask spread and market-impact stress;
+* sequential walk-forward behaviour;
+* behavioural and tracking-error regret;
+* research degrees of freedom;
+* non-production boundaries;
+* final README and configuration consistency.
 
 Phase 8 did **not** add a new alpha signal or optimise the `loose_relief` rule.
 
-Its job was to narrow the already-promoted Phase 6B candidate by testing:
-
-* tax-drag sensitivity;
-* bid-ask / market-impact stress;
-* walk-forward evidence;
-* tracking-error regret;
-* research flexibility;
-* research-only boundary discipline;
-* final README/config consistency.
+Its purpose was to determine how much of the Phase 6C claim survived once practical friction, sequential instability, investor behaviour, and research flexibility were made explicit.
 
 ---
 
@@ -2169,42 +2483,68 @@ Correct interpretation:
 
 ## Phase 8 Final Verdict
 
-Phase 8 materially narrowed the final-candidate claim.
+Phase 8 materially narrowed the final ETF candidate’s claim.
 
-| Diagnostic                     | Result                        | Interpretation                                                          |
-| ------------------------------ | ----------------------------- | ----------------------------------------------------------------------- |
-| Tax drag                       | Survived at 20% proxy         | Edge over SPY 12M remained, but was thin                                |
-| Bid-ask / market-impact stress | Failed configured stress gate | Candidate kept risk-control value but lost CAGR edge versus SPY 12M     |
-| Walk-forward validation        | Failed / mixed                | Positive in all windows, but inconsistent versus SPY 12M and Buy & Hold |
-| Behavioural regret             | Failed                        | Material regret versus SPY Buy & Hold                                   |
-| Research degrees of freedom    | Completed                     | Claim narrowed after many tested branches                               |
-| Boundary-control audit         | Completed                     | Research-only / non-production boundary documented                      |
-| README consistency             | Completed                     | Phase 8 checkpoint internally consistent                                |
+| Diagnostic                           | Result                        | Interpretation                                                                            |
+| ------------------------------------ | ----------------------------- | ----------------------------------------------------------------------------------------- |
+| Simplified tax drag                  | Survived at the 20% proxy     | The advantage over SPY 12M remained, but the CAGR margin was thin                         |
+| Bid-ask and market-impact stress     | Failed configured stress gate | Risk-control value survived, but the CAGR advantage over SPY 12M did not                  |
+| Walk-forward validation              | Failed / mixed                | The candidate remained positive but did not outperform its benchmarks consistently        |
+| Behavioural regret                   | Failed                        | Relative underperformance versus SPY Buy & Hold could be severe and prolonged             |
+| Research degrees of freedom          | Completed                     | The final claim was narrowed after documenting the number of tested and rejected branches |
+| Boundary-control audit               | Completed                     | The research-only and non-production boundaries were made explicit                        |
+| README and configuration consistency | Completed                     | The Phase 8 checkpoint reconciled internally                                              |
 
 Final Phase 8 interpretation:
 
-> The Phase 6B `loose_relief` candidate remains the best execution-realistic risk-adjusted candidate built so far, but the claim is heavily caveated. It is not production-ready, not live-tradable, not tax-proof, not friction-proof, not a raw Buy-and-Hold replacement, and not a clean prospective validation winner.
+> The Phase 6B `loose_relief` candidate remained the best execution-realistic ETF risk-adjusted candidate built so far, but the evidence was heavily caveated.
+
+It should not be described as:
+
+* friction-proof;
+* tax-proof;
+* a clean walk-forward winner;
+* behaviourally easy to follow;
+* a raw-return replacement for SPY Buy & Hold;
+* production-ready;
+* live-tradable.
+
+The correct description after Phase 8 was:
+
+> A defensive research candidate with meaningful historical risk-control value, but material sensitivity to costs, sequential market conditions, and investor tracking regret.
 
 # Phase 9: Technical Indicator Extension
 
-Phase 9 tested whether additional price-derived technical indicators could explain where the final candidate helped or failed.
+Phase 9 tested whether additional price-derived technical indicators could explain where the final ETF candidate helped or failed and whether any tightly bounded technical extension could improve it.
 
-This phase was deliberately bounded. It did **not** create an open-ended indicator search, optimise thresholds, or promote a new strategy.
+The phase was deliberately constrained. It did **not** permit:
+
+* an open-ended indicator search;
+* threshold optimisation;
+* repeated rule mutation;
+* post-result parameter tuning;
+* automatic strategy promotion.
 
 The sequence was:
 
-```text id="98c6kb"
+```text
 Phase 9A: diagnostic technical-regime analysis
 Phase 9B: cluster-stability audit
-Phase 9C: pre-registered technical-rule design spec
+Phase 9C: pre-registered technical-rule design specification
 Phase 9D: pre-registered technical-rule test
 Phase 9E: technical-extension closeout
 Phase 9F: final Phase 9 checkpoint audit
 ```
 
-Final Phase 9 conclusion:
+Phase 9 therefore separated three distinct activities:
 
-> Technical indicators produced useful diagnostic evidence, but no pre-registered technical rule passed validation. The final candidate hierarchy remained unchanged.
+1. using technical indicators to explain historical behaviour;
+2. testing whether those diagnostic patterns were stable;
+3. testing only the pre-registered rules that survived the design stage.
+
+The final Phase 9 conclusion was:
+
+> Technical indicators produced useful explanatory evidence, but no pre-registered technical rule passed validation. The final candidate hierarchy remained unchanged.
 
 ---
 
@@ -2495,43 +2835,74 @@ Correct interpretation:
 
 ## Phase 9 Final Verdict
 
-| Phase | Result                     | Interpretation                                          |
-| ----- | -------------------------- | ------------------------------------------------------- |
-| 9A    | Diagnostic completed       | Technical regimes helped explain candidate behaviour    |
-| 9B    | Stability audit completed  | Some clusters were useful, but most were unstable       |
-| 9C    | Pre-registration completed | Only two bounded technical-rule hypotheses were allowed |
-| 9D    | Failed                     | No pre-registered technical rule passed validation      |
-| 9E    | Closeout completed         | Technical branch closed without promotion               |
-| 9F    | Checkpoint audit completed | README/config/report consistency passed                 |
+| Phase | Result                     | Interpretation                                                                |
+| ----- | -------------------------- | ----------------------------------------------------------------------------- |
+| 9A    | Diagnostic completed       | Technical regimes helped explain where the candidate helped or underperformed |
+| 9B    | Stability audit completed  | A small number of clusters were useful, but most were unstable                |
+| 9C    | Pre-registration completed | Only two bounded technical-rule hypotheses were permitted                     |
+| 9D    | Failed                     | Neither pre-registered technical rule passed validation                       |
+| 9E    | Closeout completed         | The technical-extension branch was closed without promotion                   |
+| 9F    | Checkpoint audit completed | README, configuration, reports, and closeout status reconciled                |
 
 Final Phase 9 interpretation:
 
-> Technical indicators helped explain the candidate’s behaviour, but failed as validated rule extensions. The final candidate hierarchy stayed unchanged.
+> Technical indicators were valuable as diagnostic tools but failed as validated rule extensions.
+
+The branch produced several useful lessons:
+
+* explanatory clusters are not automatically tradable rules;
+* apparent regime relationships can be unstable across periods;
+* pre-registration prevented further threshold search after failure;
+* the failed rules were documented rather than retuned;
+* no successor candidate was created;
+* the Phase 6C ETF hierarchy remained unchanged.
+
+The correct conclusion was therefore:
+
+> Phase 9 improved understanding of the existing candidate but did not improve the candidate itself.
 
 ---
 
-# Phase 10: Macro / Rates / Inflation Extension
+# Phase 10: Macro, Rates, and Inflation Extension
 
-Phase 10 tested whether macro, rates, and inflation data could be safely introduced into the framework.
+Phase 10 tested whether macroeconomic, interest-rate, and inflation data could be introduced into the framework without compromising point-in-time integrity or creating hidden lookahead risk.
 
-The phase deliberately started with source reliability, leakage control, and point-in-time alignment before any macro rule test.
+The phase deliberately began with:
+
+* feature-family selection;
+* source feasibility;
+* release-date policies;
+* revision and vintage controls;
+* conservative point-in-time alignment;
+* diagnostic analysis.
+
+Only after those controls passed were a small number of macro-rule hypotheses pre-registered and tested.
 
 The sequence was:
 
-```text id="tmdn2t"
-Phase 10A: feature-family feasibility spec
-Phase 10B: macro/rates/inflation source and leakage feasibility audit
-Phase 10C: macro source reliability and point-in-time alignment audit
+```text
+Phase 10A: feature-family feasibility specification
+Phase 10B: macro source and leakage feasibility audit
+Phase 10C: source reliability and point-in-time alignment audit
 Phase 10D: diagnostic-only macro regime analysis
-Phase 10E: pre-registered macro hypothesis design spec
-Phase 10F: pre-registered macro rule test
-Phase 10G: macro branch closeout
+Phase 10E: pre-registered macro hypothesis design specification
+Phase 10F: pre-registered macro-rule test
+Phase 10G: macro-branch closeout
 Phase 10H: final Phase 10 checkpoint audit
 ```
 
-Final Phase 10 conclusion:
+Phase 10 did not permit:
 
-> Macro/rates/inflation data was feasible and diagnostically informative, but the pre-registered macro-rule test failed. No macro rule was promoted and the final candidate hierarchy remained unchanged.
+* unrestricted macro-feature search;
+* post-result threshold optimisation;
+* repeated rule mutation;
+* silent use of revised data as though it had been known historically;
+* model training;
+* automatic strategy promotion.
+
+The final Phase 10 conclusion was:
+
+> Macro, rates, and inflation data were feasible to source, align, and analyse safely, but neither pre-registered macro rule passed validation. No macro rule was promoted, no successor candidate was created, and the ETF strategy hierarchy remained unchanged.
 
 ---
 
@@ -2951,7 +3322,7 @@ Correct interpretation:
 
 ---
 
-## Phase 10H: Final Phase 10 Checkpoint / README-Config-Report Consistency Audit
+## Phase 10H: Final Phase 10 Checkpoint and README–Config–Report Consistency Audit
 
 Phase 10H verified the final Phase 10 record after the macro/rates/inflation branch was closed without promotion.
 
@@ -3000,46 +3371,83 @@ Correct interpretation:
 
 ## Phase 10 Final Verdict
 
-| Phase | Result                              | Interpretation                                                   |
-| ----- | ----------------------------------- | ---------------------------------------------------------------- |
-| 10A   | Feasibility spec completed          | Macro/rates/inflation selected as first non-price feature family |
-| 10B   | Source/leakage feasibility passed   | Macro sources were feasible enough for point-in-time audit       |
-| 10C   | Source reliability/alignment passed | Macro series loaded and aligned with conservative lagging        |
-| 10D   | Diagnostic analysis completed       | Macro regimes were informative but not strategy-promotional      |
-| 10E   | Pre-registration completed          | Two bounded macro hypotheses were allowed                        |
-| 10F   | Failed                              | No pre-registered macro rule passed                              |
-| 10G   | Closeout completed                  | Macro branch closed without promotion                            |
-| 10H   | Checkpoint audit completed          | README/config/report consistency passed                          |
+| Phase | Result                                  | Interpretation                                                                  |
+| ----- | --------------------------------------- | ------------------------------------------------------------------------------- |
+| 10A   | Feasibility specification completed     | Macro, rates, and inflation were selected as the first non-price feature family |
+| 10B   | Source and leakage feasibility passed   | Suitable sources and timing controls were identified                            |
+| 10C   | Source reliability and alignment passed | Four macro series were loaded and conservatively aligned                        |
+| 10D   | Diagnostic analysis completed           | Macro regimes helped explain candidate behaviour                                |
+| 10E   | Pre-registration completed              | Only two bounded macro hypotheses were permitted                                |
+| 10F   | Failed                                  | Neither pre-registered rule passed every validation gate                        |
+| 10G   | Closeout completed                      | The macro branch was closed without promotion                                   |
+| 10H   | Checkpoint audit completed              | README, configuration, reports, and closeout state reconciled                   |
 
 Final Phase 10 interpretation:
 
-> Macro/rates/inflation data can be handled safely and was diagnostically useful, but it did not produce a validated rule extension. The final candidate hierarchy stayed unchanged.
+> Macro, rates, and inflation data were operationally feasible and diagnostically informative, but they did not produce a validated strategy extension.
+
+The branch established several important lessons:
+
+* release dates and data availability matter more than observation dates;
+* revision-prone series require explicit vintage or lagging policies;
+* ex-post macro labels must not be treated as live inputs;
+* diagnostic regime relationships are not automatically tradable rules;
+* higher headline CAGR is insufficient when drawdown and robustness deteriorate;
+* interesting failed hypotheses must not be softened or retuned after the result;
+* branch failure should preserve, rather than silently mutate, the existing strategy hierarchy.
+
+The correct conclusion was therefore:
+
+> Phase 10 improved the project’s macro-data discipline and explanatory framework, but it did not improve the final ETF candidate.
+
+---
 
 # Phase 11: Regime-Scoring Architecture
 
-Phase 11 reviewed the project architecture after both technical and macro rule-extension branches produced useful diagnostics but failed as pre-registered rule overlays.
+Phase 11 reviewed the project’s decision architecture after both the technical and macro extension branches produced useful diagnostic evidence but failed as pre-registered rule overlays.
 
-The key conclusion was:
+The central architectural conclusion was:
 
-> The project should not keep adding simple if/then rule overlays. Richer information needs a better architecture before it can be used responsibly.
+> The project should not continue stacking simple if/then rules onto the existing ETF candidate. Richer information requires a more structured decision layer before it can be evaluated responsibly.
 
-Phase 11 did **not** create a new strategy, score, signal, allocation rule, model, backtest, or candidate promotion.
+Phase 11 therefore shifted from strategy testing to architecture design.
+
+It did **not** create:
+
+* a calculated regime score;
+* numeric score weights;
+* an allocation signal;
+* a trading rule;
+* a backtest;
+* a predictive model;
+* new data ingestion;
+* a promoted candidate.
 
 The sequence was:
 
 ```text
 Phase 11A: richer-information architecture review
-Phase 11B: regime-scoring architecture spec
-Phase 11C: regime-scoring rulebook spec
+Phase 11B: regime-scoring architecture specification
+Phase 11C: regime-scoring rulebook specification
 Phase 11D: diagnostic-panel design
 Phase 11E: diagnostic-panel template implementation audit
 Phase 11F: diagnostic-panel content audit
 Phase 11G: final Phase 11 closeout
 ```
 
-Final Phase 11 conclusion:
+The branch separated architecture from implementation:
 
-> A regime-scoring architecture and diagnostic-panel framework were prepared, but no regime score, score weights, signal, allocation rule, strategy test, model, new data ingestion, candidate promotion, or final-candidate change exists.
+1. select an appropriate future decision structure;
+2. define component families and boundaries;
+3. define the rulebook grammar;
+4. define report schemas;
+5. create schema-compliant templates;
+6. audit template content;
+7. close the branch before any empirical score was calculated.
+
+The final Phase 11 conclusion was:
+
+> A regime-scoring architecture and diagnostic-panel framework were prepared, but no empirical regime score, score weight, signal, allocation rule, model, strategy test, new data ingestion, candidate promotion, or final-candidate change existed.
 
 ---
 
@@ -3343,7 +3751,7 @@ Correct interpretation:
 
 ---
 
-## Phase 11E: Regime-Scoring Diagnostic Panel Template Implementation Audit
+## Phase 11E: Regime-Scoring Diagnostic-Panel Template Implementation Audit
 
 Phase 11E created schema-compliant diagnostic-panel templates from the Phase 11D design.
 
@@ -3437,7 +3845,7 @@ Correct interpretation:
 
 ---
 
-## Phase 11F: Regime-Scoring Diagnostic Panel Content Audit
+## Phase 11F: Regime-Scoring Diagnostic-Panel Content Audit
 
 Phase 11F audited the content of the diagnostic-panel templates created in Phase 11E.
 
@@ -3597,57 +4005,96 @@ Correct interpretation:
 
 ## Phase 11 Final Verdict
 
-| Phase | Result                                  | Interpretation                                                  |
-| ----- | --------------------------------------- | --------------------------------------------------------------- |
-| 11A   | Architecture review completed           | Simple if/then overlays rejected as immediate next architecture |
-| 11B   | Architecture spec completed             | Regime-scoring layer designed conceptually                      |
-| 11C   | Rulebook spec completed                 | Component grammar and boundaries defined                        |
-| 11D   | Panel design completed                  | Diagnostic panel structure designed                             |
-| 11E   | Template implementation audit completed | Schema-compliant templates generated                            |
-| 11F   | Content audit completed                 | Template content passed consistency checks                      |
-| 11G   | Closeout completed                      | Branch closed without scoring or promotion                      |
+| Phase | Result                                  | Interpretation                                                                 |
+| ----- | --------------------------------------- | ------------------------------------------------------------------------------ |
+| 11A   | Architecture review completed           | Repeated simple overlays were rejected as the immediate next design            |
+| 11B   | Architecture specification completed    | A conceptual regime-scoring layer was defined                                  |
+| 11C   | Rulebook specification completed        | Component grammar, missingness rules, and weighting boundaries were documented |
+| 11D   | Diagnostic-panel design completed       | Report structures and required columns were defined                            |
+| 11E   | Template implementation audit completed | Schema-compliant diagnostic templates were generated                           |
+| 11F   | Content audit completed                 | Template content and boundaries passed consistency checks                      |
+| 11G   | Closeout completed                      | The branch closed without empirical scoring, testing, or promotion             |
 
 Final Phase 11 interpretation:
 
-> Phase 11 built the architecture for a future diagnostic regime score, but deliberately stopped before calculating anything. It was design infrastructure, not trading evidence.
+> Phase 11 created design infrastructure for a future diagnostic regime score but deliberately stopped before calculating or testing one.
+
+The branch established several principles:
+
+* technical and macro context should be represented as components rather than isolated rule overlays;
+* validation risk must be part of the architecture rather than an afterthought;
+* unaudited fundamental and sentiment families must remain blocked;
+* missing data must not be silently filled;
+* empirical return-based weights must not be introduced without pre-registration;
+* diagnostic states must remain separate from trading signals;
+* architecture design does not constitute trading evidence;
+* schema and boundary audits should precede any empirical implementation.
+
+The correct conclusion was:
+
+> Phase 11 improved the project’s decision architecture, not its historical performance.
+
+A future score implementation required a separate, explicitly pre-registered phase with fixed components, fixed weighting rules, point-in-time inputs, missingness controls, and a clear non-trading boundary.
 
 ---
 
 # Phase 12: Diagnostic Regime Score
 
-Phase 12 calculated, audited, interpreted, and closed the first categorical diagnostic regime score.
+Phase 12 implemented, audited, interpreted, and closed the project’s first categorical diagnostic regime score.
 
-This phase was still **not** a trading-signal phase.
+The purpose was not to create a new trading system. It was to test whether the technical, macroeconomic, and validation-risk evidence developed in earlier phases could be combined under a pre-registered, non-empirical decision grammar.
 
-It did not create:
+Phase 12 therefore maintained a strict boundary between:
+
+* diagnostic context;
+* trading signals;
+* allocation rules;
+* predictive models;
+* strategy backtests.
+
+It did **not** create:
 
 * a trading signal;
 * an allocation rule;
 * a strategy backtest;
-* empirical weights;
+* empirical or return-fitted weights;
 * model training;
 * new data ingestion;
 * candidate promotion;
-* final-candidate change.
+* a change to the final ETF candidate.
 
 The sequence was:
 
 ```text
-Phase 12A: score-calculation pre-registration spec
+Phase 12A: score-calculation pre-registration specification
 Phase 12B: score-calculation readiness audit
-Phase 12C: diagnostic score calculation
-Phase 12D: diagnostic score distribution/content audit
-Phase 12E: diagnostic score interpretation/closeout audit
+Phase 12C: categorical diagnostic-score calculation
+Phase 12D: score-distribution and content audit
+Phase 12E: score interpretation and closeout audit
 Phase 12F: final Phase 12 checkpoint audit
 ```
 
-Final Phase 12 conclusion:
+The resulting score combined three categorical components:
 
-> The diagnostic regime score is **fragile**. This is a research-context result only, not a trading signal.
+```text
+technical_regime_context
+macro_regime_context
+validation_risk_context
+```
+
+Technical and macro context were neutral, while validation risk was fragile. Under the locked aggregation grammar, this produced a final diagnostic state of:
+
+```text
+fragile
+```
+
+The final Phase 12 conclusion was:
+
+> The available technical and macro evidence was not sufficiently supportive to overcome the project’s fragile validation-risk context. The resulting categorical score was research context only and did not constitute a trading signal.
 
 ---
 
-## Phase 12A: Score-Calculation Pre-Registration Spec
+## Phase 12A: Score-Calculation Pre-Registration Specification
 
 Phase 12A locked the future diagnostic score-calculation design before any score was calculated.
 
@@ -3803,7 +4250,7 @@ Correct interpretation:
 
 ---
 
-## Phase 12D: Diagnostic Score Distribution / Content Audit
+## Phase 12D: Diagnostic Score Distribution and Content Audit
 
 Phase 12D audited the Phase 12C diagnostic score distribution and content quality.
 
@@ -3856,7 +4303,7 @@ Correct interpretation:
 
 ---
 
-## Phase 12E: Diagnostic Score Interpretation / Closeout Audit
+## Phase 12E: Diagnostic Score Interpretation and Closeout Audit
 
 Phase 12E interpreted the Phase 12C diagnostic score and closed the score-interpretation branch.
 
@@ -3978,51 +4425,101 @@ Correct interpretation:
 
 ## Phase 12 Final Verdict
 
-| Phase | Result                            | Interpretation                                             |
-| ----- | --------------------------------- | ---------------------------------------------------------- |
-| 12A   | Pre-registration completed        | Score grammar locked before calculation                    |
-| 12B   | Readiness audit completed         | Diagnostic calculation allowed only after pre-registration |
-| 12C   | Diagnostic score calculated       | Final diagnostic score state: `fragile`                    |
-| 12D   | Score content audit completed     | Score remained categorical and non-signal                  |
-| 12E   | Interpretation closeout completed | Fragile score interpreted as research-only context         |
-| 12F   | Final checkpoint completed        | Branch closed without signal or promotion                  |
+| Phase | Result                                   | Interpretation                                                                                             |
+| ----- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 12A   | Pre-registration completed               | Eligible components, aggregation grammar, missingness rules, and boundaries were locked before calculation |
+| 12B   | Readiness audit completed                | Calculation was allowed only after confirming the pre-registration was complete                            |
+| 12C   | Diagnostic score calculated              | The final categorical diagnostic state was `fragile`                                                       |
+| 12D   | Distribution and content audit completed | The result remained categorical, bounded, and free from signal, backtest, and empirical-weight columns     |
+| 12E   | Interpretation closeout completed        | The fragile state was interpreted as research-only context                                                 |
+| 12F   | Final checkpoint completed               | The branch closed without signal conversion, testing, or promotion                                         |
 
 Final Phase 12 interpretation:
 
-> The diagnostic score synthesised the existing evidence as fragile under the pre-registered Phase 12 grammar. This did not create a trading system. It made the caveat stack explicit and closed the SPY regime-switch research arc as a disciplined baseline framework.
+> Phase 12 synthesised the existing ETF evidence into a fragile categorical diagnostic state under a pre-registered grammar.
+
+The branch established several important principles:
+
+* validation risk can override otherwise neutral component evidence;
+* diagnostic states must remain separate from trading actions;
+* categorical aggregation does not establish predictive power;
+* no score should become a signal without a separate pre-registered conversion phase;
+* architecture and audit discipline are not substitutes for out-of-sample trading evidence;
+* a fragile result should narrow the project’s claims rather than trigger immediate rule modification.
+
+The correct conclusion was:
+
+> Phase 12 made the existing caveat stack explicit and closed the original SPY regime-switch research arc as a disciplined baseline framework. It did not create a new strategy.
+
+---
 
 # Phase 13: Multi-Factor Model Path and Paper-Trading Route Decision
 
-Phase 13 pivoted the project from the frozen SPY regime-switch research arc toward the original long-term goal:
+Phase 13 transitioned the project from the frozen SPY regime-switch baseline towards its broader long-term objective:
 
-> Build a disciplined decision system that can eventually use technical, macro, fundamental, sentiment, and model-based information to support long-term trading / investing decisions.
+> Build a disciplined decision system capable of incorporating technical, macroeconomic, fundamental, sentiment, and model-based information into long-term trading and investment research.
 
-This phase also forced an important reality check.
+The phase pursued two connected objectives:
 
-The first technical + macro ML branch did **not** produce a model strong enough to justify holdout evaluation. After that failure, Phase 13 redirected the project toward the fastest responsible paper-trading route:
+1. design and test the first governed multi-factor machine-learning path;
+2. determine the fastest responsible route from historical research into paper-trading operations.
 
-> Move the best existing non-ML overlay candidate into visual backtest, signal-mapping, and paper-trading readiness work.
+The phase began by freezing the original SPY research arc as reusable benchmark and validation infrastructure. It then introduced:
 
-Phase 13 did not produce a live model, trading signal, backtest promotion, paper-trading deployment, or final-candidate change.
+* feature-source contracts;
+* timestamp and leakage policies;
+* feature schemas;
+* technical and macro feature calculation;
+* target and split pre-registration;
+* ML dataset construction;
+* model-readiness and availability audits;
+* bounded baseline-model testing;
+* target and feature redesign diagnostics;
+* a formal commercial continuation or termination decision.
+
+The first technical-plus-macro ML branch did **not** produce evidence strong enough to justify promotion.
+
+Macro-feature availability initially failed and had to be diagnosed separately. Even after the dataset and model pipeline were repaired and audited, the ML v1 branch failed its validation-to-holdout and commercial continuation requirements.
+
+The project therefore did not force an ML result into production.
+
+Instead, Phase 13 redirected the near-term operational path towards the strongest existing non-ML ETF candidate:
+
+> **SPY 3D Confirmed Overlay + `deep_drawdown_guard` + `loose_relief`**
+
+At the Phase 13 checkpoint, this became the preferred route for:
+
+* reproducible visual backtesting;
+* signal and exposure mapping;
+* operational reconstruction;
+* paper-trading readiness work.
 
 The sequence was:
 
 ```text
-13A–13B: freeze SPY baseline arc and define multi-factor roadmap
+13A–13B: freeze the SPY baseline arc and define the multi-factor roadmap
 13C–13H: define feature-source contracts, schemas, and calculation rules
-13I–13J: calculate and audit technical/macro feature panels
+13I–13J: calculate and audit the technical and macro feature panels
 13K–13N: prepare and audit the first ML dataset
 13O–13R: diagnose and repair macro availability
 13S–13W: pre-register, train, audit, and interpret baseline ML models
-13X–13AF: checkpoint failed ML branch and pivot to target-feature redesign
-13AG–13AK: run target-feature redesign diagnostics and select redesigned target path
-13AM–13AN: pre-register and audit redesigned model run readiness
-13AV–13AW: commercially pause/kill ML v1 and choose the non-ML overlay paper-readiness route
+13X–13AF: checkpoint the failed ML branch and redesign targets/features
+13AG–13AK: execute target-feature redesign diagnostics
+13AM–13AN: pre-register and audit redesigned-model readiness
+13AV–13AW: pause/kill ML v1 commercially and select the non-ML paper-readiness route
 ```
 
-Final Phase 13 conclusion:
+Phase 13 did not create:
 
-> The technical + macro ML v1 branch was paused/killed commercially. The fastest responsible route is now the non-ML Phase 6B/6C `loose_relief` overlay visual-backtest and paper-readiness path.
+* a promoted ML trading model;
+* an approved live signal;
+* real-money deployment;
+* broker integration;
+* a change to the validated ETF hierarchy.
+
+The final Phase 13 conclusion was:
+
+> The technical-plus-macro ML v1 branch was paused commercially after failing to establish reliable validation-to-holdout evidence. The fastest responsible operational route was the existing non-ML `loose_relief` ETF overlay, while the multi-factor architecture, contracts, datasets, and failure evidence were retained for future research.
 
 ---
 
@@ -4066,7 +4563,7 @@ Correct interpretation:
 
 ---
 
-## Phase 13B: Multi-Factor Long-Term Decision Model Architecture Roadmap Spec
+## Phase 13B: Multi-Factor Long-Term Decision-Model Architecture Roadmap Specification
 
 Phase 13B created the roadmap for the long-term multi-factor decision-model path.
 
@@ -4114,9 +4611,33 @@ Correct interpretation:
 
 ## Phase 13C–13H: Feature Contracts, Schemas, and Calculation Pre-Registration
 
-Phases 13C–13H built the feature-governance layer before any model work.
+Phases 13C–13H established the feature-governance layer before any model was permitted to train.
 
-The goal was to avoid the common failure mode of throwing raw features into a model and calling the result “AI trading”.
+The purpose was to prevent a common failure mode in quantitative research:
+
+> Combining poorly timestamped features, future information, revised macro data, and undocumented transforms in a model and then presenting the output as an artificial-intelligence trading system.
+
+This stage therefore required every feature family to document:
+
+* source identity;
+* economic observation date;
+* public release date;
+* conservative availability date;
+* decision date;
+* revision or vintage treatment;
+* missingness policy;
+* transformation rules;
+* leakage controls;
+* contract version;
+* audit outputs.
+
+Technical and macro families were permitted to proceed to bounded calculation.
+
+Fundamental and sentiment families remained blocked because their historical point-in-time sources had not yet been audited.
+
+No signal, target-driven feature selection, model training, backtest, paper-trading deployment, or candidate promotion was allowed during these phases.
+
+---
 
 ### Phase 13C: Feature-Source Inventory / Leakage-Feasibility Spec
 
@@ -4312,7 +4833,33 @@ Phase 13H verdict:
 
 ---
 
-## Phase 13I–13J: Technical/Macro Feature Calculation and Quality Audit
+## Phase 13I–13J: Technical and Macro Feature Calculation and Quality Audit
+
+Phases 13I and 13J converted the pre-registered contracts into the first governed technical and macro feature panel.
+
+The calculation produced:
+
+* eight registered technical and macro features;
+* categorical feature states;
+* source and contract metadata;
+* availability and missingness states;
+* leakage flags;
+* visual audit tables;
+* a future model-matrix preview.
+
+The resulting panel contained:
+
+```text
+53,620 rows
+8 registered features
+0 leakage flags
+```
+
+The panel passed its structural quality audit.
+
+However, structural validity did not imply model readiness. The subsequent Phase 13K interpretation found that all four macro feature states remained unavailable, exposing a material gap between schema compliance and usable historical feature coverage.
+
+---
 
 ### Phase 13I: Feature Calculation Execution
 
@@ -4400,7 +4947,49 @@ Phase 13J verdict:
 
 ---
 
-## Phase 13K–13N: ML Dataset Preparation
+## Phase 13K–13N: ML Dataset Preparation and Macro-Availability Guard
+
+Phases 13K–13N interpreted the feature panel, pre-registered the first ML target and temporal splits, assembled the dataset, and audited its quality.
+
+The primary target was fixed as:
+
+```text
+future_63d_spy_return_state
+```
+
+The split design was fixed before model training:
+
+| Split                    | Dates                    |
+| ------------------------ | ------------------------ |
+| Initial training period  | 2006-04-28 to 2016-12-30 |
+| Validation period        | 2017-01-03 to 2020-12-31 |
+| Untouched holdout period | 2021-01-01 to 2026-05-01 |
+
+A hard macro-availability guard then identified that the four macro feature states had zero usable availability.
+
+The system responded conservatively:
+
+```text
+macro available ratio = 0.0000
+macro blocked = True
+dataset label = technical_only_macro_blocked_dataset_v1
+```
+
+This was an important integrity result.
+
+The project did not silently:
+
+* fill missing macro states;
+* label the dataset as multi-factor;
+* train on unavailable features;
+* weaken the availability threshold;
+* reinterpret missingness as neutral information.
+
+The assembled dataset still passed its structural, target, split, and leakage audits, but it was correctly classified as technical-only until the macro branch could be repaired.
+
+The correct conclusion after Phase 13N was:
+
+> The first ML dataset was structurally valid and leak-audited, but it was not yet an honest technical-plus-macro dataset. Macro availability required a dedicated repair and re-audit before the intended multi-factor model path could continue.
 
 ### Phase 13K: Feature Panel Interpretation / Model-Readiness Planning
 
@@ -4534,7 +5123,45 @@ Phase 13N verdict:
 
 ---
 
-## Phase 13O–13R: Macro Availability Repair
+## Phase 13O–13R: Macro-Availability Repair
+
+Phases 13O–13R investigated and repaired the zero-availability problem affecting the macro feature family.
+
+The issue was not missing macro data. The source existed, but its structure did not match the feature-calculation logic:
+
+```text
+Stored source format:
+series_id + value
+
+Expected feature format:
+DGS2
+DGS10
+CPIAUCSL
+UNRATE
+```
+
+The project therefore treated the problem as a source-normalisation defect rather than silently dropping macro data, filling unavailable values, or mislabelling the dataset as multi-factor.
+
+The repair sequence was:
+
+```text
+Phase 13O: identify the root cause
+Phase 13P: pre-register the repair decision
+Phase 13Q: execute long-to-wide normalisation and rebuild the dataset
+Phase 13R: audit the repaired dataset
+```
+
+The repair succeeded:
+
+```text
+macro available ratio = 0.9720
+dataset label = multi_factor_technical_macro_dataset_v1
+leakage flags = 0
+```
+
+This restored the intended technical-plus-macro dataset path.
+
+It did not create a model, signal, strategy backtest, paper-trading system, or promoted candidate.
 
 ### Phase 13O: Macro Availability Root-Cause Diagnostic
 
@@ -4574,7 +5201,7 @@ Phase 13O verdict:
 
 ---
 
-### Phase 13P: Macro Feature Repair Decision / Repair Spec
+### Phase 13P: Macro Feature Repair Decision and Specification
 
 Phase 13P converted the Phase 13O root-cause diagnosis into a repair decision and repair specification.
 
@@ -4665,6 +5292,55 @@ Phase 13R verdict:
 
 ## Phase 13S–13W: Baseline ML Training and Interpretation
 
+Phases 13S–13W executed the first governed machine-learning experiment on the repaired technical-plus-macro dataset.
+
+The protocol was pre-registered before training and enforced:
+
+* fixed model families;
+* fixed train and validation periods;
+* train-only preprocessing;
+* untouched holdout data;
+* no feature selection using validation or holdout;
+* no threshold tuning;
+* no strategy backtest;
+* no signal mapping;
+* no candidate promotion.
+
+Five registered model families were evaluated:
+
+```text
+majority-class dummy
+stratified dummy
+multinomial logistic regression
+random forest
+histogram gradient boosting
+```
+
+Random Forest produced the strongest validation metrics:
+
+```text
+validation balanced accuracy = 0.4253
+validation macro F1 = 0.4010
+```
+
+However, the apparent validation lead was insufficient for continuation because:
+
+* all substantive models showed material train-validation gaps;
+* the diagnostic-leading Random Forest had zero recall for the fragile class;
+* the model failed precisely where the future decision system needed the strongest adverse-regime sensitivity.
+
+The Phase 13W continuation decision was therefore:
+
+```text
+continue_only_after_model_diagnostic_repair
+```
+
+No model was selected, no holdout prediction was permitted, and no trading claim was made.
+
+The correct conclusion was:
+
+> The baseline ML run produced some validation signal, but its overfitting and complete failure to recall the fragile class prevented progression to holdout evaluation.
+
 ### Phase 13S: ML Model Training Pre-Registration and Baseline Model Design Spec
 
 Phase 13S pre-registered the ML model-training protocol for the repaired technical + macro dataset.
@@ -4693,7 +5369,7 @@ Phase 13S verdict:
 
 ---
 
-### Phase 13T: ML Training Readiness / Leakage Boundary Audit
+### Phase 13T: ML Training Readiness and Leakage-Boundary Audit
 
 Phase 13T confirmed dataset readiness, training protocol completeness, train-only preprocessing controls, holdout lockout, and forbidden-output absence.
 
@@ -4776,7 +5452,7 @@ Phase 13V verdict:
 
 ---
 
-### Phase 13W: ML Validation Result Interpretation / Continuation Decision
+### Phase 13W: ML Validation Result Interpretation and Continuation Decision
 
 Phase 13W interpreted the validation-only ML evidence.
 
@@ -4836,7 +5512,53 @@ Correct interpretation:
 
 ---
 
-## Phase 13X–13AF: ML Diagnostic Repair, Failure Attribution, and Commercial Pivot
+## Phase 13X–13AF: Diagnostic Repair, Failure Attribution, and Architecture Pivot
+
+Phases 13X–13AF tested whether the baseline ML defects could be repaired without opening an unrestricted modelling search.
+
+The repair path was pre-registered and limited to:
+
+* shallower and more regularised Random Forests;
+* fragile-class weighting;
+* stronger logistic regularisation;
+* shallow, L2-regularised histogram gradient boosting.
+
+The repair goals were:
+
+1. improve fragile-class recall;
+2. reduce train-validation overfitting;
+3. preserve a meaningful edge over dummy baselines.
+
+The repair execution was technically clean but economically unsuccessful.
+
+No registered repair variant achieved acceptable fragile-class recall:
+
+| Repair Variant                         | Fragile Validation Recall |
+| -------------------------------------- | ------------------------: |
+| Shallow regularised Random Forest      |                    0.0000 |
+| Fragile-weighted Random Forest         |                    0.0000 |
+| Highly regularised Logistic Regression |                    0.0000 |
+| Shallow L2 Hist Gradient Boosting      |                    0.0098 |
+
+The failure-attribution audit showed that:
+
+* the fragile labels were economically meaningful;
+* the class was less common, but not absent;
+* technical and macro features were insufficient to identify fragile regimes reliably;
+* the 63-day horizon or target structure might be poorly aligned;
+* additional tuning of the same models was unlikely to solve the core problem.
+
+The architecture decision was therefore:
+
+```text
+pivot_to_target_feature_redesign_preregistration
+```
+
+Direct holdout evaluation was blocked.
+
+The correct conclusion was:
+
+> The model-family repair attempt failed. The project therefore moved to a pre-registered target and feature redesign rather than continuing incremental tuning of the same technical-plus-macro setup.
 
 ### Phase 13X: ML Branch Checkpoint Audit
 
@@ -4883,7 +5605,7 @@ Phase 13Y verdict:
 
 ---
 
-### Phase 13Z: ML Diagnostic Repair Readiness / Boundary Audit
+### Phase 13Z: ML Diagnostic Repair Readiness and Boundary Audit
 
 Phase 13Z confirmed that the registered repair path was ready for train/validation-only execution.
 
@@ -4934,7 +5656,7 @@ Correct interpretation:
 
 ---
 
-### Phase 13AC: ML Failure Attribution / Target-Feature Diagnostic
+### Phase 13AC: ML Failure Attribution and Target-Feature Diagnostic
 
 Phase 13AC diagnosed why the registered repair attempt failed.
 
@@ -5017,7 +5739,49 @@ Correct interpretation:
 
 ---
 
-## Phase 13AG–13AK: Target-Feature Redesign
+## Phase 13AG–13AN: Target and Feature Redesign
+
+Phases 13AG–13AN investigated whether the ML failure was partly caused by the original fragile-class target rather than model choice alone.
+
+The redesign process remained bounded:
+
+1. pre-register alternative target definitions;
+2. analyse class balance and economic meaning;
+3. select one candidate target path;
+4. pre-register a new train/validation-only model run;
+5. keep the holdout locked.
+
+The target diagnostic compared:
+
+* the original 63-day return-state target;
+* a looser 63-day return threshold;
+* a 63-day return-plus-drawdown composite;
+* a drawdown-first fragile target;
+* blocked 21-day and 126-day future candidates.
+
+The original target had economically meaningful outcomes but weak validation-period class balance.
+
+Three redesigned targets improved class balance while retaining economic ordering.
+
+The selected candidate target was:
+
+```text
+return_drawdown_63d_composite
+```
+
+This was a target-path decision only.
+
+It did not select a model, create a trading signal, unlock holdout predictions, or authorise backtesting.
+
+The redesigned model run was then pre-registered with:
+
+* fixed model families;
+* minimum edge over dummy baselines;
+* minimum fragile-class recall;
+* maximum overfit gaps;
+* no holdout access;
+* no feature-importance inspection;
+* no signal or strategy testing.
 
 ### Phase 13AG: Target-Feature Redesign Pre-Registration Spec
 
@@ -5181,7 +5945,7 @@ Phase 13AM verdict:
 
 ---
 
-### Phase 13AN: Redesigned Model Run Readiness / Leakage Audit
+### Phase 13AN: Redesigned Model Run Readiness and Leakage Audit
 
 Phase 13AN audited readiness for the redesigned model run.
 
@@ -5212,6 +5976,32 @@ Phase 13AN verdict:
 
 ## Phase 13AO–13AQ: Redesigned Model Run Failure
 
+The redesigned model run tested whether the more balanced `return_drawdown_63d_composite` target could resolve the weaknesses of ML v1.
+
+The target redesign improved class balance, but it did not produce a model suitable for holdout evaluation.
+
+The diagnostic-leading model was:
+
+```text
+redesigned_random_forest_regularised
+```
+
+| Metric                             | Result |
+| ---------------------------------- | -----: |
+| Validation balanced accuracy       | 0.3942 |
+| Validation macro F1                | 0.3517 |
+| Fragile-class recall               | 0.0090 |
+| Real model passed all gates        |  False |
+| Holdout pre-registration justified |  False |
+
+The critical failure remained fragile-class detection.
+
+Despite the more balanced target, the best model correctly recalled less than 1% of fragile validation observations.
+
+The correct interpretation was:
+
+> Target redesign improved the dataset structure but did not resolve the core predictive weakness. The technical-plus-macro ML v1 branch still could not identify adverse regimes reliably enough to justify holdout predictions, signal creation, backtesting, or paper trading.
+
 The detailed Phase 13AO–13AQ reports are not expanded in this README section, but their conclusion is captured by Phase 13AV.
 
 The key result:
@@ -5239,8 +6029,73 @@ Correct interpretation:
 > Even after target redesign, the technical + macro ML v1 branch did not detect fragile regimes well enough. It did not justify holdout prediction, signal creation, backtesting, or paper trading.
 
 ---
+## Phase 13AV–13AW: Commercial Stop Decision and Paper-Trading Route Selection
 
-## Phase 13AV: ML Branch Commercial Decision / Kill-or-Pivot Spec
+Phases 13AV and 13AW converted the failed technical-plus-macro ML evidence into a practical project decision.
+
+The decision criterion was no longer:
+
+> Can another minor model adjustment improve validation metrics?
+
+It became:
+
+> What is the shortest responsible path towards a functioning paper-trading workflow?
+
+The ML branch had already undergone:
+
+* source repair;
+* dataset reassembly;
+* baseline model testing;
+* registered model repair;
+* failure attribution;
+* target redesign;
+* redesigned model testing.
+
+It still failed to achieve acceptable fragile-class recall or justify holdout evaluation.
+
+The commercial decision was therefore:
+
+```text
+pause_current_technical_macro_ml_v1
+```
+
+This blocked:
+
+* further minor tuning of the same technical-plus-macro models;
+* direct holdout evaluation;
+* ML signal mapping;
+* ML strategy backtesting;
+* ML paper deployment.
+
+Future ML work remained possible only after genuinely new information families—such as point-in-time fundamentals, sentiment, news, or additional market-stress features—were acquired and audited.
+
+The project then compared three operational routes and selected:
+
+```text
+route_3_non_ml_overlay_visual_backtest_paper_readiness
+```
+
+The selected system was:
+
+```text
+phase6b_loose_relief_execution_realistic_overlay
+```
+
+This route was chosen because it:
+
+* used an already validated non-ML candidate;
+* avoided forcing a failed ML branch forward;
+* had the strongest existing historical evidence;
+* represented the fastest bounded path to operational paper testing;
+* preserved the long-term multi-factor ambition without blocking near-term progress.
+
+The route selection did not itself enable paper trading, live execution, broker integration, or real-money deployment.
+
+The correct conclusion was:
+
+> ML v1 was paused, and the existing non-ML overlay became the preferred near-term paper-readiness route.
+
+## Phase 13AV: ML Branch Commercial Stop-or-Pivot Decision
 
 Phase 13AV converted the failed Phase 13AQ validation-to-holdout result into a commercial/trading-path decision.
 
@@ -5352,55 +6207,99 @@ Correct interpretation:
 
 ## Phase 13 Final Verdict
 
-| Area                   | Result                  | Interpretation                                                                                  |
-| ---------------------- | ----------------------- | ----------------------------------------------------------------------------------------------- |
-| SPY baseline arc       | Frozen                  | Baseline framework preserved; not the final project endpoint                                    |
-| Multi-factor roadmap   | Completed               | Technical, macro, fundamental, sentiment, dissertation-methodology path documented              |
-| Feature contracts      | Completed               | Technical and macro feature schemas, leakage policies, and ML safeguards locked                 |
-| Feature calculation    | Completed               | Technical/macro feature panels calculated and audited                                           |
-| Macro availability     | Repaired                | Long-format macro source normalised into usable technical + macro dataset                       |
-| Baseline ML v1         | Failed                  | Random Forest showed validation signal but fragile recall and overfit were unacceptable         |
-| ML repair              | Failed                  | Registered repair variants did not solve fragile recall                                         |
-| Target redesign        | Helped but insufficient | Redesigned target improved balance, but technical + macro ML still failed validation-to-holdout |
-| ML commercial decision | Paused/killed           | No more minor tuning of technical + macro ML v1                                                 |
-| Paper-trading route    | Selected                | Move Phase 6B/6C non-ML overlay toward visual backtest and paper-readiness                      |
+| Area                              | Result                                            | Interpretation                                                                         |
+| --------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| SPY baseline arc                  | Frozen                                            | Preserved as benchmark and validation infrastructure                                   |
+| Multi-factor roadmap              | Completed                                         | Technical, macro, fundamental, sentiment, and methodology paths documented             |
+| Feature contracts                 | Completed                                         | Timing, leakage, revision, missingness, and schema rules established                   |
+| Technical and macro feature panel | Completed                                         | Eight governed features calculated and audited                                         |
+| Macro availability                | Repaired                                          | Long-format source correctly normalised into a usable wide panel                       |
+| First multi-factor dataset        | Completed                                         | Technical-plus-macro dataset assembled with no leakage flags                           |
+| Baseline ML v1                    | Failed                                            | Validation signal existed, but overfitting and zero fragile recall blocked progression |
+| Registered model repair           | Failed                                            | Regularisation and class weighting did not resolve fragile recall                      |
+| Target redesign                   | Structurally useful but predictively insufficient | Class balance improved, but the redesigned models still failed                         |
+| Holdout evaluation                | Blocked                                           | No model justified holdout prediction                                                  |
+| ML commercial decision            | Paused                                            | Further minor tuning of technical-plus-macro ML v1 prohibited                          |
+| Paper-trading route               | Selected                                          | Existing non-ML `loose_relief` overlay moved to operational-readiness work             |
 
 Final Phase 13 interpretation:
 
-> Phase 13 proved that the original multi-factor ambition is still the long-term project goal, but the current technical + macro ML branch is not good enough. The practical route now is to stop burning time on failed ML v1 and move the existing Phase 6B/6C non-ML overlay candidate toward visual inspection, signal mapping, and paper-trading readiness.
+> Phase 13 built the project’s first governed technical-plus-macro ML pipeline, repaired its data issues, trained bounded baseline models, diagnosed failure, redesigned the target, and still rejected the branch when the evidence remained insufficient.
+
+The phase demonstrated that:
+
+* a functioning ML pipeline is not the same as a useful ML model;
+* validation improvements are insufficient if adverse-regime recall remains near zero;
+* target redesign can improve class balance without improving predictive quality;
+* failed models should not receive holdout access merely because significant engineering effort was invested;
+* architecture, contracts, and datasets remain valuable even when the model fails;
+* commercial project priorities should determine when a research branch is paused;
+* the fastest responsible paper route may be a validated non-ML system rather than a weaker ML system.
+
+The correct conclusion was:
+
+> The long-term multi-factor objective remained valid, but technical-plus-macro ML v1 was not good enough. The project therefore preserved the ML infrastructure and failure evidence while moving the validated non-ML ETF overlay towards visual inspection, operational replay, and paper-trading readiness.
 
 # Phase 14: Non-ML Visual Backtest and Signal-Mapping Route
 
-Phase 14 moved the project from research-checkpoint documentation into practical paper-trading preparation.
+Phase 14 translated the validated non-ML ETF candidate from research outputs into practical visual and operational artefacts.
 
-After Phase 13 killed the technical + macro ML v1 branch commercially, Phase 14 focused on the fastest responsible path:
+After Phase 13 commercially paused the technical-plus-macro ML v1 branch, the project selected the fastest responsible near-term route:
 
-> Take the best existing non-ML Phase 6B/6C `loose_relief` overlay candidate and generate practical visual backtest artefacts, signal previews, benchmark comparisons, and operational reports.
+> Use the existing Phase 6B/6C `loose_relief` execution-realistic overlay to build reproducible visual backtests, benchmark comparisons, signal previews, and operational reports.
 
-Phase 14 did **not** deploy paper trading, integrate with a broker/API, run live trading, use real money, train models, calculate feature importance, promote a candidate, or change the final candidate.
+The purpose was not to retest or promote the candidate. It was to answer a different set of questions:
 
-The sequence was:
+1. Can the intended candidate stream be identified unambiguously?
+2. Do the visual reports reconcile with the canonical Phase 6B/6C metrics?
+3. Can the candidate’s exposure, switches, and current state be represented operationally?
+4. Is the resulting output sufficiently trustworthy to define a paper-trading workflow?
 
-```text
-14A: Visual backtest / signal-mapping pre-registration
-14B: Visual backtest readiness audit
-14C: Initial visual backtest execution
-14D: Visual backtest result audit
-14E: Source identity and metric reconciliation audit
-14F: Candidate-source correction decision
-14I: Correct Phase 6B/6C daily stream export
-14J: Exported candidate stream audit
-14G: Corrected visual backtest re-run
-14H: Corrected visual backtest audit / reconciliation decision
+Phase 14 did **not**:
+
+* deploy paper trading;
+* integrate with a broker or API;
+* run live trading;
+* use real money;
+* train a model;
+* calculate feature importance;
+* promote a new candidate;
+* change the final ETF hierarchy.
+
+The implementation sequence followed the actual checkpoint history:
+
+```text id="x4dt8p"
+14A: visual-backtest and signal-mapping pre-registration
+14B: visual-backtest readiness audit
+14C: initial visual-backtest execution
+14D: initial result audit
+14E: candidate-source identity and metric-reconciliation audit
+14F: candidate-source correction decision
+14I: correct Phase 6B/6C daily-stream export
+14J: exported-stream audit
+14G: corrected visual-backtest re-run
+14H: corrected visual-backtest audit and reconciliation decision
 ```
 
-Final Phase 14 conclusion:
+Phases 14I and 14J were introduced before the corrected 14G/14H run was finalised because an explicit candidate-stream export and audit were required to repair the source-resolution failure.
 
-> The first visual backtest used the wrong source. After correction, the Phase 6B/6C `loose_relief` candidate was exported properly, visualised correctly, and reconciled financially. Paper-workflow pre-registration became allowed, but paper trading remained blocked.
+The central Phase 14 finding was:
+
+> The first visual backtest was mechanically valid but used the wrong strategy source. The project rejected those results, exported the intended Phase 6B/6C candidate explicitly, reran the visual reports, and reconciled the corrected financial stream with the canonical checkpoint.
+
+By the end of Phase 14:
+
+* candidate-source identity had passed;
+* financial metrics had reconciled;
+* corrected visual artefacts existed;
+* a preview current state could be displayed;
+* operational switch reconstruction was still unresolved;
+* paper-workflow pre-registration was allowed;
+* paper deployment, broker integration, live trading, and real money remained blocked.
 
 ---
 
-## Phase 14A: Non-ML Paper-Trading Candidate Visual Backtest / Signal-Mapping Pre-Registration
+## Phase 14A: Non-ML Candidate Visual-Backtest and Signal-Mapping Pre-Registration
 
 Phase 14A pre-registered the non-ML visual backtest and signal-mapping preview path after Phase 13AW selected the Phase 6B/6C `loose_relief` overlay as the fastest responsible paper-readiness route.
 
@@ -5610,7 +6509,7 @@ Phase 14D verdict:
 
 ---
 
-## Phase 14E: Visual Backtest Interpretation / Candidate Source Identity Audit
+## Phase 14E: Visual-Backtest Interpretation and Candidate-Source Identity Audit
 
 Phase 14E checked whether the Phase 14C visual backtest used the intended Phase 6B/6C `loose_relief` execution-realistic overlay.
 
@@ -5703,7 +6602,7 @@ Phase 14E verdict:
 
 ---
 
-## Phase 14F: Candidate Source Correction / Re-Run Decision
+## Phase 14F: Candidate-Source Correction and Re-Run Decision
 
 Phase 14F converted the Phase 14E source-identity failure into a correction requirement.
 
@@ -5946,7 +6845,7 @@ Phase 14G verdict:
 
 ---
 
-## Phase 14H: Corrected Visual Backtest Audit / Reconciliation Decision
+## Phase 14H: Corrected Visual-Backtest Audit and Reconciliation Decision
 
 Phase 14H audited the corrected visual backtest outputs and made the reconciliation decision.
 
@@ -5993,24 +6892,82 @@ Phase 14H verdict:
 
 Note: Phase labels follow the actual implementation/checkpoint history. Phase 14I/14J were added to export and audit the corrected candidate stream before the corrected Phase 14G/14H visual re-run was finalised.
 
+## Phase 14 Final Verdict
+
+| Area                               | Result           | Interpretation                                                                                   |
+| ---------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------ |
+| Initial visual-report generation   | Completed        | The reporting pipeline could generate the required artefacts                                     |
+| Initial candidate-source identity  | Failed           | The resolver selected a relative-momentum allocator rather than the intended final overlay       |
+| Initial metric reconciliation      | Failed           | The observed 8.94% CAGR and -35.74% drawdown did not match the canonical candidate               |
+| Wrong-source outputs               | Rejected         | They were retained as audit history but excluded from paper-workflow use                         |
+| Explicit Phase 6B/6C stream export | Passed           | The intended `loose_relief` daily financial stream was made discoverable                         |
+| Corrected financial reconciliation | Passed           | End value, CAGR, Calmar, and max drawdown matched the canonical checkpoint within tolerance      |
+| Corrected visual reports           | Passed           | The intended candidate was visualised against SPY Buy & Hold                                     |
+| Operational switch reconstruction  | Still unresolved | The corrected stream produced zero reconstructed switches despite 36 expected canonical switches |
+| Paper-workflow pre-registration    | Allowed          | The next bounded phase could define the workflow                                                 |
+| Paper-trading deployment           | Blocked          | Source reconciliation alone was insufficient for operational execution                           |
+
+Final Phase 14 interpretation:
+
+> Phase 14 successfully corrected and visualised the intended ETF candidate, but it also demonstrated that financial reconciliation and operational replay are separate requirements.
+
+The financial stream showed the correct historical return path:
+
+```text id="n70xme"
+End value: approximately $71,779
+CAGR: approximately 10.35%–10.37%
+Calmar: approximately 0.429
+Max drawdown: approximately -24.12%
+```
+
+However, the exported daily stream did not yet expose the final executable switch semantics required for a trustworthy paper workflow.
+
+The correct conclusion was:
+
+> The project had a financially reconciled candidate and reliable visual reporting, but it still needed an independently reconstructed operational switch history and a genuinely fresh post-endpoint signal.
+
 ---
 
 # Phase 15: Paper-Trading Workflow and Operational Readiness
 
-Phase 15 started the paper-trading workflow path after Phase 14H allowed workflow pre-registration.
+Phase 15 began the transition from historical strategy reporting into operational paper-trading infrastructure.
 
-This phase is where the project stopped being mostly “research reporting” and started confronting operational execution requirements.
+The phase did not assume that a validated backtest was automatically executable. Instead, it required the project to reconstruct the exact operational decisions that would have been made and to generate fresh signals without contaminating the pinned historical checkpoint.
 
-The key operational questions became:
+The principal questions were:
 
-1. Can the final candidate produce an explainable operational switch history?
-2. Can the system generate a fresh current signal beyond the pinned 2026-05-01 endpoint?
-3. Can post-endpoint candidate rows be generated using the actual Phase 6B/6C rule logic?
-4. Can paper-trading workflow be started without faking readiness?
+1. Can the final candidate produce an explainable and reproducible switch history?
+2. Can the canonical 36 overlay switches be reconstructed from the correct executable decision field?
+3. Can fresh market data be processed beyond the pinned `2026-05-01` endpoint without mutating canonical reports?
+4. Can the actual Phase 6B/6C rule logic generate post-endpoint candidate rows?
+5. Can a current signal be audited for freshness, provenance, and benchmark consistency?
+6. Can paper workflow proceed without guessed weights, manual signal invention, or stale historical state?
 
-Final Phase 15 status after the Phase 15T blocker and later Phase 15WXYZ repair:
+The Phase 15 sequence deliberately preserved failed operational attempts because each failure identified a different semantic problem:
 
-> The historical 36-switch operational log is solved. Phase 15T correctly found that the historical final-candidate frame could not itself generate post-endpoint rows. Later, Phase 15WXYZ repaired this by rerunning the existing Phase 6B/6C rule engine on an extended fresh-data clone while preserving the canonical 2026-05-01 research endpoint. A valid 8-row post-endpoint candidate stream was generated and handed off, but downstream Phase 15Q/15R/15O/15P/15M/15N consumption and audit still require inspection. Paper dry-run and paper trading remain blocked.
+```text id="rdfgss"
+15A–15B: pre-register the workflow and confirm readiness is blocked
+15C–15D: attempt initial switch and signal reconstruction
+15E–15F: attribute the missing switch source and define fresh-data controls
+15G–15H: reject an incorrect 92-switch reconstruction
+15I–15J: reconstruct the correct 36-switch operational history
+Later Phase 15 work: generate, hand off, and audit a post-endpoint rule-engine stream
+```
+
+The Phase 15 blocking states documented below are **historical checkpoint decisions**. They describe what the system knew at each subphase and should not be interpreted as the project’s current overall status.
+
+The major Phase 15 achievements were eventually:
+
+* reconstruction of the canonical 36-switch operational history;
+* preservation of the fixed `2026-05-01` research endpoint;
+* separation of fresh data from canonical historical reports;
+* rerunning the existing Phase 6B/6C rule logic on a fresh-data extension;
+* generation of a valid post-endpoint candidate stream;
+* explicit rejection of guessed, manually filled, or carry-forward-only target weights.
+
+At the end of the Phase 15 work described by this historical branch, downstream fresh-signal consumption and audit still remained necessary before paper dry-run progression.
+
+Later project phases subsequently extended this operational foundation into manual paper-session tracking. Those later developments do not change the validity of the blockers recorded at their original Phase 15 checkpoints.
 
 ---
 
@@ -6153,7 +7110,7 @@ Correct interpretation:
 
 ---
 
-## Phase 15C–15D: First Operational Switch / Signal Reconstruction Attempt
+## Phase 15C–15D: First Operational Switch and Signal-Reconstruction Attempt
 
 Phases 15C and 15D attempted to resolve the operational blockers from Phase 15B.
 
@@ -6218,7 +7175,7 @@ Phase 15C/15D verdict:
 
 ---
 
-## Phase 15E–15F: Switch Source Attribution and Fresh-Data Extension Spec
+## Phase 15E–15F: Switch-Source Attribution and Fresh-Data Extension Specification
 
 ### Phase 15E: Operational Switch Source Attribution
 
@@ -6364,15 +7321,39 @@ Phase 15G/15H verdict:
 
 ## Phase 15I–15J: Correct 36-Switch Operational Reconstruction
 
-Phases 15I and 15J fixed the switch-log problem.
+Phases 15I and 15J corrected the semantic error in the earlier switch-log attempts.
 
-The key discovery was that the final executable allocation decision is represented by:
+The earlier reconstruction had treated noisy position or turnover changes as final overlay decisions, producing 92 events instead of the expected 36.
 
-```text
+The key correction was identifying the final executable allocation field:
+
+```text id="m6lgbm"
 target_offensive_weight
 ```
 
-not by `position`, `cash_position`, or raw turnover.
+This field represented the candidate’s final offensive allocation decision after the applicable confirmation, guard, and relief logic had been resolved.
+
+It was therefore the correct source for reconstructing transitions between:
+
+```text id="m12jbi"
+offensive SPY mode
+defensive allocator mode
+```
+
+The corrected reconstruction was required to:
+
+* produce the expected 36 canonical switches;
+* preserve exact decision-date ordering;
+* retain previous and new mode;
+* retain previous and new exposure;
+* identify whether a switch occurred;
+* preserve the underlying decision lineage;
+* avoid interpreting ordinary turnover as an overlay regime switch;
+* remain separate from the candidate’s financial-return reconciliation.
+
+This distinction was essential:
+
+> Financial returns establish what the candidate earned; the operational switch log establishes what the paper workflow would have been instructed to do.
 
 ---
 
@@ -6932,61 +7913,87 @@ Important limitation:
 
 ## Phase 15 Current Bottom Line
 
-Phase 15 solved several major operational blockers:
+Phase 15 resolved the two main operational problems inherited from Phase 14:
 
-| Area                                                 | Status                                                             |
-| ---------------------------------------------------- | ------------------------------------------------------------------ |
-| Correct Phase 6B/6C financial candidate stream       | Solved                                                             |
-| Correct visual backtest source                       | Solved                                                             |
-| Correct visual reports                               | Solved                                                             |
-| Canonical 36-switch historical operational log       | Solved                                                             |
-| Correct switch-definition column                     | Solved: `target_offensive_weight`                                  |
-| Pinned endpoint signal consistency                   | Solved                                                             |
-| Fresh current-signal schema                          | Solved                                                             |
-| Paper workflow contract                              | Pre-registered                                                     |
-| Phase 15T historical final-frame replay blocker      | Diagnosed                                                          |
-| Phase 15WXYZ fresh rule-engine replay                | Solved                                                             |
-| Fresh post-endpoint candidate rows                   | Generated: 8 rows                                                  |
-| Fresh handoff file                                   | Written: `data/fresh/phase15q_rule_generated_candidate_stream.csv` |
-| Downstream Phase 15Q/15R/15O/15P/15M/15N consumption | Pending inspection                                                 |
-| Valid audited fresh current signal                   | Still blocked pending downstream audit                             |
-| Paper dry-run                                        | Blocked                                                            |
-| Paper trading                                        | Blocked                                                            |
-| Broker/API integration                               | Blocked                                                            |
-| Real-money deployment                                | Blocked                                                            |
+1. reconstructing the final candidate’s executable switch history;
+2. generating a genuine post-endpoint candidate stream without mutating the pinned historical checkpoint.
 
-The repeated historical failure was:
+The phase established that:
 
-```text
-post_endpoint_rows = 0
+| Area                                 | Phase 15 Result                          |
+| ------------------------------------ | ---------------------------------------- |
+| Correct Phase 6B/6C financial stream | Solved                                   |
+| Correct visual-backtest source       | Solved                                   |
+| Canonical historical switch history  | Reconstructed: 36 switches               |
+| Correct executable switch field      | `target_offensive_weight`                |
+| Pinned endpoint consistency          | Passed                                   |
+| Fresh-signal schema                  | Completed                                |
+| Historical-frame replay limitation   | Diagnosed                                |
+| Fresh rule-engine replay             | Implemented                              |
+| Post-endpoint candidate rows         | Generated                                |
+| Canonical endpoint mutation          | Prevented                                |
+| Fresh handoff file                   | Written                                  |
+| Immediate paper deployment           | Still blocked at the Phase 15 checkpoint |
+
+The key architectural distinction was:
+
+> `_find_final_candidate_frame` exposes the pinned historical candidate, whereas a genuine fresh extension requires rerunning the actual Phase 6B/6C strategy engine on newly available data.
+
+Phase 15WXYZ therefore used a bounded fresh-extension process:
+
+```text id="5wrsxj"
+1. Preserve the canonical configuration and 2026-05-01 endpoint.
+2. Create a separate fresh-data configuration clone.
+3. Rerun the existing strategy engine on extended data.
+4. Export only rows after the canonical endpoint.
+5. Store the result separately from canonical reports.
+6. Audit source, benchmark, weight, and out-of-sample metadata.
 ```
 
-That blocker was correctly diagnosed through Phase 15T.
+This produced a valid eight-row candidate extension covering:
 
-The later Phase 15WXYZ repair changed the state:
-
-```text
-post_endpoint_rows = 8
-rule_generated_stream_valid = True
-handoff_file_written = True
+```text id="u0f3u9"
+2026-05-04 to 2026-05-13
 ```
 
-Current blocker:
+and wrote the fresh handoff file:
 
-> The project now has a valid rule-generated post-endpoint candidate stream, but the downstream Phase 15Q/15R/15O/15P/15M/15N chain must still consume and audit that stream before a fresh current signal or paper dry-run can be considered.
+```text id="jzatn8"
+data/fresh/phase15q_rule_generated_candidate_stream.csv
+```
 
-Until that downstream chain passes:
+A signal-price semantic error in the first export was also caught and corrected. The original `SPY_close` field contained strategy-equity-like values; the corrected extension used `signal_price` as the SPY or proxy-price field.
 
-* no valid audited fresh signal;
-* no paper dry-run;
-* no paper trading;
-* no broker/API integration;
-* no live trading;
-* no real-money deployment.
+### Historical Phase 15 Checkpoint
+
+At the immediate end of Phase 15, downstream consumption and current-signal auditing still remained incomplete. Therefore:
+
+* paper dry-run remained blocked;
+* broker integration remained blocked;
+* live trading remained blocked;
+* real-money deployment remained blocked.
+
+Those blocking decisions were correct for the information available at that checkpoint.
+
+### Later Progression
+
+Later project phases built on the Phase 15 operational foundation and advanced beyond this checkpoint.
+
+Subsequent work eventually added:
+
+* downstream signal consumption and audit;
+* manual paper-session preparation;
+* session rollover and archival;
+* paper holdings and cash accounting;
+* portfolio valuation and performance reporting;
+* the first valid entered ETF/multi-asset manual paper session;
+* a separate individual-equity research and shadow-portfolio branch.
+
+Phase 15 should therefore be read as the phase that solved **fresh rule replay and historical operational reconstruction**, not as the project’s current overall status.
 
 Final Phase 15 interpretation:
 
-> The project is no longer blocked by historical switch reconstruction or absence of a post-endpoint candidate stream. It is now blocked by downstream fresh-signal consumption, validation, and audit.
+> Phase 15 converted the validated ETF candidate from a historical return stream into an operationally reconstructable strategy with a separately generated post-endpoint extension. It established the infrastructure required for later manual paper tracking, but did not itself authorise broker execution, live trading, or real-money use.
 
 ---
 
@@ -7143,9 +8150,28 @@ The key should live in `.env` or the local shell environment, not in committed c
 
 # Known Limitations
 
-This project is **not production-ready**.
+This project remains **research-grade and non-production**.
 
-It is a research-grade systematic strategy lab with paper-trading preparation work in progress. It is not financial advice, not a live-trading system, and not ready for real-money deployment.
+It now includes functioning manual paper and prospective shadow infrastructure, but that does not make it a production trading platform.
+
+The distinction is important:
+
+```text id="9d673o"
+Historical backtest
+≠ prospective shadow result
+≠ manual paper execution
+≠ automated broker paper trading
+≠ live trading
+≠ real-money readiness
+```
+
+The ETF/multi-asset branch has recorded a valid entered manual paper session.
+
+The individual-equity branch has generated a genuine post-endpoint ranking, target portfolio, and proposed simulated orders. Its first entered stock-shadow session remains pending valid next-open execution prices.
+
+No broker API, automated execution, live-money workflow, or production approval exists.
+
+---
 
 ## Data and Source Limitations
 
@@ -7254,17 +8280,25 @@ Tracking-error regret remains a major liveability risk.
 
 ---
 
-## Asset Expansion Limitations
+## Asset Expansion and Scope Limitations
 
-Controlled asset expansion did not produce a clean validated successor.
+The original controlled ETF expansion did not produce a clean validated successor:
 
-* USO/oil was promising but not validated.
-* ETH was rejected for now.
-* Oil + ETH did not improve the overlay enough to validate inclusion.
+* USO/oil was promising but not validated;
+* ETH was rejected;
+* oil plus ETH did not improve the overlay sufficiently;
 * BTC and ETH remain quarantined research branches.
-* Multi-asset expansion remains blocked until the SPY paper-trading candidate path is inspected properly.
 
-The project should not expand sideways into crypto, gold, oil, stocks, or broader multi-asset systems until the current SPY candidate is operationally understood.
+The project later opened a separate individual-equity research branch. This did not promote individual stocks into the validated ETF strategy.
+
+The two branches remain distinct:
+
+| Branch                     | Scope                                                       |
+| -------------------------- | ----------------------------------------------------------- |
+| ETF and multi-asset branch | Validated SPY regime-switch and manual paper workflow       |
+| Individual-equity branch   | Noncanonical research pilot and prospective shadow workflow |
+
+The individual-equity branch must not be interpreted as a validated expansion of the Phase 6B/6C ETF candidate.
 
 ---
 
@@ -7333,66 +8367,154 @@ No score-to-signal conversion exists.
 
 ---
 
-## ML / Multi-Factor Model Limitations
+## ML and Multi-Factor Model Limitations
 
-The Phase 13 technical + macro ML v1 branch did not produce a model strong enough to justify holdout evaluation.
+The Phase 13 technical-plus-macro ML v1 branch did not produce a model strong enough to justify holdout evaluation or trading use.
 
-Important ML boundaries:
+Its limitations included:
 
-* the current ML evidence is validation-only classification evidence;
-* it is not trading evidence;
-* no holdout predictions have been generated;
-* no model has been selected;
-* no feature importance has been calculated;
-* no signal or allocation rule exists;
-* no strategy backtest has been run;
-* no paper-trading output exists;
-* no candidate has been promoted;
-* no final-candidate change occurred.
+* substantial train-validation gaps;
+* near-zero or zero fragile-class recall;
+* insufficient predictive value from technical and macro features;
+* no justified holdout prediction;
+* no promoted model;
+* no ML-derived trading signal;
+* no ML strategy backtest;
+* no ML paper deployment.
 
-The technical + macro ML branch was paused/killed commercially because fragile-regime recall remained effectively unresolved.
+The branch was commercially paused after both registered model repair and target redesign failed.
 
-The project should not reopen the same technical + macro ML v1 branch through minor tuning. Future ML work is only justified if genuinely new feature families are added, such as:
+The later individual-equity branch uses an interpretable Ridge cross-sectional ranker, but it is a separate research architecture.
 
-* fundamental data;
-* sentiment data;
-* market-stress data;
-* better target/feature families that are separately pre-registered.
+It does not reverse the Phase 13 conclusion.
 
-Fundamental and sentiment families remain blocked until dedicated source, leakage, and noise audits pass.
+Future multi-factor work remains dependent on acquiring and auditing genuinely new point-in-time information, including:
+
+* historical index membership;
+* filing-time fundamental data;
+* amendments and restatements;
+* historical news and sentiment;
+* transcripts and analyst revisions;
+* additional market-stress features.
+
+Fundamental, news, sentiment, transcript, and analyst contracts have been designed for the individual-equity architecture, but the required canonical historical datasets have not yet been acquired and integrated.
 
 ---
 
-## Paper-Trading Readiness Limitations
+## Individual-Equity Research Limitations
 
-The project has started operational paper-trading preparation, but it is still not paper-trading ready.
+The individual-equity branch is deliberately labelled as a controlled pilot.
 
-Completed operational progress includes:
+Its current universe contains 16 surviving stocks:
 
-* corrected Phase 6B/6C source identity;
-* corrected visual backtest reports;
-* canonical 36-switch operational reconstruction;
-* correct executable switch-definition column: `target_offensive_weight`;
-* endpoint signal consistency audit;
-* paper-trading workflow contract pre-registration;
-* fresh-signal schema preparation;
-* Phase 15WXYZ fresh-extension pipeline;
-* generation of 8 valid post-endpoint candidate rows through `2026-05-13`;
-* fresh handoff file written to `data/fresh/phase15q_rule_generated_candidate_stream.csv`.
+```text id="209xel"
+AAPL, MSFT, NVDA, AMZN, GOOGL, META, JPM, BRK-B,
+XOM, JNJ, UNH, PG, COST, CAT, NEE, TSLA
+```
 
-Remaining operational concerns include:
+The pilot has several material limitations:
 
-* downstream Phase 15Q/15R/15O/15P/15M/15N consumption and audit;
-* confirming that downstream phases consume the fresh handoff file rather than falling back to `in_memory_final_candidate_frame`;
-* benchmark update checks;
-* signal freshness checks;
-* current-signal validity checks;
-* paper-dry-run eligibility;
-* monitoring/reporting readiness.
+* the universe is hand-selected;
+* it is survivorship-biased;
+* it is not a historical reconstruction of the S&P 500 or Nasdaq-100;
+* membership is noncanonical;
+* market-data provenance remains research-grade;
+* the current feature set is primarily technical, liquidity, and stress based;
+* weekly 20-day forward labels overlap;
+* the research period is relatively short;
+* historical portfolio results may be inflated by universe selection;
+* only a small number of securities are ranked on each date;
+* no broad-index generalisation claim is permitted.
 
-The canonical `2026-05-01` endpoint remains valid for historical research, but it cannot be used as a current executable paper-trading signal.
+The Phase 23G Ridge ranker produced encouraging out-of-sample rank-correlation evidence:
 
-Paper dry-run, broker/API integration, live trading, real-money deployment, paper-trading-ready claims, candidate promotion, final-candidate changes, new ML, optimisation, and multi-asset expansion remain blocked until the relevant readiness gates pass.
+```text id="xaw732"
+Mean Spearman IC: 0.1225
+Median Spearman IC: 0.1485
+Positive-IC dates: 62.9%
+```
+
+Phase 23H robustness supported continued research, but the top-minus-bottom spread interval remained weaker and crossed slightly below zero.
+
+The Phase 23I historical portfolio results must therefore retain the label:
+
+```text id="ue4zkz"
+NONCANONICAL PILOT DIAGNOSTIC — NOT INVESTABLE PERFORMANCE
+```
+
+The historical results do not establish:
+
+* canonical stock-selection performance;
+* index-wide generalisation;
+* production readiness;
+* live-trading suitability;
+* future profitability.
+
+---
+
+## Paper and Shadow-Trading Limitations
+
+The ETF/multi-asset branch has progressed into manual paper tracking and has recorded a valid entered session.
+
+However, it remains:
+
+* manually operated;
+* dependent on explicit session review;
+* separate from broker execution;
+* research-only;
+* subject to stale-data and operational-error risk.
+
+The individual-equity branch has reached a different point.
+
+Completed individual-equity shadow progress includes:
+
+* frozen Phase 23G model specification;
+* deterministic model hash;
+* cost-aware portfolio construction;
+* separate post-endpoint data storage;
+* historical overlap validation;
+* post-endpoint data for SPY and all 16 pilot stocks;
+* genuine prospective feature calculation;
+* prospective stock ranking;
+* target-portfolio construction;
+* proposed shadow orders;
+* explicit next-open execution controls.
+
+At the latest recorded checkpoint, the prospective signal date was:
+
+```text id="b4ctq0"
+2026-06-12
+```
+
+The frozen model ranked the following stocks in its top five:
+
+```text id="i3jt51"
+TSLA
+META
+CAT
+AMZN
+NVDA
+```
+
+The corresponding research target assigned 20% to each stock before integer-share rounding and execution-price validation.
+
+The proposed orders remained blocked because valid next-open execution prices were not yet available:
+
+```text id="yat9qd"
+execution_open_price_pending
+```
+
+This was the correct result.
+
+The fill helper correctly refused to fabricate execution prices or mark blocked orders as entered.
+
+Until valid next-open prices exist:
+
+* no individual-equity simulated entry may be recorded;
+* no entered shadow position exists;
+* no prospective stock-performance claim may be made.
+
+Automated broker paper trading, live trading, and real-money deployment remain blocked across both branches.
 
 ---
 
@@ -7448,24 +8570,45 @@ The project has caught and fixed multiple implementation and research-process is
 * Phase 15T revealed that `_find_final_candidate_frame` exposed the pinned historical candidate frame but did not replay Phase 6B/6C logic beyond the endpoint;
 * Phase 15WXYZ fixed the fresh-extension architecture by rerunning the existing project pipeline on an extended fresh-data clone while preserving the canonical `2026-05-01` baseline;
 * Phase 15WXYZ initial export used strategy equity-like values as `SPY_close`; this was corrected to use `signal_price` as the SPY/proxy price field.
+* Phase 21H entered-session processing exposed a dtype compatibility issue during manual paper-session ingestion; the fill path was patched and revalidated.
+* Phase 22C tested a dynamic-opportunity return enhancement, but the change failed to improve the strategy sufficiently and was rejected rather than promoted.
+* Phase 23F input bootstrapping exposed ticker-alias handling requirements, including consistent treatment of `BRK-B`; the alias path was corrected and tested.
+* Phase 23G prediction accounting distinguished 10,560 model/baseline prediction rows from 2,112 unique stock-date observations, preventing an inflated sample-size claim.
+* Phase 23H identified overlapping weekly 20-day labels and used moving-block bootstrap and within-date permutation tests instead of treating observations as independent.
+* Phase 23I froze the model specification with a deterministic hash so later prospective runs cannot silently change the trained ranker.
+* Phase 23I separated historical portfolio diagnostics from prospective shadow reports, preventing noncanonical historical performance from being presented as live evidence.
+* The initial Phase 23I shadow workflow could detect newer data but did not itself calculate a genuine new frozen-model ranking; Phase 23J added the required post-endpoint feature calculation and prospective scoring path.
+* Phase 23J introduced historical-overlap checks and SHA-256 validation so refreshed data cannot silently modify the canonical pilot files.
+* Phase 23J correctly blocked simulated order entry when the next eligible opening prices were unavailable.
+* The Phase 23I fill helper correctly rejected attempts to mark blocked orders as entered, preventing fabricated next-open execution.
 
 ---
 
 # Project Structure
 
-```text
+```text id="7q8779"
 Market-strats-lab/
 ├── configs/
 │   └── spy_sma10.yaml
 ├── data/
+│   ├── raw/
 │   ├── processed/
-│   └── raw/
+│   ├── fresh/
+│   ├── individual_equity_pilot/
+│   └── individual_equity_post_endpoint/
 ├── experiments/
+├── notebooks/
 ├── reports/
+│   ├── individual_equity_decision_system/
+│   └── individual_equity_shadow/
+├── scripts/
+│   └── fill_phase23i_shadow_session.py
 ├── src/
 │   └── market_strats/
 │       ├── __init__.py
 │       ├── analysis/
+│       │   ├── frozen_cost_aware_portfolio.py
+│       │   └── post_endpoint_individual_equity_extension.py
 │       ├── data/
 │       ├── strategies/
 │       └── run_backtest.py
@@ -7475,15 +8618,31 @@ Market-strats-lab/
 └── .gitignore
 ```
 
+Generated reports, market-data extensions, ledgers, caches, filled session files, and paper/shadow account state are local research artefacts and should not be committed unless explicitly intended.
+
+In particular, normal source commits should exclude:
+
+```text id="7ldpgf"
+reports/
+data/individual_equity_pilot/
+data/individual_equity_post_endpoint/
+filled session files
+manual ledgers
+positions and cash state
+cache directories
+```
+
 ---
 
 # Installation
 
-```powershell
+```powershell id="ud2mt5"
 git clone <your-repo-url>
 cd Market-strats-lab
+
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+
 pip install -e ".[dev]"
 ```
 
@@ -7491,29 +8650,88 @@ pip install -e ".[dev]"
 
 # Running the Project
 
-Run the full strategy suite:
+## Full Research Suite
 
-```powershell
-.\.venv\Scripts\python -m market_strats.run_backtest --config configs/spy_sma10.yaml
+```powershell id="36g5j7"
+$env:MPLBACKEND="Agg"
+
+.\.venv\Scripts\python -m market_strats.run_backtest `
+  --config configs/spy_sma10.yaml
 ```
 
-Run tests and linting:
+## Phase 23J Post-Endpoint Individual-Equity Extension
 
-```powershell
-.\.venv\Scripts\python -m pytest; .\.venv\Scripts\python -m ruff check .
+```powershell id="r2m9c3"
+$env:MPLBACKEND="Agg"
+
+.\.venv\Scripts\python -m market_strats.run_backtest `
+  --config configs/spy_sma10.yaml `
+  --phase23j-only
 ```
 
-Save full terminal output:
+## Phase 23I Prospective Stock-Shadow Runner
 
-```powershell
-.\.venv\Scripts\python -m market_strats.run_backtest --config configs/spy_sma10.yaml *> reports\latest_terminal_output.txt
+```powershell id="3emdly"
+$env:MPLBACKEND="Agg"
+
+.\.venv\Scripts\python -m market_strats.run_backtest `
+  --config configs/spy_sma10.yaml `
+  --phase23i-shadow-only
 ```
 
-Load local `.env` variables in PowerShell when running Stooq-authenticated data checks:
+## Create Explicit Simulated Fills
 
-```powershell
-Get-Content .env | ForEach-Object { if ($_ -match "^\s*([^#][^=]+)=(.*)$") { [Environment]::SetEnvironmentVariable($matches[1].Trim(), $matches[2].Trim(), "Process") } }
+This command is permitted only after every proposed order has:
+
+```text id="5czv6o"
+execution_price_available = True
+paper_order_allowed = True
+order_blocking_reason = blank
 ```
+
+Run:
+
+```powershell id="b72vlb"
+.\.venv\Scripts\python `
+  scripts\fill_phase23i_shadow_session.py `
+  --confirm-simulated-fill
+```
+
+The helper will reject the operation if the proposed orders remain blocked.
+
+## Tests and Linting
+
+```powershell id="zwwzim"
+$env:MPLBACKEND="Agg"
+
+.\.venv\Scripts\python -m ruff check .
+.\.venv\Scripts\python -m pytest
+```
+
+## Save Full Terminal Output
+
+```powershell id="5wfwav"
+.\.venv\Scripts\python -m market_strats.run_backtest `
+  --config configs/spy_sma10.yaml `
+  *> reports\latest_terminal_output.txt
+```
+
+## Load Local Environment Variables
+
+```powershell id="uuyfut"
+Get-Content .env |
+  ForEach-Object {
+    if ($_ -match "^\s*([^#][^=]+)=(.*)$") {
+      [Environment]::SetEnvironmentVariable(
+        $matches[1].Trim(),
+        $matches[2].Trim(),
+        "Process"
+      )
+    }
+  }
+```
+
+API keys and secrets must remain outside committed configuration.
 
 ---
 
@@ -7664,6 +8882,59 @@ data/fresh/phase15q_rule_generated_candidate_stream.csv
 
 The Phase 15WXYZ reports are separate from the canonical pinned research reports. Their purpose is to generate a post-endpoint / out-of-sample candidate stream without mutating the canonical `2026-05-01` historical checkpoint.
 
+## Phase 23J Post-Endpoint Extension
+
+```text id="sqol94"
+reports/individual_equity_decision_system/
+└── phase23j_post_endpoint_individual_equity_extension/
+    ├── phase23j_summary.csv
+    ├── phase23j_download_status.csv
+    ├── phase23j_extension_validation.csv
+    ├── phase23j_current_features.csv
+    ├── phase23j_current_ranking.csv
+    ├── phase23j_current_target_portfolio.csv
+    └── phase23j_historical_integrity.csv
+```
+
+These reports document:
+
+* post-endpoint download status;
+* overlap validation;
+* historical-file integrity;
+* frozen-model verification;
+* prospective feature calculation;
+* current stock ranking;
+* target weights;
+* next-open execution readiness.
+
+## Phase 23I Prospective Shadow Reports
+
+```text id="hx4dcs"
+reports/individual_equity_shadow/
+└── phase23i_prospective_shadow/
+    ├── phase23i_shadow_summary.csv
+    ├── current_proposed_order_plan.csv
+    ├── manual_session_template.csv
+    ├── filled_session_validation.csv
+    ├── positions.csv
+    ├── cash_ledger.csv
+    ├── valuation_history.csv
+    └── archive/
+```
+
+The shadow namespace is deliberately separate from:
+
+* canonical historical reports;
+* ETF manual-paper ledgers;
+* Phase 21 session files;
+* individual-equity historical portfolio diagnostics.
+
+## Historical Phase15 Reports
+
+The existing detailed Phase15 report inventory remains useful as a historical operational audit trail.
+
+Reports labelled as expected, blocked, superseded, or failed should retain those labels. Their existence does not imply that the corresponding subphase passed.
+
 ---
 
 ## Other Important Reports
@@ -7690,216 +8961,275 @@ reports/candidate_portfolio_spy_dominant_signal_portfolio_metrics.csv
 
 ---
 
+
 # Current Configuration Overview
 
-The main configuration is maintained in:
+The main configuration remains:
 
-```text
+```text id="moao2e"
 configs/spy_sma10.yaml
 ```
 
-The current project configuration supports a broad historical research suite across:
+The configuration now supports two connected research tracks.
 
-* SPY, QQQ, IWM, EFA, EEM, GLD, SLV, DBC, USO, TLT, AGG, VNQ, BTC-USD, and ETH-USD;
-* buy-and-hold benchmarks;
-* monthly and daily SMA variants;
-* 12-month absolute momentum;
-* drawdown-tranche strategies;
-* trend-filtered drawdown strategies;
-* dual-momentum pairs;
-* core-satellite portfolios;
-* rebalance audits;
-* cross-asset diagnostics;
-* EFA robustness checks;
-* candidate portfolio diagnostics;
-* relative-momentum tactical allocators;
-* trend-confirmed and constrained relative-momentum allocators;
-* relative-momentum holdout validation and regime diagnostics;
-* SPY regime-switch overlays;
-* regime-switch whipsaw audits;
-* regime-switch holdout validation;
-* slippage, cash-yield, and raw-close sensitivity tests;
-* controlled USO/oil asset-expansion diagnostics;
-* ETH quarantine diagnostics;
-* endpoint-pinned research-period validation;
-* dynamic stress-slippage execution realism diagnostics;
-* switch-effectiveness and switch-failure attribution audits;
-* `deep_drawdown_guard` validation;
-* breadth-confirmation and breadth-materiality tests;
-* SPY stress-confirmation diagnostics;
-* offensive-relief validation;
-* final candidate comparison and promotion decisions;
-* final checkpoint integrity audits;
-* lookahead / signal-execution audits;
-* secondary data-source cross-checks and difference attribution;
-* bootstrap robustness and bootstrap stability audits;
-* rolling-window survivability audits;
-* simplified tax-drag diagnostics;
-* bid-ask / market-impact stress diagnostics;
-* walk-forward / expanding-window validation audits;
-* behavioural / tracking-error regret audits;
-* research-degrees-of-freedom audits;
-* research-only / non-production boundary audits;
-* technical-indicator diagnostics and pre-registered technical-rule tests;
-* macro/rates/inflation source, alignment, diagnostic, and rule-test phases;
-* regime-scoring architecture, diagnostic score calculation, and closeout phases;
-* technical + macro feature engineering and ML dataset assembly;
-* registered ML model training, repair, failure attribution, and commercial kill/pivot decisions;
-* non-ML visual backtest and corrected candidate-source audits;
-* operational switch reconstruction;
-* paper-trading workflow pre-registration;
-* fresh current-signal schema and post-endpoint data-extension preparation.
+## ETF and Multi-Asset Track
 
-The canonical research endpoint remains pinned at:
+The historical suite includes:
 
-```text
+* SPY and multi-asset benchmarks;
+* absolute and relative momentum;
+* trend confirmation;
+* constrained tactical allocation;
+* regime-switch overlays;
+* confirmation, guard, and relief logic;
+* execution-cost and tax diagnostics;
+* bootstrap and rolling-window validation;
+* technical and macro extensions;
+* regime-scoring diagnostics;
+* visual reporting;
+* operational replay;
+* fresh-signal extensions;
+* manual paper-session infrastructure.
+
+## Individual-Equity Track
+
+The current individual-equity architecture includes:
+
+* universe and membership contracts;
+* fundamental-source audit contracts;
+* news and sentiment-source contracts;
+* point-in-time feature-panel contracts;
+* pilot feature calculation;
+* target construction;
+* purged and embargoed walk-forward ranking;
+* Ridge-model robustness;
+* frozen model specification and hash;
+* cost-aware historical portfolio diagnostics;
+* separate prospective shadow reports;
+* post-endpoint price acquisition;
+* frozen-model prospective ranking;
+* target-portfolio and order generation;
+* next-open execution controls;
+* manual shadow fills, holdings, cash, and valuation infrastructure.
+
+The canonical historical endpoint remains:
+
+```text id="jgd7y9"
 2026-05-01
 ```
 
-This endpoint protects historical checkpoint consistency. Fresh/current signal generation must be handled as a separate post-endpoint / out-of-sample extension and must not mutate canonical Phase 6B/6C metrics, README numbers, or historical reports.
+Later data must remain separately labelled and stored as post-endpoint research.
 
 ---
 
 # Research Phase Status
 
-| Branch                                                     | Status                                                                                                                                                                                                                                                                                                                                                                                              |
-| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Phase 15U reusable Phase 6B/6C rule-replay engine          | Completed mechanically but insufficient — exposed a signal-to-weight mapper, not the full project replay pipeline; did not generate valid post-endpoint candidate rows and was superseded by the fresh-extension pipeline approach                                                                                                                                                                  |
-| Phase 15V post-endpoint rule-based candidate stream export | Blocked — no valid rule-input panel was available, post-endpoint rows remained 0, and no valid candidate stream was produced; superseded by Phase 15WXYZ                                                                                                                                                                                                                                            |
-| Phase 15WXYZ fresh-extension pipeline                      | Completed — cloned the config without mutating the canonical `2026-05-01` endpoint, reran the existing project pipeline on extended data, generated 8 valid post-endpoint rows through `2026-05-13`, corrected SPY/proxy price semantics, wrote `data/fresh/phase15q_rule_generated_candidate_stream.csv`, and allowed the Phase 15Q/15R rerun path; paper dry-run and paper trading remain blocked |
-| Current operational status                                 | Post-endpoint rule-generated candidate stream exists, but downstream Phase 15Q/15R/15O/15P/15M/15N rerun must be inspected before any paper-dry-run pre-registration can be considered                                                                                                                                                                                                              |
+| Branch                                   | Current Status                                                                      |
+| ---------------------------------------- | ----------------------------------------------------------------------------------- |
+| ETF historical strategy research         | Mature historical framework; final hierarchy unchanged                              |
+| ETF final candidate                      | `3D confirmed + deep_drawdown_guard + loose_relief`                                 |
+| ETF raw-wealth benchmark                 | SPY Buy & Hold                                                                      |
+| ETF manual paper workflow                | Operational; first valid entered session recorded                                   |
+| Phase 22 dynamic-opportunity enhancement | Rejected after failing to improve the research case                                 |
+| Individual-equity architecture           | Completed through source, panel, model, robustness, portfolio, and shadow contracts |
+| Individual-equity pilot data             | Built for 16 noncanonical surviving stocks                                          |
+| Individual-equity model                  | Frozen interpretable Ridge ranker                                                   |
+| Individual-equity robustness             | Encouraging IC evidence with material caveats                                       |
+| Historical stock portfolio               | Cost-aware diagnostic completed; not investable performance                         |
+| Post-endpoint stock data                 | Downloaded and validated separately                                                 |
+| Prospective stock ranking                | Generated for the latest recorded signal date                                       |
+| Proposed stock-shadow orders             | Generated                                                                           |
+| First entered stock-shadow session       | Pending valid next-open execution prices                                            |
+| Broker/API integration                   | Blocked                                                                             |
+| Automated broker paper trading           | Blocked                                                                             |
+| Live trading                             | Blocked                                                                             |
+| Real-money deployment                    | Blocked                                                                             |
+
 ---
 
 # What Should Happen Next
 
-Do **not** add another strategy variant immediately.
+The immediate priority is operational, not another historical strategy search.
 
-The current priority is operational, not exploratory:
+## Immediate Milestone
 
-> Consume the valid Phase 15WXYZ post-endpoint candidate stream through the downstream Phase 15Q/15R/15O/15P/15M/15N chain and determine whether a fresh current signal can pass audit gates.
+Complete the first genuine entered individual-equity shadow session.
 
-The immediate work is:
+Required sequence:
 
-1. Verify that the updated `configs/spy_sma10.yaml` is actually copied into `configs/spy_sma10.yaml`.
-2. Verify that the updated Phase 15 modules are copied into the project:
+```text id="h1jgoc"
+1. Refresh Phase 23J after the next eligible execution session is available.
+2. Confirm planned execution date and opening prices.
+3. Confirm every target-portfolio row has execution_price_available = True.
+4. Regenerate the Phase 23I shadow order plan.
+5. Confirm current_orders_blocked = False.
+6. Explicitly create simulated fills.
+7. Rerun Phase 23I to validate and ingest the entered session.
+8. Archive the filled session.
+9. Confirm positions, cash, and valuation history.
+```
 
-   * `real_post_endpoint_source.py`
-   * `post_endpoint_candidate_stream.py`
-   * `fresh_current_signal_generation.py`
-   * `fresh_extension_pipeline.py`
-   * `run_backtest.py`
-3. Verify that the valid handoff file exists:
+The first entered session remains a workflow milestone, not proof of predictive value.
 
-   ```text
-   data/fresh/phase15q_rule_generated_candidate_stream.csv
-   ```
-4. Verify that Phase 15Q/15R/15O/15P/15M/15N are enabled for the downstream rerun.
-5. Run tests and linting.
-6. Run the backtest pipeline.
-7. Inspect the generated Phase 15Q/15R/15O/15P/15M/15N reports.
-8. Confirm that 15O and 15M consume the fresh handoff rather than falling back to `in_memory_final_candidate_frame`.
-9. Only if Phase 15N allows it, move to paper-dry-run pre-registration.
-10. Keep broker/API integration, live trading, real-money deployment, candidate promotion, new ML, optimisation, and multi-asset expansion blocked.
+## Next Engineering Phase
 
-The next valid decision is not “is the strategy profitable?” The next valid decision is narrower:
+After the first entered stock-shadow session, the next bounded phase should be:
 
-> Does the fresh post-endpoint signal pipeline produce a valid, audited, non-stale current signal that is eligible for paper-dry-run pre-registration?
+```text id="hgrb3z"
+Phase 23K — Prospective Shadow Monitoring, Drift, and Operational Controls
+```
 
-If Phase 15N still blocks the system because the latest available fresh-extension row is only `2026-05-13`, that is a data-freshness problem, not a strategy-validation problem.
+Phase 23K should monitor:
+
+* weekly rankings;
+* selected and rejected securities;
+* proposed versus entered orders;
+* portfolio valuation;
+* cash balances;
+* realised and unrealised returns;
+* drawdowns;
+* turnover and transaction costs;
+* maturing 20-day prediction outcomes;
+* information coefficient through time;
+* top-minus-bottom spread;
+* score-distribution drift;
+* feature-distribution drift;
+* model-hash consistency;
+* stale or missing data;
+* sector and security concentration;
+* skipped, blocked, and failed sessions.
+
+## Evidence Horizon
+
+A practical evaluation schedule is:
+
+| Horizon                     | Interpretation                                                 |
+| --------------------------- | -------------------------------------------------------------- |
+| First 1–2 sessions          | Operational smoke test only                                    |
+| 4–8 weekly sessions         | Early process and data-quality evidence                        |
+| At least 12 weekly sessions | Minimum preliminary prospective review                         |
+| Preferably 26 weeks         | Stronger evidence before considering broker-sandbox automation |
+
+Broker integration, automated paper execution, live trading, and real money must remain blocked until the prospective process is materially broader, operationally clean, and independently reviewed.
 
 ---
 
 # Final Conclusion
 
-This project has moved from simple backtesting into a structured systematic-strategy research and operational-readiness framework.
+Market Strats Lab has progressed from simple ETF backtests into a two-track systematic research and operational-testing framework.
 
-The final answer is not:
+It has not discovered a perfect strategy.
 
-> We found the perfect strategy.
+It has established a disciplined process for:
 
-The real answer is:
+* constructing hypotheses;
+* preventing lookahead;
+* pinning historical checkpoints;
+* testing execution friction;
+* documenting failed branches;
+* freezing models and rules;
+* separating historical and prospective evidence;
+* reconstructing operational decisions;
+* tracking manual paper and shadow sessions.
 
-> Simple systematic rules can improve the path of returns, but the winner depends on objective, regime, execution assumptions, behavioural tolerance, and operational readiness.
+## ETF and Multi-Asset Conclusion
 
-The current final strategy hierarchy is:
+The validated ETF hierarchy remains:
 
-| Role                                     | Winner / Status                                                                                                           |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Raw wealth benchmark                     | SPY Buy & Hold                                                                                                            |
-| Simple defensive timing benchmark        | SPY 12M Momentum                                                                                                          |
-| Original flat-slippage canonical overlay | SPY Trend Regime Switch Overlay 3D Confirmed                                                                              |
-| Validated execution-realistic baseline   | SPY Trend Regime Switch Overlay 3D Confirmed + `deep_drawdown_guard`                                                      |
-| Best execution-realistic candidate       | SPY Trend Regime Switch Overlay 3D Confirmed + `deep_drawdown_guard` + `loose_relief`                                     |
-| Bootstrap robustness status              | Phase 7D passed                                                                                                           |
-| Bootstrap stability status               | Phase 7E passed                                                                                                           |
-| Rolling-window survivability status      | Phase 7F failed overall; liveability is mixed                                                                             |
-| Simplified tax-drag status               | Phase 8A survived at 20% proxy; 30% proxy erased the SPY 12M CAGR edge                                                    |
-| Bid-ask / market-impact status           | Phase 8B failed configured stress gate; execution friction remains a major caveat                                         |
-| Walk-forward validation status           | Phase 8C failed / mixed evidence; forward-window superiority was not clean                                                |
-| Behavioural regret status                | Phase 8D failed / material behavioural regret versus Buy & Hold                                                           |
-| Research degrees-of-freedom status       | Phase 8E completed; claims narrowed explicitly                                                                            |
-| Research-only boundary status            | Phase 8F boundary-control audit passed; research-only boundary documented                                                 |
-| Phase 9 technical extension status       | Diagnostic evidence only; no technical rule promoted                                                                      |
-| Phase 10 macro extension status          | Macro/rates/inflation branch closed without promotion                                                                     |
-| Phase 11/12 regime-score status          | Diagnostic score framework created; no signal or allocation rule promoted                                                 |
-| Phase 13 ML status                       | Technical + macro ML v1 paused/killed commercially; no model earned holdout                                               |
-| Phase 14 visual-backtest status          | Corrected Phase 6B/6C candidate visual reports generated and source identity reconciled                                   |
-| Phase 15 operational status              | Switch reconstruction solved; fresh post-endpoint candidate stream generated; downstream fresh-signal audit still pending |
+| Role                               | System                                                            |
+| ---------------------------------- | ----------------------------------------------------------------- |
+| Raw wealth benchmark               | SPY Buy & Hold                                                    |
+| Simple defensive benchmark         | SPY 12M Absolute Momentum                                         |
+| Original canonical overlay         | SPY 3D Confirmed Overlay                                          |
+| Execution-realistic baseline       | SPY 3D Confirmed Overlay + `deep_drawdown_guard`                  |
+| Best execution-realistic candidate | SPY 3D Confirmed Overlay + `deep_drawdown_guard` + `loose_relief` |
 
-The best execution-realistic candidate remains:
-
-> **SPY Trend Regime Switch Overlay 3D Confirmed + `deep_drawdown_guard` + `loose_relief`**
-
-Final pinned result:
+Pinned final-candidate result:
 
 | Metric               |                    Value |
 | -------------------- | -----------------------: |
 | Period               | 2006-04-28 to 2026-05-01 |
-| End Value            |               $71,779.16 |
+| End value            |               $71,779.16 |
 | CAGR                 |                   10.35% |
 | Calmar               |                    0.429 |
-| Max Drawdown         |                  -24.12% |
-| Metric Trade Count   |                       66 |
-| Overlay Switch Count |                       36 |
+| Max drawdown         |                  -24.12% |
+| Metric trade count   |                       66 |
+| Overlay switch count |                       36 |
 
-It improves the Phase 4 execution-realistic baseline:
+The correct interpretation remains:
 
-| Metric       | Phase 4 baseline | Phase 6B `loose_relief` |
-| ------------ | ---------------: | ----------------------: |
-| CAGR         |            9.93% |                  10.35% |
-| Calmar       |            0.412 |                   0.429 |
-| Max Drawdown |          -24.12% |                 -24.12% |
+> The ETF candidate materially improved drawdown and risk-adjusted performance while giving up some raw upside relative to SPY Buy & Hold.
 
-It also beats SPY 12M on the pinned full-period strict risk-adjusted gate.
+The ETF branch has progressed into manual paper tracking, but remains research-only and manually operated.
 
-However:
+## Individual-Equity Conclusion
 
-> SPY Buy & Hold remains the raw wealth winner.
+The individual-equity branch has produced:
 
-The final candidate is therefore best described as:
+* a point-in-time research architecture;
+* a controlled 16-stock pilot;
+* a governed feature and target panel;
+* an interpretable frozen Ridge ranker;
+* purged and embargoed walk-forward predictions;
+* encouraging rank-correlation robustness;
+* cost-aware historical portfolio diagnostics;
+* a separate post-endpoint extension;
+* a genuine prospective ranking;
+* a target portfolio;
+* proposed next-open shadow orders.
 
-> **The best execution-realistic risk-adjusted candidate built so far, with mixed rolling-window liveability, meaningful spread/impact sensitivity, mixed walk-forward evidence, material behavioural-regret risk, explicit research-degrees-of-freedom caveats, a documented research-only/non-production boundary, and incomplete paper-trading readiness.**
+The latest recorded prospective top-five ranking was:
 
-It should **not** be described as:
+```text id="4f6mxc"
+TSLA
+META
+CAT
+AMZN
+NVDA
+```
 
-* a raw-CAGR replacement for Buy & Hold;
-* a universally liveable system;
-* a production-ready strategy;
-* a live-trading system;
-* a financial recommendation;
-* paper-trading-ready before Phase 15N permits it;
+These outputs are not investment recommendations.
+
+The branch remains:
+
+```text id="8x0esw"
+NONCANONICAL
+SURVIVORSHIP-BIASED
+RESEARCH-ONLY
+NOT INVESTABLE PERFORMANCE
+```
+
+The next meaningful milestone is the first valid entered stock-shadow session using actual next-open execution prices.
+
+## Overall Project Position
+
+The project’s strongest achievement is not a single performance number.
+
+It is the research and operational discipline demonstrated by repeatedly:
+
+* rejecting wrong data sources;
+* rejecting unreconciled metrics;
+* rejecting failed rule extensions;
+* rejecting weak ML models;
+* blocking stale signals;
+* refusing fabricated execution prices;
+* preserving historical checkpoints;
+* keeping research, paper, broker, and live states separate.
+
+The project is currently best described as:
+
+> A reproducible systematic-strategy research lab with a mature ETF research and manual-paper branch, an emerging individual-equity prospective-shadow branch, and strict controls against premature live or real-money deployment.
+
+It should not be described as:
+
+* a guaranteed edge;
+* a production trading system;
+* an automated broker strategy;
+* a universally validated stock-selection model;
+* financial advice;
+* live-trading-ready;
 * real-money-ready.
 
-Current operational checkpoint:
+Current boundary:
 
-* canonical historical endpoint remains `2026-05-01`;
-* canonical Phase 6B/6C metrics remain unchanged;
-* the true 36-switch operational history has been reconstructed using `target_offensive_weight`;
-* the pinned endpoint signal is `offensive_spy` with exposure `1.0`, but it is preview-only;
-* the fresh-extension pipeline generated 8 valid post-endpoint rows through `2026-05-13`;
-* the fresh handoff file exists at `data/fresh/phase15q_rule_generated_candidate_stream.csv`;
-* downstream Phase 15Q/15R/15O/15P/15M/15N reports must still be inspected before any paper-dry-run pre-registration is allowed.
-
-That distinction is the current point of the project:
-
-> The strategy has earned operational signal engineering. It has not yet earned paper trading, live trading, or real-money deployment.
+> The project has earned continued prospective manual testing. It has not earned automated broker execution, live trading, or real-money deployment.
