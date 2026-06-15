@@ -13580,6 +13580,7 @@ phase23i_prospective_shadow_runner:
   source_phase23i_dir: "reports/individual_equity_decision_system/phase23i_frozen_cost_aware_portfolio"
   source_phase23f_dir: "reports/individual_equity_decision_system/phase23f_pilot_feature_calculation"
   source_phase23g_dir: "reports/individual_equity_decision_system/phase23g_interpretable_stock_ranker"
+  source_phase23j_dir: "reports/individual_equity_decision_system/phase23j_post_endpoint_individual_equity_extension"
   pilot_input_dir: "data/individual_equity_pilot"
   canonical_research_endpoint: "2026-05-01"
   portfolio_id: "ridge_top5_equal_weight"
@@ -13632,3 +13633,74 @@ phase23f_pilot_individual_equity_input_bootstrap:
   allow_real_money: false
   allow_broker_api: false
   allow_promotion: false
+
+phase23j_post_endpoint_individual_equity_extension:
+  enabled: true
+  output_dir: "reports/individual_equity_decision_system/phase23j_post_endpoint_individual_equity_extension"
+  dashboard_status_path: "reports/paper_trading/dashboard/phase23j_post_endpoint_individual_equity_extension_status.csv"
+  historical_input_dir: "data/individual_equity_pilot"
+  extension_input_dir: "data/individual_equity_post_endpoint"
+  combined_input_dir: "data/individual_equity_post_endpoint/combined"
+  source_phase23f_dir: "reports/individual_equity_decision_system/phase23f_pilot_feature_calculation"
+  source_phase23g_dir: "reports/individual_equity_decision_system/phase23g_interpretable_stock_ranker"
+  source_phase23i_dir: "reports/individual_equity_decision_system/phase23i_frozen_cost_aware_portfolio"
+  canonical_research_endpoint: "2026-05-01"
+  overlap_start_date: "2026-04-20"
+  minimum_overlap_rows: 21
+  as_of_date: ""
+  minimum_post_endpoint_rows: 5
+  minimum_security_count: 12
+  retry_attempts: 3
+  retry_delay_seconds: 2.0
+  inter_symbol_delay_seconds: 0.25
+  overlap_price_relative_tolerance: 1.0e-8
+  overlap_volume_absolute_tolerance: 0.0
+  allow_network_download: true
+  refresh_existing_extension: true
+  starting_cash: 100000
+  portfolio_id: "ridge_top5_equal_weight"
+  paper_only: true
+  research_pilot_only: true
+  membership_canonical: false
+  market_data_canonical: false
+  generalization_claim_allowed: false
+  investable_performance_claim_allowed: false
+  automated_broker_paper_trading_allowed: false
+  paper_trading_allowed: false
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false
+
+phase23k_prospective_monitoring:
+  enabled: true
+  output_dir: "reports/individual_equity_shadow/phase23k_prospective_monitoring"
+  dashboard_status_path: "reports/paper_trading/dashboard/phase23k_prospective_monitoring_status.csv"
+  source_phase23i_dir: "reports/individual_equity_decision_system/phase23i_frozen_cost_aware_portfolio"
+  source_phase23i_shadow_dir: "reports/individual_equity_shadow/phase23i_prospective_shadow"
+  source_phase23j_dir: "reports/individual_equity_decision_system/phase23j_post_endpoint_individual_equity_extension"
+  source_phase23f_dir: "reports/individual_equity_decision_system/phase23f_pilot_feature_calculation"
+  pilot_input_dir: "data/individual_equity_pilot"
+  post_endpoint_input_dir: "data/individual_equity_post_endpoint"
+  combined_input_dir: "data/individual_equity_post_endpoint/combined"
+  candidate_system_id: "phase23i_ridge_top5_equal_weight_shadow"
+  required_model_id: "phase23g_ridge_ranker_v1"
+  required_model_hash: "514cdac8750d8072131c34f765d3b69130946795699b342b031d0a755c3c8483"
+  decision_cadence: "weekly"
+  target_horizon_trading_days: 20
+  expected_universe_size: 16
+  selected_count: 5
+  gap_warning_abs_pct: 0.02
+  gap_severe_abs_pct: 0.05
+  minimum_sessions_for_drift_warning: 8
+  stale_signal_days: 3
+  negative_cash_tolerance: 0.01
+  simulated_cost_bps: 10.0
+  paper_only: true
+  research_pilot_only: true
+  automated_broker_paper_trading_allowed: false
+  paper_trading_allowed: false
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  promotion_allowed: false

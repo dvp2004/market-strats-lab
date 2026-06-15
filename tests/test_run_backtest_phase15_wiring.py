@@ -54,6 +54,8 @@ PHASE23G_FUNCTION = "save_phase23g_interpretable_stock_ranker"
 PHASE23H_FUNCTION = "save_phase23h_interpretable_ranker_robustness"
 PHASE23I_FUNCTION = "save_phase23i_frozen_cost_aware_portfolio"
 PHASE23I_SHADOW_FUNCTION = "save_phase23i_prospective_shadow_runner"
+PHASE23J_FUNCTION = "save_phase23j_post_endpoint_individual_equity_extension"
+PHASE23K_FUNCTION = "save_phase23k_prospective_shadow_monitoring"
 
 
 def _phase_config(enabled: bool) -> dict:
@@ -1274,3 +1276,86 @@ def test_phase23i_cli_flags_are_available():
     assert "--phase23i-shadow-only" in source
     assert "_run_phase23i_frozen_cost_aware_portfolio(" in source
     assert "_run_phase23i_prospective_shadow_runner(" in source
+
+def test_phase23j_runner_helper_calls_phase_when_enabled(monkeypatch):
+    calls: list[dict] = []
+
+    def phase23j_recorder(**kwargs):
+        calls.append(kwargs)
+        return {
+            "summary": pd.DataFrame(
+                {
+                    "phase23j_decision": [
+                        "phase23j_post_endpoint_shadow_activation_ready_manual_research_only"
+                    ]
+                }
+            )
+        }
+
+    monkeypatch.setattr(run_backtest, PHASE23J_FUNCTION, phase23j_recorder)
+    reports_dir = Path("reports")
+
+    outputs = run_backtest._run_phase23j_post_endpoint_individual_equity_extension(
+        config={
+            "phase23j_post_endpoint_individual_equity_extension": {"enabled": True}
+        },
+        reports_dir=reports_dir,
+    )
+
+    assert calls == [
+        {
+            "config": {
+                "phase23j_post_endpoint_individual_equity_extension": {
+                    "enabled": True
+                }
+            },
+            "reports_dir": reports_dir,
+        }
+    ]
+    assert "summary" in outputs
+
+
+def test_phase23j_cli_flag_is_available():
+    source = Path(run_backtest.__file__).read_text(encoding="utf-8")
+
+    assert "--phase23j-only" in source
+    assert "_run_phase23j_post_endpoint_individual_equity_extension(" in source
+
+
+def test_phase23k_runner_helper_calls_phase_when_enabled(monkeypatch):
+    calls: list[dict] = []
+
+    def phase23k_recorder(**kwargs):
+        calls.append(kwargs)
+        return {
+            "summary": pd.DataFrame(
+                {
+                    "phase23k_decision": [
+                        "phase23k_monitoring_active_current_session_execution_pending"
+                    ]
+                }
+            )
+        }
+
+    monkeypatch.setattr(run_backtest, PHASE23K_FUNCTION, phase23k_recorder)
+    reports_dir = Path("reports")
+
+    outputs = run_backtest._run_phase23k_prospective_shadow_monitoring(
+        config={"phase23k_prospective_monitoring": {"enabled": True}},
+        reports_dir=reports_dir,
+    )
+
+    assert calls == [
+        {
+            "config": {"phase23k_prospective_monitoring": {"enabled": True}},
+            "reports_dir": reports_dir,
+        }
+    ]
+    assert "summary" in outputs
+
+
+def test_phase23k_cli_flag_is_available():
+    source = Path(run_backtest.__file__).read_text(encoding="utf-8")
+
+    assert "--phase23k-only" in source
+    assert "_run_phase23k_prospective_shadow_monitoring(" in source

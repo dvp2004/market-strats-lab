@@ -336,6 +336,12 @@ from market_strats.analysis.frozen_cost_aware_portfolio import (
     save_phase23i_frozen_cost_aware_portfolio,
     save_phase23i_prospective_shadow_runner,
 )
+from market_strats.analysis.post_endpoint_individual_equity_extension import (
+    save_phase23j_post_endpoint_individual_equity_extension,
+)
+from market_strats.analysis.prospective_shadow_monitoring import (
+    save_phase23k_prospective_shadow_monitoring,
+)
 
 
 def save_phase15o_current_signal_preregistration(**kwargs):
@@ -2187,6 +2193,34 @@ def _run_phase23i_prospective_shadow_runner(
     )
 
 
+def _run_phase23j_post_endpoint_individual_equity_extension(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(
+        config, "phase23j_post_endpoint_individual_equity_extension"
+    ):
+        return {}
+    return save_phase23j_post_endpoint_individual_equity_extension(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
+def _run_phase23k_prospective_shadow_monitoring(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(config, "phase23k_prospective_monitoring"):
+        return {}
+    return save_phase23k_prospective_shadow_monitoring(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
 def _run_daily_phase15_operational_chain(
     *,
     config: dict,
@@ -2565,6 +2599,22 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--phase23j-only",
+        action="store_true",
+        help=(
+            "Run only the Phase 23J post-endpoint individual-equity data "
+            "extension and frozen-model prospective scoring workflow."
+        ),
+    )
+    parser.add_argument(
+        "--phase23k-only",
+        action="store_true",
+        help=(
+            "Run only the Phase 23K prospective shadow monitoring, drift, "
+            "and operational controls report."
+        ),
+    )
+    parser.add_argument(
         "--daily-paper-only",
         action="store_true",
         help="Run only the lightweight daily paper workflow.",
@@ -2723,6 +2773,20 @@ def main() -> None:
 
     if args.phase23i_shadow_only:
         _run_phase23i_prospective_shadow_runner(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase23j_only:
+        _run_phase23j_post_endpoint_individual_equity_extension(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase23k_only:
+        _run_phase23k_prospective_shadow_monitoring(
             config=config,
             reports_dir=reports_dir,
         )
