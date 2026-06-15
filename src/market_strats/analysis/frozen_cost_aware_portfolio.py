@@ -106,10 +106,15 @@ DEFAULT_PHASE23I_SHADOW_CONFIG: dict[str, Any] = {
     ),
     "source_phase23f_dir": DEFAULT_PHASE23I_CONFIG["source_phase23f_dir"],
     "source_phase23g_dir": DEFAULT_PHASE23I_CONFIG["source_phase23g_dir"],
+    "source_phase23j_dir": (
+        "reports/individual_equity_decision_system/"
+        "phase23j_post_endpoint_individual_equity_extension"
+    ),
     "pilot_input_dir": DEFAULT_PHASE23I_CONFIG["pilot_input_dir"],
     "canonical_research_endpoint": CANONICAL_RESEARCH_ENDPOINT,
     "portfolio_id": "ridge_top5_equal_weight",
     "starting_cash": 100000.0,
+    "simulated_cost_bps": 10.0,
     "filled_session_filename": "shadow_manual_session_filled.csv",
     "archive_dir": "reports/individual_equity_shadow/phase23i_prospective_shadow/archive",
     "emergency_shadow_kill_switch": False,
@@ -1661,8 +1666,10 @@ def _archive_shadow_filled_session(
             / f"shadow_manual_session_filled_{session_date}_signal_{signal_date}.csv"
         )
         archive_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(filled_path, archive_path)
-        archive_status = "archived_valid_completed_session"
+        if archive_path.exists():
+            raise FileExistsError(f"Shadow archive already exists: {archive_path}")
+        shutil.move(str(filled_path), str(archive_path))
+        archive_status = "archived_valid_completed_session_source_moved"
     else:
         session_date = ""
         signal_date = ""
@@ -1684,7 +1691,7 @@ def _archive_shadow_filled_session(
                 else False,
                 "ledger_row_count_after_ingestion": len(ledger),
                 "archive_status": archive_status,
-                "notes": "copy-only archive; source file is not deleted",
+                "notes": "validated filled session moved to immutable archive",
             }
         ]
     )
@@ -1702,6 +1709,9 @@ def _validate_shadow_filled_session(
         "selected_signal_date",
         "portfolio_id",
         "ticker",
+        "order_side",
+        "proposed_quantity",
+        "reference_price",
         "manual_decision",
         "session_state",
         "simulated_fill_price",
@@ -1729,12 +1739,35 @@ def _validate_shadow_filled_session(
         )
         return validation, pd.DataFrame()
     missing = [column for column in required if column not in filled.columns]
+    template_keys: dict[tuple[str, str], dict[str, Any]] = {}
+    if not template.empty and {"ticker", "order_side"}.issubset(template.columns):
+        template_keys = {
+            (str(row.ticker), str(row.order_side).upper()): row._asdict()
+            for row in template.itertuples(index=False)
+        }
+    row_count_matches = len(filled) == len(template)
     for index, row in filled.iterrows():
         blockers = []
+        if not row_count_matches:
+            blockers.append("filled_row_count_does_not_match_template")
         if missing:
             blockers.append("missing_required_columns:" + ";".join(missing))
         decision = str(row.get("manual_decision", "")).strip()
         state = str(row.get("session_state", "")).strip()
+        ticker = str(row.get("ticker", "")).strip()
+        side = str(row.get("order_side", "")).strip().upper()
+        template_row = template_keys.get((ticker, side))
+        if template_row is None:
+            blockers.append("filled_row_not_in_current_template")
+        else:
+            proposed = int(max(_safe_float(template_row.get("proposed_quantity", 0)), 0))
+            filled_quantity = int(
+                max(_safe_float(row.get("simulated_fill_quantity", 0)), 0)
+            )
+            if state in {"entered", "partially_entered"} and filled_quantity > proposed:
+                blockers.append("filled_quantity_exceeds_proposed_quantity")
+        if side not in {"BUY", "SELL"}:
+            blockers.append("invalid_order_side")
         if decision == "" or decision == "pending":
             blockers.append("manual_decision_pending")
         if state not in {
@@ -1807,6 +1840,240 @@ def _validate_shadow_filled_session(
     return validation, row_validation
 
 
+def _shadow_price_map(
+    *, ranking: pd.DataFrame, target: pd.DataFrame
+) -> dict[str, float]:
+    prices: dict[str, float] = {}
+    for frame in [ranking, target]:
+        if frame.empty or "ticker" not in frame.columns:
+            continue
+        for row in frame.itertuples(index=False):
+            execution_price = _safe_float(
+                getattr(row, "execution_open_price", np.nan)
+            )
+            reference_price = _safe_float(getattr(row, "reference_price", np.nan))
+            price = execution_price if execution_price > 0 else reference_price
+            if price > 0:
+                prices[str(row.ticker)] = price
+    return prices
+
+
+def _shadow_accounting_from_ledger(
+    *,
+    ledger: pd.DataFrame,
+    starting_cash: float,
+    price_map: dict[str, float],
+    simulated_cost_bps: float,
+    valuation_date: str,
+    portfolio_id: str,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, int], float]:
+    cash = float(starting_cash)
+    shares: dict[str, int] = {}
+    cash_rows: list[dict[str, Any]] = [
+        {
+            "ledger_date": valuation_date,
+            "ticker": "CASH",
+            "cash_flow_type": "initial_shadow_cash",
+            "cash_change": float(starting_cash),
+            "transaction_cost": 0.0,
+            "cash_balance": float(starting_cash),
+        }
+    ]
+    if not ledger.empty:
+        working = ledger.copy()
+        if "session_date" in working.columns:
+            working["session_date"] = pd.to_datetime(
+                working["session_date"], errors="coerce"
+            )
+        entered = working.loc[
+            working.get("session_state", pd.Series(index=working.index, dtype=str))
+            .astype(str)
+            .isin(["entered", "partially_entered"])
+        ].copy()
+        if not entered.empty:
+            entered["_side_order"] = (
+                entered.get("order_side", pd.Series(index=entered.index, dtype=str))
+                .astype(str)
+                .str.upper()
+                .map({"SELL": 0, "BUY": 1})
+                .fillna(2)
+            )
+            entered = entered.sort_values(
+                ["session_date", "_side_order", "ticker"], na_position="last"
+            )
+            for row in entered.itertuples(index=False):
+                ticker = str(getattr(row, "ticker", "")).strip()
+                side = str(getattr(row, "order_side", "BUY")).strip().upper()
+                quantity = int(max(_safe_float(getattr(row, "simulated_fill_quantity", 0)), 0))
+                price = _safe_float(getattr(row, "simulated_fill_price", np.nan))
+                if not ticker or quantity <= 0 or price <= 0:
+                    continue
+                gross = quantity * price
+                cost = gross * float(simulated_cost_bps) / 10000.0
+                if side == "SELL":
+                    available = shares.get(ticker, 0)
+                    executed = min(quantity, available)
+                    gross = executed * price
+                    cost = gross * float(simulated_cost_bps) / 10000.0
+                    shares[ticker] = available - executed
+                    cash_change = gross - cost
+                    cash += cash_change
+                else:
+                    affordable = int(max((cash) / max(price * (1 + float(simulated_cost_bps) / 10000.0), 1e-12), 0))
+                    executed = min(quantity, affordable)
+                    gross = executed * price
+                    cost = gross * float(simulated_cost_bps) / 10000.0
+                    shares[ticker] = shares.get(ticker, 0) + executed
+                    cash_change = -(gross + cost)
+                    cash += cash_change
+                cash_rows.append(
+                    {
+                        "ledger_date": getattr(row, "session_date", valuation_date),
+                        "ticker": ticker,
+                        "cash_flow_type": f"shadow_{side.lower()}_fill",
+                        "cash_change": cash_change,
+                        "transaction_cost": cost,
+                        "cash_balance": cash,
+                    }
+                )
+    positions_rows: list[dict[str, Any]] = []
+    market_value = 0.0
+    for ticker, quantity in sorted(shares.items()):
+        if quantity <= 0:
+            continue
+        price = price_map.get(ticker, np.nan)
+        value = quantity * price if pd.notna(price) and price > 0 else np.nan
+        if pd.notna(value):
+            market_value += float(value)
+        positions_rows.append(
+            {
+                "portfolio_id": portfolio_id,
+                "ticker": ticker,
+                "shares": int(quantity),
+                "reference_price": price,
+                "market_value": value,
+                "cash_balance": np.nan,
+                "position_status": "entered_shadow_position",
+            }
+        )
+    positions_rows.append(
+        {
+            "portfolio_id": portfolio_id,
+            "ticker": "CASH",
+            "shares": 0,
+            "reference_price": 1.0,
+            "market_value": cash,
+            "cash_balance": cash,
+            "position_status": (
+                "shadow_cash_residual"
+                if any(quantity > 0 for quantity in shares.values())
+                else "initial_shadow_cash_only"
+            ),
+        }
+    )
+    total_value = cash + market_value
+    valuation = pd.DataFrame(
+        [
+            {
+                "valuation_date": valuation_date,
+                "portfolio_id": portfolio_id,
+                "portfolio_value": total_value,
+                "market_value": market_value,
+                "cash_balance": cash,
+                "valuation_status": (
+                    "entered_shadow_positions_valued"
+                    if any(quantity > 0 for quantity in shares.values())
+                    else "cash_only_until_entered_session"
+                ),
+            }
+        ]
+    )
+    return (
+        pd.DataFrame(positions_rows),
+        pd.DataFrame(cash_rows),
+        valuation,
+        shares,
+        cash,
+    )
+
+
+def _build_shadow_delta_orders(
+    *,
+    target: pd.DataFrame,
+    ranking: pd.DataFrame,
+    existing_ledger: pd.DataFrame,
+    starting_cash: float,
+    simulated_cost_bps: float,
+    portfolio_id: str,
+    valuation_date: str,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    price_map = _shadow_price_map(ranking=ranking, target=target)
+    positions, cash_ledger, valuation, shares, _cash = _shadow_accounting_from_ledger(
+        ledger=existing_ledger,
+        starting_cash=starting_cash,
+        price_map=price_map,
+        simulated_cost_bps=simulated_cost_bps,
+        valuation_date=valuation_date,
+        portfolio_id=portfolio_id,
+    )
+    portfolio_value = _safe_float(valuation.iloc[0].get("portfolio_value"), starting_cash)
+    target_weights = (
+        target.set_index("ticker")["target_weight"].apply(_safe_float).to_dict()
+        if not target.empty and {"ticker", "target_weight"}.issubset(target.columns)
+        else {}
+    )
+    all_tickers = sorted(set(target_weights) | {ticker for ticker, qty in shares.items() if qty > 0})
+    rows: list[dict[str, Any]] = []
+    selected_signal_date = (
+        str(target.iloc[0].get("selected_signal_date", "")) if not target.empty else ""
+    )
+    for ticker in all_tickers:
+        price = price_map.get(ticker, np.nan)
+        current_shares = int(shares.get(ticker, 0))
+        target_weight = float(target_weights.get(ticker, 0.0))
+        target_notional = portfolio_value * target_weight
+        target_shares = (
+            int(np.floor(target_notional / price))
+            if pd.notna(price) and price > 0
+            else current_shares
+        )
+        delta = target_shares - current_shares
+        if delta == 0:
+            continue
+        side = "BUY" if delta > 0 else "SELL"
+        rows.append(
+            {
+                "selected_signal_date": selected_signal_date,
+                "portfolio_id": portfolio_id,
+                "ticker": ticker,
+                "target_weight": target_weight,
+                "target_notional": target_notional,
+                "reference_price": price,
+                "reference_price_date": (
+                    str(
+                        ranking.loc[
+                            ranking["ticker"].astype(str).eq(ticker),
+                            "reference_price_date",
+                        ].iloc[0]
+                    )
+                    if not ranking.empty
+                    and "reference_price_date" in ranking.columns
+                    and ranking["ticker"].astype(str).eq(ticker).any()
+                    else ""
+                ),
+                "current_shares": current_shares,
+                "target_shares": target_shares,
+                "proposed_quantity": abs(delta),
+                "order_side": side,
+                "estimated_order_notional": abs(delta) * price
+                if pd.notna(price)
+                else np.nan,
+                "noncanonical_label": NONCANONICAL_LABEL,
+            }
+        )
+    return pd.DataFrame(rows), positions, cash_ledger, valuation
+
+
 def save_phase23i_prospective_shadow_runner(
     *,
     config: dict[str, Any],
@@ -1826,7 +2093,9 @@ def save_phase23i_prospective_shadow_runner(
     phase23g_dir = _resolve_reports_path(
         configured_path=section["source_phase23g_dir"], reports_dir=reports_path
     )
-    pilot_input_dir = _resolve_project_path(section["pilot_input_dir"])
+    phase23j_dir = _resolve_reports_path(
+        configured_path=section["source_phase23j_dir"], reports_dir=reports_path
+    )
     archive_dir = _resolve_reports_path(
         configured_path=section["archive_dir"], reports_dir=reports_path
     )
@@ -1836,14 +2105,22 @@ def save_phase23i_prospective_shadow_runner(
     freeze = _read_csv(source_phase23i_dir / "phase23i_model_freeze.csv")
     freeze_hashes = _read_csv(source_phase23i_dir / "phase23i_model_freeze_hashes.csv")
     predictions = _read_csv(phase23g_dir / "phase23g_oos_predictions.csv")
-    membership = _read_csv(pilot_input_dir / "pilot_membership_manifest.csv")
-    prices = _load_price_files(membership=membership, pilot_input_dir=pilot_input_dir) if not membership.empty else {}
-    latest_price_date = max(
-        [frame["date"].max() for frame in prices.values() if not frame.empty],
-        default=pd.NaT,
-    )
+    phase23j_summary = _read_csv(phase23j_dir / "phase23j_summary.csv")
+    phase23j_ranking = _read_csv(phase23j_dir / "phase23j_current_ranking.csv")
+    phase23j_target = _read_csv(phase23j_dir / "phase23j_current_target_portfolio.csv")
+    phase23j_freshness = _read_csv(phase23j_dir / "phase23j_data_freshness.csv")
     endpoint = pd.Timestamp(section["canonical_research_endpoint"])
-    post_endpoint_available = pd.notna(latest_price_date) and latest_price_date > endpoint
+    post_endpoint_available = bool(
+        not phase23j_summary.empty
+        and _bool_value(phase23j_summary.iloc[0].get("post_endpoint_data_ready", False))
+        and _bool_value(
+            phase23j_summary.iloc[0].get("prospective_ranking_generated", False)
+        )
+    )
+    latest_price_date = pd.NaT
+    if not phase23j_freshness.empty:
+        latest_value = phase23j_freshness.iloc[0].get("as_of_date", "")
+        latest_price_date = pd.to_datetime(latest_value, errors="coerce")
     safety_flags_false = not any(
         _bool_value(section.get(flag, False))
         for flag in [
@@ -1906,8 +2183,13 @@ def save_phase23i_prospective_shadow_runner(
         ]
     )
     latest_ranking = pd.DataFrame()
-    if not predictions.empty:
-        ridge = predictions.loc[predictions["model_version"].astype(str).eq(RIDGE_MODEL)].copy()
+    if post_endpoint_available and not phase23j_ranking.empty:
+        latest_ranking = phase23j_ranking.copy().sort_values("predicted_rank")
+        latest_ranking.insert(0, "ranking_status", "post_endpoint_prospective_frozen_model")
+    elif not predictions.empty:
+        ridge = predictions.loc[
+            predictions["model_version"].astype(str).eq(RIDGE_MODEL)
+        ].copy()
         if not ridge.empty:
             latest_signal = pd.to_datetime(ridge["signal_date"]).max()
             latest_ranking = ridge.loc[
@@ -1922,24 +2204,10 @@ def save_phase23i_prospective_shadow_runner(
                     "predicted_20d_excess_return_or_ranking_score",
                 ]
             ].copy()
-            latest_ranking.insert(0, "ranking_status", "historical_endpoint_reference_only")
-    spec = _portfolio_spec(section["portfolio_id"])
-    target_weights: dict[str, float] = {}
-    constraints: list[dict[str, Any]] = []
-    if not predictions.empty and not membership.empty:
-        latest_signal = pd.to_datetime(predictions["signal_date"]).dt.normalize().max()
-        target_weights, constraints = build_phase23i_targets_for_signal(
-            predictions=predictions,
-            membership=membership,
-            signal_date=latest_signal,
-            spec=spec,
-            config=DEFAULT_PHASE23I_CONFIG,
-        )
-    target_status = (
-        "target_constructed_but_shadow_orders_blocked"
-        if target_weights
-        else "target_construction_failed"
-    )
+            latest_ranking.insert(
+                0, "ranking_status", "historical_endpoint_reference_only"
+            )
+
     block_reasons = []
     if not post_endpoint_available:
         block_reasons.append("post_endpoint_data_missing")
@@ -1947,29 +2215,56 @@ def save_phase23i_prospective_shadow_runner(
         block_reasons.append("model_freeze_hash_mismatch")
     if not safety_flags_false:
         block_reasons.append("safety_flag_or_kill_switch_block")
-    order_allowed = not block_reasons
-    current_target = pd.DataFrame(
-        [
-            {
-                "selected_signal_date": CANONICAL_RESEARCH_ENDPOINT,
-                "portfolio_id": section["portfolio_id"],
-                "ticker": ticker,
-                "target_weight": weight,
-                "target_notional": float(section["starting_cash"]) * weight,
-                "target_status": target_status,
-                "paper_order_allowed": order_allowed,
-                "order_blocking_reason": ";".join(block_reasons),
-                "noncanonical_label": NONCANONICAL_LABEL,
-            }
-            for ticker, weight in sorted(target_weights.items())
-        ]
+    if phase23j_target.empty:
+        block_reasons.append("prospective_target_missing")
+    execution_prices_available = bool(
+        not phase23j_target.empty
+        and "execution_price_available" in phase23j_target.columns
+        and phase23j_target["execution_price_available"].map(_bool_value).all()
     )
-    proposed_orders = current_target.copy()
+    if not execution_prices_available:
+        block_reasons.append("execution_open_price_pending")
+    order_allowed = not block_reasons
+
+    if not phase23j_target.empty:
+        current_target = phase23j_target.copy()
+    else:
+        current_target = pd.DataFrame()
+    if not current_target.empty:
+        current_target["target_status"] = np.where(
+            order_allowed,
+            "post_endpoint_target_ready_for_manual_shadow",
+            "post_endpoint_target_blocked",
+        )
+        current_target["paper_order_allowed"] = order_allowed
+        current_target["order_blocking_reason"] = ";".join(block_reasons)
+        if "noncanonical_label" not in current_target.columns:
+            current_target["noncanonical_label"] = NONCANONICAL_LABEL
+    session_date = datetime.now(timezone.utc).date().isoformat()
+    ledger_path = output_dir / "shadow_session_ledger.csv"
+    existing_ledger = _read_csv(ledger_path)
+    proposed_orders, positions_before, cash_before, valuation_before = (
+        _build_shadow_delta_orders(
+            target=current_target,
+            ranking=latest_ranking,
+            existing_ledger=existing_ledger,
+            starting_cash=float(section["starting_cash"]),
+            simulated_cost_bps=float(section.get("simulated_cost_bps", 10.0)),
+            portfolio_id=str(section["portfolio_id"]),
+            valuation_date=session_date,
+        )
+    )
     if not proposed_orders.empty:
         proposed_orders["session_state"] = "proposed" if order_allowed else "blocked"
         proposed_orders["order_instruction"] = "manual_research_shadow_only"
+        proposed_orders["paper_order_allowed"] = order_allowed
+        proposed_orders["order_blocking_reason"] = ";".join(block_reasons)
+        proposed_orders["target_status"] = np.where(
+            order_allowed,
+            "post_endpoint_delta_order_ready",
+            "post_endpoint_delta_order_blocked",
+        )
 
-    session_date = datetime.now(timezone.utc).date().isoformat()
     manual_template = proposed_orders.copy()
     if not manual_template.empty:
         manual_template.insert(0, "session_date", session_date)
@@ -1989,8 +2284,6 @@ def save_phase23i_prospective_shadow_runner(
         template=manual_template,
         safety_flags_false=safety_flags_false,
     )
-    ledger_path = output_dir / "shadow_session_ledger.csv"
-    existing_ledger = _read_csv(ledger_path)
     ledger = existing_ledger.copy()
     if not filled.empty and bool(validation.iloc[0]["session_valid"]):
         new_rows = filled.copy()
@@ -2003,36 +2296,14 @@ def save_phase23i_prospective_shadow_runner(
         validation=validation,
         ledger=ledger,
     )
-    positions = pd.DataFrame(
-        [
-            {
-                "portfolio_id": section["portfolio_id"],
-                "ticker": "CASH",
-                "shares": 0.0,
-                "cash_balance": float(section["starting_cash"]),
-                "position_status": "initial_shadow_cash_only",
-            }
-        ]
-    )
-    cash_ledger = pd.DataFrame(
-        [
-            {
-                "ledger_date": session_date,
-                "cash_flow_type": "initial_shadow_cash",
-                "cash_change": float(section["starting_cash"]),
-                "cash_balance": float(section["starting_cash"]),
-            }
-        ]
-    )
-    valuation = pd.DataFrame(
-        [
-            {
-                "valuation_date": session_date,
-                "portfolio_id": section["portfolio_id"],
-                "portfolio_value": float(section["starting_cash"]),
-                "valuation_status": "cash_only_until_entered_session",
-            }
-        ]
+    price_map = _shadow_price_map(ranking=latest_ranking, target=current_target)
+    positions, cash_ledger, valuation, _shares, _cash = _shadow_accounting_from_ledger(
+        ledger=ledger,
+        starting_cash=float(section["starting_cash"]),
+        price_map=price_map,
+        simulated_cost_bps=float(section.get("simulated_cost_bps", 10.0)),
+        valuation_date=session_date,
+        portfolio_id=str(section["portfolio_id"]),
     )
     rollover = pd.DataFrame(
         [

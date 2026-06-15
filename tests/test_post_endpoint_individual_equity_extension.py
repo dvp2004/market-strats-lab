@@ -17,6 +17,7 @@ from market_strats.analysis.pilot_individual_equity_feature_calculation import (
 )
 from market_strats.analysis.post_endpoint_individual_equity_extension import (
     DEFAULT_PHASE23J_CONFIG,
+    count_us_equity_trading_sessions,
     merge_historical_and_extension,
     next_us_equity_trading_day,
     save_phase23j_post_endpoint_individual_equity_extension,
@@ -26,6 +27,12 @@ from market_strats.analysis.post_endpoint_individual_equity_extension import (
 
 def test_phase23j_overlap_default_is_twenty_one_rows() -> None:
     assert DEFAULT_PHASE23J_CONFIG["minimum_overlap_rows"] == 21
+    assert DEFAULT_PHASE23J_CONFIG["overlap_start_date"] == "2026-03-30"
+    available = count_us_equity_trading_sessions(
+        DEFAULT_PHASE23J_CONFIG["overlap_start_date"],
+        DEFAULT_PHASE23J_CONFIG["canonical_research_endpoint"],
+    )
+    assert available >= 21
 
 
 def _price_frame(dates: pd.DatetimeIndex, base: float, drift: float) -> pd.DataFrame:
@@ -168,7 +175,7 @@ def _config(tmp_path: Path) -> dict:
             "source_phase23g_dir": str(tmp_path / "reports" / "phase23g"),
             "source_phase23i_dir": str(tmp_path / "reports" / "phase23i"),
             "canonical_research_endpoint": "2026-05-01",
-            "overlap_start_date": "2026-03-25",
+            "overlap_start_date": "2026-03-30",
             "minimum_overlap_rows": 21,
             "as_of_date": "2026-06-15",
             "minimum_post_endpoint_rows": 5,
@@ -244,6 +251,12 @@ def test_phase23j_generates_prospective_ranking_and_target(tmp_path: Path) -> No
     assert outputs["current_target_portfolio"]["reference_price"].gt(0).all()
     assert "expected_execution_date" in outputs["current_target_portfolio"].columns
     assert "observed_execution_date" in outputs["current_target_portfolio"].columns
+    assert "execution_open_price" in outputs["current_target_portfolio"].columns
+    assert "execution_price_available" in outputs["current_target_portfolio"].columns
+    assert (
+        outputs["current_target_portfolio"]["planned_execution_date"]
+        == outputs["current_target_portfolio"]["expected_execution_date"]
+    ).all()
     assert not (tmp_path / "reports" / "reports").exists()
 
 
@@ -269,6 +282,77 @@ def test_phase23j_blocks_on_overlap_mismatch(tmp_path: Path) -> None:
         "phase23j_post_endpoint_extension_incomplete"
     )
     assert not bool(outputs["summary"].iloc[0]["shadow_activation_ready"])
+
+
+def test_phase23j_preflight_blocks_impossible_overlap_configuration(
+    tmp_path: Path,
+) -> None:
+    _history, _manifest = _prepare_sources(tmp_path)
+    config = _config(tmp_path)
+    config["phase23j_post_endpoint_individual_equity_extension"][
+        "overlap_start_date"
+    ] = "2026-04-20"
+
+    def download(_ticker: str, _start: str, _end: str) -> pd.DataFrame:
+        raise AssertionError("preflight should run before downloads")
+
+    outputs = save_phase23j_post_endpoint_individual_equity_extension(
+        config=config,
+        reports_dir=tmp_path / "reports",
+        download_fn=download,
+    )
+
+    summary = outputs["summary"].iloc[0]
+    assert summary["phase23j_decision"] == (
+        "phase23j_blocked_overlap_configuration_insufficient"
+    )
+    assert "overlap_configuration_insufficient" in summary["blocking_reasons"]
+    gate_details = ";".join(outputs["gate_report"]["detail"].astype(str))
+    assert "available_overlap_sessions=10" in gate_details
+    assert "required_overlap_sessions=21" in gate_details
+    assert "failed_symbols" not in summary["blocking_reasons"]
+
+
+def test_phase23j_impossible_overlap_clears_stale_current_outputs(
+    tmp_path: Path,
+) -> None:
+    _history, _manifest = _prepare_sources(tmp_path)
+    config = _config(tmp_path)
+    phase23j_dir = tmp_path / "reports" / "phase23j"
+    phase23j_dir.mkdir(parents=True)
+    pd.DataFrame(
+        [
+            {
+                "selected_signal_date": "2026-06-12",
+                "planned_execution_date": "",
+                "portfolio_id": "ridge_top5_equal_weight",
+                "ticker": "STALE",
+                "target_weight": 0.2,
+            }
+        ]
+    ).to_csv(phase23j_dir / "phase23j_current_target_portfolio.csv", index=False)
+    config["phase23j_post_endpoint_individual_equity_extension"][
+        "overlap_start_date"
+    ] = "2026-04-20"
+
+    outputs = save_phase23j_post_endpoint_individual_equity_extension(
+        config=config,
+        reports_dir=tmp_path / "reports",
+        download_fn=lambda _ticker, _start, _end: pd.DataFrame(),
+    )
+
+    assert outputs["current_target_portfolio"].empty
+    target = pd.read_csv(phase23j_dir / "phase23j_current_target_portfolio.csv")
+    assert target.empty
+    for column in [
+        "planned_execution_date",
+        "expected_execution_date",
+        "observed_execution_date",
+        "execution_open_price",
+        "execution_price_available",
+    ]:
+        assert column in target.columns
+    assert "STALE" not in target.to_string()
 
 
 def test_phase23i_shadow_consumes_phase23j_outputs(tmp_path: Path) -> None:
@@ -387,3 +471,9 @@ def test_phase23j_proposal_waits_for_next_open_price(tmp_path: Path) -> None:
     assert not bool(summary["simulated_fill_ready"])
     assert not bool(summary["shadow_activation_ready"])
     assert not outputs["current_target_portfolio"]["paper_order_allowed"].any()
+    target = outputs["current_target_portfolio"]
+    assert target["expected_execution_date"].eq("2026-06-15").all()
+    assert target["planned_execution_date"].eq("2026-06-15").all()
+    assert target["observed_execution_date"].fillna("").eq("").all()
+    assert target["execution_price_available"].map(bool).eq(False).all()
+    assert set(target["order_blocking_reason"]) == {"execution_open_price_pending"}

@@ -65,7 +65,7 @@ DEFAULT_PHASE23J_CONFIG: dict[str, Any] = {
         "phase23i_frozen_cost_aware_portfolio"
     ),
     "canonical_research_endpoint": "2026-05-01",
-    "overlap_start_date": "2026-04-20",
+    "overlap_start_date": "2026-03-30",
     "minimum_overlap_rows": 21,
     "as_of_date": "",
     "minimum_post_endpoint_rows": 5,
@@ -94,6 +94,92 @@ DEFAULT_PHASE23J_CONFIG: dict[str, Any] = {
 }
 
 DownloadFn = Callable[[str, str, str], pd.DataFrame]
+
+CURRENT_FEATURE_COLUMNS = [
+    "panel_row_id",
+    "decision_timestamp_utc",
+    "signal_date",
+    "execution_date",
+    "universe_id",
+    "permanent_security_id",
+    "permanent_company_id",
+    "ticker",
+    "ticker_asof",
+    "sector_asof",
+    "industry_asof",
+    "membership_known_timestamp_utc",
+    "membership_effective_date",
+    "membership_active",
+    "model_cutoff_timestamp_utc",
+    "technical_available_timestamp_utc",
+    "fundamental_available_timestamp_utc",
+    "sentiment_available_timestamp_utc",
+    "macro_available_timestamp_utc",
+    "cross_asset_available_timestamp_utc",
+    "market_stress_available_timestamp_utc",
+    "liquidity_available_timestamp_utc",
+    "event_available_timestamp_utc",
+    "feature_max_available_timestamp_utc",
+    "feature_set_version",
+    "source_snapshot_id",
+    "split_label",
+    "training_eligible",
+    *CORE_FEATURE_COLUMNS,
+    "feature_missing_count",
+    "oldest_feature_age_days",
+]
+
+CURRENT_RANKING_COLUMNS = [
+    "decision_timestamp_utc",
+    "signal_date",
+    "panel_row_id",
+    "universe_id",
+    "permanent_security_id",
+    "ticker",
+    "sector_asof",
+    "model_version",
+    "training_cutoff",
+    "purge_boundary_signal_date",
+    "training_rows",
+    "training_decision_dates",
+    "predicted_20d_excess_return_or_ranking_score",
+    "predicted_rank",
+    "prediction_is_prospective",
+    "prediction_is_out_of_sample",
+    "noncanonical_pilot_warning",
+    "reference_price",
+    "reference_price_date",
+]
+
+CURRENT_TARGET_COLUMNS = [
+    "selected_signal_date",
+    "planned_execution_date",
+    "expected_execution_date",
+    "observed_execution_date",
+    "portfolio_id",
+    "ticker",
+    "target_weight",
+    "target_notional",
+    "reference_price",
+    "reference_price_date",
+    "execution_open_price",
+    "execution_price_available",
+    "estimated_target_shares",
+    "target_status",
+    "paper_order_allowed",
+    "order_blocking_reason",
+    "noncanonical_label",
+]
+
+PROSPECTIVE_COEFFICIENT_COLUMNS = [
+    "feature_name",
+    "coefficient",
+    "ridge_alpha",
+    "training_rows",
+    "training_decision_dates",
+    "model_fit_timestamp_utc",
+    "preprocessing_metadata",
+]
 
 
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
@@ -225,6 +311,25 @@ def next_us_equity_trading_day(date: pd.Timestamp) -> pd.Timestamp:
     ):
         candidate += pd.Timedelta(days=1)
     return candidate.normalize()
+
+
+def count_us_equity_trading_sessions(
+    start_date: str | pd.Timestamp, end_date: str | pd.Timestamp
+) -> int:
+    start = pd.Timestamp(start_date).normalize()
+    end = pd.Timestamp(end_date).normalize()
+    if pd.isna(start) or pd.isna(end) or start > end:
+        return 0
+    count = 0
+    candidate = start
+    while candidate <= end:
+        if (
+            candidate.weekday() < 5
+            and candidate.normalize() not in _us_equity_market_holidays(candidate.year)
+        ):
+            count += 1
+        candidate += pd.Timedelta(days=1)
+    return count
 
 
 def _end_exclusive(as_of_date: pd.Timestamp) -> str:
@@ -530,6 +635,7 @@ def _blocked_outputs(
     dashboard_path: Path,
     decision: str,
     reasons: list[str],
+    gate_rows: list[dict[str, Any]] | None = None,
 ) -> dict[str, pd.DataFrame]:
     summary = pd.DataFrame(
         [
@@ -553,7 +659,9 @@ def _blocked_outputs(
             }
         ]
     )
-    gates = pd.DataFrame([_gate("phase23j_blocked", False, ";".join(reasons))])
+    gates = pd.DataFrame(
+        (gate_rows or []) + [_gate("phase23j_blocked", False, ";".join(reasons))]
+    )
     gates["all_gates_passed"] = False
     conclusion = pd.DataFrame(
         [
@@ -567,11 +675,59 @@ def _blocked_outputs(
         ]
     )
     output_dir.mkdir(parents=True, exist_ok=True)
+    current_features = pd.DataFrame(columns=CURRENT_FEATURE_COLUMNS)
+    current_ranking = pd.DataFrame(columns=CURRENT_RANKING_COLUMNS)
+    current_target = pd.DataFrame(columns=CURRENT_TARGET_COLUMNS)
+    coefficients = pd.DataFrame(columns=PROSPECTIVE_COEFFICIENT_COLUMNS)
+    download_status = pd.DataFrame(columns=["ticker", "role", "status", "error"])
+    source_inventory = pd.DataFrame(columns=["ticker", "role", "source_path"])
+    extension_validation = pd.DataFrame(
+        columns=["ticker", "role", "gate", "passed", "result", "detail", "all_gates_passed"]
+    )
+    data_freshness = pd.DataFrame(
+        columns=[
+            "canonical_research_endpoint",
+            "as_of_date",
+            "latest_common_signal_date",
+            "validated_security_count",
+            "benchmark_ready",
+            "canonical_historical_files_unchanged",
+            "post_endpoint_data_ready",
+            "data_namespace",
+            "source_metadata_retained",
+            "checksums_retained",
+        ]
+    )
+    constraint_audit = pd.DataFrame(columns=["signal_date", "ticker", "action", "reason"])
     _write_csv(summary, output_dir / "phase23j_summary.csv")
     _write_csv(gates, output_dir / "phase23j_gate_report.csv")
     _write_csv(conclusion, output_dir / "phase23j_conclusion.csv")
+    _write_csv(download_status, output_dir / "phase23j_download_status.csv")
+    _write_csv(source_inventory, output_dir / "phase23j_source_inventory.csv")
+    _write_csv(extension_validation, output_dir / "phase23j_extension_validation.csv")
+    _write_csv(data_freshness, output_dir / "phase23j_data_freshness.csv")
+    _write_csv(current_features, output_dir / "phase23j_current_features.csv")
+    _write_csv(current_features, output_dir / "phase23j_prospective_feature_panel.csv")
+    _write_csv(current_ranking, output_dir / "phase23j_current_ranking.csv")
+    _write_csv(current_target, output_dir / "phase23j_current_target_portfolio.csv")
+    _write_csv(coefficients, output_dir / "phase23j_prospective_model_coefficients.csv")
+    _write_csv(constraint_audit, output_dir / "phase23j_constraint_audit.csv")
     _write_csv(summary.assign(dashboard_status="phase23j_status_written"), dashboard_path)
-    return {"summary": summary, "gate_report": gates, "conclusion": conclusion}
+    return {
+        "summary": summary,
+        "gate_report": gates,
+        "conclusion": conclusion,
+        "download_status": download_status,
+        "source_inventory": source_inventory,
+        "extension_validation": extension_validation,
+        "data_freshness": data_freshness,
+        "current_features": current_features,
+        "prospective_feature_panel": current_features,
+        "current_ranking": current_ranking,
+        "current_target_portfolio": current_target,
+        "prospective_model_coefficients": coefficients,
+        "constraint_audit": constraint_audit,
+    }
 
 
 def save_phase23j_post_endpoint_individual_equity_extension(
@@ -641,6 +797,30 @@ def save_phase23j_post_endpoint_individual_equity_extension(
             dashboard_path=dashboard_path,
             decision="phase23j_blocked_as_of_not_after_endpoint",
             reasons=["as_of_date_not_after_canonical_endpoint"],
+        )
+    available_overlap_sessions = count_us_equity_trading_sessions(
+        section["overlap_start_date"],
+        endpoint,
+    )
+    required_overlap_sessions = int(section["minimum_overlap_rows"])
+    if available_overlap_sessions < required_overlap_sessions:
+        detail = (
+            "overlap_configuration_insufficient;"
+            f"available_overlap_sessions={available_overlap_sessions};"
+            f"required_overlap_sessions={required_overlap_sessions}"
+        )
+        return _blocked_outputs(
+            output_dir=output_dir,
+            dashboard_path=dashboard_path,
+            decision="phase23j_blocked_overlap_configuration_insufficient",
+            reasons=[detail],
+            gate_rows=[
+                _gate(
+                    "overlap_configuration_sufficient",
+                    False,
+                    detail,
+                )
+            ],
         )
     configured_download = download_fn or _default_yfinance_download
     if not section["allow_network_download"] and download_fn is None:
@@ -1064,6 +1244,7 @@ def save_phase23j_post_endpoint_individual_equity_extension(
         "source_inventory": inventory,
         "extension_validation": extension_validation,
         "data_freshness": data_freshness,
+        "current_features": prospective_panel,
         "prospective_feature_panel": prospective_panel,
         "prospective_model_coefficients": prospective_coefficients,
         "current_ranking": ranking,

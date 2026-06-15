@@ -40,12 +40,27 @@ def build_filled_shadow_session(
                 "Cannot mark blocked Phase23I shadow orders as entered. "
                 "Review current_proposed_order_plan.csv first."
             )
+        if "execution_open_price" not in filled.columns:
+            raise ValueError(
+                "Cannot simulate fills before the next-open execution price is available."
+            )
+        execution_price = pd.to_numeric(
+            filled["execution_open_price"], errors="coerce"
+        )
+        proposed_quantity = pd.to_numeric(
+            filled.get("proposed_quantity", filled.get("estimated_target_shares")),
+            errors="coerce",
+        )
+        if execution_price.isna().any() or execution_price.le(0).any():
+            raise ValueError(
+                "Cannot simulate fills before positive next-open prices are available."
+            )
+        if proposed_quantity.isna().any() or proposed_quantity.le(0).any():
+            raise ValueError("Cannot simulate fills without positive proposed quantities.")
         filled["manual_decision"] = "enter_simulated_shadow_trade"
         filled["session_state"] = "entered"
-        filled["simulated_fill_price"] = 1.0
-        filled["simulated_fill_quantity"] = (
-            pd.to_numeric(filled["target_notional"], errors="coerce").fillna(0.0)
-        )
+        filled["simulated_fill_price"] = execution_price
+        filled["simulated_fill_quantity"] = proposed_quantity.astype(int)
         filled["override_reason"] = "explicit_user_simulated_shadow_fill_command"
         filled["notes"] = (
             "SIMULATED PAPER SHADOW FILL ONLY - no broker, no live trading, "

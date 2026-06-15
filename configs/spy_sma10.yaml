@@ -13645,7 +13645,7 @@ phase23j_post_endpoint_individual_equity_extension:
   source_phase23g_dir: "reports/individual_equity_decision_system/phase23g_interpretable_stock_ranker"
   source_phase23i_dir: "reports/individual_equity_decision_system/phase23i_frozen_cost_aware_portfolio"
   canonical_research_endpoint: "2026-05-01"
-  overlap_start_date: "2026-04-20"
+  overlap_start_date: "2026-03-30"
   minimum_overlap_rows: 21
   as_of_date: ""
   minimum_post_endpoint_rows: 5

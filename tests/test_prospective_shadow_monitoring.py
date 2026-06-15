@@ -408,6 +408,26 @@ def test_ic_uses_complete_cross_section(tmp_path: Path) -> None:
     assert outputs["prospective_ic_history"].iloc[0]["security_count"] == 16
 
 
+def test_ic_reports_insufficient_variation_for_constant_realised_outcomes(tmp_path: Path) -> None:
+    outputs = _run(tmp_path, mature=True)
+    row = outputs["prospective_ic_history"].iloc[0]
+    assert pd.isna(row["spearman_ic"])
+    assert row["status"] == "insufficient_cross_sectional_variation"
+
+
+def test_ic_reports_insufficient_variation_for_constant_model_scores(tmp_path: Path) -> None:
+    config = _write_sources(tmp_path, mature=True)
+    ranking_path = Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"]) / "phase23j_current_ranking.csv"
+    ranking = pd.read_csv(ranking_path)
+    ranking["predicted_20d_excess_return_or_ranking_score"] = 1.0
+    ranking.to_csv(ranking_path, index=False)
+
+    outputs = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    row = outputs["prospective_ic_history"].iloc[0]
+    assert pd.isna(row["spearman_ic"])
+    assert row["status"] == "insufficient_cross_sectional_variation"
+
+
 def test_top_minus_bottom_spread_is_calculated(tmp_path: Path) -> None:
     outputs = _run(tmp_path, mature=True)
     assert pd.notna(outputs["prospective_spread_history"].iloc[0]["top_minus_bottom_spread"])

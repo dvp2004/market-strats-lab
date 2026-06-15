@@ -1,0 +1,17 @@
+universe_id,permanent_security_id,permanent_company_id,ticker,sector,industry,membership_start_date,membership_end_date,membership_known_timestamp_utc,price_file,canonical_membership,research_pilot_only
+SP500_PILOT_NONCANONICAL,PILOT_SEC_AAPL,PILOT_CO_AAPL,AAPL,Information Technology,Technology Hardware,2023-01-03,,2023-01-03T00:00:00Z,AAPL.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_MSFT,PILOT_CO_MSFT,MSFT,Information Technology,Systems Software,2023-01-03,,2023-01-03T00:00:00Z,MSFT.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_NVDA,PILOT_CO_NVDA,NVDA,Information Technology,Semiconductors,2023-01-03,,2023-01-03T00:00:00Z,NVDA.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_AMZN,PILOT_CO_AMZN,AMZN,Consumer Discretionary,Broadline Retail,2023-01-03,,2023-01-03T00:00:00Z,AMZN.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_GOOGL,PILOT_CO_GOOGL,GOOGL,Communication Services,Interactive Media and Services,2023-01-03,,2023-01-03T00:00:00Z,GOOGL.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_META,PILOT_CO_META,META,Communication Services,Interactive Media and Services,2023-01-03,,2023-01-03T00:00:00Z,META.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_JPM,PILOT_CO_JPM,JPM,Financials,Diversified Banks,2023-01-03,,2023-01-03T00:00:00Z,JPM.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_BRK_B,PILOT_CO_BRK_B,BRK-B,Financials,Multi-Sector Holdings,2023-01-03,,2023-01-03T00:00:00Z,BRK-B.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_XOM,PILOT_CO_XOM,XOM,Energy,Integrated Oil and Gas,2023-01-03,,2023-01-03T00:00:00Z,XOM.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_JNJ,PILOT_CO_JNJ,JNJ,Health Care,Pharmaceuticals,2023-01-03,,2023-01-03T00:00:00Z,JNJ.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_UNH,PILOT_CO_UNH,UNH,Health Care,Managed Health Care,2023-01-03,,2023-01-03T00:00:00Z,UNH.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_PG,PILOT_CO_PG,PG,Consumer Staples,Household Products,2023-01-03,,2023-01-03T00:00:00Z,PG.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_COST,PILOT_CO_COST,COST,Consumer Staples,Consumer Staples Merchandise Retail,2023-01-03,,2023-01-03T00:00:00Z,COST.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_CAT,PILOT_CO_CAT,CAT,Industrials,Construction Machinery,2023-01-03,,2023-01-03T00:00:00Z,CAT.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_NEE,PILOT_CO_NEE,NEE,Utilities,Electric Utilities,2023-01-03,,2023-01-03T00:00:00Z,NEE.csv,False,True
+SP500_PILOT_NONCANONICAL,PILOT_SEC_TSLA,PILOT_CO_TSLA,TSLA,Consumer Discretionary,Automobile Manufacturers,2023-01-03,,2023-01-03T00:00:00Z,TSLA.csv,False,True

@@ -5,6 +5,7 @@ import json
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
+from time import sleep
 from typing import Any
 
 import numpy as np
@@ -137,7 +138,14 @@ def _write_csv(frame: pd.DataFrame, path: Path, columns: list[str] | None = None
         working = working[columns]
     temporary = path.with_suffix(path.suffix + ".tmp")
     working.to_csv(temporary, index=False)
-    temporary.replace(path)
+    for attempt in range(5):
+        try:
+            temporary.replace(path)
+            return
+        except PermissionError:
+            if attempt == 4:
+                raise
+            sleep(0.1)
 
 
 def _generated_at() -> str:
@@ -251,11 +259,22 @@ def trading_horizon_end_date(
     return pd.Timestamp(dates[end_index]).normalize()
 
 
-def _spearman(left: pd.Series, right: pd.Series) -> float:
-    frame = pd.DataFrame({"left": left, "right": right}).dropna()
+def _safe_spearman(left: pd.Series, right: pd.Series) -> tuple[float, str]:
+    frame = pd.DataFrame(
+        {
+            "left": pd.to_numeric(left, errors="coerce"),
+            "right": pd.to_numeric(right, errors="coerce"),
+        }
+    ).replace([np.inf, -np.inf], np.nan)
+    frame = frame.dropna()
     if len(frame) < 2:
-        return np.nan
-    return float(frame["left"].rank().corr(frame["right"].rank()))
+        return np.nan, "insufficient_cross_sectional_observations"
+    if frame["left"].nunique(dropna=True) < 2 or frame["right"].nunique(dropna=True) < 2:
+        return np.nan, "insufficient_cross_sectional_variation"
+    correlation = frame["left"].rank().corr(frame["right"].rank())
+    if pd.isna(correlation):
+        return np.nan, "insufficient_cross_sectional_variation"
+    return float(correlation), "calculated"
 
 
 def _normalised_wasserstein(reference: pd.Series, current: pd.Series) -> float:
@@ -751,7 +770,9 @@ def _build_maturity_and_outcomes(
         outcomes["universe_mean_20d_return"] = universe_mean
         outcomes["realised_20d_excess_return"] = outcomes["realised_20d_return"] - universe_mean
         outcome_frames.append(outcomes)
-        ic = _spearman(outcomes["original_score"], outcomes["realised_20d_excess_return"])
+        ic, ic_status = _safe_spearman(
+            outcomes["original_score"], outcomes["realised_20d_excess_return"]
+        )
         top5 = outcomes.nsmallest(5, "original_rank")
         bottom5 = outcomes.nlargest(5, "original_rank")
         top_mean = float(top5["realised_20d_excess_return"].mean())
@@ -767,7 +788,7 @@ def _build_maturity_and_outcomes(
                 "top5_mean_excess_return": top_mean,
                 "bottom5_mean_excess_return": bottom_mean,
                 "top_minus_bottom_spread": spread,
-                "status": "calculated",
+                "status": ic_status,
             }
         )
         spread_rows.append(ic_rows[-1].copy())
@@ -875,7 +896,7 @@ def _build_score_drift(snapshots: pd.DataFrame, section: dict[str, Any]) -> tupl
                 on="ticker",
                 suffixes=("_prior", "_current"),
             )
-            stability = _spearman(merged["rank_prior"], merged["rank_current"])
+            stability, _ = _safe_spearman(merged["rank_prior"], merged["rank_current"])
         status = "descriptive_only"
         if len(sessions) >= int(section["minimum_sessions_for_drift_warning"]) and pd.notna(rank_turnover) and rank_turnover > 0.8:
             status = "score_drift_warning"
