@@ -11,6 +11,8 @@ htmlcov/
 
 data/raw/
 data/processed/
+data/global_multi_asset_alpha/
+state/global_multi_asset_alpha/
 reports/
 experiments/
 

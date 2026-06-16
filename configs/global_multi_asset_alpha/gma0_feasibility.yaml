@@ -1,0 +1,99 @@
+track:
+  track_id: gma_alpha
+  phase_id: gma0_feasibility
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+
+paths:
+  raw_root: data/global_multi_asset_alpha/raw
+  processed_root: data/global_multi_asset_alpha/processed
+  manifest_root: data/global_multi_asset_alpha/manifests
+  report_root: reports/global_multi_asset_alpha/feasibility
+  cache_root: data/global_multi_asset_alpha/cache/yfinance
+
+provider:
+  name: yahoo_yfinance
+  fetch_enabled: true
+  immutable_snapshots: true
+  auto_adjust: false
+  timeout_seconds: 30
+
+audit:
+  expected_price_columns: [date, open, high, low, close, adj_close, volume]
+  minimum_history_observations: 252
+  momentum_warmup_months: 12
+  require_raw_open: true
+  require_adjusted_close: true
+  require_volume: true
+  stale_price_threshold_days: 5
+  zero_volume_threshold_days: 3
+  hash_algorithm: sha256
+
+replay_start:
+  required_core_instruments:
+    - SPY
+    - QQQ
+    - IWM
+    - RSP
+    - EFA
+    - VGK
+    - EWJ
+    - EEM
+    - SHY
+    - IEF
+    - TLT
+    - TIP
+    - AGG
+    - LQD
+    - HYG
+    - EMB
+    - GLD
+    - DBC
+    - VNQ
+    - UUP
+    - BIL
+  minimum_warmup_months: 12
+  provisional_first_signal_rule: calculated_from_required_core_instruments_after_12_month_warmup
+  provisional_execution_rule: next_available_raw_open_after_signal_date
+  benchmark_exemptions:
+    - SPY Buy & Hold
+    - ACWI Buy & Hold
+    - fixed 60/40 benchmark
+    - static risk-balanced benchmark
+  draft_governance_notes:
+    - Historical economic acceptance thresholds are draft governance only in GMA-0.
+    - No regime contribution threshold is implemented before preregistration.
+
+instruments:
+  SPY: {}
+  QQQ: {}
+  IWM: {}
+  RSP: {}
+  EFA: {}
+  VGK: {}
+  EWJ: {}
+  EEM: {}
+  VWO: {}
+  SHY: {}
+  IEF: {}
+  TLT: {}
+  TIP: {}
+  AGG: {}
+  LQD: {}
+  HYG: {}
+  EMB: {}
+  GLD: {}
+  DBC: {}
+  DBA: {}
+  DBB: {}
+  USO: {}
+  VNQ: {}
+  UUP: {}
+  FXE: {}
+  FXY: {}
+  FXB: {}
+  BIL: {}
+  BTC-USD: {}
+  ACWI: {}
