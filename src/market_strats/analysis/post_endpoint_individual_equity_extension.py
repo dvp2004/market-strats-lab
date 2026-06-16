@@ -29,7 +29,6 @@ from market_strats.analysis.pilot_individual_equity_feature_calculation import (
 )
 from market_strats.analysis.pilot_individual_equity_input_bootstrap import (
     _default_yfinance_download,
-    normalize_yfinance_price_frame,
 )
 
 
@@ -165,6 +164,9 @@ CURRENT_TARGET_COLUMNS = [
     "execution_open_price",
     "execution_price_available",
     "estimated_target_shares",
+    "signal_estimated_target_shares",
+    "execution_target_shares",
+    "execution_open_status",
     "target_status",
     "paper_order_allowed",
     "order_blocking_reason",
@@ -361,6 +363,163 @@ def _normalise_local_price(frame: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def _flatten_phase23j_yfinance_columns(frame: pd.DataFrame) -> pd.DataFrame:
+    if not isinstance(frame.columns, pd.MultiIndex):
+        return frame.copy()
+    if frame.columns.nlevels != 2:
+        raise ValueError(f"Unsupported yfinance column levels: {frame.columns.nlevels}")
+    known = {
+        "Open",
+        "High",
+        "Low",
+        "Close",
+        "Adj Close",
+        "Volume",
+        "Dividends",
+        "Stock Splits",
+    }
+    first = [str(value) for value in frame.columns.get_level_values(0)]
+    second = [str(value) for value in frame.columns.get_level_values(1)]
+    working = frame.copy()
+    if set(first) & known:
+        working.columns = frame.columns.get_level_values(0)
+        return working
+    if set(second) & known:
+        working.columns = frame.columns.get_level_values(1)
+        return working
+    raise ValueError("Unable to identify yfinance field level")
+
+
+def _normalise_phase23j_download_frame(frame: pd.DataFrame) -> pd.DataFrame:
+    if frame is None or frame.empty:
+        raise ValueError("Downloaded price frame is empty")
+    working = _flatten_phase23j_yfinance_columns(frame)
+    if (
+        "Date" not in working.columns
+        and "date" not in working.columns
+        and isinstance(working.index, pd.DatetimeIndex)
+    ):
+        working = working.reset_index()
+        first_column = working.columns[0]
+        if first_column not in {"Date", "Datetime", "date"}:
+            working = working.rename(columns={first_column: "date"})
+    rename = {
+        "Date": "date",
+        "Datetime": "date",
+        "Open": "open",
+        "High": "high",
+        "Low": "low",
+        "Close": "close",
+        "Adj Close": "adj_close",
+        "Volume": "volume",
+        "Dividends": "dividends",
+        "Stock Splits": "stock_splits",
+    }
+    working = working.rename(columns=rename)
+    required = ["date", "open", "high", "low", "close", "adj_close", "volume"]
+    missing = sorted(set(required) - set(working.columns))
+    if missing:
+        raise ValueError("Downloaded frame missing columns: " + ";".join(missing))
+    for column in ["open", "high", "low", "close", "adj_close", "volume"]:
+        working[column] = pd.to_numeric(working[column], errors="coerce")
+    for column in ["dividends", "stock_splits"]:
+        if column not in working.columns:
+            working[column] = 0.0
+        working[column] = pd.to_numeric(working[column], errors="coerce").fillna(0.0)
+    working["date"] = pd.to_datetime(working["date"], errors="coerce", utc=True)
+    working["date"] = working["date"].dt.tz_convert(None).dt.normalize()
+    working = working.sort_values("date").drop_duplicates("date", keep="last")
+
+    full_bar_required = ["open", "high", "low", "close", "adj_close", "volume"]
+    incomplete = working[full_bar_required].isna().any(axis=1)
+    if incomplete.any():
+        complete_positions = [
+            position for position, value in enumerate(incomplete) if not value
+        ]
+        last_complete_position = max(complete_positions) if complete_positions else -1
+        interior_mask = pd.Series(
+            [
+                bool(value) and position < last_complete_position
+                for position, value in enumerate(incomplete)
+            ],
+            index=working.index,
+        )
+        if interior_mask.any():
+            bad_dates = (
+                working.loc[interior_mask, "date"].dt.strftime("%Y-%m-%d").tolist()
+            )
+            raise ValueError(
+                "Downloaded frame has incomplete non-trailing rows: "
+                + ";".join(bad_dates)
+            )
+    return working[
+        [
+            "date",
+            "open",
+            "high",
+            "low",
+            "close",
+            "adj_close",
+            "volume",
+            "dividends",
+            "stock_splits",
+        ]
+    ].reset_index(drop=True)
+
+
+def _complete_research_bar_rows(frame: pd.DataFrame) -> pd.DataFrame:
+    if frame.empty:
+        return frame.copy()
+    working = _normalise_local_price(frame)
+    required = ["open", "high", "low", "close", "adj_close", "volume"]
+    complete = working[required].notna().all(axis=1)
+    positive = (working[["open", "high", "low", "close", "adj_close"]] > 0).all(axis=1)
+    volume_ok = working["volume"].ge(0)
+    ohlc_ok = (
+        working["high"].ge(working[["open", "close", "low"]].max(axis=1))
+        & working["low"].le(working[["open", "close", "high"]].min(axis=1))
+    )
+    return working.loc[complete & positive & volume_ok & ohlc_ok].copy()
+
+
+def _finite_positive(value: Any) -> bool:
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return False
+    return bool(np.isfinite(numeric) and numeric > 0)
+
+
+def _valid_execution_open(row: pd.Series) -> tuple[bool, float, str]:
+    open_price = pd.to_numeric(row.get("open", np.nan), errors="coerce")
+    high = pd.to_numeric(row.get("high", np.nan), errors="coerce")
+    low = pd.to_numeric(row.get("low", np.nan), errors="coerce")
+    volume = pd.to_numeric(row.get("volume", np.nan), errors="coerce")
+    if not (_finite_positive(open_price) and _finite_positive(high) and _finite_positive(low)):
+        return False, np.nan, "execution_open_ohl_missing_or_nonpositive"
+    if float(high) < float(low):
+        return False, np.nan, "execution_open_high_below_low"
+    if not (float(low) <= float(open_price) <= float(high)):
+        return False, np.nan, "execution_open_outside_ohl_range"
+    if pd.notna(volume) and (not np.isfinite(float(volume)) or float(volume) < 0):
+        return False, np.nan, "execution_open_volume_invalid"
+    return True, float(open_price), "execution_open_available"
+
+
+def _execution_open_for_date(
+    frame: pd.DataFrame, expected_execution_date: pd.Timestamp
+) -> tuple[bool, float, str]:
+    if frame.empty or pd.isna(expected_execution_date):
+        return False, np.nan, "execution_open_price_pending"
+    working = _normalise_local_price(frame)
+    rows = working.loc[
+        pd.to_datetime(working["date"], errors="coerce").eq(expected_execution_date)
+    ]
+    if rows.empty:
+        return False, np.nan, "execution_open_price_pending"
+    return _valid_execution_open(rows.iloc[0])
+
+
 def validate_extension_against_history(
     *,
     historical: pd.DataFrame,
@@ -442,19 +601,29 @@ def validate_extension_against_history(
             f"endpoint={endpoint.date().isoformat()}",
         )
     )
+    complete_bar_available = post[["close", "adj_close"]].notna().all(axis=1)
+    incomplete_close_bar = ~complete_bar_available
+    complete_bar_valid = (
+        complete_bar_available
+        & post[["open", "high", "low", "close", "adj_close"]].notna().all(axis=1)
+        & (post[["open", "high", "low", "close", "adj_close"]] > 0).all(axis=1)
+        & post["volume"].notna()
+        & post["volume"].ge(0)
+        & post["high"].ge(post[["open", "close", "low"]].max(axis=1))
+        & post["low"].le(post[["open", "close", "high"]].min(axis=1))
+    )
+    partial_execution_open_valid = (
+        post[["open", "high", "low"]].notna().all(axis=1)
+        & (post[["open", "high", "low"]] > 0).all(axis=1)
+        & post["high"].ge(post["low"])
+        & post["open"].between(post["low"], post["high"])
+        & (post["volume"].isna() | post["volume"].ge(0))
+    )
     rows.append(
         _gate(
             "post_endpoint_ohlc_valid",
-            not post.empty
-            and bool(
-                (post["high"] >= post[["open", "close", "low"]].max(axis=1)).all()
-                and (post["low"] <= post[["open", "close", "high"]].min(axis=1)).all()
-                and (post[["open", "high", "low", "close", "adj_close"]] > 0)
-                .all()
-                .all()
-                and (post["volume"] >= 0).all()
-            ),
-            f"rows={len(post)}",
+            not post.empty and bool((complete_bar_valid | incomplete_close_bar).all()),
+            f"rows={len(post)};partial_execution_open_rows={int((~complete_bar_valid & partial_execution_open_valid).sum())}",
         )
     )
     report = pd.DataFrame(rows)
@@ -486,7 +655,7 @@ def _download_with_retries(
     last_error: Exception | None = None
     for attempt in range(1, max(int(attempts), 1) + 1):
         try:
-            return normalize_yfinance_price_frame(
+            return _normalise_phase23j_download_frame(
                 download_fn(ticker, start, end_exclusive)
             )
         except Exception as exc:  # pragma: no cover - exercised by injected tests
@@ -993,10 +1162,15 @@ def save_phase23j_post_endpoint_individual_equity_extension(
             "allow_paper_orders": False,
         },
     )
+    research_prices_by_security = {
+        security_id: _complete_research_bar_rows(frame)
+        for security_id, frame in combined_prices_by_security.items()
+    }
+    research_benchmark = _complete_research_bar_rows(benchmark_combined)
     prospective_panel, _prospective_targets, _source_inventory = build_pilot_panel_and_targets(
         manifest=manifest,
-        price_frames=combined_prices_by_security,
-        benchmark=benchmark_combined,
+        price_frames=research_prices_by_security,
+        benchmark=research_benchmark,
         phase_config=prospective_config,
     )
     if not prospective_panel.empty:
@@ -1033,54 +1207,78 @@ def save_phase23j_post_endpoint_individual_equity_extension(
             spec=_portfolio_spec(str(section["portfolio_id"])),
             config=phase23i_config,
         )
-    reference_prices: dict[str, float] = {}
-    latest_prices_date: dict[str, str] = {}
-    for row in manifest.itertuples(index=False):
-        frame = combined_prices_by_security.get(str(row.permanent_security_id), pd.DataFrame())
-        if frame.empty:
-            continue
-        latest_row = frame.sort_values("date").iloc[-1]
-        reference_prices[str(row.ticker)] = float(latest_row["close"])
-        latest_prices_date[str(row.ticker)] = pd.Timestamp(latest_row["date"]).date().isoformat()
-    if not ranking.empty:
-        ranking["reference_price"] = ranking["ticker"].map(reference_prices)
-        ranking["reference_price_date"] = ranking["ticker"].map(latest_prices_date)
     selected_signal_timestamp = (
         pd.to_datetime(ranking["signal_date"]).max().normalize()
         if not ranking.empty
         else pd.NaT
     )
+    reference_prices: dict[str, float] = {}
+    reference_price_dates: dict[str, str] = {}
+    for row in manifest.itertuples(index=False):
+        frame = combined_prices_by_security.get(str(row.permanent_security_id), pd.DataFrame())
+        if frame.empty or pd.isna(selected_signal_timestamp):
+            continue
+        working = _complete_research_bar_rows(frame)
+        signal_rows = working.loc[
+            pd.to_datetime(working["date"], errors="coerce").eq(
+                selected_signal_timestamp
+            )
+        ]
+        if signal_rows.empty:
+            continue
+        signal_row = signal_rows.iloc[0]
+        reference = pd.to_numeric(signal_row.get("close", np.nan), errors="coerce")
+        if pd.notna(reference) and float(reference) > 0:
+            reference_prices[str(row.ticker)] = float(reference)
+            reference_price_dates[str(row.ticker)] = (
+                selected_signal_timestamp.date().isoformat()
+            )
+    if not ranking.empty:
+        ranking["reference_price"] = ranking["ticker"].map(reference_prices)
+        ranking["reference_price_date"] = ranking["ticker"].map(reference_price_dates)
     expected_execution_date = pd.NaT
     observed_execution_date = pd.NaT
     if pd.notna(selected_signal_timestamp):
         expected_execution_date = next_us_equity_trading_day(selected_signal_timestamp)
-    if pd.notna(expected_execution_date) and not benchmark_combined.empty:
-        benchmark_dates = pd.to_datetime(benchmark_combined["date"], errors="coerce")
-        observed_dates = benchmark_dates.loc[benchmark_dates.ge(expected_execution_date)]
-        if not observed_dates.empty:
-            observed_execution_date = pd.Timestamp(observed_dates.min()).normalize()
+    execution_open_prices: dict[str, float] = {}
+    execution_open_available: dict[str, bool] = {}
+    execution_open_status: dict[str, str] = {}
+    for ticker in sorted(target_weights):
+        security_row = manifest.loc[manifest["ticker"].astype(str).eq(ticker)]
+        if security_row.empty:
+            execution_open_prices[ticker] = np.nan
+            execution_open_available[ticker] = False
+            execution_open_status[ticker] = "execution_security_not_found"
+            continue
+        security_id = str(security_row.iloc[0]["permanent_security_id"])
+        security_frame = combined_prices_by_security.get(security_id, pd.DataFrame())
+        available, open_price, status = _execution_open_for_date(
+            security_frame, expected_execution_date
+        )
+        execution_open_prices[ticker] = open_price
+        execution_open_available[ticker] = available
+        execution_open_status[ticker] = status
+    all_execution_opens_ready = bool(target_weights) and all(
+        execution_open_available.get(ticker, False) for ticker in target_weights
+    )
+    if all_execution_opens_ready:
+        observed_execution_date = expected_execution_date
     target_rows = []
     for ticker, weight in sorted(target_weights.items()):
         reference = reference_prices.get(ticker, np.nan)
         target_notional = float(shadow_config["starting_cash"]) * float(weight)
-        execution_open = np.nan
-        if pd.notna(observed_execution_date):
-            security_row = manifest.loc[manifest["ticker"].astype(str).eq(ticker)]
-            if not security_row.empty:
-                security_id = str(security_row.iloc[0]["permanent_security_id"])
-                security_frame = combined_prices_by_security.get(
-                    security_id, pd.DataFrame()
-                )
-                if not security_frame.empty:
-                    execution_rows = security_frame.loc[
-                        pd.to_datetime(security_frame["date"], errors="coerce").eq(
-                            observed_execution_date
-                        )
-                    ]
-                    if not execution_rows.empty:
-                        execution_open = float(execution_rows.iloc[0]["open"])
-        fill_ready = pd.notna(execution_open) and execution_open > 0
-        sizing_price = execution_open if fill_ready else reference
+        execution_open = execution_open_prices.get(ticker, np.nan)
+        fill_ready = bool(execution_open_available.get(ticker, False))
+        signal_estimated_target_shares = (
+            int(np.floor(target_notional / reference))
+            if pd.notna(reference) and reference > 0
+            else 0
+        )
+        execution_target_shares = (
+            int(np.floor(target_notional / execution_open))
+            if fill_ready and pd.notna(execution_open) and execution_open > 0
+            else 0
+        )
         target_rows.append(
             {
                 "selected_signal_date": ranking["signal_date"].iloc[0] if not ranking.empty else "",
@@ -1098,15 +1296,20 @@ def save_phase23j_post_endpoint_individual_equity_extension(
                 "target_weight": float(weight),
                 "target_notional": target_notional,
                 "reference_price": reference,
-                "reference_price_date": latest_prices_date.get(ticker, ""),
+                "reference_price_date": reference_price_dates.get(ticker, ""),
                 "execution_open_price": execution_open,
                 "execution_price_available": fill_ready,
-                "estimated_target_shares": int(np.floor(target_notional / sizing_price))
-                if pd.notna(sizing_price) and sizing_price > 0
-                else 0,
+                "estimated_target_shares": signal_estimated_target_shares,
+                "signal_estimated_target_shares": signal_estimated_target_shares,
+                "execution_target_shares": execution_target_shares,
+                "execution_open_status": execution_open_status.get(
+                    ticker, "execution_open_price_pending"
+                ),
                 "target_status": "prospective_frozen_model_target",
-                "paper_order_allowed": fill_ready,
-                "order_blocking_reason": "" if fill_ready else "execution_open_price_pending",
+                "paper_order_allowed": all_execution_opens_ready,
+                "order_blocking_reason": ""
+                if all_execution_opens_ready
+                else "execution_open_price_pending",
                 "noncanonical_label": NONCANONICAL_WARNING,
             }
         )

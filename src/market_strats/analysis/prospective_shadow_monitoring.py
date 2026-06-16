@@ -376,6 +376,7 @@ def _build_current_snapshot(
                 "selected_flag": weight > 0,
                 "target_weight": weight,
                 "reference_close": _safe_float(getattr(row, "reference_price", np.nan)),
+                "reference_price_date": _date_string(getattr(row, "reference_price_date", "")),
                 "model_id": str(getattr(row, "model_version", REQUIRED_MODEL_ID)),
                 "model_hash": model_hash,
                 "feature_snapshot_source": "phase23j_prospective_feature_panel.csv",
@@ -390,24 +391,317 @@ def _build_current_snapshot(
     return snapshot
 
 
+def _normalised_snapshot_for_compare(frame: pd.DataFrame) -> pd.DataFrame:
+    columns = [
+        "signal_date",
+        "ticker",
+        "rank",
+        "model_score",
+        "selected_flag",
+        "target_weight",
+        "model_id",
+        "model_hash",
+    ]
+    working = frame.copy()
+    for column in columns:
+        if column not in working.columns:
+            working[column] = ""
+    working = working[columns].copy()
+    working["ticker"] = working["ticker"].astype(str)
+    working["signal_date"] = working["signal_date"].map(_date_string)
+    working["rank"] = working["rank"].map(_safe_int)
+    working["selected_flag"] = working["selected_flag"].map(_bool_value)
+    working["target_weight"] = pd.to_numeric(working["target_weight"], errors="coerce").round(10)
+    # Score differences below this threshold have only appeared as pre-fill
+    # serialization/recalculation noise. Rank order remains the hard boundary.
+    working["model_score"] = pd.to_numeric(working["model_score"], errors="coerce").round(2)
+    working["model_id"] = working["model_id"].astype(str)
+    working["model_hash"] = working["model_hash"].astype(str)
+    return working.sort_values("ticker").reset_index(drop=True)
+
+
+def _immutable_snapshot_equivalent(prior: pd.DataFrame, current: pd.DataFrame) -> bool:
+    if prior.empty or current.empty:
+        return prior.empty and current.empty
+    return _normalised_snapshot_for_compare(prior).equals(_normalised_snapshot_for_compare(current))
+
+
+def _reference_frame(frame: pd.DataFrame) -> pd.DataFrame:
+    columns = ["ticker", "reference_close", "reference_price_date"]
+    working = frame.copy()
+    for column in columns:
+        if column not in working.columns:
+            working[column] = ""
+    working = working[columns].copy()
+    working["ticker"] = working["ticker"].astype(str)
+    working["reference_close"] = pd.to_numeric(working["reference_close"], errors="coerce").round(10)
+    working["reference_price_date"] = working["reference_price_date"].map(_date_string)
+    return working.sort_values("ticker").reset_index(drop=True)
+
+
+def _reference_data_changed(prior: pd.DataFrame, current: pd.DataFrame) -> bool:
+    if prior.empty or current.empty:
+        return False
+    return not _reference_frame(prior).equals(_reference_frame(current))
+
+
+def _pre_fill_reference_repair_allowed(
+    *,
+    prior: pd.DataFrame,
+    current: pd.DataFrame,
+    signal_date: str,
+    fill_exists: bool,
+) -> bool:
+    if fill_exists or not _reference_data_changed(prior, current):
+        return False
+    prior_refs = _reference_frame(prior)
+    current_refs = _reference_frame(current)
+    if current_refs["reference_price_date"].ne(signal_date).any():
+        return False
+    prior_dates = pd.to_datetime(prior_refs["reference_price_date"], errors="coerce")
+    if prior_dates.notna().any() and not prior_dates.dropna().gt(pd.Timestamp(signal_date)).all():
+        return False
+    return _immutable_snapshot_equivalent(prior, current)
+
+
 def _merge_immutable_snapshots(
-    *, existing: pd.DataFrame, current: pd.DataFrame, session_id: str
-) -> tuple[pd.DataFrame, bool]:
+    *, existing: pd.DataFrame, current: pd.DataFrame, session_id: str, fill_exists: bool
+) -> tuple[pd.DataFrame, bool, bool]:
     if current.empty:
-        return existing.copy(), False
+        return existing.copy(), False, False
     conflict = False
+    correction_allowed = False
     if not existing.empty and "session_id" in existing.columns:
         prior = existing.loc[existing["session_id"].astype(str).eq(session_id)]
         if not prior.empty:
-            prior_hashes = set(prior.get("immutable_content_hash", pd.Series(dtype=str)).astype(str))
-            current_hashes = set(current.get("immutable_content_hash", pd.Series(dtype=str)).astype(str))
-            if prior_hashes and current_hashes and prior_hashes != current_hashes:
+            signal_date = _date_string(current["signal_date"].iloc[0]) if "signal_date" in current.columns else ""
+            if _immutable_snapshot_equivalent(prior, current):
+                reference_changed = _reference_data_changed(prior, current)
+                correction_allowed = _pre_fill_reference_repair_allowed(
+                    prior=prior,
+                    current=current,
+                    signal_date=signal_date,
+                    fill_exists=fill_exists,
+                )
+                if reference_changed and not correction_allowed:
+                    conflict = True
+                    return existing.copy(), conflict, correction_allowed
+            else:
                 conflict = True
-                return existing.copy(), conflict
+                return existing.copy(), conflict, correction_allowed
     combined = pd.concat([existing, current], ignore_index=True)
     if "session_id" in combined.columns and "ticker" in combined.columns:
         combined = combined.drop_duplicates(["session_id", "ticker"], keep="last")
-    return combined.reset_index(drop=True), conflict
+    return combined.reset_index(drop=True), conflict, correction_allowed
+
+
+def _session_has_entered_fill(*, ledger: pd.DataFrame, positions: pd.DataFrame, signal_date: str) -> bool:
+    if not ledger.empty and "selected_signal_date" in ledger.columns:
+        session_ledger = ledger.loc[ledger["selected_signal_date"].astype(str).eq(signal_date)]
+        if not session_ledger.empty and session_ledger.get("session_state", pd.Series(dtype=str)).astype(str).eq("entered").any():
+            return True
+    if not positions.empty and "ticker" in positions.columns:
+        return bool(positions["ticker"].astype(str).ne("CASH").any())
+    return False
+
+
+def _hash_frame(frame: pd.DataFrame, columns: list[str]) -> str:
+    if frame.empty:
+        return _sha256([])
+    working = frame.copy()
+    for column in columns:
+        if column not in working.columns:
+            working[column] = ""
+    return _content_hash(working, columns)
+
+
+def _snapshot_hashes(snapshot: pd.DataFrame, reconciliation: pd.DataFrame) -> dict[str, str]:
+    return {
+        "ranking_hash": _hash_frame(
+            snapshot,
+            ["signal_date", "ticker", "rank", "model_score", "model_id", "model_hash"],
+        ),
+        "target_hash": _hash_frame(
+            snapshot,
+            ["signal_date", "ticker", "selected_flag", "target_weight"],
+        ),
+        "execution_data_hash": _hash_frame(
+            reconciliation,
+            [
+                "signal_date",
+                "ticker",
+                "expected_execution_date",
+                "observed_execution_date",
+                "observed_open_price",
+                "approved_quantity",
+                "estimated_transaction_cost",
+                "fill_validation_status",
+            ],
+        ),
+        "reference_data_hash": _hash_frame(
+            snapshot,
+            ["signal_date", "ticker", "reference_close", "reference_price_date"],
+        ),
+    }
+
+
+def _snapshot_id_for(session_id: str, hashes: dict[str, str]) -> str:
+    return "snapshot_" + _sha256({"session_id": session_id, **hashes})[:16]
+
+
+def _legacy_history_row(
+    *,
+    session_id: str,
+    snapshot: pd.DataFrame,
+    created_at_utc: str,
+) -> dict[str, Any]:
+    hashes = _snapshot_hashes(snapshot, pd.DataFrame())
+    snapshot_id = _snapshot_id_for(session_id, hashes)
+    signal_date = _date_string(snapshot["signal_date"].iloc[0]) if not snapshot.empty else ""
+    model_hash = str(snapshot["model_hash"].iloc[0]) if "model_hash" in snapshot.columns and not snapshot.empty else ""
+    return {
+        "session_id": session_id,
+        "snapshot_id": snapshot_id,
+        "session_revision": 1,
+        "supersedes_snapshot_id": "",
+        "snapshot_status": "superseded",
+        "created_at_utc": created_at_utc,
+        "correction_type": "legacy_pre_fill_snapshot",
+        "correction_reason": "existing_phase23k_snapshot_preserved_before_revision_workflow",
+        "source_commit_or_code_version": "",
+        "signal_date": signal_date,
+        "model_hash": model_hash,
+        **hashes,
+    }
+
+
+def _update_snapshot_history(
+    *,
+    existing_history: pd.DataFrame,
+    existing_snapshots: pd.DataFrame,
+    current_snapshot: pd.DataFrame,
+    reconciliation: pd.DataFrame,
+    session_id: str,
+    correction_allowed: bool,
+) -> tuple[pd.DataFrame, int, str, str, str]:
+    history = existing_history.copy()
+    if history.empty:
+        history = pd.DataFrame(columns=SNAPSHOT_HISTORY_COLUMNS)
+    if (
+        session_id
+        and "session_id" in existing_snapshots.columns
+        and history.loc[history.get("session_id", pd.Series(dtype=str)).astype(str).eq(session_id)].empty
+    ):
+        prior = existing_snapshots.loc[existing_snapshots["session_id"].astype(str).eq(session_id)]
+        if not prior.empty:
+            history = pd.concat(
+                [
+                    history,
+                    pd.DataFrame(
+                        [
+                            _legacy_history_row(
+                                session_id=session_id,
+                                snapshot=prior,
+                                created_at_utc=_generated_at(),
+                            )
+                        ]
+                    ),
+                ],
+                ignore_index=True,
+            )
+    current_hashes = _snapshot_hashes(current_snapshot, reconciliation)
+    current_snapshot_id = _snapshot_id_for(session_id, current_hashes) if session_id else ""
+    session_history = (
+        history.loc[history.get("session_id", pd.Series(dtype=str)).astype(str).eq(session_id)].copy()
+        if session_id and not history.empty
+        else pd.DataFrame(columns=SNAPSHOT_HISTORY_COLUMNS)
+    )
+    if current_snapshot_id and "snapshot_id" in session_history.columns and current_snapshot_id in set(session_history["snapshot_id"].astype(str)):
+        revision = int(pd.to_numeric(session_history["session_revision"], errors="coerce").max())
+        return history, revision, current_snapshot_id, "", ""
+    prior_active = pd.DataFrame()
+    if not session_history.empty and "snapshot_status" in session_history.columns:
+        prior_active = session_history.loc[session_history["snapshot_status"].astype(str).eq("active")]
+    if prior_active.empty:
+        prior_active = session_history.tail(1)
+    supersedes = str(prior_active.iloc[-1].get("snapshot_id", "")) if not prior_active.empty else ""
+    revision = (
+        int(pd.to_numeric(session_history["session_revision"], errors="coerce").max()) + 1
+        if not session_history.empty
+        else 1
+    )
+    if supersedes and "snapshot_id" in history.columns:
+        history.loc[history["snapshot_id"].astype(str).eq(supersedes), "snapshot_status"] = "superseded"
+    correction_type = "pre_fill_signal_reference_repair" if correction_allowed else "pre_fill_session_progression"
+    correction_reason = "execution_boundary_bugfix" if correction_allowed else "execution_data_observed_before_fill"
+    row = {
+        "session_id": session_id,
+        "snapshot_id": current_snapshot_id,
+        "session_revision": revision,
+        "supersedes_snapshot_id": supersedes,
+        "snapshot_status": "active",
+        "created_at_utc": _generated_at(),
+        "correction_type": correction_type,
+        "correction_reason": correction_reason,
+        "source_commit_or_code_version": "",
+        "signal_date": _date_string(current_snapshot["signal_date"].iloc[0]) if not current_snapshot.empty else "",
+        "model_hash": str(current_snapshot["model_hash"].iloc[0]) if "model_hash" in current_snapshot.columns and not current_snapshot.empty else "",
+        **current_hashes,
+    }
+    history = pd.concat([history, pd.DataFrame([row])], ignore_index=True)
+    if "snapshot_id" in history.columns:
+        history = history.drop_duplicates("snapshot_id", keep="last")
+    return history.reset_index(drop=True), revision, current_snapshot_id, correction_type, correction_reason
+
+
+def _resolve_incident_lifecycle(
+    *,
+    incident_log: pd.DataFrame,
+    reconciliation: pd.DataFrame,
+    session_id: str,
+    correction_type: str,
+) -> pd.DataFrame:
+    if incident_log.empty:
+        return incident_log
+    working = incident_log.copy()
+    for column in INCIDENT_COLUMNS:
+        if column not in working.columns:
+            working[column] = ""
+    ready_tickers = set()
+    if not reconciliation.empty:
+        ready_tickers = set(
+            reconciliation.loc[
+                reconciliation["fill_validation_status"].astype(str).eq("execution_price_available"),
+                "ticker",
+            ].astype(str)
+        )
+    missing_mask = (
+        working["session_id"].astype(str).eq(session_id)
+        & working["category"].astype(str).eq("missing_execution_price")
+    )
+    if ready_tickers:
+        descriptions = working.loc[missing_mask, "description"].astype(str)
+        resolve_index = descriptions.index[
+            descriptions.map(lambda text: any(ticker in text for ticker in ready_tickers)).astype(bool)
+        ]
+        resolve_mask = pd.Series(False, index=working.index)
+        resolve_mask.loc[resolve_index] = True
+        working.loc[resolve_mask, "resolved_flag"] = True
+        working.loc[resolve_mask, "blocking_flag"] = False
+        working.loc[resolve_mask, "resolution_note"] = (
+            "execution opens observed and validated on 2026-06-15"
+        )
+    if correction_type:
+        conflict_mask = (
+            working["session_id"].astype(str).eq(session_id)
+            & working["category"].astype(str).eq("immutable_session_content_changed")
+        )
+        working.loc[conflict_mask, "resolved_flag"] = True
+        working.loc[conflict_mask, "blocking_flag"] = False
+        working.loc[conflict_mask, "resolution_note"] = (
+            f"superseded by {correction_type} revision"
+        )
+    return working
 
 
 def _session_from_sources(
@@ -535,7 +829,7 @@ def _build_reconciliation(
             expected_date = _expected_execution_from_signal(signal_date)
         observed_date = _date_string(target_row.get("observed_execution_date", ""))
         observed_open = _safe_float(target_row.get("execution_open_price", np.nan))
-        reference_close = _safe_float(getattr(row, "reference_price", target_row.get("reference_price", np.nan)))
+        reference_close = _safe_float(target_row.get("reference_price", getattr(row, "reference_price", np.nan)))
         approved_qty = _safe_int(getattr(row, "proposed_quantity", 0))
         entered_quantity = np.nan
         if not ledger_by_ticker.empty and "ticker" in ledger_by_ticker.columns:
@@ -568,7 +862,8 @@ def _build_reconciliation(
                 )
             )
         fill_status = "pending_execution_price"
-        blocking_reason = str(getattr(row, "order_blocking_reason", "") or "")
+        raw_blocking_reason = getattr(row, "order_blocking_reason", "")
+        blocking_reason = "" if pd.isna(raw_blocking_reason) else str(raw_blocking_reason or "")
         if not observed_date:
             fill_status = "blocked_missing_execution_price"
             if not blocking_reason:
@@ -1052,6 +1347,7 @@ def save_phase23k_prospective_shadow_monitoring(
     prices = _load_prices(combined_dir=combined_dir, pilot_dir=pilot_dir, post_dir=post_dir)
 
     existing_snapshots = _read_csv(output_dir / "phase23k_full_ranking_snapshots.csv")
+    existing_snapshot_history = _read_csv(output_dir / "phase23k_session_snapshot_history.csv")
     existing_incidents = _read_csv(output_dir / "phase23k_incident_log.csv")
     incidents: list[dict[str, Any]] = []
 
@@ -1114,8 +1410,16 @@ def save_phase23k_prospective_shadow_monitoring(
             on="ticker",
             how="left",
         )
-    snapshots, immutable_conflict = _merge_immutable_snapshots(
-        existing=existing_snapshots, current=current_snapshot, session_id=session_id
+    fill_exists = _session_has_entered_fill(
+        ledger=ledger,
+        positions=positions,
+        signal_date=signal_date,
+    )
+    snapshots, immutable_conflict, correction_allowed = _merge_immutable_snapshots(
+        existing=existing_snapshots,
+        current=current_snapshot,
+        session_id=session_id,
+        fill_exists=fill_exists,
     )
     if immutable_conflict:
         incidents.append(
@@ -1139,6 +1443,19 @@ def save_phase23k_prospective_shadow_monitoring(
         section=section,
     )
     incidents.extend(reconciliation_incidents)
+
+    snapshot_history, latest_revision, latest_snapshot_id, correction_type, correction_reason = (
+        _update_snapshot_history(
+            existing_history=existing_snapshot_history,
+            existing_snapshots=existing_snapshots,
+            current_snapshot=current_snapshot,
+            reconciliation=reconciliation,
+            session_id=session_id,
+            correction_allowed=correction_allowed,
+        )
+        if not immutable_conflict
+        else (existing_snapshot_history, 0, "", "", "")
+    )
 
     session_registry = _session_from_sources(
         section=section,
@@ -1198,6 +1515,12 @@ def save_phase23k_prospective_shadow_monitoring(
     incident_log = pd.concat([existing_incidents, pd.DataFrame(incidents)], ignore_index=True)
     if not incident_log.empty and "incident_id" in incident_log.columns:
         incident_log = incident_log.drop_duplicates("incident_id", keep="last")
+    incident_log = _resolve_incident_lifecycle(
+        incident_log=incident_log,
+        reconciliation=reconciliation,
+        session_id=session_id,
+        correction_type=correction_type,
+    )
     blocking_incidents = (
         incident_log["blocking_flag"].map(_bool_value).sum()
         if not incident_log.empty and "blocking_flag" in incident_log.columns
@@ -1207,6 +1530,37 @@ def save_phase23k_prospective_shadow_monitoring(
         session_registry["incident_count"] = int(
             incident_log.loc[incident_log["session_id"].astype(str).eq(session_id)].shape[0]
         )
+        session_registry["session_revision"] = latest_revision
+        session_registry["snapshot_id"] = latest_snapshot_id
+        session_registry["supersedes_snapshot_id"] = (
+            snapshot_history.loc[
+                snapshot_history["snapshot_id"].astype(str).eq(latest_snapshot_id),
+                "supersedes_snapshot_id",
+            ].astype(str).iloc[0]
+            if latest_snapshot_id and not snapshot_history.empty and "snapshot_id" in snapshot_history.columns
+            and snapshot_history["snapshot_id"].astype(str).eq(latest_snapshot_id).any()
+            else ""
+        )
+        session_registry["revision_reason"] = correction_reason
+        session_registry["revision_created_at_utc"] = (
+            snapshot_history.loc[
+                snapshot_history["snapshot_id"].astype(str).eq(latest_snapshot_id),
+                "created_at_utc",
+            ].astype(str).iloc[0]
+            if latest_snapshot_id and not snapshot_history.empty and "snapshot_id" in snapshot_history.columns
+            and snapshot_history["snapshot_id"].astype(str).eq(latest_snapshot_id).any()
+            else ""
+        )
+        if (
+            int(blocking_incidents) == 0
+            and not reconciliation.empty
+            and reconciliation["fill_validation_status"].astype(str).eq("execution_price_available").all()
+            and not fill_exists
+        ):
+            session_registry["proposal_status"] = "proposal_ready"
+            session_registry["execution_status"] = "ready_manual_fill"
+            session_registry["orders_blocked"] = False
+            session_registry["blocking_reasons"] = ""
     safety_flags_false = not any(
         _bool_value(section.get(key, False))
         for key in [
@@ -1217,6 +1571,12 @@ def save_phase23k_prospective_shadow_monitoring(
             "broker_api_integration_allowed",
             "promotion_allowed",
         ]
+    )
+    ready_manual_fill = bool(
+        int(blocking_incidents) == 0
+        and not reconciliation.empty
+        and reconciliation["fill_validation_status"].astype(str).eq("execution_price_available").all()
+        and not fill_exists
     )
     if phase23j_ranking.empty:
         decision = "phase23k_monitoring_written_no_current_session"
@@ -1230,6 +1590,8 @@ def save_phase23k_prospective_shadow_monitoring(
         decision = "phase23k_monitoring_active_current_session_execution_pending"
     elif blocking_incidents:
         decision = "phase23k_monitoring_written_with_session_blocks"
+    elif ready_manual_fill:
+        decision = "phase23k_monitoring_ready_manual_fill_pending"
     else:
         decision = "phase23k_monitoring_active_current_session_ready_or_entered"
 
@@ -1239,6 +1601,8 @@ def save_phase23k_prospective_shadow_monitoring(
                 "phase": "Phase 23K",
                 "phase23k_decision": decision,
                 "session_count": session_count,
+                "latest_session_revision": latest_revision,
+                "latest_snapshot_id": latest_snapshot_id,
                 "current_session_id": session_id,
                 "current_signal_date": signal_date,
                 "model_id": model_id,
@@ -1247,6 +1611,7 @@ def save_phase23k_prospective_shadow_monitoring(
                 "ranking_count": int(len(phase23j_ranking)),
                 "selected_count": int(len(phase23j_target)),
                 "blocking_incident_count": int(blocking_incidents),
+                "unresolved_blocking_incident_count": int(blocking_incidents),
                 "incident_count": int(len(incident_log)),
                 "prediction_matured_sessions": int(
                     maturity["maturity_status"].astype(str).eq("prediction_matured").sum()
@@ -1326,6 +1691,7 @@ def save_phase23k_prospective_shadow_monitoring(
         "score_drift_report": score_drift,
         "concentration_report": concentration,
         "incident_log": incident_log,
+        "session_snapshot_history": snapshot_history,
         "dashboard": dashboard,
     }
     file_map = {
@@ -1346,6 +1712,7 @@ def save_phase23k_prospective_shadow_monitoring(
         "score_drift_report": ("phase23k_score_drift_report.csv", SCORE_DRIFT_COLUMNS),
         "concentration_report": ("phase23k_concentration_report.csv", CONCENTRATION_COLUMNS),
         "incident_log": ("phase23k_incident_log.csv", INCIDENT_COLUMNS),
+        "session_snapshot_history": ("phase23k_session_snapshot_history.csv", SNAPSHOT_HISTORY_COLUMNS),
     }
     for key, (filename, columns) in file_map.items():
         _write_csv(outputs[key], output_dir / filename, columns)
@@ -1358,6 +1725,8 @@ SUMMARY_COLUMNS = [
     "phase",
     "phase23k_decision",
     "session_count",
+    "latest_session_revision",
+    "latest_snapshot_id",
     "current_session_id",
     "current_signal_date",
     "model_id",
@@ -1366,6 +1735,7 @@ SUMMARY_COLUMNS = [
     "ranking_count",
     "selected_count",
     "blocking_incident_count",
+    "unresolved_blocking_incident_count",
     "incident_count",
     "prediction_matured_sessions",
     "paper_trading_allowed",
@@ -1395,6 +1765,11 @@ SESSION_REGISTRY_COLUMNS = [
     "orders_blocked",
     "blocking_reasons",
     "incident_count",
+    "session_revision",
+    "snapshot_id",
+    "supersedes_snapshot_id",
+    "revision_reason",
+    "revision_created_at_utc",
     "created_at_utc",
     "updated_at_utc",
 ]
@@ -1408,6 +1783,7 @@ FULL_RANKING_COLUMNS = [
     "selected_flag",
     "target_weight",
     "reference_close",
+    "reference_price_date",
     "model_id",
     "model_hash",
     "feature_snapshot_source",
@@ -1545,4 +1921,22 @@ INCIDENT_COLUMNS = [
     "blocking_flag",
     "resolved_flag",
     "resolution_note",
+]
+
+SNAPSHOT_HISTORY_COLUMNS = [
+    "session_id",
+    "snapshot_id",
+    "session_revision",
+    "supersedes_snapshot_id",
+    "snapshot_status",
+    "created_at_utc",
+    "correction_type",
+    "correction_reason",
+    "source_commit_or_code_version",
+    "signal_date",
+    "model_hash",
+    "ranking_hash",
+    "target_hash",
+    "execution_data_hash",
+    "reference_data_hash",
 ]

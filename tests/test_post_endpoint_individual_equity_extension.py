@@ -154,6 +154,47 @@ def _extension_downloads(history: dict[str, pd.DataFrame]) -> dict[str, pd.DataF
     return downloads
 
 
+def _make_latest_execution_rows_partial(
+    downloads: dict[str, pd.DataFrame],
+    *,
+    missing_close_tickers: set[str] | None = None,
+    invalid_open_tickers: set[str] | None = None,
+    invalid_ohlc_tickers: set[str] | None = None,
+    execution_open_multiplier: float = 1.15,
+) -> None:
+    missing_close_tickers = missing_close_tickers or set(downloads)
+    invalid_open_tickers = invalid_open_tickers or set()
+    invalid_ohlc_tickers = invalid_ohlc_tickers or set()
+    for ticker, frame in list(downloads.items()):
+        working = frame.copy()
+        working["date"] = pd.to_datetime(working["date"])
+        mask = working["date"].eq(pd.Timestamp("2026-06-15"))
+        if not mask.any():
+            downloads[ticker] = working
+            continue
+        previous_close = float(
+            working.loc[working["date"].lt("2026-06-15"), "close"].dropna().iloc[-1]
+        )
+        open_price = previous_close * execution_open_multiplier
+        working.loc[mask, "open"] = open_price
+        working.loc[mask, "high"] = open_price * 1.01
+        working.loc[mask, "low"] = open_price * 0.99
+        working.loc[mask, "volume"] = 1_500_000
+        if ticker in missing_close_tickers:
+            working.loc[mask, ["close", "adj_close"]] = np.nan
+        else:
+            close_price = open_price * 1.001
+            working.loc[mask, "close"] = close_price
+            working.loc[mask, "adj_close"] = close_price
+        if ticker in invalid_open_tickers:
+            working.loc[mask, "open"] = 0.0
+        if ticker in invalid_ohlc_tickers:
+            working.loc[mask, "open"] = open_price * 1.05
+            working.loc[mask, "high"] = open_price
+            working.loc[mask, "low"] = open_price * 0.99
+        downloads[ticker] = working
+
+
 def _config(tmp_path: Path) -> dict:
     return {
         "phase23j_post_endpoint_individual_equity_extension": {
@@ -258,6 +299,152 @@ def test_phase23j_generates_prospective_ranking_and_target(tmp_path: Path) -> No
         == outputs["current_target_portfolio"]["expected_execution_date"]
     ).all()
     assert not (tmp_path / "reports" / "reports").exists()
+
+
+def test_phase23j_accepts_partial_execution_open_but_freezes_references(
+    tmp_path: Path,
+) -> None:
+    history, _manifest = _prepare_sources(tmp_path)
+    downloads = _extension_downloads(history)
+    _make_latest_execution_rows_partial(downloads)
+
+    def download(ticker: str, _start: str, _end: str) -> pd.DataFrame:
+        return downloads[ticker].copy()
+
+    outputs = save_phase23j_post_endpoint_individual_equity_extension(
+        config=_config(tmp_path),
+        reports_dir=tmp_path / "reports",
+        download_fn=download,
+    )
+
+    target = outputs["current_target_portfolio"]
+    assert outputs["summary"].iloc[0]["phase23j_decision"] == (
+        "phase23j_post_endpoint_shadow_activation_ready_manual_research_only"
+    )
+    assert target["selected_signal_date"].eq("2026-06-12").all()
+    assert target["reference_price_date"].eq("2026-06-12").all()
+    assert target["observed_execution_date"].eq("2026-06-15").all()
+    assert target["execution_price_available"].map(bool).all()
+    assert target["paper_order_allowed"].map(bool).all()
+    assert target["execution_open_price"].gt(0).all()
+    assert target["signal_estimated_target_shares"].gt(0).all()
+    assert target["execution_target_shares"].gt(0).all()
+    assert (
+        outputs["current_ranking"]["reference_price_date"].dropna().eq("2026-06-12").all()
+    )
+    assert pd.to_datetime(outputs["current_features"]["signal_date"]).max() == pd.Timestamp(
+        "2026-06-12"
+    )
+
+
+def test_phase23j_complete_next_day_close_does_not_replace_signal_reference(
+    tmp_path: Path,
+) -> None:
+    history, _manifest = _prepare_sources(tmp_path)
+    downloads = _extension_downloads(history)
+    _make_latest_execution_rows_partial(
+        downloads,
+        missing_close_tickers=set(downloads) - {"AAA"},
+        execution_open_multiplier=1.25,
+    )
+
+    def download(ticker: str, _start: str, _end: str) -> pd.DataFrame:
+        return downloads[ticker].copy()
+
+    outputs = save_phase23j_post_endpoint_individual_equity_extension(
+        config=_config(tmp_path),
+        reports_dir=tmp_path / "reports",
+        download_fn=download,
+    )
+
+    target = outputs["current_target_portfolio"]
+    assert target["reference_price_date"].nunique() == 1
+    assert target["reference_price_date"].iloc[0] == "2026-06-12"
+    assert "2026-06-15" not in set(target["reference_price_date"].astype(str))
+    aaa = target.loc[target["ticker"].eq("AAA")]
+    if not aaa.empty:
+        assert aaa.iloc[0]["reference_price"] != aaa.iloc[0]["execution_open_price"]
+
+
+def test_phase23j_blocks_whole_portfolio_when_one_execution_open_missing(
+    tmp_path: Path,
+) -> None:
+    history, _manifest = _prepare_sources(tmp_path)
+    downloads = _extension_downloads(history)
+    _make_latest_execution_rows_partial(downloads, invalid_open_tickers={"AAA"})
+
+    def download(ticker: str, _start: str, _end: str) -> pd.DataFrame:
+        return downloads[ticker].copy()
+
+    outputs = save_phase23j_post_endpoint_individual_equity_extension(
+        config=_config(tmp_path),
+        reports_dir=tmp_path / "reports",
+        download_fn=download,
+    )
+
+    target = outputs["current_target_portfolio"]
+    assert not target.empty
+    assert target["observed_execution_date"].fillna("").eq("").all()
+    assert not target["paper_order_allowed"].map(bool).any()
+    assert "execution_open_price_pending" in set(target["order_blocking_reason"])
+    if "AAA" in set(target["ticker"]):
+        aaa = target.loc[target["ticker"].eq("AAA")].iloc[0]
+        assert not bool(aaa["execution_price_available"])
+
+
+def test_phase23j_invalid_execution_ohlc_blocks_whole_portfolio(
+    tmp_path: Path,
+) -> None:
+    history, _manifest = _prepare_sources(tmp_path)
+    downloads = _extension_downloads(history)
+    _make_latest_execution_rows_partial(downloads, invalid_ohlc_tickers={"BBB"})
+
+    def download(ticker: str, _start: str, _end: str) -> pd.DataFrame:
+        return downloads[ticker].copy()
+
+    outputs = save_phase23j_post_endpoint_individual_equity_extension(
+        config=_config(tmp_path),
+        reports_dir=tmp_path / "reports",
+        download_fn=download,
+    )
+
+    target = outputs["current_target_portfolio"]
+    assert not target["paper_order_allowed"].map(bool).any()
+    if "BBB" in set(target["ticker"]):
+        bbb = target.loc[target["ticker"].eq("BBB")].iloc[0]
+        assert bbb["execution_open_status"] == "execution_open_outside_ohl_range"
+
+
+def test_phase23j_keeps_signal_estimate_separate_from_execution_open_quantity(
+    tmp_path: Path,
+) -> None:
+    history, _manifest = _prepare_sources(tmp_path)
+    downloads = _extension_downloads(history)
+    _make_latest_execution_rows_partial(downloads, execution_open_multiplier=1.30)
+
+    def download(ticker: str, _start: str, _end: str) -> pd.DataFrame:
+        return downloads[ticker].copy()
+
+    outputs = save_phase23j_post_endpoint_individual_equity_extension(
+        config=_config(tmp_path),
+        reports_dir=tmp_path / "reports",
+        download_fn=download,
+    )
+
+    target = outputs["current_target_portfolio"]
+    expected_signal = np.floor(
+        target["target_notional"] / target["reference_price"]
+    ).astype(int)
+    expected_execution = np.floor(
+        target["target_notional"] / target["execution_open_price"]
+    ).astype(int)
+    assert target["signal_estimated_target_shares"].equals(expected_signal)
+    assert target["estimated_target_shares"].equals(expected_signal)
+    assert target["execution_target_shares"].equals(expected_execution)
+    assert (
+        target["signal_estimated_target_shares"]
+        != target["execution_target_shares"]
+    ).any()
 
 
 def test_phase23j_expected_execution_date_uses_holiday_calendar() -> None:
@@ -389,6 +576,52 @@ def test_phase23i_shadow_consumes_phase23j_outputs(tmp_path: Path) -> None:
     assert outputs["current_manual_session_template"]["reference_price"].gt(0).all()
     assert outputs["current_manual_session_template"]["proposed_quantity"].gt(0).all()
     assert outputs["positions"].iloc[0]["position_status"] == "initial_shadow_cash_only"
+
+
+def test_phase23i_shadow_execution_open_sizing_does_not_overdraw_cash_after_costs(
+    tmp_path: Path,
+) -> None:
+    history, _manifest = _prepare_sources(tmp_path)
+    downloads = _extension_downloads(history)
+    _make_latest_execution_rows_partial(downloads, execution_open_multiplier=1.45)
+
+    def download(ticker: str, _start: str, _end: str) -> pd.DataFrame:
+        return downloads[ticker].copy()
+
+    config = _config(tmp_path)
+    save_phase23j_post_endpoint_individual_equity_extension(
+        config=config,
+        reports_dir=tmp_path / "reports",
+        download_fn=download,
+    )
+    config["phase23i_prospective_shadow_runner"] = {
+        "enabled": True,
+        "output_dir": str(tmp_path / "reports" / "shadow"),
+        "dashboard_status_path": str(tmp_path / "reports" / "dashboard" / "shadow.csv"),
+        "source_phase23i_dir": str(tmp_path / "reports" / "phase23i"),
+        "source_phase23g_dir": str(tmp_path / "reports" / "phase23g"),
+        "source_phase23j_dir": str(tmp_path / "reports" / "phase23j"),
+        "pilot_input_dir": str(tmp_path / "data" / "individual_equity_pilot"),
+        "archive_dir": str(tmp_path / "reports" / "shadow" / "archive"),
+        "canonical_research_endpoint": "2026-05-01",
+        "starting_cash": 10000,
+        "simulated_cost_bps": 50,
+    }
+    outputs = save_phase23i_prospective_shadow_runner(
+        config=config,
+        reports_dir=tmp_path / "reports",
+    )
+
+    orders = outputs["current_proposed_order_plan"]
+    cost_rate = 50 / 10000
+    total_cash_required = (
+        orders["proposed_quantity"]
+        * orders["reference_price"]
+        * (1 + cost_rate)
+    ).sum()
+    assert total_cash_required <= 10000 + 1e-8
+    assert orders["target_shares"].le(orders["phase23j_execution_target_shares"]).all()
+    assert orders["estimated_post_trade_cash_after_all_orders"].iloc[0] >= -1e-8
 
 
 def test_entered_shadow_session_updates_positions_cash_and_archive(tmp_path: Path) -> None:

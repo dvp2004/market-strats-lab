@@ -285,6 +285,49 @@ def test_rerun_same_session_does_not_duplicate_snapshot_rows(tmp_path: Path) -> 
     assert len(outputs["full_ranking_snapshots"]) == 16
 
 
+def test_pending_execution_data_progresses_without_new_logical_session(tmp_path: Path) -> None:
+    first = _run(tmp_path)
+    first_session = first["session_registry"].iloc[0]["session_id"]
+
+    outputs = save_phase23k_prospective_shadow_monitoring(
+        config=_write_sources(tmp_path, execution_available=True),
+        reports_dir=tmp_path / "reports",
+    )
+
+    registry = outputs["session_registry"]
+    assert registry.iloc[0]["session_id"] == first_session
+    assert len(registry) == 1
+    assert registry.iloc[0]["execution_status"] == "ready_manual_fill"
+    assert outputs["summary"].iloc[0]["phase23k_decision"] == "phase23k_monitoring_ready_manual_fill_pending"
+    assert outputs["summary"].iloc[0]["latest_session_revision"] >= 2
+
+
+def test_execution_prices_and_quantities_update_before_fill(tmp_path: Path) -> None:
+    _run(tmp_path)
+    outputs = save_phase23k_prospective_shadow_monitoring(
+        config=_write_sources(tmp_path, execution_available=True),
+        reports_dir=tmp_path / "reports",
+    )
+    recon = outputs["order_execution_reconciliation"]
+    assert recon["fill_validation_status"].eq("execution_price_available").all()
+    assert recon["approved_quantity"].eq(200).all()
+    assert outputs["session_registry"].iloc[0]["orders_blocked"] is False or not bool(
+        outputs["session_registry"].iloc[0]["orders_blocked"]
+    )
+
+
+def test_same_updated_snapshot_rerun_is_idempotent(tmp_path: Path) -> None:
+    _run(tmp_path)
+    config = _write_sources(tmp_path, execution_available=True)
+    first = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    first_history_count = len(first["session_snapshot_history"])
+    first_revision = int(first["summary"].iloc[0]["latest_session_revision"])
+
+    second = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    assert len(second["session_snapshot_history"]) == first_history_count
+    assert int(second["summary"].iloc[0]["latest_session_revision"]) == first_revision
+
+
 def test_conflicting_immutable_session_content_blocks(tmp_path: Path) -> None:
     _run(tmp_path)
     config = _write_sources(tmp_path)
@@ -292,6 +335,28 @@ def test_conflicting_immutable_session_content_blocks(tmp_path: Path) -> None:
     ranking = pd.read_csv(ranking_path)
     ranking.loc[0, "predicted_rank"] = 16
     ranking.to_csv(ranking_path, index=False)
+    outputs = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    assert "immutable_session_content_changed" in set(outputs["incident_log"]["category"])
+
+
+def test_selected_ticker_change_blocks_existing_session(tmp_path: Path) -> None:
+    _run(tmp_path)
+    config = _write_sources(tmp_path)
+    target_path = Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"]) / "phase23j_current_target_portfolio.csv"
+    target = pd.read_csv(target_path)
+    target.loc[0, "ticker"] = "TSLA"
+    target.to_csv(target_path, index=False)
+    outputs = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    assert "immutable_session_content_changed" in set(outputs["incident_log"]["category"])
+
+
+def test_target_weight_change_blocks_existing_session(tmp_path: Path) -> None:
+    _run(tmp_path)
+    config = _write_sources(tmp_path)
+    target_path = Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"]) / "phase23j_current_target_portfolio.csv"
+    target = pd.read_csv(target_path)
+    target.loc[0, "target_weight"] = 0.25
+    target.to_csv(target_path, index=False)
     outputs = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
     assert "immutable_session_content_changed" in set(outputs["incident_log"]["category"])
 
@@ -311,6 +376,53 @@ def test_changed_universe_blocks(tmp_path: Path) -> None:
     assert "changed_universe" in set(outputs["incident_log"]["category"])
 
 
+def test_specific_later_date_to_signal_date_reference_repair_is_allowed_before_fill(tmp_path: Path) -> None:
+    config = _write_sources(tmp_path, execution_available=True)
+    ranking_path = Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"]) / "phase23j_current_ranking.csv"
+    ranking = pd.read_csv(ranking_path)
+    ranking["reference_price_date"] = "2026-06-15"
+    ranking.loc[ranking["ticker"].eq("META"), "reference_price"] = 999.0
+    ranking.to_csv(ranking_path, index=False)
+    first = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    assert first["summary"].iloc[0]["phase23k_decision"] == "phase23k_monitoring_ready_manual_fill_pending"
+
+    repaired = save_phase23k_prospective_shadow_monitoring(
+        config=_write_sources(tmp_path, execution_available=True),
+        reports_dir=tmp_path / "reports",
+    )
+    assert repaired["summary"].iloc[0]["phase23k_decision"] == "phase23k_monitoring_ready_manual_fill_pending"
+    history = repaired["session_snapshot_history"]
+    assert "pre_fill_signal_reference_repair" in set(history["correction_type"].astype(str))
+    assert "execution_boundary_bugfix" in set(history["correction_reason"].astype(str))
+
+
+def test_arbitrary_reference_price_change_blocks(tmp_path: Path) -> None:
+    _run(tmp_path, execution_available=True)
+    config = _write_sources(tmp_path, execution_available=True)
+    ranking_path = Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"]) / "phase23j_current_ranking.csv"
+    ranking = pd.read_csv(ranking_path)
+    ranking.loc[ranking["ticker"].eq("META"), "reference_price"] = 999.0
+    ranking.to_csv(ranking_path, index=False)
+    outputs = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    assert "immutable_session_content_changed" in set(outputs["incident_log"]["category"])
+
+
+def test_reference_correction_is_prohibited_after_fill(tmp_path: Path) -> None:
+    config = _write_sources(tmp_path, execution_available=True, entered=True)
+    ranking_path = Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"]) / "phase23j_current_ranking.csv"
+    ranking = pd.read_csv(ranking_path)
+    ranking["reference_price_date"] = "2026-06-15"
+    ranking.loc[ranking["ticker"].eq("META"), "reference_price"] = 999.0
+    ranking.to_csv(ranking_path, index=False)
+    save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+
+    outputs = save_phase23k_prospective_shadow_monitoring(
+        config=_write_sources(tmp_path, execution_available=True, entered=True),
+        reports_dir=tmp_path / "reports",
+    )
+    assert "immutable_session_content_changed" in set(outputs["incident_log"]["category"])
+
+
 def test_ranking_snapshot_preserves_all_sixteen_securities(tmp_path: Path) -> None:
     outputs = _run(tmp_path)
     assert len(outputs["full_ranking_snapshots"]) == 16
@@ -326,6 +438,54 @@ def test_exactly_five_selected_flags_and_weights(tmp_path: Path) -> None:
 def test_missing_opening_price_blocks(tmp_path: Path) -> None:
     outputs = _run(tmp_path)
     assert "missing_execution_price" in set(outputs["incident_log"]["category"])
+
+
+def test_prior_snapshot_remains_in_snapshot_history(tmp_path: Path) -> None:
+    _run(tmp_path)
+    outputs = save_phase23k_prospective_shadow_monitoring(
+        config=_write_sources(tmp_path, execution_available=True),
+        reports_dir=tmp_path / "reports",
+    )
+    history = outputs["session_snapshot_history"]
+    assert len(history) >= 2
+    assert "superseded" in set(history["snapshot_status"].astype(str))
+    assert "active" in set(history["snapshot_status"].astype(str))
+
+
+def test_latest_registry_has_one_logical_session_row(tmp_path: Path) -> None:
+    _run(tmp_path)
+    outputs = save_phase23k_prospective_shadow_monitoring(
+        config=_write_sources(tmp_path, execution_available=True),
+        reports_dir=tmp_path / "reports",
+    )
+    assert len(outputs["session_registry"]) == 1
+    assert outputs["session_registry"]["session_id"].nunique() == 1
+
+
+def test_missing_price_incidents_resolve_without_deletion(tmp_path: Path) -> None:
+    _run(tmp_path)
+    outputs = save_phase23k_prospective_shadow_monitoring(
+        config=_write_sources(tmp_path, execution_available=True),
+        reports_dir=tmp_path / "reports",
+    )
+    missing = outputs["incident_log"].loc[
+        outputs["incident_log"]["category"].astype(str).eq("missing_execution_price")
+    ]
+    assert len(missing) == 5
+    assert missing["resolved_flag"].map(lambda value: str(value).lower() == "true").all()
+    assert missing["resolution_note"].astype(str).str.contains("execution opens observed and validated").all()
+
+
+def test_repeated_reruns_do_not_duplicate_resolved_incidents(tmp_path: Path) -> None:
+    _run(tmp_path)
+    config = _write_sources(tmp_path, execution_available=True)
+    save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    outputs = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    missing = outputs["incident_log"].loc[
+        outputs["incident_log"]["category"].astype(str).eq("missing_execution_price")
+    ]
+    assert len(missing) == 5
+    assert not outputs["incident_log"]["incident_id"].duplicated().any()
 
 
 def test_nonpositive_opening_price_blocks(tmp_path: Path) -> None:
@@ -387,6 +547,12 @@ def test_no_ic_before_twenty_trading_days(tmp_path: Path) -> None:
     outputs = _run(tmp_path)
     assert outputs["prospective_ic_history"].empty
     assert outputs["prediction_maturity_registry"]["maturity_status"].eq("prediction_pending").all()
+    maturity_incidents = outputs["incident_log"].loc[
+        outputs["incident_log"]["category"].astype(str).eq("prediction_maturity_data_missing")
+    ]
+    assert not maturity_incidents.empty
+    assert not maturity_incidents["blocking_flag"].map(lambda value: str(value).lower() == "true").any()
+    assert not maturity_incidents["resolved_flag"].map(lambda value: str(value).lower() == "true").any()
 
 
 def test_maturity_uses_trading_days_not_calendar_days() -> None:
@@ -455,6 +621,13 @@ def test_incident_log_dedupes_same_incident(tmp_path: Path) -> None:
         config=_write_sources(tmp_path), reports_dir=tmp_path / "reports"
     )
     assert not outputs["incident_log"]["incident_id"].duplicated().any()
+
+
+def test_no_filled_session_file_is_created_by_monitoring(tmp_path: Path) -> None:
+    config = _write_sources(tmp_path, execution_available=True)
+    save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    shadow_dir = Path(config["phase23k_prospective_monitoring"]["source_phase23i_shadow_dir"])
+    assert not (shadow_dir / "shadow_manual_session_filled.csv").exists()
 
 
 def test_safety_flags_remain_false(tmp_path: Path) -> None:

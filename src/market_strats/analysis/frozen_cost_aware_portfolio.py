@@ -2023,6 +2023,51 @@ def _build_shadow_delta_orders(
         else {}
     )
     all_tickers = sorted(set(target_weights) | {ticker for ticker, qty in shares.items() if qty > 0})
+    target_detail = (
+        target.set_index("ticker").to_dict(orient="index")
+        if not target.empty and "ticker" in target.columns
+        else {}
+    )
+    desired_target_shares: dict[str, int] = {}
+    for ticker in all_tickers:
+        price = price_map.get(ticker, np.nan)
+        current_shares = int(shares.get(ticker, 0))
+        target_weight = float(target_weights.get(ticker, 0.0))
+        target_notional = portfolio_value * target_weight
+        desired_target_shares[ticker] = (
+            int(np.floor(target_notional / price))
+            if pd.notna(price) and price > 0
+            else current_shares
+        )
+    cost_rate = float(simulated_cost_bps) / 10000.0
+    gross_trade_cash = 0.0
+    total_cost = 0.0
+    for ticker in all_tickers:
+        price = price_map.get(ticker, np.nan)
+        if pd.isna(price) or price <= 0:
+            continue
+        delta = desired_target_shares.get(ticker, 0) - int(shares.get(ticker, 0))
+        notional = delta * price
+        gross_trade_cash += notional
+        total_cost += abs(notional) * cost_rate
+    cash_after = _cash - gross_trade_cash - total_cost
+    buy_tickers = [
+        ticker
+        for ticker in all_tickers
+        if desired_target_shares.get(ticker, 0) > int(shares.get(ticker, 0))
+    ]
+    opens = {
+        ticker: price_map.get(ticker, np.nan)
+        for ticker in all_tickers
+        if pd.notna(price_map.get(ticker, np.nan)) and price_map.get(ticker, np.nan) > 0
+    }
+    target_shares_by_ticker, adjusted_cash_after = _adjust_buys_for_cash(
+        target_shares=desired_target_shares,
+        opens=opens,
+        cash_after=cash_after,
+        buy_tickers=buy_tickers,
+        per_share_cost_rate=cost_rate,
+    )
     rows: list[dict[str, Any]] = []
     selected_signal_date = (
         str(target.iloc[0].get("selected_signal_date", "")) if not target.empty else ""
@@ -2032,15 +2077,12 @@ def _build_shadow_delta_orders(
         current_shares = int(shares.get(ticker, 0))
         target_weight = float(target_weights.get(ticker, 0.0))
         target_notional = portfolio_value * target_weight
-        target_shares = (
-            int(np.floor(target_notional / price))
-            if pd.notna(price) and price > 0
-            else current_shares
-        )
+        target_shares = int(target_shares_by_ticker.get(ticker, current_shares))
         delta = target_shares - current_shares
         if delta == 0:
             continue
         side = "BUY" if delta > 0 else "SELL"
+        detail = target_detail.get(ticker, {})
         rows.append(
             {
                 "selected_signal_date": selected_signal_date,
@@ -2063,11 +2105,24 @@ def _build_shadow_delta_orders(
                 ),
                 "current_shares": current_shares,
                 "target_shares": target_shares,
+                "signal_estimated_target_shares": int(
+                    max(_safe_float(detail.get("signal_estimated_target_shares", 0), 0), 0)
+                ),
+                "phase23j_execution_target_shares": int(
+                    max(_safe_float(detail.get("execution_target_shares", 0), 0), 0)
+                ),
                 "proposed_quantity": abs(delta),
                 "order_side": side,
                 "estimated_order_notional": abs(delta) * price
                 if pd.notna(price)
                 else np.nan,
+                "estimated_transaction_cost": (
+                    abs(delta) * price * cost_rate if pd.notna(price) else np.nan
+                ),
+                "estimated_post_trade_cash_after_all_orders": adjusted_cash_after,
+                "cash_affordability_status": "cost_aware_quantity_adjusted"
+                if target_shares != desired_target_shares.get(ticker, target_shares)
+                else "cost_aware_quantity_ok",
                 "noncanonical_label": NONCANONICAL_LABEL,
             }
         )
