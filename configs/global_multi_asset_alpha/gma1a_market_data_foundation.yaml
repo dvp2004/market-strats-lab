@@ -1,0 +1,80 @@
+track:
+  track_id: gma_alpha
+  phase_id: gma1a_market_data_foundation
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+
+source_selection:
+  gma0_manifest_root: data/global_multi_asset_alpha/manifests
+  gma0_report_root: reports/global_multi_asset_alpha/feasibility
+  selection_policy: latest_valid_live_yahoo_snapshot
+  require_live_yahoo_audit: true
+  require_completed_history: true
+  require_valid_hashes: true
+  prohibit_mutable_latest_files: true
+  require_provider_symbol_match: true
+  require_registry_match: true
+
+price_basis:
+  execution_price_basis: raw_open
+  execution_validation_basis: raw_ohlc
+  signal_total_return_basis: constructed_total_return_from_raw_close_and_dividends
+  adjusted_close_role: reconciliation_and_cross_check_only
+  dividend_accounting: explicit_cash_dividends_from_provider
+  split_accounting: explicit_split_ratio_from_provider
+  raw_price_split_basis_policy: yahoo_auto_adjust_false_prices_are_split_adjusted
+  missing_action_policy: flag_and_continue
+
+calendars:
+  etf_calendar: us_listed_etf
+  bitcoin_calendar: bitcoin_utc_daily
+  decision_timezone: America/New_York
+  valuation_timezone: America/New_York
+  incomplete_observation_policy: exclude_from_completed_history
+
+cash:
+  authoritative_source_type: point_in_time_treasury_bill_rate
+  bil_role: tradable_etf_proxy_and_cross_check_only
+  missing_rate_policy: flag_and_defer_to_gma1b
+  future_rate_phase: gma1b_macro_data_foundation
+
+quality:
+  required_core_instruments:
+    - SPY
+    - QQQ
+    - IWM
+    - RSP
+    - EFA
+    - VGK
+    - EWJ
+    - EEM
+    - SHY
+    - IEF
+    - TLT
+    - TIP
+    - AGG
+    - LQD
+    - HYG
+    - EMB
+    - GLD
+    - DBC
+    - VNQ
+    - UUP
+    - BIL
+  maximum_missing_interior_rows: 0
+  maximum_duplicate_rows: 0
+  adjusted_close_reconciliation_tolerance_bps: 1.0
+  material_return_difference_tolerance_bps: 1.0
+  require_raw_open: true
+  require_raw_ohlc: true
+  require_adjusted_close: true
+  require_volume: true
+  require_action_capability: true
+  required_core_failure_policy: block_gma1a
+
+paths:
+  canonical_bundle_root: data/global_multi_asset_alpha/canonical_market
+  report_root: reports/global_multi_asset_alpha/data_foundation
+  state_root: state/global_multi_asset_alpha
