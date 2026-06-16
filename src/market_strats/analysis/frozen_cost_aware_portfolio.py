@@ -2083,6 +2083,20 @@ def _build_shadow_delta_orders(
             continue
         side = "BUY" if delta > 0 else "SELL"
         detail = target_detail.get(ticker, {})
+        reference_price = _safe_float(detail.get("reference_price", np.nan))
+        execution_open_price = _safe_float(detail.get("execution_open_price", np.nan))
+        reference_price_date = str(detail.get("reference_price_date", ""))
+        if not reference_price_date and not ranking.empty and "reference_price_date" in ranking.columns:
+            reference_price_date = (
+                str(
+                    ranking.loc[
+                        ranking["ticker"].astype(str).eq(ticker),
+                        "reference_price_date",
+                    ].iloc[0]
+                )
+                if ranking["ticker"].astype(str).eq(ticker).any()
+                else ""
+            )
         rows.append(
             {
                 "selected_signal_date": selected_signal_date,
@@ -2090,18 +2104,17 @@ def _build_shadow_delta_orders(
                 "ticker": ticker,
                 "target_weight": target_weight,
                 "target_notional": target_notional,
-                "reference_price": price,
-                "reference_price_date": (
-                    str(
-                        ranking.loc[
-                            ranking["ticker"].astype(str).eq(ticker),
-                            "reference_price_date",
-                        ].iloc[0]
-                    )
-                    if not ranking.empty
-                    and "reference_price_date" in ranking.columns
-                    and ranking["ticker"].astype(str).eq(ticker).any()
-                    else ""
+                "reference_price": reference_price,
+                "reference_price_date": reference_price_date,
+                "expected_execution_date": str(
+                    detail.get("expected_execution_date", "")
+                ),
+                "observed_execution_date": str(
+                    detail.get("observed_execution_date", "")
+                ),
+                "execution_open_price": execution_open_price,
+                "execution_price_available": _bool_value(
+                    detail.get("execution_price_available", False)
                 ),
                 "current_shares": current_shares,
                 "target_shares": target_shares,

@@ -573,8 +573,26 @@ def test_phase23i_shadow_consumes_phase23j_outputs(tmp_path: Path) -> None:
     )
     assert bool(outputs["summary"].iloc[0]["shadow_readiness_passed"])
     assert not outputs["current_manual_session_template"].empty
-    assert outputs["current_manual_session_template"]["reference_price"].gt(0).all()
-    assert outputs["current_manual_session_template"]["proposed_quantity"].gt(0).all()
+    template = outputs["current_manual_session_template"]
+    for column in [
+        "reference_price",
+        "reference_price_date",
+        "expected_execution_date",
+        "observed_execution_date",
+        "execution_open_price",
+        "execution_price_available",
+        "signal_estimated_target_shares",
+        "phase23j_execution_target_shares",
+    ]:
+        assert column in template.columns
+    assert template["reference_price"].gt(0).all()
+    assert template["execution_open_price"].gt(0).all()
+    assert template["reference_price_date"].eq("2026-06-12").all()
+    assert template["expected_execution_date"].eq("2026-06-15").all()
+    assert template["observed_execution_date"].eq("2026-06-15").all()
+    assert template["execution_price_available"].map(bool).all()
+    assert template["reference_price"].ne(template["execution_open_price"]).all()
+    assert template["proposed_quantity"].gt(0).all()
     assert outputs["positions"].iloc[0]["position_status"] == "initial_shadow_cash_only"
 
 
@@ -616,7 +634,7 @@ def test_phase23i_shadow_execution_open_sizing_does_not_overdraw_cash_after_cost
     cost_rate = 50 / 10000
     total_cash_required = (
         orders["proposed_quantity"]
-        * orders["reference_price"]
+        * orders["execution_open_price"]
         * (1 + cost_rate)
     ).sum()
     assert total_cash_required <= 10000 + 1e-8
@@ -658,7 +676,7 @@ def test_entered_shadow_session_updates_positions_cash_and_archive(tmp_path: Pat
     template = first["current_manual_session_template"].copy()
     template["manual_decision"] = "enter_simulated_shadow_trade"
     template["session_state"] = "entered"
-    template["simulated_fill_price"] = template["reference_price"]
+    template["simulated_fill_price"] = template["execution_open_price"]
     template["simulated_fill_quantity"] = template["proposed_quantity"]
     template["override_reason"] = "explicit_test_simulated_fill"
     template["notes"] = "research-only test fill"
