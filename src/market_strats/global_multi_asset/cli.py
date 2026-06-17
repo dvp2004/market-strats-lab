@@ -12,6 +12,8 @@ from market_strats.global_multi_asset.gma1b_macro_cash import (
     run_gma1b_live_diagnostic,
     run_gma1b_macro_cash_foundation,
 )
+from market_strats.global_multi_asset.gma2_config import load_gma2_config
+from market_strats.global_multi_asset.gma2_replay import run_gma2_replay_foundation
 
 
 def _print_progress(message: str) -> None:
@@ -55,6 +57,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--series-id",
         default=None,
         help="Configured FRED series id for --live-diagnose",
+    )
+    subparsers.add_parser(
+        "build-replay-foundation",
+        help="Run GMA-2 point-in-time replay foundation",
     )
     return parser
 
@@ -121,6 +127,16 @@ def main(argv: list[str] | None = None) -> int:
         if bool(args.live):
             return 0 if result.decision.startswith("gma1b_feasible") else 2
         return 0 if result.decision.startswith("gma1b_feasible") or result.decision == "gma1b_live_data_incomplete" else 2
+    if args.command == "build-replay-foundation":
+        config = load_gma2_config(args.config)
+        result = run_gma2_replay_foundation(config)
+        print(f"GMA-2 decision: {result.decision}")
+        if result.replay_hash:
+            print(f"GMA-2 replay hash: {result.replay_hash}")
+        if result.warnings:
+            for w in result.warnings:
+                print(f"  warning: {w}")
+        return 0 if result.decision.startswith("gma2_feasible") else 2
     return 2
 
 

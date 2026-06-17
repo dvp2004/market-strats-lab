@@ -1,0 +1,107 @@
+track:
+  track_id: gma_alpha
+  phase_id: gma2_replay_foundation
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  simulated_monetary_results_only: true
+
+accepted_inputs:
+  gma1a_commit: "6dab8908c5a64d019e3a185d640a96fc6dffabf8"
+  gma1a_tag: "gma1a-data-foundation-v1"
+  gma1a_accepted_selection_hash: "953d5615d0773e71f49a9af5b55c598266478381ecf5bcf19c8a9d2831084b78"
+  gma1b_commit: "e987e9f40c56c005ab22746be71d4353b2646887"
+  gma1b_tag: "gma1b-macro-cash-foundation-v1"
+  gma1b_accepted_live_hash: ""
+  gma1b_accepted_canonical_macro_hash: "175e77d7a66684493bb6692a0f063bfbe224c0940ed48a1c1a6810b943becb99"
+  canonical_research_end_date: "2026-05-01"
+
+research_start_date: "2024-01-05"
+research_end_date: "2026-05-01"
+smoke_replay_start_date: "2024-01-05"
+smoke_replay_end_date: "2024-01-10"
+signal_calendar:
+  cadence: "weekly"
+  weekday: "FRIDAY"
+  signal_cutoff_time_utc: "22:00:00"
+execution_policy:
+  rule: "next_valid_session_open"
+  same_close_execution_allowed: false
+  ambiguous_alignment_policy: "fail_closed"
+  asset_holiday_policy: "next_eligible_trading_date"
+valuation_policy:
+  basis: "raw_close_with_explicit_dividends_and_splits"
+  benchmark_symbol: "SPY"
+cash_accrual_policy:
+  authoritative_series: "DGS3MO"
+  quoted_basis: "investment_yield_percent"
+  day_count: "actual_365"
+  accrual_calendar: "calendar_day"
+  future_yield_observations_allowed: false
+transaction_cost_policy:
+  bps_per_notional: 1.0
+  charge_once: true
+missing_data_policy:
+  mandatory_field_policy: "fail_closed"
+  unapproved_fallback_provider_policy: "fail_closed"
+stale_price_policy:
+  max_stale_trading_days: 0
+  stale_price_policy: "fail_closed"
+rebalance_policy:
+  target_weight_tolerance: 0.000001
+  rebalance_on_signal_change: true
+benchmark:
+  symbol: "SPY"
+  basis: "raw_close_total_return_comparison"
+initial_capital: 100000.0
+minimum_trade_notional: 1.0
+portfolio_tolerance: 0.01
+portfolio_weight_tolerance: 0.000001
+
+paths:
+  canonical_market_root: "data/global_multi_asset_alpha/canonical_market"
+  canonical_macro_root: "data/global_multi_asset_alpha/canonical_macro"
+  data_foundation_report_root: "reports/global_multi_asset_alpha/data_foundation"
+  macro_foundation_report_root: "reports/global_multi_asset_alpha/macro_foundation"
+  replay_data_root: "data/global_multi_asset_alpha/replay_foundation"
+  replay_report_root: "reports/global_multi_asset_alpha/replay_foundation"
+
+smoke_policies:
+  cash_only:
+    label: "engine_validation_only"
+    not_strategy_candidate: true
+    not_paper_trading_recommendation: true
+    allocations:
+      "2024-01-05":
+        CASH: 1.0
+  spy_buy_hold:
+    label: "engine_validation_only"
+    not_strategy_candidate: true
+    not_paper_trading_recommendation: true
+    allocations:
+      "2024-01-05":
+        SPY: 1.0
+  static_diversified:
+    label: "engine_validation_only"
+    not_strategy_candidate: true
+    not_paper_trading_recommendation: true
+    allocations:
+      "2024-01-05":
+        SPY: 0.40
+        QQQ: 0.30
+        IEF: 0.20
+        CASH: 0.10
+  scripted_switch_fixture:
+    label: "engine_validation_only"
+    not_strategy_candidate: true
+    not_paper_trading_recommendation: true
+    allocations:
+      "2024-01-05":
+        SPY: 0.50
+        QQQ: 0.25
+        CASH: 0.25
+      "2024-01-08":
+        SPY: 0.25
+        QQQ: 0.50
+        CASH: 0.25
