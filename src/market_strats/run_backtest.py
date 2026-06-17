@@ -342,6 +342,9 @@ from market_strats.analysis.post_endpoint_individual_equity_extension import (
 from market_strats.analysis.prospective_shadow_monitoring import (
     save_phase23k_prospective_shadow_monitoring,
 )
+from market_strats.analysis.phase23l_operational_paper_bridge import (
+    save_phase23l_operational_paper_bridge,
+)
 
 
 def save_phase15o_current_signal_preregistration(**kwargs):
@@ -2221,6 +2224,19 @@ def _run_phase23k_prospective_shadow_monitoring(
     )
 
 
+def _run_phase23l_operational_paper_bridge(
+    *,
+    config: dict,
+    reports_dir: Path,
+) -> dict[str, pd.DataFrame]:
+    if not _phase_enabled(config, "phase23l_operational_paper_bridge"):
+        return {}
+    return save_phase23l_operational_paper_bridge(
+        config=config,
+        reports_dir=reports_dir,
+    )
+
+
 def _run_daily_phase15_operational_chain(
     *,
     config: dict,
@@ -2615,6 +2631,14 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--phase23l-only",
+        action="store_true",
+        help=(
+            "Run only the Phase 23L operational mark-to-market and "
+            "TradingView manual paper bridge."
+        ),
+    )
+    parser.add_argument(
         "--daily-paper-only",
         action="store_true",
         help="Run only the lightweight daily paper workflow.",
@@ -2787,6 +2811,13 @@ def main() -> None:
 
     if args.phase23k_only:
         _run_phase23k_prospective_shadow_monitoring(
+            config=config,
+            reports_dir=reports_dir,
+        )
+        return
+
+    if args.phase23l_only:
+        _run_phase23l_operational_paper_bridge(
             config=config,
             reports_dir=reports_dir,
         )
