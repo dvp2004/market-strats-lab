@@ -1,0 +1,306 @@
+track:
+  track_id: gma_alpha
+  phase_id: gma1b_macro_cash_foundation
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+
+provider:
+  primary_provider: fred
+  vintage_provider: alfred
+  api_key_environment_variable: FRED_API_KEY
+  timeout_seconds: 20
+  retry_count: 2
+  immutable_snapshots: true
+  prohibit_unofficial_fallback: true
+
+point_in_time:
+  require_realtime_periods: true
+  require_availability_timestamp: true
+  conservative_missing_release_time_policy: end_of_release_date_utc
+  future_revision_policy: prohibit_future_revisions
+  unknown_publication_time_policy: release_date_available_after_235959_utc
+  asof_query_policy: latest_available_vintage_at_or_before_query_timestamp
+
+cash:
+  authoritative_series: DGS3MO
+  source_yield_convention: percent_annualized_investment_yield
+  annualisation_day_count: actual_365
+  accrual_calendar: calendar_day
+  weekend_accrual_policy: accrue_across_non_publication_days_using_latest_available_rate
+  publication_lag_policy: rate_available_after_release_date_end_utc
+  missing_rate_policy: fail_closed
+  negative_rate_policy: allow_and_accrue
+  bil_role: tradable_etf_proxy_and_cross_check_only
+
+quality:
+  required_series:
+    - cash_3m_treasury
+    - treasury_2y
+    - treasury_10y
+    - treasury_30y
+    - curve_10y_2y
+    - curve_10y_3m
+    - breakeven_10y
+    - real_yield_10y
+    - vix
+    - high_yield_oas
+    - financial_stress
+    - cpi
+    - unemployment
+    - industrial_production
+  optional_series: []
+  maximum_staleness_days: 7
+  maximum_missing_interior_observations: 0
+  require_series_metadata: true
+  require_vintage_integrity: true
+  require_hash_validation: true
+  revision_materiality_tolerance: 0.000001
+
+paths:
+  raw_root: data/global_multi_asset_alpha/macro_raw
+  manifest_root: data/global_multi_asset_alpha/macro_manifests
+  canonical_root: data/global_multi_asset_alpha/canonical_macro
+  report_root: reports/global_multi_asset_alpha/macro_foundation
+  state_root: state/global_multi_asset_alpha
+
+series:
+  - macro_id: cash_3m_treasury
+    provider: fred
+    series_id: DGS3MO
+    display_name: 3-month Treasury/cash rate
+    economic_role: authoritative_cash_rate
+    frequency: daily
+    units: percent
+    seasonal_adjustment: not_seasonally_adjusted
+    native_observation_calendar: federal_reserve_business_day
+    expected_publication_frequency: daily
+    is_required: true
+    is_vintage_aware: true
+    revision_prone: false
+    availability_timestamp_policy: release_date_available_after_235959_utc
+    maximum_staleness_days: 7
+    transformation_policy: percent_to_decimal_yield
+    notes: Authoritative cash accrual source; BIL is not authoritative cash.
+  - macro_id: treasury_2y
+    provider: fred
+    series_id: DGS2
+    display_name: 2-year Treasury yield
+    economic_role: rates_level
+    frequency: daily
+    units: percent
+    seasonal_adjustment: not_seasonally_adjusted
+    native_observation_calendar: federal_reserve_business_day
+    expected_publication_frequency: daily
+    is_required: true
+    is_vintage_aware: true
+    revision_prone: false
+    availability_timestamp_policy: release_date_available_after_235959_utc
+    maximum_staleness_days: 7
+    transformation_policy: percent_level
+    notes: Official FRED Treasury constant maturity rate.
+  - macro_id: treasury_10y
+    provider: fred
+    series_id: DGS10
+    display_name: 10-year Treasury yield
+    economic_role: rates_level
+    frequency: daily
+    units: percent
+    seasonal_adjustment: not_seasonally_adjusted
+    native_observation_calendar: federal_reserve_business_day
+    expected_publication_frequency: daily
+    is_required: true
+    is_vintage_aware: true
+    revision_prone: false
+    availability_timestamp_policy: release_date_available_after_235959_utc
+    maximum_staleness_days: 7
+    transformation_policy: percent_level
+    notes: Official FRED Treasury constant maturity rate.
+  - macro_id: treasury_30y
+    provider: fred
+    series_id: DGS30
+    display_name: 30-year Treasury yield
+    economic_role: rates_level
+    frequency: daily
+    units: percent
+    seasonal_adjustment: not_seasonally_adjusted
+    native_observation_calendar: federal_reserve_business_day
+    expected_publication_frequency: daily
+    is_required: true
+    is_vintage_aware: true
+    revision_prone: false
+    availability_timestamp_policy: release_date_available_after_235959_utc
+    maximum_staleness_days: 7
+    transformation_policy: percent_level
+    notes: Official FRED Treasury constant maturity rate.
+  - macro_id: curve_10y_2y
+    provider: fred
+    series_id: T10Y2Y
+    display_name: 10y minus 2y curve
+    economic_role: yield_curve_slope
+    frequency: daily
+    units: percent
+    seasonal_adjustment: not_seasonally_adjusted
+    native_observation_calendar: federal_reserve_business_day
+    expected_publication_frequency: daily
+    is_required: true
+    is_vintage_aware: true
+    revision_prone: false
+    availability_timestamp_policy: release_date_available_after_235959_utc
+    maximum_staleness_days: 7
+    transformation_policy: official_spread_series
+    notes: Authoritative official spread series.
+  - macro_id: curve_10y_3m
+    provider: fred
+    series_id: T10Y3M
+    display_name: 10y minus 3m curve
+    economic_role: yield_curve_slope
+    frequency: daily
+    units: percent
+    seasonal_adjustment: not_seasonally_adjusted
+    native_observation_calendar: federal_reserve_business_day
+    expected_publication_frequency: daily
+    is_required: true
+    is_vintage_aware: true
+    revision_prone: false
+    availability_timestamp_policy: release_date_available_after_235959_utc
+    maximum_staleness_days: 7
+    transformation_policy: official_spread_series
+    notes: Authoritative official spread series.
+  - macro_id: breakeven_10y
+    provider: fred
+    series_id: T10YIE
+    display_name: 10-year breakeven inflation
+    economic_role: inflation_expectations
+    frequency: daily
+    units: percent
+    seasonal_adjustment: not_seasonally_adjusted
+    native_observation_calendar: federal_reserve_business_day
+    expected_publication_frequency: daily
+    is_required: true
+    is_vintage_aware: true
+    revision_prone: false
+    availability_timestamp_policy: release_date_available_after_235959_utc
+    maximum_staleness_days: 7
+    transformation_policy: percent_level
+    notes: Official FRED breakeven inflation series.
+  - macro_id: real_yield_10y
+    provider: fred
+    series_id: DFII10
+    display_name: 10-year real-yield proxy
+    economic_role: real_rates
+    frequency: daily
+    units: percent
+    seasonal_adjustment: not_seasonally_adjusted
+    native_observation_calendar: federal_reserve_business_day
+    expected_publication_frequency: daily
+    is_required: true
+    is_vintage_aware: true
+    revision_prone: false
+    availability_timestamp_policy: release_date_available_after_235959_utc
+    maximum_staleness_days: 7
+    transformation_policy: percent_level
+    notes: Official FRED TIPS real-yield proxy.
+  - macro_id: vix
+    provider: fred
+    series_id: VIXCLS
+    display_name: VIX
+    economic_role: equity_volatility
+    frequency: daily
+    units: index
+    seasonal_adjustment: not_seasonally_adjusted
+    native_observation_calendar: cboe_business_day
+    expected_publication_frequency: daily
+    is_required: true
+    is_vintage_aware: true
+    revision_prone: false
+    availability_timestamp_policy: release_date_available_after_235959_utc
+    maximum_staleness_days: 7
+    transformation_policy: level
+    notes: Official FRED-hosted VIX close.
+  - macro_id: high_yield_oas
+    provider: fred
+    series_id: BAMLH0A0HYM2
+    display_name: High-yield option-adjusted spread
+    economic_role: credit_stress
+    frequency: daily
+    units: percent
+    seasonal_adjustment: not_seasonally_adjusted
+    native_observation_calendar: ice_bofa_business_day
+    expected_publication_frequency: daily
+    is_required: true
+    is_vintage_aware: true
+    revision_prone: false
+    availability_timestamp_policy: release_date_available_after_235959_utc
+    maximum_staleness_days: 7
+    transformation_policy: percent_level
+    notes: Official FRED ICE BofA high-yield OAS.
+  - macro_id: financial_stress
+    provider: fred
+    series_id: STLFSI4
+    display_name: Financial stress index
+    economic_role: financial_conditions
+    frequency: weekly
+    units: index
+    seasonal_adjustment: not_seasonally_adjusted
+    native_observation_calendar: weekly_publication
+    expected_publication_frequency: weekly
+    is_required: true
+    is_vintage_aware: true
+    revision_prone: true
+    availability_timestamp_policy: release_date_available_after_235959_utc
+    maximum_staleness_days: 14
+    transformation_policy: level
+    notes: Official St. Louis Fed Financial Stress Index.
+  - macro_id: cpi
+    provider: fred
+    series_id: CPIAUCSL
+    display_name: CPI
+    economic_role: inflation
+    frequency: monthly
+    units: index
+    seasonal_adjustment: seasonally_adjusted
+    native_observation_calendar: monthly_release
+    expected_publication_frequency: monthly
+    is_required: true
+    is_vintage_aware: true
+    revision_prone: true
+    availability_timestamp_policy: release_date_available_after_235959_utc
+    maximum_staleness_days: 45
+    transformation_policy: level
+    notes: Vintage-aware monthly macro series; no final-value backfill.
+  - macro_id: unemployment
+    provider: fred
+    series_id: UNRATE
+    display_name: Unemployment rate
+    economic_role: labor_market
+    frequency: monthly
+    units: percent
+    seasonal_adjustment: seasonally_adjusted
+    native_observation_calendar: monthly_release
+    expected_publication_frequency: monthly
+    is_required: true
+    is_vintage_aware: true
+    revision_prone: true
+    availability_timestamp_policy: release_date_available_after_235959_utc
+    maximum_staleness_days: 45
+    transformation_policy: level
+    notes: Vintage-aware monthly macro series; no final-value backfill.
+  - macro_id: industrial_production
+    provider: fred
+    series_id: INDPRO
+    display_name: Industrial production
+    economic_role: growth
+    frequency: monthly
+    units: index
+    seasonal_adjustment: seasonally_adjusted
+    native_observation_calendar: monthly_release
+    expected_publication_frequency: monthly
+    is_required: true
+    is_vintage_aware: true
+    revision_prone: true
+    availability_timestamp_policy: release_date_available_after_235959_utc
+    maximum_staleness_days: 45
+    transformation_policy: level
+    notes: Vintage-aware monthly macro series; no final-value backfill.
