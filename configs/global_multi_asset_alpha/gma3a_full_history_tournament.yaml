@@ -1,0 +1,110 @@
+track:
+  track_id: gma_alpha
+  phase_id: gma3a_transparent_strategy_tournament
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  browser_automation_allowed: false
+  ml_portfolio_influence_allowed: false
+
+data_purpose: "historical_strategy_tournament"
+
+accepted_inputs:
+  gma1a_commit: "6dab8908c5a64d019e3a185d640a96fc6dffabf8"
+  gma1a_tag: "gma1a-data-foundation-v1"
+  gma1a_accepted_selection_hash: "953d5615d0773e71f49a9af5b55c598266478381ecf5bcf19c8a9d2831084b78"
+  gma1b_commit: "e987e9f40c56c005ab22746be71d4353b2646887"
+  gma1b_tag: "gma1b-macro-cash-foundation-v1"
+  gma1b_accepted_canonical_macro_hash: "175e77d7a66684493bb6692a0f063bfbe224c0940ed48a1c1a6810b943becb99"
+  gma2_commit: "77cb3e5fc9425bba7c4cec222626ea41b242f7ce"
+  gma2_tag: "gma2-replay-foundation-v1"
+  gma2_accepted_replay_hash: "3579d3fc8c555f31cecf980cc8f64005e2dc82f9904c37b07a5063e61a1f86fe"
+  canonical_research_end_date: "2026-05-01"
+
+paths:
+  gma2_config: "configs/global_multi_asset_alpha/gma2_full_history_engine.yaml"
+  output_root: "reports/global_multi_asset_alpha/gma3a_full_history_tournament"
+  data_root: "data/global_multi_asset_alpha/gma3a_full_history_tournament"
+  canonical_market_root: "data/global_multi_asset_alpha/canonical_market"
+  canonical_macro_root: "data/global_multi_asset_alpha/gma3a_tournament_cash"
+  data_foundation_report_root: "reports/global_multi_asset_alpha/data_foundation"
+  macro_foundation_report_root: "reports/global_multi_asset_alpha/macro_foundation"
+  replay_foundation_report_root: "reports/global_multi_asset_alpha/replay_foundation"
+
+capital:
+  starting_paper_capital: 100000.0
+  account_starting_capital: 100000.0
+
+calendar:
+  signal_time_utc: "22:00:00"
+  execution_policy: "next_valid_session_open"
+  same_close_execution_allowed: false
+
+costs:
+  bps_per_notional: 1.0
+
+limits:
+  maximum_single_asset_weight: 0.35
+  maximum_bitcoin_weight: 0.05
+  maximum_tactical_allocation: 0.50
+  minimum_trade_notional: 1.0
+  portfolio_tolerance: 0.01
+  target_weight_tolerance: 0.000001
+
+selection_gates:
+  require_no_lookahead_failure: true
+  require_no_accounting_failure: true
+  require_positive_common_period_net_return: true
+  acceptable_maximum_drawdown: -0.35
+  maximum_annualised_turnover: 4.0
+  maximum_annualised_cost_drag: 0.01
+  core_fallback_maximum_drawdown: -0.35
+  core_fallback_maximum_annualised_turnover: 4.0
+  core_fallback_maximum_annualised_cost_drag: 0.01
+  require_positive_or_defensible_holdout: true
+  require_no_single_favourable_period_dependency: true
+  require_parameter_neighbour_stability: true
+
+strategy_universe:
+  allowed_symbols:
+    - SPY
+    - QQQ
+    - IWM
+    - EFA
+    - EEM
+    - SHY
+    - IEF
+    - TLT
+    - AGG
+    - LQD
+    - HYG
+    - GLD
+    - DBC
+    - VNQ
+    - UUP
+    - BTC-USD
+    - CASH
+  benchmark_symbol: SPY
+  balanced_benchmark_weights:
+    SPY: 0.35
+    QQQ: 0.20
+    IEF: 0.20
+    GLD: 0.10
+    DBC: 0.05
+    CASH: 0.10
+
+live_paper_ensemble:
+  strategy_id: "gma_live_paper_ensemble_v0"
+  core_strategy_id: "gma_balanced_core_v0"
+  tactical_slots: 3
+  core_allocation: 0.50
+  tactical_allocation: 0.50
+  allow_core_only: true
+
+manual_tradingview:
+  account_name: "TradingView Paper Trading - GMA Alpha V0"
+  packet_prefix: "gma3a"
+  preview_only: true
+  broker_submission_allowed: false
+  real_money_allowed: false

@@ -14,6 +14,8 @@ from market_strats.global_multi_asset.gma1b_macro_cash import (
 )
 from market_strats.global_multi_asset.gma2_config import load_gma2_config
 from market_strats.global_multi_asset.gma2_replay import run_gma2_replay_foundation
+from market_strats.global_multi_asset.gma3a_config import load_gma3a_config
+from market_strats.global_multi_asset.gma3a_tournament import run_gma3a_transparent_tournament
 
 
 def _print_progress(message: str) -> None:
@@ -61,6 +63,10 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser(
         "build-replay-foundation",
         help="Run GMA-2 point-in-time replay foundation",
+    )
+    subparsers.add_parser(
+        "run-transparent-tournament",
+        help="Run GMA-3A transparent strategy tournament and paper portfolio V0",
     )
     return parser
 
@@ -137,6 +143,15 @@ def main(argv: list[str] | None = None) -> int:
             for w in result.warnings:
                 print(f"  warning: {w}")
         return 0 if result.decision.startswith("gma2_feasible") else 2
+    if args.command == "run-transparent-tournament":
+        config = load_gma3a_config(args.config)
+        result = run_gma3a_transparent_tournament(config)
+        print(f"GMA-3A decision: {result.decision}")
+        print(f"GMA-3A order packet rows: {result.order_packet_rows}")
+        if result.warnings:
+            for w in result.warnings:
+                print(f"  warning: {w}")
+        return 0 if not result.decision.startswith("gma3a_blocked") else 2
     return 2
 
 

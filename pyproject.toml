@@ -23,6 +23,7 @@ dev = [
 
 [tool.ruff]
 line-length = 100
+extend-exclude = [".pytest*", ".pytest_*"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
