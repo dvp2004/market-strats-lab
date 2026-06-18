@@ -326,17 +326,17 @@ def _core_extended_dates(config: GMA3AConfig, prices: dict[str, pd.DataFrame], c
     allowed = config.raw["strategy_universe"]["allowed_symbols"]
     core_symbols = [s for s in allowed if s not in {"BTC-USD", "CASH"}]
     ext_symbols = [s for s in allowed if s != "CASH"]
-    
+
     cash_dates = set(cash_df["accrual_start"]) | set(cash_df["accrual_end"])
-    
+
     core_market = [set(prices[s].index) for s in core_symbols if s in prices]
     core_common = set.intersection(*core_market) if core_market else set()
     core_dates = sorted(core_common & cash_dates)
-    
+
     ext_market = [set(prices[s].index) for s in ext_symbols if s in prices]
     ext_common = set.intersection(*ext_market) if ext_market else set()
     ext_dates = sorted(ext_common & cash_dates)
-    
+
     rows = [
         {
             "universe_id": "core_common_period",
@@ -384,7 +384,7 @@ def _simulate_strategy(
         if idx > 0:
             period_return, _ = _cash_period_return(cash_df, dates[idx - 1], date)
             cash += cash * period_return
-            
+
         is_rebalance = False
         if idx > 0:
             current_date = pd.to_datetime(dates[idx - 1])
@@ -506,7 +506,7 @@ def _extend_prices(canonical: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.Dat
     manifest = {}
     input_hashes = {}
     data_status = []
-    
+
     canon_end = pd.to_datetime("2026-05-01").date()
     from datetime import datetime
     now = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -514,10 +514,10 @@ def _extend_prices(canonical: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.Dat
     for symbol, canon_df in canonical.items():
         if symbol == "CASH":
             continue
-            
+
         post_df = canon_df[canon_df.index > canon_end].copy()
         augmented[symbol] = canon_df
-        
+
         if post_df.empty:
             data_status.append({
                 "symbol": symbol,
@@ -525,30 +525,30 @@ def _extend_prices(canonical: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.Dat
                 "partial_bar_exclusion": False
             })
             continue
-            
+
         start_date = post_df.index.min()
         end_date = post_df.index.max()
         sessions = len(post_df)
-        
+
         last_row = post_df.iloc[-1]
         manifest_hash = str(last_row.get("source_manifest_sha256", "na"))
         raw_hash = str(last_row.get("source_raw_sha256", "na"))
         norm_hash = str(last_row.get("source_normalised_sha256", "na"))
-        
+
         manifest[symbol] = {
             "post_endpoint_start": str(start_date),
             "post_endpoint_end": str(end_date),
             "post_endpoint_sessions": sessions,
             "input_hash": manifest_hash
         }
-        
+
         input_hashes[symbol] = {
             "raw_hash": raw_hash,
             "normalised_hash": norm_hash,
             "retrieval_timestamp": now,
             "provider": "yahoo_yfinance"
         }
-        
+
         data_status.append({
             "symbol": symbol,
             "status": "available",
@@ -565,17 +565,17 @@ def _metrics(equity: pd.DataFrame, costs: pd.DataFrame, benchmark: pd.DataFrame,
     for strategy_id, group in equity.groupby("strategy_id"):
         ordered = group.sort_values("valuation_date").copy()
         ordered["valuation_date"] = pd.to_datetime(ordered["valuation_date"])
-        
+
         last_date = ordered.iloc[-1]["valuation_date"]
         holdout_start = last_date - pd.DateOffset(years=1)
-        
+
         wf_mask = ordered["valuation_date"] <= holdout_start
         ho_mask = ordered["valuation_date"] > holdout_start
-        
+
         full_returns = ordered["daily_return"].astype(float)
         wf_returns = full_returns[wf_mask]
         ho_returns = full_returns[ho_mask]
-        
+
         def _calc(sub, rets):
             if sub.empty:
                 return 0.0, 0.0, 0.0, 0.0, 0.0
@@ -592,7 +592,7 @@ def _metrics(equity: pd.DataFrame, costs: pd.DataFrame, benchmark: pd.DataFrame,
             peak = sub["portfolio_value"].astype(float).cummax()
             dd = sub["portfolio_value"].astype(float) / peak - 1.0
             return cagr, vol, sharpe, sortino, float(dd.min())
-            
+
         f_cagr, f_vol, f_sharpe, f_sortino, f_max_dd = _calc(ordered, full_returns)
         wf_cagr, wf_vol, wf_sharpe, wf_sortino, wf_max_dd = _calc(ordered[wf_mask], wf_returns)
         ho_cagr, ho_vol, ho_sharpe, ho_sortino, ho_max_dd = _calc(ordered[ho_mask], ho_returns)
@@ -612,13 +612,13 @@ def _metrics(equity: pd.DataFrame, costs: pd.DataFrame, benchmark: pd.DataFrame,
         annualised_cost_drag = cost_sum / float(ordered.iloc[0]["portfolio_value"]) / replay_years if replay_years else 0.0
         benchmark_rows = benchmark.loc[benchmark["strategy_id"] == strategy_id]
         relative = float(benchmark_rows["benchmark_relative_return"].iloc[-1]) if not benchmark_rows.empty else 0.0
-        
+
         ho_bench = benchmark_rows.copy()
         if not ho_bench.empty:
             ho_bench["valuation_date"] = pd.to_datetime(ho_bench["valuation_date"])
             ho_bench = ho_bench[ho_bench["valuation_date"] > holdout_start]
         ho_relative = float(ho_bench.iloc[-1]["benchmark_relative_return"] - ho_bench.iloc[0]["benchmark_relative_return"]) if not ho_bench.empty else 0.0
-        
+
         rows.append({
             "universe_id": universe_id, "strategy_id": strategy_id, "evaluation": "full_period",
             "starting_value": float(ordered.iloc[0]["portfolio_value"]),
@@ -1261,7 +1261,7 @@ def run_gma3a_transparent_tournament(config: GMA3AConfig) -> GMA3AResult:
             account_outputs[strategy_id + "_extended"]["costs"]["account_id"] = strategy_id + "_extended"
             account_outputs[strategy_id]["equity"]["universe_id"] = "core_common_period"
             account_outputs[strategy_id + "_extended"]["equity"]["universe_id"] = "extended_btc_period"
-            
+
         equity = pd.concat([v["equity"] for v in account_outputs.values()], ignore_index=True)
         costs = pd.concat([v["costs"] for v in account_outputs.values()], ignore_index=True)
         benchmark = _benchmark_relative(equity, prices)
@@ -1286,7 +1286,7 @@ def run_gma3a_transparent_tournament(config: GMA3AConfig) -> GMA3AResult:
             "gma_live_paper_ensemble_v0", core_dates, prices, cash, macro, config, passing
         )
         account_outputs["gma_live_paper_ensemble_v0"]["equity"]["universe_id"] = "core_common_period"
-        
+
         equity = pd.concat([v["equity"] for v in account_outputs.values()], ignore_index=True)
         drawdowns = pd.concat([v["drawdown"] for v in account_outputs.values()], ignore_index=True)
         holdings = pd.concat([v["holdings"] for v in account_outputs.values()], ignore_index=True)
@@ -1295,10 +1295,10 @@ def run_gma3a_transparent_tournament(config: GMA3AConfig) -> GMA3AResult:
         benchmark = _benchmark_relative(equity, prices)
         scoreboard = _metrics(equity, costs, benchmark)
         gates = _gate_report(scoreboard, equity, config)
-        
+
         # Determine current targets using augmented post-endpoint prices, but strategy decisions use canonical!
         augmented_prices, post_manifest, post_input_hashes, post_data_status = _extend_prices(prices)
-        
+
         latest_targets, contributions, packet, target_blocking, target_warnings = _current_targets(config, augmented_prices, macro, passing)
         warnings.extend(target_warnings)
         turnover_audit = _turnover_definition_audit(scoreboard, config)
@@ -1313,7 +1313,7 @@ def run_gma3a_transparent_tournament(config: GMA3AConfig) -> GMA3AResult:
             selected_core="gma_balanced_core_v0",
             passing_tactical=passing,
         )
-        
+
         (out / "gma3a_post_endpoint_manifest.json").write_text(_stable_json(post_manifest), encoding="utf-8")
         (out / "gma3a_post_endpoint_input_hashes.json").write_text(_stable_json(post_input_hashes), encoding="utf-8")
         pd.DataFrame(post_data_status).to_csv(out / "gma3a_post_endpoint_data_status.csv", index=False)
@@ -1341,7 +1341,7 @@ def run_gma3a_transparent_tournament(config: GMA3AConfig) -> GMA3AResult:
             json.dumps(frozen_contract, indent=2, sort_keys=True, default=str),
             encoding="utf-8",
         )
-        
+
         scoreboard[scoreboard["evaluation"] == "walk_forward"].to_csv(out / "gma3a_walk_forward_scoreboard.csv", index=False)
         scoreboard[scoreboard["evaluation"] == "holdout"].to_csv(out / "gma3a_holdout_scoreboard.csv", index=False)
         pd.DataFrame(

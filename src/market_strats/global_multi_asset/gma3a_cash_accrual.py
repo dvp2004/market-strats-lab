@@ -17,10 +17,10 @@ def build_tournament_cash_accrual(raw_path: Path, output_root: Path) -> None:
     dgs3mo = raw[raw["series_id"].eq("DGS3MO")].copy()
     if dgs3mo.empty:
         raise ValueError("No DGS3MO data found")
-        
+
     dgs3mo["observation_date_dt"] = pd.to_datetime(dgs3mo["observation_date"])
     dgs3mo = dgs3mo.sort_values("observation_date_dt").reset_index(drop=True)
-    
+
     spy_path = Path("data/global_multi_asset_alpha/canonical_market/SPY_canonical_97d24833e7e3.csv")
     spy_df = pd.read_csv(spy_path)
     spy_dates = sorted(spy_df["date"].tolist())
@@ -28,14 +28,14 @@ def build_tournament_cash_accrual(raw_path: Path, output_root: Path) -> None:
     dgs3mo = dgs3mo[~dgs3mo["value"].isna() & (dgs3mo["value"] != ".")]
     dgs3mo["value_float"] = pd.to_numeric(dgs3mo["value"], errors='coerce')
     dgs3mo = dgs3mo.dropna(subset=["value_float"]).sort_values("observation_date").reset_index(drop=True)
-    
+
     rows: list[dict[str, Any]] = []
-    
+
     # We iterate over SPY dates
     for idx in range(len(spy_dates) - 1):
         start_date = spy_dates[idx]
         end_date = spy_dates[idx + 1]
-        
+
         # Find the latest DGS3MO observation <= start_date
         # DGS3MO observation_date is the date it is published.
         # "availability_timestamp_policy" in GMA-1B says "release_date_available_after_235959_utc"
@@ -50,13 +50,13 @@ def build_tournament_cash_accrual(raw_path: Path, output_root: Path) -> None:
             continue
         row = valid.iloc[-1]
         val = float(row["value_float"])
-        
+
         start = pd.Timestamp(start_date)
         end = pd.Timestamp(end_date)
         accrual_days = (end - start).days
         annual_yield = val / 100.0
         period_return = annual_yield * accrual_days / 365.0
-        
+
         rows.append({
             "observation_date": start_date,
             "availability_timestamp_utc": f"{start_date} 23:59:59+00:00",
@@ -73,14 +73,14 @@ def build_tournament_cash_accrual(raw_path: Path, output_root: Path) -> None:
             "source_manifest_sha256": "live_raw_file",
             "cash_status": "available_after_timestamp",
         })
-        
+
     df = pd.DataFrame(rows)
     df = df[df["observation_date"] <= "2026-05-01"]
-    
+
     output_root.mkdir(parents=True, exist_ok=True)
     out_csv = output_root / "tournament_cash_accrual.csv"
     df.to_csv(out_csv, index=False)
-    
+
     out_json = output_root / "tournament_cash_accrual_manifest.json"
     manifest = {
         "source_hash": sha256_file(raw_path),
