@@ -6,6 +6,7 @@ import json
 import math
 import subprocess
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -168,6 +169,38 @@ def _safe_available_symbols(prices: dict[str, pd.DataFrame], symbols: list[str],
     return [symbol for symbol in symbols if symbol == "CASH" or (symbol in prices and date in prices[symbol].index)]
 
 
+def _observed_holiday(date: Any) -> Any:
+    holiday = pd.Timestamp(date).date()
+    if holiday.weekday() == 5:
+        return holiday - timedelta(days=1)
+    if holiday.weekday() == 6:
+        return holiday + timedelta(days=1)
+    return holiday
+
+
+def _us_equity_market_holidays(year: int) -> set[Any]:
+    return {
+        _observed_holiday(pd.Timestamp(year=year, month=1, day=1).date()),
+        _observed_holiday(pd.Timestamp(year=year, month=6, day=19).date()),
+        _observed_holiday(pd.Timestamp(year=year, month=7, day=4).date()),
+        _observed_holiday(pd.Timestamp(year=year, month=12, day=25).date()),
+    }
+
+
+def _is_us_equity_session_date(date: Any) -> bool:
+    session = pd.Timestamp(date).date()
+    if session.weekday() >= 5:
+        return False
+    return session not in _us_equity_market_holidays(session.year)
+
+
+def _next_us_equity_session_date(date: Any) -> Any:
+    session = pd.Timestamp(date).date() + timedelta(days=1)
+    while not _is_us_equity_session_date(session):
+        session += timedelta(days=1)
+    return session
+
+
 def _gma3a_next_execution_date(signal_date: Any, prices: dict[str, pd.DataFrame], assets: set[str]) -> Any:
     tradable_assets = {asset for asset in assets if asset != "CASH"}
     if tradable_assets:
@@ -176,6 +209,35 @@ def _gma3a_next_execution_date(signal_date: Any, prices: dict[str, pd.DataFrame]
     if not benchmark_dates:
         raise GMA2ReplayError("no benchmark session after cash-only signal")
     return benchmark_dates[0]
+
+
+def _gma3a_execution_timing_block(
+    *,
+    signal_date: Any,
+    execution_date: Any | None,
+    assets: set[str],
+    as_of_date: Any | None = None,
+) -> str:
+    if execution_date is None:
+        return ""
+    tradable_assets = {asset for asset in assets if asset != "CASH"}
+    if not tradable_assets:
+        return ""
+    signal = pd.Timestamp(signal_date).date()
+    execution = pd.Timestamp(execution_date).date()
+    today = pd.Timestamp(as_of_date).date() if as_of_date is not None else datetime.now(timezone.utc).date()
+    expected_next = _next_us_equity_session_date(signal)
+    if execution != expected_next:
+        return (
+            "non_retroactive_execution_block: expected_next_open "
+            f"{expected_next} but available_execution_open {execution}"
+        )
+    if execution < today:
+        return (
+            "non_retroactive_execution_block: execution window "
+            f"{execution} has passed as of {today}"
+        )
+    return ""
 
 
 def _returns(prices: dict[str, pd.DataFrame], symbol: str, date: Any, lookback: int = 1) -> float:
@@ -501,7 +563,57 @@ def _simulate_strategy(
     return {name: pd.DataFrame(values) for name, values in rows.items()}
 
 
-def _extend_prices(canonical: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.DataFrame], dict[str, Any], dict[str, Any], list[dict[str, Any]]]:
+def _load_refreshed_post_endpoint_rows(
+    *,
+    config: GMA3AConfig | None,
+    symbol: str,
+    canon_end: Any,
+) -> tuple[pd.DataFrame | None, str, str]:
+    if config is None:
+        return None, "not_configured", ""
+    path = config.paths["data_root"] / "post_endpoint_market" / f"{symbol}_post_endpoint.csv"
+    if not path.exists():
+        return None, "missing", str(path)
+    df = pd.read_csv(path)
+    required = {
+        "date",
+        "instrument_id",
+        "open_raw",
+        "high_raw",
+        "low_raw",
+        "close_raw",
+        "adj_close_provider",
+        "volume",
+        "is_completed_observation",
+        "calendar_id",
+        "source_manifest_sha256",
+        "source_raw_sha256",
+        "source_normalised_sha256",
+        "total_return_factor",
+        "total_return_index",
+    }
+    missing = required - set(df.columns)
+    if missing:
+        return None, f"invalid_missing_columns:{','.join(sorted(missing))}", str(path)
+    df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.date
+    df = df.loc[df["date"] > canon_end].copy()
+    if df.empty:
+        return None, "empty_after_endpoint", str(path)
+    if df["date"].duplicated().any():
+        return None, "invalid_duplicate_dates", str(path)
+    numeric_columns = ["open_raw", "high_raw", "low_raw", "close_raw", "adj_close_provider", "total_return_index"]
+    for column in numeric_columns:
+        df[column] = pd.to_numeric(df[column], errors="coerce")
+        if df[column].isna().any() or df[column].le(0).any():
+            return None, f"invalid_non_positive_or_missing:{column}", str(path)
+    df = df.set_index("date").sort_index()
+    return df, "loaded", str(path)
+
+
+def _extend_prices(
+    canonical: dict[str, pd.DataFrame],
+    config: GMA3AConfig | None = None,
+) -> tuple[dict[str, pd.DataFrame], dict[str, Any], dict[str, Any], list[dict[str, Any]]]:
     augmented = {}
     manifest = {}
     input_hashes = {}
@@ -515,14 +627,30 @@ def _extend_prices(canonical: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.Dat
         if symbol == "CASH":
             continue
 
-        post_df = canon_df[canon_df.index > canon_end].copy()
-        augmented[symbol] = canon_df
+        refreshed_df, refresh_status, refresh_path = _load_refreshed_post_endpoint_rows(
+            config=config,
+            symbol=symbol,
+            canon_end=canon_end,
+        )
+        embedded_post_df = canon_df[canon_df.index > canon_end].copy()
+        if refreshed_df is not None:
+            pre_endpoint = canon_df[canon_df.index <= canon_end].copy()
+            augmented[symbol] = pd.concat([pre_endpoint, refreshed_df], axis=0).sort_index()
+            post_df = refreshed_df
+            post_endpoint_source = "gma3a_post_endpoint_refresh"
+        else:
+            augmented[symbol] = canon_df
+            post_df = embedded_post_df
+            post_endpoint_source = "embedded_canonical_post_endpoint"
 
         if post_df.empty:
             data_status.append({
                 "symbol": symbol,
                 "status": "no_post_endpoint_data",
-                "partial_bar_exclusion": False
+                "partial_bar_exclusion": False,
+                "post_endpoint_source": post_endpoint_source,
+                "refresh_status": refresh_status,
+                "refresh_path": refresh_path,
             })
             continue
 
@@ -539,14 +667,18 @@ def _extend_prices(canonical: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.Dat
             "post_endpoint_start": str(start_date),
             "post_endpoint_end": str(end_date),
             "post_endpoint_sessions": sessions,
-            "input_hash": manifest_hash
+            "input_hash": manifest_hash,
+            "post_endpoint_source": post_endpoint_source,
+            "refresh_status": refresh_status,
+            "refresh_path": refresh_path,
         }
 
         input_hashes[symbol] = {
             "raw_hash": raw_hash,
             "normalised_hash": norm_hash,
             "retrieval_timestamp": now,
-            "provider": "yahoo_yfinance"
+            "provider": "yahoo_yfinance",
+            "post_endpoint_source": post_endpoint_source,
         }
 
         data_status.append({
@@ -554,7 +686,10 @@ def _extend_prices(canonical: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.Dat
             "status": "available",
             "partial_bar_exclusion": False,
             "latest_completed_date": str(end_date),
-            "sessions": sessions
+            "sessions": sessions,
+            "post_endpoint_source": post_endpoint_source,
+            "refresh_status": refresh_status,
+            "refresh_path": refresh_path,
         })
 
     return augmented, manifest, input_hashes, data_status
@@ -1168,6 +1303,14 @@ def _current_targets(
     blocking = ""
     try:
         execution_date = _gma3a_next_execution_date(latest_common, prices, set(targets))
+        timing_block = _gma3a_execution_timing_block(
+            signal_date=latest_common,
+            execution_date=execution_date,
+            assets=set(targets),
+        )
+        if timing_block:
+            blocking = timing_block
+            warnings.append(blocking)
     except Exception as exc:  # noqa: BLE001
         blocking = f"next_execution_unavailable: {exc}"
         warnings.append(blocking)
@@ -1200,7 +1343,7 @@ def _current_targets(
                 "ml_contribution": 0.0,
             }
         )
-        if symbol != "CASH" and execution_date and abs(weight) > 1e-12:
+        if symbol != "CASH" and execution_date and not blocking and abs(weight) > 1e-12:
             price = _price_at(prices, symbol, execution_date, "open_raw")
             qty = int((capital * weight) // price)
             if qty:
@@ -1296,8 +1439,8 @@ def run_gma3a_transparent_tournament(config: GMA3AConfig) -> GMA3AResult:
         scoreboard = _metrics(equity, costs, benchmark)
         gates = _gate_report(scoreboard, equity, config)
 
-        # Determine current targets using augmented post-endpoint prices, but strategy decisions use canonical!
-        augmented_prices, post_manifest, post_input_hashes, post_data_status = _extend_prices(prices)
+        # Determine current targets using augmented post-endpoint prices, but strategy decisions use canonical.
+        augmented_prices, post_manifest, post_input_hashes, post_data_status = _extend_prices(prices, config)
 
         latest_targets, contributions, packet, target_blocking, target_warnings = _current_targets(config, augmented_prices, macro, passing)
         warnings.extend(target_warnings)
@@ -1349,7 +1492,7 @@ def run_gma3a_transparent_tournament(config: GMA3AConfig) -> GMA3AResult:
         ).to_csv(out / "gma3a_parameter_stability.csv", index=False)
 
         latest_date = latest_targets["data_as_of_date"].iloc[0]
-        market_state = _market_state(latest_date, prices, macro)
+        market_state = _market_state(latest_date, augmented_prices, macro)
         market_state.to_csv(out / "gma3a_current_market_state.csv", index=False)
         _write_markdown(
             out / "gma3a_current_market_state.md",

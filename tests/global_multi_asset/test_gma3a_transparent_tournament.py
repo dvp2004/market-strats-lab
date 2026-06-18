@@ -10,6 +10,9 @@ from market_strats.global_multi_asset.gma3a_config import validate_gma3a_config
 from market_strats.global_multi_asset.gma3a_tournament import (
     STRATEGY_IDS,
     _core_fallback_passed,
+    _extend_prices,
+    _gma3a_execution_timing_block,
+    _is_us_equity_session_date,
     _manual_fill_columns,
     run_gma3a_transparent_tournament,
     verify_gma3a_upstream,
@@ -301,3 +304,99 @@ def test_no_change_to_accepted_gma2_files():
     ]
     result = subprocess.run(["git", "diff", "--name-only", "--", *files], check=True, capture_output=True, text=True)
     assert not result.stdout.strip()
+
+
+def test_operational_post_endpoint_refresh_rows_are_merged(tmp_path: Path, temp_config):
+    raw = dict(temp_config.raw)
+    raw["paths"] = {key: str(value) for key, value in temp_config.paths.items()}
+    raw["paths"]["data_root"] = str(tmp_path / "gma3a_data")
+    config = validate_gma3a_config(raw, path=temp_config.path)
+    post_root = config.paths["data_root"] / "post_endpoint_market"
+    post_root.mkdir(parents=True)
+
+    canonical = pd.DataFrame(
+        [
+            {
+                "date": pd.Timestamp("2026-05-01").date(),
+                "instrument_id": "SPY",
+                "open_raw": 100.0,
+                "high_raw": 101.0,
+                "low_raw": 99.0,
+                "close_raw": 100.0,
+                "adj_close_provider": 100.0,
+                "volume": 1000,
+                "dividend_cash": 0.0,
+                "split_ratio": 0.0,
+                "is_completed_observation": True,
+                "calendar_id": "us_listed_etf",
+                "source_manifest_sha256": "canonical_manifest",
+                "source_raw_sha256": "canonical_raw",
+                "source_normalised_sha256": "canonical_norm",
+                "total_return_factor": 1.0,
+                "total_return_index": 1.0,
+            },
+            {
+                "date": pd.Timestamp("2026-06-12").date(),
+                "instrument_id": "SPY",
+                "open_raw": 110.0,
+                "high_raw": 111.0,
+                "low_raw": 109.0,
+                "close_raw": 110.0,
+                "adj_close_provider": 110.0,
+                "volume": 1000,
+                "dividend_cash": 0.0,
+                "split_ratio": 0.0,
+                "is_completed_observation": True,
+                "calendar_id": "us_listed_etf",
+                "source_manifest_sha256": "old_manifest",
+                "source_raw_sha256": "old_raw",
+                "source_normalised_sha256": "old_norm",
+                "total_return_factor": 1.1,
+                "total_return_index": 1.1,
+            },
+        ]
+    ).set_index("date")
+    refreshed = canonical.reset_index().copy()
+    refreshed = refreshed.loc[refreshed["date"].astype(str).eq("2026-06-12")].copy()
+    refreshed.loc[:, "close_raw"] = 120.0
+    refreshed.loc[:, "open_raw"] = 119.0
+    refreshed.loc[:, "high_raw"] = 121.0
+    refreshed.loc[:, "low_raw"] = 118.0
+    refreshed.loc[:, "adj_close_provider"] = 120.0
+    refreshed.loc[:, "total_return_index"] = 1.2
+    refreshed.loc[:, "source_manifest_sha256"] = "fresh_manifest"
+    refreshed.loc[:, "source_raw_sha256"] = "fresh_raw"
+    refreshed.loc[:, "source_normalised_sha256"] = "fresh_norm"
+    refreshed.to_csv(post_root / "SPY_post_endpoint.csv", index=False)
+
+    augmented, _manifest, _input_hashes, data_status = _extend_prices({"SPY": canonical}, config)
+
+    assert augmented["SPY"].loc[pd.Timestamp("2026-05-01").date(), "close_raw"] == pytest.approx(100.0)
+    assert augmented["SPY"].loc[pd.Timestamp("2026-06-12").date(), "close_raw"] == pytest.approx(120.0)
+    assert data_status[0]["post_endpoint_source"] == "gma3a_post_endpoint_refresh"
+
+
+def test_juneteenth_2026_is_not_us_equity_session():
+    assert not _is_us_equity_session_date(pd.Timestamp("2026-06-19").date())
+    assert _is_us_equity_session_date(pd.Timestamp("2026-06-18").date())
+    assert _is_us_equity_session_date(pd.Timestamp("2026-06-22").date())
+
+
+def test_non_retroactive_execution_blocks_missed_next_open():
+    blocker = _gma3a_execution_timing_block(
+        signal_date=pd.Timestamp("2026-06-17").date(),
+        execution_date=pd.Timestamp("2026-06-18").date(),
+        assets={"SPY", "GLD"},
+        as_of_date=pd.Timestamp("2026-06-19").date(),
+    )
+    assert "execution window 2026-06-18 has passed" in blocker
+
+
+def test_non_retroactive_execution_blocks_skipping_true_next_open_to_monday():
+    blocker = _gma3a_execution_timing_block(
+        signal_date=pd.Timestamp("2026-06-17").date(),
+        execution_date=pd.Timestamp("2026-06-22").date(),
+        assets={"SPY", "GLD"},
+        as_of_date=pd.Timestamp("2026-06-19").date(),
+    )
+    assert "expected_next_open 2026-06-18" in blocker

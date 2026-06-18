@@ -15,6 +15,7 @@ from market_strats.global_multi_asset.gma1b_macro_cash import (
 from market_strats.global_multi_asset.gma2_config import load_gma2_config
 from market_strats.global_multi_asset.gma2_replay import run_gma2_replay_foundation
 from market_strats.global_multi_asset.gma3a_config import load_gma3a_config
+from market_strats.global_multi_asset.gma3a_post_endpoint_refresh import run_gma3a_post_endpoint_refresh
 from market_strats.global_multi_asset.gma3a_tournament import run_gma3a_transparent_tournament
 
 
@@ -67,6 +68,10 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser(
         "run-transparent-tournament",
         help="Run GMA-3A transparent strategy tournament and paper portfolio V0",
+    )
+    subparsers.add_parser(
+        "refresh-post-endpoint-market",
+        help="Refresh GMA-3A-only post-endpoint market data for paper packet generation",
     )
     return parser
 
@@ -152,6 +157,15 @@ def main(argv: list[str] | None = None) -> int:
             for w in result.warnings:
                 print(f"  warning: {w}")
         return 0 if not result.decision.startswith("gma3a_blocked") else 2
+    if args.command == "refresh-post-endpoint-market":
+        config = load_gma3a_config(args.config)
+        result = run_gma3a_post_endpoint_refresh(config)
+        print(f"GMA-3A post-endpoint refresh decision: {result.decision}")
+        print(f"GMA-3A refreshed symbols: {','.join(result.refreshed_symbols)}")
+        if result.warnings:
+            for w in result.warnings:
+                print(f"  warning: {w}")
+        return 0 if result.decision == "gma3a_post_endpoint_refresh_completed" else 2
     return 2
 
 
