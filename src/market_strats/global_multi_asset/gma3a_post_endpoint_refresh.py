@@ -11,10 +11,10 @@ from typing import Any
 import pandas as pd
 
 from market_strats.global_multi_asset.data.manifests import sha256_file
-from market_strats.global_multi_asset.data.price_provider import YFinanceProvider
+from market_strats.global_multi_asset.data.price_provider import YFinanceProvider, safe_symbol
 from market_strats.global_multi_asset.data.validation import (
-    completed_history,
     corporate_action_frame,
+    PRICE_COLUMNS,
 )
 from market_strats.global_multi_asset.gma2_replay import _load_prices
 from market_strats.global_multi_asset.gma3a_config import GMA3AConfig
@@ -54,6 +54,17 @@ class GMA3APostEndpointRefreshResult:
     warnings: list[str]
 
 
+@dataclass(frozen=True)
+class _ProcessedSnapshotForMaterialization:
+    completed: pd.DataFrame
+    raw: pd.DataFrame
+    manifest_path: Path
+    normalised_path: Path
+    raw_path: Path
+    latest_completed_date: Any
+    completed_row_count: int
+
+
 def _target_symbols(config: GMA3AConfig) -> list[str]:
     weights = config.raw.get("strategy_universe", {}).get("balanced_benchmark_weights", {}) or {}
     symbols = [str(symbol) for symbol in weights if str(symbol) != "CASH"]
@@ -87,6 +98,81 @@ def _merge_actions(normalised: pd.DataFrame, raw: pd.DataFrame) -> pd.DataFrame:
     completed["dividend_cash"] = pd.to_numeric(completed["dividends"], errors="coerce").fillna(0.0)
     completed["split_ratio"] = pd.to_numeric(completed["splits"], errors="coerce").fillna(0.0)
     return completed
+
+
+def _post_endpoint_completed_history(frame: pd.DataFrame) -> pd.DataFrame:
+    if frame.empty:
+        return frame.copy()
+    working = frame.copy().sort_values("date").reset_index(drop=True)
+    working["date"] = pd.to_datetime(working["date"], errors="coerce")
+    required_complete = working[PRICE_COLUMNS].isna().any(axis=1)
+    while len(working) and bool(required_complete.iloc[-1]):
+        working = working.iloc[:-1].copy()
+        required_complete = required_complete.iloc[:-1].copy()
+    if bool(required_complete.any()):
+        raise ValueError("processed provider snapshot contains incomplete interior rows")
+    return working.reset_index(drop=True)
+
+
+def _resolve_snapshot_path(value: Any) -> Path:
+    path = Path(str(value))
+    if path.is_absolute() or path.exists():
+        return path
+    return Path.cwd() / path
+
+
+def _processed_snapshot_from_manifest(manifest_path: Path) -> _ProcessedSnapshotForMaterialization | None:
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    normalised_path = _resolve_snapshot_path(manifest.get("normalised_file_path", ""))
+    raw_path = _resolve_snapshot_path(manifest.get("raw_file_path", ""))
+    if not normalised_path.exists() or not raw_path.exists():
+        return None
+    normalised = pd.read_csv(normalised_path)
+    completed = _post_endpoint_completed_history(normalised)
+    if completed.empty:
+        return None
+    raw = pd.read_csv(raw_path)
+    latest = pd.to_datetime(completed["date"], errors="coerce").max()
+    if pd.isna(latest):
+        return None
+    return _ProcessedSnapshotForMaterialization(
+        completed=completed,
+        raw=raw,
+        manifest_path=manifest_path,
+        normalised_path=normalised_path,
+        raw_path=raw_path,
+        latest_completed_date=latest.date(),
+        completed_row_count=int(len(completed)),
+    )
+
+
+def _best_processed_snapshot_for_materialization(
+    *,
+    symbol: str,
+    provider: str,
+    manifest_root: Path,
+) -> _ProcessedSnapshotForMaterialization | None:
+    manifest_dir = manifest_root / provider / safe_symbol(symbol)
+    if not manifest_dir.exists():
+        return None
+    candidates: list[_ProcessedSnapshotForMaterialization] = []
+    for manifest_path in sorted(manifest_dir.glob("*_manifest.json")):
+        try:
+            candidate = _processed_snapshot_from_manifest(manifest_path)
+        except Exception:  # noqa: BLE001
+            candidate = None
+        if candidate is not None:
+            candidates.append(candidate)
+    if not candidates:
+        return None
+    return sorted(
+        candidates,
+        key=lambda item: (
+            pd.Timestamp(item.latest_completed_date),
+            item.completed_row_count,
+            item.manifest_path.stat().st_mtime,
+        ),
+    )[-1]
 
 
 def _build_post_endpoint_rows(
@@ -187,15 +273,24 @@ def run_gma3a_post_endpoint_refresh(config: GMA3AConfig) -> GMA3APostEndpointRef
         row_count = 0
         try:
             snapshot = provider.fetch(symbol, start=POST_ENDPOINT_START, end=request_end)
-            completed = completed_history(snapshot.normalised_frame, snapshot.retrieved_at_utc)
+            materialized = _best_processed_snapshot_for_materialization(
+                symbol=symbol,
+                provider=snapshot.provider,
+                manifest_root=manifest_root,
+            )
+            completed = materialized.completed if materialized is not None else _post_endpoint_completed_history(snapshot.normalised_frame)
+            raw = materialized.raw if materialized is not None else snapshot.raw_frame
+            manifest_path = materialized.manifest_path if materialized is not None else snapshot.manifest_path
+            normalised_path = materialized.normalised_path if materialized is not None else snapshot.normalised_file_path
+            raw_path = materialized.raw_path if materialized is not None else snapshot.raw_file_path
             post_rows = _build_post_endpoint_rows(
                 symbol=symbol,
                 canonical=canonical[symbol],
                 completed=completed,
-                raw=snapshot.raw_frame,
-                manifest_path=snapshot.manifest_path,
-                normalised_path=snapshot.normalised_file_path,
-                raw_path=snapshot.raw_file_path,
+                raw=raw,
+                manifest_path=manifest_path,
+                normalised_path=normalised_path,
+                raw_path=raw_path,
             )
             if post_rows.empty:
                 raise ValueError("provider returned no completed post-endpoint rows")

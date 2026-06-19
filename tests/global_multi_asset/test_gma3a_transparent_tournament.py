@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -7,12 +8,18 @@ import pytest
 import yaml
 
 from market_strats.global_multi_asset.gma3a_config import validate_gma3a_config
+from market_strats.global_multi_asset.gma3a_post_endpoint_refresh import (
+    _best_processed_snapshot_for_materialization,
+    _build_post_endpoint_rows,
+    _post_endpoint_completed_history,
+)
 from market_strats.global_multi_asset.gma3a_tournament import (
     STRATEGY_IDS,
     _core_fallback_passed,
     _extend_prices,
     _gma3a_execution_timing_block,
     _is_us_equity_session_date,
+    _latest_signal_date_with_later_execution,
     _manual_fill_columns,
     run_gma3a_transparent_tournament,
     verify_gma3a_upstream,
@@ -291,7 +298,7 @@ def test_empty_packet_remains_empty_without_later_execution_opens(result):
     packet = pd.read_csv(result.output_root / "gma3a_tradingview_order_packet.csv")
     recon = pd.read_csv(result.output_root / "gma3a_tracking_reconciliation.csv")
     assert packet.empty
-    assert "next_execution_unavailable" in str(recon.iloc[0]["blocking_reason"])
+    assert "non_retroactive_execution_block" in str(recon.iloc[0]["blocking_reason"])
 
 
 def test_no_change_to_accepted_gma2_files():
@@ -376,10 +383,179 @@ def test_operational_post_endpoint_refresh_rows_are_merged(tmp_path: Path, temp_
     assert data_status[0]["post_endpoint_source"] == "gma3a_post_endpoint_refresh"
 
 
+def test_post_endpoint_finalizer_keeps_latest_valid_processed_snapshot_row(tmp_path: Path):
+    canonical = pd.DataFrame(
+        [
+            {
+                "date": pd.Timestamp("2026-05-01").date(),
+                "instrument_id": "IEF",
+                "open_raw": 100.0,
+                "high_raw": 101.0,
+                "low_raw": 99.0,
+                "close_raw": 100.0,
+                "adj_close_provider": 100.0,
+                "volume": 1000,
+                "dividend_cash": 0.0,
+                "split_ratio": 0.0,
+                "is_completed_observation": True,
+                "calendar_id": "us_listed_etf",
+                "source_manifest_sha256": "canonical_manifest",
+                "source_raw_sha256": "canonical_raw",
+                "source_normalised_sha256": "canonical_norm",
+                "total_return_factor": 1.0,
+                "total_return_index": 1.0,
+            }
+        ]
+    ).set_index("date")
+    normalised = pd.DataFrame(
+        [
+            {
+                "date": pd.Timestamp("2026-06-17"),
+                "open": 101.0,
+                "high": 102.0,
+                "low": 100.0,
+                "close": 101.5,
+                "adj_close": 101.5,
+                "volume": 1000,
+            },
+            {
+                "date": pd.Timestamp("2026-06-18"),
+                "open": 102.0,
+                "high": 103.0,
+                "low": 101.0,
+                "close": 102.5,
+                "adj_close": 102.5,
+                "volume": 1100,
+            },
+        ]
+    )
+    raw = normalised.rename(
+        columns={
+            "date": "Date",
+            "open": "Open",
+            "high": "High",
+            "low": "Low",
+            "close": "Close",
+            "adj_close": "Adj Close",
+            "volume": "Volume",
+        }
+    )
+    manifest_path = tmp_path / "manifest.json"
+    normalised_path = tmp_path / "normalised.csv"
+    raw_path = tmp_path / "raw.csv"
+    manifest_path.write_text("{}", encoding="utf-8")
+    normalised.to_csv(normalised_path, index=False)
+    raw.to_csv(raw_path, index=False)
+
+    completed = _post_endpoint_completed_history(normalised)
+    post_rows = _build_post_endpoint_rows(
+        symbol="IEF",
+        canonical=canonical,
+        completed=completed,
+        raw=raw,
+        manifest_path=manifest_path,
+        normalised_path=normalised_path,
+        raw_path=raw_path,
+    )
+
+    assert list(post_rows["date"]) == ["2026-06-17", "2026-06-18"]
+    assert post_rows.iloc[-1]["close_raw"] == pytest.approx(102.5)
+    assert post_rows.iloc[-1]["is_completed_observation"]
+
+
+def test_post_endpoint_materialization_prefers_latest_complete_processed_snapshot(tmp_path: Path):
+    manifest_root = tmp_path / "manifests"
+    processed_root = tmp_path / "processed"
+    raw_root = tmp_path / "raw"
+    for root in [manifest_root, processed_root, raw_root]:
+        (root / "yahoo_yfinance" / "IEF").mkdir(parents=True)
+
+    older_normalised = pd.DataFrame(
+        [
+            {
+                "date": pd.Timestamp("2026-06-17"),
+                "open": 101.0,
+                "high": 102.0,
+                "low": 100.0,
+                "close": 101.5,
+                "adj_close": 101.5,
+                "volume": 1000,
+            },
+            {
+                "date": pd.Timestamp("2026-06-18"),
+                "open": 102.0,
+                "high": 103.0,
+                "low": 101.0,
+                "close": 102.5,
+                "adj_close": 102.5,
+                "volume": 1100,
+            },
+        ]
+    )
+    newer_normalised = older_normalised.copy()
+    newer_normalised.loc[newer_normalised["date"].eq(pd.Timestamp("2026-06-18")), "close"] = pd.NA
+    newer_normalised.loc[newer_normalised["date"].eq(pd.Timestamp("2026-06-18")), "adj_close"] = pd.NA
+
+    for stamp, frame in [("20260618T194650000000Z", older_normalised), ("20260619T111457000000Z", newer_normalised)]:
+        normalised_path = processed_root / "yahoo_yfinance" / "IEF" / f"IEF_{stamp}_normalised.csv"
+        raw_path = raw_root / "yahoo_yfinance" / "IEF" / f"IEF_{stamp}.csv"
+        manifest_path = manifest_root / "yahoo_yfinance" / "IEF" / f"IEF_{stamp}_manifest.json"
+        frame.to_csv(normalised_path, index=False)
+        frame.rename(
+            columns={
+                "date": "Date",
+                "open": "Open",
+                "high": "High",
+                "low": "Low",
+                "close": "Close",
+                "adj_close": "Adj Close",
+                "volume": "Volume",
+            }
+        ).to_csv(raw_path, index=False)
+        manifest_path.write_text(
+            json.dumps(
+                {
+                    "normalised_file_path": str(normalised_path),
+                    "raw_file_path": str(raw_path),
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    selected = _best_processed_snapshot_for_materialization(
+        symbol="IEF",
+        provider="yahoo_yfinance",
+        manifest_root=manifest_root,
+    )
+
+    assert selected is not None
+    assert selected.latest_completed_date == pd.Timestamp("2026-06-18").date()
+    assert selected.completed.iloc[-1]["close"] == pytest.approx(102.5)
+    assert "20260618T194650000000Z" in selected.normalised_path.name
+
+
 def test_juneteenth_2026_is_not_us_equity_session():
     assert not _is_us_equity_session_date(pd.Timestamp("2026-06-19").date())
     assert _is_us_equity_session_date(pd.Timestamp("2026-06-18").date())
     assert _is_us_equity_session_date(pd.Timestamp("2026-06-22").date())
+
+
+def test_latest_signal_date_requires_later_execution_row():
+    dates = [
+        pd.Timestamp("2026-06-17").date(),
+        pd.Timestamp("2026-06-18").date(),
+    ]
+    prices = {
+        symbol: pd.DataFrame({"close_raw": [100.0, 101.0]}, index=dates)
+        for symbol in ["SPY", "QQQ", "IEF", "GLD", "DBC"]
+    }
+
+    signal_date = _latest_signal_date_with_later_execution(
+        prices,
+        {"SPY", "QQQ", "IEF", "GLD", "DBC"},
+    )
+
+    assert signal_date == pd.Timestamp("2026-06-17").date()
 
 
 def test_non_retroactive_execution_blocks_missed_next_open():

@@ -211,6 +211,20 @@ def _gma3a_next_execution_date(signal_date: Any, prices: dict[str, pd.DataFrame]
     return benchmark_dates[0]
 
 
+def _latest_signal_date_with_later_execution(
+    prices: dict[str, pd.DataFrame],
+    symbols: set[str],
+) -> Any:
+    tradable = sorted(symbol for symbol in symbols if symbol != "CASH")
+    common_dates = set(prices[tradable[0]].index)
+    for symbol in tradable[1:]:
+        common_dates &= set(prices[symbol].index)
+    for candidate in sorted(common_dates, reverse=True):
+        if all(any(date > candidate for date in prices[symbol].index) for symbol in tradable):
+            return candidate
+    return min(max(df.index) for symbol, df in prices.items() if symbol in symbols)
+
+
 def _gma3a_execution_timing_block(
     *,
     signal_date: Any,
@@ -1296,7 +1310,10 @@ def _current_targets(
     contrib_rows = []
     order_rows = []
     warnings = []
-    latest_common = min(max(df.index) for symbol, df in prices.items() if symbol in {"SPY", "QQQ", "IEF", "GLD", "DBC"})
+    latest_common = _latest_signal_date_with_later_execution(
+        prices,
+        {"SPY", "QQQ", "IEF", "GLD", "DBC"},
+    )
     targets, reason = strategy_targets("gma_live_paper_ensemble_v0", latest_common, prices, macro, config, passing)
     core_only = not passing
     execution_date = None
