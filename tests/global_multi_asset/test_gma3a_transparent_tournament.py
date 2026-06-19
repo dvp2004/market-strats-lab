@@ -1,19 +1,30 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pandas as pd
 import pytest
 import yaml
 
+from market_strats.global_multi_asset import cli as gma_cli
 from market_strats.global_multi_asset.gma3a_config import validate_gma3a_config
+from market_strats.global_multi_asset.gma3a_manual_fills import validate_gma3a_manual_fills
+from market_strats.global_multi_asset.gma3a_paper_readiness import run_gma3a_paper_readiness
+from market_strats.global_multi_asset.gma3a_post_endpoint_refresh import (
+    _best_processed_snapshot_for_materialization,
+    _build_post_endpoint_rows,
+    _post_endpoint_completed_history,
+)
 from market_strats.global_multi_asset.gma3a_tournament import (
     STRATEGY_IDS,
     _core_fallback_passed,
     _extend_prices,
     _gma3a_execution_timing_block,
     _is_us_equity_session_date,
+    _latest_signal_date_with_later_execution,
     _manual_fill_columns,
+    _order_packet_columns,
     run_gma3a_transparent_tournament,
     verify_gma3a_upstream,
 )
@@ -291,7 +302,7 @@ def test_empty_packet_remains_empty_without_later_execution_opens(result):
     packet = pd.read_csv(result.output_root / "gma3a_tradingview_order_packet.csv")
     recon = pd.read_csv(result.output_root / "gma3a_tracking_reconciliation.csv")
     assert packet.empty
-    assert "next_execution_unavailable" in str(recon.iloc[0]["blocking_reason"])
+    assert "non_retroactive_execution_block" in str(recon.iloc[0]["blocking_reason"])
 
 
 def test_no_change_to_accepted_gma2_files():
@@ -376,10 +387,419 @@ def test_operational_post_endpoint_refresh_rows_are_merged(tmp_path: Path, temp_
     assert data_status[0]["post_endpoint_source"] == "gma3a_post_endpoint_refresh"
 
 
+def test_post_endpoint_finalizer_keeps_latest_valid_processed_snapshot_row(tmp_path: Path):
+    canonical = pd.DataFrame(
+        [
+            {
+                "date": pd.Timestamp("2026-05-01").date(),
+                "instrument_id": "IEF",
+                "open_raw": 100.0,
+                "high_raw": 101.0,
+                "low_raw": 99.0,
+                "close_raw": 100.0,
+                "adj_close_provider": 100.0,
+                "volume": 1000,
+                "dividend_cash": 0.0,
+                "split_ratio": 0.0,
+                "is_completed_observation": True,
+                "calendar_id": "us_listed_etf",
+                "source_manifest_sha256": "canonical_manifest",
+                "source_raw_sha256": "canonical_raw",
+                "source_normalised_sha256": "canonical_norm",
+                "total_return_factor": 1.0,
+                "total_return_index": 1.0,
+            }
+        ]
+    ).set_index("date")
+    normalised = pd.DataFrame(
+        [
+            {
+                "date": pd.Timestamp("2026-06-17"),
+                "open": 101.0,
+                "high": 102.0,
+                "low": 100.0,
+                "close": 101.5,
+                "adj_close": 101.5,
+                "volume": 1000,
+            },
+            {
+                "date": pd.Timestamp("2026-06-18"),
+                "open": 102.0,
+                "high": 103.0,
+                "low": 101.0,
+                "close": 102.5,
+                "adj_close": 102.5,
+                "volume": 1100,
+            },
+        ]
+    )
+    raw = normalised.rename(
+        columns={
+            "date": "Date",
+            "open": "Open",
+            "high": "High",
+            "low": "Low",
+            "close": "Close",
+            "adj_close": "Adj Close",
+            "volume": "Volume",
+        }
+    )
+    manifest_path = tmp_path / "manifest.json"
+    normalised_path = tmp_path / "normalised.csv"
+    raw_path = tmp_path / "raw.csv"
+    manifest_path.write_text("{}", encoding="utf-8")
+    normalised.to_csv(normalised_path, index=False)
+    raw.to_csv(raw_path, index=False)
+
+    completed = _post_endpoint_completed_history(normalised)
+    post_rows = _build_post_endpoint_rows(
+        symbol="IEF",
+        canonical=canonical,
+        completed=completed,
+        raw=raw,
+        manifest_path=manifest_path,
+        normalised_path=normalised_path,
+        raw_path=raw_path,
+    )
+
+    assert list(post_rows["date"]) == ["2026-06-17", "2026-06-18"]
+    assert post_rows.iloc[-1]["close_raw"] == pytest.approx(102.5)
+    assert post_rows.iloc[-1]["is_completed_observation"]
+
+
+def test_post_endpoint_materialization_prefers_latest_complete_processed_snapshot(tmp_path: Path):
+    manifest_root = tmp_path / "manifests"
+    processed_root = tmp_path / "processed"
+    raw_root = tmp_path / "raw"
+    for root in [manifest_root, processed_root, raw_root]:
+        (root / "yahoo_yfinance" / "IEF").mkdir(parents=True)
+
+    older_normalised = pd.DataFrame(
+        [
+            {
+                "date": pd.Timestamp("2026-06-17"),
+                "open": 101.0,
+                "high": 102.0,
+                "low": 100.0,
+                "close": 101.5,
+                "adj_close": 101.5,
+                "volume": 1000,
+            },
+            {
+                "date": pd.Timestamp("2026-06-18"),
+                "open": 102.0,
+                "high": 103.0,
+                "low": 101.0,
+                "close": 102.5,
+                "adj_close": 102.5,
+                "volume": 1100,
+            },
+        ]
+    )
+    newer_normalised = older_normalised.copy()
+    newer_normalised.loc[newer_normalised["date"].eq(pd.Timestamp("2026-06-18")), "close"] = pd.NA
+    newer_normalised.loc[newer_normalised["date"].eq(pd.Timestamp("2026-06-18")), "adj_close"] = pd.NA
+
+    for stamp, frame in [("20260618T194650000000Z", older_normalised), ("20260619T111457000000Z", newer_normalised)]:
+        normalised_path = processed_root / "yahoo_yfinance" / "IEF" / f"IEF_{stamp}_normalised.csv"
+        raw_path = raw_root / "yahoo_yfinance" / "IEF" / f"IEF_{stamp}.csv"
+        manifest_path = manifest_root / "yahoo_yfinance" / "IEF" / f"IEF_{stamp}_manifest.json"
+        frame.to_csv(normalised_path, index=False)
+        frame.rename(
+            columns={
+                "date": "Date",
+                "open": "Open",
+                "high": "High",
+                "low": "Low",
+                "close": "Close",
+                "adj_close": "Adj Close",
+                "volume": "Volume",
+            }
+        ).to_csv(raw_path, index=False)
+        manifest_path.write_text(
+            json.dumps(
+                {
+                    "normalised_file_path": str(normalised_path),
+                    "raw_file_path": str(raw_path),
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    selected = _best_processed_snapshot_for_materialization(
+        symbol="IEF",
+        provider="yahoo_yfinance",
+        manifest_root=manifest_root,
+    )
+
+    assert selected is not None
+    assert selected.latest_completed_date == pd.Timestamp("2026-06-18").date()
+    assert selected.completed.iloc[-1]["close"] == pytest.approx(102.5)
+    assert "20260618T194650000000Z" in selected.normalised_path.name
+
+
 def test_juneteenth_2026_is_not_us_equity_session():
     assert not _is_us_equity_session_date(pd.Timestamp("2026-06-19").date())
     assert _is_us_equity_session_date(pd.Timestamp("2026-06-18").date())
     assert _is_us_equity_session_date(pd.Timestamp("2026-06-22").date())
+
+
+def test_latest_signal_date_requires_later_execution_row():
+    dates = [
+        pd.Timestamp("2026-06-17").date(),
+        pd.Timestamp("2026-06-18").date(),
+    ]
+    prices = {
+        symbol: pd.DataFrame({"close_raw": [100.0, 101.0]}, index=dates)
+        for symbol in ["SPY", "QQQ", "IEF", "GLD", "DBC"]
+    }
+
+    signal_date = _latest_signal_date_with_later_execution(
+        prices,
+        {"SPY", "QQQ", "IEF", "GLD", "DBC"},
+    )
+
+    assert signal_date == pd.Timestamp("2026-06-17").date()
+
+
+def test_paper_readiness_reports_non_retroactive_block_without_order_packet(tmp_path: Path, temp_config):
+    raw = dict(temp_config.raw)
+    raw["paths"] = {key: str(value) for key, value in temp_config.paths.items()}
+    raw["paths"]["output_root"] = str(tmp_path / "reports")
+    raw["paths"]["data_root"] = str(tmp_path / "data")
+    config = validate_gma3a_config(raw, path=temp_config.path)
+    out = config.paths["output_root"]
+    data_root = config.paths["data_root"]
+    out.mkdir(parents=True)
+    post_root = data_root / "post_endpoint_market"
+    post_root.mkdir(parents=True)
+
+    for symbol in ["SPY", "QQQ", "IEF", "GLD", "DBC"]:
+        pd.DataFrame(
+            [
+                {
+                    "date": "2026-06-18",
+                    "instrument_id": symbol,
+                    "close_raw": 100.0,
+                }
+            ]
+        ).to_csv(post_root / f"{symbol}_post_endpoint.csv", index=False)
+
+    pd.DataFrame(
+        [
+            {
+                "phase": "GMA-3A-R2",
+                "decision": "gma3ar2_ready_core_only_waiting_execution_open",
+                "order_packet_rows": 0,
+                "target_blocking_reason": (
+                    "non_retroactive_execution_block: execution window 2026-06-18 "
+                    "has passed as of 2026-06-19"
+                ),
+                "paper_only": True,
+                "live_trading_allowed": False,
+                "real_money_allowed": False,
+                "broker_api_integration_allowed": False,
+                "ml_portfolio_influence": 0,
+            }
+        ]
+    ).to_csv(out / "gma3a_summary.csv", index=False)
+    pd.DataFrame(
+        [
+            {
+                "decision_date": "2026-06-17",
+                "expected_execution_date": "2026-06-18",
+                "symbol": "SPY",
+                "final_target_weight": 0.35,
+            }
+        ]
+    ).to_csv(out / "gma3a_current_strategy_targets.csv", index=False)
+    pd.DataFrame(columns=_manual_fill_columns()).to_csv(out / "gma3a_tradingview_manual_fill_template.csv", index=False)
+    pd.DataFrame(columns=_order_packet_columns()).to_csv(out / "gma3a_tradingview_order_packet.csv", index=False)
+
+    result = run_gma3a_paper_readiness(config)
+    summary = pd.read_csv(result.summary_path).iloc[0]
+
+    assert result.readiness_status == "blocked"
+    assert result.execution_status == "retroactive_blocked"
+    assert not result.manual_tradingview_entry_active
+    assert result.order_packet_rows == 0
+    assert summary["SPY_latest_finalized_date"] == "2026-06-18"
+    assert bool(summary["safety_flags_valid"])
+    assert "non_retroactive_execution_block" in result.blocking_reason
+
+
+def _manual_fill_test_config(tmp_path: Path, temp_config, *, active_packet: bool):
+    raw = dict(temp_config.raw)
+    raw["paths"] = {key: str(value) for key, value in temp_config.paths.items()}
+    raw["paths"]["output_root"] = str(tmp_path / "reports")
+    raw["paths"]["data_root"] = str(tmp_path / "data")
+    config = validate_gma3a_config(raw, path=temp_config.path)
+    out = config.paths["output_root"]
+    data_root = config.paths["data_root"]
+    out.mkdir(parents=True)
+    post_root = data_root / "post_endpoint_market"
+    post_root.mkdir(parents=True)
+    for symbol in ["SPY", "QQQ", "IEF", "GLD", "DBC"]:
+        pd.DataFrame([{"date": "2026-06-18", "instrument_id": symbol, "close_raw": 100.0}]).to_csv(
+            post_root / f"{symbol}_post_endpoint.csv",
+            index=False,
+        )
+    blocking_reason = (
+        ""
+        if active_packet
+        else "non_retroactive_execution_block: execution window 2026-06-18 has passed as of 2026-06-19"
+    )
+    pd.DataFrame(
+        [
+            {
+                "phase": "GMA-3A-R2",
+                "decision": (
+                    "gma3ar2_live_paper_packet_ready_manual_submission_required"
+                    if active_packet
+                    else "gma3ar2_ready_core_only_waiting_execution_open"
+                ),
+                "order_packet_rows": 1 if active_packet else 0,
+                "target_blocking_reason": blocking_reason,
+                "paper_only": True,
+                "live_trading_allowed": False,
+                "real_money_allowed": False,
+                "broker_api_integration_allowed": False,
+                "ml_portfolio_influence": 0,
+            }
+        ]
+    ).to_csv(out / "gma3a_summary.csv", index=False)
+    pd.DataFrame(
+        [
+            {
+                "decision_date": "2026-06-17",
+                "expected_execution_date": "2026-06-18",
+                "symbol": "SPY",
+                "final_target_weight": 0.35,
+            }
+        ]
+    ).to_csv(out / "gma3a_current_strategy_targets.csv", index=False)
+    packet_rows = [
+        {
+            "order_packet_id": "packet-spy-buy",
+            "account_id": "gma_live_paper_ensemble_v0",
+            "decision_date": "2026-06-17",
+            "expected_execution_date": "2026-06-18",
+            "symbol": "SPY",
+            "asset_class": "US large-cap equities",
+            "side": "BUY",
+            "current_confirmed_quantity": 0,
+            "target_quantity": 10,
+            "order_quantity": 10,
+            "target_weight": 0.35,
+            "reference_price": 100.0,
+            "reference_price_date": "2026-06-18",
+            "reason_codes": "test",
+            "contributing_strategies": "test",
+            "paper_only": True,
+            "live_trading_allowed": False,
+            "real_money_allowed": False,
+            "blocking_reason": "",
+        }
+    ]
+    pd.DataFrame(packet_rows if active_packet else [], columns=_order_packet_columns()).to_csv(
+        out / "gma3a_tradingview_order_packet.csv",
+        index=False,
+    )
+    return config
+
+
+def _write_fill_file(path: Path, rows: list[dict[str, object]]) -> Path:
+    pd.DataFrame(rows).to_csv(path, index=False)
+    return path
+
+
+def _valid_fill_row(**overrides):
+    row = {
+        "fill_id": "fill-1",
+        "order_packet_id": "packet-spy-buy",
+        "symbol": "SPY",
+        "submitted_side": "BUY",
+        "filled_quantity": 10,
+        "fill_price": 101.0,
+        "fill_timestamp": "2026-06-18T14:35:00Z",
+        "account_name": "TradingView Paper Trading - GMA Alpha V0",
+        "live_trading_allowed": False,
+        "real_money_allowed": False,
+        "broker_api_submission": False,
+    }
+    row.update(overrides)
+    return row
+
+
+def test_manual_fill_validation_rejects_when_readiness_blocked(tmp_path: Path, temp_config):
+    config = _manual_fill_test_config(tmp_path, temp_config, active_packet=False)
+    fills_path = _write_fill_file(tmp_path / "fills.csv", [_valid_fill_row()])
+
+    result = validate_gma3a_manual_fills(config, fills_path)
+    summary = pd.read_csv(result.summary_path).iloc[0]
+    rows = pd.read_csv(result.row_validation_path)
+
+    assert not result.session_valid
+    assert result.accepted_rows == 0
+    assert result.rejected_rows == 1
+    assert "manual_tradingview_entry_not_active" in result.blocking_reason
+    assert "manual_tradingview_entry_not_active" in rows.iloc[0]["row_blocking_reasons"]
+    assert not bool(summary["canonical_holdings_updated"])
+
+
+def test_manual_fill_validation_rejects_unknown_order_packet_id(tmp_path: Path, temp_config):
+    config = _manual_fill_test_config(tmp_path, temp_config, active_packet=True)
+    fills_path = _write_fill_file(tmp_path / "fills.csv", [_valid_fill_row(order_packet_id="unknown-packet")])
+
+    result = validate_gma3a_manual_fills(config, fills_path)
+    rows = pd.read_csv(result.row_validation_path)
+
+    assert not result.session_valid
+    assert "unknown_order_packet_id" in rows.iloc[0]["row_blocking_reasons"]
+
+
+def test_manual_fill_validation_rejects_symbol_and_side_mismatch(tmp_path: Path, temp_config):
+    config = _manual_fill_test_config(tmp_path, temp_config, active_packet=True)
+    fills_path = _write_fill_file(tmp_path / "fills.csv", [_valid_fill_row(symbol="QQQ", submitted_side="SELL")])
+
+    result = validate_gma3a_manual_fills(config, fills_path)
+    rows = pd.read_csv(result.row_validation_path)
+
+    assert not result.session_valid
+    assert "symbol_mismatch" in rows.iloc[0]["row_blocking_reasons"]
+    assert "side_mismatch" in rows.iloc[0]["row_blocking_reasons"]
+
+
+def test_manual_fill_validation_rejects_duplicate_fill(tmp_path: Path, temp_config):
+    config = _manual_fill_test_config(tmp_path, temp_config, active_packet=True)
+    fills_path = _write_fill_file(tmp_path / "fills.csv", [_valid_fill_row(), _valid_fill_row()])
+
+    result = validate_gma3a_manual_fills(config, fills_path)
+    rows = pd.read_csv(result.row_validation_path)
+
+    assert not result.session_valid
+    assert result.rejected_rows == 2
+    assert rows["row_blocking_reasons"].str.contains("duplicate_fill_id").all()
+    assert rows["row_blocking_reasons"].str.contains("duplicate_order_packet_id_partial_fill_not_supported").all()
+
+
+def test_manual_fill_validation_accepts_valid_active_packet_fill(tmp_path: Path, temp_config):
+    config = _manual_fill_test_config(tmp_path, temp_config, active_packet=True)
+    fills_path = _write_fill_file(tmp_path / "fills.csv", [_valid_fill_row()])
+
+    result = validate_gma3a_manual_fills(config, fills_path)
+    summary = pd.read_csv(result.summary_path).iloc[0]
+    reconciliation = pd.read_csv(result.reconciliation_path)
+
+    assert result.session_valid
+    assert result.accepted_rows == 1
+    assert result.rejected_rows == 0
+    assert bool(summary["manual_paper_only"])
+    assert not bool(summary["canonical_holdings_updated"])
+    assert not bool(summary["canonical_cash_updated"])
+    assert reconciliation.iloc[0]["confirmed_quantity_after_fill"] == 10
+    assert reconciliation.iloc[0]["target_vs_confirmed_difference"] == 0
+    assert reconciliation.iloc[0]["cash_impact_estimate"] == -1010.0
 
 
 def test_non_retroactive_execution_blocks_missed_next_open():
@@ -390,6 +810,106 @@ def test_non_retroactive_execution_blocks_missed_next_open():
         as_of_date=pd.Timestamp("2026-06-19").date(),
     )
     assert "execution window 2026-06-18 has passed" in blocker
+
+
+def test_daily_paper_cycle_runs_refresh_tournament_then_readiness(tmp_path: Path, monkeypatch, capsys):
+    calls: list[str] = []
+    config = object()
+    output_root = tmp_path / "reports"
+    output_root.mkdir()
+    summary_path = output_root / "gma3a_paper_readiness_summary.csv"
+    pd.DataFrame(
+        [
+            {
+                "decision_date": "2026-06-17",
+                "expected_execution_date": "2026-06-18",
+                "target_blocking_reason": (
+                    "non_retroactive_execution_block: execution window 2026-06-18 "
+                    "has passed as of 2026-06-19"
+                ),
+                "order_packet_rows": 0,
+                "paper_only": True,
+                "live_trading_allowed": False,
+                "real_money_allowed": False,
+                "broker_api_integration_allowed": False,
+                "ml_portfolio_influence": 0.0,
+                "SPY_latest_finalized_date": "2026-06-18",
+                "QQQ_latest_finalized_date": "2026-06-18",
+                "IEF_latest_finalized_date": "2026-06-18",
+                "GLD_latest_finalized_date": "2026-06-18",
+                "DBC_latest_finalized_date": "2026-06-18",
+            }
+        ]
+    ).to_csv(summary_path, index=False)
+
+    def fake_load_config(path):
+        calls.append(f"load:{path}")
+        return config
+
+    def fake_refresh(received_config):
+        assert received_config is config
+        calls.append("refresh")
+        return type(
+            "RefreshResult",
+            (),
+            {
+                "decision": "gma3a_post_endpoint_refresh_completed",
+                "refreshed_symbols": ["SPY", "QQQ", "IEF", "GLD", "DBC"],
+                "warnings": [],
+            },
+        )()
+
+    def fake_tournament(received_config):
+        assert received_config is config
+        calls.append("tournament")
+        return type(
+            "TournamentResult",
+            (),
+            {
+                "decision": "gma3ar2_ready_core_only_waiting_execution_open",
+                "order_packet_rows": 0,
+                "warnings": [],
+            },
+        )()
+
+    def fake_readiness(received_config):
+        assert received_config is config
+        calls.append("readiness")
+        return gma_cli.GMA3APaperReadinessResult(
+            readiness_status="blocked",
+            execution_status="retroactive_blocked",
+            output_root=output_root,
+            summary_path=summary_path,
+            markdown_path=output_root / "gma3a_paper_readiness.md",
+            order_packet_rows=0,
+            manual_tradingview_entry_active=False,
+            blocking_reason=(
+                "non_retroactive_execution_block: execution window 2026-06-18 "
+                "has passed as of 2026-06-19"
+            ),
+        )
+
+    monkeypatch.setattr(gma_cli, "load_gma3a_config", fake_load_config)
+    monkeypatch.setattr(gma_cli, "run_gma3a_post_endpoint_refresh", fake_refresh)
+    monkeypatch.setattr(gma_cli, "run_gma3a_transparent_tournament", fake_tournament)
+    monkeypatch.setattr(gma_cli, "run_gma3a_paper_readiness", fake_readiness)
+
+    result = gma_cli.main(
+        ["--config", "configs/global_multi_asset_alpha/gma3a_full_history_tournament.yaml", "daily-paper-cycle"]
+    )
+
+    output = capsys.readouterr().out
+    assert result == 0
+    assert calls == [
+        "load:configs/global_multi_asset_alpha/gma3a_full_history_tournament.yaml",
+        "refresh",
+        "tournament",
+        "readiness",
+    ]
+    assert "manual TradingView entry active: False" in output
+    assert "SPY latest finalized post-endpoint date: 2026-06-18" in output
+    assert "No instruction to trade is active." in output
+    assert "manual TradingView paper entry active\n" not in output
 
 
 def test_non_retroactive_execution_blocks_skipping_true_next_open_to_monday():

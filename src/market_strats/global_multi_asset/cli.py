@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+import pandas as pd
+
 from market_strats.global_multi_asset.availability_audit import run_gma0_availability_audit
 from market_strats.global_multi_asset.config import load_config
 from market_strats.global_multi_asset.gma1a_config import load_gma1a_config
@@ -15,6 +17,12 @@ from market_strats.global_multi_asset.gma1b_macro_cash import (
 from market_strats.global_multi_asset.gma2_config import load_gma2_config
 from market_strats.global_multi_asset.gma2_replay import run_gma2_replay_foundation
 from market_strats.global_multi_asset.gma3a_config import load_gma3a_config
+from market_strats.global_multi_asset.gma3a_manual_fills import validate_gma3a_manual_fills
+from market_strats.global_multi_asset.gma3a_paper_readiness import (
+    TARGET_ASSETS,
+    GMA3APaperReadinessResult,
+    run_gma3a_paper_readiness,
+)
 from market_strats.global_multi_asset.gma3a_post_endpoint_refresh import run_gma3a_post_endpoint_refresh
 from market_strats.global_multi_asset.gma3a_tournament import run_gma3a_transparent_tournament
 
@@ -73,7 +81,62 @@ def build_parser() -> argparse.ArgumentParser:
         "refresh-post-endpoint-market",
         help="Refresh GMA-3A-only post-endpoint market data for paper packet generation",
     )
+    subparsers.add_parser(
+        "paper-readiness",
+        help="Summarize whether current GMA outputs can produce a manual TradingView paper packet",
+    )
+    subparsers.add_parser(
+        "daily-paper-cycle",
+        help="Refresh GMA post-endpoint data, regenerate tournament reports, then run paper readiness",
+    )
+    validate_fills = subparsers.add_parser(
+        "validate-manual-fills",
+        help="Validate user-entered TradingView paper fills against the active GMA packet",
+    )
+    validate_fills.add_argument("--fills", required=True, help="Path to user-entered manual fill CSV")
     return parser
+
+
+def _read_readiness_summary(result: GMA3APaperReadinessResult) -> dict[str, object]:
+    summary = pd.read_csv(result.summary_path)
+    if summary.empty:
+        return {}
+    return dict(summary.iloc[0])
+
+
+def _print_readiness_status(result: GMA3APaperReadinessResult) -> None:
+    row = _read_readiness_summary(result)
+    packet_path = result.output_root / "gma3a_tradingview_order_packet.csv"
+    print("GMA-3A paper-readiness compact status:")
+    for symbol in TARGET_ASSETS:
+        latest = row.get(f"{symbol}_latest_finalized_date", "")
+        print(f"  {symbol} latest finalized post-endpoint date: {latest}")
+    print(f"  GMA decision date: {row.get('decision_date', '')}")
+    print(f"  expected execution date: {row.get('expected_execution_date', '')}")
+    print(f"  readiness status: {result.readiness_status}")
+    print(f"  execution status: {result.execution_status}")
+    print(f"  target blocking reason: {result.blocking_reason}")
+    print(f"  order packet row count: {result.order_packet_rows}")
+    print(f"  manual TradingView entry active: {result.manual_tradingview_entry_active}")
+    print(f"  manual TradingView entry sheet: {packet_path}")
+    print(f"  paper-readiness markdown report: {result.markdown_path}")
+    print("  safety flags:")
+    print(f"    paper_only = {row.get('paper_only', '')}")
+    print(f"    live_trading_allowed = {row.get('live_trading_allowed', '')}")
+    print(f"    real_money_allowed = {row.get('real_money_allowed', '')}")
+    print(f"    broker_api_integration_allowed = {row.get('broker_api_integration_allowed', '')}")
+    print(f"    ml_portfolio_influence = {row.get('ml_portfolio_influence', '')}")
+    if result.manual_tradingview_entry_active:
+        print("manual TradingView paper entry active")
+        print("manual paper only")
+        print("no live trading")
+        print("no broker API")
+        print("no automatic submission")
+    else:
+        print("GMA manual TradingView paper entry is blocked.")
+        if result.blocking_reason:
+            print(f"Blocker: {result.blocking_reason}")
+        print("No instruction to trade is active.")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -166,6 +229,47 @@ def main(argv: list[str] | None = None) -> int:
             for w in result.warnings:
                 print(f"  warning: {w}")
         return 0 if result.decision == "gma3a_post_endpoint_refresh_completed" else 2
+    if args.command == "paper-readiness":
+        config = load_gma3a_config(args.config)
+        result = run_gma3a_paper_readiness(config)
+        _print_readiness_status(result)
+        return 0
+    if args.command == "daily-paper-cycle":
+        config = load_gma3a_config(args.config)
+        print("GMA daily paper cycle: refresh-post-endpoint-market")
+        refresh_result = run_gma3a_post_endpoint_refresh(config)
+        print(f"  refresh decision: {refresh_result.decision}")
+        print(f"  refreshed symbols: {','.join(refresh_result.refreshed_symbols)}")
+        if refresh_result.warnings:
+            for warning in refresh_result.warnings:
+                print(f"  refresh warning: {warning}")
+        print("GMA daily paper cycle: run-transparent-tournament")
+        tournament_result = run_gma3a_transparent_tournament(config)
+        print(f"  tournament decision: {tournament_result.decision}")
+        print(f"  tournament order packet rows: {tournament_result.order_packet_rows}")
+        if tournament_result.warnings:
+            for warning in tournament_result.warnings:
+                print(f"  tournament warning: {warning}")
+        print("GMA daily paper cycle: paper-readiness")
+        readiness_result = run_gma3a_paper_readiness(config)
+        _print_readiness_status(readiness_result)
+        return 0
+    if args.command == "validate-manual-fills":
+        config = load_gma3a_config(args.config)
+        result = validate_gma3a_manual_fills(config, Path(args.fills))
+        print(f"GMA manual fill validation status: {'valid' if result.session_valid else 'blocked'}")
+        print(f"GMA manual fill accepted rows: {result.accepted_rows}")
+        print(f"GMA manual fill rejected rows: {result.rejected_rows}")
+        if result.blocking_reason:
+            print(f"GMA manual fill blocker: {result.blocking_reason}")
+        print(f"GMA manual fill summary: {result.summary_path}")
+        print(f"GMA manual fill row validation: {result.row_validation_path}")
+        print(f"GMA manual fill reconciliation: {result.reconciliation_path}")
+        print("manual paper only")
+        print("no live trading")
+        print("no broker API")
+        print("no automatic submission")
+        return 0
     return 2
 
 

@@ -185,7 +185,6 @@ def main() -> None:
     summary = pd.DataFrame(rows).sort_values(["cagr_pct", "sharpe_0rf"], ascending=False)
 
     spy = summary[summary["strategy"] == "SPY_buy_hold"].iloc[0]
-    qqq = summary[summary["strategy"] == "QQQ_buy_hold"].iloc[0]
 
     viable = summary[
         (~summary["strategy"].isin(["SPY_buy_hold", "QQQ_buy_hold", "XLK_buy_hold"]))

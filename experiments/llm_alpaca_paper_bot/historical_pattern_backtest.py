@@ -3,7 +3,6 @@
 from pathlib import Path
 from datetime import datetime, timezone
 import os
-import json
 from typing import Dict
 
 import numpy as np
