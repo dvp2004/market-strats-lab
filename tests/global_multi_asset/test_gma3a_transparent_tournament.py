@@ -9,6 +9,7 @@ import yaml
 
 from market_strats.global_multi_asset import cli as gma_cli
 from market_strats.global_multi_asset.gma3a_config import validate_gma3a_config
+from market_strats.global_multi_asset.gma3a_manual_fills import validate_gma3a_manual_fills
 from market_strats.global_multi_asset.gma3a_paper_readiness import run_gma3a_paper_readiness
 from market_strats.global_multi_asset.gma3a_post_endpoint_refresh import (
     _best_processed_snapshot_for_materialization,
@@ -625,6 +626,180 @@ def test_paper_readiness_reports_non_retroactive_block_without_order_packet(tmp_
     assert summary["SPY_latest_finalized_date"] == "2026-06-18"
     assert bool(summary["safety_flags_valid"])
     assert "non_retroactive_execution_block" in result.blocking_reason
+
+
+def _manual_fill_test_config(tmp_path: Path, temp_config, *, active_packet: bool):
+    raw = dict(temp_config.raw)
+    raw["paths"] = {key: str(value) for key, value in temp_config.paths.items()}
+    raw["paths"]["output_root"] = str(tmp_path / "reports")
+    raw["paths"]["data_root"] = str(tmp_path / "data")
+    config = validate_gma3a_config(raw, path=temp_config.path)
+    out = config.paths["output_root"]
+    data_root = config.paths["data_root"]
+    out.mkdir(parents=True)
+    post_root = data_root / "post_endpoint_market"
+    post_root.mkdir(parents=True)
+    for symbol in ["SPY", "QQQ", "IEF", "GLD", "DBC"]:
+        pd.DataFrame([{"date": "2026-06-18", "instrument_id": symbol, "close_raw": 100.0}]).to_csv(
+            post_root / f"{symbol}_post_endpoint.csv",
+            index=False,
+        )
+    blocking_reason = (
+        ""
+        if active_packet
+        else "non_retroactive_execution_block: execution window 2026-06-18 has passed as of 2026-06-19"
+    )
+    pd.DataFrame(
+        [
+            {
+                "phase": "GMA-3A-R2",
+                "decision": (
+                    "gma3ar2_live_paper_packet_ready_manual_submission_required"
+                    if active_packet
+                    else "gma3ar2_ready_core_only_waiting_execution_open"
+                ),
+                "order_packet_rows": 1 if active_packet else 0,
+                "target_blocking_reason": blocking_reason,
+                "paper_only": True,
+                "live_trading_allowed": False,
+                "real_money_allowed": False,
+                "broker_api_integration_allowed": False,
+                "ml_portfolio_influence": 0,
+            }
+        ]
+    ).to_csv(out / "gma3a_summary.csv", index=False)
+    pd.DataFrame(
+        [
+            {
+                "decision_date": "2026-06-17",
+                "expected_execution_date": "2026-06-18",
+                "symbol": "SPY",
+                "final_target_weight": 0.35,
+            }
+        ]
+    ).to_csv(out / "gma3a_current_strategy_targets.csv", index=False)
+    packet_rows = [
+        {
+            "order_packet_id": "packet-spy-buy",
+            "account_id": "gma_live_paper_ensemble_v0",
+            "decision_date": "2026-06-17",
+            "expected_execution_date": "2026-06-18",
+            "symbol": "SPY",
+            "asset_class": "US large-cap equities",
+            "side": "BUY",
+            "current_confirmed_quantity": 0,
+            "target_quantity": 10,
+            "order_quantity": 10,
+            "target_weight": 0.35,
+            "reference_price": 100.0,
+            "reference_price_date": "2026-06-18",
+            "reason_codes": "test",
+            "contributing_strategies": "test",
+            "paper_only": True,
+            "live_trading_allowed": False,
+            "real_money_allowed": False,
+            "blocking_reason": "",
+        }
+    ]
+    pd.DataFrame(packet_rows if active_packet else [], columns=_order_packet_columns()).to_csv(
+        out / "gma3a_tradingview_order_packet.csv",
+        index=False,
+    )
+    return config
+
+
+def _write_fill_file(path: Path, rows: list[dict[str, object]]) -> Path:
+    pd.DataFrame(rows).to_csv(path, index=False)
+    return path
+
+
+def _valid_fill_row(**overrides):
+    row = {
+        "fill_id": "fill-1",
+        "order_packet_id": "packet-spy-buy",
+        "symbol": "SPY",
+        "submitted_side": "BUY",
+        "filled_quantity": 10,
+        "fill_price": 101.0,
+        "fill_timestamp": "2026-06-18T14:35:00Z",
+        "account_name": "TradingView Paper Trading - GMA Alpha V0",
+        "live_trading_allowed": False,
+        "real_money_allowed": False,
+        "broker_api_submission": False,
+    }
+    row.update(overrides)
+    return row
+
+
+def test_manual_fill_validation_rejects_when_readiness_blocked(tmp_path: Path, temp_config):
+    config = _manual_fill_test_config(tmp_path, temp_config, active_packet=False)
+    fills_path = _write_fill_file(tmp_path / "fills.csv", [_valid_fill_row()])
+
+    result = validate_gma3a_manual_fills(config, fills_path)
+    summary = pd.read_csv(result.summary_path).iloc[0]
+    rows = pd.read_csv(result.row_validation_path)
+
+    assert not result.session_valid
+    assert result.accepted_rows == 0
+    assert result.rejected_rows == 1
+    assert "manual_tradingview_entry_not_active" in result.blocking_reason
+    assert "manual_tradingview_entry_not_active" in rows.iloc[0]["row_blocking_reasons"]
+    assert not bool(summary["canonical_holdings_updated"])
+
+
+def test_manual_fill_validation_rejects_unknown_order_packet_id(tmp_path: Path, temp_config):
+    config = _manual_fill_test_config(tmp_path, temp_config, active_packet=True)
+    fills_path = _write_fill_file(tmp_path / "fills.csv", [_valid_fill_row(order_packet_id="unknown-packet")])
+
+    result = validate_gma3a_manual_fills(config, fills_path)
+    rows = pd.read_csv(result.row_validation_path)
+
+    assert not result.session_valid
+    assert "unknown_order_packet_id" in rows.iloc[0]["row_blocking_reasons"]
+
+
+def test_manual_fill_validation_rejects_symbol_and_side_mismatch(tmp_path: Path, temp_config):
+    config = _manual_fill_test_config(tmp_path, temp_config, active_packet=True)
+    fills_path = _write_fill_file(tmp_path / "fills.csv", [_valid_fill_row(symbol="QQQ", submitted_side="SELL")])
+
+    result = validate_gma3a_manual_fills(config, fills_path)
+    rows = pd.read_csv(result.row_validation_path)
+
+    assert not result.session_valid
+    assert "symbol_mismatch" in rows.iloc[0]["row_blocking_reasons"]
+    assert "side_mismatch" in rows.iloc[0]["row_blocking_reasons"]
+
+
+def test_manual_fill_validation_rejects_duplicate_fill(tmp_path: Path, temp_config):
+    config = _manual_fill_test_config(tmp_path, temp_config, active_packet=True)
+    fills_path = _write_fill_file(tmp_path / "fills.csv", [_valid_fill_row(), _valid_fill_row()])
+
+    result = validate_gma3a_manual_fills(config, fills_path)
+    rows = pd.read_csv(result.row_validation_path)
+
+    assert not result.session_valid
+    assert result.rejected_rows == 2
+    assert rows["row_blocking_reasons"].str.contains("duplicate_fill_id").all()
+    assert rows["row_blocking_reasons"].str.contains("duplicate_order_packet_id_partial_fill_not_supported").all()
+
+
+def test_manual_fill_validation_accepts_valid_active_packet_fill(tmp_path: Path, temp_config):
+    config = _manual_fill_test_config(tmp_path, temp_config, active_packet=True)
+    fills_path = _write_fill_file(tmp_path / "fills.csv", [_valid_fill_row()])
+
+    result = validate_gma3a_manual_fills(config, fills_path)
+    summary = pd.read_csv(result.summary_path).iloc[0]
+    reconciliation = pd.read_csv(result.reconciliation_path)
+
+    assert result.session_valid
+    assert result.accepted_rows == 1
+    assert result.rejected_rows == 0
+    assert bool(summary["manual_paper_only"])
+    assert not bool(summary["canonical_holdings_updated"])
+    assert not bool(summary["canonical_cash_updated"])
+    assert reconciliation.iloc[0]["confirmed_quantity_after_fill"] == 10
+    assert reconciliation.iloc[0]["target_vs_confirmed_difference"] == 0
+    assert reconciliation.iloc[0]["cash_impact_estimate"] == -1010.0
 
 
 def test_non_retroactive_execution_blocks_missed_next_open():

@@ -17,6 +17,7 @@ from market_strats.global_multi_asset.gma1b_macro_cash import (
 from market_strats.global_multi_asset.gma2_config import load_gma2_config
 from market_strats.global_multi_asset.gma2_replay import run_gma2_replay_foundation
 from market_strats.global_multi_asset.gma3a_config import load_gma3a_config
+from market_strats.global_multi_asset.gma3a_manual_fills import validate_gma3a_manual_fills
 from market_strats.global_multi_asset.gma3a_paper_readiness import (
     TARGET_ASSETS,
     GMA3APaperReadinessResult,
@@ -88,6 +89,11 @@ def build_parser() -> argparse.ArgumentParser:
         "daily-paper-cycle",
         help="Refresh GMA post-endpoint data, regenerate tournament reports, then run paper readiness",
     )
+    validate_fills = subparsers.add_parser(
+        "validate-manual-fills",
+        help="Validate user-entered TradingView paper fills against the active GMA packet",
+    )
+    validate_fills.add_argument("--fills", required=True, help="Path to user-entered manual fill CSV")
     return parser
 
 
@@ -247,6 +253,22 @@ def main(argv: list[str] | None = None) -> int:
         print("GMA daily paper cycle: paper-readiness")
         readiness_result = run_gma3a_paper_readiness(config)
         _print_readiness_status(readiness_result)
+        return 0
+    if args.command == "validate-manual-fills":
+        config = load_gma3a_config(args.config)
+        result = validate_gma3a_manual_fills(config, Path(args.fills))
+        print(f"GMA manual fill validation status: {'valid' if result.session_valid else 'blocked'}")
+        print(f"GMA manual fill accepted rows: {result.accepted_rows}")
+        print(f"GMA manual fill rejected rows: {result.rejected_rows}")
+        if result.blocking_reason:
+            print(f"GMA manual fill blocker: {result.blocking_reason}")
+        print(f"GMA manual fill summary: {result.summary_path}")
+        print(f"GMA manual fill row validation: {result.row_validation_path}")
+        print(f"GMA manual fill reconciliation: {result.reconciliation_path}")
+        print("manual paper only")
+        print("no live trading")
+        print("no broker API")
+        print("no automatic submission")
         return 0
     return 2
 

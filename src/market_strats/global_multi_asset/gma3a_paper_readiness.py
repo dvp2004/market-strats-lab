@@ -37,6 +37,12 @@ def _bool_value(value: Any) -> bool:
     return str(value).strip().lower() == "true"
 
 
+def _text_value(value: Any) -> str:
+    if pd.isna(value):
+        return ""
+    return str(value).strip()
+
+
 def _latest_post_endpoint_dates(data_root: Path) -> dict[str, str]:
     root = data_root / "post_endpoint_market"
     latest: dict[str, str] = {}
@@ -132,10 +138,10 @@ def run_gma3a_paper_readiness(config: GMA3AConfig) -> GMA3APaperReadinessResult:
         decision_date = ""
         expected_execution_date = ""
     else:
-        decision_date = str(targets.iloc[0].get("decision_date", ""))
-        expected_execution_date = str(targets.iloc[0].get("expected_execution_date", ""))
+        decision_date = _text_value(targets.iloc[0].get("decision_date", ""))
+        expected_execution_date = _text_value(targets.iloc[0].get("expected_execution_date", ""))
 
-    target_blocking_reason = str(summary_row.get("target_blocking_reason", ""))
+    target_blocking_reason = _text_value(summary_row.get("target_blocking_reason", ""))
     order_packet_rows = _packet_row_count(packet)
     execution_status = _execution_status(
         target_blocking_reason,
