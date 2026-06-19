@@ -220,7 +220,7 @@ def subperiod_summary(equity_df: pd.DataFrame, close: pd.DataFrame) -> pd.DataFr
 
         if len(replay_slice) >= 252:
             m = perf_metrics(
-                f"QQQ_50_200_historical_replay",
+                "QQQ_50_200_historical_replay",
                 replay_slice,
                 exposure_slice,
                 None,
@@ -252,7 +252,7 @@ def main() -> None:
     print("Running event-style historical replay.")
     print(f"Symbol: {SYMBOL}")
     print(f"Rule: {FAST_MA}DMA > {SLOW_MA}DMA")
-    print(f"Execution proxy: next trading day adjusted close")
+    print("Execution proxy: next trading day adjusted close")
     print(f"Initial cash: ${INITIAL_CASH:,.2f}")
     print(f"Transaction cost: {TRANSACTION_COST_BPS} bps")
     print(f"Slippage: {SLIPPAGE_BPS} bps")

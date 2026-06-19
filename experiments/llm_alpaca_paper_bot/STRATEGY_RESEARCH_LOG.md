@@ -1,6 +1,6 @@
 # Strategy Research Log — LLM Alpaca Paper Bot
 
-_Last updated: 2026-06-19 12:39:47_
+_Last updated: 2026-06-19 14:31:47_
 
 ## Current Purpose
 
@@ -10,16 +10,26 @@ This file tracks the separate Alpaca paper-bot strategy experiment inside:
 
 The goal is to avoid repeating tests, losing context, or confusing older flawed results with current findings.
 
+Important architecture correction:
+
+- QQQ 1-share paper bot = Execution Harness V0 / Broker Plumbing Test.
+- GMA = main multi-asset portfolio strategy research system.
+- Do not treat `QQQ_50_200_cross` as the final project direction.
+- Do not promote QQQ variants into the main project without GMA-level validation.
+- Do not expand the QQQ bot into a separate portfolio system.
+- Use Alpaca only as a future execution adapter for approved portfolio targets.
+
 This log is research documentation only. It is not a live-trading approval.
 
 ---
 
 ## Current Status
 
-- Current implemented paper bot: `QQQ_50_200_cross`
+- Current implemented execution-harness test signal: `QQQ_50_200_cross`
 - Current paper sizing: 1 QQQ share only
 - Current execution mode should remain paper-only
-- Main research question now: should `QQQ_50_200_cross` stay as default, or should a stronger QQQ MA variant replace it after further validation?
+- Main harness question now: can the local code safely translate a signal into paper intent, detect open orders, block duplicate orders, and produce logs/reports?
+- Main strategy system remains GMA, not the QQQ moving-average experiment.
 - API keys were exposed earlier and should be rotated before continued broker/API use.
 
 ---
@@ -541,37 +551,56 @@ Primary replacement candidate:
 
 `QQQ_75_250_cross`
 
-Raw-score challenger:
+Aggressive preview-only candidate:
 
 `QQQ_100_225_cross`
 
-Conservative candidate:
+Conservative preview-only candidate:
 
 `QQQ_above_175_cash`
 
 Current recommendation:
 
-`replace_after_no_order_dry_run`
+`observe_then_reassess_after_order_resolution`
 
 Meaning:
 
 1. Keep `QQQ_50_200_cross` as the active paper-bot default.
-2. Keep `QQQ_75_250_cross` running as no-order preview.
-3. Do not submit more orders while the existing 1-share QQQ paper test is still open/being observed.
-4. Promote `QQQ_75_250_cross` only after preview observation and walk-forward validation.
-5. Any future promotion should happen through `paper_bot_config.yaml`, not by hardcoding a new strategy in Python.
+2. Keep `QQQ_75_250_cross` running as the no-order replacement preview.
+3. Keep `QQQ_100_225_cross` as aggressive preview only.
+4. Keep `QQQ_above_175_cash` as conservative preview only.
+5. Do not submit more orders while the existing 1-share QQQ paper BUY order is accepted/unfilled.
+6. Do not promote `QQQ_75_250_cross` yet, even though it beat QQQ 50/200 in fixed walk-forward checks.
+7. Any future promotion should happen through `paper_bot_config.yaml`, not by hardcoding a new strategy in Python.
 
 ---
 
 ## Next Required Work
 
-1. Check current QQQ order/position status.
-2. Add a daily paper status report.
-3. Build walk-forward validation for QQQ MA candidates.
-4. Update candidate-selection scoring with walk-forward results.
-5. Add market-hours and holiday guard.
-6. Keep `QQQ_50_200_cross` active until the replacement candidate passes the next validation layer.
-7. Do not scale above 1 paper share yet.
+1. Wait until the market reopens and the current QQQ paper order either fills, cancels, expires, or otherwise resolves.
+
+2. Run the safe daily cycle after market open:
+
+   ```powershell
+   .\experiments\llm_alpaca_paper_bot\run_safe_daily_cycle.ps1
+   .\experiments\llm_alpaca_paper_bot\run_safe_daily_cycle.ps1 -CandidatePreview
+   ```
+
+3. Regenerate the preview-log comparison report:
+
+   ```powershell
+   .\.venv\Scripts\python.exe experiments\llm_alpaca_paper_bot\preview_log_comparison_report.py
+   ```
+
+4. Confirm whether the active strategy and replacement candidate still agree.
+
+5. If the order fills, confirm the bot moves from `BUY` to `HOLD`.
+
+6. Keep `orders_enabled: false` and `ENABLE_PAPER_ORDERS=false` unless deliberately testing one controlled paper execution.
+
+7. Do not scale above 1 paper share.
+
+8. Do not push to remote until exposed API keys are rotated and `.env` is confirmed untracked.
 
 ---
 
@@ -589,3 +618,17 @@ Meaning:
 | `ma_parameter_sweep_viable.csv` | present |
 | `ma_parameter_sweep_qcc_cluster.csv` | present |
 | `qqq_50_200_paper_signal.jsonl` | present |
+| `paper_candidate_selection_summary.csv` | present |
+| `paper_candidate_selection_rejections.csv` | present |
+| `paper_candidate_selection_report.md` | present |
+| `walk_forward_ma_validation_summary.csv` | present |
+| `walk_forward_ma_validation_report.md` | present |
+| `ma_parallel_signal_preview.jsonl` | present |
+| `latest_ma_parallel_signal_preview.csv` | present |
+| `config_driven_paper_signal.jsonl` | present |
+| `daily_paper_status_report.md` | present |
+| `daily_paper_status_snapshot.json` | present |
+| `daily_paper_status_history.jsonl` | present |
+| `preview_log_comparison_summary.csv` | present |
+| `preview_log_comparison_disagreements.csv` | present |
+| `preview_log_comparison_report.md` | present |
