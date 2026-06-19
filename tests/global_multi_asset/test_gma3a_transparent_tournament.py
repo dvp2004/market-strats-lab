@@ -8,6 +8,7 @@ import pytest
 import yaml
 
 from market_strats.global_multi_asset.gma3a_config import validate_gma3a_config
+from market_strats.global_multi_asset.gma3a_paper_readiness import run_gma3a_paper_readiness
 from market_strats.global_multi_asset.gma3a_post_endpoint_refresh import (
     _best_processed_snapshot_for_materialization,
     _build_post_endpoint_rows,
@@ -21,6 +22,7 @@ from market_strats.global_multi_asset.gma3a_tournament import (
     _is_us_equity_session_date,
     _latest_signal_date_with_later_execution,
     _manual_fill_columns,
+    _order_packet_columns,
     run_gma3a_transparent_tournament,
     verify_gma3a_upstream,
 )
@@ -556,6 +558,72 @@ def test_latest_signal_date_requires_later_execution_row():
     )
 
     assert signal_date == pd.Timestamp("2026-06-17").date()
+
+
+def test_paper_readiness_reports_non_retroactive_block_without_order_packet(tmp_path: Path, temp_config):
+    raw = dict(temp_config.raw)
+    raw["paths"] = {key: str(value) for key, value in temp_config.paths.items()}
+    raw["paths"]["output_root"] = str(tmp_path / "reports")
+    raw["paths"]["data_root"] = str(tmp_path / "data")
+    config = validate_gma3a_config(raw, path=temp_config.path)
+    out = config.paths["output_root"]
+    data_root = config.paths["data_root"]
+    out.mkdir(parents=True)
+    post_root = data_root / "post_endpoint_market"
+    post_root.mkdir(parents=True)
+
+    for symbol in ["SPY", "QQQ", "IEF", "GLD", "DBC"]:
+        pd.DataFrame(
+            [
+                {
+                    "date": "2026-06-18",
+                    "instrument_id": symbol,
+                    "close_raw": 100.0,
+                }
+            ]
+        ).to_csv(post_root / f"{symbol}_post_endpoint.csv", index=False)
+
+    pd.DataFrame(
+        [
+            {
+                "phase": "GMA-3A-R2",
+                "decision": "gma3ar2_ready_core_only_waiting_execution_open",
+                "order_packet_rows": 0,
+                "target_blocking_reason": (
+                    "non_retroactive_execution_block: execution window 2026-06-18 "
+                    "has passed as of 2026-06-19"
+                ),
+                "paper_only": True,
+                "live_trading_allowed": False,
+                "real_money_allowed": False,
+                "broker_api_integration_allowed": False,
+                "ml_portfolio_influence": 0,
+            }
+        ]
+    ).to_csv(out / "gma3a_summary.csv", index=False)
+    pd.DataFrame(
+        [
+            {
+                "decision_date": "2026-06-17",
+                "expected_execution_date": "2026-06-18",
+                "symbol": "SPY",
+                "final_target_weight": 0.35,
+            }
+        ]
+    ).to_csv(out / "gma3a_current_strategy_targets.csv", index=False)
+    pd.DataFrame(columns=_manual_fill_columns()).to_csv(out / "gma3a_tradingview_manual_fill_template.csv", index=False)
+    pd.DataFrame(columns=_order_packet_columns()).to_csv(out / "gma3a_tradingview_order_packet.csv", index=False)
+
+    result = run_gma3a_paper_readiness(config)
+    summary = pd.read_csv(result.summary_path).iloc[0]
+
+    assert result.readiness_status == "blocked"
+    assert result.execution_status == "retroactive_blocked"
+    assert not result.manual_tradingview_entry_active
+    assert result.order_packet_rows == 0
+    assert summary["SPY_latest_finalized_date"] == "2026-06-18"
+    assert bool(summary["safety_flags_valid"])
+    assert "non_retroactive_execution_block" in result.blocking_reason
 
 
 def test_non_retroactive_execution_blocks_missed_next_open():

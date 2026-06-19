@@ -15,6 +15,7 @@ from market_strats.global_multi_asset.gma1b_macro_cash import (
 from market_strats.global_multi_asset.gma2_config import load_gma2_config
 from market_strats.global_multi_asset.gma2_replay import run_gma2_replay_foundation
 from market_strats.global_multi_asset.gma3a_config import load_gma3a_config
+from market_strats.global_multi_asset.gma3a_paper_readiness import run_gma3a_paper_readiness
 from market_strats.global_multi_asset.gma3a_post_endpoint_refresh import run_gma3a_post_endpoint_refresh
 from market_strats.global_multi_asset.gma3a_tournament import run_gma3a_transparent_tournament
 
@@ -72,6 +73,10 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser(
         "refresh-post-endpoint-market",
         help="Refresh GMA-3A-only post-endpoint market data for paper packet generation",
+    )
+    subparsers.add_parser(
+        "paper-readiness",
+        help="Summarize whether current GMA outputs can produce a manual TradingView paper packet",
     )
     return parser
 
@@ -166,6 +171,18 @@ def main(argv: list[str] | None = None) -> int:
             for w in result.warnings:
                 print(f"  warning: {w}")
         return 0 if result.decision == "gma3a_post_endpoint_refresh_completed" else 2
+    if args.command == "paper-readiness":
+        config = load_gma3a_config(args.config)
+        result = run_gma3a_paper_readiness(config)
+        print(f"GMA-3A paper readiness: {result.readiness_status}")
+        print(f"GMA-3A execution status: {result.execution_status}")
+        print(f"GMA-3A manual TradingView entry active: {result.manual_tradingview_entry_active}")
+        print(f"GMA-3A order packet rows: {result.order_packet_rows}")
+        if result.blocking_reason:
+            print(f"GMA-3A blocking reason: {result.blocking_reason}")
+        print(f"GMA-3A readiness summary: {result.summary_path}")
+        print(f"GMA-3A readiness markdown: {result.markdown_path}")
+        return 0
     return 2
 
 
