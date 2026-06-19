@@ -7,6 +7,7 @@ import pandas as pd
 import pytest
 import yaml
 
+from market_strats.global_multi_asset import cli as gma_cli
 from market_strats.global_multi_asset.gma3a_config import validate_gma3a_config
 from market_strats.global_multi_asset.gma3a_paper_readiness import run_gma3a_paper_readiness
 from market_strats.global_multi_asset.gma3a_post_endpoint_refresh import (
@@ -634,6 +635,106 @@ def test_non_retroactive_execution_blocks_missed_next_open():
         as_of_date=pd.Timestamp("2026-06-19").date(),
     )
     assert "execution window 2026-06-18 has passed" in blocker
+
+
+def test_daily_paper_cycle_runs_refresh_tournament_then_readiness(tmp_path: Path, monkeypatch, capsys):
+    calls: list[str] = []
+    config = object()
+    output_root = tmp_path / "reports"
+    output_root.mkdir()
+    summary_path = output_root / "gma3a_paper_readiness_summary.csv"
+    pd.DataFrame(
+        [
+            {
+                "decision_date": "2026-06-17",
+                "expected_execution_date": "2026-06-18",
+                "target_blocking_reason": (
+                    "non_retroactive_execution_block: execution window 2026-06-18 "
+                    "has passed as of 2026-06-19"
+                ),
+                "order_packet_rows": 0,
+                "paper_only": True,
+                "live_trading_allowed": False,
+                "real_money_allowed": False,
+                "broker_api_integration_allowed": False,
+                "ml_portfolio_influence": 0.0,
+                "SPY_latest_finalized_date": "2026-06-18",
+                "QQQ_latest_finalized_date": "2026-06-18",
+                "IEF_latest_finalized_date": "2026-06-18",
+                "GLD_latest_finalized_date": "2026-06-18",
+                "DBC_latest_finalized_date": "2026-06-18",
+            }
+        ]
+    ).to_csv(summary_path, index=False)
+
+    def fake_load_config(path):
+        calls.append(f"load:{path}")
+        return config
+
+    def fake_refresh(received_config):
+        assert received_config is config
+        calls.append("refresh")
+        return type(
+            "RefreshResult",
+            (),
+            {
+                "decision": "gma3a_post_endpoint_refresh_completed",
+                "refreshed_symbols": ["SPY", "QQQ", "IEF", "GLD", "DBC"],
+                "warnings": [],
+            },
+        )()
+
+    def fake_tournament(received_config):
+        assert received_config is config
+        calls.append("tournament")
+        return type(
+            "TournamentResult",
+            (),
+            {
+                "decision": "gma3ar2_ready_core_only_waiting_execution_open",
+                "order_packet_rows": 0,
+                "warnings": [],
+            },
+        )()
+
+    def fake_readiness(received_config):
+        assert received_config is config
+        calls.append("readiness")
+        return gma_cli.GMA3APaperReadinessResult(
+            readiness_status="blocked",
+            execution_status="retroactive_blocked",
+            output_root=output_root,
+            summary_path=summary_path,
+            markdown_path=output_root / "gma3a_paper_readiness.md",
+            order_packet_rows=0,
+            manual_tradingview_entry_active=False,
+            blocking_reason=(
+                "non_retroactive_execution_block: execution window 2026-06-18 "
+                "has passed as of 2026-06-19"
+            ),
+        )
+
+    monkeypatch.setattr(gma_cli, "load_gma3a_config", fake_load_config)
+    monkeypatch.setattr(gma_cli, "run_gma3a_post_endpoint_refresh", fake_refresh)
+    monkeypatch.setattr(gma_cli, "run_gma3a_transparent_tournament", fake_tournament)
+    monkeypatch.setattr(gma_cli, "run_gma3a_paper_readiness", fake_readiness)
+
+    result = gma_cli.main(
+        ["--config", "configs/global_multi_asset_alpha/gma3a_full_history_tournament.yaml", "daily-paper-cycle"]
+    )
+
+    output = capsys.readouterr().out
+    assert result == 0
+    assert calls == [
+        "load:configs/global_multi_asset_alpha/gma3a_full_history_tournament.yaml",
+        "refresh",
+        "tournament",
+        "readiness",
+    ]
+    assert "manual TradingView entry active: False" in output
+    assert "SPY latest finalized post-endpoint date: 2026-06-18" in output
+    assert "No instruction to trade is active." in output
+    assert "manual TradingView paper entry active\n" not in output
 
 
 def test_non_retroactive_execution_blocks_skipping_true_next_open_to_monday():
