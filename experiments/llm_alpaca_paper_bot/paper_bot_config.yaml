@@ -1,0 +1,29 @@
+﻿paper_only: true
+orders_enabled: false
+max_shares: 1
+
+active_strategy:
+  name: QQQ_50_200_cross
+  symbol: QQQ
+  rule_type: cross
+  fast: 50
+  slow: 200
+
+preview_strategies:
+  - name: QQQ_75_250_cross
+    symbol: QQQ
+    rule_type: cross
+    fast: 75
+    slow: 250
+
+  - name: QQQ_100_225_cross
+    symbol: QQQ
+    rule_type: cross
+    fast: 100
+    slow: 225
+
+  - name: QQQ_above_175_cash
+    symbol: QQQ
+    rule_type: above_ma
+    fast:
+    slow: 175

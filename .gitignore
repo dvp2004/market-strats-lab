@@ -18,3 +18,10 @@ experiments/
 
 .DS_Store
 .env
+
+# Local secrets / paper-trading runtime state
+.env
+*.local
+paper_bot_state/
+paper_bot_logs/
+
