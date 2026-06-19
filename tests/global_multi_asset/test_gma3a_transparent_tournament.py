@@ -908,6 +908,10 @@ def test_daily_paper_cycle_runs_refresh_tournament_then_readiness(tmp_path: Path
     ]
     assert "manual TradingView entry active: False" in output
     assert "SPY latest finalized post-endpoint date: 2026-06-18" in output
+    assert "manual TradingView entry sheet:" in output
+    assert "gma3a_manual_tradingview_entry_sheet.md" in output
+    assert "order packet:" in output
+    assert "gma3a_tradingview_order_packet.csv" in output
     assert "No instruction to trade is active." in output
     assert "manual TradingView paper entry active\n" not in output
 

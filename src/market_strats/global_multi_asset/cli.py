@@ -106,6 +106,7 @@ def _read_readiness_summary(result: GMA3APaperReadinessResult) -> dict[str, obje
 
 def _print_readiness_status(result: GMA3APaperReadinessResult) -> None:
     row = _read_readiness_summary(result)
+    manual_entry_sheet_path = result.output_root / "gma3a_manual_tradingview_entry_sheet.md"
     packet_path = result.output_root / "gma3a_tradingview_order_packet.csv"
     print("GMA-3A paper-readiness compact status:")
     for symbol in TARGET_ASSETS:
@@ -118,7 +119,8 @@ def _print_readiness_status(result: GMA3APaperReadinessResult) -> None:
     print(f"  target blocking reason: {result.blocking_reason}")
     print(f"  order packet row count: {result.order_packet_rows}")
     print(f"  manual TradingView entry active: {result.manual_tradingview_entry_active}")
-    print(f"  manual TradingView entry sheet: {packet_path}")
+    print(f"  manual TradingView entry sheet: {manual_entry_sheet_path}")
+    print(f"  order packet: {packet_path}")
     print(f"  paper-readiness markdown report: {result.markdown_path}")
     print("  safety flags:")
     print(f"    paper_only = {row.get('paper_only', '')}")
