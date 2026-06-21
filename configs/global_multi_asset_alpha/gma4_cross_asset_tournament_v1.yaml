@@ -1,4 +1,4 @@
-track:
+﻿track:
   track_id: gma_alpha
   phase_id: gma4_cross_asset_historical_strategy_tournament_v1
   paper_only: true
@@ -14,6 +14,17 @@ evidence:
   historical_final_holdout_claim_allowed: false
   canonical_research_end_date: "2026-05-01"
 
+data_bundle:
+  bundle_id: gma4_fixed_22_etf_v1
+  market_root: data/global_multi_asset_alpha/gma4_fixed_22_etf_v1/market
+  cash_path: data/global_multi_asset_alpha/gma4_fixed_22_etf_v1/cash/canonical_cash_accrual.csv
+  cash_source_id: gma3a_tournament_cash
+  cash_source_path: ../Market-strats-lab/data/global_multi_asset_alpha/gma3a_tournament_cash/canonical_cash_accrual.csv
+  cash_methodology_label: existing_gma3a_historical_tournament_cash_series_not_new_methodology
+  inventory_path: reports/global_multi_asset_alpha/gma4_fixed_22_etf_v1/gma4_market_bundle_inventory.csv
+  report_root: reports/global_multi_asset_alpha/gma4_fixed_22_etf_v1
+  active_gma_canonical_bundle: false
+  historical_research_only: true
 universe:
   universe_id: gma4_fixed_22_etf_v1
   bil_role: tradeable_defensive_cash_proxy
@@ -115,6 +126,10 @@ scoreboard:
     - regime_id
     - start_date
     - end_date
+    - trial_decision_eligible_start_date
+    - evaluation_effective_start_date
+    - excluded_pre_decision_sessions
+    - regime_coverage_status
     - session_count
     - terminal_wealth
     - net_cagr

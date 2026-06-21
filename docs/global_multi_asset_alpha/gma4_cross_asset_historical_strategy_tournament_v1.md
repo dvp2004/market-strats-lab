@@ -69,3 +69,21 @@ Supported scheduling primitives:
 - `monthly_last_session_next_open`
 
 Both primitives preserve the existing next-valid-session-open execution convention. Same-close execution remains prohibited.
+
+## GMA-4E Cash Adoption And Run History
+
+GMA-4E uses the existing validated GMA-3A historical tournament cash series as the isolated GMA-4 cash input. The copied GMA-4 bundle file is:
+
+`data/global_multi_asset_alpha/gma4_fixed_22_etf_v1/cash/canonical_cash_accrual.csv`
+
+The copy retains only fixed-22 common-session accrual intervals through `2026-05-01`, preserves the source `period_return` values, records source and copied-file hashes in the GMA-4 bundle manifest, and labels the methodology as derived from the existing GMA historical tournament cash series rather than a newly introduced cash methodology.
+
+GMA-4E also writes local comparison files under:
+
+`reports/global_multi_asset_alpha/gma4_cross_asset_tournament_v1/`
+
+- `gma4_tournament_run_history_v1.csv`
+- `gma4_latest_results_v1.csv`
+- `gma4_latest_results_v1.md`
+
+These files are historical research records only. They do not create paper orders, broker integration, prospective shadow records, strategy candidates, or allocation decisions.

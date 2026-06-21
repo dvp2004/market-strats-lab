@@ -1,4 +1,4 @@
-"""Reusable GMA-4 replay adapter backed by GMA-3A accounting machinery."""
+﻿"""Reusable GMA-4 replay adapter backed by GMA-3A accounting machinery."""
 
 from __future__ import annotations
 
@@ -159,10 +159,13 @@ def run_gma4_replay_adapter(
     strategy_id: str = "gma4_synthetic_adapter_trial",
     strategy_version: str = "test_only_v0",
     config: GMA4ReplayConfig | None = None,
+    minimum_signal_date: Any | None = None,
 ) -> GMA4ReplayAdapterResult:
     validated_prices = validate_gma4_price_inputs(prices)
     dates = _common_dates(validated_prices)
     signal_dates = build_gma4_rebalance_signal_dates(dates, rebalance_schedule)
+    if minimum_signal_date is not None:
+        signal_dates = [date for date in signal_dates if date >= minimum_signal_date]
     if not signal_dates:
         raise GMA4ReplayAdapterError("GMA-4 replay schedule produced no signal dates")
     cached_targets = _validate_and_cache_targets(

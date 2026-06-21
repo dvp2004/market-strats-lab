@@ -1,4 +1,4 @@
-"""GMA-4A cross-asset historical tournament contract and registry validation."""
+﻿"""GMA-4A cross-asset historical tournament contract and registry validation."""
 
 from __future__ import annotations
 
@@ -125,6 +125,10 @@ REQUIRED_SCOREBOARD_COLUMNS = [
     "regime_id",
     "start_date",
     "end_date",
+    "trial_decision_eligible_start_date",
+    "evaluation_effective_start_date",
+    "excluded_pre_decision_sessions",
+    "regime_coverage_status",
     "session_count",
     "terminal_wealth",
     "net_cagr",

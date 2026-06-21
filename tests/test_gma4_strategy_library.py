@@ -123,3 +123,19 @@ def test_simple_blends_reference_declared_non_blend_components():
         for component_id in trial["parameters"]["component_trial_ids"]:
             assert component_id in rules
             assert trial_by_id[component_id]["family"] != "simple_blend"
+
+
+def test_declared_lookbacks_control_trial_decision_eligibility():
+    rules = build_gma4_trial_rules()
+
+    assert rules["gma4_benchmark_spy_buy_hold_v1"].required_lookback_sessions == 0
+    assert rules["gma4_meanrev_5d_bottom3_equal_weight_v1"].required_lookback_sessions == 5
+    assert rules["gma4_abs_trend_12m_equal_weight_v1"].required_lookback_sessions == 252
+    assert (
+        rules["gma4_meanrev_5d_bottom3_equal_weight_v1"].required_lookback_sessions
+        < rules["gma4_abs_trend_12m_equal_weight_v1"].required_lookback_sessions
+    )
+    assert rules["gma4_blend_equal_abs12_xsmom12_v1"].required_lookback_sessions == max(
+        rules["gma4_abs_trend_12m_equal_weight_v1"].required_lookback_sessions,
+        rules["gma4_xsmom_12m_top3_equal_weight_v1"].required_lookback_sessions,
+    )
