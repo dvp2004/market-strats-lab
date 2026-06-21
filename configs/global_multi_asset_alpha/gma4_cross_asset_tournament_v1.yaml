@@ -1,0 +1,142 @@
+track:
+  track_id: gma_alpha
+  phase_id: gma4_cross_asset_historical_strategy_tournament_v1
+  paper_only: true
+  live_trading_allowed: false
+  real_money_allowed: false
+  broker_api_integration_allowed: false
+  manual_tradingview_packet_generation_allowed: false
+  active_gma_paper_workflow_influence_allowed: false
+  prospective_shadow_generation_allowed: false
+
+evidence:
+  evidence_class: observed_development_evidence
+  historical_final_holdout_claim_allowed: false
+  canonical_research_end_date: "2026-05-01"
+
+universe:
+  universe_id: gma4_fixed_22_etf_v1
+  bil_role: tradeable_defensive_cash_proxy
+  internal_cash_accounting_symbol: CASH
+  internal_cash_is_universe_asset: false
+  symbols:
+    - SPY
+    - QQQ
+    - IWM
+    - XLB
+    - XLE
+    - XLF
+    - XLI
+    - XLK
+    - XLP
+    - XLU
+    - XLV
+    - XLY
+    - EFA
+    - EEM
+    - BIL
+    - IEF
+    - TLT
+    - AGG
+    - LQD
+    - HYG
+    - GLD
+    - DBC
+  forbidden_symbols:
+    - SHY
+    - VNQ
+    - UUP
+    - BTC-USD
+    - ETH-USD
+
+evaluation_contract:
+  cost_scenarios:
+    - baseline_1bps
+    - stressed_10bps
+    - stressed_25bps
+    - severe_50bps
+  evaluation_scopes:
+    - full_common_history
+    - rolling_3_year
+    - rolling_5_year
+    - sequential_walk_forward
+    - predefined_regime
+  regimes:
+    - regime_id: gfc_stress
+      start_date: "2007-10-09"
+      end_date: "2009-03-09"
+      eligible_for_candidate_selection: false
+    - regime_id: euro_us_debt_stress
+      start_date: "2011-07-22"
+      end_date: "2011-10-03"
+      eligible_for_candidate_selection: false
+    - regime_id: low_vol_calm_2017
+      start_date: "2017-01-03"
+      end_date: "2017-12-29"
+      eligible_for_candidate_selection: false
+    - regime_id: covid_crash
+      start_date: "2020-02-19"
+      end_date: "2020-03-23"
+      eligible_for_candidate_selection: false
+    - regime_id: covid_recovery
+      start_date: "2020-03-24"
+      end_date: "2021-12-31"
+      eligible_for_candidate_selection: false
+    - regime_id: inflation_rate_shock_2022
+      start_date: "2022-01-03"
+      end_date: "2022-10-12"
+      eligible_for_candidate_selection: false
+    - regime_id: geopolitical_stress_descriptive
+      start_date: "2023-10-09"
+      end_date: "2026-05-01"
+      eligible_for_candidate_selection: false
+      descriptive_only: true
+
+scoreboard:
+  ranking_by_highest_sharpe_alone_allowed: false
+  candidate_assessment_requirements:
+    - net_results_after_costs
+    - drawdown
+    - turnover
+    - concentration
+    - exposure
+    - rolling_windows
+    - regime_dependence
+    - cost_sensitivity
+    - parameter_neighbour_stability
+  columns:
+    - run_id
+    - trial_id
+    - strategy_id
+    - family
+    - cost_scenario
+    - evaluation_scope
+    - window_id
+    - regime_id
+    - start_date
+    - end_date
+    - session_count
+    - terminal_wealth
+    - net_cagr
+    - annualised_volatility
+    - sharpe_0rf
+    - sortino_0rf
+    - max_drawdown
+    - calmar
+    - time_underwater_days
+    - trade_count
+    - cumulative_turnover
+    - annualised_turnover
+    - cost_drag
+    - average_rebalance_turnover
+    - max_single_asset_weight_observed
+    - average_cash_weight
+    - maximum_cash_weight
+    - maximum_hhi_concentration
+    - benchmark_relative_return
+    - data_hash
+    - config_hash
+    - trial_hash
+    - evidence_class
+    - status
+    - rejection_reason

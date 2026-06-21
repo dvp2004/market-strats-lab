@@ -1,0 +1,278 @@
+registry_id: gma4_trial_registry_v1
+phase_id: gma4_cross_asset_historical_strategy_tournament_v1
+default_status: preregistered_not_run
+default_candidate_eligibility:
+  approved_for_paper: false
+  approved_for_live: false
+  approved_for_gma_allocation: false
+  approved_for_prospective_shadow: false
+  approved_for_broker_execution: false
+  reason: preregistered_historical_research_only_not_a_candidate
+
+trials:
+  - trial_id: gma4_benchmark_bil_buy_hold_v1
+    strategy_id: bil_buy_hold
+    family: benchmark
+    version: v1
+    description: Buy and hold BIL as defensive cash-proxy benchmark.
+    rebalance_cadence: buy_and_hold
+    signal_inputs: [fixed_symbol]
+    parameters: {symbol: BIL}
+    weighting_method: single_asset_100pct
+    eligible_symbols: [BIL]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: benchmark_not_candidate}
+  - trial_id: gma4_benchmark_spy_buy_hold_v1
+    strategy_id: spy_buy_hold
+    family: benchmark
+    version: v1
+    description: Buy and hold SPY as broad equity benchmark.
+    rebalance_cadence: buy_and_hold
+    signal_inputs: [fixed_symbol]
+    parameters: {symbol: SPY}
+    weighting_method: single_asset_100pct
+    eligible_symbols: [SPY]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: benchmark_not_candidate}
+  - trial_id: gma4_benchmark_equal_weight_22_monthly_v1
+    strategy_id: equal_weight_22_monthly
+    family: benchmark
+    version: v1
+    description: Monthly equal weight across the fixed 22 ETF universe.
+    rebalance_cadence: monthly
+    signal_inputs: [fixed_universe]
+    parameters: {asset_count: 22}
+    weighting_method: equal_weight
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: benchmark_not_candidate}
+  - trial_id: gma4_abs_trend_10m_equal_weight_v1
+    strategy_id: absolute_trend
+    family: absolute_trend
+    version: v1
+    description: Hold ETFs above their 10-month trend filter, equal weighted; otherwise allocate to BIL.
+    rebalance_cadence: monthly
+    signal_inputs: [monthly_total_return, trend_filter]
+    parameters: {lookback_months: 10, defensive_symbol: BIL}
+    weighting_method: equal_weight
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: preregistered_historical_research_only_not_a_candidate}
+  - trial_id: gma4_abs_trend_12m_equal_weight_v1
+    strategy_id: absolute_trend
+    family: absolute_trend
+    version: v1
+    description: Hold ETFs above their 12-month trend filter, equal weighted; otherwise allocate to BIL.
+    rebalance_cadence: monthly
+    signal_inputs: [monthly_total_return, trend_filter]
+    parameters: {lookback_months: 12, defensive_symbol: BIL}
+    weighting_method: equal_weight
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: preregistered_historical_research_only_not_a_candidate}
+  - trial_id: gma4_abs_trend_10m_inverse_vol_v1
+    strategy_id: absolute_trend
+    family: absolute_trend
+    version: v1
+    description: Hold ETFs above their 10-month trend filter, inverse-vol weighted; otherwise allocate to BIL.
+    rebalance_cadence: monthly
+    signal_inputs: [monthly_total_return, trend_filter, trailing_volatility]
+    parameters: {lookback_months: 10, volatility_lookback_days: 63, defensive_symbol: BIL}
+    weighting_method: inverse_volatility
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: preregistered_historical_research_only_not_a_candidate}
+  - trial_id: gma4_abs_trend_12m_inverse_vol_v1
+    strategy_id: absolute_trend
+    family: absolute_trend
+    version: v1
+    description: Hold ETFs above their 12-month trend filter, inverse-vol weighted; otherwise allocate to BIL.
+    rebalance_cadence: monthly
+    signal_inputs: [monthly_total_return, trend_filter, trailing_volatility]
+    parameters: {lookback_months: 12, volatility_lookback_days: 63, defensive_symbol: BIL}
+    weighting_method: inverse_volatility
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: preregistered_historical_research_only_not_a_candidate}
+  - trial_id: gma4_xsmom_6m_top3_equal_weight_v1
+    strategy_id: cross_sectional_momentum
+    family: cross_sectional_momentum
+    version: v1
+    description: Monthly top 3 ETFs by 6-month momentum, equal weighted.
+    rebalance_cadence: monthly
+    signal_inputs: [monthly_total_return, cross_sectional_rank]
+    parameters: {lookback_months: 6, top_n: 3}
+    weighting_method: equal_weight
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: preregistered_historical_research_only_not_a_candidate}
+  - trial_id: gma4_xsmom_12m_top3_equal_weight_v1
+    strategy_id: cross_sectional_momentum
+    family: cross_sectional_momentum
+    version: v1
+    description: Monthly top 3 ETFs by 12-month momentum, equal weighted.
+    rebalance_cadence: monthly
+    signal_inputs: [monthly_total_return, cross_sectional_rank]
+    parameters: {lookback_months: 12, top_n: 3}
+    weighting_method: equal_weight
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: preregistered_historical_research_only_not_a_candidate}
+  - trial_id: gma4_xsmom_6m_top5_inverse_vol_v1
+    strategy_id: cross_sectional_momentum
+    family: cross_sectional_momentum
+    version: v1
+    description: Monthly top 5 ETFs by 6-month momentum, inverse-vol weighted.
+    rebalance_cadence: monthly
+    signal_inputs: [monthly_total_return, cross_sectional_rank, trailing_volatility]
+    parameters: {lookback_months: 6, top_n: 5, volatility_lookback_days: 63}
+    weighting_method: inverse_volatility
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: preregistered_historical_research_only_not_a_candidate}
+  - trial_id: gma4_xsmom_12m_top5_inverse_vol_v1
+    strategy_id: cross_sectional_momentum
+    family: cross_sectional_momentum
+    version: v1
+    description: Monthly top 5 ETFs by 12-month momentum, inverse-vol weighted.
+    rebalance_cadence: monthly
+    signal_inputs: [monthly_total_return, cross_sectional_rank, trailing_volatility]
+    parameters: {lookback_months: 12, top_n: 5, volatility_lookback_days: 63}
+    weighting_method: inverse_volatility
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: preregistered_historical_research_only_not_a_candidate}
+  - trial_id: gma4_meanrev_5d_bottom3_equal_weight_v1
+    strategy_id: short_horizon_mean_reversion
+    family: short_horizon_mean_reversion
+    version: v1
+    description: Monthly bottom 3 ETFs by 5-day return, equal weighted.
+    rebalance_cadence: monthly
+    signal_inputs: [short_horizon_return, cross_sectional_rank]
+    parameters: {lookback_days: 5, bottom_n: 3}
+    weighting_method: equal_weight
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: preregistered_historical_research_only_not_a_candidate}
+  - trial_id: gma4_meanrev_10d_bottom3_equal_weight_v1
+    strategy_id: short_horizon_mean_reversion
+    family: short_horizon_mean_reversion
+    version: v1
+    description: Monthly bottom 3 ETFs by 10-day return, equal weighted.
+    rebalance_cadence: monthly
+    signal_inputs: [short_horizon_return, cross_sectional_rank]
+    parameters: {lookback_days: 10, bottom_n: 3}
+    weighting_method: equal_weight
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: preregistered_historical_research_only_not_a_candidate}
+  - trial_id: gma4_meanrev_5d_bottom3_long_trend_filter_v1
+    strategy_id: short_horizon_mean_reversion
+    family: short_horizon_mean_reversion
+    version: v1
+    description: Monthly bottom 3 ETFs by 5-day return, constrained to ETFs above long trend filter.
+    rebalance_cadence: monthly
+    signal_inputs: [short_horizon_return, cross_sectional_rank, trend_filter]
+    parameters: {lookback_days: 5, bottom_n: 3, trend_filter_months: 10, defensive_symbol: BIL}
+    weighting_method: equal_weight
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: preregistered_historical_research_only_not_a_candidate}
+  - trial_id: gma4_defensive_inverse_vol_63d_v1
+    strategy_id: defensive_risk_regime
+    family: defensive_risk_regime_allocation
+    version: v1
+    description: Risk-balanced allocation using 63-day inverse volatility, including BIL as defensive sleeve.
+    rebalance_cadence: monthly
+    signal_inputs: [trailing_volatility]
+    parameters: {volatility_lookback_days: 63, defensive_symbol: BIL}
+    weighting_method: inverse_volatility
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: preregistered_historical_research_only_not_a_candidate}
+  - trial_id: gma4_defensive_spy_200d_rotation_v1
+    strategy_id: defensive_risk_regime
+    family: defensive_risk_regime_allocation
+    version: v1
+    description: Rotate between SPY and BIL depending on SPY 200-day trend state.
+    rebalance_cadence: monthly
+    signal_inputs: [spy_200_day_trend]
+    parameters: {risk_symbol: SPY, defensive_symbol: BIL, moving_average_days: 200}
+    weighting_method: binary_rotation
+    eligible_symbols: [SPY, BIL]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: preregistered_historical_research_only_not_a_candidate}
+  - trial_id: gma4_defensive_drawdown_guard_v1
+    strategy_id: defensive_risk_regime
+    family: defensive_risk_regime_allocation
+    version: v1
+    description: Reduce risk assets to BIL after portfolio drawdown guard is triggered.
+    rebalance_cadence: monthly
+    signal_inputs: [portfolio_drawdown_state]
+    parameters: {drawdown_trigger: -0.10, recovery_threshold: -0.05, defensive_symbol: BIL}
+    weighting_method: guardrail_rotation
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: preregistered_historical_research_only_not_a_candidate}
+  - trial_id: gma4_blend_equal_abs12_xsmom12_v1
+    strategy_id: simple_blend
+    family: simple_blend
+    version: v1
+    description: Equal blend of absolute 12-month trend and cross-sectional 12-month top 3 momentum.
+    rebalance_cadence: monthly
+    signal_inputs: [component_trial_outputs]
+    parameters:
+      component_trial_ids: [gma4_abs_trend_12m_equal_weight_v1, gma4_xsmom_12m_top3_equal_weight_v1]
+      component_robustness_requirement: component_robustness_required_before_candidate_consideration
+    weighting_method: equal_component_blend
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: component_robustness_required_before_candidate_consideration}
+  - trial_id: gma4_blend_risk_abs12_xsmom6_meanrev5_v1
+    strategy_id: simple_blend
+    family: simple_blend
+    version: v1
+    description: Risk-weighted blend of absolute 12-month trend, 6-month top 5 momentum, and 5-day mean reversion.
+    rebalance_cadence: monthly
+    signal_inputs: [component_trial_outputs]
+    parameters:
+      component_trial_ids: [gma4_abs_trend_12m_inverse_vol_v1, gma4_xsmom_6m_top5_inverse_vol_v1, gma4_meanrev_5d_bottom3_equal_weight_v1]
+      component_robustness_requirement: component_robustness_required_before_candidate_consideration
+    weighting_method: risk_weighted_component_blend
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: component_robustness_required_before_candidate_consideration}
+  - trial_id: gma4_blend_equal_abs10_xsmom6_defensive_v1
+    strategy_id: simple_blend
+    family: simple_blend
+    version: v1
+    description: Equal blend of absolute 10-month trend, 6-month top 3 momentum, and defensive drawdown guard.
+    rebalance_cadence: monthly
+    signal_inputs: [component_trial_outputs]
+    parameters:
+      component_trial_ids: [gma4_abs_trend_10m_equal_weight_v1, gma4_xsmom_6m_top3_equal_weight_v1, gma4_defensive_drawdown_guard_v1]
+      component_robustness_requirement: component_robustness_required_before_candidate_consideration
+    weighting_method: equal_component_blend
+    eligible_symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+    cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+    status: preregistered_not_run
+    candidate_eligibility: {approved_for_paper: false, approved_for_live: false, approved_for_gma_allocation: false, approved_for_prospective_shadow: false, approved_for_broker_execution: false, reason: component_robustness_required_before_candidate_consideration}
