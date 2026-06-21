@@ -56,3 +56,16 @@ The permanent contract predeclares cost scenarios, evaluation scopes, regime win
 - `build_gma4_contract_summary(config, registry)`
 
 These functions validate configuration and registry structure only. They do not run any historical tournament and do not produce candidates.
+
+## GMA-4B Replay Adapter
+
+GMA-4B adds `src/market_strats/global_multi_asset/gma4_replay_adapter.py` as an in-memory adapter for future tournament work. The adapter validates the fixed 22-ETF universe, supports only generic rebalance schedules, and delegates portfolio accounting to the GMA-3A simulation seam.
+
+The adapter does not load files, download data, write reports, write output data, create a CLI command, generate TradingView packets, submit broker orders, create a prospective-shadow release, run the 20 preregistered trials, or claim a candidate.
+
+Supported scheduling primitives:
+
+- `weekly_friday_next_open`
+- `monthly_last_session_next_open`
+
+Both primitives preserve the existing next-valid-session-open execution convention. Same-close execution remains prohibited.
