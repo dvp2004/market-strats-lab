@@ -87,3 +87,9 @@ GMA-4E also writes local comparison files under:
 - `gma4_latest_results_v1.md`
 
 These files are historical research records only. They do not create paper orders, broker integration, prospective shadow records, strategy candidates, or allocation decisions.
+
+## GMA-4F Robustness Board
+
+GMA-4F is a deterministic post-processing phase for a completed GMA-4 tournament run. It reads only saved run outputs, builds a one-row-per-trial robustness board, writes growth, resilience, and cost-resilience research views, and updates the latest readable discussion file inside an explicit generated marker section.
+
+The robustness board does not rerun the tournament, fetch data, alter transaction costs, change strategy rules, train an ensemble model, create paper orders, create broker integration, create prospective shadow records, or make promotion decisions. The ensemble model remains a planned later phase using strictly walk-forward training against the fixed GMA-4 rule-based baselines.
