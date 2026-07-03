@@ -141,7 +141,8 @@ def _source_paths(
     dashboard_dir: Path,
 ) -> dict[str, Path]:
     return {
-        "finalist_paper_targets": finalist_tracking_dir / REQUIRED_SOURCE_FILES["finalist_paper_targets"],
+        "finalist_paper_targets": finalist_tracking_dir
+        / REQUIRED_SOURCE_FILES["finalist_paper_targets"],
         "finalist_paper_orders_preview": finalist_tracking_dir
         / REQUIRED_SOURCE_FILES["finalist_paper_orders_preview"],
         "finalist_daily_tracking_tear_sheet": finalist_tracking_dir
@@ -150,17 +151,14 @@ def _source_paths(
         / REQUIRED_SOURCE_FILES["finalist_daily_tracking_tear_sheet_md"],
         "finalist_manual_paper_journal_template": finalist_tracking_dir
         / REQUIRED_SOURCE_FILES["finalist_manual_paper_journal_template"],
-        "finalist_tracking_status": dashboard_dir / REQUIRED_SOURCE_FILES["finalist_tracking_status"],
+        "finalist_tracking_status": dashboard_dir
+        / REQUIRED_SOURCE_FILES["finalist_tracking_status"],
         "paper_cycle_latest": cycle_tracker_dir / REQUIRED_SOURCE_FILES["paper_cycle_latest"],
     }
 
 
 def _missing_source_paths(source_paths: dict[str, Path]) -> list[str]:
-    return [
-        str(path)
-        for path in source_paths.values()
-        if not path.exists() or path.is_dir()
-    ]
+    return [str(path) for path in source_paths.values() if not path.exists() or path.is_dir()]
 
 
 def _selected_signal_date(
@@ -370,8 +368,10 @@ def validate_manual_session(
 
         if require_tear and not _bool_value(row.get("tear_sheet_reviewed", False)):
             blockers.append("tear_sheet_review_missing")
-        if warnings_present and require_warning and not _bool_value(
-            row.get("warnings_acknowledged", False)
+        if (
+            warnings_present
+            and require_warning
+            and not _bool_value(row.get("warnings_acknowledged", False))
         ):
             blockers.append("warning_acknowledgement_missing")
         row_btc_positive = (
@@ -801,7 +801,9 @@ def save_phase20c_manual_paper_session(
                 checklist_path.exists() and checklist_path.stat().st_size > 0,
             ),
             _gate_row("status_report_written", status_path.exists() and not status.empty),
-            _gate_row("validation_report_written", validation_path.exists() and not validation.empty),
+            _gate_row(
+                "validation_report_written", validation_path.exists() and not validation.empty
+            ),
             _gate_row("dashboard_status_written", dashboard_path.exists() and not dashboard.empty),
             _gate_row("live_trading_disabled", not live_trading_allowed),
             _gate_row("real_money_disabled", not real_money_allowed),

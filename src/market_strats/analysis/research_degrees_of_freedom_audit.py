@@ -78,8 +78,7 @@ def build_phase8e_inventory(phase_config: dict[str, Any]) -> pd.DataFrame:
 
     if missing_columns:
         raise ValueError(
-            "Phase 8E inventory is missing required columns: "
-            f"{sorted(missing_columns)}"
+            f"Phase 8E inventory is missing required columns: {sorted(missing_columns)}"
         )
 
     numeric_columns = [
@@ -111,18 +110,12 @@ def build_phase8e_summary(inventory: pd.DataFrame, phase_config: dict[str, Any])
 
     total_tested = int(inventory["tested_units"].sum()) if not inventory.empty else 0
     total_promoted = int(inventory["promoted_units"].sum()) if not inventory.empty else 0
-    total_failed = (
-        int(inventory["failed_or_rejected_units"].sum()) if not inventory.empty else 0
-    )
-    total_mixed = (
-        int(inventory["mixed_or_caveated_units"].sum()) if not inventory.empty else 0
-    )
+    total_failed = int(inventory["failed_or_rejected_units"].sum()) if not inventory.empty else 0
+    total_mixed = int(inventory["mixed_or_caveated_units"].sum()) if not inventory.empty else 0
     branch_count = int(len(inventory))
 
     promoted_share = total_promoted / total_tested if total_tested > 0 else 0.0
-    failed_or_mixed_share = (
-        (total_failed + total_mixed) / total_tested if total_tested > 0 else 0.0
-    )
+    failed_or_mixed_share = (total_failed + total_mixed) / total_tested if total_tested > 0 else 0.0
 
     if total_tested == 0:
         claim_strength = "Invalid — no inventory supplied"
@@ -137,9 +130,7 @@ def build_phase8e_summary(inventory: pd.DataFrame, phase_config: dict[str, Any])
                 "final_candidate": claim_context.get("final_candidate"),
                 "final_candidate_role": claim_context.get("final_candidate_role"),
                 "raw_wealth_benchmark": claim_context.get("raw_wealth_benchmark"),
-                "simple_defensive_benchmark": claim_context.get(
-                    "simple_defensive_benchmark"
-                ),
+                "simple_defensive_benchmark": claim_context.get("simple_defensive_benchmark"),
                 "canonical_start_date": claim_context.get("canonical_start_date"),
                 "canonical_end_date": claim_context.get("canonical_end_date"),
                 "branch_count": branch_count,

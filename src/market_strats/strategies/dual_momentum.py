@@ -49,9 +49,7 @@ def run_dual_momentum_strategy(
     )
 
     if df.empty:
-        raise ValueError(
-            f"No overlapping dates for {asset_a_name} and {asset_b_name}"
-        )
+        raise ValueError(f"No overlapping dates for {asset_a_name} and {asset_b_name}")
 
     df = df.sort_values("date").reset_index(drop=True)
     df = df.set_index("date")
@@ -78,9 +76,7 @@ def run_dual_momentum_strategy(
 
     trailing_return_a = (monthly_close_a / monthly_close_a.shift(momentum_months)) - 1.0
     trailing_return_b = (monthly_close_b / monthly_close_b.shift(momentum_months)) - 1.0
-    trailing_cash_return = (
-        monthly_cash_index / monthly_cash_index.shift(momentum_months)
-    ) - 1.0
+    trailing_cash_return = (monthly_cash_index / monthly_cash_index.shift(momentum_months)) - 1.0
 
     target_weight_a = pd.Series(np.nan, index=df.index, dtype=float)
     target_weight_b = pd.Series(np.nan, index=df.index, dtype=float)
@@ -100,9 +96,7 @@ def run_dual_momentum_strategy(
     signal_reason = pd.Series(index=df.index, dtype="object")
     signal_reason.iloc[0] = "WARMUP_CASH"
 
-    signal_dates = trailing_return_a.dropna().index.intersection(
-        trailing_return_b.dropna().index
-    )
+    signal_dates = trailing_return_a.dropna().index.intersection(trailing_return_b.dropna().index)
     signal_dates = signal_dates.intersection(trailing_cash_return.dropna().index)
 
     for signal_date in signal_dates:
@@ -154,10 +148,7 @@ def run_dual_momentum_strategy(
 
     cash_position = 1.0 - held_weight_a - held_weight_b
 
-    turnover = (
-        target_weight_a.diff().abs().fillna(0.0)
-        + target_weight_b.diff().abs().fillna(0.0)
-    )
+    turnover = target_weight_a.diff().abs().fillna(0.0) + target_weight_b.diff().abs().fillna(0.0)
 
     slippage_cost = turnover * (slippage_bps / 10_000.0)
 

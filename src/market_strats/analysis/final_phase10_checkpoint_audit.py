@@ -213,9 +213,7 @@ def build_phase10h_phase10g_closeout_check(
     conclusion = _read_csv_if_exists(reports.get("conclusion", ""))
     gate_report = _read_csv_if_exists(reports.get("gate_report", ""))
     summary = _read_csv_if_exists(reports.get("summary", ""))
-    phase10f_failure_check = _read_csv_if_exists(
-        reports.get("phase10f_failure_check", "")
-    )
+    phase10f_failure_check = _read_csv_if_exists(reports.get("phase10f_failure_check", ""))
 
     closeout_verdict = ""
     closeout_all_gates_passed = False
@@ -228,9 +226,7 @@ def build_phase10h_phase10g_closeout_check(
 
     if not conclusion.empty:
         closeout_verdict = str(conclusion.iloc[0].get("verdict", ""))
-        closeout_all_gates_passed = _bool_value(
-            conclusion.iloc[0].get("all_gates_passed", False)
-        )
+        closeout_all_gates_passed = _bool_value(conclusion.iloc[0].get("all_gates_passed", False))
 
     if not gate_report.empty and "passed" in gate_report.columns:
         closeout_all_gates_passed = closeout_all_gates_passed and bool(
@@ -241,12 +237,8 @@ def build_phase10h_phase10g_closeout_check(
         successor_candidate_created = _bool_value(
             summary.iloc[0].get("successor_candidate_created", True)
         )
-        final_candidate_changed = _bool_value(
-            summary.iloc[0].get("final_candidate_changed", True)
-        )
-        strategy_promotion = _bool_value(
-            summary.iloc[0].get("strategy_promotion", False)
-        )
+        final_candidate_changed = _bool_value(summary.iloc[0].get("final_candidate_changed", True))
+        strategy_promotion = _bool_value(summary.iloc[0].get("strategy_promotion", False))
 
     if not phase10f_failure_check.empty:
         checks = phase10f_failure_check.set_index("check")
@@ -271,8 +263,7 @@ def build_phase10h_phase10g_closeout_check(
         },
         {
             "check": "Phase 10G closeout passed",
-            "passed": closeout_all_gates_passed
-            and "closed without promotion" in closeout_verdict,
+            "passed": closeout_all_gates_passed and "closed without promotion" in closeout_verdict,
             "detail": f"verdict={closeout_verdict}",
         },
         {
@@ -344,20 +335,12 @@ def build_phase10h_summary(
     canonical_hierarchy_check: pd.DataFrame,
 ) -> pd.DataFrame:
     required_readme_passed = (
-        bool(
-            readme_phrase_check[
-                readme_phrase_check["check_type"] == "required"
-            ]["passed"].all()
-        )
+        bool(readme_phrase_check[readme_phrase_check["check_type"] == "required"]["passed"].all())
         if not readme_phrase_check.empty
         else False
     )
     forbidden_readme_absent = (
-        bool(
-            readme_phrase_check[
-                readme_phrase_check["check_type"] == "forbidden"
-            ]["passed"].all()
-        )
+        bool(readme_phrase_check[readme_phrase_check["check_type"] == "forbidden"]["passed"].all())
         if not readme_phrase_check.empty
         else False
     )
@@ -377,14 +360,10 @@ def build_phase10h_summary(
                 "expected_reports_present": bool(report_inventory_check["present"].all())
                 if not report_inventory_check.empty
                 else False,
-                "phase10g_closeout_passed": bool(
-                    phase10g_closeout_check["passed"].all()
-                )
+                "phase10g_closeout_passed": bool(phase10g_closeout_check["passed"].all())
                 if not phase10g_closeout_check.empty
                 else False,
-                "canonical_hierarchy_present": bool(
-                    canonical_hierarchy_check["passed"].all()
-                )
+                "canonical_hierarchy_present": bool(canonical_hierarchy_check["passed"].all())
                 if not canonical_hierarchy_check.empty
                 else False,
                 "strategy_promotion": False,
@@ -451,8 +430,7 @@ def build_phase10h_gate_report(
         ),
         _gate_row(
             "Config flags match final Phase 10 checkpoint state",
-            (not gates.get("require_config_flags_clean", True))
-            or bool(row["config_flags_clean"]),
+            (not gates.get("require_config_flags_clean", True)) or bool(row["config_flags_clean"]),
             f"config_flags_clean={row['config_flags_clean']}",
         ),
         _gate_row(
@@ -650,8 +628,7 @@ def save_phase10h_final_phase10_checkpoint_audit(
     canonical_hierarchy_check = build_phase10h_canonical_hierarchy_check(
         readme_text=readme_text,
         canonical_phrases=[
-            str(item)
-            for item in _as_list(phase_config.get("canonical_hierarchy_phrases"))
+            str(item) for item in _as_list(phase_config.get("canonical_hierarchy_phrases"))
         ],
     )
     summary = build_phase10h_summary(

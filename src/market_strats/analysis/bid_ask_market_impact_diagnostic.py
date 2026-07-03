@@ -248,11 +248,10 @@ def _get_spy_strategy_result(
 
     if strategy_name not in strategy_results:
         available = sorted(strategy_results.keys())
-        raise ValueError(
-            f"SPY strategy result {strategy_name!r} not found. Available: {available}"
-        )
+        raise ValueError(f"SPY strategy result {strategy_name!r} not found. Available: {available}")
 
     return strategy_results[strategy_name]
+
 
 def _align_frame_to_period(
     frame: pd.DataFrame,
@@ -266,9 +265,7 @@ def _align_frame_to_period(
 
     aligned = frame.copy()
     aligned["date"] = pd.to_datetime(aligned["date"])
-    aligned = aligned[
-        (aligned["date"] >= start_date) & (aligned["date"] <= end_date)
-    ].copy()
+    aligned = aligned[(aligned["date"] >= start_date) & (aligned["date"] <= end_date)].copy()
     aligned = aligned.sort_values("date").reset_index(drop=True)
 
     if aligned.empty:
@@ -288,6 +285,7 @@ def _align_frame_to_period(
     aligned.loc[aligned.index[0], "strategy_return"] = 0.0
 
     return aligned
+
 
 def _resolve_phase8b_input_frames(
     *,
@@ -355,9 +353,7 @@ def apply_bid_ask_market_impact_scenario(
     turnover = out["turnover_for_phase8b"]
 
     spread_bps = float(scenario.get("spread_bps", 0.0))
-    impact_bps_per_100pct_turnover = float(
-        scenario.get("impact_bps_per_100pct_turnover", 0.0)
-    )
+    impact_bps_per_100pct_turnover = float(scenario.get("impact_bps_per_100pct_turnover", 0.0))
 
     multiplier = _stress_multiplier(base_drawdown, scenario)
     effective_spread_bps = spread_bps * multiplier
@@ -478,9 +474,7 @@ def build_phase8b_summary(metrics: pd.DataFrame, phase_config: dict[str, Any]) -
     for scenario in metrics["scenario"].drop_duplicates():
         scenario_metrics = metrics[metrics["scenario"] == scenario].set_index("strategy")
 
-        if not {candidate_name, spy_bh_name, spy_12m_name}.issubset(
-            scenario_metrics.index
-        ):
+        if not {candidate_name, spy_bh_name, spy_12m_name}.issubset(scenario_metrics.index):
             continue
 
         candidate = scenario_metrics.loc[candidate_name]
@@ -498,12 +492,8 @@ def build_phase8b_summary(metrics: pd.DataFrame, phase_config: dict[str, Any]) -
                 "candidate_calmar": candidate["calmar"],
                 "spy_12m_calmar": spy_12m["calmar"],
                 "buy_hold_calmar": spy_bh["calmar"],
-                "candidate_minus_spy_12m_calmar": (
-                    candidate["calmar"] - spy_12m["calmar"]
-                ),
-                "candidate_minus_buy_hold_calmar": (
-                    candidate["calmar"] - spy_bh["calmar"]
-                ),
+                "candidate_minus_spy_12m_calmar": (candidate["calmar"] - spy_12m["calmar"]),
+                "candidate_minus_buy_hold_calmar": (candidate["calmar"] - spy_bh["calmar"]),
                 "candidate_max_drawdown": candidate["max_drawdown"],
                 "spy_12m_max_drawdown": spy_12m["max_drawdown"],
                 "buy_hold_max_drawdown": spy_bh["max_drawdown"],
@@ -513,9 +503,7 @@ def build_phase8b_summary(metrics: pd.DataFrame, phase_config: dict[str, Any]) -
                 "candidate_drawdown_advantage_vs_buy_hold": (
                     candidate["max_drawdown"] - spy_bh["max_drawdown"]
                 ),
-                "candidate_cagr_degradation_pts": -candidate[
-                    "cagr_delta_vs_no_extra_cost"
-                ],
+                "candidate_cagr_degradation_pts": -candidate["cagr_delta_vs_no_extra_cost"],
                 "candidate_avg_annual_extra_drag": candidate["avg_annual_extra_drag"],
             }
         )
@@ -549,9 +537,7 @@ def build_phase8b_gate_report(
 
     scenario_metrics = metrics[metrics["scenario"] == gate_scenario].set_index("strategy")
 
-    if not {candidate_name, spy_bh_name, spy_12m_name}.issubset(
-        scenario_metrics.index
-    ):
+    if not {candidate_name, spy_bh_name, spy_12m_name}.issubset(scenario_metrics.index):
         raise ValueError(f"Gate scenario {gate_scenario!r} is missing required strategies.")
 
     candidate = scenario_metrics.loc[candidate_name]
@@ -567,9 +553,7 @@ def build_phase8b_gate_report(
     else:
         candidate_cagr_degradation = float(no_extra.iloc[0]["cagr"] - candidate["cagr"])
 
-    max_degradation = float(
-        gates.get("max_candidate_cagr_degradation_pts_vs_no_extra_cost", 0.50)
-    )
+    max_degradation = float(gates.get("max_candidate_cagr_degradation_pts_vs_no_extra_cost", 0.50))
     max_degradation_decimal = max_degradation / 100.0
 
     rows = [
@@ -606,8 +590,7 @@ def build_phase8b_gate_report(
         _gate_row(
             "Candidate CAGR degradation versus no-extra-cost case is not excessive",
             candidate_cagr_degradation <= max_degradation_decimal,
-            f"degradation {candidate_cagr_degradation:.4%}; "
-            f"limit {max_degradation_decimal:.4%}",
+            f"degradation {candidate_cagr_degradation:.4%}; limit {max_degradation_decimal:.4%}",
         ),
     ]
 

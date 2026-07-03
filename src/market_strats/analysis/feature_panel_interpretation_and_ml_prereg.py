@@ -104,9 +104,7 @@ DEFAULT_PHASE13L_CONFIG: dict[str, Any] = {
         "require_no_paper_trading_deployment": True,
         "require_no_candidate_promotion": True,
         "require_no_final_candidate_change": True,
-        "required_spec_role": (
-            "Dataset split and ML target design pre-registration spec only"
-        ),
+        "required_spec_role": ("Dataset split and ML target design pre-registration spec only"),
     },
 }
 
@@ -350,16 +348,10 @@ def build_phase13k_model_readiness_plan(
         [
             {
                 "dataset_unit": str(plan.get("dataset_unit", "")),
-                "eligible_feature_inputs": _join_list(
-                    plan.get("eligible_feature_inputs")
-                ),
-                "future_encoding_policy": _join_list(
-                    plan.get("future_encoding_policy")
-                ),
+                "eligible_feature_inputs": _join_list(plan.get("eligible_feature_inputs")),
+                "future_encoding_policy": _join_list(plan.get("future_encoding_policy")),
                 "blocked_now": _join_list(plan.get("blocked_now")),
-                "readiness_interpretation": str(
-                    plan.get("readiness_interpretation", "")
-                ),
+                "readiness_interpretation": str(plan.get("readiness_interpretation", "")),
             }
         ]
     )
@@ -380,10 +372,8 @@ def build_phase13k_phase13l_boundary_check(
             "phase13l_forbidden_next_step",
             str(boundary.get("forbidden_next_step", "")),
             "model training" in str(boundary.get("forbidden_next_step", "")).lower()
-            and "strategy backtest"
-            in str(boundary.get("forbidden_next_step", "")).lower()
-            and "signal creation"
-            in str(boundary.get("forbidden_next_step", "")).lower(),
+            and "strategy backtest" in str(boundary.get("forbidden_next_step", "")).lower()
+            and "signal creation" in str(boundary.get("forbidden_next_step", "")).lower(),
         ),
         (
             "phase13l_may_define_target",
@@ -517,18 +507,14 @@ def build_phase13k_summary(
                 "feature_id_count": int(len(actual_ids)),
                 "family_count": int(len(actual_families)),
                 "required_feature_ids_present": required_ids.issubset(actual_ids),
-                "required_families_present": required_families.issubset(
-                    actual_families
-                ),
+                "required_families_present": required_families.issubset(actual_families),
                 "available_ratio": available_ratio,
                 "leakage_flag_count": leakage_flags,
                 "state_distribution_rows": int(len(state_distribution)),
                 "availability_summary_rows": int(len(availability_summary)),
                 "family_coverage_rows": int(len(family_coverage_summary)),
                 "model_readiness_plan_rows": int(len(model_readiness_plan)),
-                "phase13l_boundary_passed": bool(
-                    phase13l_boundary_check["passed"].all()
-                )
+                "phase13l_boundary_passed": bool(phase13l_boundary_check["passed"].all())
                 if not phase13l_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -554,9 +540,7 @@ def build_phase13k_gate_report(
     policy = phase_config.get("interpretation_policy", {})
 
     if summary.empty:
-        return pd.DataFrame(
-            [_gate_row("Phase 13K summary exists", False, "No summary.")]
-        )
+        return pd.DataFrame([_gate_row("Phase 13K summary exists", False, "No summary.")])
 
     row = summary.iloc[0]
     required_role = str(
@@ -569,8 +553,7 @@ def build_phase13k_gate_report(
     rows = [
         _gate_row(
             "Phase 13J passed",
-            (not gates.get("require_phase13j_passed", True))
-            or bool(row["phase13j_result_passed"]),
+            (not gates.get("require_phase13j_passed", True)) or bool(row["phase13j_result_passed"]),
             f"phase13j_result_passed={bool(row['phase13j_result_passed'])}",
         ),
         _gate_row(
@@ -588,8 +571,7 @@ def build_phase13k_gate_report(
         _gate_row(
             "Minimum feature-panel rows reached",
             (not gates.get("require_min_feature_panel_rows", True))
-            or int(row["feature_panel_rows"])
-            >= int(policy.get("min_feature_panel_rows", 100)),
+            or int(row["feature_panel_rows"]) >= int(policy.get("min_feature_panel_rows", 100)),
             f"feature_panel_rows={int(row['feature_panel_rows'])}",
         ),
         _gate_row(
@@ -608,8 +590,7 @@ def build_phase13k_gate_report(
             "Required feature IDs are present",
             (not gates.get("require_required_feature_ids_present", True))
             or bool(row["required_feature_ids_present"]),
-            f"required_feature_ids_present="
-            f"{bool(row['required_feature_ids_present'])}",
+            f"required_feature_ids_present={bool(row['required_feature_ids_present'])}",
         ),
         _gate_row(
             "State distribution exists",
@@ -672,8 +653,7 @@ def build_phase13k_conclusion(gate_report: pd.DataFrame) -> pd.DataFrame:
         "create a signal, run a backtest, deploy paper trading, promote a candidate, "
         "or change the final candidate."
         if all_passed
-        else "Phase 13K found an interpretation, readiness, leakage, boundary, "
-        "or scope issue."
+        else "Phase 13K found an interpretation, readiness, leakage, boundary, or scope issue."
     )
 
     return pd.DataFrame(
@@ -783,8 +763,7 @@ def save_phase13k_feature_panel_interpretation_model_readiness(
             "Gate Report": gate_report,
             "Conclusion": conclusion,
         },
-        output_path=reports_path
-        / "phase13k_feature_panel_interpretation_model_readiness.md",
+        output_path=reports_path / "phase13k_feature_panel_interpretation_model_readiness.md",
     )
 
     print("Wrote Phase 13K feature panel interpretation/model-readiness reports.")
@@ -919,10 +898,8 @@ def build_phase13l_phase13m_boundary_check(
             "phase13m_forbidden_next_step",
             str(boundary.get("forbidden_next_step", "")),
             "model training" in str(boundary.get("forbidden_next_step", "")).lower()
-            and "strategy backtest"
-            in str(boundary.get("forbidden_next_step", "")).lower()
-            and "signal creation"
-            in str(boundary.get("forbidden_next_step", "")).lower(),
+            and "strategy backtest" in str(boundary.get("forbidden_next_step", "")).lower()
+            and "signal creation" in str(boundary.get("forbidden_next_step", "")).lower(),
         ),
         (
             "phase13m_may_assemble_dataset",
@@ -931,12 +908,8 @@ def build_phase13l_phase13m_boundary_check(
         ),
         (
             "phase13m_may_calculate_registered_targets",
-            _bool_value(
-                boundary.get("phase13m_may_calculate_registered_targets", False)
-            ),
-            _bool_value(
-                boundary.get("phase13m_may_calculate_registered_targets", False)
-            ),
+            _bool_value(boundary.get("phase13m_may_calculate_registered_targets", False)),
+            _bool_value(boundary.get("phase13m_may_calculate_registered_targets", False)),
         ),
         (
             "phase13m_may_train_model",
@@ -1032,9 +1005,7 @@ def build_phase13l_summary(
                 "phase_branch": str(phase_config.get("phase_branch", "")),
                 "source_phase": str(phase_config.get("source_phase", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "phase13k_reports_present": bool(
-                    report_inventory_check["present"].all()
-                )
+                "phase13k_reports_present": bool(report_inventory_check["present"].all())
                 if not report_inventory_check.empty
                 else False,
                 "phase13k_result_passed": bool(phase13k_result_check["passed"].all())
@@ -1054,9 +1025,7 @@ def build_phase13l_summary(
                 )
                 if not leakage_control_policy.empty
                 else False,
-                "phase13m_boundary_passed": bool(
-                    phase13m_boundary_check["passed"].all()
-                )
+                "phase13m_boundary_passed": bool(phase13m_boundary_check["passed"].all())
                 if not phase13m_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -1084,9 +1053,7 @@ def build_phase13l_gate_report(
     gates = phase_config.get("gates", {})
 
     if summary.empty:
-        return pd.DataFrame(
-            [_gate_row("Phase 13L summary exists", False, "No summary.")]
-        )
+        return pd.DataFrame([_gate_row("Phase 13L summary exists", False, "No summary.")])
 
     row = summary.iloc[0]
     required_role = str(
@@ -1135,14 +1102,12 @@ def build_phase13l_gate_report(
         ),
         _gate_row(
             "Dataset design is defined",
-            (not gates.get("require_dataset_design", True))
-            or bool(row["dataset_design_defined"]),
+            (not gates.get("require_dataset_design", True)) or bool(row["dataset_design_defined"]),
             f"dataset_design_defined={bool(row['dataset_design_defined'])}",
         ),
         _gate_row(
             "Split design is defined",
-            (not gates.get("require_split_design", True))
-            or bool(row["split_design_defined"]),
+            (not gates.get("require_split_design", True)) or bool(row["split_design_defined"]),
             f"split_design_defined={bool(row['split_design_defined'])}",
         ),
         _gate_row(
@@ -1155,8 +1120,7 @@ def build_phase13l_gate_report(
             "Leakage controls are defined",
             (not gates.get("require_leakage_control_policy", True))
             or (
-                int(row["leakage_control_count"])
-                >= int(gates.get("min_leakage_controls", 6))
+                int(row["leakage_control_count"]) >= int(gates.get("min_leakage_controls", 6))
                 and bool(row["leakage_controls_required"])
             ),
             f"leakage_control_count={int(row['leakage_control_count'])}",
@@ -1198,8 +1162,7 @@ def build_phase13l_conclusion(gate_report: pd.DataFrame) -> pd.DataFrame:
         "backtest, deploy paper trading, promote a candidate, or change the final "
         "candidate."
         if all_passed
-        else "Phase 13L found a target, split, walk-forward, leakage, boundary, "
-        "or scope issue."
+        else "Phase 13L found a target, split, walk-forward, leakage, boundary, or scope issue."
     )
 
     return pd.DataFrame(
@@ -1240,14 +1203,10 @@ def save_phase13l_dataset_split_target_preregistration_spec(
     )
 
     target_design = _single_row_from_dict(phase_config.get("target_design", {}))
-    secondary_target_design = _single_row_from_dict(
-        phase_config.get("secondary_target_design", {})
-    )
+    secondary_target_design = _single_row_from_dict(phase_config.get("secondary_target_design", {}))
     dataset_design = _single_row_from_dict(phase_config.get("dataset_design", {}))
     split_design = _single_row_from_dict(phase_config.get("split_design", {}))
-    walk_forward_policy = _single_row_from_dict(
-        phase_config.get("walk_forward_policy", {})
-    )
+    walk_forward_policy = _single_row_from_dict(phase_config.get("walk_forward_policy", {}))
     leakage_control_policy = build_phase13l_leakage_control_policy(phase_config)
     phase13m_boundary_check = build_phase13l_phase13m_boundary_check(phase_config)
     scope_boundary_check = build_phase13l_scope_boundary_check(phase_config)
@@ -1310,8 +1269,7 @@ def save_phase13l_dataset_split_target_preregistration_spec(
             "Gate Report": gate_report,
             "Conclusion": conclusion,
         },
-        output_path=reports_path
-        / "phase13l_dataset_split_target_preregistration_spec.md",
+        output_path=reports_path / "phase13l_dataset_split_target_preregistration_spec.md",
     )
 
     print("Wrote Phase 13L dataset split / ML target pre-registration reports.")

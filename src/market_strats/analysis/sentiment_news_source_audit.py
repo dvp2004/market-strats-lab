@@ -10,12 +10,10 @@ import pandas as pd
 DEFAULT_PHASE23D_CONFIG: dict[str, Any] = {
     "enabled": False,
     "output_dir": (
-        "reports/individual_equity_decision_system/"
-        "phase23d_sentiment_news_source_audit"
+        "reports/individual_equity_decision_system/phase23d_sentiment_news_source_audit"
     ),
     "dashboard_status_path": (
-        "reports/paper_trading/dashboard/"
-        "phase23d_sentiment_news_source_audit_status.csv"
+        "reports/paper_trading/dashboard/phase23d_sentiment_news_source_audit_status.csv"
     ),
     "audit_as_of_date": "2026-06-13",
     "required_start_date": "2006-04-28",
@@ -118,9 +116,7 @@ def _gate(name: str, passed: bool, detail: str) -> dict[str, Any]:
     }
 
 
-def _resolve_configured_path(
-    *, configured_path: str | Path, reports_dir: str | Path
-) -> Path:
+def _resolve_configured_path(*, configured_path: str | Path, reports_dir: str | Path) -> Path:
     """Resolve configured paths without creating ``reports/reports``.
 
     A path already rooted at ``reports`` is anchored to the supplied reports root.
@@ -160,8 +156,7 @@ def build_source_registry() -> pd.DataFrame:
             ),
             "audit_status": "approved_contract_source_download_and_parser_pilot_pending",
             "evidence_reference": (
-                "https://www.sec.gov/search-filings/"
-                "edgar-application-programming-interfaces"
+                "https://www.sec.gov/search-filings/edgar-application-programming-interfaces"
             ),
         },
         {
@@ -266,8 +261,7 @@ def build_source_registry() -> pd.DataFrame:
             ),
             "audit_status": "experimental_until_coverage_entity_and_revision_audits_pass",
             "evidence_reference": (
-                "https://blog.gdeltproject.org/"
-                "gdelt-2-0-our-global-world-in-realtime/"
+                "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
             ),
         },
         {
@@ -357,17 +351,29 @@ def build_source_registry() -> pd.DataFrame:
 def build_source_scorecard(source_registry: pd.DataFrame) -> pd.DataFrame:
     frame = source_registry.copy()
     frame["authority_score"] = frame["official_provider"].astype(bool).astype(int) * 2
-    frame["automation_score"] = frame["programmatic_access"].map(
-        {True: 2, False: 0, "issuer_specific": 1, "agency_specific": 1}
-    ).fillna(0)
-    frame["timestamp_score"] = frame["event_timestamp_quality"].astype(str).map(
-        lambda value: 2 if "required" not in value and "available" in value else 1
+    frame["automation_score"] = (
+        frame["programmatic_access"]
+        .map({True: 2, False: 0, "issuer_specific": 1, "agency_specific": 1})
+        .fillna(0)
     )
-    frame["lineage_score"] = frame["revision_lineage"].map(
-        {True: 2, False: 0, "required_by_import_contract": 1, "issuer_specific": 1}
-    ).fillna(1)
-    frame["identifier_score"] = frame["stable_entity_identifier"].astype(str).map(
-        lambda value: 2 if value in {"CIK_join_required", "permanent_security_id_required"} else 1
+    frame["timestamp_score"] = (
+        frame["event_timestamp_quality"]
+        .astype(str)
+        .map(lambda value: 2 if "required" not in value and "available" in value else 1)
+    )
+    frame["lineage_score"] = (
+        frame["revision_lineage"]
+        .map({True: 2, False: 0, "required_by_import_contract": 1, "issuer_specific": 1})
+        .fillna(1)
+    )
+    frame["identifier_score"] = (
+        frame["stable_entity_identifier"]
+        .astype(str)
+        .map(
+            lambda value: (
+                2 if value in {"CIK_join_required", "permanent_security_id_required"} else 1
+            )
+        )
     )
     frame["audit_score"] = frame[
         [
@@ -517,28 +523,92 @@ def build_timestamp_availability_policy(phase_config: dict[str, Any]) -> pd.Data
 
 def build_revision_deduplication_policy() -> pd.DataFrame:
     rows = [
-        ("R1", "append_never_overwrite", "Every observed story/post/transcript version remains immutable."),
-        ("R2", "root_event_lineage", "Updates and corrections link to one root_event_id and monotonic event_version."),
-        ("R3", "retraction_not_deletion", "Retractions block future eligibility but do not erase the historically observed text."),
-        ("R4", "duplicate_story_clusters", "Syndicated copies are clustered but first-seen timing remains source-specific."),
-        ("R5", "body_hash_versioning", "Changed normalized text or metadata creates a new source revision."),
-        ("R6", "transcript_vintages", "Live, preliminary, corrected, and final transcripts remain separate vintages."),
-        ("R7", "social_edit_delete_state", "Edited/deleted/removed social content is represented through explicit versions and states."),
-        ("R8", "feature_recalculation_versioned", "Re-scoring with a new NLP model creates a new feature revision, never a rewritten historical feature."),
+        (
+            "R1",
+            "append_never_overwrite",
+            "Every observed story/post/transcript version remains immutable.",
+        ),
+        (
+            "R2",
+            "root_event_lineage",
+            "Updates and corrections link to one root_event_id and monotonic event_version.",
+        ),
+        (
+            "R3",
+            "retraction_not_deletion",
+            "Retractions block future eligibility but do not erase the historically observed text.",
+        ),
+        (
+            "R4",
+            "duplicate_story_clusters",
+            "Syndicated copies are clustered but first-seen timing remains source-specific.",
+        ),
+        (
+            "R5",
+            "body_hash_versioning",
+            "Changed normalized text or metadata creates a new source revision.",
+        ),
+        (
+            "R6",
+            "transcript_vintages",
+            "Live, preliminary, corrected, and final transcripts remain separate vintages.",
+        ),
+        (
+            "R7",
+            "social_edit_delete_state",
+            "Edited/deleted/removed social content is represented through explicit versions and states.",
+        ),
+        (
+            "R8",
+            "feature_recalculation_versioned",
+            "Re-scoring with a new NLP model creates a new feature revision, never a rewritten historical feature.",
+        ),
     ]
     return pd.DataFrame(rows, columns=["rule_id", "policy", "requirement"])
 
 
 def build_entity_linking_policy() -> pd.DataFrame:
     rows = [
-        ("E1", "permanent_id_primary", "Canonical events require a permanent security or issuer identifier."),
-        ("E2", "ticker_is_time_varying", "Ticker text is resolved using the point-in-time identity map from Phase23B."),
-        ("E3", "multi_entity_allocation", "One event may map to multiple issuers with separate relevance scores."),
-        ("E4", "ambiguous_alias_block", "Unresolved common words or ambiguous tickers remain unassigned and training-ineligible."),
-        ("E5", "subsidiary_parent_mapping", "Subsidiary/product events require an auditable parent-security relationship valid at event time."),
-        ("E6", "index_macro_separation", "Macro/index-wide events are stored separately from company-specific events."),
-        ("E7", "link_model_versioning", "Automated entity-link model and alias dictionaries are versioned."),
-        ("E8", "future_identity_block", "Future mergers, ticker changes, or names cannot be used to resolve earlier events unless historically knowable."),
+        (
+            "E1",
+            "permanent_id_primary",
+            "Canonical events require a permanent security or issuer identifier.",
+        ),
+        (
+            "E2",
+            "ticker_is_time_varying",
+            "Ticker text is resolved using the point-in-time identity map from Phase23B.",
+        ),
+        (
+            "E3",
+            "multi_entity_allocation",
+            "One event may map to multiple issuers with separate relevance scores.",
+        ),
+        (
+            "E4",
+            "ambiguous_alias_block",
+            "Unresolved common words or ambiguous tickers remain unassigned and training-ineligible.",
+        ),
+        (
+            "E5",
+            "subsidiary_parent_mapping",
+            "Subsidiary/product events require an auditable parent-security relationship valid at event time.",
+        ),
+        (
+            "E6",
+            "index_macro_separation",
+            "Macro/index-wide events are stored separately from company-specific events.",
+        ),
+        (
+            "E7",
+            "link_model_versioning",
+            "Automated entity-link model and alias dictionaries are versioned.",
+        ),
+        (
+            "E8",
+            "future_identity_block",
+            "Future mergers, ticker changes, or names cannot be used to resolve earlier events unless historically knowable.",
+        ),
     ]
     return pd.DataFrame(rows, columns=["rule_id", "policy", "requirement"])
 
@@ -597,24 +667,109 @@ def build_coverage_policy(phase_config: dict[str, Any]) -> pd.DataFrame:
 
 def build_feature_registry() -> pd.DataFrame:
     rows = [
-        ("news_sentiment_1d", "company_news", "relevance-weighted issuer news tone over 1 day", "pilot_required"),
-        ("news_sentiment_5d", "company_news", "relevance-weighted issuer news tone over 5 days", "pilot_required"),
-        ("news_volume_surprise", "company_news", "event count versus trailing issuer baseline", "pilot_required"),
-        ("news_novelty", "company_news", "novelty versus previously known story clusters", "pilot_required"),
-        ("negative_event_intensity", "event_risk", "legal, fraud, bankruptcy, regulatory, and controversy intensity", "pilot_required"),
-        ("positive_catalyst_intensity", "event_risk", "product, contract, guidance, approval, and strategic catalyst intensity", "pilot_required"),
+        (
+            "news_sentiment_1d",
+            "company_news",
+            "relevance-weighted issuer news tone over 1 day",
+            "pilot_required",
+        ),
+        (
+            "news_sentiment_5d",
+            "company_news",
+            "relevance-weighted issuer news tone over 5 days",
+            "pilot_required",
+        ),
+        (
+            "news_volume_surprise",
+            "company_news",
+            "event count versus trailing issuer baseline",
+            "pilot_required",
+        ),
+        (
+            "news_novelty",
+            "company_news",
+            "novelty versus previously known story clusters",
+            "pilot_required",
+        ),
+        (
+            "negative_event_intensity",
+            "event_risk",
+            "legal, fraud, bankruptcy, regulatory, and controversy intensity",
+            "pilot_required",
+        ),
+        (
+            "positive_catalyst_intensity",
+            "event_risk",
+            "product, contract, guidance, approval, and strategic catalyst intensity",
+            "pilot_required",
+        ),
         ("filing_tone", "filing_text", "tone of as-filed regulatory text", "pilot_required"),
-        ("risk_factor_change", "filing_text", "semantic change in risk-factor sections versus prior known filing", "pilot_required"),
-        ("management_uncertainty", "filing_text", "uncertainty and forward-looking language score", "pilot_required"),
-        ("earnings_call_prepared_tone", "earnings_calls", "prepared remarks sentiment and uncertainty", "licensed_source_required"),
-        ("earnings_call_qa_tone", "earnings_calls", "analyst Q&A sentiment, evasiveness, and disagreement", "licensed_source_required"),
-        ("analyst_revision_breadth", "analyst_actions", "net upgrades/downgrades and estimate revisions", "licensed_source_required"),
-        ("target_price_revision", "analyst_actions", "point-in-time target-price revision magnitude", "licensed_source_required"),
-        ("social_attention", "social_sentiment", "issuer-linked message volume versus baseline", "experimental_optional"),
-        ("social_sentiment_dispersion", "social_sentiment", "cross-message disagreement and polarity dispersion", "experimental_optional"),
-        ("macro_policy_tone", "macro_news", "official policy-statement tone and topic intensity", "pilot_required"),
-        ("macro_release_event_risk", "macro_news", "scheduled release and surprise-event risk context", "pilot_required"),
-        ("cross_source_sentiment_consensus", "ensemble", "agreement across approved independent source families", "future_ensemble"),
+        (
+            "risk_factor_change",
+            "filing_text",
+            "semantic change in risk-factor sections versus prior known filing",
+            "pilot_required",
+        ),
+        (
+            "management_uncertainty",
+            "filing_text",
+            "uncertainty and forward-looking language score",
+            "pilot_required",
+        ),
+        (
+            "earnings_call_prepared_tone",
+            "earnings_calls",
+            "prepared remarks sentiment and uncertainty",
+            "licensed_source_required",
+        ),
+        (
+            "earnings_call_qa_tone",
+            "earnings_calls",
+            "analyst Q&A sentiment, evasiveness, and disagreement",
+            "licensed_source_required",
+        ),
+        (
+            "analyst_revision_breadth",
+            "analyst_actions",
+            "net upgrades/downgrades and estimate revisions",
+            "licensed_source_required",
+        ),
+        (
+            "target_price_revision",
+            "analyst_actions",
+            "point-in-time target-price revision magnitude",
+            "licensed_source_required",
+        ),
+        (
+            "social_attention",
+            "social_sentiment",
+            "issuer-linked message volume versus baseline",
+            "experimental_optional",
+        ),
+        (
+            "social_sentiment_dispersion",
+            "social_sentiment",
+            "cross-message disagreement and polarity dispersion",
+            "experimental_optional",
+        ),
+        (
+            "macro_policy_tone",
+            "macro_news",
+            "official policy-statement tone and topic intensity",
+            "pilot_required",
+        ),
+        (
+            "macro_release_event_risk",
+            "macro_news",
+            "scheduled release and surprise-event risk context",
+            "pilot_required",
+        ),
+        (
+            "cross_source_sentiment_consensus",
+            "ensemble",
+            "agreement across approved independent source families",
+            "future_ensemble",
+        ),
     ]
     return pd.DataFrame(
         rows,
@@ -625,21 +780,69 @@ def build_feature_registry() -> pd.DataFrame:
 def build_validation_plan() -> pd.DataFrame:
     rows = [
         ("V1", "schema completeness", "all required event and sentiment fields present"),
-        ("V2", "timestamp ordering", "published <= first seen <= knowledge <= feature availability"),
+        (
+            "V2",
+            "timestamp ordering",
+            "published <= first seen <= knowledge <= feature availability",
+        ),
         ("V3", "processing delay", "knowledge time satisfies configured conservative delay"),
-        ("V4", "event/version uniqueness", "event_id and event_version uniquely identify one immutable source version"),
+        (
+            "V4",
+            "event/version uniqueness",
+            "event_id and event_version uniquely identify one immutable source version",
+        ),
         ("V5", "revision lineage", "updates/corrections/retractions link to a root event"),
         ("V6", "body integrity", "body hash matches normalized archived text"),
-        ("V7", "entity precision", "sample entity links meet preregistered precision and ambiguity thresholds"),
-        ("V8", "point-in-time ticker mapping", "event identity resolves through Phase23B mapping valid at event time"),
-        ("V9", "coverage continuity", "approved backfile covers required period with documented outages"),
-        ("V10", "survivorship retention", "removed, delisted, bankrupt, and acquired issuers remain queryable"),
-        ("V11", "deduplication stability", "story clusters are deterministic and do not leak future copies"),
-        ("V12", "retraction behaviour", "historically observed events remain but future eligibility changes at retraction time"),
-        ("V13", "sentiment calibration", "scores are stable, bounded, and calibrated by source/event family"),
-        ("V14", "language handling", "language detection/translation path is versioned and audited"),
-        ("V15", "license provenance", "every canonical event has documented permitted research use"),
-        ("V16", "immutable raw archive", "checksums, retrieval timestamps, and source vintages are preserved"),
+        (
+            "V7",
+            "entity precision",
+            "sample entity links meet preregistered precision and ambiguity thresholds",
+        ),
+        (
+            "V8",
+            "point-in-time ticker mapping",
+            "event identity resolves through Phase23B mapping valid at event time",
+        ),
+        (
+            "V9",
+            "coverage continuity",
+            "approved backfile covers required period with documented outages",
+        ),
+        (
+            "V10",
+            "survivorship retention",
+            "removed, delisted, bankrupt, and acquired issuers remain queryable",
+        ),
+        (
+            "V11",
+            "deduplication stability",
+            "story clusters are deterministic and do not leak future copies",
+        ),
+        (
+            "V12",
+            "retraction behaviour",
+            "historically observed events remain but future eligibility changes at retraction time",
+        ),
+        (
+            "V13",
+            "sentiment calibration",
+            "scores are stable, bounded, and calibrated by source/event family",
+        ),
+        (
+            "V14",
+            "language handling",
+            "language detection/translation path is versioned and audited",
+        ),
+        (
+            "V15",
+            "license provenance",
+            "every canonical event has documented permitted research use",
+        ),
+        (
+            "V16",
+            "immutable raw archive",
+            "checksums, retrieval timestamps, and source vintages are preserved",
+        ),
     ]
     return pd.DataFrame(rows, columns=["test_id", "test", "acceptance_rule"])
 
@@ -775,20 +978,38 @@ def validate_news_event_frame(
     parsed = bool(published.notna().all() and first_seen.notna().all() and knowledge.notna().all())
     rows.append(_gate("timestamps_parse", parsed, f"rows={len(working)}"))
 
-    ordering = bool(((published <= first_seen) & (first_seen <= knowledge)).all()) if parsed else False
-    rows.append(_gate("published_first_seen_knowledge_ordering", ordering, "published <= first_seen <= knowledge"))
+    ordering = (
+        bool(((published <= first_seen) & (first_seen <= knowledge)).all()) if parsed else False
+    )
+    rows.append(
+        _gate(
+            "published_first_seen_knowledge_ordering",
+            ordering,
+            "published <= first_seen <= knowledge",
+        )
+    )
 
     delay = pd.Timedelta(minutes=int(conservative_processing_delay_minutes))
     delayed = bool((knowledge >= first_seen + delay).all()) if parsed else False
-    rows.append(_gate("knowledge_respects_processing_delay", delayed, f"minutes={int(conservative_processing_delay_minutes)}"))
+    rows.append(
+        _gate(
+            "knowledge_respects_processing_delay",
+            delayed,
+            f"minutes={int(conservative_processing_delay_minutes)}",
+        )
+    )
 
     revision_ok = True
     if revision is not None and revision.notna().any():
         revision_ok = bool((revision.dropna() >= published.loc[revision.notna()]).all())
-    rows.append(_gate("revision_not_before_publication", revision_ok, "revision timestamp ordering"))
+    rows.append(
+        _gate("revision_not_before_publication", revision_ok, "revision timestamp ordering")
+    )
 
     versions = pd.to_numeric(working["event_version"], errors="coerce")
-    rows.append(_gate("event_versions_positive", bool((versions >= 1).all()), f"rows={len(working)}"))
+    rows.append(
+        _gate("event_versions_positive", bool((versions >= 1).all()), f"rows={len(working)}")
+    )
 
     unique = not bool(working.duplicated(["event_id", "event_version"]).any())
     rows.append(_gate("event_versions_unique", unique, f"rows={len(working)}"))
@@ -799,9 +1020,20 @@ def validate_news_event_frame(
         allowed_licenses = {"licensed", "public_official"}
         canonical_safe = bool(
             canonical_rows["license_class"].astype(str).isin(allowed_licenses).all()
-            and canonical_rows["permanent_security_id"].fillna("").astype(str).str.strip().ne("").all()
+            and canonical_rows["permanent_security_id"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .ne("")
+            .all()
         )
-    rows.append(_gate("canonical_rows_have_provenance_and_identity", canonical_safe, "licensed/public official plus permanent ID"))
+    rows.append(
+        _gate(
+            "canonical_rows_have_provenance_and_identity",
+            canonical_safe,
+            "licensed/public official plus permanent ID",
+        )
+    )
 
     report = pd.DataFrame(rows)
     report["all_gates_passed"] = bool(report["passed"].all())
@@ -867,11 +1099,14 @@ def validate_sentiment_observation_frame(
         source_keys = source_events[["event_id", "event_version", "knowledge_timestamp_utc"]].copy()
         source_keys["event_version"] = pd.to_numeric(source_keys["event_version"], errors="coerce")
         joined = working.merge(source_keys, on=["event_id", "event_version"], how="left")
-        source_knowledge = pd.to_datetime(joined["knowledge_timestamp_utc"], utc=True, errors="coerce")
-        feature_available = pd.to_datetime(joined["feature_available_timestamp_utc"], utc=True, errors="coerce")
+        source_knowledge = pd.to_datetime(
+            joined["knowledge_timestamp_utc"], utc=True, errors="coerce"
+        )
+        feature_available = pd.to_datetime(
+            joined["feature_available_timestamp_utc"], utc=True, errors="coerce"
+        )
         source_join_ok = bool(
-            source_knowledge.notna().all()
-            and (feature_available >= source_knowledge).all()
+            source_knowledge.notna().all() and (feature_available >= source_knowledge).all()
         )
     rows.append(_gate("feature_not_before_source_knowledge", source_join_ok, "source event join"))
 
@@ -901,19 +1136,63 @@ def build_gate_report(
     )
     gates = [
         _gate("phase_enabled", bool(phase_config["enabled"]), "Phase23D explicitly enabled"),
-        _gate("source_families_registered", len(source_registry) >= 9, f"sources={len(source_registry)}"),
-        _gate("canonical_candidate_paths_identified", canonical_candidate_count >= 5, f"count={canonical_candidate_count}"),
-        _gate("no_unvalidated_source_marked_data_ready", not bool(source_scorecard["canonical_data_ready_now"].any()), "acquisition and pilots remain pending"),
-        _gate("news_event_schema_complete", len(news_event_schema) >= 20, f"columns={len(news_event_schema)}"),
-        _gate("sentiment_schema_complete", len(sentiment_schema) >= 14, f"columns={len(sentiment_schema)}"),
-        _gate("timestamp_policy_complete", len(timestamp_policy) >= 8, f"rules={len(timestamp_policy)}"),
-        _gate("revision_policy_complete", len(revision_policy) >= 8, f"rules={len(revision_policy)}"),
+        _gate(
+            "source_families_registered",
+            len(source_registry) >= 9,
+            f"sources={len(source_registry)}",
+        ),
+        _gate(
+            "canonical_candidate_paths_identified",
+            canonical_candidate_count >= 5,
+            f"count={canonical_candidate_count}",
+        ),
+        _gate(
+            "no_unvalidated_source_marked_data_ready",
+            not bool(source_scorecard["canonical_data_ready_now"].any()),
+            "acquisition and pilots remain pending",
+        ),
+        _gate(
+            "news_event_schema_complete",
+            len(news_event_schema) >= 20,
+            f"columns={len(news_event_schema)}",
+        ),
+        _gate(
+            "sentiment_schema_complete",
+            len(sentiment_schema) >= 14,
+            f"columns={len(sentiment_schema)}",
+        ),
+        _gate(
+            "timestamp_policy_complete",
+            len(timestamp_policy) >= 8,
+            f"rules={len(timestamp_policy)}",
+        ),
+        _gate(
+            "revision_policy_complete", len(revision_policy) >= 8, f"rules={len(revision_policy)}"
+        ),
         _gate("entity_policy_complete", len(entity_policy) >= 8, f"rules={len(entity_policy)}"),
-        _gate("coverage_gaps_explicit", not bool(coverage_policy["canonical_ready_now"].any()), f"segments={len(coverage_policy)}"),
-        _gate("feature_registry_defined", len(feature_registry) >= 15, f"features={len(feature_registry)}"),
-        _gate("validation_plan_complete", len(validation_plan) >= 16, f"tests={len(validation_plan)}"),
-        _gate("acquisition_plan_defined", len(acquisition_plan) >= 6, f"actions={len(acquisition_plan)}"),
-        _gate("research_only_boundary_enforced", bool(scope_boundary["passed"].all()), f"controls={len(scope_boundary)}"),
+        _gate(
+            "coverage_gaps_explicit",
+            not bool(coverage_policy["canonical_ready_now"].any()),
+            f"segments={len(coverage_policy)}",
+        ),
+        _gate(
+            "feature_registry_defined",
+            len(feature_registry) >= 15,
+            f"features={len(feature_registry)}",
+        ),
+        _gate(
+            "validation_plan_complete", len(validation_plan) >= 16, f"tests={len(validation_plan)}"
+        ),
+        _gate(
+            "acquisition_plan_defined",
+            len(acquisition_plan) >= 6,
+            f"actions={len(acquisition_plan)}",
+        ),
+        _gate(
+            "research_only_boundary_enforced",
+            bool(scope_boundary["passed"].all()),
+            f"controls={len(scope_boundary)}",
+        ),
     ]
     report = pd.DataFrame(gates)
     report["all_gates_passed"] = bool(report["passed"].all())
@@ -944,14 +1223,20 @@ def build_summary(
                 "all_gates_passed": execution_passed,
                 "sentiment_news_source_contract_ready": contract_ready,
                 "sentiment_news_data_ready": data_ready,
-                "source_contracts_ready_count": int(source_scorecard["source_contract_ready"].sum()),
-                "canonical_data_sources_ready_count": int(source_scorecard["canonical_data_ready_now"].sum()),
+                "source_contracts_ready_count": int(
+                    source_scorecard["source_contract_ready"].sum()
+                ),
+                "canonical_data_sources_ready_count": int(
+                    source_scorecard["canonical_data_ready_now"].sum()
+                ),
                 "required_start_date": phase_config["required_start_date"],
                 "required_end_date": phase_config["required_end_date"],
                 "gdelt2_start_date": phase_config["gdelt2_start_date"],
                 "licensed_company_news_backfile_required": True,
                 "social_sentiment_optional_ablation_only": True,
-                "conservative_processing_delay_minutes": int(phase_config["conservative_processing_delay_minutes"]),
+                "conservative_processing_delay_minutes": int(
+                    phase_config["conservative_processing_delay_minutes"]
+                ),
                 "text_panel_build_allowed": False,
                 "sentiment_calculation_allowed": False,
                 "feature_calculation_allowed": False,

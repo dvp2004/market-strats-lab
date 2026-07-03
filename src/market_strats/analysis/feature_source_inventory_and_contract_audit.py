@@ -8,9 +8,7 @@ import pandas as pd
 
 DEFAULT_PHASE13C_CONFIG: dict[str, Any] = {
     "enabled": False,
-    "spec_role": (
-        "Multi-factor feature-source inventory and leakage-feasibility spec only"
-    ),
+    "spec_role": ("Multi-factor feature-source inventory and leakage-feasibility spec only"),
     "phase_branch": "Phase 13 multi-factor model architecture planning",
     "source_phase": "Phase 13B",
     "proposed_next_phase": "Phase 13D",
@@ -99,9 +97,7 @@ DEFAULT_PHASE13D_CONFIG: dict[str, Any] = {
         "require_no_paper_trading_deployment": True,
         "require_no_candidate_promotion": True,
         "require_no_final_candidate_change": True,
-        "required_audit_role": (
-            "Feature contract and data availability readiness audit only"
-        ),
+        "required_audit_role": ("Feature contract and data availability readiness audit only"),
     },
 }
 
@@ -249,9 +245,7 @@ def build_phase13c_feature_source_inventory(
                 "candidate_sources": _join_list(item.get("candidate_sources")),
                 "feature_examples": _join_list(item.get("feature_examples")),
                 "timing_frequency": str(item.get("timing_frequency", "")),
-                "point_in_time_requirement": str(
-                    item.get("point_in_time_requirement", "")
-                ),
+                "point_in_time_requirement": str(item.get("point_in_time_requirement", "")),
                 "revision_risk": str(item.get("revision_risk", "")),
                 "leakage_risk": str(item.get("leakage_risk", "")),
                 "immediate_decision": str(item.get("immediate_decision", "")),
@@ -304,12 +298,8 @@ def build_phase13c_blocked_family_policy(
     return pd.DataFrame(
         [
             {
-                "fundamental_blocked_until": str(
-                    policy.get("fundamental_blocked_until", "")
-                ),
-                "sentiment_blocked_until": str(
-                    policy.get("sentiment_blocked_until", "")
-                ),
+                "fundamental_blocked_until": str(policy.get("fundamental_blocked_until", "")),
+                "sentiment_blocked_until": str(policy.get("sentiment_blocked_until", "")),
                 "dissertation_direct_alpha_blocked_until": str(
                     policy.get("dissertation_direct_alpha_blocked_until", "")
                 ),
@@ -342,12 +332,9 @@ def build_phase13c_phase13d_boundary_check(
             "phase13d_forbidden_next_step",
             str(boundary.get("forbidden_next_step", "")),
             (
-                "feature ingestion"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "strategy backtest"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "model training"
-                in str(boundary.get("forbidden_next_step", "")).lower()
+                "feature ingestion" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "strategy backtest" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "model training" in str(boundary.get("forbidden_next_step", "")).lower()
             ),
         ),
         (
@@ -357,12 +344,8 @@ def build_phase13c_phase13d_boundary_check(
         ),
         (
             "phase13d_may_audit_contract_requirements",
-            _bool_value(
-                boundary.get("phase13d_may_audit_contract_requirements", False)
-            ),
-            _bool_value(
-                boundary.get("phase13d_may_audit_contract_requirements", False)
-            ),
+            _bool_value(boundary.get("phase13d_may_audit_contract_requirements", False)),
+            _bool_value(boundary.get("phase13d_may_audit_contract_requirements", False)),
         ),
         (
             "phase13d_may_ingest_features",
@@ -463,28 +446,20 @@ def build_phase13c_summary(
     required_families = {"technical", "macro", "fundamental", "sentiment"}
 
     fundamental_rows = (
-        feature_source_inventory[
-            feature_source_inventory["family_id"].astype(str) == "fundamental"
-        ]
+        feature_source_inventory[feature_source_inventory["family_id"].astype(str) == "fundamental"]
         if not feature_source_inventory.empty
         else pd.DataFrame()
     )
     sentiment_rows = (
-        feature_source_inventory[
-            feature_source_inventory["family_id"].astype(str) == "sentiment"
-        ]
+        feature_source_inventory[feature_source_inventory["family_id"].astype(str) == "sentiment"]
         if not feature_source_inventory.empty
         else pd.DataFrame()
     )
 
     blocked_policy_clean = (
         not blocked_family_policy.empty
-        and _bool_value(
-            blocked_family_policy.iloc[0]["blocked_families_may_appear_in_roadmap"]
-        )
-        and not _bool_value(
-            blocked_family_policy.iloc[0]["blocked_families_may_be_ingested_now"]
-        )
+        and _bool_value(blocked_family_policy.iloc[0]["blocked_families_may_appear_in_roadmap"])
+        and not _bool_value(blocked_family_policy.iloc[0]["blocked_families_may_be_ingested_now"])
         and not _bool_value(
             blocked_family_policy.iloc[0]["blocked_families_may_be_used_in_model_now"]
         )
@@ -522,15 +497,11 @@ def build_phase13c_summary(
                 )
                 if not fundamental_rows.empty
                 else False,
-                "sentiment_blocked_now": bool(
-                    sentiment_rows["blocked_now"].map(_bool_value).all()
-                )
+                "sentiment_blocked_now": bool(sentiment_rows["blocked_now"].map(_bool_value).all())
                 if not sentiment_rows.empty
                 else False,
                 "blocked_family_policy_clean": blocked_policy_clean,
-                "phase13d_boundary_passed": bool(
-                    phase13d_boundary_check["passed"].all()
-                )
+                "phase13d_boundary_passed": bool(phase13d_boundary_check["passed"].all())
                 if not phase13d_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -570,15 +541,13 @@ def build_phase13c_gate_report(
     rows = [
         _gate_row(
             "Phase 13B passed",
-            (not gates.get("require_phase13b_passed", True))
-            or bool(row["phase13b_result_passed"]),
+            (not gates.get("require_phase13b_passed", True)) or bool(row["phase13b_result_passed"]),
             f"phase13b_result_passed={bool(row['phase13b_result_passed'])}",
         ),
         _gate_row(
             "Feature-source inventory is complete enough",
             (not gates.get("require_feature_source_inventory", True))
-            or int(row["feature_family_count"])
-            >= int(gates.get("min_feature_families", 5)),
+            or int(row["feature_family_count"]) >= int(gates.get("min_feature_families", 5)),
             f"feature_family_count={int(row['feature_family_count'])}",
         ),
         _gate_row(
@@ -606,8 +575,7 @@ def build_phase13c_gate_report(
             "Leakage controls are documented",
             (not gates.get("require_leakage_control_policy", True))
             or (
-                int(row["leakage_control_count"])
-                >= int(gates.get("min_leakage_controls", 6))
+                int(row["leakage_control_count"]) >= int(gates.get("min_leakage_controls", 6))
                 and bool(row["leakage_controls_required"])
             ),
             (
@@ -769,9 +737,7 @@ def save_phase13c_multifactor_feature_source_inventory_spec(
     source_report_check = build_phase13c_source_report_check(phase_config)
     phase13b_result_check = build_phase13c_phase13b_result_check(phase_config)
     feature_source_inventory = build_phase13c_feature_source_inventory(phase_config)
-    feature_contract_requirements = build_phase13c_feature_contract_requirements(
-        phase_config
-    )
+    feature_contract_requirements = build_phase13c_feature_contract_requirements(phase_config)
     leakage_control_policy = build_phase13c_leakage_control_policy(phase_config)
     blocked_family_policy = build_phase13c_blocked_family_policy(phase_config)
     phase13d_boundary_check = build_phase13c_phase13d_boundary_check(phase_config)
@@ -823,8 +789,7 @@ def save_phase13c_multifactor_feature_source_inventory_spec(
         summary=summary,
         gate_report=gate_report,
         conclusion=conclusion,
-        output_path=reports_path
-        / "phase13c_multifactor_feature_source_inventory_spec.md",
+        output_path=reports_path / "phase13c_multifactor_feature_source_inventory_spec.md",
     )
 
     print("Wrote Phase 13C feature-source inventory spec reports.")
@@ -1003,7 +968,9 @@ def build_phase13d_contract_coverage_check(
             "passed": not bool(
                 feature_source_inventory[
                     feature_source_inventory["family_id"].astype(str) == "technical"
-                ]["blocked_now"].map(_bool_value).all()
+                ]["blocked_now"]
+                .map(_bool_value)
+                .all()
             ),
             "detail": "technical should be contract-feasible",
         },
@@ -1012,7 +979,9 @@ def build_phase13d_contract_coverage_check(
             "passed": not bool(
                 feature_source_inventory[
                     feature_source_inventory["family_id"].astype(str) == "macro"
-                ]["blocked_now"].map(_bool_value).all()
+                ]["blocked_now"]
+                .map(_bool_value)
+                .all()
             ),
             "detail": "macro should be feasible only with lag/revision controls",
         },
@@ -1065,12 +1034,9 @@ def build_phase13d_phase13e_boundary_check(
             "phase13e_forbidden_next_step",
             str(boundary.get("forbidden_next_step", "")),
             (
-                "actual feature ingestion"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "model training"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "strategy backtest"
-                in str(boundary.get("forbidden_next_step", "")).lower()
+                "actual feature ingestion" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "model training" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "strategy backtest" in str(boundary.get("forbidden_next_step", "")).lower()
             ),
         ),
         (
@@ -1085,12 +1051,8 @@ def build_phase13d_phase13e_boundary_check(
         ),
         (
             "phase13e_may_define_visual_feature_reports",
-            _bool_value(
-                boundary.get("phase13e_may_define_visual_feature_reports", False)
-            ),
-            _bool_value(
-                boundary.get("phase13e_may_define_visual_feature_reports", False)
-            ),
+            _bool_value(boundary.get("phase13e_may_define_visual_feature_reports", False)),
+            _bool_value(boundary.get("phase13e_may_define_visual_feature_reports", False)),
         ),
         (
             "phase13e_may_ingest_features",
@@ -1180,9 +1142,7 @@ def build_phase13d_summary(
                 "blocked_families_respected": bool(blocked_family_check["passed"].all())
                 if not blocked_family_check.empty
                 else False,
-                "phase13e_boundary_passed": bool(
-                    phase13e_boundary_check["passed"].all()
-                )
+                "phase13e_boundary_passed": bool(phase13e_boundary_check["passed"].all())
                 if not phase13e_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -1402,24 +1362,18 @@ def save_phase13d_feature_contract_readiness_audit(
     readiness_claims_check = build_phase13d_readiness_claims_check(phase_config)
 
     reports = phase_config.get("phase13c_reports", {})
-    feature_source_inventory = _read_csv_if_exists(
-        reports.get("feature_source_inventory", "")
-    )
+    feature_source_inventory = _read_csv_if_exists(reports.get("feature_source_inventory", ""))
     feature_contract_requirements = _read_csv_if_exists(
         reports.get("feature_contract_requirements", "")
     )
-    leakage_control_policy = _read_csv_if_exists(
-        reports.get("leakage_control_policy", "")
-    )
+    leakage_control_policy = _read_csv_if_exists(reports.get("leakage_control_policy", ""))
 
     contract_coverage_check = build_phase13d_contract_coverage_check(
         feature_source_inventory=feature_source_inventory,
         feature_contract_requirements=feature_contract_requirements,
         leakage_control_policy=leakage_control_policy,
     )
-    blocked_family_check = build_phase13d_blocked_family_check(
-        feature_source_inventory
-    )
+    blocked_family_check = build_phase13d_blocked_family_check(feature_source_inventory)
     phase13e_boundary_check = build_phase13d_phase13e_boundary_check(phase_config)
     scope_boundary_check = build_phase13_scope_boundary_check(phase_config)
 

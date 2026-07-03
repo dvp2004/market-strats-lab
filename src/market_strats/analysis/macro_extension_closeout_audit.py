@@ -174,9 +174,7 @@ def build_phase10g_phase10f_failure_check(
     conclusion = _read_csv_if_exists(reports.get("conclusion", ""))
     rule_gate_report = _read_csv_if_exists(reports.get("rule_gate_report", ""))
     rule_comparison = _read_csv_if_exists(reports.get("rule_comparison_summary", ""))
-    discipline_gate_report = _read_csv_if_exists(
-        reports.get("discipline_gate_report", "")
-    )
+    discipline_gate_report = _read_csv_if_exists(reports.get("discipline_gate_report", ""))
 
     verdict = ""
     conclusion_strategy_promotion = False
@@ -207,9 +205,7 @@ def build_phase10g_phase10f_failure_check(
         and "all_discipline_gates_passed" in discipline_gate_report.columns
     ):
         discipline_passed = bool(
-            discipline_gate_report["all_discipline_gates_passed"]
-            .map(_bool_value)
-            .all()
+            discipline_gate_report["all_discipline_gates_passed"].map(_bool_value).all()
         )
 
     rows = [
@@ -270,15 +266,11 @@ def build_phase10g_closeout_summary(phase_config: dict[str, Any]) -> pd.DataFram
                 "successor_candidate_created": bool(
                     phase_config.get("successor_candidate_created", False)
                 ),
-                "final_candidate_changed": bool(
-                    phase_config.get("final_candidate_changed", False)
-                ),
+                "final_candidate_changed": bool(phase_config.get("final_candidate_changed", False)),
                 "macro_rule_promotion_allowed": bool(
                     phase_config.get("macro_rule_promotion_allowed", False)
                 ),
-                "strategy_promotion": bool(
-                    phase_config.get("strategy_promotion", False)
-                ),
+                "strategy_promotion": bool(phase_config.get("strategy_promotion", False)),
             }
         ]
     )
@@ -305,14 +297,10 @@ def build_phase10g_gate_report(
     closeout = closeout_summary.iloc[0] if not closeout_summary.empty else {}
 
     expected_reports_present = (
-        bool(report_inventory_check["present"].all())
-        if not report_inventory_check.empty
-        else False
+        bool(report_inventory_check["present"].all()) if not report_inventory_check.empty else False
     )
     config_flags_clean = (
-        bool(config_flag_check["passed"].all())
-        if not config_flag_check.empty
-        else False
+        bool(config_flag_check["passed"].all()) if not config_flag_check.empty else False
     )
 
     phase10f_failure_documented = False
@@ -356,8 +344,7 @@ def build_phase10g_gate_report(
     rows = [
         _gate_row(
             "Expected Phase 10 reports are present",
-            (not gates.get("require_expected_reports_present", True))
-            or expected_reports_present,
+            (not gates.get("require_expected_reports_present", True)) or expected_reports_present,
             f"missing_reports={int((~report_inventory_check['present']).sum()) if not report_inventory_check.empty else 'unknown'}",
         ),
         _gate_row(
@@ -373,8 +360,7 @@ def build_phase10g_gate_report(
         ),
         _gate_row(
             "No Phase 10F rule passed all gates",
-            (not gates.get("require_no_phase10f_rule_passed", True))
-            or no_phase10f_rule_passed,
+            (not gates.get("require_no_phase10f_rule_passed", True)) or no_phase10f_rule_passed,
             "No pre-registered macro rule may be treated as passed.",
         ),
         _gate_row(
@@ -412,8 +398,7 @@ def build_phase10g_gate_report(
         ),
         _gate_row(
             "Audit role is correct",
-            str(phase_config.get("audit_role", ""))
-            == str(gates.get("required_audit_role", "")),
+            str(phase_config.get("audit_role", "")) == str(gates.get("required_audit_role", "")),
             f"audit_role={phase_config.get('audit_role', '')}",
         ),
     ]

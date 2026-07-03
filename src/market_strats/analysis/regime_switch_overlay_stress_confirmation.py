@@ -81,8 +81,8 @@ def _create_stress_state_frame(
     offensive["trend_sma"] = price.rolling(trend_sma_days).mean()
     offensive["trend_distance"] = (price / offensive["trend_sma"]) - 1.0
     offensive["return_20d"] = price.pct_change(20)
-    offensive["realized_vol_annualized"] = (
-        returns.rolling(volatility_window_days).std() * np.sqrt(252.0)
+    offensive["realized_vol_annualized"] = returns.rolling(volatility_window_days).std() * np.sqrt(
+        252.0
     )
 
     rolling_high = price.cummax()
@@ -118,9 +118,7 @@ def _create_stress_guard_inputs(
         near_high_min_trend_distance=float(
             phase4_guard_config.get("near_high_min_trend_distance", -0.01)
         ),
-        deep_drawdown_threshold=float(
-            phase4_guard_config.get("deep_drawdown_threshold", -0.20)
-        ),
+        deep_drawdown_threshold=float(phase4_guard_config.get("deep_drawdown_threshold", -0.20)),
     )
 
     vol_stress = state["realized_vol_annualized"] >= float(
@@ -144,10 +142,7 @@ def _create_stress_guard_inputs(
             state["realized_vol_annualized"]
             <= float(phase_config.get("relief_vol_annualized_threshold", 0.18))
         )
-        & (
-            state["return_20d"]
-            >= float(phase_config.get("relief_20d_return_threshold", -0.02))
-        )
+        & (state["return_20d"] >= float(phase_config.get("relief_20d_return_threshold", -0.02)))
         & (
             state["trend_distance"]
             >= float(phase_config.get("relief_trend_distance_threshold", 0.00))
@@ -337,8 +332,7 @@ def _create_stress_confirmation_summary(
                 "benchmark_max_drawdown_pct": benchmark_row["max_drawdown_pct"],
                 "candidate_max_drawdown_pct": row["max_drawdown_pct"],
                 "drawdown_delta_pct_points": round(
-                    float(row["max_drawdown_pct"])
-                    - float(benchmark_row["max_drawdown_pct"]),
+                    float(row["max_drawdown_pct"]) - float(benchmark_row["max_drawdown_pct"]),
                     3,
                 ),
                 "benchmark_end_value": benchmark_row["end_value"],
@@ -349,8 +343,7 @@ def _create_stress_confirmation_summary(
                 ),
                 "benchmark_trade_count": benchmark_row["trade_count"],
                 "candidate_trade_count": row["trade_count"],
-                "trade_count_delta": int(row["trade_count"])
-                - int(benchmark_row["trade_count"]),
+                "trade_count_delta": int(row["trade_count"]) - int(benchmark_row["trade_count"]),
             }
         )
 
@@ -401,9 +394,7 @@ def _create_stress_confirmation_gate_report(
         return pd.DataFrame()
 
     phase_config = config.get("phase6_stress_confirmation_validation", {})
-    benchmark_variant = str(
-        phase_config.get("benchmark_variant", "phase4_execution_candidate")
-    )
+    benchmark_variant = str(phase_config.get("benchmark_variant", "phase4_execution_candidate"))
 
     full = summary[summary["period"] == "full"].copy()
     holdout = summary[summary["period"] == "holdout"].copy()
@@ -414,24 +405,14 @@ def _create_stress_confirmation_gate_report(
     if candidates.empty:
         return pd.DataFrame()
 
-    min_cagr_improvement = float(
-        phase_config.get("min_full_cagr_improvement_pct_points", 0.15)
-    )
-    min_calmar_improvement = float(
-        phase_config.get("min_full_calmar_improvement", 0.005)
-    )
+    min_cagr_improvement = float(phase_config.get("min_full_cagr_improvement_pct_points", 0.15))
+    min_calmar_improvement = float(phase_config.get("min_full_calmar_improvement", 0.005))
     max_holdout_cagr_damage = float(
         phase_config.get("max_allowed_holdout_cagr_damage_pct_points", -0.50)
     )
-    max_holdout_calmar_damage = float(
-        phase_config.get("max_allowed_holdout_calmar_damage", -0.05)
-    )
-    max_drawdown_damage = float(
-        phase_config.get("max_allowed_drawdown_damage_pct_points", -0.50)
-    )
-    max_switch_count_delta = int(
-        phase_config.get("max_allowed_switch_count_delta", 10)
-    )
+    max_holdout_calmar_damage = float(phase_config.get("max_allowed_holdout_calmar_damage", -0.05))
+    max_drawdown_damage = float(phase_config.get("max_allowed_drawdown_damage_pct_points", -0.50))
+    max_switch_count_delta = int(phase_config.get("max_allowed_switch_count_delta", 10))
 
     candidates["score"] = (
         candidates["cagr_delta_pct_points"].astype(float)
@@ -498,9 +479,7 @@ def _create_stress_confirmation_gate_report(
                 f"thresholds: {damaged_names}."
             )
 
-    benchmark_events = event_summary[
-        event_summary["variant_name"] == benchmark_variant
-    ]
+    benchmark_events = event_summary[event_summary["variant_name"] == benchmark_variant]
     candidate_events = event_summary[event_summary["variant_name"] == best_variant]
 
     excessive_switch_change = False
@@ -512,8 +491,7 @@ def _create_stress_confirmation_gate_report(
         )
         excessive_switch_change = abs(switch_delta) > max_switch_count_delta
         switch_interpretation = (
-            f"{best_variant} changed switch count by {switch_delta} versus "
-            f"{benchmark_variant}."
+            f"{best_variant} changed switch count by {switch_delta} versus {benchmark_variant}."
         )
 
     promotion_ready = (
@@ -642,9 +620,7 @@ def create_regime_switch_overlay_stress_confirmation(
     confirmation_days = int(overlay_config.get("confirmation_days", 1))
     baseline_slippage_bps = float(config.get("slippage_bps", 5.0))
 
-    benchmark_variant = str(
-        phase_config.get("benchmark_variant", "phase4_execution_candidate")
-    )
+    benchmark_variant = str(phase_config.get("benchmark_variant", "phase4_execution_candidate"))
 
     variant_names = [
         benchmark_variant,
@@ -807,9 +783,7 @@ def save_regime_switch_overlay_stress_confirmation(
 
     metrics_path = reports_dir / "regime_switch_overlay_stress_confirmation_metrics.csv"
     summary_path = reports_dir / "regime_switch_overlay_stress_confirmation_summary.csv"
-    event_summary_path = (
-        reports_dir / "regime_switch_overlay_stress_confirmation_event_summary.csv"
-    )
+    event_summary_path = reports_dir / "regime_switch_overlay_stress_confirmation_event_summary.csv"
     gate_path = reports_dir / "regime_switch_overlay_stress_confirmation_gate_report.csv"
     conclusion_path = reports_dir / "phase6a_stress_confirmation_conclusion.csv"
     markdown_path = reports_dir / "regime_switch_overlay_stress_confirmation.md"

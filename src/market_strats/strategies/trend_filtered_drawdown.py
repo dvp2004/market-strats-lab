@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from market_strats.strategies.accounting import calculate_allocation_strategy_returns
 
+
 def run_trend_filtered_drawdown_strategy(
     prices: pd.DataFrame,
     initial_capital: float,

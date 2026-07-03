@@ -31,8 +31,7 @@ def _get_spy_strategy_result(
 
     if strategy_name not in strategy_results:
         raise ValueError(
-            f"SPY strategy result missing: {strategy_name}. "
-            f"Available: {sorted(strategy_results)}"
+            f"SPY strategy result missing: {strategy_name}. Available: {sorted(strategy_results)}"
         )
 
     result = strategy_results[strategy_name].copy()
@@ -48,8 +47,7 @@ def _filter_period(
     output = result.copy()
     output["date"] = pd.to_datetime(output["date"])
     output = output[
-        (output["date"] >= pd.Timestamp(start_date))
-        & (output["date"] <= pd.Timestamp(end_date))
+        (output["date"] >= pd.Timestamp(start_date)) & (output["date"] <= pd.Timestamp(end_date))
     ].copy()
     return output.sort_values("date").reset_index(drop=True)
 
@@ -133,9 +131,7 @@ def _apply_tax_drag(
 
     output["tax_cost_return"] = realised_gain_proxy * tax_rate
     output["pre_tax_strategy_return"] = output["strategy_return"]
-    output["strategy_return"] = (
-        output["pre_tax_strategy_return"] - output["tax_cost_return"]
-    )
+    output["strategy_return"] = output["pre_tax_strategy_return"] - output["tax_cost_return"]
 
     output["turnover"] = output["taxable_turnover"]
     output["equity"] = initial_capital * (1.0 + output["strategy_return"]).cumprod()
@@ -206,9 +202,7 @@ def _create_tax_adjusted_results(
     start_date = str(phase_config.get("pinned_start_date", "2006-04-28"))
     end_date = str(phase_config.get("pinned_end_date", "2026-05-01"))
     initial_capital = float(phase_config.get("initial_capital", 10000.0))
-    taxable_turnover_multiplier = float(
-        phase_config.get("taxable_turnover_multiplier", 1.0)
-    )
+    taxable_turnover_multiplier = float(phase_config.get("taxable_turnover_multiplier", 1.0))
 
     tax_rates = [float(value) for value in phase_config.get("tax_rates", [0.0, 0.2])]
 
@@ -273,11 +267,7 @@ def _create_tax_adjusted_results(
             adjusted_results.append(stored)
 
     metrics = pd.DataFrame(rows)
-    daily = (
-        pd.concat(adjusted_results, ignore_index=True)
-        if adjusted_results
-        else pd.DataFrame()
-    )
+    daily = pd.concat(adjusted_results, ignore_index=True) if adjusted_results else pd.DataFrame()
 
     return {
         "metrics": metrics,
@@ -327,17 +317,11 @@ def _create_tax_drag_summary(metrics: pd.DataFrame) -> pd.DataFrame:
                 "spy_buy_hold_max_drawdown_pct": buy_hold["max_drawdown_pct"],
                 "spy_12m_max_drawdown_pct": spy_12m["max_drawdown_pct"],
                 "candidate_minus_buy_hold_drawdown_pct_points": round(
-                    float(
-                        candidate["max_drawdown_pct"]
-                        - buy_hold["max_drawdown_pct"]
-                    ),
+                    float(candidate["max_drawdown_pct"] - buy_hold["max_drawdown_pct"]),
                     4,
                 ),
                 "candidate_minus_spy_12m_drawdown_pct_points": round(
-                    float(
-                        candidate["max_drawdown_pct"]
-                        - spy_12m["max_drawdown_pct"]
-                    ),
+                    float(candidate["max_drawdown_pct"] - spy_12m["max_drawdown_pct"]),
                     4,
                 ),
                 "candidate_average_annual_tax_drag_pct_points": candidate[
@@ -369,9 +353,7 @@ def _create_tax_drag_gate_report(
     matching = summary[np.isclose(summary["tax_rate"], benchmark_tax_rate)]
 
     if matching.empty:
-        raise ValueError(
-            f"Benchmark tax rate {benchmark_tax_rate} not found in tax summary"
-        )
+        raise ValueError(f"Benchmark tax rate {benchmark_tax_rate} not found in tax summary")
 
     row = matching.iloc[0]
 
@@ -460,11 +442,7 @@ def _create_tax_drag_gate_report(
                 "value": round(check["value"], 4),
                 "threshold": check["threshold"],
                 "operator": check["operator"],
-                "interpretation": (
-                    "Tax-drag gate passed."
-                    if passed
-                    else "Tax-drag gate failed."
-                ),
+                "interpretation": ("Tax-drag gate passed." if passed else "Tax-drag gate failed."),
             }
         )
 
@@ -477,12 +455,8 @@ def _create_tax_drag_conclusion(gate_report: pd.DataFrame) -> pd.DataFrame:
 
     failed = gate_report[gate_report["status"] == "Failed"]
 
-    spy_12m_failed = failed[
-        failed["claim"].str.contains("SPY 12M", case=False, na=False)
-    ]
-    buy_hold_failed = failed[
-        failed["claim"].str.contains("Buy & Hold", case=False, na=False)
-    ]
+    spy_12m_failed = failed[failed["claim"].str.contains("SPY 12M", case=False, na=False)]
+    buy_hold_failed = failed[failed["claim"].str.contains("Buy & Hold", case=False, na=False)]
 
     return pd.DataFrame(
         [

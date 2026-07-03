@@ -34,8 +34,7 @@ from market_strats.analysis.pilot_individual_equity_input_bootstrap import (
 
 PHASE23J_SECTION = "phase23j_post_endpoint_individual_equity_extension"
 NONCANONICAL_WARNING = (
-    "POST-ENDPOINT NONCANONICAL PILOT SHADOW DATA - RESEARCH ONLY - "
-    "NOT INVESTABLE PERFORMANCE"
+    "POST-ENDPOINT NONCANONICAL PILOT SHADOW DATA - RESEARCH ONLY - NOT INVESTABLE PERFORMANCE"
 )
 
 DEFAULT_PHASE23J_CONFIG: dict[str, Any] = {
@@ -52,16 +51,13 @@ DEFAULT_PHASE23J_CONFIG: dict[str, Any] = {
     "extension_input_dir": "data/individual_equity_post_endpoint",
     "combined_input_dir": "data/individual_equity_post_endpoint/combined",
     "source_phase23f_dir": (
-        "reports/individual_equity_decision_system/"
-        "phase23f_pilot_feature_calculation"
+        "reports/individual_equity_decision_system/phase23f_pilot_feature_calculation"
     ),
     "source_phase23g_dir": (
-        "reports/individual_equity_decision_system/"
-        "phase23g_interpretable_stock_ranker"
+        "reports/individual_equity_decision_system/phase23g_interpretable_stock_ranker"
     ),
     "source_phase23i_dir": (
-        "reports/individual_equity_decision_system/"
-        "phase23i_frozen_cost_aware_portfolio"
+        "reports/individual_equity_decision_system/phase23i_frozen_cost_aware_portfolio"
     ),
     "canonical_research_endpoint": "2026-05-01",
     "overlap_start_date": "2026-03-30",
@@ -198,9 +194,7 @@ def _phase_config(config: dict[str, Any]) -> dict[str, Any]:
     return _deep_merge(DEFAULT_PHASE23J_CONFIG, config.get(PHASE23J_SECTION, {}))
 
 
-def _resolve_reports_path(
-    *, configured_path: str | Path, reports_dir: str | Path
-) -> Path:
+def _resolve_reports_path(*, configured_path: str | Path, reports_dir: str | Path) -> Path:
     reports_root = Path(reports_dir)
     path = Path(configured_path)
     if path.is_absolute():
@@ -210,9 +204,7 @@ def _resolve_reports_path(
     return reports_root / path
 
 
-def _resolve_project_path(
-    *, configured_path: str | Path, reports_dir: str | Path
-) -> Path:
+def _resolve_project_path(*, configured_path: str | Path, reports_dir: str | Path) -> Path:
     path = Path(configured_path)
     if path.is_absolute():
         return path
@@ -293,9 +285,7 @@ def _us_equity_market_holidays(year: int) -> set[pd.Timestamp]:
         _observed_us_market_holiday(year, 1, 1),
         _nth_weekday(year, 1, 0, 3),
         _nth_weekday(year, 2, 0, 3),
-        pd.Timestamp(year=year, month=4, day=3)
-        if year == 2026
-        else pd.NaT,
+        pd.Timestamp(year=year, month=4, day=3) if year == 2026 else pd.NaT,
         _last_weekday(year, 5, 0),
         _observed_us_market_holiday(year, 6, 19),
         _observed_us_market_holiday(year, 7, 4),
@@ -307,9 +297,8 @@ def _us_equity_market_holidays(year: int) -> set[pd.Timestamp]:
 
 def next_us_equity_trading_day(date: pd.Timestamp) -> pd.Timestamp:
     candidate = pd.Timestamp(date).normalize() + pd.Timedelta(days=1)
-    while (
-        candidate.weekday() >= 5
-        or candidate.normalize() in _us_equity_market_holidays(candidate.year)
+    while candidate.weekday() >= 5 or candidate.normalize() in _us_equity_market_holidays(
+        candidate.year
     ):
         candidate += pd.Timedelta(days=1)
     return candidate.normalize()
@@ -325,9 +314,8 @@ def count_us_equity_trading_sessions(
     count = 0
     candidate = start
     while candidate <= end:
-        if (
-            candidate.weekday() < 5
-            and candidate.normalize() not in _us_equity_market_holidays(candidate.year)
+        if candidate.weekday() < 5 and candidate.normalize() not in _us_equity_market_holidays(
+            candidate.year
         ):
             count += 1
         candidate += pd.Timedelta(days=1)
@@ -433,9 +421,7 @@ def _normalise_phase23j_download_frame(frame: pd.DataFrame) -> pd.DataFrame:
     full_bar_required = ["open", "high", "low", "close", "adj_close", "volume"]
     incomplete = working[full_bar_required].isna().any(axis=1)
     if incomplete.any():
-        complete_positions = [
-            position for position, value in enumerate(incomplete) if not value
-        ]
+        complete_positions = [position for position, value in enumerate(incomplete) if not value]
         last_complete_position = max(complete_positions) if complete_positions else -1
         interior_mask = pd.Series(
             [
@@ -445,12 +431,9 @@ def _normalise_phase23j_download_frame(frame: pd.DataFrame) -> pd.DataFrame:
             index=working.index,
         )
         if interior_mask.any():
-            bad_dates = (
-                working.loc[interior_mask, "date"].dt.strftime("%Y-%m-%d").tolist()
-            )
+            bad_dates = working.loc[interior_mask, "date"].dt.strftime("%Y-%m-%d").tolist()
             raise ValueError(
-                "Downloaded frame has incomplete non-trailing rows: "
-                + ";".join(bad_dates)
+                "Downloaded frame has incomplete non-trailing rows: " + ";".join(bad_dates)
             )
     return working[
         [
@@ -475,9 +458,8 @@ def _complete_research_bar_rows(frame: pd.DataFrame) -> pd.DataFrame:
     complete = working[required].notna().all(axis=1)
     positive = (working[["open", "high", "low", "close", "adj_close"]] > 0).all(axis=1)
     volume_ok = working["volume"].ge(0)
-    ohlc_ok = (
-        working["high"].ge(working[["open", "close", "low"]].max(axis=1))
-        & working["low"].le(working[["open", "close", "high"]].min(axis=1))
+    ohlc_ok = working["high"].ge(working[["open", "close", "low"]].max(axis=1)) & working["low"].le(
+        working[["open", "close", "high"]].min(axis=1)
     )
     return working.loc[complete & positive & volume_ok & ohlc_ok].copy()
 
@@ -512,9 +494,7 @@ def _execution_open_for_date(
     if frame.empty or pd.isna(expected_execution_date):
         return False, np.nan, "execution_open_price_pending"
     working = _normalise_local_price(frame)
-    rows = working.loc[
-        pd.to_datetime(working["date"], errors="coerce").eq(expected_execution_date)
-    ]
+    rows = working.loc[pd.to_datetime(working["date"], errors="coerce").eq(expected_execution_date)]
     if rows.empty:
         return False, np.nan, "execution_open_price_pending"
     return _valid_execution_open(rows.iloc[0])
@@ -573,9 +553,7 @@ def validate_extension_against_history(
                 mismatch_details.append(f"{column}:{int((~close).sum())}")
         left_volume = pd.to_numeric(overlap["volume_historical"], errors="coerce")
         right_volume = pd.to_numeric(overlap["volume_extension"], errors="coerce")
-        volume_ok = (left_volume - right_volume).abs().le(
-            float(volume_absolute_tolerance)
-        )
+        volume_ok = (left_volume - right_volume).abs().le(float(volume_absolute_tolerance))
         if not bool(volume_ok.all()):
             overlap_ok = False
             mismatch_details.append(f"volume:{int((~volume_ok).sum())}")
@@ -655,9 +633,7 @@ def _download_with_retries(
     last_error: Exception | None = None
     for attempt in range(1, max(int(attempts), 1) + 1):
         try:
-            return _normalise_phase23j_download_frame(
-                download_fn(ticker, start, end_exclusive)
-            )
+            return _normalise_phase23j_download_frame(download_fn(ticker, start, end_exclusive))
         except Exception as exc:  # pragma: no cover - exercised by injected tests
             last_error = exc
             if attempt < max(int(attempts), 1):
@@ -665,9 +641,7 @@ def _download_with_retries(
     raise RuntimeError(f"Download failed for {ticker}: {last_error}")
 
 
-def _frozen_model_status(
-    *, source_phase23i_dir: Path
-) -> tuple[pd.DataFrame, bool, str]:
+def _frozen_model_status(*, source_phase23i_dir: Path) -> tuple[pd.DataFrame, bool, str]:
     freeze = _read_csv(source_phase23i_dir / "phase23i_model_freeze.csv")
     hashes = _read_csv(source_phase23i_dir / "phase23i_model_freeze_hashes.csv")
     expected = str(freeze.iloc[0].get("phase23i_freeze_hash", "")) if not freeze.empty else ""
@@ -694,7 +668,12 @@ def fit_frozen_model_and_score(
     prospective_panel: pd.DataFrame,
     freeze: pd.DataFrame,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    if historical_panel.empty or historical_targets.empty or prospective_panel.empty or freeze.empty:
+    if (
+        historical_panel.empty
+        or historical_targets.empty
+        or prospective_panel.empty
+        or freeze.empty
+    ):
         return pd.DataFrame(), pd.DataFrame()
     freeze_row = freeze.iloc[0]
     features = [
@@ -703,12 +682,12 @@ def fit_frozen_model_and_score(
         if item.strip()
     ]
     if not features:
-        features = [feature for feature in CORE_FEATURE_COLUMNS if feature in prospective_panel.columns]
+        features = [
+            feature for feature in CORE_FEATURE_COLUMNS if feature in prospective_panel.columns
+        ]
     if any(feature not in prospective_panel.columns for feature in features):
         return pd.DataFrame(), pd.DataFrame()
-    primary_target = str(
-        freeze_row.get("primary_target", "forward_20d_excess_return_vs_universe")
-    )
+    primary_target = str(freeze_row.get("primary_target", "forward_20d_excess_return_vs_universe"))
     joined = _prepare_joined_panel(
         historical_panel,
         historical_targets,
@@ -717,9 +696,7 @@ def fit_frozen_model_and_score(
     if joined.empty:
         return pd.DataFrame(), pd.DataFrame()
     test = prospective_panel.copy()
-    test["decision_timestamp_utc"] = pd.to_datetime(
-        test["decision_timestamp_utc"], utc=True
-    )
+    test["decision_timestamp_utc"] = pd.to_datetime(test["decision_timestamp_utc"], utc=True)
     latest_timestamp = test["decision_timestamp_utc"].max()
     latest_signal = pd.to_datetime(test["signal_date"]).max().normalize()
     purge_days = int(freeze_row.get("purge_window_trading_days", 63))
@@ -758,13 +735,11 @@ def fit_frozen_model_and_score(
     ranking["training_cutoff"] = latest_timestamp.isoformat()
     ranking["purge_boundary_signal_date"] = purge_boundary.date().isoformat()
     ranking["training_rows"] = len(train)
-    ranking["training_decision_dates"] = int(
-        train["decision_timestamp_utc"].nunique()
-    )
+    ranking["training_decision_dates"] = int(train["decision_timestamp_utc"].nunique())
     ranking["predicted_20d_excess_return_or_ranking_score"] = scores
-    ranking["predicted_rank"] = pd.Series(scores, index=ranking.index).rank(
-        ascending=False, method="first"
-    ).astype(int)
+    ranking["predicted_rank"] = (
+        pd.Series(scores, index=ranking.index).rank(ascending=False, method="first").astype(int)
+    )
     ranking["prediction_is_prospective"] = True
     ranking["prediction_is_out_of_sample"] = True
     ranking["noncanonical_pilot_warning"] = NONCANONICAL_WARNING
@@ -786,9 +761,7 @@ def fit_frozen_model_and_score(
                 "coefficient": float(coefficient),
                 "ridge_alpha": alpha,
                 "training_rows": len(train),
-                "training_decision_dates": int(
-                    train["decision_timestamp_utc"].nunique()
-                ),
+                "training_decision_dates": int(train["decision_timestamp_utc"].nunique()),
                 "model_fit_timestamp_utc": latest_timestamp.isoformat(),
                 "preprocessing_metadata": str(preprocessing.get(feature, {})),
             }
@@ -828,9 +801,7 @@ def _blocked_outputs(
             }
         ]
     )
-    gates = pd.DataFrame(
-        (gate_rows or []) + [_gate("phase23j_blocked", False, ";".join(reasons))]
-    )
+    gates = pd.DataFrame((gate_rows or []) + [_gate("phase23j_blocked", False, ";".join(reasons))])
     gates["all_gates_passed"] = False
     conclusion = pd.DataFrame(
         [
@@ -1000,7 +971,9 @@ def save_phase23j_post_endpoint_individual_equity_extension(
             reasons=["network_download_disabled"],
         )
 
-    symbols: list[tuple[str, str, Path]] = [("SPY", "benchmark", historical_dir / "benchmark_SPY.csv")]
+    symbols: list[tuple[str, str, Path]] = [
+        ("SPY", "benchmark", historical_dir / "benchmark_SPY.csv")
+    ]
     for row in manifest.itertuples(index=False):
         symbols.append((str(row.ticker), "pilot_security", historical_dir / str(row.price_file)))
 
@@ -1116,9 +1089,7 @@ def save_phase23j_post_endpoint_individual_equity_extension(
     download_status = pd.DataFrame(status_rows)
     inventory = pd.DataFrame(inventory_rows)
     extension_validation = (
-        pd.concat(validation_frames, ignore_index=True)
-        if validation_frames
-        else pd.DataFrame()
+        pd.concat(validation_frames, ignore_index=True) if validation_frames else pd.DataFrame()
     )
     validated_security_count = int(
         download_status.loc[
@@ -1208,9 +1179,7 @@ def save_phase23j_post_endpoint_individual_equity_extension(
             config=phase23i_config,
         )
     selected_signal_timestamp = (
-        pd.to_datetime(ranking["signal_date"]).max().normalize()
-        if not ranking.empty
-        else pd.NaT
+        pd.to_datetime(ranking["signal_date"]).max().normalize() if not ranking.empty else pd.NaT
     )
     reference_prices: dict[str, float] = {}
     reference_price_dates: dict[str, str] = {}
@@ -1220,9 +1189,7 @@ def save_phase23j_post_endpoint_individual_equity_extension(
             continue
         working = _complete_research_bar_rows(frame)
         signal_rows = working.loc[
-            pd.to_datetime(working["date"], errors="coerce").eq(
-                selected_signal_timestamp
-            )
+            pd.to_datetime(working["date"], errors="coerce").eq(selected_signal_timestamp)
         ]
         if signal_rows.empty:
             continue
@@ -1230,9 +1197,7 @@ def save_phase23j_post_endpoint_individual_equity_extension(
         reference = pd.to_numeric(signal_row.get("close", np.nan), errors="coerce")
         if pd.notna(reference) and float(reference) > 0:
             reference_prices[str(row.ticker)] = float(reference)
-            reference_price_dates[str(row.ticker)] = (
-                selected_signal_timestamp.date().isoformat()
-            )
+            reference_price_dates[str(row.ticker)] = selected_signal_timestamp.date().isoformat()
     if not ranking.empty:
         ranking["reference_price"] = ranking["ticker"].map(reference_prices)
         ranking["reference_price_date"] = ranking["ticker"].map(reference_price_dates)
@@ -1352,8 +1317,16 @@ def save_phase23j_post_endpoint_individual_equity_extension(
     gates = pd.DataFrame(
         [
             _gate("canonical_historical_files_unchanged", canonical_unchanged, "hash comparison"),
-            _gate("all_required_extensions_valid", all_inputs_ready, f"validated={validated_security_count}"),
-            _gate("post_endpoint_feature_panel_ready", prospective_features_ready, f"rows={len(prospective_panel)}"),
+            _gate(
+                "all_required_extensions_valid",
+                all_inputs_ready,
+                f"validated={validated_security_count}",
+            ),
+            _gate(
+                "post_endpoint_feature_panel_ready",
+                prospective_features_ready,
+                f"rows={len(prospective_panel)}",
+            ),
             _gate("frozen_model_hash_verified", freeze_matches, observed_freeze_hash),
             _gate("prospective_ranking_generated", ranking_ready, f"rows={len(ranking)}"),
             _gate("target_portfolio_generated", target_ready, f"rows={len(current_target)}"),
@@ -1396,9 +1369,7 @@ def save_phase23j_post_endpoint_individual_equity_extension(
                 "validated_security_count": validated_security_count,
                 "prospective_feature_rows": len(prospective_panel),
                 "prospective_ranking_rows": len(ranking),
-                "selected_signal_date": ranking["signal_date"].iloc[0]
-                if not ranking.empty
-                else "",
+                "selected_signal_date": ranking["signal_date"].iloc[0] if not ranking.empty else "",
                 "model_version": RIDGE_MODEL,
                 "phase23i_freeze_hash": observed_freeze_hash,
                 "canonical_research_endpoint": endpoint.date().isoformat(),

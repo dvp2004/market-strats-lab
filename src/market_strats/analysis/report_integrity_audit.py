@@ -116,17 +116,11 @@ def _create_endpoint_audit(
                 "file_name": path.name,
                 "has_end_date_column": True,
                 "row_count": len(data),
-                "max_end_date": (
-                    max_end_date.date().isoformat()
-                    if pd.notna(max_end_date)
-                    else ""
-                ),
+                "max_end_date": (max_end_date.date().isoformat() if pd.notna(max_end_date) else ""),
                 "bad_row_count": int(bad_mask.sum()),
                 "status": "Passed" if not bad_mask.any() else "Failed",
                 "reason": (
-                    ""
-                    if not bad_mask.any()
-                    else f"Contains end_date later than {pinned_end_date}"
+                    "" if not bad_mask.any() else f"Contains end_date later than {pinned_end_date}"
                 ),
             }
         )
@@ -275,9 +269,7 @@ def _create_final_checkpoint_claim_audit(
                 "regime_switch_overlay_offensive_relief_event_summary.csv",
             )
         )
-        switch_variant_name = str(
-            expected.get("overlay_switch_variant_name", "loose_relief")
-        )
+        switch_variant_name = str(expected.get("overlay_switch_variant_name", "loose_relief"))
         switch_report_path = Path(reports_dir) / switch_report_name
 
         if not switch_report_path.exists():
@@ -390,9 +382,7 @@ def _create_integrity_conclusion(
     readme_audit: pd.DataFrame,
 ) -> pd.DataFrame:
     endpoint_failures = endpoint_audit[endpoint_audit["status"] == "Failed"]
-    missing_reports = expected_report_audit[
-        expected_report_audit["status"] == "Missing"
-    ]
+    missing_reports = expected_report_audit[expected_report_audit["status"] == "Missing"]
     failed_claims = claim_audit[claim_audit["status"] == "Failed"]
     failed_readme = readme_audit[readme_audit["status"] == "Failed"]
 
@@ -523,8 +513,7 @@ def create_report_integrity_audit(
 
     pinned_end_date = str(phase_config.get("pinned_end_date", "2026-05-01"))
     expected_reports = [
-        str(report_name)
-        for report_name in phase_config.get("expected_reports", [])
+        str(report_name) for report_name in phase_config.get("expected_reports", [])
     ]
 
     manifest = _create_report_manifest(reports_dir)

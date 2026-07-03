@@ -113,8 +113,7 @@ def _asset_allocation_stats(
     asset: str,
 ) -> dict:
     rows = allocation_summary[
-        (allocation_summary["universe"] == universe_name)
-        & (allocation_summary["asset"] == asset)
+        (allocation_summary["universe"] == universe_name) & (allocation_summary["asset"] == asset)
     ]
 
     if rows.empty:
@@ -251,9 +250,7 @@ def _create_decision(
         eth_verdict = "ETH was barely selected under the current rules."
     else:
         eth_classification = "Rejected"
-        eth_verdict = (
-            "ETH did not improve the capped overlay enough to justify inclusion."
-        )
+        eth_verdict = "ETH did not improve the capped overlay enough to justify inclusion."
 
     if oil_eth_overlay_pass:
         oil_eth_classification = "Combined expansion candidate"
@@ -313,9 +310,7 @@ def _create_decision(
                     "max_drawdown_pct",
                 ),
                 "overlay_drawdown_delta_pct_points": oil_eth_overlay_drawdown_delta,
-                "overlay_volatility_delta_pct_points": (
-                    oil_eth_overlay_volatility_delta
-                ),
+                "overlay_volatility_delta_pct_points": (oil_eth_overlay_volatility_delta),
                 "allocator_cagr_delta_pct_points": oil_eth_allocator_cagr_delta,
                 "eth_avg_weight_pct": round(oil_eth_eth_stats["avg_weight_pct"], 3),
                 "eth_max_weight_pct": round(oil_eth_eth_stats["max_weight_pct"], 3),
@@ -362,9 +357,7 @@ def create_eth_quarantine_diagnostic(
     initial_capital = float(config["initial_capital"])
 
     baseline_name = str(diagnostic_config.get("baseline_universe_name", "Base"))
-    eth_name = str(
-        diagnostic_config.get("eth_universe_name", "Base + ETH Quarantine")
-    )
+    eth_name = str(diagnostic_config.get("eth_universe_name", "Base + ETH Quarantine"))
     oil_eth_name = str(
         diagnostic_config.get(
             "oil_eth_universe_name",
@@ -372,13 +365,9 @@ def create_eth_quarantine_diagnostic(
         )
     )
 
-    baseline_assets = [
-        str(asset).upper() for asset in diagnostic_config["baseline_assets"]
-    ]
+    baseline_assets = [str(asset).upper() for asset in diagnostic_config["baseline_assets"]]
     eth_assets = [str(asset).upper() for asset in diagnostic_config["eth_assets"]]
-    oil_eth_assets = [
-        str(asset).upper() for asset in diagnostic_config["oil_eth_assets"]
-    ]
+    oil_eth_assets = [str(asset).upper() for asset in diagnostic_config["oil_eth_assets"]]
 
     top_n = int(diagnostic_config.get("top_n", 3))
     lookback_months = int(diagnostic_config.get("lookback_months", 12))
@@ -387,8 +376,7 @@ def create_eth_quarantine_diagnostic(
     max_asset_weight = float(diagnostic_config.get("max_asset_weight", 1.0 / top_n))
 
     group_caps = {
-        str(group): float(cap)
-        for group, cap in diagnostic_config.get("group_caps", {}).items()
+        str(group): float(cap) for group, cap in diagnostic_config.get("group_caps", {}).items()
     }
     asset_groups = {
         str(asset).upper(): str(group)
@@ -400,9 +388,7 @@ def create_eth_quarantine_diagnostic(
     oil_eth_panel = _build_close_panel(ticker_outputs, oil_eth_assets)
 
     common_dates = sorted(
-        set(baseline_panel.index)
-        .intersection(eth_panel.index)
-        .intersection(oil_eth_panel.index)
+        set(baseline_panel.index).intersection(eth_panel.index).intersection(oil_eth_panel.index)
     )
 
     if not common_dates:
@@ -453,9 +439,7 @@ def create_eth_quarantine_diagnostic(
     baseline_allocator = baseline_allocator[
         pd.to_datetime(baseline_allocator["date"]).isin(common_dates)
     ].copy()
-    eth_allocator = eth_allocator[
-        pd.to_datetime(eth_allocator["date"]).isin(common_dates)
-    ].copy()
+    eth_allocator = eth_allocator[pd.to_datetime(eth_allocator["date"]).isin(common_dates)].copy()
     oil_eth_allocator = oil_eth_allocator[
         pd.to_datetime(oil_eth_allocator["date"]).isin(common_dates)
     ].copy()
@@ -470,9 +454,7 @@ def create_eth_quarantine_diagnostic(
         offensive_result=spy_buy_hold,
         defensive_result=baseline_allocator,
         initial_capital=initial_capital,
-        trend_sma_days=int(
-            config.get("regime_switch_overlay", {}).get("trend_sma_days", 200)
-        ),
+        trend_sma_days=int(config.get("regime_switch_overlay", {}).get("trend_sma_days", 200)),
         slippage_bps=float(config.get("slippage_bps", 0.0)),
         confirmation_days=confirmation_days,
     )
@@ -480,9 +462,7 @@ def create_eth_quarantine_diagnostic(
         offensive_result=spy_buy_hold,
         defensive_result=eth_allocator,
         initial_capital=initial_capital,
-        trend_sma_days=int(
-            config.get("regime_switch_overlay", {}).get("trend_sma_days", 200)
-        ),
+        trend_sma_days=int(config.get("regime_switch_overlay", {}).get("trend_sma_days", 200)),
         slippage_bps=float(config.get("slippage_bps", 0.0)),
         confirmation_days=confirmation_days,
     )
@@ -490,9 +470,7 @@ def create_eth_quarantine_diagnostic(
         offensive_result=spy_buy_hold,
         defensive_result=oil_eth_allocator,
         initial_capital=initial_capital,
-        trend_sma_days=int(
-            config.get("regime_switch_overlay", {}).get("trend_sma_days", 200)
-        ),
+        trend_sma_days=int(config.get("regime_switch_overlay", {}).get("trend_sma_days", 200)),
         slippage_bps=float(config.get("slippage_bps", 0.0)),
         confirmation_days=confirmation_days,
     )

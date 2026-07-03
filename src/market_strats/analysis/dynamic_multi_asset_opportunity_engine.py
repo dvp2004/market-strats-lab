@@ -157,11 +157,7 @@ def load_asset_prices(root: Path, symbols: list[str]) -> tuple[pd.DataFrame, pd.
         data = frame[["date", price_col]].copy()
         data["date"] = pd.to_datetime(data["date"])
         data[price_col] = pd.to_numeric(data[price_col], errors="coerce")
-        data = (
-            data.dropna(subset=["date", price_col])
-            .drop_duplicates("date")
-            .sort_values("date")
-        )
+        data = data.dropna(subset=["date", price_col]).drop_duplicates("date").sort_values("date")
         data = data.loc[data[price_col] > 0]
         if data.empty:
             availability_rows.append(
@@ -242,9 +238,7 @@ def build_feature_store(prices: pd.DataFrame) -> pd.DataFrame:
         frame["asset_drawdown_penalty"] = frame["drawdown_from_252d_high"].abs()
         if "SPY" in price_only.columns:
             spy_price = price_only["SPY"].reindex(frame.index).ffill()
-            frame["market_risk_on_flag"] = (
-                spy_price > spy_price.rolling(200).mean()
-            ).astype(float)
+            frame["market_risk_on_flag"] = (spy_price > spy_price.rolling(200).mean()).astype(float)
         else:
             frame["market_risk_on_flag"] = 1.0
         frame["cash_filter"] = 1.0 - frame["market_risk_on_flag"]
@@ -276,13 +270,9 @@ def compute_opportunity_scores(feature_store: pd.DataFrame) -> pd.DataFrame:
         score_frame["score_return_126d"] = _zscore(score_frame["return_126d"])
         score_frame["score_return_252d"] = _zscore(score_frame["return_252d"])
         score_frame["score_trend"] = _zscore(score_frame["trend_strength_50_200"])
-        score_frame["score_risk_adjusted_momentum"] = _zscore(
-            score_frame["risk_adjusted_momentum"]
-        )
+        score_frame["score_risk_adjusted_momentum"] = _zscore(score_frame["risk_adjusted_momentum"])
         score_frame["score_volatility_penalty"] = _zscore(score_frame["volatility_63d"])
-        score_frame["score_drawdown_penalty"] = _zscore(
-            score_frame["asset_drawdown_penalty"]
-        )
+        score_frame["score_drawdown_penalty"] = _zscore(score_frame["asset_drawdown_penalty"])
         score_frame["opportunity_score"] = (
             0.25 * score_frame["score_return_63d"]
             + 0.25 * score_frame["score_return_126d"]
@@ -439,7 +429,9 @@ def simulate_dynamic_strategy(
     if prices.empty or scores.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     returns = _returns_with_cash(prices)
-    common_dates = pd.DatetimeIndex(sorted(set(returns.index) & set(pd.to_datetime(scores["date"]))))
+    common_dates = pd.DatetimeIndex(
+        sorted(set(returns.index) & set(pd.to_datetime(scores["date"])))
+    )
     common_dates = common_dates[common_dates >= common_dates.min() + pd.Timedelta(days=252)]
     if len(common_dates) < 30:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
@@ -474,7 +466,9 @@ def simulate_dynamic_strategy(
                 "strategy_name": spec.strategy_name,
                 "signal_date": signal_date.date().isoformat(),
                 "execution_date": execution_date.date().isoformat(),
-                "selected_assets": ",".join([asset for asset in target_weights.index if asset != "CASH"]),
+                "selected_assets": ",".join(
+                    [asset for asset in target_weights.index if asset != "CASH"]
+                ),
                 "target_weights": ";".join(
                     f"{asset}:{weight:.6f}" for asset, weight in target_weights.items()
                 ),
@@ -531,9 +525,11 @@ def _drawdown(values: pd.Series) -> pd.Series:
 def _metrics(equity: pd.DataFrame, events: pd.DataFrame, weights: pd.DataFrame) -> dict[str, Any]:
     if equity.empty:
         return {}
-    series = equity.sort_values("date").set_index(pd.to_datetime(equity["date"]))[
-        "portfolio_value"
-    ].astype(float)
+    series = (
+        equity.sort_values("date")
+        .set_index(pd.to_datetime(equity["date"]))["portfolio_value"]
+        .astype(float)
+    )
     years = max((series.index.max() - series.index.min()).days / 365.25, 1 / 365.25)
     final_value = float(series.iloc[-1])
     cagr = (final_value / float(series.iloc[0])) ** (1 / years) - 1
@@ -571,9 +567,11 @@ def _metrics(equity: pd.DataFrame, events: pd.DataFrame, weights: pd.DataFrame) 
 def _daily_drawdowns(equity: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for strategy, group in equity.groupby("strategy_name"):
-        series = group.sort_values("date").set_index(pd.to_datetime(group["date"]))[
-            "portfolio_value"
-        ].astype(float)
+        series = (
+            group.sort_values("date")
+            .set_index(pd.to_datetime(group["date"]))["portfolio_value"]
+            .astype(float)
+        )
         drawdowns = _drawdown(series)
         rows.append(
             pd.DataFrame(
@@ -626,7 +624,11 @@ def _common_comparison(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     benchmark_equity = _read_csv(benchmark_equity_path)
     rows: list[pd.DataFrame] = []
-    if not benchmark_equity.empty and {"date", "canonical_candidate_id", "portfolio_value"}.issubset(benchmark_equity.columns):
+    if not benchmark_equity.empty and {
+        "date",
+        "canonical_candidate_id",
+        "portfolio_value",
+    }.issubset(benchmark_equity.columns):
         bench = benchmark_equity.rename(columns={"canonical_candidate_id": "strategy_name"})
         rows.append(bench[["date", "strategy_name", "portfolio_value"]])
     if not dynamic_equity.empty:
@@ -739,9 +741,27 @@ def _write_charts(
     tc: pd.DataFrame,
 ) -> None:
     visuals_dir.mkdir(parents=True, exist_ok=True)
-    _plot_lines(common_equity, "portfolio_value", visuals_dir / "phase22a_equity_curves.png", "Phase22A Equity Curves", "Portfolio value")
-    _plot_lines(drawdowns, "drawdown_pct", visuals_dir / "phase22a_drawdowns.png", "Phase22A Drawdowns", "Drawdown (%)")
-    _plot_bar(comparison, "strategy_name", "final_value", visuals_dir / "phase22a_final_value_bar.png", "Final Value")
+    _plot_lines(
+        common_equity,
+        "portfolio_value",
+        visuals_dir / "phase22a_equity_curves.png",
+        "Phase22A Equity Curves",
+        "Portfolio value",
+    )
+    _plot_lines(
+        drawdowns,
+        "drawdown_pct",
+        visuals_dir / "phase22a_drawdowns.png",
+        "Phase22A Drawdowns",
+        "Drawdown (%)",
+    )
+    _plot_bar(
+        comparison,
+        "strategy_name",
+        "final_value",
+        visuals_dir / "phase22a_final_value_bar.png",
+        "Final Value",
+    )
     if not comparison.empty:
         fig, ax = plt.subplots(figsize=(9, 5))
         ax.scatter(comparison["max_drawdown"], comparison["CAGR"])
@@ -754,11 +774,39 @@ def _write_charts(
         fig.savefig(visuals_dir / "phase22a_risk_return_scatter.png", dpi=140)
         plt.close(fig)
     else:
-        _placeholder_chart(visuals_dir / "phase22a_risk_return_scatter.png", "Risk/Return Scatter", "No comparison data")
-    _plot_bar(latest_scores.head(15), "symbol", "opportunity_score", visuals_dir / "phase22a_latest_scores_bar.png", "Latest Opportunity Scores")
-    _plot_bar(latest_weights, "asset", "weight", visuals_dir / "phase22a_latest_weights_bar.png", "Latest Dynamic Weights")
-    _plot_bar(metrics, "strategy_name", "turnover", visuals_dir / "phase22a_turnover_by_strategy.png", "Average Turnover")
-    _plot_bar(tc, "strategy_cost_case", "final_value", visuals_dir / "phase22a_transaction_cost_sensitivity.png", "Transaction Cost Sensitivity")
+        _placeholder_chart(
+            visuals_dir / "phase22a_risk_return_scatter.png",
+            "Risk/Return Scatter",
+            "No comparison data",
+        )
+    _plot_bar(
+        latest_scores.head(15),
+        "symbol",
+        "opportunity_score",
+        visuals_dir / "phase22a_latest_scores_bar.png",
+        "Latest Opportunity Scores",
+    )
+    _plot_bar(
+        latest_weights,
+        "asset",
+        "weight",
+        visuals_dir / "phase22a_latest_weights_bar.png",
+        "Latest Dynamic Weights",
+    )
+    _plot_bar(
+        metrics,
+        "strategy_name",
+        "turnover",
+        visuals_dir / "phase22a_turnover_by_strategy.png",
+        "Average Turnover",
+    )
+    _plot_bar(
+        tc,
+        "strategy_cost_case",
+        "final_value",
+        visuals_dir / "phase22a_transaction_cost_sensitivity.png",
+        "Transaction Cost Sensitivity",
+    )
 
 
 def _research_summary(
@@ -770,8 +818,12 @@ def _research_summary(
     tc: pd.DataFrame,
     decision: str,
 ) -> None:
-    available_assets = availability.loc[availability["available"].map(_bool_value), "symbol"].astype(str).tolist()
-    unavailable_assets = availability.loc[~availability["available"].map(_bool_value), "symbol"].astype(str).tolist()
+    available_assets = (
+        availability.loc[availability["available"].map(_bool_value), "symbol"].astype(str).tolist()
+    )
+    unavailable_assets = (
+        availability.loc[~availability["available"].map(_bool_value), "symbol"].astype(str).tolist()
+    )
     lines = [
         "# Phase 22A Dynamic Multi-Asset Opportunity Engine v0",
         "",
@@ -793,13 +845,19 @@ def _research_summary(
         "Macro, fundamental, sentiment, valuation, and liquidity scores are not active in Phase22A. Requires point-in-time/vintage-safe data audit.",
         "",
         "Strategy metrics:",
-        metrics.to_markdown(index=False) if not metrics.empty else "No dynamic strategy metrics available.",
+        metrics.to_markdown(index=False)
+        if not metrics.empty
+        else "No dynamic strategy metrics available.",
         "",
         "Comparison vs current table:",
-        comparison.to_markdown(index=False) if not comparison.empty else "No benchmark comparison available.",
+        comparison.to_markdown(index=False)
+        if not comparison.empty
+        else "No benchmark comparison available.",
         "",
         "Transaction cost sensitivity:",
-        tc.to_markdown(index=False) if not tc.empty else "No transaction cost sensitivity available.",
+        tc.to_markdown(index=False)
+        if not tc.empty
+        else "No transaction cost sensitivity available.",
         "",
         "Limitations: technical/risk-only v0, monthly rebalancing, local adjusted-close data, report-only transaction costs, no paper integration.",
         "",
@@ -888,7 +946,14 @@ def save_phase22a_dynamic_multi_asset_opportunity_engine(
     metrics = pd.DataFrame(metrics_rows)
     tc = pd.DataFrame(tc_rows)
     drawdowns = _daily_drawdowns(dynamic_equity) if not dynamic_equity.empty else pd.DataFrame()
-    benchmark_path = root / "reports" / "paper_trading" / "regime_informed_tracking" / "performance" / "regime_informed_historical_daily_equity.csv"
+    benchmark_path = (
+        root
+        / "reports"
+        / "paper_trading"
+        / "regime_informed_tracking"
+        / "performance"
+        / "regime_informed_historical_daily_equity.csv"
+    )
     comparison, common_equity = _common_comparison(
         dynamic_equity=dynamic_equity,
         benchmark_equity_path=benchmark_path,
@@ -898,9 +963,7 @@ def save_phase22a_dynamic_multi_asset_opportunity_engine(
         score_counts = scores.groupby("date")["symbol"].nunique()
         usable_score_dates = score_counts.loc[score_counts >= 3]
         latest_date = (
-            usable_score_dates.index.max()
-            if not usable_score_dates.empty
-            else scores["date"].max()
+            usable_score_dates.index.max() if not usable_score_dates.empty else scores["date"].max()
         )
     else:
         latest_date = ""
@@ -912,9 +975,7 @@ def save_phase22a_dynamic_multi_asset_opportunity_engine(
         else pd.DataFrame()
     )
     latest_weights = (
-        dynamic_weights.loc[
-            dynamic_weights["date"] == dynamic_weights["date"].max()
-        ].copy()
+        dynamic_weights.loc[dynamic_weights["date"] == dynamic_weights["date"].max()].copy()
         if not dynamic_weights.empty
         else pd.DataFrame()
     )
@@ -1018,10 +1079,14 @@ def save_phase22a_dynamic_multi_asset_opportunity_engine(
                 "phase22a_decision": decision,
                 "all_gates_passed": all_gates_passed,
                 "available_assets": ",".join(
-                    availability.loc[availability["available"].map(_bool_value), "symbol"].astype(str)
+                    availability.loc[availability["available"].map(_bool_value), "symbol"].astype(
+                        str
+                    )
                 ),
                 "unavailable_assets": ",".join(
-                    availability.loc[~availability["available"].map(_bool_value), "symbol"].astype(str)
+                    availability.loc[~availability["available"].map(_bool_value), "symbol"].astype(
+                        str
+                    )
                 ),
                 "dynamic_strategy_count": len(metrics),
                 "latest_feature_date": str(latest_date)[:10] if latest_date != "" else "",

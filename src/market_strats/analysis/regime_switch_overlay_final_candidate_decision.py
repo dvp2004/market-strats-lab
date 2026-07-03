@@ -357,8 +357,7 @@ def _get_metric_row(
     candidate_name: str,
 ) -> pd.Series:
     rows = comparison[
-        (comparison["period"] == period)
-        & (comparison["candidate_name"] == candidate_name)
+        (comparison["period"] == period) & (comparison["candidate_name"] == candidate_name)
     ]
 
     if rows.empty:
@@ -392,8 +391,7 @@ def _create_delta_report(
 
         for benchmark_name in benchmark_names:
             benchmark_rows = comparison[
-                (comparison["period"] == period)
-                & (comparison["candidate_name"] == benchmark_name)
+                (comparison["period"] == period) & (comparison["candidate_name"] == benchmark_name)
             ]
 
             if benchmark_rows.empty:
@@ -422,15 +420,13 @@ def _create_delta_report(
                     "candidate_max_drawdown_pct": candidate["max_drawdown_pct"],
                     "benchmark_max_drawdown_pct": benchmark["max_drawdown_pct"],
                     "drawdown_delta_pct_points": round(
-                        float(candidate["max_drawdown_pct"])
-                        - float(benchmark["max_drawdown_pct"]),
+                        float(candidate["max_drawdown_pct"]) - float(benchmark["max_drawdown_pct"]),
                         3,
                     ),
                     "candidate_volatility_pct": candidate["volatility_pct"],
                     "benchmark_volatility_pct": benchmark["volatility_pct"],
                     "volatility_delta_pct_points": round(
-                        float(candidate["volatility_pct"])
-                        - float(benchmark["volatility_pct"]),
+                        float(candidate["volatility_pct"]) - float(benchmark["volatility_pct"]),
                         3,
                     ),
                     "candidate_trade_count": candidate["trade_count"],
@@ -466,15 +462,11 @@ def _create_final_gate_report(
     min_calmar_improvement = float(
         phase_config.get("min_calmar_improvement_vs_execution_benchmark", 0.010)
     )
-    max_drawdown_damage = float(
-        phase_config.get("max_allowed_drawdown_damage_pct_points", -0.50)
-    )
+    max_drawdown_damage = float(phase_config.get("max_allowed_drawdown_damage_pct_points", -0.50))
     max_holdout_cagr_damage = float(
         phase_config.get("max_allowed_holdout_cagr_damage_pct_points", -0.50)
     )
-    max_holdout_calmar_damage = float(
-        phase_config.get("max_allowed_holdout_calmar_damage", -0.05)
-    )
+    max_holdout_calmar_damage = float(phase_config.get("max_allowed_holdout_calmar_damage", -0.05))
     max_holdout_drawdown_damage = float(
         phase_config.get("max_allowed_holdout_drawdown_damage_pct_points", -0.50)
     )
@@ -509,8 +501,7 @@ def _create_final_gate_report(
         3,
     )
     full_drawdown_delta = round(
-        float(full_candidate["max_drawdown_pct"])
-        - float(full_execution["max_drawdown_pct"]),
+        float(full_candidate["max_drawdown_pct"]) - float(full_execution["max_drawdown_pct"]),
         3,
     )
 
@@ -529,8 +520,7 @@ def _create_final_gate_report(
         3,
     )
     holdout_drawdown_delta = round(
-        float(holdout_candidate["max_drawdown_pct"])
-        - float(holdout_execution["max_drawdown_pct"]),
+        float(holdout_candidate["max_drawdown_pct"]) - float(holdout_execution["max_drawdown_pct"]),
         3,
     )
 
@@ -561,9 +551,7 @@ def _create_final_gate_report(
         episode_safe = damaged.empty
 
         if damaged.empty:
-            episode_interpretation = (
-                "No episode segment breached the final damage thresholds."
-            )
+            episode_interpretation = "No episode segment breached the final damage thresholds."
         else:
             damaged_periods = ", ".join(damaged["period"].astype(str).tolist())
             episode_interpretation = (
@@ -574,14 +562,11 @@ def _create_final_gate_report(
     beats_spy_12m = (
         float(full_candidate["cagr_pct"]) > float(pinned_spy_12m["cagr_pct"])
         and float(full_candidate["calmar"]) > float(pinned_spy_12m["calmar"])
-        and float(full_candidate["max_drawdown_pct"])
-        > float(pinned_spy_12m["max_drawdown_pct"])
+        and float(full_candidate["max_drawdown_pct"]) > float(pinned_spy_12m["max_drawdown_pct"])
     )
 
     pinned_spy_bh = phase_config["pinned_spy_buy_hold"]
-    beats_spy_bh_raw = float(full_candidate["cagr_pct"]) > float(
-        pinned_spy_bh["cagr_pct"]
-    )
+    beats_spy_bh_raw = float(full_candidate["cagr_pct"]) > float(pinned_spy_bh["cagr_pct"])
 
     phase3_row = _get_metric_row(
         comparison=comparison,
@@ -589,17 +574,11 @@ def _create_final_gate_report(
         candidate_name=phase3_name,
     )
 
-    phase3_documented_separately = (
-        round(float(phase3_row["cagr_pct"]), 2)
-        == round(float(phase_config["pinned_phase3_flat_5bps"]["cagr_pct"]), 2)
+    phase3_documented_separately = round(float(phase3_row["cagr_pct"]), 2) == round(
+        float(phase_config["pinned_phase3_flat_5bps"]["cagr_pct"]), 2
     )
 
-    final_promoted = (
-        full_improves_execution
-        and holdout_safe
-        and episode_safe
-        and beats_spy_12m
-    )
+    final_promoted = full_improves_execution and holdout_safe and episode_safe and beats_spy_12m
 
     return pd.DataFrame(
         [
@@ -728,20 +707,16 @@ def _create_final_project_decision(gate_report: pd.DataFrame) -> pd.DataFrame:
                 "status": "Survived" if final_passed else "Not yet",
                 "evidence_quality": "Phase 6C final gate report",
                 "interpretation": (
-                    "Phase 6B loose_relief becomes the best execution-realistic "
-                    "candidate."
+                    "Phase 6B loose_relief becomes the best execution-realistic candidate."
                     if final_passed
-                    else "Phase 6B loose_relief remains an advanced candidate but is "
-                    "not promoted."
+                    else "Phase 6B loose_relief remains an advanced candidate but is not promoted."
                 ),
             },
             {
                 "claim": "Breadth confirmation is rejected for promotion.",
                 "status": "Survived",
                 "evidence_quality": "Phase 5B materiality validation",
-                "interpretation": (
-                    "Breadth confirmation failed stricter materiality gates."
-                ),
+                "interpretation": ("Breadth confirmation failed stricter materiality gates."),
             },
             {
                 "claim": "Defensive stress confirmation is rejected.",
@@ -766,8 +741,7 @@ def _create_final_project_decision(gate_report: pd.DataFrame) -> pd.DataFrame:
                 "status": "Survived",
                 "evidence_quality": "Project discipline",
                 "interpretation": (
-                    "Further strategy testing before documentation would be feature "
-                    "chasing."
+                    "Further strategy testing before documentation would be feature chasing."
                 ),
             },
             {

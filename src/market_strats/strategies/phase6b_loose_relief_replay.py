@@ -233,9 +233,7 @@ def replay_phase6b_loose_relief_target_weights(
         ["data_source_timestamp", "source_timestamp", "updated_at"],
     )
     timestamp = (
-        frame[timestamp_col].astype(str)
-        if timestamp_col
-        else frame["date"].dt.strftime("%Y-%m-%d")
+        frame[timestamp_col].astype(str) if timestamp_col else frame["date"].dt.strftime("%Y-%m-%d")
     )
 
     stream = pd.DataFrame(
@@ -283,7 +281,11 @@ def _summary(
     target_source_passed = (
         rows > 0
         and "target_weight_source" in stream.columns
-        and stream["target_weight_source"].astype(str).str.lower().eq(VALID_TARGET_WEIGHT_SOURCE).all()
+        and stream["target_weight_source"]
+        .astype(str)
+        .str.lower()
+        .eq(VALID_TARGET_WEIGHT_SOURCE)
+        .all()
     )
     out_of_sample_passed = (
         rows > 0

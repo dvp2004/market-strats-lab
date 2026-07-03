@@ -57,16 +57,19 @@ def _first(frame: pd.DataFrame, column: str) -> str:
 def _filled_matches_template(template: pd.DataFrame, filled: pd.DataFrame) -> bool:
     if template.empty or filled.empty:
         return False
-    return (
-        _first(template, "session_date") == _first(filled, "session_date")
-        and _first(template, "selected_signal_date")
-        == _first(filled, "selected_signal_date")
-    )
+    return _first(template, "session_date") == _first(filled, "session_date") and _first(
+        template, "selected_signal_date"
+    ) == _first(filled, "selected_signal_date")
 
 
 def _filled_already_ingested(filled: pd.DataFrame, ledger: pd.DataFrame) -> bool:
     keys = ["session_date", "selected_signal_date", "canonical_candidate_id", "asset"]
-    if filled.empty or ledger.empty or not set(keys).issubset(filled.columns) or not set(keys).issubset(ledger.columns):
+    if (
+        filled.empty
+        or ledger.empty
+        or not set(keys).issubset(filled.columns)
+        or not set(keys).issubset(ledger.columns)
+    ):
         return False
     filled_keys = set(map(tuple, filled[keys].astype(str).to_numpy()))
     ledger_keys = set(map(tuple, ledger[keys].astype(str).to_numpy()))
@@ -249,9 +252,7 @@ def save_phase21g_regime_informed_session_rollover(
             {
                 "run_date": datetime.now(timezone.utc).date().isoformat(),
                 "current_template_session_date": _first(template, "session_date"),
-                "current_template_selected_signal_date": _first(
-                    template, "selected_signal_date"
-                ),
+                "current_template_selected_signal_date": _first(template, "selected_signal_date"),
                 "filled_file_present": filled_present,
                 "filled_session_date": _first(filled, "session_date"),
                 "filled_selected_signal_date": _first(filled, "selected_signal_date"),

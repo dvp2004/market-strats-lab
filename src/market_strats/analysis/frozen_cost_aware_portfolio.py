@@ -31,24 +31,19 @@ CANONICAL_RESEARCH_ENDPOINT = "2026-05-01"
 DEFAULT_PHASE23I_CONFIG: dict[str, Any] = {
     "enabled": False,
     "output_dir": (
-        "reports/individual_equity_decision_system/"
-        "phase23i_frozen_cost_aware_portfolio"
+        "reports/individual_equity_decision_system/phase23i_frozen_cost_aware_portfolio"
     ),
     "dashboard_status_path": (
-        "reports/paper_trading/dashboard/"
-        "phase23i_frozen_cost_aware_portfolio_status.csv"
+        "reports/paper_trading/dashboard/phase23i_frozen_cost_aware_portfolio_status.csv"
     ),
     "source_phase23f_dir": (
-        "reports/individual_equity_decision_system/"
-        "phase23f_pilot_feature_calculation"
+        "reports/individual_equity_decision_system/phase23f_pilot_feature_calculation"
     ),
     "source_phase23g_dir": (
-        "reports/individual_equity_decision_system/"
-        "phase23g_interpretable_stock_ranker"
+        "reports/individual_equity_decision_system/phase23g_interpretable_stock_ranker"
     ),
     "source_phase23h_dir": (
-        "reports/individual_equity_decision_system/"
-        "phase23h_interpretable_ranker_robustness"
+        "reports/individual_equity_decision_system/phase23h_interpretable_ranker_robustness"
     ),
     "pilot_input_dir": "data/individual_equity_pilot",
     "initial_capital": 100000.0,
@@ -97,12 +92,9 @@ DEFAULT_PHASE23I_CONFIG: dict[str, Any] = {
 DEFAULT_PHASE23I_SHADOW_CONFIG: dict[str, Any] = {
     "enabled": False,
     "output_dir": "reports/individual_equity_shadow/phase23i_prospective_shadow",
-    "dashboard_status_path": (
-        "reports/paper_trading/dashboard/phase23i_shadow_status.csv"
-    ),
+    "dashboard_status_path": ("reports/paper_trading/dashboard/phase23i_shadow_status.csv"),
     "source_phase23i_dir": (
-        "reports/individual_equity_decision_system/"
-        "phase23i_frozen_cost_aware_portfolio"
+        "reports/individual_equity_decision_system/phase23i_frozen_cost_aware_portfolio"
     ),
     "source_phase23f_dir": DEFAULT_PHASE23I_CONFIG["source_phase23f_dir"],
     "source_phase23g_dir": DEFAULT_PHASE23I_CONFIG["source_phase23g_dir"],
@@ -172,9 +164,7 @@ def _shadow_config(config: dict[str, Any]) -> dict[str, Any]:
     )
 
 
-def _resolve_reports_path(
-    *, configured_path: str | Path, reports_dir: str | Path
-) -> Path:
+def _resolve_reports_path(*, configured_path: str | Path, reports_dir: str | Path) -> Path:
     reports_root = Path(reports_dir)
     path = Path(configured_path)
     if path.is_absolute():
@@ -302,13 +292,9 @@ def _cost_scenarios(config: dict[str, Any]) -> list[CostScenario]:
         scenarios.append(
             CostScenario(
                 name=name,
-                bps_per_one_way_notional=float(
-                    values.get("bps_per_one_way_notional", 0.0)
-                ),
+                bps_per_one_way_notional=float(values.get("bps_per_one_way_notional", 0.0)),
                 fixed_commission=float(values.get("fixed_commission", fixed)),
-                spread_slippage_bps=float(
-                    values.get("spread_slippage_bps", spread)
-                ),
+                spread_slippage_bps=float(values.get("spread_slippage_bps", spread)),
             )
         )
     return scenarios
@@ -326,9 +312,7 @@ def build_phase23i_model_freeze(
     phase23g_config = phase23g_config or DEFAULT_PHASE23G_CONFIG
     model_version = str(config.get("model_version", RIDGE_MODEL))
     registry_row = model_registry.loc[
-        model_registry.get("model_version", pd.Series(dtype=str)).astype(str).eq(
-            model_version
-        )
+        model_registry.get("model_version", pd.Series(dtype=str)).astype(str).eq(model_version)
     ]
     registry = registry_row.iloc[0].to_dict() if not registry_row.empty else {}
     feature_text = str(registry.get("feature_set", ";".join(CORE_FEATURE_COLUMNS)))
@@ -374,8 +358,7 @@ def build_phase23i_model_freeze(
             "canonical_research_endpoint", CANONICAL_RESEARCH_ENDPOINT
         ),
         "noncanonical_pilot_warning": (
-            "membership_canonical=False; market_data_canonical=False; "
-            "research pilot only"
+            "membership_canonical=False; market_data_canonical=False; research pilot only"
         ),
         "research_pilot_only": True,
         "membership_canonical": False,
@@ -474,7 +457,9 @@ def _price_lookup(prices: dict[str, pd.DataFrame], ticker: str) -> pd.DataFrame:
     return prices.get(ticker, pd.DataFrame())
 
 
-def _next_eligible_date(prices: dict[str, pd.DataFrame], signal_date: pd.Timestamp) -> pd.Timestamp | None:
+def _next_eligible_date(
+    prices: dict[str, pd.DataFrame], signal_date: pd.Timestamp
+) -> pd.Timestamp | None:
     spy = _price_lookup(prices, "SPY")
     if spy.empty:
         return None
@@ -576,9 +561,7 @@ def build_phase23i_targets_for_signal(
                 "reason": "no rankings for signal date",
             }
         ]
-    model_rows["predicted_rank"] = pd.to_numeric(
-        model_rows["predicted_rank"], errors="coerce"
-    )
+    model_rows["predicted_rank"] = pd.to_numeric(model_rows["predicted_rank"], errors="coerce")
     ranked = model_rows.sort_values(["predicted_rank", "ticker"])
     selected: list[str] = []
     sector_counts: dict[str, int] = {}
@@ -683,16 +666,16 @@ def simulate_phase23i_portfolio(
     initial_capital = float(config["initial_capital"])
     min_order_notional = float(config.get("min_order_notional", 0.0))
     no_trade_band = float(config.get("no_trade_band_weight", 0.0))
-    scenario_cost_rate = (
-        cost.bps_per_one_way_notional + cost.spread_slippage_bps
-    ) / 10000.0
+    scenario_cost_rate = (cost.bps_per_one_way_notional + cost.spread_slippage_bps) / 10000.0
     signal_dates = sorted(
         pd.to_datetime(predictions["signal_date"]).dt.normalize().dropna().unique()
     )
     calendar = _all_calendar_dates(prices)
     shares: dict[str, int] = {}
     cash = initial_capital
-    target_by_exec: dict[pd.Timestamp, tuple[pd.Timestamp, dict[str, float], list[dict[str, Any]]]] = {}
+    target_by_exec: dict[
+        pd.Timestamp, tuple[pd.Timestamp, dict[str, float], list[dict[str, Any]]]
+    ] = {}
 
     for raw_signal_date in signal_dates:
         signal_date = pd.Timestamp(raw_signal_date)
@@ -737,7 +720,9 @@ def simulate_phase23i_portfolio(
             constraints_all.extend(constraints)
             tickers = sorted(set(shares) | set(target_weights))
             opens = {ticker: _price_on(prices, ticker, date, "open") for ticker in tickers}
-            missing_open = [ticker for ticker, price in opens.items() if not np.isfinite(price) or price <= 0]
+            missing_open = [
+                ticker for ticker, price in opens.items() if not np.isfinite(price) or price <= 0
+            ]
             pre_trade_value = cash + sum(
                 shares.get(ticker, 0) * opens.get(ticker, np.nan)
                 for ticker in tickers
@@ -773,9 +758,8 @@ def simulate_phase23i_portfolio(
                         target_shares[ticker] = shares.get(ticker, 0)
                         delta = 0
                         notional = 0.0
-                    order_cost = (
-                        abs(notional) * scenario_cost_rate
-                        + (cost.fixed_commission if delta != 0 else 0.0)
+                    order_cost = abs(notional) * scenario_cost_rate + (
+                        cost.fixed_commission if delta != 0 else 0.0
                     )
                     order_costs[ticker] = order_cost
                     gross_trade_cash += notional
@@ -797,10 +781,7 @@ def simulate_phase23i_portfolio(
                     notional = delta * opens[ticker]
                     if delta == 0:
                         continue
-                    order_cost = (
-                        abs(notional) * scenario_cost_rate
-                        + cost.fixed_commission
-                    )
+                    order_cost = abs(notional) * scenario_cost_rate + cost.fixed_commission
                     direction = "BUY" if delta > 0 else "SELL"
                     order = {
                         "signal_date": signal_date.date().isoformat(),
@@ -971,9 +952,7 @@ def _metric_from_equity(
     frame["date"] = pd.to_datetime(frame["date"])
     frame = frame.sort_values("date")
     value_frame = frame[["date", "net_equity"]].copy()
-    value_frame["net_equity"] = pd.to_numeric(
-        value_frame["net_equity"], errors="coerce"
-    )
+    value_frame["net_equity"] = pd.to_numeric(value_frame["net_equity"], errors="coerce")
     value_frame = value_frame.dropna(subset=["net_equity"])
     if len(value_frame) < 2:
         return {}
@@ -1016,9 +995,7 @@ def _metric_from_equity(
             active = aligned[0] - aligned[1]
             tracking_error = active.std() * np.sqrt(252)
             information_ratio = (
-                active.mean() / active.std() * np.sqrt(252)
-                if active.std() > 0
-                else np.nan
+                active.mean() / active.std() * np.sqrt(252) if active.std() > 0 else np.nan
             )
             benchmark_relative_return = (values.iloc[-1] / values.iloc[0] - 1) - (
                 (1 + aligned[1]).prod() - 1
@@ -1069,9 +1046,9 @@ def _security_attribution(holdings: pd.DataFrame, membership: pd.DataFrame) -> p
     frame["date"] = pd.to_datetime(frame["date"])
     frame = frame.sort_values(["portfolio_id", "cost_scenario", "ticker", "date"])
     frame["market_value"] = pd.to_numeric(frame["market_value"], errors="coerce")
-    frame["daily_contribution"] = frame.groupby(
-        ["portfolio_id", "cost_scenario", "ticker"]
-    )["market_value"].diff()
+    frame["daily_contribution"] = frame.groupby(["portfolio_id", "cost_scenario", "ticker"])[
+        "market_value"
+    ].diff()
     sector = dict(zip(membership["ticker"], membership["sector"], strict=False))
     grouped = (
         frame.groupby(["portfolio_id", "cost_scenario", "ticker"], dropna=False)
@@ -1316,14 +1293,12 @@ def save_phase23i_frozen_cost_aware_portfolio(
             ),
             _gate_row(
                 "phase23g_integrity_passed",
-                not phase23g_gate.empty
-                and bool(phase23g_gate["passed"].map(_bool_value).all()),
+                not phase23g_gate.empty and bool(phase23g_gate["passed"].map(_bool_value).all()),
                 "Phase23G gates pass",
             ),
             _gate_row(
                 "phase23h_integrity_passed",
-                not phase23h_gate.empty
-                and bool(phase23h_gate["passed"].map(_bool_value).all()),
+                not phase23h_gate.empty and bool(phase23h_gate["passed"].map(_bool_value).all()),
                 "Phase23H gates pass",
             ),
             _gate_row(
@@ -1393,8 +1368,7 @@ def save_phase23i_frozen_cost_aware_portfolio(
                 "model_version": spec.model_version,
                 "top_n": spec.top_n,
                 "weighting": spec.weighting,
-                "primary_preregistered": spec.portfolio_id
-                == section["primary_portfolio_id"],
+                "primary_preregistered": spec.portfolio_id == section["primary_portfolio_id"],
                 "selected_by_phase23i_performance": False,
                 "noncanonical_label": NONCANONICAL_LABEL,
             }
@@ -1483,9 +1457,9 @@ def save_phase23i_frozen_cost_aware_portfolio(
             _gate_row(
                 "cash_and_holdings_reconcile",
                 not combined["daily_equity"].empty
-                and pd.to_numeric(
-                    combined["daily_equity"]["net_equity"], errors="coerce"
-                ).gt(0).all(),
+                and pd.to_numeric(combined["daily_equity"]["net_equity"], errors="coerce")
+                .gt(0)
+                .all(),
                 "positive net equity from simulated holdings/cash",
             ),
             _gate_row(
@@ -1507,9 +1481,7 @@ def save_phase23i_frozen_cost_aware_portfolio(
         historical_metrics["portfolio_id"].eq(section["primary_portfolio_id"])
         & historical_metrics["cost_scenario"].eq("cost_25bps")
     ]
-    primary_survived = (
-        not primary_25.empty and _safe_float(primary_25.iloc[0].get("CAGR")) > 0
-    )
+    primary_survived = not primary_25.empty and _safe_float(primary_25.iloc[0].get("CAGR")) > 0
     summary = pd.DataFrame(
         [
             {
@@ -1657,13 +1629,22 @@ def _archive_shadow_filled_session(
     validation: pd.DataFrame,
     ledger: pd.DataFrame,
 ) -> tuple[pd.DataFrame, str, str]:
-    if filled_path.exists() and not validation.empty and bool(validation.iloc[0].get("session_valid", False)):
+    if (
+        filled_path.exists()
+        and not validation.empty
+        and bool(validation.iloc[0].get("session_valid", False))
+    ):
         filled = _read_csv(filled_path)
-        session_date = str(filled.iloc[0].get("session_date", "unknown")) if not filled.empty else "unknown"
-        signal_date = str(filled.iloc[0].get("selected_signal_date", "unknown")) if not filled.empty else "unknown"
+        session_date = (
+            str(filled.iloc[0].get("session_date", "unknown")) if not filled.empty else "unknown"
+        )
+        signal_date = (
+            str(filled.iloc[0].get("selected_signal_date", "unknown"))
+            if not filled.empty
+            else "unknown"
+        )
         archive_path = (
-            archive_dir
-            / f"shadow_manual_session_filled_{session_date}_signal_{signal_date}.csv"
+            archive_dir / f"shadow_manual_session_filled_{session_date}_signal_{signal_date}.csv"
         )
         archive_path.parent.mkdir(parents=True, exist_ok=True)
         if archive_path.exists():
@@ -1761,9 +1742,7 @@ def _validate_shadow_filled_session(
             blockers.append("filled_row_not_in_current_template")
         else:
             proposed = int(max(_safe_float(template_row.get("proposed_quantity", 0)), 0))
-            filled_quantity = int(
-                max(_safe_float(row.get("simulated_fill_quantity", 0)), 0)
-            )
+            filled_quantity = int(max(_safe_float(row.get("simulated_fill_quantity", 0)), 0))
             if state in {"entered", "partially_entered"} and filled_quantity > proposed:
                 blockers.append("filled_quantity_exceeds_proposed_quantity")
         if side not in {"BUY", "SELL"}:
@@ -1840,17 +1819,13 @@ def _validate_shadow_filled_session(
     return validation, row_validation
 
 
-def _shadow_price_map(
-    *, ranking: pd.DataFrame, target: pd.DataFrame
-) -> dict[str, float]:
+def _shadow_price_map(*, ranking: pd.DataFrame, target: pd.DataFrame) -> dict[str, float]:
     prices: dict[str, float] = {}
     for frame in [ranking, target]:
         if frame.empty or "ticker" not in frame.columns:
             continue
         for row in frame.itertuples(index=False):
-            execution_price = _safe_float(
-                getattr(row, "execution_open_price", np.nan)
-            )
+            execution_price = _safe_float(getattr(row, "execution_open_price", np.nan))
             reference_price = _safe_float(getattr(row, "reference_price", np.nan))
             price = execution_price if execution_price > 0 else reference_price
             if price > 0:
@@ -1882,9 +1857,7 @@ def _shadow_accounting_from_ledger(
     if not ledger.empty:
         working = ledger.copy()
         if "session_date" in working.columns:
-            working["session_date"] = pd.to_datetime(
-                working["session_date"], errors="coerce"
-            )
+            working["session_date"] = pd.to_datetime(working["session_date"], errors="coerce")
         entered = working.loc[
             working.get("session_state", pd.Series(index=working.index, dtype=str))
             .astype(str)
@@ -1919,7 +1892,12 @@ def _shadow_accounting_from_ledger(
                     cash_change = gross - cost
                     cash += cash_change
                 else:
-                    affordable = int(max((cash) / max(price * (1 + float(simulated_cost_bps) / 10000.0), 1e-12), 0))
+                    affordable = int(
+                        max(
+                            (cash) / max(price * (1 + float(simulated_cost_bps) / 10000.0), 1e-12),
+                            0,
+                        )
+                    )
                     executed = min(quantity, affordable)
                     gross = executed * price
                     cost = gross * float(simulated_cost_bps) / 10000.0
@@ -2022,7 +2000,9 @@ def _build_shadow_delta_orders(
         if not target.empty and {"ticker", "target_weight"}.issubset(target.columns)
         else {}
     )
-    all_tickers = sorted(set(target_weights) | {ticker for ticker, qty in shares.items() if qty > 0})
+    all_tickers = sorted(
+        set(target_weights) | {ticker for ticker, qty in shares.items() if qty > 0}
+    )
     target_detail = (
         target.set_index("ticker").to_dict(orient="index")
         if not target.empty and "ticker" in target.columns
@@ -2086,7 +2066,11 @@ def _build_shadow_delta_orders(
         reference_price = _safe_float(detail.get("reference_price", np.nan))
         execution_open_price = _safe_float(detail.get("execution_open_price", np.nan))
         reference_price_date = str(detail.get("reference_price_date", ""))
-        if not reference_price_date and not ranking.empty and "reference_price_date" in ranking.columns:
+        if (
+            not reference_price_date
+            and not ranking.empty
+            and "reference_price_date" in ranking.columns
+        ):
             reference_price_date = (
                 str(
                     ranking.loc[
@@ -2106,12 +2090,8 @@ def _build_shadow_delta_orders(
                 "target_notional": target_notional,
                 "reference_price": reference_price,
                 "reference_price_date": reference_price_date,
-                "expected_execution_date": str(
-                    detail.get("expected_execution_date", "")
-                ),
-                "observed_execution_date": str(
-                    detail.get("observed_execution_date", "")
-                ),
+                "expected_execution_date": str(detail.get("expected_execution_date", "")),
+                "observed_execution_date": str(detail.get("observed_execution_date", "")),
                 "execution_open_price": execution_open_price,
                 "execution_price_available": _bool_value(
                     detail.get("execution_price_available", False)
@@ -2126,9 +2106,7 @@ def _build_shadow_delta_orders(
                 ),
                 "proposed_quantity": abs(delta),
                 "order_side": side,
-                "estimated_order_notional": abs(delta) * price
-                if pd.notna(price)
-                else np.nan,
+                "estimated_order_notional": abs(delta) * price if pd.notna(price) else np.nan,
                 "estimated_transaction_cost": (
                     abs(delta) * price * cost_rate if pd.notna(price) else np.nan
                 ),
@@ -2181,9 +2159,7 @@ def save_phase23i_prospective_shadow_runner(
     post_endpoint_available = bool(
         not phase23j_summary.empty
         and _bool_value(phase23j_summary.iloc[0].get("post_endpoint_data_ready", False))
-        and _bool_value(
-            phase23j_summary.iloc[0].get("prospective_ranking_generated", False)
-        )
+        and _bool_value(phase23j_summary.iloc[0].get("prospective_ranking_generated", False))
     )
     latest_price_date = pd.NaT
     if not phase23j_freshness.empty:
@@ -2199,11 +2175,7 @@ def save_phase23i_prospective_shadow_runner(
             "promotion_allowed",
         ]
     )
-    expected_hash = (
-        str(freeze.iloc[0].get("phase23i_freeze_hash", ""))
-        if not freeze.empty
-        else ""
-    )
+    expected_hash = str(freeze.iloc[0].get("phase23i_freeze_hash", "")) if not freeze.empty else ""
     actual_hash = (
         str(
             freeze_hashes.loc[
@@ -2255,9 +2227,7 @@ def save_phase23i_prospective_shadow_runner(
         latest_ranking = phase23j_ranking.copy().sort_values("predicted_rank")
         latest_ranking.insert(0, "ranking_status", "post_endpoint_prospective_frozen_model")
     elif not predictions.empty:
-        ridge = predictions.loc[
-            predictions["model_version"].astype(str).eq(RIDGE_MODEL)
-        ].copy()
+        ridge = predictions.loc[predictions["model_version"].astype(str).eq(RIDGE_MODEL)].copy()
         if not ridge.empty:
             latest_signal = pd.to_datetime(ridge["signal_date"]).max()
             latest_ranking = ridge.loc[
@@ -2272,9 +2242,7 @@ def save_phase23i_prospective_shadow_runner(
                     "predicted_20d_excess_return_or_ranking_score",
                 ]
             ].copy()
-            latest_ranking.insert(
-                0, "ranking_status", "historical_endpoint_reference_only"
-            )
+            latest_ranking.insert(0, "ranking_status", "historical_endpoint_reference_only")
 
     block_reasons = []
     if not post_endpoint_available:
@@ -2311,16 +2279,14 @@ def save_phase23i_prospective_shadow_runner(
     session_date = datetime.now(timezone.utc).date().isoformat()
     ledger_path = output_dir / "shadow_session_ledger.csv"
     existing_ledger = _read_csv(ledger_path)
-    proposed_orders, positions_before, cash_before, valuation_before = (
-        _build_shadow_delta_orders(
-            target=current_target,
-            ranking=latest_ranking,
-            existing_ledger=existing_ledger,
-            starting_cash=float(section["starting_cash"]),
-            simulated_cost_bps=float(section.get("simulated_cost_bps", 10.0)),
-            portfolio_id=str(section["portfolio_id"]),
-            valuation_date=session_date,
-        )
+    proposed_orders, positions_before, cash_before, valuation_before = _build_shadow_delta_orders(
+        target=current_target,
+        ranking=latest_ranking,
+        existing_ledger=existing_ledger,
+        starting_cash=float(section["starting_cash"]),
+        simulated_cost_bps=float(section.get("simulated_cost_bps", 10.0)),
+        portfolio_id=str(section["portfolio_id"]),
+        valuation_date=session_date,
     )
     if not proposed_orders.empty:
         proposed_orders["session_state"] = "proposed" if order_allowed else "blocked"
@@ -2456,9 +2422,17 @@ def save_phase23i_prospective_shadow_runner(
         [
             _gate_row("model_freeze_present", not freeze.empty, str(source_phase23i_dir)),
             _gate_row("model_hash_matches", model_hash_matches, "frozen spec unchanged"),
-            _gate_row("post_endpoint_data_available", post_endpoint_available, "shadow namespace requires post-endpoint data"),
+            _gate_row(
+                "post_endpoint_data_available",
+                post_endpoint_available,
+                "shadow namespace requires post-endpoint data",
+            ),
             _gate_row("manual_session_template_written", True, "template is output only"),
-            _gate_row("proposed_vs_entered_separation", True, "positions are not updated from proposed orders"),
+            _gate_row(
+                "proposed_vs_entered_separation",
+                True,
+                "positions are not updated from proposed orders",
+            ),
             _gate_row("safety_flags_false", safety_flags_false, "all safety flags false"),
         ]
     )
@@ -2503,7 +2477,9 @@ def save_phase23i_prospective_shadow_runner(
         if not ledger.empty
         else pd.DataFrame(),
         "skipped_blocked_order_history": ledger.loc[
-            ledger.get("session_state", pd.Series(dtype=str)).astype(str).isin(["skipped", "blocked"])
+            ledger.get("session_state", pd.Series(dtype=str))
+            .astype(str)
+            .isin(["skipped", "blocked"])
         ]
         if not ledger.empty
         else pd.DataFrame(),

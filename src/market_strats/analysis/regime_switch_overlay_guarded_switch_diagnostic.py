@@ -31,13 +31,9 @@ def _prepare_offensive_state_frame(
         raise ValueError("offensive_result must contain adj_close")
 
     offensive["signal_price"] = offensive["adj_close"].astype(float)
-    offensive["trend_sma"] = offensive["signal_price"].rolling(
-        trend_sma_days
-    ).mean()
+    offensive["trend_sma"] = offensive["signal_price"].rolling(trend_sma_days).mean()
     offensive["trend_ready"] = offensive["trend_sma"].notna()
-    offensive["trend_distance"] = (
-        offensive["signal_price"] / offensive["trend_sma"]
-    ) - 1.0
+    offensive["trend_distance"] = (offensive["signal_price"] / offensive["trend_sma"]) - 1.0
 
     rolling_high = offensive["signal_price"].cummax()
     offensive["drawdown"] = (offensive["signal_price"] / rolling_high) - 1.0
@@ -66,17 +62,13 @@ def _create_defensive_entry_guard_series(
 
     elif guard_name == "near_high_whipsaw_guard":
         shallow_drawdown = state["drawdown"] > float(near_high_drawdown_threshold)
-        meaningfully_below_trend = state["trend_distance"] <= float(
-            near_high_min_trend_distance
-        )
+        meaningfully_below_trend = state["trend_distance"] <= float(near_high_min_trend_distance)
         allowed = (~shallow_drawdown) | meaningfully_below_trend
 
     elif guard_name == "combined_deep_and_near_high_guard":
         not_deep_drawdown = state["drawdown"] > float(deep_drawdown_threshold)
         shallow_drawdown = state["drawdown"] > float(near_high_drawdown_threshold)
-        meaningfully_below_trend = state["trend_distance"] <= float(
-            near_high_min_trend_distance
-        )
+        meaningfully_below_trend = state["trend_distance"] <= float(near_high_min_trend_distance)
         near_high_allowed = (~shallow_drawdown) | meaningfully_below_trend
         allowed = not_deep_drawdown & near_high_allowed
 
@@ -181,8 +173,7 @@ def _create_guarded_switch_summary(metrics: pd.DataFrame) -> pd.DataFrame:
                 ),
                 "max_drawdown_pct": row["max_drawdown_pct"],
                 "drawdown_delta_vs_baseline_pct_points": round(
-                    float(row["max_drawdown_pct"])
-                    - float(baseline_row["max_drawdown_pct"]),
+                    float(row["max_drawdown_pct"]) - float(baseline_row["max_drawdown_pct"]),
                     3,
                 ),
                 "end_value": row["end_value"],
@@ -286,9 +277,7 @@ def _create_guarded_switch_conclusion(
         holdout_calmar_delta = float(holdout_row["calmar_delta_vs_baseline"])
 
     improves_full_period = (
-        full_cagr_delta > 0.0
-        and full_calmar_delta >= 0.0
-        and full_drawdown_delta >= -1.0
+        full_cagr_delta > 0.0 and full_calmar_delta >= 0.0 and full_drawdown_delta >= -1.0
     )
 
     survives_holdout = (
@@ -299,9 +288,7 @@ def _create_guarded_switch_conclusion(
     )
 
     event_row = event_summary[event_summary["guard_name"] == best_guard]
-    baseline_event_row = event_summary[
-        event_summary["guard_name"] == "baseline_no_guard"
-    ]
+    baseline_event_row = event_summary[event_summary["guard_name"] == "baseline_no_guard"]
 
     switch_reduction_interpretation = "Switch-count comparison unavailable."
 
@@ -317,11 +304,7 @@ def _create_guarded_switch_conclusion(
         [
             {
                 "claim": "A guarded switch rule improves the dynamic baseline.",
-                "status": (
-                    "Survived"
-                    if improves_full_period and survives_holdout
-                    else "Failed"
-                ),
+                "status": ("Survived" if improves_full_period and survives_holdout else "Failed"),
                 "evidence_quality": "Compared guarded variants against dynamic stress-slippage baseline",
                 "interpretation": (
                     f"Best full-period guard was {best_guard}. Full-period CAGR "
@@ -429,9 +412,7 @@ def create_regime_switch_overlay_guarded_switch_diagnostic(
             near_high_min_trend_distance=float(
                 diagnostic_config.get("near_high_min_trend_distance", -0.01)
             ),
-            deep_drawdown_threshold=float(
-                diagnostic_config.get("deep_drawdown_threshold", -0.20)
-            ),
+            deep_drawdown_threshold=float(diagnostic_config.get("deep_drawdown_threshold", -0.20)),
         )
 
         if guard_name == "baseline_no_guard":
@@ -552,9 +533,7 @@ def save_regime_switch_overlay_guarded_switch_diagnostic(
 
     metrics_path = reports_dir / "regime_switch_overlay_guarded_switch_metrics.csv"
     summary_path = reports_dir / "regime_switch_overlay_guarded_switch_summary.csv"
-    event_summary_path = (
-        reports_dir / "regime_switch_overlay_guarded_switch_event_summary.csv"
-    )
+    event_summary_path = reports_dir / "regime_switch_overlay_guarded_switch_event_summary.csv"
     conclusion_path = reports_dir / "phase4d_guarded_switch_conclusion.csv"
     markdown_path = reports_dir / "regime_switch_overlay_guarded_switch.md"
 

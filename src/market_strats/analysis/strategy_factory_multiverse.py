@@ -87,9 +87,7 @@ def parse_universe_config(section: dict[str, Any]) -> dict[str, dict[str, Any]]:
             "symbols": symbols,
             "allow_btc": _bool_value(universe_config.get("allow_btc", False)),
             "btc_caps": [
-                float(cap)
-                for cap in universe_config.get("btc_caps", [])
-                if cap is not None
+                float(cap) for cap in universe_config.get("btc_caps", []) if cap is not None
             ],
         }
 
@@ -134,9 +132,7 @@ def _finalist_rules(section: dict[str, Any]) -> dict[str, Any]:
         "max_drawdown_worse_than_spy_allowed_pp": float(
             rules.get("max_drawdown_worse_than_spy_allowed_pp", 5.0)
         ),
-        "min_rolling_3y_beat_spy_pct": float(
-            rules.get("min_rolling_3y_beat_spy_pct", 60.0)
-        ),
+        "min_rolling_3y_beat_spy_pct": float(rules.get("min_rolling_3y_beat_spy_pct", 60.0)),
         "require_no_live_flags": _bool_value(rules.get("require_no_live_flags", True)),
     }
 
@@ -782,8 +778,8 @@ def _period_metrics(
             btc_average_weight = float(result[btc_col].mean()) if btc_col in result else 0.0
             btc_max_weight = float(result[btc_col].max()) if btc_col in result else 0.0
             cagr_edge = float(metrics["cagr_pct"]) - float(benchmark_metrics["cagr_pct"])
-            drawdown_difference = (
-                float(metrics["max_drawdown_pct"]) - float(benchmark_metrics["max_drawdown_pct"])
+            drawdown_difference = float(metrics["max_drawdown_pct"]) - float(
+                benchmark_metrics["max_drawdown_pct"]
             )
             row = {
                 "universe_name": universe_name,
@@ -939,9 +935,8 @@ def build_phase19a_finalist_classifications(
     rows: list[dict[str, Any]] = []
     for row in leaderboard.to_dict("records"):
         positive_edge = int(row.get("positive_CAGR_edge_periods", 0)) > 0
-        drawdown_ok = (
-            float(row.get("worst_drawdown_difference_vs_SPY", -999.0))
-            >= -float(rules["max_drawdown_worse_than_spy_allowed_pp"])
+        drawdown_ok = float(row.get("worst_drawdown_difference_vs_SPY", -999.0)) >= -float(
+            rules["max_drawdown_worse_than_spy_allowed_pp"]
         )
         rolling_value = row.get("mean_rolling_3y_beat_SPY_pct")
         rolling_calculable = pd.notna(rolling_value)
@@ -993,9 +988,7 @@ def build_phase19a_finalist_classifications(
                 "classification": classification,
                 "positive_cagr_edge_vs_spy_passed": positive_edge,
                 "drawdown_limit_passed": drawdown_ok,
-                "rolling_3y_beat_spy_reference_threshold": rules[
-                    "min_rolling_3y_beat_spy_pct"
-                ],
+                "rolling_3y_beat_spy_reference_threshold": rules["min_rolling_3y_beat_spy_pct"],
                 "rolling_3y_beat_spy_reference_passed": rolling_ok,
                 "high_turnover_flag": high_turnover,
                 "btc_high_caveat": btc_weight > 0,
@@ -1050,13 +1043,9 @@ def build_phase19a_entity_contribution_summary(
         classifications["classification"].astype(str).str.startswith("finalist")
     ].copy()
     finalist_keys = {
-        (row["universe_name"], row["candidate_id"])
-        for row in finalists.to_dict("records")
+        (row["universe_name"], row["candidate_id"]) for row in finalists.to_dict("records")
     }
-    top20_keys = {
-        (row["universe_name"], row["candidate_id"])
-        for row in top20.to_dict("records")
-    }
+    top20_keys = {(row["universe_name"], row["candidate_id"]) for row in top20.to_dict("records")}
     all_symbols = sorted(
         {
             symbol
@@ -1184,7 +1173,9 @@ def _plot_top_equity(
             continue
         series = result.copy()
         series["date"] = pd.to_datetime(series["date"])
-        ax.plot(series["date"], series["equity"], label=f"{row['universe_name']}:{row['candidate_id']}")
+        ax.plot(
+            series["date"], series["equity"], label=f"{row['universe_name']}:{row['candidate_id']}"
+        )
     ax.set_title("Phase 19A Top Candidate Equity Curves")
     ax.set_ylabel("Equity")
     ax.grid(True, alpha=0.25)
@@ -1292,8 +1283,7 @@ def _write_dashboard_index(
     if not entity_summary.empty:
         for row in entity_summary.to_dict("records"):
             lines.append(
-                f"- `{row['symbol']}` finalist count: "
-                f"{int(row['appears_in_finalist_count'])}"
+                f"- `{row['symbol']}` finalist count: {int(row['appears_in_finalist_count'])}"
             )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -1343,9 +1333,7 @@ def save_phase19a_strategy_factory_multiverse(
 ) -> dict[str, Path]:
     section = _phase_config(config)
     output_dir = Path(section.get("output_dir", reports_dir / "strategy_factory/multiverse"))
-    dashboard_dir = Path(
-        section.get("dashboard_dir", output_dir / "dashboard")
-    )
+    dashboard_dir = Path(section.get("dashboard_dir", output_dir / "dashboard"))
     output_dir.mkdir(parents=True, exist_ok=True)
     dashboard_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1399,7 +1387,9 @@ def save_phase19a_strategy_factory_multiverse(
                 symbol for symbol in _real_symbols(symbols) if symbol not in loaded_data
             ]
 
-        available_symbols = [symbol for symbol in symbols if symbol == CASH or symbol in loaded_data]
+        available_symbols = [
+            symbol for symbol in symbols if symbol == CASH or symbol in loaded_data
+        ]
         if "SPY" not in available_symbols or len(_real_symbols(available_symbols)) < 1:
             missing_rows.append(
                 {
@@ -1448,9 +1438,7 @@ def save_phase19a_strategy_factory_multiverse(
             all_metric_frames.append(metrics)
 
     metrics = (
-        pd.concat(all_metric_frames, ignore_index=True)
-        if all_metric_frames
-        else pd.DataFrame()
+        pd.concat(all_metric_frames, ignore_index=True) if all_metric_frames else pd.DataFrame()
     )
     if missing_rows:
         metrics = pd.concat([metrics, pd.DataFrame(missing_rows)], ignore_index=True)

@@ -1,4 +1,5 @@
 """GMA-2 point-in-time multi-asset replay foundation."""
+
 from __future__ import annotations
 
 import hashlib
@@ -55,9 +56,13 @@ def _git_rev(ref: str) -> str:
 
 def verify_accepted_inputs(config: GMA2Config) -> dict[str, str]:
     accepted = config.accepted_inputs
-    data_hash = Path("reports/global_multi_asset_alpha/data_foundation/canonical_selection_hash.txt")
+    data_hash = Path(
+        "reports/global_multi_asset_alpha/data_foundation/canonical_selection_hash.txt"
+    )
     macro_hash = Path("reports/global_multi_asset_alpha/macro_foundation/canonical_macro_hash.txt")
-    macro_manifest = Path("reports/global_multi_asset_alpha/macro_foundation/canonical_macro_manifest.json")
+    macro_manifest = Path(
+        "reports/global_multi_asset_alpha/macro_foundation/canonical_macro_manifest.json"
+    )
     for path in [data_hash, macro_hash, macro_manifest]:
         if not path.exists():
             raise GMA2ReplayError(f"accepted input artifact missing: {path}")
@@ -192,7 +197,9 @@ def normalise_weights(weights: dict[str, float], tolerance: float = 1e-9) -> dic
     return normalised
 
 
-def next_valid_execution_date(signal_date: Any, prices: dict[str, pd.DataFrame], assets: set[str]) -> Any:
+def next_valid_execution_date(
+    signal_date: Any, prices: dict[str, pd.DataFrame], assets: set[str]
+) -> Any:
     candidates: list[Any] = []
     for asset in assets:
         if asset == "CASH":
@@ -202,7 +209,14 @@ def next_valid_execution_date(signal_date: Any, prices: dict[str, pd.DataFrame],
             raise GMA2ReplayError(f"no execution date after signal for {asset}")
         candidates.append(asset_dates[0])
     if not candidates:
-        all_dates = sorted({date for price_frame in prices.values() for date in price_frame.index if date > signal_date})
+        all_dates = sorted(
+            {
+                date
+                for price_frame in prices.values()
+                for date in price_frame.index
+                if date > signal_date
+            }
+        )
         if not all_dates:
             raise GMA2ReplayError("no replay calendar date after cash-only signal")
         return all_dates[0]
@@ -224,7 +238,9 @@ def _price_at(prices: dict[str, pd.DataFrame], asset: str, date: Any, field: str
     return value
 
 
-def _cash_period_return(cash_df: pd.DataFrame, start: Any, end: Any) -> tuple[float, dict[str, Any]]:
+def _cash_period_return(
+    cash_df: pd.DataFrame, start: Any, end: Any
+) -> tuple[float, dict[str, Any]]:
     rows = cash_df.loc[(cash_df["accrual_start"] == start) & (cash_df["accrual_end"] == end)]
     if rows.empty:
         raise GMA2ReplayError(f"missing cash accrual period {start} to {end}")
@@ -253,7 +269,9 @@ def _build_signal_schedule(
             )
             valuation_dates.add(signal_date)
             valuation_dates.add(execution_date)
-    return sorted(events, key=lambda row: (row["observed_execution_date"], row["policy_id"])), valuation_dates
+    return sorted(
+        events, key=lambda row: (row["observed_execution_date"], row["policy_id"])
+    ), valuation_dates
 
 
 def _policy_valuation_dates(
@@ -340,8 +358,7 @@ def run_single_policy_replay(
             target_weights = event["target_weights"]
             assets = set(target_weights) | set(shares)
             pre_value = cash + sum(
-                qty * _price_at(prices, asset, date, "open_raw")
-                for asset, qty in shares.items()
+                qty * _price_at(prices, asset, date, "open_raw") for asset, qty in shares.items()
             )
             current_values = {
                 asset: shares.get(asset, 0.0) * _price_at(prices, asset, date, "open_raw")
@@ -351,7 +368,10 @@ def run_single_policy_replay(
             post_cost_value = pre_value
             for _ in range(5):
                 estimated_abs_trade = sum(
-                    abs(post_cost_value * target_weights.get(asset, 0.0) - current_values.get(asset, 0.0))
+                    abs(
+                        post_cost_value * target_weights.get(asset, 0.0)
+                        - current_values.get(asset, 0.0)
+                    )
                     for asset in assets
                     if asset != "CASH"
                 )
@@ -502,7 +522,8 @@ def run_single_policy_replay(
                     "scheduled_execution_date": event["scheduled_execution_date"],
                     "observed_execution_date": event["observed_execution_date"],
                     "valuation_date": date,
-                    "execution_after_signal": event["observed_execution_date"] > event["signal_date"],
+                    "execution_after_signal": event["observed_execution_date"]
+                    > event["signal_date"],
                     "same_close_execution_allowed": False,
                     "alignment_status": "passed",
                 }
@@ -516,7 +537,9 @@ def run_single_policy_replay(
 def _concat_policy_outputs(outputs: dict[str, dict[str, pd.DataFrame]]) -> dict[str, pd.DataFrame]:
     names = sorted(next(iter(outputs.values())).keys())
     return {
-        name: pd.concat([policy_outputs[name] for policy_outputs in outputs.values()], ignore_index=True)
+        name: pd.concat(
+            [policy_outputs[name] for policy_outputs in outputs.values()], ignore_index=True
+        )
         for name in names
     }
 
@@ -553,8 +576,14 @@ def _rolling_relative(benchmark: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for policy_id, group in benchmark.groupby("policy_id"):
         sorted_group = group.sort_values("valuation_date").copy()
-        sorted_group["rolling_relative_return"] = sorted_group["relative_return"].rolling(2, min_periods=1).mean()
-        rows.extend(sorted_group[["policy_id", "valuation_date", "rolling_relative_return"]].to_dict("records"))
+        sorted_group["rolling_relative_return"] = (
+            sorted_group["relative_return"].rolling(2, min_periods=1).mean()
+        )
+        rows.extend(
+            sorted_group[["policy_id", "valuation_date", "rolling_relative_return"]].to_dict(
+                "records"
+            )
+        )
     return pd.DataFrame(rows)
 
 
@@ -567,7 +596,8 @@ def _money_made_lost(daily: pd.DataFrame) -> pd.DataFrame:
                 "policy_id": policy_id,
                 "start_value": ordered.iloc[0]["portfolio_value"],
                 "end_value": ordered.iloc[-1]["portfolio_value"],
-                "money_made_lost": ordered.iloc[-1]["portfolio_value"] - ordered.iloc[0]["portfolio_value"],
+                "money_made_lost": ordered.iloc[-1]["portfolio_value"]
+                - ordered.iloc[0]["portfolio_value"],
                 "max_drawdown": ordered["drawdown"].min(),
             }
         )
@@ -646,7 +676,9 @@ def _write_outputs(
         "market_inventory_hash": _sha256_file(
             config.paths["data_foundation_report_root"] / "canonical_market_bundle_inventory.csv"
         ),
-        "cash_accrual_hash": _sha256_file(config.paths["canonical_macro_root"] / "canonical_cash_accrual.csv"),
+        "cash_accrual_hash": _sha256_file(
+            config.paths["canonical_macro_root"] / "canonical_cash_accrual.csv"
+        ),
         "macro_observations_hash": _sha256_file(
             config.paths["canonical_macro_root"] / "point_in_time_macro_observations.csv"
         ),
@@ -659,8 +691,7 @@ def _write_outputs(
         "accepted_inputs": accepted,
         "config": config.raw,
         "tables": {
-            name: tables[name].sort_index(axis=1).to_dict(orient="records")
-            for name in csv_names
+            name: tables[name].sort_index(axis=1).to_dict(orient="records") for name in csv_names
         },
     }
     replay_hash = _sha256_text(_stable_json(replay_payload))
@@ -694,7 +725,11 @@ def _write_outputs(
         ("no_lookahead_failures", True, "signal dates precede execution dates"),
         ("next_session_execution_passed", True, "observed execution after signal"),
         ("cash_accrual_passed", True, "DGS3MO calendar-day accrual"),
-        ("portfolio_reconciliation_passed", bool(tables["portfolio_reconciliation"]["reconciliation_passed"].all()), ""),
+        (
+            "portfolio_reconciliation_passed",
+            bool(tables["portfolio_reconciliation"]["reconciliation_passed"].all()),
+            "",
+        ),
         ("replay_reproducibility_passed", True, replay_hash),
         ("required_practical_artifacts_generated", True, "csv_and_charts_written"),
         ("tradingview_preview_generated", True, str(tv_root)),
@@ -721,16 +756,50 @@ def _write_outputs(
     (report_root / "gma2_conclusion.md").write_text(conclusion + "\n", encoding="utf-8")
 
     daily = tables["daily_portfolio_value"]
-    pivot_value = daily.pivot(index="valuation_date", columns="policy_id", values="portfolio_value").reset_index()
-    _write_chart(report_root / "equity_curve_vs_spy.png", "Equity Curve by Smoke Policy", pivot_value, "valuation_date", list(pivot_value.columns[1:]))
-    pivot_dd = daily.pivot(index="valuation_date", columns="policy_id", values="drawdown").reset_index()
-    _write_chart(report_root / "drawdown_curve.png", "Drawdown by Smoke Policy", pivot_dd, "valuation_date", list(pivot_dd.columns[1:]))
+    pivot_value = daily.pivot(
+        index="valuation_date", columns="policy_id", values="portfolio_value"
+    ).reset_index()
+    _write_chart(
+        report_root / "equity_curve_vs_spy.png",
+        "Equity Curve by Smoke Policy",
+        pivot_value,
+        "valuation_date",
+        list(pivot_value.columns[1:]),
+    )
+    pivot_dd = daily.pivot(
+        index="valuation_date", columns="policy_id", values="drawdown"
+    ).reset_index()
+    _write_chart(
+        report_root / "drawdown_curve.png",
+        "Drawdown by Smoke Policy",
+        pivot_dd,
+        "valuation_date",
+        list(pivot_dd.columns[1:]),
+    )
     exposure = tables["daily_exposure"].copy()
     exposure["series"] = exposure["policy_id"] + ":" + exposure["asset"]
-    pivot_exposure = exposure.pivot_table(index="valuation_date", columns="series", values="actual_weight", aggfunc="sum").reset_index()
-    _write_chart(report_root / "exposure_timeline.png", "Exposure Timeline", pivot_exposure, "valuation_date", list(pivot_exposure.columns[1:]))
-    rolling = tables["rolling_relative_performance"].pivot(index="valuation_date", columns="policy_id", values="rolling_relative_return").reset_index()
-    _write_chart(report_root / "rolling_relative_performance.png", "Rolling Relative Performance", rolling, "valuation_date", list(rolling.columns[1:]))
+    pivot_exposure = exposure.pivot_table(
+        index="valuation_date", columns="series", values="actual_weight", aggfunc="sum"
+    ).reset_index()
+    _write_chart(
+        report_root / "exposure_timeline.png",
+        "Exposure Timeline",
+        pivot_exposure,
+        "valuation_date",
+        list(pivot_exposure.columns[1:]),
+    )
+    rolling = (
+        tables["rolling_relative_performance"]
+        .pivot(index="valuation_date", columns="policy_id", values="rolling_relative_return")
+        .reset_index()
+    )
+    _write_chart(
+        report_root / "rolling_relative_performance.png",
+        "Rolling Relative Performance",
+        rolling,
+        "valuation_date",
+        list(rolling.columns[1:]),
+    )
     cash = daily.copy()
     cash["cash_value_series"] = cash["cash_value"]
     cash["invested_value_series"] = cash["invested_value"]
@@ -743,12 +812,32 @@ def _write_outputs(
     )
     trades = tables["trade_log"].copy()
     if not trades.empty:
-        turnover = trades.groupby(["observed_execution_date", "policy_id"], as_index=False)["trade_notional"].sum()
+        turnover = trades.groupby(["observed_execution_date", "policy_id"], as_index=False)[
+            "trade_notional"
+        ].sum()
         turnover["turnover_abs"] = turnover["trade_notional"].abs()
-        pivot_turnover = turnover.pivot(index="observed_execution_date", columns="policy_id", values="turnover_abs").fillna(0).reset_index()
-        _write_chart(report_root / "turnover_timeline.png", "Turnover Timeline", pivot_turnover, "observed_execution_date", list(pivot_turnover.columns[1:]))
+        pivot_turnover = (
+            turnover.pivot(
+                index="observed_execution_date", columns="policy_id", values="turnover_abs"
+            )
+            .fillna(0)
+            .reset_index()
+        )
+        _write_chart(
+            report_root / "turnover_timeline.png",
+            "Turnover Timeline",
+            pivot_turnover,
+            "observed_execution_date",
+            list(pivot_turnover.columns[1:]),
+        )
     else:
-        _write_chart(report_root / "turnover_timeline.png", "Turnover Timeline", pd.DataFrame({"date": [], "turnover": []}), "date", ["turnover"])
+        _write_chart(
+            report_root / "turnover_timeline.png",
+            "Turnover Timeline",
+            pd.DataFrame({"date": [], "turnover": []}),
+            "date",
+            ["turnover"],
+        )
 
     _write_tradingview_preview(config, tables, prices, tv_root)
     return replay_hash
@@ -761,10 +850,21 @@ def _write_tradingview_preview(
     tv_root: Path,
 ) -> None:
     trade_log = tables["trade_log"].copy()
-    symbols = sorted(set(trade_log["asset"]) | {str(config.raw["benchmark"]["symbol"])}) if not trade_log.empty else ["SPY"]
+    symbols = (
+        sorted(set(trade_log["asset"]) | {str(config.raw["benchmark"]["symbol"])})
+        if not trade_log.empty
+        else ["SPY"]
+    )
     (tv_root / "tradingview_watchlist.txt").write_text("\n".join(symbols) + "\n", encoding="utf-8")
     pd.DataFrame(
-        [{"internal_symbol": symbol, "tradingview_symbol": symbol.replace("-", ""), "mapping_status": "preview_only"} for symbol in symbols]
+        [
+            {
+                "internal_symbol": symbol,
+                "tradingview_symbol": symbol.replace("-", ""),
+                "mapping_status": "preview_only",
+            }
+            for symbol in symbols
+        ]
     ).to_csv(tv_root / "tradingview_symbol_mapping.csv", index=False)
 
     signal_preview_rows = []
@@ -803,7 +903,9 @@ def _write_tradingview_preview(
             "do not contain credentials, and do not integrate with a TradingView account.",
         ]
     )
-    (tv_root / "tradingview_setup_instructions.md").write_text(instructions + "\n", encoding="utf-8")
+    (tv_root / "tradingview_setup_instructions.md").write_text(
+        instructions + "\n", encoding="utf-8"
+    )
     pine = "\n".join(
         [
             "//@version=5",
@@ -828,11 +930,15 @@ def run_gma2_replay_foundation(config: GMA2Config) -> GMA2ReplayResult:
         if len(valuation_dates) < 2:
             raise GMA2ReplayError("insufficient replay valuation dates")
         outputs = {
-            policy_id: run_single_policy_replay(config, policy_id, prices, cash, events, valuation_dates)
+            policy_id: run_single_policy_replay(
+                config, policy_id, prices, cash, events, valuation_dates
+            )
             for policy_id in config.smoke_policies
         }
         tables = _concat_policy_outputs(outputs)
-        tables["benchmark_comparison"] = _benchmark_comparison(config, prices, tables["daily_portfolio_value"])
+        tables["benchmark_comparison"] = _benchmark_comparison(
+            config, prices, tables["daily_portfolio_value"]
+        )
         tables["rolling_relative_performance"] = _rolling_relative(tables["benchmark_comparison"])
         tables["money_made_lost_table"] = _money_made_lost(tables["daily_portfolio_value"])
         tables["macro_point_in_time_audit"] = _macro_audit(config, macro, valuation_dates)
@@ -850,9 +956,9 @@ def run_gma2_replay_foundation(config: GMA2Config) -> GMA2ReplayResult:
     except GMA2ReplayError as exc:
         report_root = config.paths["replay_report_root"]
         report_root.mkdir(parents=True, exist_ok=True)
-        pd.DataFrame(
-            [{"gate": "gma2_fail_closed", "passed": False, "detail": str(exc)}]
-        ).to_csv(report_root / "gma2_gate_report.csv", index=False)
+        pd.DataFrame([{"gate": "gma2_fail_closed", "passed": False, "detail": str(exc)}]).to_csv(
+            report_root / "gma2_gate_report.csv", index=False
+        )
         (report_root / "gma2_conclusion.md").write_text(
             f"# GMA-2 Replay Foundation Conclusion\n\nDecision: `gma2_blocked_input_integrity`\n\n{exc}\n",
             encoding="utf-8",

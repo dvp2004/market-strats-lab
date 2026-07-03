@@ -1,4 +1,5 @@
 """GMA-3A transparent strategy tournament configuration."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

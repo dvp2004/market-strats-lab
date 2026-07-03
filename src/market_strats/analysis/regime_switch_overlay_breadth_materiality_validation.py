@@ -118,9 +118,7 @@ def _create_base_guard_inputs(
         near_high_min_trend_distance=float(
             phase4_guard_config.get("near_high_min_trend_distance", -0.01)
         ),
-        deep_drawdown_threshold=float(
-            phase4_guard_config.get("deep_drawdown_threshold", -0.20)
-        ),
+        deep_drawdown_threshold=float(phase4_guard_config.get("deep_drawdown_threshold", -0.20)),
     )
 
     breadth.index = pd.to_datetime(offensive["date"])
@@ -175,18 +173,14 @@ def _create_overlay_for_variant(
         defensive_guard_name = "deep_drawdown_guard"
 
     elif defensive_breadth_threshold is not None:
-        breadth_condition = (
-            guard_inputs["risk_asset_breadth_pct"] <= defensive_breadth_threshold
-        )
+        breadth_condition = guard_inputs["risk_asset_breadth_pct"] <= defensive_breadth_threshold
         defensive_entry_allowed = deep_drawdown_guard & breadth_condition
         defensive_guard_name = (
             f"deep_drawdown_guard_and_defensive_breadth_{defensive_breadth_threshold:.2f}"
         )
 
     else:
-        raise ValueError(
-            "defensive_breadth_threshold must be supplied for breadth variants"
-        )
+        raise ValueError("defensive_breadth_threshold must be supplied for breadth variants")
 
     return run_spy_trend_regime_switch_overlay(
         offensive_result=offensive_result,
@@ -301,8 +295,7 @@ def _create_materiality_summary(
                 "benchmark_max_drawdown_pct": benchmark_row["max_drawdown_pct"],
                 "candidate_max_drawdown_pct": row["max_drawdown_pct"],
                 "drawdown_delta_pct_points": round(
-                    float(row["max_drawdown_pct"])
-                    - float(benchmark_row["max_drawdown_pct"]),
+                    float(row["max_drawdown_pct"]) - float(benchmark_row["max_drawdown_pct"]),
                     3,
                 ),
                 "benchmark_end_value": benchmark_row["end_value"],
@@ -313,8 +306,7 @@ def _create_materiality_summary(
                 ),
                 "benchmark_trade_count": benchmark_row["trade_count"],
                 "candidate_trade_count": row["trade_count"],
-                "trade_count_delta": int(row["trade_count"])
-                - int(benchmark_row["trade_count"]),
+                "trade_count_delta": int(row["trade_count"]) - int(benchmark_row["trade_count"]),
             }
         )
 
@@ -387,9 +379,7 @@ def _create_changed_switch_audit(
 
     if not benchmark_effectiveness.empty:
         benchmark_effectiveness = benchmark_effectiveness.copy()
-        benchmark_effectiveness["switch_key"] = _normalise_switch_key(
-            benchmark_effectiveness
-        )
+        benchmark_effectiveness["switch_key"] = _normalise_switch_key(benchmark_effectiveness)
         removed = removed.merge(
             benchmark_effectiveness[
                 [
@@ -406,9 +396,7 @@ def _create_changed_switch_audit(
 
     if not candidate_effectiveness.empty:
         candidate_effectiveness = candidate_effectiveness.copy()
-        candidate_effectiveness["switch_key"] = _normalise_switch_key(
-            candidate_effectiveness
-        )
+        candidate_effectiveness["switch_key"] = _normalise_switch_key(candidate_effectiveness)
         added = added.merge(
             candidate_effectiveness[
                 [
@@ -520,9 +508,7 @@ def _create_materiality_gate_report(
         return pd.DataFrame()
 
     phase_config = config.get("phase5_breadth_materiality_validation", {})
-    benchmark_variant = str(
-        phase_config.get("benchmark_variant", "phase4_execution_candidate")
-    )
+    benchmark_variant = str(phase_config.get("benchmark_variant", "phase4_execution_candidate"))
 
     full = summary[summary["period"] == "full"].copy()
     holdout = summary[summary["period"] == "holdout"].copy()
@@ -533,21 +519,13 @@ def _create_materiality_gate_report(
     if candidates.empty:
         return pd.DataFrame()
 
-    min_cagr_improvement = float(
-        phase_config.get("min_full_cagr_improvement_pct_points", 0.15)
-    )
-    min_calmar_improvement = float(
-        phase_config.get("min_full_calmar_improvement", 0.005)
-    )
+    min_cagr_improvement = float(phase_config.get("min_full_cagr_improvement_pct_points", 0.15))
+    min_calmar_improvement = float(phase_config.get("min_full_calmar_improvement", 0.005))
     max_holdout_cagr_damage = float(
         phase_config.get("max_allowed_holdout_cagr_damage_pct_points", -0.50)
     )
-    max_holdout_calmar_damage = float(
-        phase_config.get("max_allowed_holdout_calmar_damage", -0.05)
-    )
-    max_drawdown_damage = float(
-        phase_config.get("max_allowed_drawdown_damage_pct_points", -0.50)
-    )
+    max_holdout_calmar_damage = float(phase_config.get("max_allowed_holdout_calmar_damage", -0.05))
+    max_drawdown_damage = float(phase_config.get("max_allowed_drawdown_damage_pct_points", -0.50))
 
     candidates["materiality_score"] = (
         candidates["cagr_delta_pct_points"].astype(float)
@@ -618,9 +596,7 @@ def _create_materiality_gate_report(
                 f"thresholds: {damaged_names}."
             )
 
-    benchmark_events = event_summary[
-        event_summary["variant_name"] == benchmark_variant
-    ]
+    benchmark_events = event_summary[event_summary["variant_name"] == benchmark_variant]
     candidate_events = event_summary[event_summary["variant_name"] == best_variant]
 
     switch_interpretation = "Switch-count comparison unavailable."
@@ -632,8 +608,7 @@ def _create_materiality_gate_report(
         )
         excessive_switch_change = abs(switch_delta) > 10
         switch_interpretation = (
-            f"{best_variant} changed switch count by {switch_delta} versus "
-            f"{benchmark_variant}."
+            f"{best_variant} changed switch count by {switch_delta} versus {benchmark_variant}."
         )
 
     promotion_ready = (
@@ -762,9 +737,7 @@ def create_regime_switch_overlay_breadth_materiality_validation(
     overlay_name = str(overlay_config.get("name", "Regime Switch Overlay"))
     initial_capital = float(config["initial_capital"])
 
-    benchmark_variant = str(
-        phase_config.get("benchmark_variant", "phase4_execution_candidate")
-    )
+    benchmark_variant = str(phase_config.get("benchmark_variant", "phase4_execution_candidate"))
     thresholds = [float(value) for value in phase_config["breadth_thresholds"]]
     segments = _segment_definitions(config)
 
@@ -836,9 +809,7 @@ def create_regime_switch_overlay_breadth_materiality_validation(
             changed_frames.append(changed)
 
     changed_switches = (
-        pd.concat(changed_frames, ignore_index=True)
-        if changed_frames
-        else pd.DataFrame()
+        pd.concat(changed_frames, ignore_index=True) if changed_frames else pd.DataFrame()
     )
     changed_switch_summary = _summarise_changed_switches(changed_switches)
 
@@ -938,12 +909,8 @@ def save_regime_switch_overlay_breadth_materiality_validation(
 
     metrics_path = reports_dir / "regime_switch_overlay_breadth_materiality_metrics.csv"
     summary_path = reports_dir / "regime_switch_overlay_breadth_materiality_summary.csv"
-    event_summary_path = (
-        reports_dir / "regime_switch_overlay_breadth_materiality_event_summary.csv"
-    )
-    changed_switches_path = (
-        reports_dir / "regime_switch_overlay_breadth_changed_switch_audit.csv"
-    )
+    event_summary_path = reports_dir / "regime_switch_overlay_breadth_materiality_event_summary.csv"
+    changed_switches_path = reports_dir / "regime_switch_overlay_breadth_changed_switch_audit.csv"
     changed_switch_summary_path = (
         reports_dir / "regime_switch_overlay_breadth_changed_switch_summary.csv"
     )

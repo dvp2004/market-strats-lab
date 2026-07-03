@@ -93,9 +93,7 @@ def _phase_result_check(
         and "passed" in str(conclusion.iloc[0].get("verdict", "")).lower()
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -275,11 +273,7 @@ def _candidate_has_required_columns(cols: dict[str, str | None]) -> bool:
     return bool(
         cols["date_col"]
         and (cols["candidate_return_col"] or cols["candidate_equity_col"])
-        and (
-            cols["benchmark_return_col"]
-            or cols["benchmark_equity_col"]
-            or cols["price_col"]
-        )
+        and (cols["benchmark_return_col"] or cols["benchmark_equity_col"] or cols["price_col"])
     )
 
 
@@ -290,8 +284,7 @@ def _source_name_passes_strict_policy(
     source_lower = source_name.lower()
 
     required = [
-        str(fragment).lower()
-        for fragment in _as_list(policy.get("required_source_name_fragments"))
+        str(fragment).lower() for fragment in _as_list(policy.get("required_source_name_fragments"))
     ]
     suspicious = [
         str(fragment).lower()
@@ -351,11 +344,7 @@ def _normalise_visual_source(
     else:
         out["mode"] = np.where(out["exposure"] > 0.5, "risk_on", "risk_off")
 
-    out = (
-        out.sort_values("decision_date")
-        .drop_duplicates("decision_date")
-        .reset_index(drop=True)
-    )
+    out = out.sort_values("decision_date").drop_duplicates("decision_date").reset_index(drop=True)
     out["candidate_return"] = out["candidate_return"].replace([np.inf, -np.inf], 0.0).fillna(0.0)
     out["benchmark_return"] = out["benchmark_return"].replace([np.inf, -np.inf], 0.0).fillna(0.0)
     return out
@@ -560,7 +549,9 @@ def _benchmark_comparison(equity: pd.DataFrame, annualisation_days: int) -> pd.D
                 "series": label,
                 "start_value": float(equity[equity_col].iloc[0]),
                 "end_value": float(equity[equity_col].iloc[-1]),
-                "total_return": float(equity[equity_col].iloc[-1] / equity[equity_col].iloc[0] - 1.0),
+                "total_return": float(
+                    equity[equity_col].iloc[-1] / equity[equity_col].iloc[0] - 1.0
+                ),
                 "cagr": cagr,
                 "annualised_volatility": vol,
                 "sharpe_zero_rf": sharpe,
@@ -576,7 +567,8 @@ def _benchmark_comparison(equity: pd.DataFrame, annualisation_days: int) -> pd.D
             "end_value": rows[0]["end_value"] - rows[1]["end_value"],
             "total_return": rows[0]["total_return"] - rows[1]["total_return"],
             "cagr": rows[0]["cagr"] - rows[1]["cagr"],
-            "annualised_volatility": rows[0]["annualised_volatility"] - rows[1]["annualised_volatility"],
+            "annualised_volatility": rows[0]["annualised_volatility"]
+            - rows[1]["annualised_volatility"],
             "sharpe_zero_rf": rows[0]["sharpe_zero_rf"] - rows[1]["sharpe_zero_rf"],
             "max_drawdown": rows[0]["max_drawdown"] - rows[1]["max_drawdown"],
             "calmar": rows[0]["calmar"] - rows[1]["calmar"],
@@ -593,8 +585,7 @@ def _switch_log(equity: pd.DataFrame) -> pd.DataFrame:
     previous_exposure = frame["exposure"].shift(1)
     previous_mode = frame["mode"].shift(1)
     switches = frame[
-        (frame["exposure"].ne(previous_exposure))
-        | (frame["mode"].ne(previous_mode))
+        (frame["exposure"].ne(previous_exposure)) | (frame["mode"].ne(previous_mode))
     ].copy()
 
     switches = switches.iloc[1:].copy() if len(switches) > 1 else switches.iloc[0:0].copy()
@@ -649,24 +640,18 @@ def _trade_log(equity: pd.DataFrame) -> pd.DataFrame:
                 "entry_candidate_equity": float(group["candidate_equity"].iloc[0]),
                 "exit_candidate_equity": float(group["candidate_equity"].iloc[-1]),
                 "candidate_pnl": float(
-                    group["candidate_equity"].iloc[-1]
-                    - group["candidate_equity"].iloc[0]
+                    group["candidate_equity"].iloc[-1] - group["candidate_equity"].iloc[0]
                 ),
                 "benchmark_pnl": float(
-                    group["benchmark_equity"].iloc[-1]
-                    - group["benchmark_equity"].iloc[0]
+                    group["benchmark_equity"].iloc[-1] - group["benchmark_equity"].iloc[0]
                 ),
                 "candidate_segment_return": float(
-                    group["candidate_equity"].iloc[-1]
-                    / group["candidate_equity"].iloc[0]
-                    - 1.0
+                    group["candidate_equity"].iloc[-1] / group["candidate_equity"].iloc[0] - 1.0
                 )
                 if group["candidate_equity"].iloc[0]
                 else 0.0,
                 "benchmark_segment_return": float(
-                    group["benchmark_equity"].iloc[-1]
-                    / group["benchmark_equity"].iloc[0]
-                    - 1.0
+                    group["benchmark_equity"].iloc[-1] / group["benchmark_equity"].iloc[0] - 1.0
                 )
                 if group["benchmark_equity"].iloc[0]
                 else 0.0,
@@ -686,7 +671,10 @@ def _money_made_lost(equity: pd.DataFrame, trade_log: pd.DataFrame) -> pd.DataFr
         [
             {"metric": "corrected_candidate_total_pnl", "value": candidate_end - candidate_start},
             {"metric": "benchmark_total_pnl", "value": benchmark_end - benchmark_start},
-            {"metric": "corrected_candidate_minus_benchmark_pnl", "value": candidate_end - benchmark_end},
+            {
+                "metric": "corrected_candidate_minus_benchmark_pnl",
+                "value": candidate_end - benchmark_end,
+            },
             {
                 "metric": "winning_trade_segments",
                 "value": int((trade_log["candidate_pnl"] > 0).sum()) if not trade_log.empty else 0,
@@ -846,12 +834,22 @@ def _write_corrected_visual_outputs(
     drawdown.to_csv(reports_path / "phase14g_corrected_visual_drawdown_curve.csv", index=False)
     exposure.to_csv(reports_path / "phase14g_corrected_visual_exposure_timeline.csv", index=False)
     trade_log.to_csv(reports_path / "phase14g_corrected_visual_trade_log.csv", index=False)
-    switch_event_log.to_csv(reports_path / "phase14g_corrected_visual_switch_event_log.csv", index=False)
+    switch_event_log.to_csv(
+        reports_path / "phase14g_corrected_visual_switch_event_log.csv", index=False
+    )
     money.to_csv(reports_path / "phase14g_corrected_visual_money_made_lost_table.csv", index=False)
-    benchmark.to_csv(reports_path / "phase14g_corrected_visual_benchmark_comparison.csv", index=False)
-    rolling.to_csv(reports_path / "phase14g_corrected_visual_rolling_relative_performance.csv", index=False)
-    signal_preview.to_csv(reports_path / "phase14g_corrected_visual_signal_template_preview.csv", index=False)
-    current_signal.to_csv(reports_path / "phase14g_corrected_visual_current_signal_state_report.csv", index=False)
+    benchmark.to_csv(
+        reports_path / "phase14g_corrected_visual_benchmark_comparison.csv", index=False
+    )
+    rolling.to_csv(
+        reports_path / "phase14g_corrected_visual_rolling_relative_performance.csv", index=False
+    )
+    signal_preview.to_csv(
+        reports_path / "phase14g_corrected_visual_signal_template_preview.csv", index=False
+    )
+    current_signal.to_csv(
+        reports_path / "phase14g_corrected_visual_current_signal_state_report.csv", index=False
+    )
 
     _save_line_chart(
         equity,
@@ -912,9 +910,7 @@ def _candidate_metric_row(benchmark: pd.DataFrame) -> pd.Series | None:
     if benchmark.empty or "series" not in benchmark.columns:
         return None
 
-    candidate = benchmark[
-        benchmark["series"].astype(str).str.lower().eq("corrected_candidate")
-    ]
+    candidate = benchmark[benchmark["series"].astype(str).str.lower().eq("corrected_candidate")]
 
     if candidate.empty:
         return None
@@ -988,7 +984,9 @@ def _metric_reconciliation_report(
             {
                 "system_id": system.get("system_id", ""),
                 "label": system.get("label", ""),
-                "required_in_side_by_side": _bool_value(system.get("required_in_side_by_side", False)),
+                "required_in_side_by_side": _bool_value(
+                    system.get("required_in_side_by_side", False)
+                ),
                 "compare_to_corrected_candidate": compare_to_candidate,
                 "expected_cagr": expected_cagr,
                 "observed_cagr": observed_cagr,
@@ -1141,9 +1139,8 @@ def save_phase14g_candidate_source_correction_visual_rerun(
         index=False,
     )
 
-    corrected_source_passed = (
-        not source_resolution.empty
-        and _bool_value(source_resolution.iloc[0].get("corrected_source_identity_passed", False))
+    corrected_source_passed = not source_resolution.empty and _bool_value(
+        source_resolution.iloc[0].get("corrected_source_identity_passed", False)
     )
     required_non_empty_visual_outputs = [
         "equity_curve",
@@ -1170,8 +1167,7 @@ def save_phase14g_candidate_source_correction_visual_rerun(
     )
 
     optional_outputs_present = bool(
-        visual_outputs
-        and all(key in visual_outputs for key in optional_empty_visual_outputs)
+        visual_outputs and all(key in visual_outputs for key in optional_empty_visual_outputs)
     )
 
     corrected_visual_reports_generated = bool(
@@ -1203,12 +1199,16 @@ def save_phase14g_candidate_source_correction_visual_rerun(
                 "execution_role": section.get("execution_role", ""),
                 "implementation_classification": section.get("implementation_classification", ""),
                 "phase14f_passed": bool(phase14f_check["passed"].all()),
-                "source_reports_present": bool(source_check["present"].all()) if not source_check.empty else False,
+                "source_reports_present": bool(source_check["present"].all())
+                if not source_check.empty
+                else False,
                 "correction_required_from_phase14f": correction_required,
                 "corrected_source_identity_passed": corrected_source_passed,
                 "corrected_visual_reports_generated": corrected_visual_reports_generated,
                 "current_signal_state_report_generated": current_signal_generated,
-                "metric_reconciliation_passed": bool(metric_reconciliation["metric_reconciliation_passed"].all())
+                "metric_reconciliation_passed": bool(
+                    metric_reconciliation["metric_reconciliation_passed"].all()
+                )
                 if not metric_reconciliation.empty
                 else False,
                 "side_by_side_rows": len(side_by_side),
@@ -1228,17 +1228,31 @@ def save_phase14g_candidate_source_correction_visual_rerun(
     gate_report = pd.DataFrame(
         [
             _gate_row("Phase 14F passed", bool(summary.iloc[0]["phase14f_passed"]), "phase14f"),
-            _gate_row("Correction required from Phase 14F", correction_required, "correction_required"),
-            _gate_row("Strict source resolution report exists", len(source_resolution) == 1, "source resolution"),
+            _gate_row(
+                "Correction required from Phase 14F", correction_required, "correction_required"
+            ),
+            _gate_row(
+                "Strict source resolution report exists",
+                len(source_resolution) == 1,
+                "source resolution",
+            ),
             _gate_row("Corrected source identity passed", corrected_source_passed, "strict source"),
             _gate_row(
                 "Corrected visual reports generated",
                 corrected_visual_reports_generated,
                 "visual outputs",
             ),
-            _gate_row("Current signal state report exists", current_signal_generated, "current signal"),
-            _gate_row("Side-by-side comparison report exists", len(side_by_side) >= 5, f"rows={len(side_by_side)}"),
-            _gate_row("Phase 14H boundary is audit-only", bool(boundary["passed"].all()), "phase14h"),
+            _gate_row(
+                "Current signal state report exists", current_signal_generated, "current signal"
+            ),
+            _gate_row(
+                "Side-by-side comparison report exists",
+                len(side_by_side) >= 5,
+                f"rows={len(side_by_side)}",
+            ),
+            _gate_row(
+                "Phase 14H boundary is audit-only", bool(boundary["passed"].all()), "phase14h"
+            ),
             _gate_row(
                 "No paper workflow/live trading/promotion",
                 bool(
@@ -1270,7 +1284,9 @@ def save_phase14g_candidate_source_correction_visual_rerun(
                 ),
                 "all_gates_passed": bool(gate_report["passed"].all()),
                 "corrected_source_identity_passed": corrected_source_passed,
-                "metric_reconciliation_passed": bool(summary.iloc[0]["metric_reconciliation_passed"]),
+                "metric_reconciliation_passed": bool(
+                    summary.iloc[0]["metric_reconciliation_passed"]
+                ),
                 "paper_trading_ready": False,
                 "strategy_promotion": False,
                 "candidate_promotion": False,
@@ -1360,21 +1376,17 @@ def _reconciliation_decision_report(
     current_signal: pd.DataFrame,
     section: dict[str, Any],
 ) -> pd.DataFrame:
-    corrected_source_identity_passed = (
-        not source_resolution.empty
-        and _bool_value(source_resolution.iloc[0].get("corrected_source_identity_passed", False))
+    corrected_source_identity_passed = not source_resolution.empty and _bool_value(
+        source_resolution.iloc[0].get("corrected_source_identity_passed", False)
     )
-    metric_reconciliation_passed = (
-        not metric_reconciliation.empty
-        and bool(metric_reconciliation["metric_reconciliation_passed"].all())
+    metric_reconciliation_passed = not metric_reconciliation.empty and bool(
+        metric_reconciliation["metric_reconciliation_passed"].all()
     )
-    current_signal_state_determined = (
-        not current_signal.empty
-        and _bool_value(current_signal.iloc[0].get("signal_determined", False))
+    current_signal_state_determined = not current_signal.empty and _bool_value(
+        current_signal.iloc[0].get("signal_determined", False)
     )
-    phase14g_passed = (
-        not phase14g_conclusion.empty
-        and _bool_value(phase14g_conclusion.iloc[0].get("all_gates_passed", False))
+    phase14g_passed = not phase14g_conclusion.empty and _bool_value(
+        phase14g_conclusion.iloc[0].get("all_gates_passed", False)
     )
 
     paper_workflow_allowed = bool(
@@ -1455,9 +1467,7 @@ def save_phase14h_corrected_visual_backtest_audit_reconciliation_decision(
     corrected_source_identity_passed = _bool_value(
         decision.iloc[0]["corrected_source_identity_passed"]
     )
-    metric_reconciliation_passed = _bool_value(
-        decision.iloc[0]["metric_reconciliation_passed"]
-    )
+    metric_reconciliation_passed = _bool_value(decision.iloc[0]["metric_reconciliation_passed"])
     no_paper_workflow_if_failed = not (
         (not corrected_source_identity_passed or not metric_reconciliation_passed)
         and _bool_value(decision.iloc[0]["paper_workflow_preregistration_allowed"])
@@ -1470,8 +1480,12 @@ def save_phase14h_corrected_visual_backtest_audit_reconciliation_decision(
                 "implementation_classification": section.get("implementation_classification", ""),
                 "phase14g_passed": bool(phase14g_check["passed"].all()),
                 "config_flags_clean": bool(flags["passed"].all()),
-                "all_corrected_reports_present": bool(inventory["present"].all()) if not inventory.empty else False,
-                "corrected_report_rows_non_empty": bool(inventory["passed"].all()) if not inventory.empty else False,
+                "all_corrected_reports_present": bool(inventory["present"].all())
+                if not inventory.empty
+                else False,
+                "corrected_report_rows_non_empty": bool(inventory["passed"].all())
+                if not inventory.empty
+                else False,
                 "chart_files_present": bool(charts["passed"].all()) if not charts.empty else False,
                 "corrected_source_identity_passed": corrected_source_identity_passed,
                 "metric_reconciliation_passed": metric_reconciliation_passed,
@@ -1493,15 +1507,39 @@ def save_phase14h_corrected_visual_backtest_audit_reconciliation_decision(
     gate_report = pd.DataFrame(
         [
             _gate_row("Phase 14G passed", bool(summary.iloc[0]["phase14g_passed"]), "phase14g"),
-            _gate_row("Config flags clean", bool(summary.iloc[0]["config_flags_clean"]), "runtime flags"),
-            _gate_row("All corrected reports present", bool(summary.iloc[0]["all_corrected_reports_present"]), "reports"),
-            _gate_row("Chart files present", bool(summary.iloc[0]["chart_files_present"]), "charts"),
-            _gate_row("Corrected source identity passed", corrected_source_identity_passed, "source identity"),
-            _gate_row("Metric reconciliation report exists", len(metric_reconciliation) > 0, "metrics"),
-            _gate_row("Reconciliation decision report exists", len(decision) == 1, str(decision.iloc[0]["decision"])),
-            _gate_row("Current signal state report exists", len(current_signal) == 1, "signal state"),
-            _gate_row("No paper workflow if failed", no_paper_workflow_if_failed, "paper workflow gate"),
-            _gate_row("Phase 14I boundary is conditional-only", bool(boundary["passed"].all()), "phase14i"),
+            _gate_row(
+                "Config flags clean", bool(summary.iloc[0]["config_flags_clean"]), "runtime flags"
+            ),
+            _gate_row(
+                "All corrected reports present",
+                bool(summary.iloc[0]["all_corrected_reports_present"]),
+                "reports",
+            ),
+            _gate_row(
+                "Chart files present", bool(summary.iloc[0]["chart_files_present"]), "charts"
+            ),
+            _gate_row(
+                "Corrected source identity passed",
+                corrected_source_identity_passed,
+                "source identity",
+            ),
+            _gate_row(
+                "Metric reconciliation report exists", len(metric_reconciliation) > 0, "metrics"
+            ),
+            _gate_row(
+                "Reconciliation decision report exists",
+                len(decision) == 1,
+                str(decision.iloc[0]["decision"]),
+            ),
+            _gate_row(
+                "Current signal state report exists", len(current_signal) == 1, "signal state"
+            ),
+            _gate_row(
+                "No paper workflow if failed", no_paper_workflow_if_failed, "paper workflow gate"
+            ),
+            _gate_row(
+                "Phase 14I boundary is conditional-only", bool(boundary["passed"].all()), "phase14i"
+            ),
             _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()), "scope"),
             _gate_row(
                 "Audit role is correct",

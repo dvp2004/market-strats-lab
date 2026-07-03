@@ -138,10 +138,7 @@ def _read_csv_if_exists(path: str | Path) -> pd.DataFrame:
 def _load_template_tables(phase_config: dict[str, Any]) -> dict[str, pd.DataFrame]:
     paths = phase_config.get("source_template_reports", {})
 
-    return {
-        key: _read_csv_if_exists(path)
-        for key, path in paths.items()
-    }
+    return {key: _read_csv_if_exists(path) for key, path in paths.items()}
 
 
 def build_phase11f_source_template_inventory(
@@ -149,9 +146,7 @@ def build_phase11f_source_template_inventory(
 ) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
 
-    for report_key, report_path in phase_config.get(
-        "source_template_reports", {}
-    ).items():
+    for report_key, report_path in phase_config.get("source_template_reports", {}).items():
         path = Path(str(report_path))
         frame = _read_csv_if_exists(path)
 
@@ -181,9 +176,10 @@ def build_phase11f_phase11e_result_check(
 
     if not phase11e_conclusion.empty:
         verdict = str(phase11e_conclusion.iloc[0].get("verdict", ""))
-        conclusion_passed = _bool_value(
-            phase11e_conclusion.iloc[0].get("all_gates_passed", False)
-        ) and "passed" in verdict.lower()
+        conclusion_passed = (
+            _bool_value(phase11e_conclusion.iloc[0].get("all_gates_passed", False))
+            and "passed" in verdict.lower()
+        )
 
     schema_passed = (
         bool(schema_compliance["schema_passed"].map(_bool_value).all())
@@ -237,9 +233,7 @@ def build_phase11f_component_content_check(
 
     active_rows = (
         component_availability[
-            component_availability["component_id"]
-            .astype(str)
-            .isin(expected_active_components)
+            component_availability["component_id"].astype(str).isin(expected_active_components)
         ]
         if not component_availability.empty and "component_id" in component_availability
         else pd.DataFrame()
@@ -375,12 +369,7 @@ def build_phase11f_weighting_content_check(
         else False
     )
     empirical_weights_blocked = (
-        bool(
-            weighting["empirical_return_weight_allowed"]
-            .map(_bool_value)
-            .eq(False)
-            .all()
-        )
+        bool(weighting["empirical_return_weight_allowed"].map(_bool_value).eq(False).all())
         if not weighting.empty and "empirical_return_weight_allowed" in weighting
         else False
     )
@@ -482,9 +471,7 @@ def build_phase11f_boundary_content_check(
         if not boundary.empty and "boundary_item" in boundary
         else set()
     )
-    missing_items = [
-        item for item in expected_boundary_items if item not in actual_items
-    ]
+    missing_items = [item for item in expected_boundary_items if item not in actual_items]
 
     allowed_false = (
         bool(boundary["allowed"].map(_bool_value).eq(False).all())
@@ -540,27 +527,20 @@ def build_phase11f_phase11g_boundary_check(
         {
             "boundary_item": "phase11g_allowed_next_step",
             "value": str(boundary.get("allowed_next_step", "")),
-            "passed": "closeout audit" in str(
-                boundary.get("allowed_next_step", "")
-            ).lower(),
+            "passed": "closeout audit" in str(boundary.get("allowed_next_step", "")).lower(),
         },
         {
             "boundary_item": "phase11g_forbidden_next_step",
             "value": str(boundary.get("forbidden_next_step", "")),
             "passed": (
-                "score calculation"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "strategy"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "promotion"
-                in str(boundary.get("forbidden_next_step", "")).lower()
+                "score calculation" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "strategy" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "promotion" in str(boundary.get("forbidden_next_step", "")).lower()
             ),
         },
         {
             "boundary_item": "phase11g_may_close_diagnostic_panel_branch",
-            "value": _bool_value(
-                boundary.get("phase11g_may_close_diagnostic_panel_branch", False)
-            ),
+            "value": _bool_value(boundary.get("phase11g_may_close_diagnostic_panel_branch", False)),
             "passed": _bool_value(
                 boundary.get("phase11g_may_close_diagnostic_panel_branch", False)
             ),
@@ -568,51 +548,37 @@ def build_phase11f_phase11g_boundary_check(
         {
             "boundary_item": "phase11g_may_calculate_scores",
             "value": _bool_value(boundary.get("phase11g_may_calculate_scores", True)),
-            "passed": not _bool_value(
-                boundary.get("phase11g_may_calculate_scores", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase11g_may_calculate_scores", True)),
         },
         {
             "boundary_item": "phase11g_may_assign_weights",
             "value": _bool_value(boundary.get("phase11g_may_assign_weights", True)),
-            "passed": not _bool_value(
-                boundary.get("phase11g_may_assign_weights", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase11g_may_assign_weights", True)),
         },
         {
             "boundary_item": "phase11g_may_create_signal",
             "value": _bool_value(boundary.get("phase11g_may_create_signal", True)),
-            "passed": not _bool_value(
-                boundary.get("phase11g_may_create_signal", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase11g_may_create_signal", True)),
         },
         {
             "boundary_item": "phase11g_may_test_strategy",
             "value": _bool_value(boundary.get("phase11g_may_test_strategy", True)),
-            "passed": not _bool_value(
-                boundary.get("phase11g_may_test_strategy", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase11g_may_test_strategy", True)),
         },
         {
             "boundary_item": "phase11g_may_train_model",
             "value": _bool_value(boundary.get("phase11g_may_train_model", True)),
-            "passed": not _bool_value(
-                boundary.get("phase11g_may_train_model", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase11g_may_train_model", True)),
         },
         {
             "boundary_item": "phase11g_may_ingest_new_data",
             "value": _bool_value(boundary.get("phase11g_may_ingest_new_data", True)),
-            "passed": not _bool_value(
-                boundary.get("phase11g_may_ingest_new_data", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase11g_may_ingest_new_data", True)),
         },
         {
             "boundary_item": "phase11g_may_promote_candidate",
             "value": _bool_value(boundary.get("phase11g_may_promote_candidate", True)),
-            "passed": not _bool_value(
-                boundary.get("phase11g_may_promote_candidate", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase11g_may_promote_candidate", True)),
         },
     ]
 
@@ -671,9 +637,7 @@ def build_phase11f_summary(
                 "phase_branch": str(phase_config.get("phase_branch", "")),
                 "source_phase": str(phase_config.get("source_phase", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "source_templates_present": bool(
-                    source_template_inventory["present"].all()
-                )
+                "source_templates_present": bool(source_template_inventory["present"].all())
                 if not source_template_inventory.empty
                 else False,
                 "source_template_count": int(len(source_template_inventory)),
@@ -686,17 +650,13 @@ def build_phase11f_summary(
                 "direction_content_passed": bool(direction_content_check["passed"].all())
                 if not direction_content_check.empty
                 else False,
-                "missingness_content_passed": bool(
-                    missingness_content_check["passed"].all()
-                )
+                "missingness_content_passed": bool(missingness_content_check["passed"].all())
                 if not missingness_content_check.empty
                 else False,
                 "weighting_content_passed": bool(weighting_content_check["passed"].all())
                 if not weighting_content_check.empty
                 else False,
-                "blocked_family_content_passed": bool(
-                    blocked_family_content_check["passed"].all()
-                )
+                "blocked_family_content_passed": bool(blocked_family_content_check["passed"].all())
                 if not blocked_family_content_check.empty
                 else False,
                 "boundary_content_passed": bool(boundary_content_check["passed"].all())
@@ -759,8 +719,7 @@ def build_phase11f_gate_report(
         ),
         _gate_row(
             "Phase 11E template audit remains passed",
-            (not gates.get("require_phase11e_passed", True))
-            or bool(row["phase11e_result_passed"]),
+            (not gates.get("require_phase11e_passed", True)) or bool(row["phase11e_result_passed"]),
             f"phase11e_result_passed={bool(row['phase11e_result_passed'])}",
         ),
         _gate_row(
@@ -797,10 +756,7 @@ def build_phase11f_gate_report(
             "Blocked-family content is consistent",
             (not gates.get("require_blocked_family_content_consistency", True))
             or bool(row["blocked_family_content_passed"]),
-            (
-                "blocked_family_content_passed="
-                f"{bool(row['blocked_family_content_passed'])}"
-            ),
+            (f"blocked_family_content_passed={bool(row['blocked_family_content_passed'])}"),
         ),
         _gate_row(
             "Boundary content is consistent",
@@ -824,17 +780,12 @@ def build_phase11f_gate_report(
             "No numeric score weights are allowed",
             (not gates.get("require_no_numeric_score_weights", True))
             or not _bool_value(phase_config.get("allow_numeric_score_weights", True)),
-            (
-                "allow_numeric_score_weights="
-                f"{phase_config.get('allow_numeric_score_weights')}"
-            ),
+            (f"allow_numeric_score_weights={phase_config.get('allow_numeric_score_weights')}"),
         ),
         _gate_row(
             "No empirical return weights are allowed",
             (not gates.get("require_no_empirical_return_weights", True))
-            or not _bool_value(
-                phase_config.get("allow_empirical_return_weights", True)
-            ),
+            or not _bool_value(phase_config.get("allow_empirical_return_weights", True)),
             (
                 "allow_empirical_return_weights="
                 f"{phase_config.get('allow_empirical_return_weights')}"
@@ -849,9 +800,7 @@ def build_phase11f_gate_report(
         _gate_row(
             "No allocation rule creation is allowed",
             (not gates.get("require_no_allocation_rule_creation", True))
-            or not _bool_value(
-                phase_config.get("allow_allocation_rule_creation", True)
-            ),
+            or not _bool_value(phase_config.get("allow_allocation_rule_creation", True)),
             (
                 "allow_allocation_rule_creation="
                 f"{phase_config.get('allow_allocation_rule_creation')}"
@@ -1069,12 +1018,10 @@ def save_phase11f_regime_scoring_diagnostic_panel_content_audit(
             str(item) for item in _as_list(phase_config.get("expected_components"))
         ],
         expected_active_components=[
-            str(item)
-            for item in _as_list(phase_config.get("expected_active_components"))
+            str(item) for item in _as_list(phase_config.get("expected_active_components"))
         ],
         expected_blocked_families=[
-            str(item)
-            for item in _as_list(phase_config.get("expected_blocked_families"))
+            str(item) for item in _as_list(phase_config.get("expected_blocked_families"))
         ],
     )
     direction_content_check = build_phase11f_direction_content_check(
@@ -1083,8 +1030,7 @@ def save_phase11f_regime_scoring_diagnostic_panel_content_audit(
             pd.DataFrame(),
         ),
         expected_active_components=[
-            str(item)
-            for item in _as_list(phase_config.get("expected_active_components"))
+            str(item) for item in _as_list(phase_config.get("expected_active_components"))
         ],
         expected_directions=[
             str(item) for item in _as_list(phase_config.get("expected_directions"))
@@ -1099,15 +1045,13 @@ def save_phase11f_regime_scoring_diagnostic_panel_content_audit(
     blocked_family_content_check = build_phase11f_blocked_family_content_check(
         blocked_family=template_tables.get("blocked_family_report", pd.DataFrame()),
         expected_blocked_families=[
-            str(item)
-            for item in _as_list(phase_config.get("expected_blocked_families"))
+            str(item) for item in _as_list(phase_config.get("expected_blocked_families"))
         ],
     )
     boundary_content_check = build_phase11f_boundary_content_check(
         boundary=template_tables.get("boundary_report", pd.DataFrame()),
         expected_boundary_items=[
-            str(item)
-            for item in _as_list(phase_config.get("expected_boundary_items"))
+            str(item) for item in _as_list(phase_config.get("expected_boundary_items"))
         ],
     )
     phase11g_boundary_check = build_phase11f_phase11g_boundary_check(phase_config)
@@ -1199,8 +1143,7 @@ def save_phase11f_regime_scoring_diagnostic_panel_content_audit(
         summary=summary,
         gate_report=gate_report,
         conclusion=conclusion,
-        output_path=reports_path
-        / "phase11f_regime_scoring_diagnostic_panel_content_audit.md",
+        output_path=reports_path / "phase11f_regime_scoring_diagnostic_panel_content_audit.md",
     )
 
     print("Wrote Phase 11F regime scoring diagnostic panel content audit reports.")

@@ -128,9 +128,7 @@ def _v2_score_frame(scores_for_signal: pd.DataFrame) -> pd.DataFrame:
     frame = scores_for_signal.loc[scores_for_signal["symbol"] != "CASH"].copy()
     if frame.empty:
         return frame
-    frame["base_opportunity_score"] = pd.to_numeric(
-        frame["opportunity_score"], errors="coerce"
-    )
+    frame["base_opportunity_score"] = pd.to_numeric(frame["opportunity_score"], errors="coerce")
     frame["fast_momentum_z"] = _zscore(frame.get("return_21d", pd.Series(index=frame.index)))
     frame["medium_momentum_z"] = _zscore(frame.get("return_63d", pd.Series(index=frame.index)))
     frame["volatility_z"] = _zscore(frame.get("volatility_63d", pd.Series(index=frame.index)))
@@ -165,9 +163,9 @@ def _v2_score_frame(scores_for_signal: pd.DataFrame) -> pd.DataFrame:
         & (drawdown.fillna(-1.0) >= -0.35)
         & ((above_50 >= 0.5) | (above_200 >= 0.5))
     )
-    frame["positive_trend_breadth_member"] = (
-        frame["v2_conviction_score"].fillna(-np.inf) > 0
-    ) & (above_200 >= 0.5)
+    frame["positive_trend_breadth_member"] = (frame["v2_conviction_score"].fillna(-np.inf) > 0) & (
+        above_200 >= 0.5
+    )
     return frame
 
 
@@ -212,9 +210,7 @@ def _conviction_weights(frame: pd.DataFrame, spec: V2StrategySpec) -> pd.Series:
     score = pd.to_numeric(selected["v2_conviction_score"], errors="coerce")
     score = (score - score.min() + 0.05).clip(lower=0.01) ** spec.score_power
     score = score / score.sum()
-    inv_vol = 1.0 / pd.to_numeric(
-        selected["volatility_63d"], errors="coerce"
-    ).clip(lower=1e-6)
+    inv_vol = 1.0 / pd.to_numeric(selected["volatility_63d"], errors="coerce").clip(lower=1e-6)
     inv_vol = inv_vol.replace([np.inf, -np.inf], np.nan).dropna()
     if inv_vol.empty:
         return score
@@ -337,9 +333,7 @@ def _weights_for_signal_v2(
             _defensive_weights(scores_for_signal, 1.0 - risk_budget),
             fill_value=0.0,
         )
-        allocation_reason = (
-            f"{spec.mode}_risk_budget_{risk_budget:.2f}_breadth_{breadth:.2f}"
-        )
+        allocation_reason = f"{spec.mode}_risk_budget_{risk_budget:.2f}_breadth_{breadth:.2f}"
 
     raw = raw[raw > 1e-12]
     if raw.sum() < 1.0:
@@ -667,9 +661,7 @@ def _return_enhancement_scorecard(
         return_pass = bool(pd.notna(best_v1_cagr) and cagr >= best_v1_cagr + min_cagr_improvement)
         spy_dd = float(spy.get("max_drawdown", np.nan))
         drawdown_pass = bool(
-            pd.notna(spy_dd)
-            and pd.notna(max_dd)
-            and max_dd >= spy_dd - max_drawdown_worsening
+            pd.notna(spy_dd) and pd.notna(max_dd) and max_dd >= spy_dd - max_drawdown_worsening
         )
         cost_pass = bool(pd.notna(cost_drag) and cost_drag <= max_cost_drag)
         rolling_pass = bool(pd.isna(rolling_win) or rolling_win >= min_rolling_win)
@@ -682,7 +674,9 @@ def _return_enhancement_scorecard(
                 "max_drawdown": max_dd,
                 "max_drawdown_vs_SPY_pp": max_dd - spy_dd if pd.notna(spy_dd) else np.nan,
                 "Calmar": calmar,
-                "Calmar_vs_best_v1": calmar - best_v1_calmar if pd.notna(best_v1_calmar) else np.nan,
+                "Calmar_vs_best_v1": calmar - best_v1_calmar
+                if pd.notna(best_v1_calmar)
+                else np.nan,
                 "rolling_3y_win_rate_vs_SPY": rolling_win,
                 "CAGR_0bps": cagr_0,
                 "CAGR_25bps": cagr_25,
@@ -837,10 +831,14 @@ def _write_research_summary(
         scorecard.to_markdown(index=False) if not scorecard.empty else "No scorecard available.",
         "",
         "Turnover diagnostics:",
-        turnover.to_markdown(index=False) if not turnover.empty else "No turnover diagnostics available.",
+        turnover.to_markdown(index=False)
+        if not turnover.empty
+        else "No turnover diagnostics available.",
         "",
         "Latest score-to-weight audit:",
-        latest_audit.to_markdown(index=False) if not latest_audit.empty else "No latest allocation audit available.",
+        latest_audit.to_markdown(index=False)
+        if not latest_audit.empty
+        else "No latest allocation audit available.",
         "",
         "Interpretation: Phase22C is a constrained research test. Passing a research gate does not authorize promotion, paper tracking, live trading, real money, or broker connectivity.",
     ]
@@ -986,8 +984,7 @@ def save_phase22c_dynamic_opportunity_return_enhancement(
 
     starting_cash = float(section.get("starting_cash", 10_000))
     transaction_cost_cases = [
-        int(value)
-        for value in section.get("transaction_cost_bps_cases", [0, 10, 25])
+        int(value) for value in section.get("transaction_cost_bps_cases", [0, 10, 25])
     ]
     for required_case in (0, 25):
         if required_case not in transaction_cost_cases:
@@ -1019,9 +1016,7 @@ def save_phase22c_dynamic_opportunity_return_enhancement(
         starting_cash=starting_cash,
         transaction_cost_cases=transaction_cost_cases,
     )
-    v2_drawdowns = (
-        _daily_drawdowns(v2_equity) if not v2_equity.empty else pd.DataFrame()
-    )
+    v2_drawdowns = _daily_drawdowns(v2_equity) if not v2_equity.empty else pd.DataFrame()
     turnover = _turnover_diagnostics(v2_events, v2_costs)
     latest_audit = _latest_allocation_audit(
         scores=scores,
@@ -1029,9 +1024,7 @@ def save_phase22c_dynamic_opportunity_return_enhancement(
         events=v2_events,
     )
 
-    v0_equity = _read_csv(
-        phase22a_dir / "phase22a_dynamic_strategy_daily_equity.csv"
-    )
+    v0_equity = _read_csv(phase22a_dir / "phase22a_dynamic_strategy_daily_equity.csv")
     v1_equity = _read_csv(phase22b_dir / "phase22b_v1_daily_equity.csv")
     benchmark_path = (
         root
@@ -1078,12 +1071,10 @@ def save_phase22c_dynamic_opportunity_return_enhancement(
     )
 
     any_return_gate = bool(
-        not scorecard.empty
-        and scorecard["return_enhancement_pass"].map(_bool_value).any()
+        not scorecard.empty and scorecard["return_enhancement_pass"].map(_bool_value).any()
     )
     any_all_research_gates = bool(
-        not scorecard.empty
-        and scorecard["all_research_gates_passed"].map(_bool_value).any()
+        not scorecard.empty and scorecard["all_research_gates_passed"].map(_bool_value).any()
     )
     if any_all_research_gates:
         decision = "phase22c_v2_candidate_passed_research_gates_not_promoted"
@@ -1124,9 +1115,7 @@ def save_phase22c_dynamic_opportunity_return_enhancement(
         ]
     )
     all_gates_passed = bool(gates["passed"].map(_bool_value).all())
-    best_strategy = (
-        str(scorecard.iloc[0]["strategy_name"]) if not scorecard.empty else ""
-    )
+    best_strategy = str(scorecard.iloc[0]["strategy_name"]) if not scorecard.empty else ""
     summary = pd.DataFrame(
         [
             {

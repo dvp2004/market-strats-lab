@@ -1,4 +1,5 @@
 """GMA-2 point-in-time replay foundation configuration."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

@@ -29,7 +29,12 @@ def _as_list(value: Any) -> list[Any]:
 
 
 def _gate_row(gate: str, passed: bool, detail: str) -> dict[str, Any]:
-    return {"gate": gate, "passed": bool(passed), "result": "Passed" if passed else "Failed", "detail": detail}
+    return {
+        "gate": gate,
+        "passed": bool(passed),
+        "result": "Passed" if passed else "Failed",
+        "detail": detail,
+    }
 
 
 def _config_section(config: dict[str, Any], key: str) -> dict[str, Any]:
@@ -56,11 +61,21 @@ def _phase_result_check(conclusion_path: str, gate_path: str, phase_name: str) -
         and _bool_value(conclusion.iloc[0].get("all_gates_passed", False))
         and "passed" in str(conclusion.iloc[0].get("verdict", "")).lower()
     )
-    gate_passed = not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
+    gate_passed = (
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
+    )
     out = pd.DataFrame(
         [
-            {"check": f"{phase_name} conclusion passed", "passed": conclusion_passed, "detail": "conclusion"},
-            {"check": f"{phase_name} gate report passed", "passed": gate_passed, "detail": "gate_report"},
+            {
+                "check": f"{phase_name} conclusion passed",
+                "passed": conclusion_passed,
+                "detail": "conclusion",
+            },
+            {
+                "check": f"{phase_name} gate report passed",
+                "passed": gate_passed,
+                "detail": "gate_report",
+            },
         ]
     )
     out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
@@ -112,12 +127,23 @@ def save_phase13y_ml_diagnostic_repair_preregistration(
 
     continuation_is_repair = (
         not decision.empty
-        and str(decision.iloc[0].get("decision", "")) == "continue_only_after_model_diagnostic_repair"
+        and str(decision.iloc[0].get("decision", ""))
+        == "continue_only_after_model_diagnostic_repair"
     )
 
     boundary_rows = [
-        {"boundary": "phase13z", "allowed": section.get("phase13z_boundary", {}).get("allowed_next_step", ""), "passed": "readiness" in str(section.get("phase13z_boundary", {}).get("allowed_next_step", "")).lower()},
-        {"boundary": "phase13aa", "allowed": section.get("phase13aa_boundary", {}).get("allowed_future_step", ""), "passed": "train/validation" in str(section.get("phase13aa_boundary", {}).get("allowed_future_step", "")).lower()},
+        {
+            "boundary": "phase13z",
+            "allowed": section.get("phase13z_boundary", {}).get("allowed_next_step", ""),
+            "passed": "readiness"
+            in str(section.get("phase13z_boundary", {}).get("allowed_next_step", "")).lower(),
+        },
+        {
+            "boundary": "phase13aa",
+            "allowed": section.get("phase13aa_boundary", {}).get("allowed_future_step", ""),
+            "passed": "train/validation"
+            in str(section.get("phase13aa_boundary", {}).get("allowed_future_step", "")).lower(),
+        },
     ]
     boundary = pd.DataFrame(boundary_rows)
     boundary["result"] = boundary["passed"].map({True: "Passed", False: "Failed"})
@@ -127,7 +153,9 @@ def save_phase13y_ml_diagnostic_repair_preregistration(
         [
             {
                 "spec_role": section.get("spec_role", ""),
-                "source_reports_present": bool(source_check["present"].all()) if not source_check.empty else False,
+                "source_reports_present": bool(source_check["present"].all())
+                if not source_check.empty
+                else False,
                 "phase13x_passed": bool(phase13x_check["passed"].all()),
                 "continuation_is_repair": continuation_is_repair,
                 "repair_target_rows": len(targets),
@@ -148,13 +176,25 @@ def save_phase13y_ml_diagnostic_repair_preregistration(
     gate = pd.DataFrame(
         [
             _gate_row("Phase 13X passed", bool(summary.iloc[0]["phase13x_passed"]), "phase13x"),
-            _gate_row("Continuation decision requires repair", continuation_is_repair, str(decision.iloc[0].get("decision", "")) if not decision.empty else "missing"),
+            _gate_row(
+                "Continuation decision requires repair",
+                continuation_is_repair,
+                str(decision.iloc[0].get("decision", "")) if not decision.empty else "missing",
+            ),
             _gate_row("Repair targets registered", len(targets) >= 3, f"rows={len(targets)}"),
-            _gate_row("Repair hypotheses registered", len(hypotheses) >= 4, f"rows={len(hypotheses)}"),
-            _gate_row("Success gates registered", len(success_gates) == 1, f"rows={len(success_gates)}"),
+            _gate_row(
+                "Repair hypotheses registered", len(hypotheses) >= 4, f"rows={len(hypotheses)}"
+            ),
+            _gate_row(
+                "Success gates registered", len(success_gates) == 1, f"rows={len(success_gates)}"
+            ),
             _gate_row("Boundaries passed", bool(boundary["passed"].all()), "phase13z/phase13aa"),
             _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()), "scope"),
-            _gate_row("Spec role is correct", section.get("spec_role") == "ML diagnostic repair pre-registration spec only", section.get("spec_role", "")),
+            _gate_row(
+                "Spec role is correct",
+                section.get("spec_role") == "ML diagnostic repair pre-registration spec only",
+                section.get("spec_role", ""),
+            ),
         ]
     )
     gate["all_gates_passed"] = bool(gate["passed"].all())
@@ -164,7 +204,9 @@ def save_phase13y_ml_diagnostic_repair_preregistration(
             {
                 "phase": "Phase 13Y",
                 "diagnostic": "ML diagnostic repair pre-registration spec",
-                "verdict": "Completed — ML diagnostic repair pre-registration spec passed" if bool(gate["passed"].all()) else "Failed ML diagnostic repair pre-registration spec",
+                "verdict": "Completed — ML diagnostic repair pre-registration spec passed"
+                if bool(gate["passed"].all())
+                else "Failed ML diagnostic repair pre-registration spec",
                 "all_gates_passed": bool(gate["passed"].all()),
                 "strategy_promotion": False,
                 "candidate_promotion": False,
@@ -207,7 +249,14 @@ def save_phase13z_ml_diagnostic_repair_readiness_audit(
     flags = []
     for key, expected in section.get("expected_runtime_flags", {}).items():
         actual = config.get(key, {}).get("enabled")
-        flags.append({"config_key": key, "expected": expected, "actual": actual, "passed": actual is expected})
+        flags.append(
+            {
+                "config_key": key,
+                "expected": expected,
+                "actual": actual,
+                "passed": actual is expected,
+            }
+        )
     config_check = pd.DataFrame(flags)
     config_check["result"] = config_check["passed"].map({True: "Passed", False: "Failed"})
 
@@ -241,8 +290,15 @@ def save_phase13z_ml_diagnostic_repair_readiness_audit(
             _gate_row("Config flags clean", bool(summary.iloc[0]["config_flags_clean"]), "flags"),
             _gate_row("Repair hypotheses present", len(hypotheses) >= 4, f"rows={len(hypotheses)}"),
             _gate_row("Success gates present", len(success) == 1, f"rows={len(success)}"),
-            _gate_row("Scope blocks forbidden actions", bool(summary.iloc[0]["scope_passed"]), "scope"),
-            _gate_row("Audit role is correct", section.get("audit_role") == "ML diagnostic repair readiness and boundary audit only", section.get("audit_role", "")),
+            _gate_row(
+                "Scope blocks forbidden actions", bool(summary.iloc[0]["scope_passed"]), "scope"
+            ),
+            _gate_row(
+                "Audit role is correct",
+                section.get("audit_role")
+                == "ML diagnostic repair readiness and boundary audit only",
+                section.get("audit_role", ""),
+            ),
         ]
     )
     gate["all_gates_passed"] = bool(gate["passed"].all())
@@ -252,7 +308,9 @@ def save_phase13z_ml_diagnostic_repair_readiness_audit(
             {
                 "phase": "Phase 13Z",
                 "diagnostic": "ML diagnostic repair readiness audit",
-                "verdict": "Completed — ML diagnostic repair readiness audit passed" if bool(gate["passed"].all()) else "Failed ML diagnostic repair readiness audit",
+                "verdict": "Completed — ML diagnostic repair readiness audit passed"
+                if bool(gate["passed"].all())
+                else "Failed ML diagnostic repair readiness audit",
                 "all_gates_passed": bool(gate["passed"].all()),
                 "strategy_promotion": False,
                 "candidate_promotion": False,
@@ -285,14 +343,27 @@ def _feature_columns(dataset: pd.DataFrame, section: dict[str, Any]) -> tuple[li
     categorical_prefixes = tuple(_as_list(prefixes.get("categorical")))
     forbidden = [str(x).lower() for x in _as_list(policy.get("forbidden_feature_fragments"))]
 
-    numeric = [c for c in dataset.columns if str(c).startswith(numeric_prefixes) and not any(f in str(c).lower() for f in forbidden)]
-    categorical = [c for c in dataset.columns if str(c).startswith(categorical_prefixes) and not any(f in str(c).lower() for f in forbidden)]
+    numeric = [
+        c
+        for c in dataset.columns
+        if str(c).startswith(numeric_prefixes) and not any(f in str(c).lower() for f in forbidden)
+    ]
+    categorical = [
+        c
+        for c in dataset.columns
+        if str(c).startswith(categorical_prefixes)
+        and not any(f in str(c).lower() for f in forbidden)
+    ]
     return numeric, categorical
 
 
 def _make_preprocessor(numeric: list[str], categorical: list[str]) -> ColumnTransformer:
-    numeric_pipe = Pipeline([("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())])
-    categorical_pipe = Pipeline([("imputer", SimpleImputer(strategy="most_frequent")), ("onehot", _safe_one_hot_encoder())])
+    numeric_pipe = Pipeline(
+        [("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())]
+    )
+    categorical_pipe = Pipeline(
+        [("imputer", SimpleImputer(strategy="most_frequent")), ("onehot", _safe_one_hot_encoder())]
+    )
     return ColumnTransformer(
         [("numeric", numeric_pipe, numeric), ("categorical", categorical_pipe, categorical)],
         remainder="drop",
@@ -344,14 +415,18 @@ def _model_rows(dataset: pd.DataFrame, section: dict[str, Any], split: str) -> p
     return frame.reset_index(drop=True)
 
 
-def _metrics(model_id: str, split: str, y_true: pd.Series, y_pred: np.ndarray, labels: list[str]) -> dict[str, Any]:
+def _metrics(
+    model_id: str, split: str, y_true: pd.Series, y_pred: np.ndarray, labels: list[str]
+) -> dict[str, Any]:
     return {
         "repair_id": model_id,
         "split_label": split,
         "rows": len(y_true),
         "balanced_accuracy": balanced_accuracy_score(y_true, y_pred),
         "macro_f1": f1_score(y_true, y_pred, labels=labels, average="macro", zero_division=0),
-        "macro_recall": recall_score(y_true, y_pred, labels=labels, average="macro", zero_division=0),
+        "macro_recall": recall_score(
+            y_true, y_pred, labels=labels, average="macro", zero_division=0
+        ),
         "model_selected": False,
         "signal_created": False,
     }
@@ -369,7 +444,9 @@ def save_phase13aa_registered_ml_diagnostic_repair_execution(
     reports_path.mkdir(parents=True, exist_ok=True)
 
     source = section.get("source_reports", {})
-    z_check = _phase_result_check(source["phase13z_conclusion"], source["phase13z_gate_report"], "Phase 13Z")
+    z_check = _phase_result_check(
+        source["phase13z_conclusion"], source["phase13z_gate_report"], "Phase 13Z"
+    )
     dataset = _read_csv_if_exists(source["dataset"])
     y_hypotheses = _read_csv_if_exists(
         reports_path / "phase13y_repair_prereg_hypothesis_registry.csv"
@@ -402,7 +479,12 @@ def save_phase13aa_registered_ml_diagnostic_repair_execution(
             continue
 
         repair_id = str(hyp["repair_id"])
-        model = Pipeline([("preprocessor", _make_preprocessor(numeric, categorical)), ("model", _make_repair_model(hyp))])
+        model = Pipeline(
+            [
+                ("preprocessor", _make_preprocessor(numeric, categorical)),
+                ("model", _make_repair_model(hyp)),
+            ]
+        )
         model.fit(x_train, y_train)
 
         train_pred = model.predict(x_train)
@@ -427,7 +509,9 @@ def save_phase13aa_registered_ml_diagnostic_repair_execution(
         for cls in labels:
             cls_mask = y_val.eq(cls)
             support = int(cls_mask.sum())
-            correct = int((pd.Series(val_pred).astype(str).eq(cls) & cls_mask.reset_index(drop=True)).sum())
+            correct = int(
+                (pd.Series(val_pred).astype(str).eq(cls) & cls_mask.reset_index(drop=True)).sum()
+            )
             recall = correct / support if support else 0.0
             recall_rows.append(
                 {
@@ -545,7 +629,9 @@ def save_phase13aa_registered_ml_diagnostic_repair_execution(
     success_rows = []
     for _, row in metrics[metrics["split_label"].eq("validation")].iterrows():
         repair_id = row["repair_id"]
-        fragile = recalls[(recalls["repair_id"].eq(repair_id)) & (recalls["class_label"].eq("fragile"))]
+        fragile = recalls[
+            (recalls["repair_id"].eq(repair_id)) & (recalls["class_label"].eq("fragile"))
+        ]
         overfit_row = overfit[overfit["repair_id"].eq(repair_id)].iloc[0]
         fragile_recall = float(fragile.iloc[0]["validation_recall"]) if not fragile.empty else 0.0
         success_rows.append(
@@ -558,9 +644,12 @@ def save_phase13aa_registered_ml_diagnostic_repair_execution(
                 "delta_macro_f1_vs_majority": row["macro_f1"] - majority_f1,
                 "balanced_accuracy_gap": overfit_row["balanced_accuracy_gap"],
                 "macro_f1_gap": overfit_row["macro_f1_gap"],
-                "passes_fragile_recall_gate": fragile_recall >= float(gate_values.get("min_validation_fragile_recall", 0.20)),
-                "passes_majority_edge_gate": (row["balanced_accuracy"] - majority_bal) >= float(gate_values.get("min_delta_balanced_accuracy_vs_majority", 0.05)),
-                "passes_overfit_gate": overfit_row["balanced_accuracy_gap"] <= float(gate_values.get("max_balanced_accuracy_overfit_gap", 0.30)),
+                "passes_fragile_recall_gate": fragile_recall
+                >= float(gate_values.get("min_validation_fragile_recall", 0.20)),
+                "passes_majority_edge_gate": (row["balanced_accuracy"] - majority_bal)
+                >= float(gate_values.get("min_delta_balanced_accuracy_vs_majority", 0.05)),
+                "passes_overfit_gate": overfit_row["balanced_accuracy_gap"]
+                <= float(gate_values.get("max_balanced_accuracy_overfit_gap", 0.30)),
                 "model_selected": False,
                 "signal_permission": False,
                 "holdout_permission": False,
@@ -574,12 +663,18 @@ def save_phase13aa_registered_ml_diagnostic_repair_execution(
             {
                 "execution_role": section.get("execution_role", ""),
                 "phase13z_passed": bool(z_check["passed"].all()),
-                "repair_models_trained": int(execution["trained"].map(_bool_value).sum()) if not execution.empty else 0,
+                "repair_models_trained": int(execution["trained"].map(_bool_value).sum())
+                if not execution.empty
+                else 0,
                 "metric_rows": len(metrics),
                 "class_recall_rows": len(recalls),
                 "overfit_rows": len(overfit),
                 "validation_prediction_rows": len(preds),
-                "validation_predictions_only": bool(preds["split_label"].astype(str).eq("validation").all()) if not preds.empty else False,
+                "validation_predictions_only": bool(
+                    preds["split_label"].astype(str).eq("validation").all()
+                )
+                if not preds.empty
+                else False,
                 "scope_passed": bool(scope["passed"].all()),
                 "holdout_predictions": False,
                 "feature_importance": False,
@@ -593,13 +688,28 @@ def save_phase13aa_registered_ml_diagnostic_repair_execution(
     gate = pd.DataFrame(
         [
             _gate_row("Phase 13Z passed", bool(summary.iloc[0]["phase13z_passed"]), "phase13z"),
-            _gate_row("Repair models trained", int(summary.iloc[0]["repair_models_trained"]) >= 4, f"models={summary.iloc[0]['repair_models_trained']}"),
+            _gate_row(
+                "Repair models trained",
+                int(summary.iloc[0]["repair_models_trained"]) >= 4,
+                f"models={summary.iloc[0]['repair_models_trained']}",
+            ),
             _gate_row("Metric report exists", len(metrics) >= 8, f"rows={len(metrics)}"),
             _gate_row("Class recall report exists", len(recalls) >= 12, f"rows={len(recalls)}"),
             _gate_row("Overfit report exists", len(overfit) >= 4, f"rows={len(overfit)}"),
-            _gate_row("Validation predictions only", bool(summary.iloc[0]["validation_predictions_only"]), "validation only"),
-            _gate_row("Scope blocks forbidden actions", bool(summary.iloc[0]["scope_passed"]), "scope"),
-            _gate_row("Execution role is correct", section.get("execution_role") == "Registered ML diagnostic repair execution on train/validation only", section.get("execution_role", "")),
+            _gate_row(
+                "Validation predictions only",
+                bool(summary.iloc[0]["validation_predictions_only"]),
+                "validation only",
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions", bool(summary.iloc[0]["scope_passed"]), "scope"
+            ),
+            _gate_row(
+                "Execution role is correct",
+                section.get("execution_role")
+                == "Registered ML diagnostic repair execution on train/validation only",
+                section.get("execution_role", ""),
+            ),
         ]
     )
     gate["all_gates_passed"] = bool(gate["passed"].all())
@@ -609,7 +719,9 @@ def save_phase13aa_registered_ml_diagnostic_repair_execution(
             {
                 "phase": "Phase 13AA",
                 "diagnostic": "Registered ML diagnostic repair execution",
-                "verdict": "Completed — registered ML diagnostic repair execution passed" if bool(gate["passed"].all()) else "Failed registered ML diagnostic repair execution",
+                "verdict": "Completed — registered ML diagnostic repair execution passed"
+                if bool(gate["passed"].all())
+                else "Failed registered ML diagnostic repair execution",
                 "all_gates_passed": bool(gate["passed"].all()),
                 "strategy_promotion": False,
                 "candidate_promotion": False,
@@ -668,7 +780,9 @@ def save_phase13ab_ml_diagnostic_repair_result_audit(
             {
                 "audit_role": section.get("audit_role", ""),
                 "phase13aa_passed": bool(aa_check["passed"].all()),
-                "reports_present": bool(inventory["present"].all()) if not inventory.empty else False,
+                "reports_present": bool(inventory["present"].all())
+                if not inventory.empty
+                else False,
                 "success_report_rows": len(success),
                 "prediction_boundary_passed": prediction_boundary_passed,
                 "scope_passed": bool(scope["passed"].all()),
@@ -685,11 +799,22 @@ def save_phase13ab_ml_diagnostic_repair_result_audit(
     gate = pd.DataFrame(
         [
             _gate_row("Phase 13AA passed", bool(summary.iloc[0]["phase13aa_passed"]), "phase13aa"),
-            _gate_row("Result reports present", bool(summary.iloc[0]["reports_present"]), "inventory"),
+            _gate_row(
+                "Result reports present", bool(summary.iloc[0]["reports_present"]), "inventory"
+            ),
             _gate_row("Repair success report exists", len(success) > 0, f"rows={len(success)}"),
-            _gate_row("Validation predictions only", prediction_boundary_passed, "prediction boundary"),
-            _gate_row("Scope blocks forbidden actions", bool(summary.iloc[0]["scope_passed"]), "scope"),
-            _gate_row("Audit role is correct", section.get("audit_role") == "ML diagnostic repair result quality and leakage audit only", section.get("audit_role", "")),
+            _gate_row(
+                "Validation predictions only", prediction_boundary_passed, "prediction boundary"
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions", bool(summary.iloc[0]["scope_passed"]), "scope"
+            ),
+            _gate_row(
+                "Audit role is correct",
+                section.get("audit_role")
+                == "ML diagnostic repair result quality and leakage audit only",
+                section.get("audit_role", ""),
+            ),
         ]
     )
     gate["all_gates_passed"] = bool(gate["passed"].all())
@@ -699,7 +824,9 @@ def save_phase13ab_ml_diagnostic_repair_result_audit(
             {
                 "phase": "Phase 13AB",
                 "diagnostic": "ML diagnostic repair result quality audit",
-                "verdict": "Completed — ML diagnostic repair result quality audit passed" if bool(gate["passed"].all()) else "Failed ML diagnostic repair result quality audit",
+                "verdict": "Completed — ML diagnostic repair result quality audit passed"
+                if bool(gate["passed"].all())
+                else "Failed ML diagnostic repair result quality audit",
                 "all_gates_passed": bool(gate["passed"].all()),
                 "strategy_promotion": False,
                 "candidate_promotion": False,
@@ -711,7 +838,15 @@ def save_phase13ab_ml_diagnostic_repair_result_audit(
     outputs = {
         "report_inventory_check": inventory,
         "phase13aa_result_check": aa_check,
-        "prediction_boundary_check": pd.DataFrame([{"check": "validation_predictions_only", "passed": prediction_boundary_passed, "result": "Passed" if prediction_boundary_passed else "Failed"}]),
+        "prediction_boundary_check": pd.DataFrame(
+            [
+                {
+                    "check": "validation_predictions_only",
+                    "passed": prediction_boundary_passed,
+                    "result": "Passed" if prediction_boundary_passed else "Failed",
+                }
+            ]
+        ),
         "scope_boundary_check": scope,
         "summary": summary,
         "gate_report": gate,

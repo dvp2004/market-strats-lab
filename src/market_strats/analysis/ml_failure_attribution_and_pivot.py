@@ -63,9 +63,7 @@ def _phase_result_check(conclusion_path: str, gate_path: str, phase_name: str) -
         and "passed" in str(conclusion.iloc[0].get("verdict", "")).lower()
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -144,9 +142,7 @@ def build_phase13ac_failure_summary_report(
     max_overfit_gap = float(thresholds.get("max_acceptable_overfit_gap", 0.30))
 
     fragile_rows = (
-        repair_class_recall[
-            repair_class_recall["class_label"].astype(str).eq("fragile")
-        ].copy()
+        repair_class_recall[repair_class_recall["class_label"].astype(str).eq("fragile")].copy()
         if not repair_class_recall.empty and "class_label" in repair_class_recall.columns
         else pd.DataFrame()
     )
@@ -312,7 +308,9 @@ def build_phase13ac_failure_attribution_report(
 
     row = failure_summary.iloc[0]
     fragile_unresolved = not _bool_value(row["any_repair_passed_fragile_recall"])
-    repair_did_not_beat_original = not _bool_value(row["best_repair_beats_original_balanced_accuracy"])
+    repair_did_not_beat_original = not _bool_value(
+        row["best_repair_beats_original_balanced_accuracy"]
+    )
     class_imbalance_issue = (
         bool(class_imbalance["class_imbalance_issue"].map(_bool_value).any())
         if not class_imbalance.empty
@@ -391,7 +389,9 @@ def build_phase13ac_continuation_options_report(
         if not failure_attribution.empty
         else pd.DataFrame()
     )
-    high_families = set(high_issues["attribution_family"].astype(str)) if not high_issues.empty else set()
+    high_families = (
+        set(high_issues["attribution_family"].astype(str)) if not high_issues.empty else set()
+    )
 
     rows = [
         {
@@ -436,7 +436,9 @@ def _boundary_report(section: dict[str, Any]) -> pd.DataFrame:
     for key in ["phase13ad_boundary", "phase13ae_boundary"]:
         boundary = section.get(key, {})
         allowed = str(boundary.get("allowed_next_step", boundary.get("allowed_future_step", "")))
-        forbidden = str(boundary.get("forbidden_next_step", boundary.get("forbidden_future_step", "")))
+        forbidden = str(
+            boundary.get("forbidden_next_step", boundary.get("forbidden_future_step", ""))
+        )
         rows.append(
             {
                 "boundary": key,
@@ -500,9 +502,7 @@ def save_phase13ac_ml_failure_attribution_diagnostic(
         class_imbalance=class_imbalance,
         phase_config=section,
     )
-    continuation_options = build_phase13ac_continuation_options_report(
-        failure_attribution
-    )
+    continuation_options = build_phase13ac_continuation_options_report(failure_attribution)
     boundary = _boundary_report(section)
     scope = _scope_check(section)
 
@@ -511,7 +511,9 @@ def save_phase13ac_ml_failure_attribution_diagnostic(
             {
                 "diagnostic_role": section.get("diagnostic_role", ""),
                 "phase13ab_passed": bool(phase13ab_check["passed"].all()),
-                "source_reports_present": bool(source_check["present"].all()) if not source_check.empty else False,
+                "source_reports_present": bool(source_check["present"].all())
+                if not source_check.empty
+                else False,
                 "failure_summary_rows": len(failure_summary),
                 "target_distribution_rows": len(target_distribution),
                 "class_imbalance_rows": len(class_imbalance),
@@ -535,16 +537,49 @@ def save_phase13ac_ml_failure_attribution_diagnostic(
     gate = pd.DataFrame(
         [
             _gate_row("Phase 13AB passed", bool(summary.iloc[0]["phase13ab_passed"]), "phase13ab"),
-            _gate_row("Source reports present", bool(summary.iloc[0]["source_reports_present"]), "source reports"),
-            _gate_row("Failure summary report exists", len(failure_summary) > 0, f"rows={len(failure_summary)}"),
-            _gate_row("Target distribution report exists", len(target_distribution) > 0, f"rows={len(target_distribution)}"),
-            _gate_row("Class imbalance report exists", len(class_imbalance) > 0, f"rows={len(class_imbalance)}"),
-            _gate_row("Target outcome profile report exists", len(target_outcome_profile) > 0, f"rows={len(target_outcome_profile)}"),
-            _gate_row("Failure attribution report exists", len(failure_attribution) >= 6, f"rows={len(failure_attribution)}"),
-            _gate_row("Continuation options report exists", len(continuation_options) > 0, f"rows={len(continuation_options)}"),
+            _gate_row(
+                "Source reports present",
+                bool(summary.iloc[0]["source_reports_present"]),
+                "source reports",
+            ),
+            _gate_row(
+                "Failure summary report exists",
+                len(failure_summary) > 0,
+                f"rows={len(failure_summary)}",
+            ),
+            _gate_row(
+                "Target distribution report exists",
+                len(target_distribution) > 0,
+                f"rows={len(target_distribution)}",
+            ),
+            _gate_row(
+                "Class imbalance report exists",
+                len(class_imbalance) > 0,
+                f"rows={len(class_imbalance)}",
+            ),
+            _gate_row(
+                "Target outcome profile report exists",
+                len(target_outcome_profile) > 0,
+                f"rows={len(target_outcome_profile)}",
+            ),
+            _gate_row(
+                "Failure attribution report exists",
+                len(failure_attribution) >= 6,
+                f"rows={len(failure_attribution)}",
+            ),
+            _gate_row(
+                "Continuation options report exists",
+                len(continuation_options) > 0,
+                f"rows={len(continuation_options)}",
+            ),
             _gate_row("Boundaries passed", bool(boundary["passed"].all()), "phase13ad/phase13ae"),
             _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()), "scope"),
-            _gate_row("Diagnostic role is correct", section.get("diagnostic_role") == "ML failure attribution and target-feature diagnostic only", section.get("diagnostic_role", "")),
+            _gate_row(
+                "Diagnostic role is correct",
+                section.get("diagnostic_role")
+                == "ML failure attribution and target-feature diagnostic only",
+                section.get("diagnostic_role", ""),
+            ),
         ]
     )
     gate["all_gates_passed"] = bool(gate["passed"].all())
@@ -554,7 +589,9 @@ def save_phase13ac_ml_failure_attribution_diagnostic(
             {
                 "phase": "Phase 13AC",
                 "diagnostic": "ML failure attribution and target-feature diagnostic",
-                "verdict": "Completed — ML failure attribution diagnostic passed" if bool(gate["passed"].all()) else "Failed ML failure attribution diagnostic",
+                "verdict": "Completed — ML failure attribution diagnostic passed"
+                if bool(gate["passed"].all())
+                else "Failed ML failure attribution diagnostic",
                 "all_gates_passed": bool(gate["passed"].all()),
                 "strategy_promotion": False,
                 "candidate_promotion": False,
@@ -626,7 +663,9 @@ def save_phase13ad_ml_failure_attribution_readiness_audit(
         "feature_insufficiency",
         "model_architecture",
     }
-    actual_families = set(attribution["attribution_family"].astype(str)) if not attribution.empty else set()
+    actual_families = (
+        set(attribution["attribution_family"].astype(str)) if not attribution.empty else set()
+    )
     attribution_complete = required_families.issubset(actual_families)
 
     summary = pd.DataFrame(
@@ -635,7 +674,9 @@ def save_phase13ad_ml_failure_attribution_readiness_audit(
                 "audit_role": section.get("audit_role", ""),
                 "phase13ac_passed": bool(ac_check["passed"].all()),
                 "config_flags_clean": bool(config_check["passed"].all()),
-                "diagnostic_reports_present": bool(inventory["present"].all()) if not inventory.empty else False,
+                "diagnostic_reports_present": bool(inventory["present"].all())
+                if not inventory.empty
+                else False,
                 "attribution_families_present": attribution_complete,
                 "scope_passed": bool(scope["passed"].all()),
                 "model_training": False,
@@ -651,10 +692,25 @@ def save_phase13ad_ml_failure_attribution_readiness_audit(
         [
             _gate_row("Phase 13AC passed", bool(summary.iloc[0]["phase13ac_passed"]), "phase13ac"),
             _gate_row("Config flags clean", bool(summary.iloc[0]["config_flags_clean"]), "flags"),
-            _gate_row("Diagnostic reports present", bool(summary.iloc[0]["diagnostic_reports_present"]), "inventory"),
-            _gate_row("Attribution families present", attribution_complete, f"families={'; '.join(sorted(actual_families))}"),
-            _gate_row("Scope blocks forbidden actions", bool(summary.iloc[0]["scope_passed"]), "scope"),
-            _gate_row("Audit role is correct", section.get("audit_role") == "ML failure attribution readiness and report audit only", section.get("audit_role", "")),
+            _gate_row(
+                "Diagnostic reports present",
+                bool(summary.iloc[0]["diagnostic_reports_present"]),
+                "inventory",
+            ),
+            _gate_row(
+                "Attribution families present",
+                attribution_complete,
+                f"families={'; '.join(sorted(actual_families))}",
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions", bool(summary.iloc[0]["scope_passed"]), "scope"
+            ),
+            _gate_row(
+                "Audit role is correct",
+                section.get("audit_role")
+                == "ML failure attribution readiness and report audit only",
+                section.get("audit_role", ""),
+            ),
         ]
     )
     gate["all_gates_passed"] = bool(gate["passed"].all())
@@ -664,7 +720,9 @@ def save_phase13ad_ml_failure_attribution_readiness_audit(
             {
                 "phase": "Phase 13AD",
                 "diagnostic": "ML failure attribution readiness audit",
-                "verdict": "Completed — ML failure attribution readiness audit passed" if bool(gate["passed"].all()) else "Failed ML failure attribution readiness audit",
+                "verdict": "Completed — ML failure attribution readiness audit passed"
+                if bool(gate["passed"].all())
+                else "Failed ML failure attribution readiness audit",
                 "all_gates_passed": bool(gate["passed"].all()),
                 "strategy_promotion": False,
                 "candidate_promotion": False,
@@ -713,20 +771,31 @@ def build_phase13ae_architecture_decision_report(
     feature_insufficiency_likely = False
 
     if not failure_summary.empty:
-        fragile_unresolved = not _bool_value(failure_summary.iloc[0].get("any_repair_passed_fragile_recall", False))
+        fragile_unresolved = not _bool_value(
+            failure_summary.iloc[0].get("any_repair_passed_fragile_recall", False)
+        )
 
     if not attribution.empty:
         high = attribution[attribution["severity"].astype(str).eq("high")]
-        feature_insufficiency_likely = "feature_insufficiency" in set(high["attribution_family"].astype(str))
+        feature_insufficiency_likely = "feature_insufficiency" in set(
+            high["attribution_family"].astype(str)
+        )
 
     if fragile_unresolved:
-        decision = policy.get("if_fragile_recall_unresolved", "pivot_to_target_feature_redesign_preregistration")
+        decision = policy.get(
+            "if_fragile_recall_unresolved", "pivot_to_target_feature_redesign_preregistration"
+        )
         reason = "Fragile recall remained unresolved after registered repair execution."
     elif feature_insufficiency_likely:
-        decision = policy.get("if_feature_insufficiency_likely", "prioritise_feature_family_expansion_before_more_model_tuning")
+        decision = policy.get(
+            "if_feature_insufficiency_likely",
+            "prioritise_feature_family_expansion_before_more_model_tuning",
+        )
         reason = "Feature insufficiency is a likely bottleneck."
     else:
-        decision = policy.get("default_decision", "pivot_to_target_feature_redesign_preregistration")
+        decision = policy.get(
+            "default_decision", "pivot_to_target_feature_redesign_preregistration"
+        )
         reason = "Defaulting to target-feature redesign before any holdout work."
 
     return pd.DataFrame(
@@ -757,7 +826,8 @@ def _next_boundary_check(section: dict[str, Any]) -> pd.DataFrame:
     checks = [
         (
             "allowed_next_step_is_redesign_preregistration",
-            "target-feature redesign" in allowed and ("pre-registration" in allowed or "preregistration" in allowed),
+            "target-feature redesign" in allowed
+            and ("pre-registration" in allowed or "preregistration" in allowed),
             allowed,
         ),
         (
@@ -846,9 +916,17 @@ def save_phase13ae_ml_branch_continuation_architecture_pivot(
             {
                 "decision_role": section.get("decision_role", ""),
                 "phase13ad_passed": bool(ad_check["passed"].all()),
-                "source_reports_present": bool(source_check["present"].all()) if not source_check.empty else False,
-                "architecture_decision": decision.iloc[0]["architecture_decision"] if not decision.empty else "",
-                "direct_holdout_blocked": _bool_value(decision.iloc[0].get("direct_holdout_blocked", False)) if not decision.empty else False,
+                "source_reports_present": bool(source_check["present"].all())
+                if not source_check.empty
+                else False,
+                "architecture_decision": decision.iloc[0]["architecture_decision"]
+                if not decision.empty
+                else "",
+                "direct_holdout_blocked": _bool_value(
+                    decision.iloc[0].get("direct_holdout_blocked", False)
+                )
+                if not decision.empty
+                else False,
                 "boundary_passed": bool(boundary["passed"].all()),
                 "scope_passed": bool(scope["passed"].all()),
                 "model_training": False,
@@ -866,11 +944,30 @@ def save_phase13ae_ml_branch_continuation_architecture_pivot(
     gate = pd.DataFrame(
         [
             _gate_row("Phase 13AD passed", bool(summary.iloc[0]["phase13ad_passed"]), "phase13ad"),
-            _gate_row("Architecture decision exists", len(decision) == 1, f"decision={summary.iloc[0]['architecture_decision']}"),
-            _gate_row("Holdout remains blocked", bool(summary.iloc[0]["direct_holdout_blocked"]), "holdout"),
-            _gate_row("Next boundary is redesign preregistration only", bool(summary.iloc[0]["boundary_passed"]), "boundary"),
-            _gate_row("Scope blocks forbidden actions", bool(summary.iloc[0]["scope_passed"]), "scope"),
-            _gate_row("Decision role is correct", section.get("decision_role") == "ML branch continuation and architecture pivot decision only", section.get("decision_role", "")),
+            _gate_row(
+                "Architecture decision exists",
+                len(decision) == 1,
+                f"decision={summary.iloc[0]['architecture_decision']}",
+            ),
+            _gate_row(
+                "Holdout remains blocked",
+                bool(summary.iloc[0]["direct_holdout_blocked"]),
+                "holdout",
+            ),
+            _gate_row(
+                "Next boundary is redesign preregistration only",
+                bool(summary.iloc[0]["boundary_passed"]),
+                "boundary",
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions", bool(summary.iloc[0]["scope_passed"]), "scope"
+            ),
+            _gate_row(
+                "Decision role is correct",
+                section.get("decision_role")
+                == "ML branch continuation and architecture pivot decision only",
+                section.get("decision_role", ""),
+            ),
         ]
     )
     gate["all_gates_passed"] = bool(gate["passed"].all())
@@ -880,7 +977,9 @@ def save_phase13ae_ml_branch_continuation_architecture_pivot(
             {
                 "phase": "Phase 13AE",
                 "diagnostic": "ML branch continuation and architecture pivot decision",
-                "verdict": "Completed — ML branch architecture pivot decision passed" if bool(gate["passed"].all()) else "Failed ML branch architecture pivot decision",
+                "verdict": "Completed — ML branch architecture pivot decision passed"
+                if bool(gate["passed"].all())
+                else "Failed ML branch architecture pivot decision",
                 "all_gates_passed": bool(gate["passed"].all()),
                 "strategy_promotion": False,
                 "candidate_promotion": False,
@@ -934,18 +1033,24 @@ def save_phase13af_phase13_ml_branch_checkpoint_audit(
     config_check["result"] = config_check["passed"].map({True: "Passed", False: "Failed"})
 
     ae_reports = section.get("phase13ae_reports", {})
-    ae_check = _phase_result_check(ae_reports["conclusion"], ae_reports["gate_report"], "Phase 13AE")
+    ae_check = _phase_result_check(
+        ae_reports["conclusion"], ae_reports["gate_report"], "Phase 13AE"
+    )
 
     checkpoint_paths = section.get("checkpoint_reports", {}).get("required_reports", [])
     checkpoint_rows = []
     for path in checkpoint_paths:
         p = Path(str(path))
-        checkpoint_rows.append({"path": str(p), "present": p.exists(), "result": "Passed" if p.exists() else "Failed"})
+        checkpoint_rows.append(
+            {"path": str(p), "present": p.exists(), "result": "Passed" if p.exists() else "Failed"}
+        )
     checkpoint_check = pd.DataFrame(checkpoint_rows)
 
     forbidden_phrases = [
         str(item).lower()
-        for item in _as_list(section.get("checkpoint_reports", {}).get("forbidden_overclaim_phrases"))
+        for item in _as_list(
+            section.get("checkpoint_reports", {}).get("forbidden_overclaim_phrases")
+        )
     ]
     text_paths = list(ae_reports.values())
     overclaim_rows = []
@@ -972,9 +1077,13 @@ def save_phase13af_phase13_ml_branch_checkpoint_audit(
         [
             {
                 "check": "phase13ag_boundary_is_target_feature_redesign_prereg",
-                "passed": bool("target-feature redesign" in allowed and "holdout prediction" in forbidden),
+                "passed": bool(
+                    "target-feature redesign" in allowed and "holdout prediction" in forbidden
+                ),
                 "detail": boundary.get("allowed_next_step", ""),
-                "result": "Passed" if "target-feature redesign" in allowed and "holdout prediction" in forbidden else "Failed",
+                "result": "Passed"
+                if "target-feature redesign" in allowed and "holdout prediction" in forbidden
+                else "Failed",
             }
         ]
     )
@@ -987,8 +1096,12 @@ def save_phase13af_phase13_ml_branch_checkpoint_audit(
                 "audit_role": section.get("audit_role", ""),
                 "phase13ae_passed": bool(ae_check["passed"].all()),
                 "config_flags_clean": bool(config_check["passed"].all()),
-                "checkpoint_reports_present": bool(checkpoint_check["present"].all()) if not checkpoint_check.empty else False,
-                "forbidden_overclaim_absent": bool(overclaim_check["passed"].all()) if not overclaim_check.empty else False,
+                "checkpoint_reports_present": bool(checkpoint_check["present"].all())
+                if not checkpoint_check.empty
+                else False,
+                "forbidden_overclaim_absent": bool(overclaim_check["passed"].all())
+                if not overclaim_check.empty
+                else False,
                 "phase13ag_boundary_passed": bool(phase13ag_boundary_check["passed"].all()),
                 "scope_passed": bool(scope["passed"].all()),
                 "model_training": False,
@@ -1007,11 +1120,29 @@ def save_phase13af_phase13_ml_branch_checkpoint_audit(
         [
             _gate_row("Phase 13AE passed", bool(summary.iloc[0]["phase13ae_passed"]), "phase13ae"),
             _gate_row("Config flags clean", bool(summary.iloc[0]["config_flags_clean"]), "flags"),
-            _gate_row("Checkpoint reports present", bool(summary.iloc[0]["checkpoint_reports_present"]), "reports"),
-            _gate_row("Forbidden overclaim absent", bool(summary.iloc[0]["forbidden_overclaim_absent"]), "overclaim"),
-            _gate_row("Phase 13AG boundary is redesign preregistration only", bool(summary.iloc[0]["phase13ag_boundary_passed"]), "phase13ag"),
-            _gate_row("Scope blocks forbidden actions", bool(summary.iloc[0]["scope_passed"]), "scope"),
-            _gate_row("Audit role is correct", section.get("audit_role") == "Phase 13 ML branch checkpoint audit only", section.get("audit_role", "")),
+            _gate_row(
+                "Checkpoint reports present",
+                bool(summary.iloc[0]["checkpoint_reports_present"]),
+                "reports",
+            ),
+            _gate_row(
+                "Forbidden overclaim absent",
+                bool(summary.iloc[0]["forbidden_overclaim_absent"]),
+                "overclaim",
+            ),
+            _gate_row(
+                "Phase 13AG boundary is redesign preregistration only",
+                bool(summary.iloc[0]["phase13ag_boundary_passed"]),
+                "phase13ag",
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions", bool(summary.iloc[0]["scope_passed"]), "scope"
+            ),
+            _gate_row(
+                "Audit role is correct",
+                section.get("audit_role") == "Phase 13 ML branch checkpoint audit only",
+                section.get("audit_role", ""),
+            ),
         ]
     )
     gate["all_gates_passed"] = bool(gate["passed"].all())
@@ -1021,7 +1152,9 @@ def save_phase13af_phase13_ml_branch_checkpoint_audit(
             {
                 "phase": "Phase 13AF",
                 "diagnostic": "Phase 13 ML branch checkpoint audit",
-                "verdict": "Completed — Phase 13 ML branch checkpoint audit passed" if bool(gate["passed"].all()) else "Failed Phase 13 ML branch checkpoint audit",
+                "verdict": "Completed — Phase 13 ML branch checkpoint audit passed"
+                if bool(gate["passed"].all())
+                else "Failed Phase 13 ML branch checkpoint audit",
                 "all_gates_passed": bool(gate["passed"].all()),
                 "strategy_promotion": False,
                 "candidate_promotion": False,

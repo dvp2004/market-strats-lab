@@ -108,9 +108,8 @@ def build_phase11b_source_decision(phase_config: dict[str, Any]) -> pd.DataFrame
                 "source_decision_present": bool(
                     str(decision.get("selected_architecture", "")).strip()
                 ),
-                "simple_overlay_rejected": "simple" in str(
-                    decision.get("rejected_immediate_architecture", "")
-                ).lower(),
+                "simple_overlay_rejected": "simple"
+                in str(decision.get("rejected_immediate_architecture", "")).lower(),
             }
         ]
     )
@@ -141,12 +140,8 @@ def build_phase11b_component_registry(phase_config: dict[str, Any]) -> pd.DataFr
                 "family": str(component.get("family", "")),
                 "role": str(component.get("role", "")),
                 "source_evidence": str(component.get("source_evidence", "")),
-                "allowed_conceptual_inputs": _join_list(
-                    component.get("allowed_conceptual_inputs")
-                ),
-                "forbidden_current_use": _join_list(
-                    component.get("forbidden_current_use")
-                ),
+                "allowed_conceptual_inputs": _join_list(component.get("allowed_conceptual_inputs")),
+                "forbidden_current_use": _join_list(component.get("forbidden_current_use")),
                 "allowed_for_phase11c_spec": bool(
                     component.get("allowed_for_phase11c_spec", False)
                 ),
@@ -321,9 +316,7 @@ def build_phase11b_summary(
     future_families_blocked = (
         bool(
             component_registry[
-                component_registry["family"].isin(
-                    ["fundamental_valuation", "sentiment_narrative"]
-                )
+                component_registry["family"].isin(["fundamental_valuation", "sentiment_narrative"])
             ]["allowed_for_phase11c_spec"]
             .eq(False)
             .all()
@@ -343,20 +336,14 @@ def build_phase11b_summary(
                 "spec_role": str(phase_config.get("spec_role", "")),
                 "phase_branch": str(phase_config.get("phase_branch", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "source_decision_present": bool(
-                    source_decision.iloc[0]["source_decision_present"]
-                )
+                "source_decision_present": bool(source_decision.iloc[0]["source_decision_present"])
                 if not source_decision.empty
                 else False,
-                "simple_overlay_rejected": bool(
-                    source_decision.iloc[0]["simple_overlay_rejected"]
-                )
+                "simple_overlay_rejected": bool(source_decision.iloc[0]["simple_overlay_rejected"])
                 if not source_decision.empty
                 else False,
                 "scoring_principle_count": int(len(scoring_principles)),
-                "required_scoring_principle_count": int(
-                    scoring_principles["required"].sum()
-                )
+                "required_scoring_principle_count": int(scoring_principles["required"].sum())
                 if not scoring_principles.empty
                 else 0,
                 "component_family_count": int(len(component_registry)),
@@ -364,12 +351,8 @@ def build_phase11b_summary(
                 "future_data_families_blocked": future_families_blocked,
                 "score_state_count": int(len(score_state_design)),
                 "score_states_non_trading": score_states_non_trading,
-                "future_validation_requirement_count": int(
-                    len(validation_requirements)
-                ),
-                "phase11c_boundary_passed": bool(
-                    phase11c_boundary_check["passed"].all()
-                )
+                "future_validation_requirement_count": int(len(validation_requirements)),
+                "phase11c_boundary_passed": bool(phase11c_boundary_check["passed"].all())
                 if not phase11c_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -410,9 +393,7 @@ def build_phase11b_gate_report(
         )
 
     row = summary.iloc[0]
-    required_role = str(
-        gates.get("required_spec_role", "Regime scoring architecture spec only")
-    )
+    required_role = str(gates.get("required_spec_role", "Regime scoring architecture spec only"))
 
     rows = [
         _gate_row(
@@ -424,34 +405,26 @@ def build_phase11b_gate_report(
         _gate_row(
             "Scoring principles are documented",
             (not gates.get("require_scoring_principles", True))
-            or int(row["scoring_principle_count"])
-            >= int(gates.get("min_scoring_principles", 5)),
+            or int(row["scoring_principle_count"]) >= int(gates.get("min_scoring_principles", 5)),
             f"scoring_principle_count={int(row['scoring_principle_count'])}",
         ),
         _gate_row(
             "Component families are documented",
             (not gates.get("require_component_families", True))
-            or int(row["component_family_count"])
-            >= int(gates.get("min_component_families", 4)),
+            or int(row["component_family_count"]) >= int(gates.get("min_component_families", 4)),
             f"component_family_count={int(row['component_family_count'])}",
         ),
         _gate_row(
             "Validation-risk context is included",
             (not gates.get("require_validation_risk_context", True))
             or bool(row["validation_risk_context_present"]),
-            (
-                "validation_risk_context_present="
-                f"{bool(row['validation_risk_context_present'])}"
-            ),
+            (f"validation_risk_context_present={bool(row['validation_risk_context_present'])}"),
         ),
         _gate_row(
             "Future unaudited data families are blocked",
             (not gates.get("require_future_data_families_blocked", True))
             or bool(row["future_data_families_blocked"]),
-            (
-                "future_data_families_blocked="
-                f"{bool(row['future_data_families_blocked'])}"
-            ),
+            (f"future_data_families_blocked={bool(row['future_data_families_blocked'])}"),
         ),
         _gate_row(
             "Score states are non-trading concepts",
@@ -685,9 +658,7 @@ def save_phase11b_regime_scoring_architecture_spec(
     scoring_principles = build_phase11b_scoring_principles(phase_config)
     component_registry = build_phase11b_component_registry(phase_config)
     score_state_design = build_phase11b_score_state_design(phase_config)
-    validation_requirements = build_phase11b_future_validation_requirements(
-        phase_config
-    )
+    validation_requirements = build_phase11b_future_validation_requirements(phase_config)
     phase11c_boundary_check = build_phase11b_phase11c_boundary_check(phase_config)
     scope_boundary_check = build_phase11b_scope_boundary_check(phase_config)
     summary = build_phase11b_summary(

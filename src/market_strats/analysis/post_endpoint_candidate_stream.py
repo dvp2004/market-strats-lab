@@ -53,14 +53,11 @@ def _phase_result_check(conclusion_path: str, gate_path: str, phase_name: str) -
     conclusion = _read_csv_if_exists(conclusion_path)
     gate = _read_csv_if_exists(gate_path)
 
-    conclusion_passed = (
-        not conclusion.empty
-        and _bool_value(conclusion.iloc[0].get("all_gates_passed", False))
+    conclusion_passed = not conclusion.empty and _bool_value(
+        conclusion.iloc[0].get("all_gates_passed", False)
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -89,7 +86,9 @@ def _first_existing_col(frame: pd.DataFrame, candidates: list[str]) -> str | Non
     return None
 
 
-def _required_column_check(frame: pd.DataFrame, required: list[str], frame_name: str) -> pd.DataFrame:
+def _required_column_check(
+    frame: pd.DataFrame, required: list[str], frame_name: str
+) -> pd.DataFrame:
     rows = []
     for col in required:
         rows.append(
@@ -349,10 +348,14 @@ def _endpoint_context(section: dict[str, Any]) -> tuple[float, str]:
     if endpoint.empty:
         return 0.0, "defensive_or_cash"
 
-    exposure = pd.to_numeric(
-        pd.Series([endpoint.iloc[0].get("endpoint_exposure", 0.0)]),
-        errors="coerce",
-    ).fillna(0.0).iloc[0]
+    exposure = (
+        pd.to_numeric(
+            pd.Series([endpoint.iloc[0].get("endpoint_exposure", 0.0)]),
+            errors="coerce",
+        )
+        .fillna(0.0)
+        .iloc[0]
+    )
     mode = str(endpoint.iloc[0].get("endpoint_mode", _mode_from_exposure(float(exposure))))
     return float(exposure), mode
 
@@ -507,7 +510,9 @@ def _build_extended_stream(
             "pinned_research_endpoint": section.get("pinned_research_endpoint", ""),
             "is_out_of_sample_extension": True,
             "benchmark_update_flag": benchmark_ok.map({True: "pass", False: "fail"}),
-            "stream_row_validity_flag": (benchmark_ok & exposure_ok).map({True: "pass", False: "fail"}),
+            "stream_row_validity_flag": (benchmark_ok & exposure_ok).map(
+                {True: "pass", False: "fail"}
+            ),
             "blocking_warnings": blocking_warnings,
         }
     )
@@ -629,7 +634,9 @@ def save_phase15o_post_endpoint_candidate_stream_extension(
         config=config,
     )
 
-    output_file = Path(section.get("output_file", "reports/phase15o_post_endpoint_candidate_stream.csv"))
+    output_file = Path(
+        section.get("output_file", "reports/phase15o_post_endpoint_candidate_stream.csv")
+    )
     output_file.parent.mkdir(parents=True, exist_ok=True)
     candidate_stream.to_csv(output_file, index=False)
 
@@ -652,8 +659,12 @@ def save_phase15o_post_endpoint_candidate_stream_extension(
                 "phase15n_passed": upstream_passed,
                 "candidate_stream_file_written": output_file.exists(),
                 "post_endpoint_rows": int(extension_summary.iloc[0]["post_endpoint_rows"]),
-                "candidate_stream_valid": _bool_value(extension_summary.iloc[0]["candidate_stream_valid"]),
-                "benchmark_update_passed": _bool_value(extension_summary.iloc[0]["benchmark_update_passed"]),
+                "candidate_stream_valid": _bool_value(
+                    extension_summary.iloc[0]["candidate_stream_valid"]
+                ),
+                "benchmark_update_passed": _bool_value(
+                    extension_summary.iloc[0]["benchmark_update_passed"]
+                ),
                 "target_exposure_continuity_passed": _bool_value(
                     extension_summary.iloc[0]["target_exposure_continuity_passed"]
                 ),
@@ -680,12 +691,26 @@ def save_phase15o_post_endpoint_candidate_stream_extension(
         [
             _gate_row(f"{upstream_label} passed", upstream_passed, upstream_label),
             _gate_row("Candidate stream file written", output_file.exists(), str(output_file)),
-            _gate_row("Required columns present", bool(required_col_check["present"].all()), "schema"),
-            _gate_row("Pinned endpoint preserved", True, section.get("pinned_research_endpoint", "")),
-            _gate_row("Out-of-sample label checked", True, str(extension_summary.iloc[0]["is_out_of_sample_extension"])),
+            _gate_row(
+                "Required columns present", bool(required_col_check["present"].all()), "schema"
+            ),
+            _gate_row(
+                "Pinned endpoint preserved", True, section.get("pinned_research_endpoint", "")
+            ),
+            _gate_row(
+                "Out-of-sample label checked",
+                True,
+                str(extension_summary.iloc[0]["is_out_of_sample_extension"]),
+            ),
             _gate_row("No canonical report mutation", True, "separate post-endpoint file"),
-            _gate_row("Phase 15P boundary is audit-only", bool(boundary["passed"].all()), "phase15p"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "Phase 15P boundary is audit-only", bool(boundary["passed"].all()), "phase15p"
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Execution role is correct",
                 section.get("execution_role")
@@ -709,7 +734,9 @@ def save_phase15o_post_endpoint_candidate_stream_extension(
                 "all_gates_passed": bool(gate_report["passed"].all()),
                 "upstream_phase_label": upstream_label,
                 "upstream_phase_passed": upstream_passed,
-                "candidate_stream_valid": _bool_value(extension_summary.iloc[0]["candidate_stream_valid"]),
+                "candidate_stream_valid": _bool_value(
+                    extension_summary.iloc[0]["candidate_stream_valid"]
+                ),
                 "post_endpoint_rows": int(extension_summary.iloc[0]["post_endpoint_rows"]),
                 "paper_dry_run_allowed": False,
                 "paper_trading_ready": False,
@@ -794,7 +821,9 @@ def _stream_audit(stream: pd.DataFrame, section: dict[str, Any]) -> pd.DataFrame
 
     current_exposure = pd.to_numeric(stream["current_exposure"], errors="coerce")
     previous_exposure = pd.to_numeric(stream["previous_exposure"], errors="coerce")
-    exposure_continuity_pass = bool(current_exposure.notna().all() and previous_exposure.notna().all())
+    exposure_continuity_pass = bool(
+        current_exposure.notna().all() and previous_exposure.notna().all()
+    )
     exposure_range_pass = bool(current_exposure.between(0.0, 1.0).all())
 
     out_of_sample_pass = bool(stream["is_out_of_sample_extension"].map(_bool_value).all())
@@ -905,12 +934,16 @@ def save_phase15p_extended_candidate_stream_audit(
                 "candidate_stream_exists": not stream.empty,
                 "required_columns_present": bool(required_col_check["present"].all()),
                 "post_endpoint_rows": int(audit.iloc[0]["post_endpoint_rows"]),
-                "post_endpoint_rows_passed": _bool_value(audit.iloc[0]["post_endpoint_rows_passed"]),
+                "post_endpoint_rows_passed": _bool_value(
+                    audit.iloc[0]["post_endpoint_rows_passed"]
+                ),
                 "benchmark_update_passed": _bool_value(audit.iloc[0]["benchmark_update_passed"]),
                 "target_exposure_continuity_passed": _bool_value(
                     audit.iloc[0]["target_exposure_continuity_passed"]
                 ),
-                "out_of_sample_label_passed": _bool_value(audit.iloc[0]["out_of_sample_label_passed"]),
+                "out_of_sample_label_passed": _bool_value(
+                    audit.iloc[0]["out_of_sample_label_passed"]
+                ),
                 "decision": decision_text,
                 "fresh_signal_rerun_allowed_next": all_stream_gates,
                 "paper_dry_run_preregistration_allowed_next": False,
@@ -935,18 +968,45 @@ def save_phase15p_extended_candidate_stream_audit(
                 True,
                 f"rows={len(stream)}; decision={decision_text}",
             ),
-            _gate_row("Required columns present", bool(required_col_check["present"].all()), "schema"),
-            _gate_row("Post-endpoint rows audited", True, str(audit.iloc[0]["post_endpoint_rows_passed"])),
-            _gate_row("Benchmark update audited", True, str(audit.iloc[0]["benchmark_update_passed"])),
-            _gate_row("Target exposure continuity audited", True, str(audit.iloc[0]["target_exposure_continuity_passed"])),
-            _gate_row("Out-of-sample label audited", True, str(audit.iloc[0]["out_of_sample_label_passed"])),
+            _gate_row(
+                "Required columns present", bool(required_col_check["present"].all()), "schema"
+            ),
+            _gate_row(
+                "Post-endpoint rows audited", True, str(audit.iloc[0]["post_endpoint_rows_passed"])
+            ),
+            _gate_row(
+                "Benchmark update audited", True, str(audit.iloc[0]["benchmark_update_passed"])
+            ),
+            _gate_row(
+                "Target exposure continuity audited",
+                True,
+                str(audit.iloc[0]["target_exposure_continuity_passed"]),
+            ),
+            _gate_row(
+                "Out-of-sample label audited",
+                True,
+                str(audit.iloc[0]["out_of_sample_label_passed"]),
+            ),
             _gate_row("Decision output exists", len(decision) == 1, decision_text),
-            _gate_row("No paper-ready claim", not _bool_value(decision.iloc[0]["paper_trading_ready"]), "paper_trading_ready=False"),
-            _gate_row("Phase 15M rerun boundary is conditional-only", bool(boundary["passed"].all()), "phase15m rerun"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "No paper-ready claim",
+                not _bool_value(decision.iloc[0]["paper_trading_ready"]),
+                "paper_trading_ready=False",
+            ),
+            _gate_row(
+                "Phase 15M rerun boundary is conditional-only",
+                bool(boundary["passed"].all()),
+                "phase15m rerun",
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Audit role is correct",
-                section.get("audit_role") == "Extended candidate stream audit and fresh signal rerun eligibility only",
+                section.get("audit_role")
+                == "Extended candidate stream audit and fresh signal rerun eligibility only",
                 section.get("audit_role", ""),
             ),
         ]

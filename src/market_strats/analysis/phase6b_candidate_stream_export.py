@@ -142,10 +142,7 @@ def _derive_exposure(frame: pd.DataFrame) -> pd.Series:
 
     if exposure_col:
         return (
-            pd.to_numeric(frame[exposure_col], errors="coerce")
-            .ffill()
-            .fillna(0.0)
-            .clip(-1.0, 1.5)
+            pd.to_numeric(frame[exposure_col], errors="coerce").ffill().fillna(0.0).clip(-1.0, 1.5)
         )
 
     mode_col = _first_existing_col(frame, ["mode", "regime", "position", "state", "signal_state"])
@@ -245,11 +242,10 @@ def _overlay_switch_count(exported: pd.DataFrame) -> int:
     if exported.empty:
         return 0
 
-    changed = (
-        exported["mode"].astype(str).ne(exported["mode"].astype(str).shift(1))
-        | pd.to_numeric(exported["exposure"], errors="coerce")
-        .fillna(0.0)
-        .ne(pd.to_numeric(exported["exposure"], errors="coerce").fillna(0.0).shift(1))
+    changed = exported["mode"].astype(str).ne(
+        exported["mode"].astype(str).shift(1)
+    ) | pd.to_numeric(exported["exposure"], errors="coerce").fillna(0.0).ne(
+        pd.to_numeric(exported["exposure"], errors="coerce").fillna(0.0).shift(1)
     )
 
     return max(int(changed.sum()) - 1, 0)
@@ -345,8 +341,7 @@ def _reconciliation_report(
     for metric, expected_value, observed, tol, check_type in checks:
         if check_type == "relative":
             passed = (
-                expected_value != 0
-                and abs(observed - expected_value) / abs(expected_value) <= tol
+                expected_value != 0 and abs(observed - expected_value) / abs(expected_value) <= tol
             )
         else:
             passed = abs(observed - expected_value) <= tol
@@ -365,14 +360,13 @@ def _reconciliation_report(
 
     return pd.DataFrame(rows)
 
+
 def _financial_reconciliation_passed(reconciliation: pd.DataFrame) -> bool:
     if reconciliation.empty:
         return False
 
     financial_metrics = {"end_value", "cagr", "calmar", "max_drawdown"}
-    financial = reconciliation[
-        reconciliation["metric"].astype(str).isin(financial_metrics)
-    ]
+    financial = reconciliation[reconciliation["metric"].astype(str).isin(financial_metrics)]
 
     return not financial.empty and bool(financial["passed"].map(_bool_value).all())
 
@@ -381,9 +375,7 @@ def _switch_count_reconciliation_passed(reconciliation: pd.DataFrame) -> bool:
     if reconciliation.empty:
         return False
 
-    switch = reconciliation[
-        reconciliation["metric"].astype(str).eq("overlay_switch_count")
-    ]
+    switch = reconciliation[reconciliation["metric"].astype(str).eq("overlay_switch_count")]
 
     return not switch.empty and bool(switch["passed"].map(_bool_value).all())
 
@@ -523,7 +515,11 @@ def save_phase14i_phase6b_candidate_daily_stream_export(
     reports_path = Path(reports_dir)
     reports_path.mkdir(parents=True, exist_ok=True)
 
-    output_file = Path(section.get("output_file", "reports/phase6b_loose_relief_execution_realistic_overlay_daily.csv"))
+    output_file = Path(
+        section.get(
+            "output_file", "reports/phase6b_loose_relief_execution_realistic_overlay_daily.csv"
+        )
+    )
     if not output_file.is_absolute():
         output_file = Path(output_file)
 
@@ -571,7 +567,9 @@ def save_phase14i_phase6b_candidate_daily_stream_export(
                 "columns": ";".join(exported.columns),
                 "missing_required_columns": ";".join(missing_columns),
                 "required_columns_present": required_columns_present,
-                "result": "Passed" if output_file.exists() and len(exported) > 0 and required_columns_present else "Failed",
+                "result": "Passed"
+                if output_file.exists() and len(exported) > 0 and required_columns_present
+                else "Failed",
             }
         ]
     )
@@ -587,8 +585,12 @@ def save_phase14i_phase6b_candidate_daily_stream_export(
                 "export_file_written": output_file.exists(),
                 "export_rows": len(exported),
                 "required_columns_present": required_columns_present,
-                "financial_metric_reconciliation_passed": _financial_reconciliation_passed(reconciliation),
-                "switch_count_reconciliation_passed": _switch_count_reconciliation_passed(reconciliation),
+                "financial_metric_reconciliation_passed": _financial_reconciliation_passed(
+                    reconciliation
+                ),
+                "switch_count_reconciliation_passed": _switch_count_reconciliation_passed(
+                    reconciliation
+                ),
                 "boundary_passed": bool(boundary["passed"].all()),
                 "scope_passed": bool(scope["passed"].all()),
                 "visual_backtest_generation": False,
@@ -606,7 +608,9 @@ def save_phase14i_phase6b_candidate_daily_stream_export(
         [
             _gate_row("Reconstruction succeeded", True, "_find_final_candidate_frame"),
             _gate_row("Export file written", output_file.exists(), str(output_file)),
-            _gate_row("Required columns present", required_columns_present, ";".join(missing_columns)),
+            _gate_row(
+                "Required columns present", required_columns_present, ";".join(missing_columns)
+            ),
             _gate_row("Export is non-empty", len(exported) > 0, f"rows={len(exported)}"),
             _gate_row("Boundary is audit-only", bool(boundary["passed"].all()), "phase14j"),
             _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()), "scope"),
@@ -631,8 +635,12 @@ def save_phase14i_phase6b_candidate_daily_stream_export(
                 ),
                 "all_gates_passed": bool(gate_report["passed"].all()),
                 "export_file": str(output_file),
-                "financial_metric_reconciliation_passed": _financial_reconciliation_passed(reconciliation),
-                    "switch_count_reconciliation_passed": _switch_count_reconciliation_passed(reconciliation),
+                "financial_metric_reconciliation_passed": _financial_reconciliation_passed(
+                    reconciliation
+                ),
+                "switch_count_reconciliation_passed": _switch_count_reconciliation_passed(
+                    reconciliation
+                ),
                 "paper_trading_ready": False,
                 "strategy_promotion": False,
                 "candidate_promotion": False,
@@ -675,7 +683,12 @@ def save_phase14j_phase6b_candidate_export_audit(
     reports_path = Path(reports_dir)
     reports_path.mkdir(parents=True, exist_ok=True)
 
-    exported_path = Path(section.get("exported_daily_file", "reports/phase6b_loose_relief_execution_realistic_overlay_daily.csv"))
+    exported_path = Path(
+        section.get(
+            "exported_daily_file",
+            "reports/phase6b_loose_relief_execution_realistic_overlay_daily.csv",
+        )
+    )
     exported = _read_csv_if_exists(exported_path)
 
     flags = _config_flag_check(config, section.get("expected_runtime_flags", {}))
@@ -721,7 +734,9 @@ def save_phase14j_phase6b_candidate_export_audit(
                 "export_rows": len(exported),
                 "required_columns_present": required_columns_present,
                 "financial_metrics_reconciled": _financial_reconciliation_passed(reconciliation),
-                "switch_count_reconciliation_passed": _switch_count_reconciliation_passed(reconciliation),
+                "switch_count_reconciliation_passed": _switch_count_reconciliation_passed(
+                    reconciliation
+                ),
                 "config_flags_clean": bool(flags["passed"].all()),
                 "phase14g_boundary_passed": bool(boundary["passed"].all()),
                 "scope_passed": bool(scope["passed"].all()),
@@ -738,7 +753,9 @@ def save_phase14j_phase6b_candidate_export_audit(
     gate_report = pd.DataFrame(
         [
             _gate_row("Export file present", exported_path.exists(), str(exported_path)),
-            _gate_row("Required columns present", required_columns_present, ";".join(missing_columns)),
+            _gate_row(
+                "Required columns present", required_columns_present, ";".join(missing_columns)
+            ),
             _gate_row(
                 "Financial metrics reconciled",
                 _financial_reconciliation_passed(reconciliation),
@@ -747,13 +764,14 @@ def save_phase14j_phase6b_candidate_export_audit(
             _gate_row(
                 "Switch count checked as operational diagnostic",
                 True,
-                (
-                    "switch_count_reconciled="
-                    f"{_switch_count_reconciliation_passed(reconciliation)}"
-                ),
+                (f"switch_count_reconciled={_switch_count_reconciliation_passed(reconciliation)}"),
             ),
             _gate_row("Config flags clean", bool(flags["passed"].all()), "runtime flags"),
-            _gate_row("Phase 14G boundary is corrected-visual-only", bool(boundary["passed"].all()), "phase14g"),
+            _gate_row(
+                "Phase 14G boundary is corrected-visual-only",
+                bool(boundary["passed"].all()),
+                "phase14g",
+            ),
             _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()), "scope"),
             _gate_row(
                 "Audit role is correct",
@@ -778,7 +796,9 @@ def save_phase14j_phase6b_candidate_export_audit(
                 "all_gates_passed": bool(gate_report["passed"].all()),
                 "export_file": str(exported_path),
                 "financial_metrics_reconciled": _financial_reconciliation_passed(reconciliation),
-                "switch_count_reconciliation_passed": _switch_count_reconciliation_passed(reconciliation),  
+                "switch_count_reconciliation_passed": _switch_count_reconciliation_passed(
+                    reconciliation
+                ),
                 "paper_trading_ready": False,
                 "strategy_promotion": False,
                 "candidate_promotion": False,

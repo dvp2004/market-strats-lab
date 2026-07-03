@@ -96,15 +96,9 @@ def _create_relief_condition(
     )
 
     relief = (
-        (
-            state["realized_vol_annualized"]
-            <= float(profile["relief_vol_annualized_threshold"])
-        )
+        (state["realized_vol_annualized"] <= float(profile["relief_vol_annualized_threshold"]))
         & (state["return_20d"] >= float(profile["relief_20d_return_threshold"]))
-        & (
-            state["trend_distance"]
-            >= float(profile["relief_trend_distance_threshold"])
-        )
+        & (state["trend_distance"] >= float(profile["relief_trend_distance_threshold"]))
     ).fillna(False)
 
     relief.index = pd.to_datetime(state["date"])
@@ -131,9 +125,7 @@ def _create_deep_drawdown_guard(
         near_high_min_trend_distance=float(
             phase4_guard_config.get("near_high_min_trend_distance", -0.01)
         ),
-        deep_drawdown_threshold=float(
-            phase4_guard_config.get("deep_drawdown_threshold", -0.20)
-        ),
+        deep_drawdown_threshold=float(phase4_guard_config.get("deep_drawdown_threshold", -0.20)),
     )
 
 
@@ -343,8 +335,7 @@ def _create_relief_summary(
                 "benchmark_max_drawdown_pct": benchmark_row["max_drawdown_pct"],
                 "candidate_max_drawdown_pct": row["max_drawdown_pct"],
                 "drawdown_delta_pct_points": round(
-                    float(row["max_drawdown_pct"])
-                    - float(benchmark_row["max_drawdown_pct"]),
+                    float(row["max_drawdown_pct"]) - float(benchmark_row["max_drawdown_pct"]),
                     3,
                 ),
                 "benchmark_end_value": benchmark_row["end_value"],
@@ -355,8 +346,7 @@ def _create_relief_summary(
                 ),
                 "benchmark_trade_count": benchmark_row["trade_count"],
                 "candidate_trade_count": row["trade_count"],
-                "trade_count_delta": int(row["trade_count"])
-                - int(benchmark_row["trade_count"]),
+                "trade_count_delta": int(row["trade_count"]) - int(benchmark_row["trade_count"]),
             }
         )
 
@@ -429,9 +419,7 @@ def _create_changed_switch_audit(
 
     if not benchmark_effectiveness.empty:
         benchmark_effectiveness = benchmark_effectiveness.copy()
-        benchmark_effectiveness["switch_key"] = _normalise_switch_key(
-            benchmark_effectiveness
-        )
+        benchmark_effectiveness["switch_key"] = _normalise_switch_key(benchmark_effectiveness)
         effectiveness_columns = [
             column
             for column in benchmark_effectiveness.columns
@@ -447,9 +435,7 @@ def _create_changed_switch_audit(
 
     if not candidate_effectiveness.empty:
         candidate_effectiveness = candidate_effectiveness.copy()
-        candidate_effectiveness["switch_key"] = _normalise_switch_key(
-            candidate_effectiveness
-        )
+        candidate_effectiveness["switch_key"] = _normalise_switch_key(candidate_effectiveness)
         effectiveness_columns = [
             column
             for column in candidate_effectiveness.columns
@@ -560,9 +546,7 @@ def _create_relief_gate_report(
         return pd.DataFrame()
 
     phase_config = config.get("phase6_offensive_relief_validation", {})
-    benchmark_variant = str(
-        phase_config.get("benchmark_variant", "phase4_execution_candidate")
-    )
+    benchmark_variant = str(phase_config.get("benchmark_variant", "phase4_execution_candidate"))
 
     full = summary[summary["period"] == "full"].copy()
     holdout = summary[summary["period"] == "holdout"].copy()
@@ -573,37 +557,23 @@ def _create_relief_gate_report(
     if candidates.empty:
         return pd.DataFrame()
 
-    min_cagr_improvement = float(
-        phase_config.get("min_full_cagr_improvement_pct_points", 0.30)
-    )
-    min_calmar_improvement = float(
-        phase_config.get("min_full_calmar_improvement", 0.010)
-    )
+    min_cagr_improvement = float(phase_config.get("min_full_cagr_improvement_pct_points", 0.30))
+    min_calmar_improvement = float(phase_config.get("min_full_calmar_improvement", 0.010))
     max_holdout_cagr_damage = float(
         phase_config.get("max_allowed_holdout_cagr_damage_pct_points", -0.50)
     )
-    max_holdout_calmar_damage = float(
-        phase_config.get("max_allowed_holdout_calmar_damage", -0.05)
-    )
-    max_drawdown_damage = float(
-        phase_config.get("max_allowed_drawdown_damage_pct_points", -0.50)
-    )
+    max_holdout_calmar_damage = float(phase_config.get("max_allowed_holdout_calmar_damage", -0.05))
+    max_drawdown_damage = float(phase_config.get("max_allowed_drawdown_damage_pct_points", -0.50))
     max_episode_cagr_damage = float(
         phase_config.get("max_allowed_episode_cagr_damage_pct_points", -0.50)
     )
-    max_episode_calmar_damage = float(
-        phase_config.get("max_allowed_episode_calmar_damage", -0.05)
-    )
-    max_switch_reduction = int(
-        phase_config.get("max_allowed_switch_count_reduction", -10)
-    )
+    max_episode_calmar_damage = float(phase_config.get("max_allowed_episode_calmar_damage", -0.05))
+    max_switch_reduction = int(phase_config.get("max_allowed_switch_count_reduction", -10))
 
     rows: list[dict] = []
     candidate_records: list[dict] = []
 
-    benchmark_events = event_summary[
-        event_summary["variant_name"] == benchmark_variant
-    ]
+    benchmark_events = event_summary[event_summary["variant_name"] == benchmark_variant]
 
     for _, candidate in candidates.iterrows():
         variant_name = str(candidate["variant_name"])
@@ -612,11 +582,7 @@ def _create_relief_gate_report(
         full_calmar_delta = float(candidate["calmar_delta"])
         full_drawdown_delta = float(candidate["drawdown_delta_pct_points"])
 
-        score = (
-            full_cagr_delta
-            + full_calmar_delta
-            + (full_drawdown_delta / 10.0)
-        )
+        score = full_cagr_delta + full_calmar_delta + (full_drawdown_delta / 10.0)
 
         passes_materiality = (
             full_cagr_delta >= min_cagr_improvement
@@ -633,9 +599,7 @@ def _create_relief_gate_report(
             holdout_row = candidate_holdout.iloc[0]
             holdout_cagr_delta = float(holdout_row["cagr_delta_pct_points"])
             holdout_calmar_delta = float(holdout_row["calmar_delta"])
-            holdout_drawdown_delta = float(
-                holdout_row["drawdown_delta_pct_points"]
-            )
+            holdout_drawdown_delta = float(holdout_row["drawdown_delta_pct_points"])
 
             holdout_damage = (
                 holdout_cagr_delta < max_holdout_cagr_damage
@@ -657,14 +621,8 @@ def _create_relief_gate_report(
 
         if not candidate_episode.empty:
             damaged_episode = candidate_episode[
-                (
-                    candidate_episode["cagr_delta_pct_points"].astype(float)
-                    < max_episode_cagr_damage
-                )
-                | (
-                    candidate_episode["calmar_delta"].astype(float)
-                    < max_episode_calmar_damage
-                )
+                (candidate_episode["cagr_delta_pct_points"].astype(float) < max_episode_cagr_damage)
+                | (candidate_episode["calmar_delta"].astype(float) < max_episode_calmar_damage)
                 | (
                     candidate_episode["drawdown_delta_pct_points"].astype(float)
                     < max_drawdown_damage
@@ -674,21 +632,15 @@ def _create_relief_gate_report(
             damaged_episode_count = int(len(damaged_episode))
 
             if damaged_episode.empty:
-                episode_interpretation = (
-                    "No episode segment breached damage thresholds."
-                )
+                episode_interpretation = "No episode segment breached damage thresholds."
             else:
-                damaged_names = ", ".join(
-                    damaged_episode["period"].astype(str).tolist()
-                )
+                damaged_names = ", ".join(damaged_episode["period"].astype(str).tolist())
                 episode_interpretation = (
                     f"{damaged_episode_count} episode segment(s) breached "
                     f"damage thresholds: {damaged_names}."
                 )
 
-        candidate_events = event_summary[
-            event_summary["variant_name"] == variant_name
-        ]
+        candidate_events = event_summary[event_summary["variant_name"] == variant_name]
 
         switch_reduction_too_large = False
         switch_delta: int | None = None
@@ -735,8 +687,7 @@ def _create_relief_gate_report(
                     "gate": "Offensive relief variant passes materiality.",
                     "status": "Passed" if passes_materiality else "Failed",
                     "evidence_quality": (
-                        "Required minimum full-period CAGR and Calmar "
-                        "improvement"
+                        "Required minimum full-period CAGR and Calmar improvement"
                     ),
                     "interpretation": (
                         f"{variant_name} full-period CAGR delta was "
@@ -749,46 +700,28 @@ def _create_relief_gate_report(
                     "candidate_variant": variant_name,
                     "gate": "Offensive relief variant avoids holdout damage.",
                     "status": "Passed" if not holdout_damage else "Failed",
-                    "evidence_quality": (
-                        "Checked holdout CAGR, Calmar, and drawdown deltas"
-                    ),
+                    "evidence_quality": ("Checked holdout CAGR, Calmar, and drawdown deltas"),
                     "interpretation": holdout_interpretation,
                 },
                 {
                     "candidate_variant": variant_name,
-                    "gate": (
-                        "Offensive relief variant avoids episode-level damage."
-                    ),
-                    "status": (
-                        "Passed" if damaged_episode_count == 0 else "Failed"
-                    ),
-                    "evidence_quality": (
-                        "Checked pre-declared episode segments"
-                    ),
+                    "gate": ("Offensive relief variant avoids episode-level damage."),
+                    "status": ("Passed" if damaged_episode_count == 0 else "Failed"),
+                    "evidence_quality": ("Checked pre-declared episode segments"),
                     "interpretation": episode_interpretation,
                 },
                 {
                     "candidate_variant": variant_name,
-                    "gate": (
-                        "Offensive relief variant avoids excessive switch "
-                        "reduction."
-                    ),
-                    "status": (
-                        "Passed"
-                        if not switch_reduction_too_large
-                        else "Failed"
-                    ),
+                    "gate": ("Offensive relief variant avoids excessive switch reduction."),
+                    "status": ("Passed" if not switch_reduction_too_large else "Failed"),
                     "evidence_quality": (
-                        "Compared switch count against Phase 4 execution "
-                        "candidate"
+                        "Compared switch count against Phase 4 execution candidate"
                     ),
                     "interpretation": switch_interpretation,
                 },
                 {
                     "candidate_variant": variant_name,
-                    "gate": (
-                        "Offensive relief variant passes all validation gates."
-                    ),
+                    "gate": ("Offensive relief variant passes all validation gates."),
                     "status": "Passed" if passes_all_gates else "Failed",
                     "evidence_quality": (
                         "Requires materiality, holdout safety, episode safety, "
@@ -805,9 +738,7 @@ def _create_relief_gate_report(
 
     candidate_record_frame = pd.DataFrame(candidate_records)
 
-    passing_candidates = candidate_record_frame[
-        candidate_record_frame["passes_all_gates"]
-    ].copy()
+    passing_candidates = candidate_record_frame[candidate_record_frame["passes_all_gates"]].copy()
 
     if not passing_candidates.empty:
         selected = passing_candidates.sort_values(
@@ -816,10 +747,7 @@ def _create_relief_gate_report(
         ).iloc[0]
         selected_variant = str(selected["candidate_variant"])
         final_status = "Passed"
-        final_interpretation = (
-            f"{selected_variant} was the best passing offensive relief "
-            "variant."
-        )
+        final_interpretation = f"{selected_variant} was the best passing offensive relief variant."
     else:
         selected = candidate_record_frame.sort_values(
             "score",
@@ -853,8 +781,7 @@ def _create_relief_conclusion(gate_report: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
 
     final_gate = gate_report[
-        gate_report["gate"]
-        == "Offensive relief confirmation is validated for promotion."
+        gate_report["gate"] == "Offensive relief confirmation is validated for promotion."
     ]
 
     final_status = final_gate.iloc[0]["status"] if not final_gate.empty else "Not yet"
@@ -867,14 +794,9 @@ def _create_relief_conclusion(gate_report: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(
         [
             {
-                "claim": (
-                    "An offensive relief profile is validated for promotion "
-                    "consideration."
-                ),
+                "claim": ("An offensive relief profile is validated for promotion consideration."),
                 "status": "Survived" if final_status == "Passed" else "Failed",
-                "evidence_quality": (
-                    "Based on Phase 6B offensive-relief validation gates"
-                ),
+                "evidence_quality": ("Based on Phase 6B offensive-relief validation gates"),
                 "interpretation": (
                     f"{selected_variant} passed all validation gates."
                     if final_status == "Passed"
@@ -883,8 +805,7 @@ def _create_relief_conclusion(gate_report: pd.DataFrame) -> pd.DataFrame:
             },
             {
                 "claim": (
-                    "Phase 6A's baseline offensive relief result was safe to "
-                    "promote immediately."
+                    "Phase 6A's baseline offensive relief result was safe to promote immediately."
                 ),
                 "status": "Failed",
                 "evidence_quality": (
@@ -938,9 +859,7 @@ def create_regime_switch_overlay_offensive_relief_validation(
     overlay_config = config.get("regime_switch_overlay", {})
     overlay_name = str(overlay_config.get("name", "Regime Switch Overlay"))
     initial_capital = float(config["initial_capital"])
-    benchmark_variant = str(
-        phase_config.get("benchmark_variant", "phase4_execution_candidate")
-    )
+    benchmark_variant = str(phase_config.get("benchmark_variant", "phase4_execution_candidate"))
     segments = _segment_definitions(config)
 
     variant_specs: list[tuple[str, dict | None]] = [(benchmark_variant, None)]
@@ -1006,9 +925,7 @@ def create_regime_switch_overlay_offensive_relief_validation(
             changed_frames.append(changed)
 
     changed_switches = (
-        pd.concat(changed_frames, ignore_index=True)
-        if changed_frames
-        else pd.DataFrame()
+        pd.concat(changed_frames, ignore_index=True) if changed_frames else pd.DataFrame()
     )
     changed_switch_summary = _summarise_changed_switches(changed_switches)
 
@@ -1108,9 +1025,7 @@ def save_regime_switch_overlay_offensive_relief_validation(
 
     metrics_path = reports_dir / "regime_switch_overlay_offensive_relief_metrics.csv"
     summary_path = reports_dir / "regime_switch_overlay_offensive_relief_summary.csv"
-    event_summary_path = (
-        reports_dir / "regime_switch_overlay_offensive_relief_event_summary.csv"
-    )
+    event_summary_path = reports_dir / "regime_switch_overlay_offensive_relief_event_summary.csv"
     changed_switches_path = (
         reports_dir / "regime_switch_overlay_offensive_relief_changed_switch_audit.csv"
     )

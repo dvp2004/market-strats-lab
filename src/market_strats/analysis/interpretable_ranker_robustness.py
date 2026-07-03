@@ -179,8 +179,12 @@ def _stability_from_ic(ic: pd.DataFrame) -> pd.DataFrame:
                 "positive_ic_fraction": (
                     float((values.dropna() > 0).mean()) if values.notna().any() else np.nan
                 ),
-                "worst_13_date_mean_ic": float(rolling13.min()) if rolling13.notna().any() else np.nan,
-                "best_13_date_mean_ic": float(rolling13.max()) if rolling13.notna().any() else np.nan,
+                "worst_13_date_mean_ic": float(rolling13.min())
+                if rolling13.notna().any()
+                else np.nan,
+                "best_13_date_mean_ic": float(rolling13.max())
+                if rolling13.notna().any()
+                else np.nan,
                 "longest_negative_ic_streak": _longest_streak(values, positive=False),
                 "longest_positive_ic_streak": _longest_streak(values, positive=True),
                 "date_count": int(ordered["decision_timestamp_utc"].nunique()),
@@ -312,9 +316,7 @@ def moving_block_bootstrap(
                 "spread_ci90_high": float(np.nanpercentile(spread_array, 95)),
                 "spread_ci95_low": float(np.nanpercentile(spread_array, 2.5)),
                 "spread_ci95_high": float(np.nanpercentile(spread_array, 97.5)),
-                "bootstrap_probability_spread_above_zero": float(
-                    np.mean(spread_array > 0)
-                ),
+                "bootstrap_probability_spread_above_zero": float(np.mean(spread_array > 0)),
                 "iid_standard_errors_used": False,
                 "overlapping_label_warning": (
                     "weekly predictions use 20-trading-day labels, so date-level "
@@ -364,9 +366,9 @@ def permutation_test(
             scores = pd.to_numeric(
                 ordered["predicted_20d_excess_return_or_ranking_score"], errors="coerce"
             ).to_numpy(dtype=float)
-            actual = pd.to_numeric(
-                ordered["actual_20d_excess_return"], errors="coerce"
-            ).to_numpy(dtype=float)
+            actual = pd.to_numeric(ordered["actual_20d_excess_return"], errors="coerce").to_numpy(
+                dtype=float
+            )
             date_arrays.append((scores, actual))
         null_ic: list[float] = []
         null_spread: list[float] = []
@@ -399,8 +401,7 @@ def permutation_test(
                 "null_mean_spread": float(np.nanmean(null_spread_array)),
                 "null_std_spread": float(np.nanstd(null_spread_array)),
                 "empirical_one_sided_spread_p_value": float(
-                    (np.sum(null_spread_array >= observed_spread) + 1)
-                    / (permutations + 1)
+                    (np.sum(null_spread_array >= observed_spread) + 1) / (permutations + 1)
                 ),
             }
         )
@@ -420,9 +421,7 @@ def _prediction_metrics(predictions: pd.DataFrame, top_k: int) -> dict[str, floa
     return {
         "mean_ic": float(ic["spearman_information_coefficient"].mean()),
         "median_ic": float(ic["spearman_information_coefficient"].median()),
-        "positive_ic_fraction": float(
-            ic["spearman_information_coefficient"].dropna().gt(0).mean()
-        ),
+        "positive_ic_fraction": float(ic["spearman_information_coefficient"].dropna().gt(0).mean()),
         "top_minus_bottom_rank_spread": float(ic["top_minus_bottom_rank_spread"].mean()),
         "prediction_coverage": float(predictions["actual_20d_excess_return"].notna().mean()),
     }
@@ -460,19 +459,17 @@ def _run_custom_ridge(
             )
             keep_dates = set(dates[-rolling_training_window_dates:])
             train = train.loc[pd.to_datetime(train["decision_timestamp_utc"]).isin(keep_dates)]
-            if (
-                train["decision_timestamp_utc"].nunique()
-                < int(phase23g_config["minimum_training_decision_dates"])
-                or len(train) < int(phase23g_config["minimum_training_rows"])
-            ):
+            if train["decision_timestamp_utc"].nunique() < int(
+                phase23g_config["minimum_training_decision_dates"]
+            ) or len(train) < int(phase23g_config["minimum_training_rows"]):
                 continue
         test = fold["test"]
-        train_cs = joined_cs.loc[
-            joined_cs["panel_row_id"].isin(set(train["panel_row_id"]))
-        ].copy()
-        test_cs = joined_cs.loc[
-            joined_cs["panel_row_id"].isin(set(test["panel_row_id"]))
-        ].sort_values("permanent_security_id").copy()
+        train_cs = joined_cs.loc[joined_cs["panel_row_id"].isin(set(train["panel_row_id"]))].copy()
+        test_cs = (
+            joined_cs.loc[joined_cs["panel_row_id"].isin(set(test["panel_row_id"]))]
+            .sort_values("permanent_security_id")
+            .copy()
+        )
         x_train_raw = train_cs[features].apply(pd.to_numeric, errors="coerce")
         x_test_raw = test_cs[features].apply(pd.to_numeric, errors="coerce")
         medians = x_train_raw.median().fillna(0.0)
@@ -482,9 +479,11 @@ def _run_custom_ridge(
         stds = x_train_raw.std().replace(0, 1.0).fillna(1.0)
         x_train = ((x_train_raw - means) / stds).to_numpy(dtype=float)
         x_test = ((x_test_raw - means) / stds).to_numpy(dtype=float)
-        y_train = pd.to_numeric(
-            train_cs["target_value"], errors="coerce"
-        ).fillna(0.0).to_numpy(dtype=float)
+        y_train = (
+            pd.to_numeric(train_cs["target_value"], errors="coerce")
+            .fillna(0.0)
+            .to_numpy(dtype=float)
+        )
         intercept, coef = _ridge_fit(x_train, y_train, float(phase23g_config["ridge_alpha"]))
         scores = pd.Series(intercept + x_test @ coef, index=test_cs.index)
         actual_rank = pd.to_numeric(test_cs["target_value"], errors="coerce").rank(
@@ -761,12 +760,20 @@ def _runtime_bounded_sensitivity(
         regularization_rows.append(
             {
                 "ridge_alpha": alpha,
-                "sensitivity_type": "observed_phase23g" if is_observed else "pre_registered_not_refit_in_phase23h",
+                "sensitivity_type": "observed_phase23g"
+                if is_observed
+                else "pre_registered_not_refit_in_phase23h",
                 "mean_ic": base_metrics.get("mean_ic") if is_observed else np.nan,
                 "median_ic": base_metrics.get("median_ic") if is_observed else np.nan,
-                "positive_ic_fraction": base_metrics.get("positive_ic_date_fraction") if is_observed else np.nan,
-                "top_minus_bottom_rank_spread": base_metrics.get("top_minus_bottom_rank_spread") if is_observed else np.nan,
-                "not_run_reason": "" if is_observed else "runtime-bounded Phase23H; not hyperparameter optimization",
+                "positive_ic_fraction": base_metrics.get("positive_ic_date_fraction")
+                if is_observed
+                else np.nan,
+                "top_minus_bottom_rank_spread": base_metrics.get("top_minus_bottom_rank_spread")
+                if is_observed
+                else np.nan,
+                "not_run_reason": ""
+                if is_observed
+                else "runtime-bounded Phase23H; not hyperparameter optimization",
             }
         )
     training_rows = [
@@ -812,12 +819,13 @@ def _security_attribution(predictions: pd.DataFrame, top_k: int) -> pd.DataFrame
     rows: list[dict[str, Any]] = []
     for security, group in ridge.groupby("permanent_security_id"):
         top_mask = group["predicted_rank"].le(top_k)
-        bottom_mask = group["predicted_rank"].ge(group.groupby("decision_timestamp_utc")["predicted_rank"].transform("max") - top_k + 1)
-        false_positive = top_mask & group["actual_20d_excess_return"].le(0)
-        error = (
-            pd.to_numeric(group["predicted_20d_excess_return_or_ranking_score"], errors="coerce")
-            - pd.to_numeric(group["actual_20d_excess_return"], errors="coerce")
+        bottom_mask = group["predicted_rank"].ge(
+            group.groupby("decision_timestamp_utc")["predicted_rank"].transform("max") - top_k + 1
         )
+        false_positive = top_mask & group["actual_20d_excess_return"].le(0)
+        error = pd.to_numeric(
+            group["predicted_20d_excess_return_or_ranking_score"], errors="coerce"
+        ) - pd.to_numeric(group["actual_20d_excess_return"], errors="coerce")
         rows.append(
             {
                 "permanent_security_id": security,
@@ -858,8 +866,7 @@ def _leave_one_security_out(predictions: pd.DataFrame, top_k: int) -> pd.DataFra
                 **metrics,
                 "mean_ic_change_vs_full": metrics["mean_ic"] - full["mean_ic"],
                 "spread_change_vs_full": (
-                    metrics["top_minus_bottom_rank_spread"]
-                    - full["top_minus_bottom_rank_spread"]
+                    metrics["top_minus_bottom_rank_spread"] - full["top_minus_bottom_rank_spread"]
                 ),
             }
         )
@@ -897,9 +904,7 @@ def _sector_diagnostics(predictions_panel: pd.DataFrame, top_k: int) -> pd.DataF
 def _sector_neutral_comparison(predictions_panel: pd.DataFrame, top_k: int) -> pd.DataFrame:
     ridge = _model_predictions(predictions_panel, RIDGE_MODEL)
     neutral = ridge.copy()
-    score = pd.to_numeric(
-        neutral["predicted_20d_excess_return_or_ranking_score"], errors="coerce"
-    )
+    score = pd.to_numeric(neutral["predicted_20d_excess_return_or_ranking_score"], errors="coerce")
     neutral["sector_neutral_score"] = score - score.groupby(
         [neutral["decision_timestamp_utc"], neutral["sector_asof"]]
     ).transform("mean")
@@ -939,9 +944,7 @@ def _regime_diagnostics(predictions_panel: pd.DataFrame, top_k: int) -> pd.DataF
     )
     thresholds = {
         "realized_volatility_21d": date_context["realized_volatility_21d"].median(),
-        "cross_sectional_dispersion_21d": date_context[
-            "cross_sectional_dispersion_21d"
-        ].median(),
+        "cross_sectional_dispersion_21d": date_context["cross_sectional_dispersion_21d"].median(),
         "market_breadth_200d": date_context["market_breadth_200d"].median(),
     }
     context = ridge.merge(date_context, on="decision_timestamp_utc", suffixes=("", "_date"))
@@ -1064,18 +1067,18 @@ def _topk_diagnostics(
         bottom_mask = ridge["predicted_rank"].ge(max_rank - k + 1)
         for side, mask in [("top", top_mask), ("bottom", bottom_mask)]:
             group = ridge.loc[mask].copy()
-            false_positive = group["actual_20d_excess_return"].le(0) if side == "top" else pd.Series(False, index=group.index)
+            false_positive = (
+                group["actual_20d_excess_return"].le(0)
+                if side == "top"
+                else pd.Series(False, index=group.index)
+            )
             rows.append(
                 {
                     "selection_bucket": f"{side}_{k}",
                     "row_count": len(group),
                     "date_count": group["decision_timestamp_utc"].nunique(),
-                    "average_forward_excess_return": group[
-                        "actual_20d_excess_return"
-                    ].mean(),
-                    "positive_alpha_hit_rate": group[
-                        "actual_20d_excess_return"
-                    ].gt(0).mean(),
+                    "average_forward_excess_return": group["actual_20d_excess_return"].mean(),
+                    "positive_alpha_hit_rate": group["actual_20d_excess_return"].gt(0).mean(),
                     "false_positive_count": int(false_positive.sum()),
                     "false_positive_rate": (
                         float(false_positive.mean()) if len(false_positive) else np.nan
@@ -1099,7 +1102,11 @@ def _topk_diagnostics(
             "predicted_rank",
             "predicted_20d_excess_return_or_ranking_score",
             "actual_20d_excess_return",
-            *[feature for feature in CORE_FEATURE_COLUMNS if feature in false_positive_cases.columns],
+            *[
+                feature
+                for feature in CORE_FEATURE_COLUMNS
+                if feature in false_positive_cases.columns
+            ],
         ]
         false_positive_cases = false_positive_cases[keep_columns]
     return pd.DataFrame(rows), false_positive_cases
@@ -1120,15 +1127,25 @@ def _rank_turnover(predictions: pd.DataFrame, top_k: int) -> pd.DataFrame:
             if previous is None:
                 previous = current
                 continue
-            merged = previous[["permanent_security_id", "predicted_rank", "predicted_20d_excess_return_or_ranking_score"]].merge(
-                current[["permanent_security_id", "predicted_rank", "predicted_20d_excess_return_or_ranking_score"]],
+            merged = previous[
+                [
+                    "permanent_security_id",
+                    "predicted_rank",
+                    "predicted_20d_excess_return_or_ranking_score",
+                ]
+            ].merge(
+                current[
+                    [
+                        "permanent_security_id",
+                        "predicted_rank",
+                        "predicted_20d_excess_return_or_ranking_score",
+                    ]
+                ],
                 on="permanent_security_id",
                 suffixes=("_previous", "_current"),
             )
             previous_top = set(
-                previous.sort_values("predicted_rank").head(top_k)[
-                    "permanent_security_id"
-                ]
+                previous.sort_values("predicted_rank").head(top_k)["permanent_security_id"]
             )
             union = previous_top | current_top
             rows.append(
@@ -1144,10 +1161,9 @@ def _rank_turnover(predictions: pd.DataFrame, top_k: int) -> pd.DataFrame:
                     "top_k_membership_turnover": 1.0
                     - len(previous_top & current_top) / max(len(union), 1),
                     "full_rank_turnover": float(
-                        (
-                            merged["predicted_rank_current"]
-                            - merged["predicted_rank_previous"]
-                        ).abs().mean()
+                        (merged["predicted_rank_current"] - merged["predicted_rank_previous"])
+                        .abs()
+                        .mean()
                     ),
                     "prediction_score_stability": _safe_spearman(
                         merged["predicted_20d_excess_return_or_ranking_score_previous"],
@@ -1177,8 +1193,16 @@ def _rank_turnover(predictions: pd.DataFrame, top_k: int) -> pd.DataFrame:
 def prediction_grain_audit(predictions: pd.DataFrame) -> pd.DataFrame:
     stock_dates = predictions[["decision_timestamp_utc", "permanent_security_id"]].drop_duplicates()
     model_count = predictions["model_version"].nunique() if "model_version" in predictions else 0
-    date_count = predictions["decision_timestamp_utc"].nunique() if "decision_timestamp_utc" in predictions else 0
-    security_count = predictions["permanent_security_id"].nunique() if "permanent_security_id" in predictions else 0
+    date_count = (
+        predictions["decision_timestamp_utc"].nunique()
+        if "decision_timestamp_utc" in predictions
+        else 0
+    )
+    security_count = (
+        predictions["permanent_security_id"].nunique()
+        if "permanent_security_id" in predictions
+        else 0
+    )
     total_rows = len(predictions)
     expected_rows = len(stock_dates) * model_count
     unique_key = not bool(
@@ -1223,9 +1247,9 @@ def _reconstruct_metrics(predictions: pd.DataFrame, top_k: int) -> pd.DataFrame:
                 "reconstructed_top_minus_bottom_rank_spread": group[
                     "top_minus_bottom_rank_spread"
                 ].mean(),
-                "reconstructed_prediction_coverage": model_predictions[
-                    "actual_20d_excess_return"
-                ].notna().mean(),
+                "reconstructed_prediction_coverage": model_predictions["actual_20d_excess_return"]
+                .notna()
+                .mean(),
             }
         )
     return pd.DataFrame(rows)
@@ -1266,7 +1290,11 @@ def _phase23g_reconciliation(
         }
         for metric, reconstructed_value in comparisons.items():
             phase_value = pd.to_numeric(metric_row[metric], errors="coerce").iloc[0]
-            diff = abs(float(reconstructed_value) - float(phase_value)) if pd.notna(reconstructed_value) and pd.notna(phase_value) else 0.0
+            diff = (
+                abs(float(reconstructed_value) - float(phase_value))
+                if pd.notna(reconstructed_value) and pd.notna(phase_value)
+                else 0.0
+            )
             rows.append(
                 {
                     "model_version": model,
@@ -1282,7 +1310,9 @@ def _phase23g_reconciliation(
         ridge = reconstructed.loc[reconstructed["model_version"].eq(RIDGE_MODEL)]
         if not ridge.empty:
             reconstructed_mean = ridge["reconstructed_mean_ic"].iloc[0]
-            phase_value = pd.to_numeric(pd.Series([summary_row.get("mean_ic")]), errors="coerce").iloc[0]
+            phase_value = pd.to_numeric(
+                pd.Series([summary_row.get("mean_ic")]), errors="coerce"
+            ).iloc[0]
             diff = abs(float(reconstructed_mean) - float(phase_value))
             rows.append(
                 {
@@ -1308,7 +1338,9 @@ def _integrity_gates(
     config: dict[str, Any],
 ) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
-    rows.append(_gate("phase23g_predictions_present", not predictions.empty, f"rows={len(predictions)}"))
+    rows.append(
+        _gate("phase23g_predictions_present", not predictions.empty, f"rows={len(predictions)}")
+    )
     rows.append(_gate("phase23f_panel_present", not panel.empty, f"rows={len(panel)}"))
     rows.append(_gate("phase23f_targets_present", not targets.empty, f"rows={len(targets)}"))
     rows.append(
@@ -1359,12 +1391,14 @@ def _integrity_gates(
             "purge_and_embargo_policy_recorded",
             bool(
                 not folds.empty
-                and folds["purge_window_trading_days"].astype(int).ge(
-                    int(config["phase23g_config"]["purge_window_trading_days"])
-                ).all()
-                and folds["embargo_window_trading_days"].astype(int).ge(
-                    int(config["phase23g_config"]["embargo_window_trading_days"])
-                ).all()
+                and folds["purge_window_trading_days"]
+                .astype(int)
+                .ge(int(config["phase23g_config"]["purge_window_trading_days"]))
+                .all()
+                and folds["embargo_window_trading_days"]
+                .astype(int)
+                .ge(int(config["phase23g_config"]["embargo_window_trading_days"]))
+                .all()
                 and (
                     pd.to_datetime(folds["purge_boundary_signal_date"])
                     < pd.to_datetime(folds["test_signal_date"])
@@ -1374,7 +1408,9 @@ def _integrity_gates(
         )
     )
     target_columns = [
-        column for column in panel.columns if column.startswith("forward_") or column.startswith("target_")
+        column
+        for column in panel.columns
+        if column.startswith("forward_") or column.startswith("target_")
     ]
     rows.append(
         _gate(
@@ -1398,10 +1434,26 @@ def _integrity_gates(
             critical=False,
         )
     )
-    rows.append(_gate("live_trading_disabled", not _bool_value(config["live_trading_allowed"]), "no live trading"))
-    rows.append(_gate("real_money_disabled", not _bool_value(config["real_money_allowed"]), "no real money"))
-    rows.append(_gate("broker_api_disabled", not _bool_value(config["broker_api_integration_allowed"]), "no broker/API"))
-    rows.append(_gate("promotion_disabled", not _bool_value(config["promotion_allowed"]), "no promotion"))
+    rows.append(
+        _gate(
+            "live_trading_disabled",
+            not _bool_value(config["live_trading_allowed"]),
+            "no live trading",
+        )
+    )
+    rows.append(
+        _gate("real_money_disabled", not _bool_value(config["real_money_allowed"]), "no real money")
+    )
+    rows.append(
+        _gate(
+            "broker_api_disabled",
+            not _bool_value(config["broker_api_integration_allowed"]),
+            "no broker/API",
+        )
+    )
+    rows.append(
+        _gate("promotion_disabled", not _bool_value(config["promotion_allowed"]), "no promotion")
+    )
     report = pd.DataFrame(rows)
     report["all_critical_gates_passed"] = bool(report.loc[report["critical"], "passed"].all())
     report["all_gates_passed"] = bool(report["passed"].all())
@@ -1619,7 +1671,12 @@ def _blocked_outputs(
         stability=pd.DataFrame(),
         failure_modes=pd.DataFrame(),
     )
-    return {"summary": summary, "gate_report": gates, "conclusion": conclusion, "dashboard": dashboard}
+    return {
+        "summary": summary,
+        "gate_report": gates,
+        "conclusion": conclusion,
+        "dashboard": dashboard,
+    }
 
 
 def save_phase23h_interpretable_ranker_robustness(
@@ -1760,14 +1817,18 @@ def save_phase23h_interpretable_ranker_robustness(
     strongest_feature = (
         feature_ablation.loc[
             feature_ablation["ablation_type"].astype(str).str.contains("single_feature")
-        ].sort_values("mean_ic", ascending=False)["feature_set_name"].iloc[0]
+        ]
+        .sort_values("mean_ic", ascending=False)["feature_set_name"]
+        .iloc[0]
         if not feature_ablation.empty
         else ""
     )
     weakest_feature = (
         feature_ablation.loc[
             feature_ablation["ablation_type"].astype(str).str.contains("single_feature")
-        ].sort_values("mean_ic", ascending=True)["feature_set_name"].iloc[0]
+        ]
+        .sort_values("mean_ic", ascending=True)["feature_set_name"]
+        .iloc[0]
         if not feature_ablation.empty
         else ""
     )
@@ -1779,9 +1840,7 @@ def save_phase23h_interpretable_ranker_robustness(
         else ""
     )
     max_leave_one_change = (
-        float(leave_one["mean_ic_change_vs_full"].abs().max())
-        if not leave_one.empty
-        else np.nan
+        float(leave_one["mean_ic_change_vs_full"].abs().max()) if not leave_one.empty else np.nan
     )
     best_period = (
         calendar.loc[calendar["model_version"].eq(RIDGE_MODEL)]

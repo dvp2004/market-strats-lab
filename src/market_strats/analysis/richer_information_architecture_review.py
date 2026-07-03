@@ -85,12 +85,10 @@ def build_phase11a_prior_branch_findings(phase_config: dict[str, Any]) -> pd.Dat
                 "rule_test_result": str(branch.get("rule_test_result", "")),
                 "closeout": str(branch.get("closeout", "")),
                 "implication": str(branch.get("implication", "")),
-                "rule_extension_failed": "failed" in str(
-                    branch.get("rule_test_result", "")
-                ).lower(),
-                "closed_without_promotion": "without promotion" in str(
-                    branch.get("closeout", "")
-                ).lower(),
+                "rule_extension_failed": "failed"
+                in str(branch.get("rule_test_result", "")).lower(),
+                "closed_without_promotion": "without promotion"
+                in str(branch.get("closeout", "")).lower(),
             }
         )
 
@@ -106,9 +104,7 @@ def build_phase11a_architecture_candidates(phase_config: dict[str, Any]) -> pd.D
                 "architecture_id": str(candidate.get("architecture_id", "")),
                 "name": str(candidate.get("name", "")),
                 "description": str(candidate.get("description", "")),
-                "allowed_as_next_branch": bool(
-                    candidate.get("allowed_as_next_branch", False)
-                ),
+                "allowed_as_next_branch": bool(candidate.get("allowed_as_next_branch", False)),
                 "reason": str(candidate.get("reason", "")),
                 "complexity": str(candidate.get("complexity", "")),
                 "overfit_risk": str(candidate.get("overfit_risk", "")),
@@ -143,9 +139,7 @@ def build_phase11a_architecture_risk_matrix(
     out["overfit_risk_score"] = out["overfit_risk"].map(risk_order).fillna(3)
     out["complexity_score"] = out["complexity"].map(risk_order).fillna(3)
     out["validation_burden_score"] = out["validation_burden"].map(risk_order).fillna(3)
-    out["interpretability_penalty"] = out["interpretability"].map(
-        interpretability_order
-    ).fillna(3)
+    out["interpretability_penalty"] = out["interpretability"].map(interpretability_order).fillna(3)
 
     out["architecture_risk_score"] = (
         out["overfit_risk_score"]
@@ -184,8 +178,7 @@ def build_phase11a_recommendation(phase_config: dict[str, Any]) -> pd.DataFrame:
                 "spec_only": "spec" in str(recommendation.get("title", "")).lower()
                 or "spec" in str(recommendation.get("recommendation", "")).lower(),
                 "strategy_test_allowed": any(
-                    "strategy test" in str(item).lower()
-                    and not str(item).lower().startswith("no")
+                    "strategy test" in str(item).lower() and not str(item).lower().startswith("no")
                     for item in _as_list(recommendation.get("allowed_scope"))
                 ),
             }
@@ -250,14 +243,12 @@ def build_phase11a_summary(
         architecture_candidates["architecture_id"] == "A1_continue_simple_rule_overlays"
     ]
 
-    simple_overlay_rejected = (
-        not simple_overlay.empty
-        and not bool(simple_overlay.iloc[0]["allowed_as_next_branch"])
+    simple_overlay_rejected = not simple_overlay.empty and not bool(
+        simple_overlay.iloc[0]["allowed_as_next_branch"]
     )
 
     preferred = architecture_candidates[
-        architecture_candidates["recommended_role"]
-        == "preferred_next_architecture_spec_candidate"
+        architecture_candidates["recommended_role"] == "preferred_next_architecture_spec_candidate"
     ]
 
     return pd.DataFrame(
@@ -286,14 +277,10 @@ def build_phase11a_summary(
                 "recommended_next_phase": str(recommendation.iloc[0]["phase"])
                 if not recommendation.empty
                 else "",
-                "recommended_next_step_is_spec_only": bool(
-                    recommendation.iloc[0]["spec_only"]
-                )
+                "recommended_next_step_is_spec_only": bool(recommendation.iloc[0]["spec_only"])
                 if not recommendation.empty
                 else False,
-                "strategy_test_allowed_next": bool(
-                    recommendation.iloc[0]["strategy_test_allowed"]
-                )
+                "strategy_test_allowed_next": bool(recommendation.iloc[0]["strategy_test_allowed"])
                 if not recommendation.empty
                 else True,
                 "boundary_checks_passed": bool(boundary_check["passed"].all())
@@ -393,10 +380,7 @@ def build_phase11a_gate_report(
             "No fundamental ingestion is allowed",
             (not gates.get("require_no_fundamental_ingestion", True))
             or not bool(phase_config.get("allow_fundamental_ingestion", True)),
-            (
-                "allow_fundamental_ingestion="
-                f"{phase_config.get('allow_fundamental_ingestion')}"
-            ),
+            (f"allow_fundamental_ingestion={phase_config.get('allow_fundamental_ingestion')}"),
         ),
         _gate_row(
             "No model training is allowed",

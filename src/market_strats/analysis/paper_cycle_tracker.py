@@ -95,7 +95,11 @@ def _join_values(values: list[str]) -> str:
 
 
 def _symbols_with_text(data_quality: pd.DataFrame, column: str) -> list[str]:
-    if data_quality.empty or column not in data_quality.columns or "symbol" not in data_quality.columns:
+    if (
+        data_quality.empty
+        or column not in data_quality.columns
+        or "symbol" not in data_quality.columns
+    ):
         return []
     rows = data_quality[data_quality[column].map(_text_value).str.len() > 0]
     return sorted(rows["symbol"].astype(str).tolist())

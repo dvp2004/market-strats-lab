@@ -130,16 +130,11 @@ def build_phase11c_component_rulebook(phase_config: dict[str, Any]) -> pd.DataFr
                 "family": str(component.get("family", "")),
                 "rulebook_role": str(component.get("rulebook_role", "")),
                 "source_evidence": str(component.get("source_evidence", "")),
-                "allowed_conceptual_inputs": _join_list(
-                    component.get("allowed_conceptual_inputs")
-                ),
-                "conceptual_direction_count": len(
-                    _as_list(component.get("conceptual_directions"))
-                ),
+                "allowed_conceptual_inputs": _join_list(component.get("allowed_conceptual_inputs")),
+                "conceptual_direction_count": len(_as_list(component.get("conceptual_directions"))),
                 "missingness_policy": str(component.get("missingness_policy", "")),
                 "current_status": str(component.get("current_status", "")),
-                "is_blocked": str(component.get("current_status", "")).lower()
-                == "blocked",
+                "is_blocked": str(component.get("current_status", "")).lower() == "blocked",
             }
         )
 
@@ -211,9 +206,7 @@ def build_phase11c_score_state_rulebook(phase_config: dict[str, Any]) -> pd.Data
                 "state_id": str(state.get("state_id", "")),
                 "conceptual_definition": str(state.get("conceptual_definition", "")),
                 "current_role": str(state.get("current_role", "")),
-                "score_calculation_allowed": bool(
-                    state.get("score_calculation_allowed", True)
-                ),
+                "score_calculation_allowed": bool(state.get("score_calculation_allowed", True)),
                 "trading_allowed": bool(state.get("trading_allowed", True)),
             }
         )
@@ -229,9 +222,7 @@ def build_phase11c_audit_output_spec(phase_config: dict[str, Any]) -> pd.DataFra
             {
                 "output_id": str(output.get("output_id", "")),
                 "output_description": str(output.get("output_description", "")),
-                "required_for_future_phase": bool(
-                    output.get("required_for_future_phase", False)
-                ),
+                "required_for_future_phase": bool(output.get("required_for_future_phase", False)),
             }
         )
 
@@ -365,16 +356,16 @@ def build_phase11c_summary(
         "macro_regime_context",
         "validation_risk_context",
     }
-    active_components_present = active_required_components.issubset(
-        set(component_rulebook["component_id"].tolist())
-    ) if not component_rulebook.empty else False
+    active_components_present = (
+        active_required_components.issubset(set(component_rulebook["component_id"].tolist()))
+        if not component_rulebook.empty
+        else False
+    )
 
     future_families_blocked = (
         bool(
             component_rulebook[
-                component_rulebook["family"].isin(
-                    ["fundamental_valuation", "sentiment_narrative"]
-                )
+                component_rulebook["family"].isin(["fundamental_valuation", "sentiment_narrative"])
             ]["is_blocked"]
             .eq(True)
             .all()
@@ -407,7 +398,9 @@ def build_phase11c_summary(
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
                 "source_architecture_present": bool(
                     source_architecture.iloc[0]["source_architecture_present"]
-                ) if not source_architecture.empty else False,
+                )
+                if not source_architecture.empty
+                else False,
                 "component_count": int(len(component_rulebook)),
                 "active_required_components_present": active_components_present,
                 "future_families_blocked": future_families_blocked,
@@ -415,26 +408,32 @@ def build_phase11c_summary(
                 "conceptual_directions_non_trading": conceptual_directions_non_trading,
                 "missingness_rule_count": int(len(missingness_rules)),
                 "required_missingness_rule_count": int(missingness_rules["required"].sum())
-                if not missingness_rules.empty else 0,
+                if not missingness_rules.empty
+                else 0,
                 "weighting_principle_count": int(len(weighting_principles)),
-                "required_weighting_principle_count": int(
-                    weighting_principles["required"].sum()
-                ) if not weighting_principles.empty else 0,
+                "required_weighting_principle_count": int(weighting_principles["required"].sum())
+                if not weighting_principles.empty
+                else 0,
                 "score_state_count": int(len(score_state_rulebook)),
                 "score_states_non_trading": score_states_non_trading,
                 "audit_output_count": int(len(audit_output_spec)),
                 "required_audit_output_count": int(
                     audit_output_spec["required_for_future_phase"].sum()
-                ) if not audit_output_spec.empty else 0,
+                )
+                if not audit_output_spec.empty
+                else 0,
                 "future_validation_gate_count": int(len(future_validation_gates)),
                 "required_future_validation_gate_count": int(
                     future_validation_gates["required"].sum()
-                ) if not future_validation_gates.empty else 0,
-                "phase11d_boundary_passed": bool(
-                    phase11d_boundary_check["passed"].all()
-                ) if not phase11d_boundary_check.empty else False,
+                )
+                if not future_validation_gates.empty
+                else 0,
+                "phase11d_boundary_passed": bool(phase11d_boundary_check["passed"].all())
+                if not phase11d_boundary_check.empty
+                else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
-                if not scope_boundary_check.empty else False,
+                if not scope_boundary_check.empty
+                else False,
                 "strategy_promotion": False,
                 "candidate_promotion": False,
             }
@@ -464,9 +463,7 @@ def build_phase11c_gate_report(
         )
 
     row = summary.iloc[0]
-    required_role = str(
-        gates.get("required_spec_role", "Regime scoring rulebook spec only")
-    )
+    required_role = str(gates.get("required_spec_role", "Regime scoring rulebook spec only"))
 
     rows = [
         _gate_row(
@@ -512,8 +509,7 @@ def build_phase11c_gate_report(
         _gate_row(
             "Missingness rules are documented",
             (not gates.get("require_missingness_rules", True))
-            or int(row["missingness_rule_count"])
-            >= int(gates.get("min_missingness_rules", 5)),
+            or int(row["missingness_rule_count"]) >= int(gates.get("min_missingness_rules", 5)),
             f"missingness_rule_count={int(row['missingness_rule_count'])}",
         ),
         _gate_row(
@@ -558,10 +554,7 @@ def build_phase11c_gate_report(
             "No numeric score weights are allowed",
             (not gates.get("require_no_numeric_score_weights", True))
             or not bool(phase_config.get("allow_numeric_score_weights", True)),
-            (
-                "allow_numeric_score_weights="
-                f"{phase_config.get('allow_numeric_score_weights')}"
-            ),
+            (f"allow_numeric_score_weights={phase_config.get('allow_numeric_score_weights')}"),
         ),
         _gate_row(
             "No empirical return weights are allowed",
@@ -784,9 +777,7 @@ def save_phase11c_regime_scoring_rulebook_spec(
 
     source_architecture = build_phase11c_source_architecture(phase_config)
     component_rulebook = build_phase11c_component_rulebook(phase_config)
-    conceptual_direction_rulebook = build_phase11c_conceptual_direction_rulebook(
-        phase_config
-    )
+    conceptual_direction_rulebook = build_phase11c_conceptual_direction_rulebook(phase_config)
     missingness_rules = build_phase11c_missingness_rules(phase_config)
     weighting_principles = build_phase11c_weighting_principles(phase_config)
     score_state_rulebook = build_phase11c_score_state_rulebook(phase_config)

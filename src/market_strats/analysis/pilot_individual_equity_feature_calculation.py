@@ -10,18 +10,12 @@ import pandas as pd
 
 DEFAULT_PHASE23F_CONFIG: dict[str, Any] = {
     "enabled": False,
-    "output_dir": (
-        "reports/individual_equity_decision_system/"
-        "phase23f_pilot_feature_calculation"
-    ),
+    "output_dir": ("reports/individual_equity_decision_system/phase23f_pilot_feature_calculation"),
     "dashboard_status_path": (
-        "reports/paper_trading/dashboard/"
-        "phase23f_pilot_feature_calculation_status.csv"
+        "reports/paper_trading/dashboard/phase23f_pilot_feature_calculation_status.csv"
     ),
     "input_dir": "data/individual_equity_pilot",
-    "membership_manifest_path": (
-        "data/individual_equity_pilot/pilot_membership_manifest.csv"
-    ),
+    "membership_manifest_path": ("data/individual_equity_pilot/pilot_membership_manifest.csv"),
     "benchmark_path": "data/individual_equity_pilot/benchmark_SPY.csv",
     "pilot_start_date": "2023-01-03",
     "pilot_end_date": "2026-05-01",
@@ -108,9 +102,7 @@ def _gate(name: str, passed: bool, detail: str) -> dict[str, Any]:
     }
 
 
-def _resolve_reports_path(
-    *, configured_path: str | Path, reports_dir: str | Path
-) -> Path:
+def _resolve_reports_path(*, configured_path: str | Path, reports_dir: str | Path) -> Path:
     reports_root = Path(reports_dir)
     path = Path(configured_path)
     if path.is_absolute():
@@ -120,9 +112,7 @@ def _resolve_reports_path(
     return reports_root / path
 
 
-def _resolve_project_path(
-    *, configured_path: str | Path, reports_dir: str | Path
-) -> Path:
+def _resolve_project_path(*, configured_path: str | Path, reports_dir: str | Path) -> Path:
     path = Path(configured_path)
     if path.is_absolute():
         return path
@@ -364,7 +354,9 @@ def validate_membership_manifest(manifest: pd.DataFrame) -> pd.DataFrame:
         return report
 
     working = manifest.copy()
-    nonblank_columns = [column for column in MEMBERSHIP_REQUIRED_COLUMNS if column != "membership_end_date"]
+    nonblank_columns = [
+        column for column in MEMBERSHIP_REQUIRED_COLUMNS if column != "membership_end_date"
+    ]
     nonblank = bool(
         working[nonblank_columns]
         .fillna("")
@@ -430,7 +422,9 @@ def normalize_price_frame(frame: pd.DataFrame) -> pd.DataFrame:
         "Dividends": "dividends",
         "Stock Splits": "stock_splits",
     }
-    working = working.rename(columns={key: value for key, value in rename.items() if key in working.columns})
+    working = working.rename(
+        columns={key: value for key, value in rename.items() if key in working.columns}
+    )
     if "date" not in working.columns and isinstance(working.index, pd.DatetimeIndex):
         working = working.reset_index().rename(columns={working.index.name or "index": "date"})
     if "adj_close" not in working.columns and "close" in working.columns:
@@ -443,9 +437,7 @@ def normalize_price_frame(frame: pd.DataFrame) -> pd.DataFrame:
     return working.reset_index(drop=True)
 
 
-def validate_price_frame(
-    prices: pd.DataFrame, *, minimum_price_rows: int = 320
-) -> pd.DataFrame:
+def validate_price_frame(prices: pd.DataFrame, *, minimum_price_rows: int = 320) -> pd.DataFrame:
     missing = sorted(set(PRICE_REQUIRED_COLUMNS) - set(prices.columns))
     rows = [_gate("required_columns_present", not missing, "missing=" + ";".join(missing))]
     if missing:
@@ -490,20 +482,22 @@ def calculate_security_features(
     working["momentum_252d_skip21d"] = adjusted.shift(21) / adjusted.shift(252) - 1.0
     working["moving_average_200d"] = adjusted.rolling(200, min_periods=200).mean()
     working["trend_distance_200d"] = adjusted / working["moving_average_200d"] - 1.0
-    working["realized_volatility_21d"] = returns.rolling(21, min_periods=21).std(ddof=1) * np.sqrt(252.0)
+    working["realized_volatility_21d"] = returns.rolling(21, min_periods=21).std(ddof=1) * np.sqrt(
+        252.0
+    )
     rolling_volume = working["volume"].rolling(20, min_periods=20).median()
     working["volume_surprise_20d"] = working["volume"] / rolling_volume - 1.0
     working["average_dollar_volume_20d"] = (
-        working["close"] * working["volume"]
-    ).rolling(20, min_periods=20).mean()
+        (working["close"] * working["volume"]).rolling(20, min_periods=20).mean()
+    )
 
     working["beta_252d"] = np.nan
     if benchmark is not None and not benchmark.empty:
         benchmark_working = normalize_price_frame(benchmark).set_index("date")
         benchmark_return = benchmark_working["adj_close"].pct_change().rename("benchmark_return")
         aligned = pd.concat([returns.rename("stock_return"), benchmark_return], axis=1)
-        covariance = aligned["stock_return"].rolling(252, min_periods=252).cov(
-            aligned["benchmark_return"]
+        covariance = (
+            aligned["stock_return"].rolling(252, min_periods=252).cov(aligned["benchmark_return"])
         )
         variance = aligned["benchmark_return"].rolling(252, min_periods=252).var()
         working["beta_252d"] = covariance / variance.replace(0.0, np.nan)
@@ -577,11 +571,7 @@ def build_pilot_panel_and_targets(
         raise ValueError("Pilot has fewer securities than minimum_securities")
 
     all_dates = pd.DatetimeIndex(
-        sorted(
-            set().union(
-                *(set(frame["date"].dropna()) for frame in calculated.values())
-            )
-        )
+        sorted(set().union(*(set(frame["date"].dropna()) for frame in calculated.values())))
     )
     start = pd.Timestamp(phase_config["pilot_start_date"])
     end = pd.Timestamp(phase_config["pilot_end_date"])
@@ -612,17 +602,13 @@ def build_pilot_panel_and_targets(
 
     panel = daily[daily["date"].isin(decision_dates)].copy()
     panel = panel[(panel["date"] >= start) & (panel["date"] <= end)]
-    panel["membership_active"] = (
-        (panel["date"] >= panel["membership_start_date"])
-        & (panel["membership_end_date"].isna() | (panel["date"] < panel["membership_end_date"]))
+    panel["membership_active"] = (panel["date"] >= panel["membership_start_date"]) & (
+        panel["membership_end_date"].isna() | (panel["date"] < panel["membership_end_date"])
     )
     panel = panel[panel["membership_active"]].copy()
 
     decision_stamp = pd.to_datetime(
-        panel["date"].dt.strftime("%Y-%m-%d")
-        + "T"
-        + str(phase_config["decision_time_utc"])
-        + "Z",
+        panel["date"].dt.strftime("%Y-%m-%d") + "T" + str(phase_config["decision_time_utc"]) + "Z",
         utc=True,
     )
     available_stamp = pd.to_datetime(
@@ -701,8 +687,7 @@ def build_pilot_panel_and_targets(
                     ),
                     "target_period_end_date": str(pd.Timestamp(future_row.name).date()),
                     "target_available_timestamp_utc": (
-                        pd.Timestamp(future_row.name).tz_localize("UTC")
-                        + pd.Timedelta(days=1)
+                        pd.Timestamp(future_row.name).tz_localize("UTC") + pd.Timedelta(days=1)
                     ),
                     "target_set_version": str(phase_config["target_set_version"]),
                 }
@@ -711,9 +696,9 @@ def build_pilot_panel_and_targets(
     if not targets.empty:
         total_mask = targets["target_name"].str.contains("total_return")
         total = targets[total_mask].copy()
-        total["universe_mean"] = total.groupby(
-            ["signal_date", "target_horizon_trading_days"]
-        )["target_value"].transform("mean")
+        total["universe_mean"] = total.groupby(["signal_date", "target_horizon_trading_days"])[
+            "target_value"
+        ].transform("mean")
         excess = total.copy()
         excess["target_value"] = excess["target_value"] - excess["universe_mean"]
         excess["target_name"] = excess["target_horizon_trading_days"].map(
@@ -758,9 +743,11 @@ def build_pilot_panel_and_targets(
         "feature_missing_count",
         "oldest_feature_age_days",
     ]
-    panel = panel[panel_columns].sort_values(
-        ["decision_timestamp_utc", "permanent_security_id"]
-    ).reset_index(drop=True)
+    panel = (
+        panel[panel_columns]
+        .sort_values(["decision_timestamp_utc", "permanent_security_id"])
+        .reset_index(drop=True)
+    )
     return panel, targets, pd.DataFrame(inventories)
 
 
@@ -802,7 +789,9 @@ def validate_pilot_panel(panel: pd.DataFrame, targets: pd.DataFrame) -> pd.DataF
         {"ticker", "ticker_asof"}.issubset(panel.columns)
         and panel["ticker"].astype(str).eq(panel["ticker_asof"].astype(str)).all()
     )
-    rows.append(_gate("ticker_matches_ticker_asof", ticker_alias_valid, "point-in-time ticker alias"))
+    rows.append(
+        _gate("ticker_matches_ticker_asof", ticker_alias_valid, "point-in-time ticker alias")
+    )
     one_row_per_security_date = not bool(
         panel.duplicated(["decision_timestamp_utc", "permanent_security_id"]).any()
     )
@@ -842,7 +831,9 @@ def validate_pilot_panel(panel: pd.DataFrame, targets: pd.DataFrame) -> pd.DataF
         )
     )
     cutoff = pd.to_datetime(panel["model_cutoff_timestamp_utc"], utc=True, errors="coerce")
-    maximum = pd.to_datetime(panel["feature_max_available_timestamp_utc"], utc=True, errors="coerce")
+    maximum = pd.to_datetime(
+        panel["feature_max_available_timestamp_utc"], utc=True, errors="coerce"
+    )
     rows.append(
         _gate(
             "feature_availability_not_after_cutoff",
@@ -860,7 +851,11 @@ def validate_pilot_panel(panel: pd.DataFrame, targets: pd.DataFrame) -> pd.DataF
             "pilot membership knowledge clock",
         )
     )
-    target_ids_valid = bool(targets["panel_row_id"].isin(set(panel["panel_row_id"])).all()) if not targets.empty else False
+    target_ids_valid = (
+        bool(targets["panel_row_id"].isin(set(panel["panel_row_id"])).all())
+        if not targets.empty
+        else False
+    )
     rows.append(_gate("targets_join_to_panel", target_ids_valid, f"targets={len(targets)}"))
     if not targets.empty:
         target_unique = not bool(targets.duplicated(["panel_row_id", "target_name"]).any())
@@ -874,7 +869,9 @@ def validate_pilot_panel(panel: pd.DataFrame, targets: pd.DataFrame) -> pd.DataF
         horizon_from_name = targets["target_name"].astype(str).str.extract(r"forward_(\d+)d")[0]
         horizon_name_valid = bool(
             horizon_from_name.notna().all()
-            and horizon_from_name.astype(int).eq(targets["target_horizon_trading_days"].astype(int)).all()
+            and horizon_from_name.astype(int)
+            .eq(targets["target_horizon_trading_days"].astype(int))
+            .all()
         )
         rows.append(
             _gate(
@@ -906,7 +903,9 @@ def validate_pilot_panel(panel: pd.DataFrame, targets: pd.DataFrame) -> pd.DataF
         target_clock_valid = False
     rows.append(_gate("targets_available_after_period_end", target_clock_valid, "label clock"))
     target_columns_in_panel = [
-        column for column in panel.columns if column.startswith("forward_") or column.startswith("target_")
+        column
+        for column in panel.columns
+        if column.startswith("forward_") or column.startswith("target_")
     ]
     rows.append(
         _gate(
@@ -918,17 +917,14 @@ def validate_pilot_panel(panel: pd.DataFrame, targets: pd.DataFrame) -> pd.DataF
     numeric_features = panel[CORE_FEATURE_COLUMNS].apply(pd.to_numeric, errors="coerce")
     finite_or_missing = bool(
         (
-            np.isfinite(numeric_features.to_numpy(dtype=float))
-            | numeric_features.isna().to_numpy()
+            np.isfinite(numeric_features.to_numpy(dtype=float)) | numeric_features.isna().to_numpy()
         ).all()
     )
     eligible = panel["training_eligible"].map(
         lambda value: str(value).strip().lower() in {"true", "1", "yes", "y"}
     )
     eligible_features_finite = bool(
-        numeric_features.loc[eligible].notna().all().all()
-        if eligible.any()
-        else False
+        numeric_features.loc[eligible].notna().all().all() if eligible.any() else False
     )
     feature_values_finite = finite_or_missing and eligible_features_finite
     finite_features = numeric_features.replace([np.inf, -np.inf], np.nan)
@@ -944,9 +940,19 @@ def validate_pilot_panel(panel: pd.DataFrame, targets: pd.DataFrame) -> pd.DataF
             f"minimum_finite_rate={finite_rate:.4f}",
         )
     )
-    if {"decision_timestamp_utc", "market_breadth_200d", "cross_sectional_dispersion_21d"}.issubset(panel.columns):
-        breadth_unique = panel.groupby("decision_timestamp_utc")["market_breadth_200d"].nunique(dropna=False).max()
-        dispersion_unique = panel.groupby("decision_timestamp_utc")["cross_sectional_dispersion_21d"].nunique(dropna=False).max()
+    if {"decision_timestamp_utc", "market_breadth_200d", "cross_sectional_dispersion_21d"}.issubset(
+        panel.columns
+    ):
+        breadth_unique = (
+            panel.groupby("decision_timestamp_utc")["market_breadth_200d"]
+            .nunique(dropna=False)
+            .max()
+        )
+        dispersion_unique = (
+            panel.groupby("decision_timestamp_utc")["cross_sectional_dispersion_21d"]
+            .nunique(dropna=False)
+            .max()
+        )
         cross_sectional_consistent = bool(breadth_unique == 1 and dispersion_unique == 1)
     else:
         cross_sectional_consistent = False
@@ -1052,9 +1058,7 @@ def save_phase23f_pilot_individual_equity_feature_calculation(
         [_gate("manifest_not_loaded", False, "local membership manifest pending")]
     )
     source_inventory = pd.DataFrame()
-    panel_validation = pd.DataFrame(
-        [_gate("pilot_panel_not_built", False, "local inputs pending")]
-    )
+    panel_validation = pd.DataFrame([_gate("pilot_panel_not_built", False, "local inputs pending")])
     panel = pd.DataFrame()
     targets = pd.DataFrame()
     build_error = ""
@@ -1101,18 +1105,14 @@ def save_phase23f_pilot_individual_equity_feature_calculation(
                     panel_validation = validate_pilot_panel(panel, targets)
         except (ValueError, KeyError, OSError) as exc:
             build_error = str(exc)
-            panel_validation = pd.DataFrame(
-                [_gate("pilot_panel_build", False, build_error)]
-            )
+            panel_validation = pd.DataFrame([_gate("pilot_panel_build", False, build_error)])
 
     inputs_ready = bool(
         not input_readiness.empty
         and input_readiness.loc[input_readiness["required"], "present"].all()
     )
     panel_built = not panel.empty
-    validation_passed = bool(
-        not panel_validation.empty and panel_validation["passed"].all()
-    )
+    validation_passed = bool(not panel_validation.empty and panel_validation["passed"].all())
     execution_passed = bool(scope_boundary["passed"].all())
 
     summary = pd.DataFrame(
@@ -1206,9 +1206,7 @@ def save_phase23f_pilot_individual_equity_feature_calculation(
     if panel_built:
         panel.to_csv(output_dir / "phase23f_pilot_feature_panel.csv", index=False)
         try:
-            panel.to_parquet(
-                output_dir / "phase23f_pilot_feature_panel.parquet", index=False
-            )
+            panel.to_parquet(output_dir / "phase23f_pilot_feature_panel.parquet", index=False)
         except ImportError:
             pass
     if not targets.empty:

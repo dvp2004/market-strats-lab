@@ -81,8 +81,7 @@ def _source_paths(section: dict[str, Any], reports_dir: Path) -> dict[str, Path]
     return {
         "phase21a_master": regime_dir / "phase21a_master_strategy_candidates.csv",
         "phase21a_scores": regime_dir / "phase21a_regime_robustness_scores.csv",
-        "phase21a_components": regime_dir
-        / "phase21a_regime_robustness_score_components.csv",
+        "phase21a_components": regime_dir / "phase21a_regime_robustness_score_components.csv",
         "phase21a_summary": regime_dir / "phase21a_candidate_regime_summary.csv",
         "phase19b_tracking": finalist_dir / "phase19b_recommended_paper_tracking_set.csv",
         "paper_targets": paper_dir / "finalist_paper_targets.csv",
@@ -100,7 +99,10 @@ def _phase21a_lookup(frames: dict[str, pd.DataFrame]) -> pd.DataFrame:
     master = frames.get("phase21a_master", pd.DataFrame()).copy()
     if master.empty:
         return master
-    if "regime_robustness_score" not in master.columns and "final_regime_robustness_score" in master.columns:
+    if (
+        "regime_robustness_score" not in master.columns
+        and "final_regime_robustness_score" in master.columns
+    ):
         master["regime_robustness_score"] = master["final_regime_robustness_score"]
     return master
 
@@ -294,9 +296,11 @@ def build_paper_shortlist_recommendation(
         "canonical_spy_qqq_60_40",
     ]
     phase = phase21a.copy()
-    phase["_priority"] = phase["canonical_candidate_id"].map(
-        {candidate_id: idx for idx, candidate_id in enumerate(priority_ids)}
-    ).fillna(999)
+    phase["_priority"] = (
+        phase["canonical_candidate_id"]
+        .map({candidate_id: idx for idx, candidate_id in enumerate(priority_ids)})
+        .fillna(999)
+    )
     phase = phase.sort_values(
         ["_priority", "regime_robustness_score"],
         ascending=[True, False],
@@ -351,21 +355,29 @@ def build_candidate_delta_report(
     phase21a: pd.DataFrame,
     shortlist: pd.DataFrame,
 ) -> pd.DataFrame:
-    phase19_ids = set(phase19b_tracking.get("canonical_candidate_id", pd.Series(dtype=str)).astype(str))
+    phase19_ids = set(
+        phase19b_tracking.get("canonical_candidate_id", pd.Series(dtype=str)).astype(str)
+    )
     current_ids = set(targets.get("canonical_candidate_id", pd.Series(dtype=str)).astype(str))
     shortlist_ids = set(shortlist.get("canonical_candidate_id", pd.Series(dtype=str)).astype(str))
     all_ids = sorted(phase19_ids | current_ids | shortlist_ids)
     lookup = phase21a.set_index("canonical_candidate_id") if not phase21a.empty else pd.DataFrame()
-    shortlist_lookup = shortlist.set_index("canonical_candidate_id") if not shortlist.empty else pd.DataFrame()
+    shortlist_lookup = (
+        shortlist.set_index("canonical_candidate_id") if not shortlist.empty else pd.DataFrame()
+    )
     rows: list[dict[str, Any]] = []
     for candidate_id in all_ids:
-        phase_row = lookup.loc[candidate_id] if candidate_id in lookup.index else pd.Series(dtype=object)
+        phase_row = (
+            lookup.loc[candidate_id] if candidate_id in lookup.index else pd.Series(dtype=object)
+        )
         short_row = (
             shortlist_lookup.loc[candidate_id]
             if candidate_id in shortlist_lookup.index
             else pd.Series(dtype=object)
         )
-        classification = _text_value(phase_row.get("master_strategy_classification", "missing_phase21a"))
+        classification = _text_value(
+            phase_row.get("master_strategy_classification", "missing_phase21a")
+        )
         if candidate_id == "canonical_spy_qqq_60_40":
             status_change = "paper_tracked_clean_growth_to_reference_only_regime_fragile"
             action = "manual_review_before_any_phase20_change"
@@ -457,7 +469,9 @@ def _write_recommendation_markdown(
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def _empty_outputs(output_dir: Path, dashboard_dir: Path, decision: str, missing: list[str]) -> dict[str, Path]:
+def _empty_outputs(
+    output_dir: Path, dashboard_dir: Path, decision: str, missing: list[str]
+) -> dict[str, Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
     dashboard_dir.mkdir(parents=True, exist_ok=True)
     gate_report = pd.DataFrame(

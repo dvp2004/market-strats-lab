@@ -45,14 +45,11 @@ def _phase_result_check(conclusion_path: str, gate_path: str, phase_name: str) -
     conclusion = _read_csv_if_exists(conclusion_path)
     gate = _read_csv_if_exists(gate_path)
 
-    conclusion_passed = (
-        not conclusion.empty
-        and _bool_value(conclusion.iloc[0].get("all_gates_passed", False))
+    conclusion_passed = not conclusion.empty and _bool_value(
+        conclusion.iloc[0].get("all_gates_passed", False)
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -174,7 +171,9 @@ def _daily_stream_switch_count(exported: pd.DataFrame) -> int:
 
     date_col = _first_existing_col(exported, ["decision_date", "date"])
     mode_col = _first_existing_col(exported, ["mode", "current_mode", "regime", "state"])
-    exposure_col = _first_existing_col(exported, ["exposure", "current_exposure", "target_exposure"])
+    exposure_col = _first_existing_col(
+        exported, ["exposure", "current_exposure", "target_exposure"]
+    )
 
     if date_col is None or exposure_col is None:
         return 0
@@ -208,24 +207,34 @@ def _classify_candidate_source(
 
     missing_count, missing_cols = _required_column_summary(frame, required_cols)
 
-    has_date = _first_existing_col(
-        frame,
-        ["decision_date", "switch_date", "date", "event_date", "signal_date"],
-    ) is not None
+    has_date = (
+        _first_existing_col(
+            frame,
+            ["decision_date", "switch_date", "date", "event_date", "signal_date"],
+        )
+        is not None
+    )
     has_mode_context = (
-        _first_existing_col(frame, ["previous_mode", "from_mode", "old_mode", "prior_mode"]) is not None
+        _first_existing_col(frame, ["previous_mode", "from_mode", "old_mode", "prior_mode"])
+        is not None
         and _first_existing_col(frame, ["current_mode", "to_mode", "new_mode", "mode"]) is not None
     )
     has_exposure_context = (
-        _first_existing_col(frame, ["previous_exposure", "from_exposure", "old_exposure"]) is not None
-        and _first_existing_col(frame, ["current_exposure", "to_exposure", "new_exposure", "exposure"]) is not None
+        _first_existing_col(frame, ["previous_exposure", "from_exposure", "old_exposure"])
+        is not None
+        and _first_existing_col(
+            frame, ["current_exposure", "to_exposure", "new_exposure", "exposure"]
+        )
+        is not None
     )
 
     count_reconciled = abs(rows - expected_count) <= tolerance
     is_empty = rows == 0
     is_summary = "summary" in name and rows <= 5
     is_changed_switch_audit = "changed_switch_audit" in name
-    is_visual_switch_log = "corrected_visual_switch_event_log" in name or "operational_switch_event_log" in name
+    is_visual_switch_log = (
+        "corrected_visual_switch_event_log" in name or "operational_switch_event_log" in name
+    )
 
     if is_empty:
         classification = "empty_or_missing_not_final_switch_source"
@@ -233,7 +242,11 @@ def _classify_candidate_source(
         classification = "intermediate_changed_switch_diagnostic_not_final_operational_log"
     elif is_summary:
         classification = "summary_file_not_final_switch_log"
-    elif count_reconciled and has_date and (missing_count == 0 or (has_mode_context and has_exposure_context)):
+    elif (
+        count_reconciled
+        and has_date
+        and (missing_count == 0 or (has_mode_context and has_exposure_context))
+    ):
         classification = "possible_final_36_switch_source"
     elif is_visual_switch_log and not count_reconciled:
         classification = "generated_visual_or_operational_log_but_count_not_reconciled"
@@ -277,10 +290,13 @@ def _source_attribution_inventory(section: dict[str, Any]) -> tuple[pd.DataFrame
             "rows": len(exported),
             "expected_switch_count": expected_count,
             "distance_to_expected": abs(_daily_stream_switch_count(exported) - expected_count),
-            "count_reconciled": abs(_daily_stream_switch_count(exported) - expected_count) <= tolerance,
+            "count_reconciled": abs(_daily_stream_switch_count(exported) - expected_count)
+            <= tolerance,
             "has_date_field": _first_existing_col(exported, ["decision_date", "date"]) is not None,
-            "has_mode_context": _first_existing_col(exported, ["mode", "current_mode", "regime"]) is not None,
-            "has_exposure_context": _first_existing_col(exported, ["exposure", "current_exposure"]) is not None,
+            "has_mode_context": _first_existing_col(exported, ["mode", "current_mode", "regime"])
+            is not None,
+            "has_exposure_context": _first_existing_col(exported, ["exposure", "current_exposure"])
+            is not None,
             "missing_required_column_count": "",
             "missing_required_columns": "",
             "is_changed_switch_audit": False,
@@ -430,8 +446,12 @@ def save_phase15e_operational_switch_source_attribution(
             {
                 "expected_final_switch_count": int(section.get("expected_final_switch_count", 36)),
                 "switch_count_abs_tolerance": int(section.get("switch_count_abs_tolerance", 2)),
-                "true_36_switch_source_found": _bool_value(decision.iloc[0]["true_36_switch_source_found"]),
-                "source_code_patch_required": _bool_value(decision.iloc[0]["source_code_patch_required"]),
+                "true_36_switch_source_found": _bool_value(
+                    decision.iloc[0]["true_36_switch_source_found"]
+                ),
+                "source_code_patch_required": _bool_value(
+                    decision.iloc[0]["source_code_patch_required"]
+                ),
                 "paper_readiness_blocked": True,
                 "reason": decision.iloc[0]["decision"],
             }
@@ -445,11 +465,15 @@ def save_phase15e_operational_switch_source_attribution(
                 "implementation_classification": section.get("implementation_classification", ""),
                 "phase15d_passed": bool(phase15d_check["passed"].all()),
                 "candidate_sources_checked": len(inventory),
-                "true_36_switch_source_found": _bool_value(decision.iloc[0]["true_36_switch_source_found"]),
+                "true_36_switch_source_found": _bool_value(
+                    decision.iloc[0]["true_36_switch_source_found"]
+                ),
                 "changed_switch_audit_classified_as_intermediate": _bool_value(
                     decision.iloc[0]["changed_switch_audit_classified_as_intermediate"]
                 ),
-                "source_code_patch_required": _bool_value(decision.iloc[0]["source_code_patch_required"]),
+                "source_code_patch_required": _bool_value(
+                    decision.iloc[0]["source_code_patch_required"]
+                ),
                 "boundary_passed": bool(boundary["passed"].all()),
                 "scope_passed": bool(scope["passed"].all()) if not scope.empty else True,
                 "paper_dry_run": False,
@@ -465,9 +489,15 @@ def save_phase15e_operational_switch_source_attribution(
     gate_report = pd.DataFrame(
         [
             _gate_row("Phase 15D passed", bool(phase15d_check["passed"].all()), "phase15d"),
-            _gate_row("Candidate source inventory exists", len(inventory) > 0, f"rows={len(inventory)}"),
-            _gate_row("Attribution decision exists", len(decision) == 1, str(decision.iloc[0]["decision"])),
-            _gate_row("True 36-switch source status exists", len(true_source_status) == 1, "status"),
+            _gate_row(
+                "Candidate source inventory exists", len(inventory) > 0, f"rows={len(inventory)}"
+            ),
+            _gate_row(
+                "Attribution decision exists", len(decision) == 1, str(decision.iloc[0]["decision"])
+            ),
+            _gate_row(
+                "True 36-switch source status exists", len(true_source_status) == 1, "status"
+            ),
             _gate_row(
                 "Changed switch audit classified",
                 "changed_switch_audit_classified_as_intermediate" in decision.columns,
@@ -481,8 +511,14 @@ def save_phase15e_operational_switch_source_attribution(
                 ),
                 "patch spec",
             ),
-            _gate_row("Phase 15F boundary is spec-only", bool(boundary["passed"].all()), "phase15f"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "Phase 15F boundary is spec-only", bool(boundary["passed"].all()), "phase15f"
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Attribution role is correct",
                 section.get("attribution_role")
@@ -505,8 +541,12 @@ def save_phase15e_operational_switch_source_attribution(
                 ),
                 "all_gates_passed": bool(gate_report["passed"].all()),
                 "decision": decision.iloc[0]["decision"],
-                "true_36_switch_source_found": _bool_value(decision.iloc[0]["true_36_switch_source_found"]),
-                "source_code_patch_required": _bool_value(decision.iloc[0]["source_code_patch_required"]),
+                "true_36_switch_source_found": _bool_value(
+                    decision.iloc[0]["true_36_switch_source_found"]
+                ),
+                "source_code_patch_required": _bool_value(
+                    decision.iloc[0]["source_code_patch_required"]
+                ),
                 "paper_trading_ready": False,
                 "paper_dry_run": False,
                 "broker_api_integration": False,
@@ -636,14 +676,44 @@ def save_phase15f_fresh_data_extension_preregistration(
     gate_report = pd.DataFrame(
         [
             _gate_row("Phase 15E passed", bool(phase15e_check["passed"].all()), "phase15e"),
-            _gate_row("Baseline protection policy exists", len(baseline_protection) > 0, f"rows={len(baseline_protection)}"),
-            _gate_row("Fresh data source policy exists", len(fresh_data_source) > 0, f"rows={len(fresh_data_source)}"),
-            _gate_row("Current signal update policy exists", len(current_signal_policy) > 0, f"rows={len(current_signal_policy)}"),
-            _gate_row("Current signal output schema exists", len(current_signal_schema) > 0, f"columns={len(current_signal_schema)}"),
-            _gate_row("Cadence policy exists", len(cadence_policy) > 0, f"rows={len(cadence_policy)}"),
-            _gate_row("Failure handling policy exists", len(failure_policy) > 0, f"rows={len(failure_policy)}"),
-            _gate_row("Phase 15G boundary is current-signal-only", bool(boundary["passed"].all()), "phase15g"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "Baseline protection policy exists",
+                len(baseline_protection) > 0,
+                f"rows={len(baseline_protection)}",
+            ),
+            _gate_row(
+                "Fresh data source policy exists",
+                len(fresh_data_source) > 0,
+                f"rows={len(fresh_data_source)}",
+            ),
+            _gate_row(
+                "Current signal update policy exists",
+                len(current_signal_policy) > 0,
+                f"rows={len(current_signal_policy)}",
+            ),
+            _gate_row(
+                "Current signal output schema exists",
+                len(current_signal_schema) > 0,
+                f"columns={len(current_signal_schema)}",
+            ),
+            _gate_row(
+                "Cadence policy exists", len(cadence_policy) > 0, f"rows={len(cadence_policy)}"
+            ),
+            _gate_row(
+                "Failure handling policy exists",
+                len(failure_policy) > 0,
+                f"rows={len(failure_policy)}",
+            ),
+            _gate_row(
+                "Phase 15G boundary is current-signal-only",
+                bool(boundary["passed"].all()),
+                "phase15g",
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Preregistration role is correct",
                 section.get("preregistration_role")

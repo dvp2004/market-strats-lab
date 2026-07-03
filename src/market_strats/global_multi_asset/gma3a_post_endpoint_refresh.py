@@ -1,4 +1,5 @@
 """GMA-3A post-endpoint market-data refresh for operational paper packets."""
+
 from __future__ import annotations
 
 import json
@@ -89,9 +90,9 @@ def _merge_actions(normalised: pd.DataFrame, raw: pd.DataFrame) -> pd.DataFrame:
     actions = actions.groupby("date", as_index=False).agg(
         {
             "dividends": "sum",
-            "splits": lambda x: x.loc[x.fillna(0.0).ne(0.0)].iloc[0]
-            if x.fillna(0.0).ne(0.0).any()
-            else 0.0,
+            "splits": lambda x: (
+                x.loc[x.fillna(0.0).ne(0.0)].iloc[0] if x.fillna(0.0).ne(0.0).any() else 0.0
+            ),
         }
     )
     completed = completed.merge(actions, on="date", how="left")
@@ -121,7 +122,9 @@ def _resolve_snapshot_path(value: Any) -> Path:
     return Path.cwd() / path
 
 
-def _processed_snapshot_from_manifest(manifest_path: Path) -> _ProcessedSnapshotForMaterialization | None:
+def _processed_snapshot_from_manifest(
+    manifest_path: Path,
+) -> _ProcessedSnapshotForMaterialization | None:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     normalised_path = _resolve_snapshot_path(manifest.get("normalised_file_path", ""))
     raw_path = _resolve_snapshot_path(manifest.get("raw_file_path", ""))
@@ -199,7 +202,12 @@ def _build_post_endpoint_rows(
     anchor = anchor_candidates.iloc[-1]
     prev_close = float(anchor["close_raw"])
     prev_index = float(anchor["total_return_index"])
-    if not math.isfinite(prev_close) or prev_close <= 0 or not math.isfinite(prev_index) or prev_index <= 0:
+    if (
+        not math.isfinite(prev_close)
+        or prev_close <= 0
+        or not math.isfinite(prev_index)
+        or prev_index <= 0
+    ):
         raise ValueError(f"{symbol} invalid canonical anchor for total-return continuation")
 
     manifest_hash = sha256_file(manifest_path)
@@ -278,10 +286,20 @@ def run_gma3a_post_endpoint_refresh(config: GMA3AConfig) -> GMA3APostEndpointRef
                 provider=snapshot.provider,
                 manifest_root=manifest_root,
             )
-            completed = materialized.completed if materialized is not None else _post_endpoint_completed_history(snapshot.normalised_frame)
+            completed = (
+                materialized.completed
+                if materialized is not None
+                else _post_endpoint_completed_history(snapshot.normalised_frame)
+            )
             raw = materialized.raw if materialized is not None else snapshot.raw_frame
-            manifest_path = materialized.manifest_path if materialized is not None else snapshot.manifest_path
-            normalised_path = materialized.normalised_path if materialized is not None else snapshot.normalised_file_path
+            manifest_path = (
+                materialized.manifest_path if materialized is not None else snapshot.manifest_path
+            )
+            normalised_path = (
+                materialized.normalised_path
+                if materialized is not None
+                else snapshot.normalised_file_path
+            )
             raw_path = materialized.raw_path if materialized is not None else snapshot.raw_file_path
             post_rows = _build_post_endpoint_rows(
                 symbol=symbol,
@@ -310,7 +328,9 @@ def run_gma3a_post_endpoint_refresh(config: GMA3AConfig) -> GMA3APostEndpointRef
                 "request_end_exclusive": request_end,
                 "latest_completed_date": latest_completed_date,
                 "completed_row_count": row_count,
-                "output_file": str(post_market_root / f"{symbol}_post_endpoint.csv") if status == "refreshed" else "",
+                "output_file": str(post_market_root / f"{symbol}_post_endpoint.csv")
+                if status == "refreshed"
+                else "",
                 "blocking_reason": blocking_reason,
             }
         )

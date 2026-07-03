@@ -112,9 +112,7 @@ def build_phase10b_source_catalog(phase_config: dict[str, Any]) -> pd.DataFrame:
                 "macro_role": str(source.get("macro_role", "")),
                 "source_family": str(source.get("source_family", "")),
                 "frequency": str(source.get("frequency", "")),
-                "expected_history_coverage": str(
-                    source.get("expected_history_coverage", "")
-                ),
+                "expected_history_coverage": str(source.get("expected_history_coverage", "")),
                 "example_series": _join_list(source.get("example_series")),
                 "has_release_calendar_or_timestamp": bool(
                     source.get("has_release_calendar_or_timestamp", False)
@@ -173,10 +171,7 @@ def build_phase10b_timing_revision_check(phase_config: dict[str, Any]) -> pd.Dat
     frame["timing_revision_ready_for_audit"] = (
         frame["has_release_policy"]
         & frame["has_revision_policy"]
-        & (
-            frame["supports_point_in_time_alignment"]
-            | frame["has_vintage_or_revision_support"]
-        )
+        & (frame["supports_point_in_time_alignment"] | frame["has_vintage_or_revision_support"])
     )
 
     return frame
@@ -208,8 +203,7 @@ def build_phase10b_leakage_control_check(phase_config: dict[str, Any]) -> pd.Dat
         return frame
 
     frame["leakage_controls_ready_for_audit"] = (
-        frame["has_leakage_risks_documented"]
-        & frame["has_required_controls_documented"]
+        frame["has_leakage_risks_documented"] & frame["has_required_controls_documented"]
     )
 
     return frame
@@ -234,9 +228,7 @@ def build_phase10b_source_recommendation(
         on="source_id",
         how="left",
     ).merge(
-        leakage_control_check[
-            ["source_id", "leakage_controls_ready_for_audit"]
-        ],
+        leakage_control_check[["source_id", "leakage_controls_ready_for_audit"]],
         on="source_id",
         how="left",
     )
@@ -246,9 +238,7 @@ def build_phase10b_source_recommendation(
         & merged["timing_revision_ready_for_audit"].fillna(False).astype(bool)
         & merged["leakage_controls_ready_for_audit"].fillna(False).astype(bool)
     )
-    merged["strategy_test_blocked"] = ~merged["allowed_for_strategy_test_now"].astype(
-        bool
-    )
+    merged["strategy_test_blocked"] = ~merged["allowed_for_strategy_test_now"].astype(bool)
 
     recommended_sources = merged[
         merged["source_audit_candidate"] & merged["strategy_test_blocked"]
@@ -256,8 +246,7 @@ def build_phase10b_source_recommendation(
 
     if recommended_sources.empty:
         recommendation = (
-            "Do not open Phase 10C; no macro/rates/inflation source passed "
-            "the feasibility audit."
+            "Do not open Phase 10C; no macro/rates/inflation source passed the feasibility audit."
         )
     else:
         recommendation = (
@@ -270,9 +259,7 @@ def build_phase10b_source_recommendation(
             {
                 "recommended_family": str(phase_config.get("recommended_family", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "recommended_source_count_for_phase10c_audit": int(
-                    len(recommended_sources)
-                ),
+                "recommended_source_count_for_phase10c_audit": int(len(recommended_sources)),
                 "recommended_sources_for_phase10c_audit": "; ".join(
                     recommended_sources["source_id"].astype(str).tolist()
                 ),
@@ -355,9 +342,7 @@ def build_phase10b_summary(
                 "recommended_family": str(phase_config.get("recommended_family", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
                 "source_candidate_count": int(len(source_catalog)),
-                "release_policy_ready_count": int(
-                    timing_revision_check["has_release_policy"].sum()
-                )
+                "release_policy_ready_count": int(timing_revision_check["has_release_policy"].sum())
                 if not timing_revision_check.empty
                 else 0,
                 "revision_policy_ready_count": int(
@@ -378,29 +363,17 @@ def build_phase10b_summary(
                 ),
                 "has_rates_source": any("rates" in role for role in source_roles),
                 "has_inflation_source": any("inflation" in role for role in source_roles),
-                "phase10c_allowed": _bool_value(
-                    recommended.get("phase10c_allowed", False)
-                ),
-                "phase10c_boundary_passed": bool(
-                    phase10c_boundary_check["passed"].all()
-                )
+                "phase10c_allowed": _bool_value(recommended.get("phase10c_allowed", False)),
+                "phase10c_boundary_passed": bool(phase10c_boundary_check["passed"].all())
                 if not phase10c_boundary_check.empty
                 else False,
-                "allow_data_download": bool(
-                    phase_config.get("allow_data_download", False)
-                ),
+                "allow_data_download": bool(phase_config.get("allow_data_download", False)),
                 "allow_feature_engineering": bool(
                     phase_config.get("allow_feature_engineering", False)
                 ),
-                "allow_signal_creation": bool(
-                    phase_config.get("allow_signal_creation", False)
-                ),
-                "allow_model_training": bool(
-                    phase_config.get("allow_model_training", False)
-                ),
-                "allow_strategy_test": bool(
-                    phase_config.get("allow_strategy_test", False)
-                ),
+                "allow_signal_creation": bool(phase_config.get("allow_signal_creation", False)),
+                "allow_model_training": bool(phase_config.get("allow_model_training", False)),
+                "allow_strategy_test": bool(phase_config.get("allow_strategy_test", False)),
                 "allow_strategy_promotion": bool(
                     phase_config.get("allow_strategy_promotion", False)
                 ),

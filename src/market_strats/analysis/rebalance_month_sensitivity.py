@@ -95,18 +95,10 @@ def run_rebalance_month_sensitivity(
         else:
             summary_row = audit_summary.iloc[0]
             rebalance_count = int(summary_row["rebalance_count"])
-            avg_rebalance_turnover_pct = float(
-                summary_row["avg_rebalance_turnover_pct"]
-            )
-            max_rebalance_turnover_pct = float(
-                summary_row["max_rebalance_turnover_pct"]
-            )
-            avg_drawdown_at_rebalance_pct = float(
-                summary_row["avg_drawdown_at_rebalance_pct"]
-            )
-            worst_drawdown_at_rebalance_pct = float(
-                summary_row["worst_drawdown_at_rebalance_pct"]
-            )
+            avg_rebalance_turnover_pct = float(summary_row["avg_rebalance_turnover_pct"])
+            max_rebalance_turnover_pct = float(summary_row["max_rebalance_turnover_pct"])
+            avg_drawdown_at_rebalance_pct = float(summary_row["avg_drawdown_at_rebalance_pct"])
+            worst_drawdown_at_rebalance_pct = float(summary_row["worst_drawdown_at_rebalance_pct"])
             avg_next_12m_return_pct = float(summary_row["avg_next_12m_return_pct"])
             positive_next_12m_pct = float(summary_row["positive_next_12m_pct"])
 
@@ -191,9 +183,7 @@ def write_rebalance_month_sensitivity_markdown(
         "positive_next_12m_pct",
     ]
 
-    available_columns = [
-        column for column in display_columns if column in sensitivity.columns
-    ]
+    available_columns = [column for column in display_columns if column in sensitivity.columns]
 
     markdown_table = sensitivity[available_columns].to_markdown(index=False)
 

@@ -96,18 +96,12 @@ DEFAULT_PILOT_SECURITIES: list[dict[str, str]] = [
 
 DEFAULT_PHASE23F_INPUT_CONFIG: dict[str, Any] = {
     "enabled": False,
-    "output_dir": (
-        "reports/individual_equity_decision_system/"
-        "phase23f_pilot_input_bootstrap"
-    ),
+    "output_dir": ("reports/individual_equity_decision_system/phase23f_pilot_input_bootstrap"),
     "dashboard_status_path": (
-        "reports/paper_trading/dashboard/"
-        "phase23f_pilot_input_bootstrap_status.csv"
+        "reports/paper_trading/dashboard/phase23f_pilot_input_bootstrap_status.csv"
     ),
     "input_dir": "data/individual_equity_pilot",
-    "membership_manifest_path": (
-        "data/individual_equity_pilot/pilot_membership_manifest.csv"
-    ),
+    "membership_manifest_path": ("data/individual_equity_pilot/pilot_membership_manifest.csv"),
     "benchmark_ticker": "SPY",
     "benchmark_filename": "benchmark_SPY.csv",
     "download_start_date": "2021-12-01",
@@ -181,9 +175,7 @@ def _phase_config(config: dict[str, Any]) -> dict[str, Any]:
     )
 
 
-def _resolve_reports_path(
-    *, configured_path: str | Path, reports_dir: str | Path
-) -> Path:
+def _resolve_reports_path(*, configured_path: str | Path, reports_dir: str | Path) -> Path:
     reports_root = Path(reports_dir)
     path = Path(configured_path)
     if path.is_absolute():
@@ -193,9 +185,7 @@ def _resolve_reports_path(
     return reports_root / path
 
 
-def _resolve_project_path(
-    *, configured_path: str | Path, reports_dir: str | Path
-) -> Path:
+def _resolve_project_path(*, configured_path: str | Path, reports_dir: str | Path) -> Path:
     path = Path(configured_path)
     if path.is_absolute():
         return path
@@ -318,7 +308,11 @@ def normalize_yfinance_price_frame(frame: pd.DataFrame) -> pd.DataFrame:
     if frame is None or frame.empty:
         raise ValueError("Downloaded price frame is empty")
     working = _flatten_single_ticker_columns(frame.copy())
-    if "Date" not in working.columns and "date" not in working.columns and isinstance(working.index, pd.DatetimeIndex):
+    if (
+        "Date" not in working.columns
+        and "date" not in working.columns
+        and isinstance(working.index, pd.DatetimeIndex)
+    ):
         working = working.reset_index()
         first_column = working.columns[0]
         if first_column not in {"Date", "Datetime", "date"}:
@@ -357,17 +351,20 @@ def normalize_yfinance_price_frame(frame: pd.DataFrame) -> pd.DataFrame:
         complete_positions = [position for position, value in enumerate(incomplete) if not value]
         last_complete_position = max(complete_positions) if complete_positions else -1
         interior_mask = pd.Series(
-            [bool(value) and position < last_complete_position for position, value in enumerate(incomplete)],
+            [
+                bool(value) and position < last_complete_position
+                for position, value in enumerate(incomplete)
+            ],
             index=working.index,
         )
         if interior_mask.any():
             bad_dates = working.loc[interior_mask, "date"].dt.strftime("%Y-%m-%d").tolist()
-            raise ValueError("Downloaded frame has incomplete non-trailing rows: " + ";".join(bad_dates))
+            raise ValueError(
+                "Downloaded frame has incomplete non-trailing rows: " + ";".join(bad_dates)
+            )
         working = working.loc[~incomplete]
 
-    return working[
-        PRICE_REQUIRED_COLUMNS + ["dividends", "stock_splits"]
-    ].reset_index(drop=True)
+    return working[PRICE_REQUIRED_COLUMNS + ["dividends", "stock_splits"]].reset_index(drop=True)
 
 
 def validate_downloaded_price_frame(
@@ -407,7 +404,8 @@ def validate_downloaded_price_frame(
                 bool(
                     dates.notna().any()
                     and dates.min() <= pd.Timestamp(requested_start_date) + pd.Timedelta(days=10)
-                    and dates.max() >= pd.Timestamp(requested_end_date_inclusive) - pd.Timedelta(days=10)
+                    and dates.max()
+                    >= pd.Timestamp(requested_end_date_inclusive) - pd.Timedelta(days=10)
                 ),
                 (
                     f"first={dates.min() if dates.notna().any() else ''};"
@@ -722,8 +720,7 @@ def save_phase23f_pilot_individual_equity_input_bootstrap(
     download_status = pd.DataFrame(statuses)
     source_inventory = pd.DataFrame(inventories)
     all_downloads_ready = bool(
-        len(download_status) == len(requests)
-        and download_status["validation_passed"].all()
+        len(download_status) == len(requests) and download_status["validation_passed"].all()
     )
     registry_ready = bool(registry_validation["passed"].all())
     scope_ready = bool(scope_boundary["passed"].all())

@@ -296,9 +296,7 @@ def build_phase19b_deep_stress_metrics(
         simplicity_score = round(max(0.0, 100.0 - execution_complexity_score), 2)
         uses_btc = bool(representative["uses_btc"])
         btc_gap_penalty = btc_gap_penalty_pct if uses_btc and btc_gap_penalty_enabled else 0.0
-        latest_period = period_rows.loc[
-            period_rows["period_name"].astype(str) == "post_2021"
-        ]
+        latest_period = period_rows.loc[period_rows["period_name"].astype(str) == "post_2021"]
         latest_period_score = (
             float(pd.to_numeric(latest_period["score"], errors="coerce").mean())
             if not latest_period.empty
@@ -537,7 +535,9 @@ def build_rejected_or_research_only(
 ) -> pd.DataFrame:
     if stress_metrics.empty:
         return pd.DataFrame()
-    selected_groups = set(selected.get("equivalent_candidate_group", pd.Series(dtype=str)).astype(str))
+    selected_groups = set(
+        selected.get("equivalent_candidate_group", pd.Series(dtype=str)).astype(str)
+    )
     out = stress_metrics.loc[
         ~stress_metrics["equivalent_candidate_group"].astype(str).isin(selected_groups)
     ].copy()
@@ -581,8 +581,7 @@ def build_entity_roster_recommendation(selected: pd.DataFrame) -> pd.DataFrame:
         )
 
     primary = selected.loc[
-        selected["paper_candidate_role"].astype(str)
-        == "primary_paper_candidate_clean_growth"
+        selected["paper_candidate_role"].astype(str) == "primary_paper_candidate_clean_growth"
     ]
     btc = selected.loc[selected["uses_btc"].astype(bool)]
     primary_assets = (
@@ -763,9 +762,15 @@ def _failure_outputs(
             pd.DataFrame(
                 [
                     {"gate": "required_phase19a_sources_present", "passed": False, "notes": reason},
-                    {"gate": "live_trading_false", "passed": not safety_flags["live_trading_allowed"]},
+                    {
+                        "gate": "live_trading_false",
+                        "passed": not safety_flags["live_trading_allowed"],
+                    },
                     {"gate": "real_money_false", "passed": not safety_flags["real_money_allowed"]},
-                    {"gate": "broker_api_false", "passed": not safety_flags["broker_api_integration_allowed"]},
+                    {
+                        "gate": "broker_api_false",
+                        "passed": not safety_flags["broker_api_integration_allowed"],
+                    },
                 ]
             ),
         ),
@@ -846,8 +851,7 @@ def save_phase19b_strategy_factory_finalist_validation(
     defensive_candidate_selected = (
         not selected.empty
         and (
-            selected["paper_candidate_role"].astype(str)
-            == "secondary_paper_candidate_defensive"
+            selected["paper_candidate_role"].astype(str) == "secondary_paper_candidate_defensive"
         ).any()
     )
     defensive_selection_reason = (
@@ -915,15 +919,33 @@ def save_phase19b_strategy_factory_finalist_validation(
         pd.DataFrame(
             [
                 {"gate": "required_phase19a_sources_present", "passed": True},
-                {"gate": "canonical_finalists_written", "passed": outputs["canonical_finalists"].exists()},
-                {"gate": "deep_stress_metrics_written", "passed": outputs["deep_stress_metrics"].exists()},
-                {"gate": "paper_candidate_shortlist_written", "passed": outputs["paper_candidate_shortlist"].exists()},
-                {"gate": "recommended_paper_tracking_set_written", "passed": outputs["recommended_paper_tracking_set"].exists()},
-                {"gate": "paper_candidate_limit_respected", "passed": len(selected) <= max_paper_candidates},
+                {
+                    "gate": "canonical_finalists_written",
+                    "passed": outputs["canonical_finalists"].exists(),
+                },
+                {
+                    "gate": "deep_stress_metrics_written",
+                    "passed": outputs["deep_stress_metrics"].exists(),
+                },
+                {
+                    "gate": "paper_candidate_shortlist_written",
+                    "passed": outputs["paper_candidate_shortlist"].exists(),
+                },
+                {
+                    "gate": "recommended_paper_tracking_set_written",
+                    "passed": outputs["recommended_paper_tracking_set"].exists(),
+                },
+                {
+                    "gate": "paper_candidate_limit_respected",
+                    "passed": len(selected) <= max_paper_candidates,
+                },
                 {"gate": "paper_only_true", "passed": safety_flags["paper_only"]},
                 {"gate": "live_trading_false", "passed": not safety_flags["live_trading_allowed"]},
                 {"gate": "real_money_false", "passed": not safety_flags["real_money_allowed"]},
-                {"gate": "broker_api_false", "passed": not safety_flags["broker_api_integration_allowed"]},
+                {
+                    "gate": "broker_api_false",
+                    "passed": not safety_flags["broker_api_integration_allowed"],
+                },
                 {"gate": "promotion_allowed_false", "passed": True},
             ]
         ),

@@ -77,9 +77,7 @@ DEFAULT_PHASE11G_CONFIG: dict[str, Any] = {
         "require_no_model_training": True,
         "require_no_new_data_ingestion": True,
         "require_no_candidate_promotion": True,
-        "required_audit_role": (
-            "Final Phase 11 regime scoring closeout/checkpoint audit only"
-        ),
+        "required_audit_role": ("Final Phase 11 regime scoring closeout/checkpoint audit only"),
     },
 }
 
@@ -212,9 +210,7 @@ def build_phase11g_phase_conclusion_check(
 
         if not frame.empty:
             verdict = str(frame.iloc[0].get("verdict", ""))
-            all_gates_passed = _bool_value(
-                frame.iloc[0].get("all_gates_passed", False)
-            )
+            all_gates_passed = _bool_value(frame.iloc[0].get("all_gates_passed", False))
 
         required_fragment = str(required_fragments.get(phase_id, "")).lower()
         fragment_present = required_fragment in verdict.lower()
@@ -324,30 +320,21 @@ def build_phase11g_phase12a_boundary_check(
         {
             "boundary_item": "phase12a_allowed_next_step",
             "value": str(boundary.get("allowed_next_step", "")),
-            "passed": "pre-registration spec" in str(
-                boundary.get("allowed_next_step", "")
-            ).lower(),
+            "passed": "pre-registration spec" in str(boundary.get("allowed_next_step", "")).lower(),
         },
         {
             "boundary_item": "phase12a_forbidden_next_step",
             "value": str(boundary.get("forbidden_next_step", "")),
             "passed": (
-                "score calculation"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "strategy"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "promotion"
-                in str(boundary.get("forbidden_next_step", "")).lower()
+                "score calculation" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "strategy" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "promotion" in str(boundary.get("forbidden_next_step", "")).lower()
             ),
         },
         {
             "boundary_item": "phase12a_may_define_score_formula_spec",
-            "value": _bool_value(
-                boundary.get("phase12a_may_define_score_formula_spec", False)
-            ),
-            "passed": _bool_value(
-                boundary.get("phase12a_may_define_score_formula_spec", False)
-            ),
+            "value": _bool_value(boundary.get("phase12a_may_define_score_formula_spec", False)),
+            "passed": _bool_value(boundary.get("phase12a_may_define_score_formula_spec", False)),
         },
         {
             "boundary_item": "phase12a_may_define_non_return_weight_policy",
@@ -361,53 +348,37 @@ def build_phase11g_phase12a_boundary_check(
         {
             "boundary_item": "phase12a_may_calculate_scores",
             "value": _bool_value(boundary.get("phase12a_may_calculate_scores", True)),
-            "passed": not _bool_value(
-                boundary.get("phase12a_may_calculate_scores", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase12a_may_calculate_scores", True)),
         },
         {
             "boundary_item": "phase12a_may_assign_empirical_weights",
-            "value": _bool_value(
-                boundary.get("phase12a_may_assign_empirical_weights", True)
-            ),
-            "passed": not _bool_value(
-                boundary.get("phase12a_may_assign_empirical_weights", True)
-            ),
+            "value": _bool_value(boundary.get("phase12a_may_assign_empirical_weights", True)),
+            "passed": not _bool_value(boundary.get("phase12a_may_assign_empirical_weights", True)),
         },
         {
             "boundary_item": "phase12a_may_create_signal",
             "value": _bool_value(boundary.get("phase12a_may_create_signal", True)),
-            "passed": not _bool_value(
-                boundary.get("phase12a_may_create_signal", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase12a_may_create_signal", True)),
         },
         {
             "boundary_item": "phase12a_may_test_strategy",
             "value": _bool_value(boundary.get("phase12a_may_test_strategy", True)),
-            "passed": not _bool_value(
-                boundary.get("phase12a_may_test_strategy", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase12a_may_test_strategy", True)),
         },
         {
             "boundary_item": "phase12a_may_train_model",
             "value": _bool_value(boundary.get("phase12a_may_train_model", True)),
-            "passed": not _bool_value(
-                boundary.get("phase12a_may_train_model", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase12a_may_train_model", True)),
         },
         {
             "boundary_item": "phase12a_may_ingest_new_data",
             "value": _bool_value(boundary.get("phase12a_may_ingest_new_data", True)),
-            "passed": not _bool_value(
-                boundary.get("phase12a_may_ingest_new_data", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase12a_may_ingest_new_data", True)),
         },
         {
             "boundary_item": "phase12a_may_promote_candidate",
             "value": _bool_value(boundary.get("phase12a_may_promote_candidate", True)),
-            "passed": not _bool_value(
-                boundary.get("phase12a_may_promote_candidate", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase12a_may_promote_candidate", True)),
         },
     ]
 
@@ -486,14 +457,10 @@ def build_phase11g_summary(
                 "config_flags_clean_for_run": bool(config_flag_check["passed"].all())
                 if not config_flag_check.empty
                 else False,
-                "phase_conclusions_passed": bool(
-                    phase_conclusion_check["passed"].all()
-                )
+                "phase_conclusions_passed": bool(phase_conclusion_check["passed"].all())
                 if not phase_conclusion_check.empty
                 else False,
-                "phase_gate_reports_passed": bool(
-                    phase_gate_report_check["passed"].all()
-                )
+                "phase_gate_reports_passed": bool(phase_gate_report_check["passed"].all())
                 if not phase_gate_report_check.empty
                 else False,
                 "boundary_reports_passed": bool(boundary_report_check["passed"].all())
@@ -502,9 +469,7 @@ def build_phase11g_summary(
                 "branch_closure_clean": bool(branch_closure_check["passed"].all())
                 if not branch_closure_check.empty
                 else False,
-                "phase12a_boundary_passed": bool(
-                    phase12a_boundary_check["passed"].all()
-                )
+                "phase12a_boundary_passed": bool(phase12a_boundary_check["passed"].all())
                 if not phase12a_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -913,8 +878,7 @@ def save_phase11g_final_regime_scoring_checkpoint_audit(
         summary=summary,
         gate_report=gate_report,
         conclusion=conclusion,
-        output_path=reports_path
-        / "phase11g_final_regime_scoring_checkpoint_audit.md",
+        output_path=reports_path / "phase11g_final_regime_scoring_checkpoint_audit.md",
     )
 
     print("Wrote Phase 11G final regime scoring checkpoint audit reports.")

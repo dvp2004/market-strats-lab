@@ -241,22 +241,12 @@ def build_phase13a_baseline_freeze_report(
                 "baseline_arc_status": str(freeze.get("baseline_arc_status", "")),
                 "final_candidate": str(freeze.get("final_candidate", "")),
                 "final_candidate_role": str(freeze.get("final_candidate_role", "")),
-                "diagnostic_score_state": str(
-                    freeze.get("diagnostic_score_state", "")
-                ),
+                "diagnostic_score_state": str(freeze.get("diagnostic_score_state", "")),
                 "diagnostic_score_role": str(freeze.get("diagnostic_score_role", "")),
-                "hierarchy_changed": _bool_value(
-                    freeze.get("hierarchy_changed", True)
-                ),
-                "candidate_promoted": _bool_value(
-                    freeze.get("candidate_promoted", True)
-                ),
-                "score_to_signal_created": _bool_value(
-                    freeze.get("score_to_signal_created", True)
-                ),
-                "baseline_reusable_assets": _join_list(
-                    freeze.get("baseline_reusable_assets")
-                ),
+                "hierarchy_changed": _bool_value(freeze.get("hierarchy_changed", True)),
+                "candidate_promoted": _bool_value(freeze.get("candidate_promoted", True)),
+                "score_to_signal_created": _bool_value(freeze.get("score_to_signal_created", True)),
+                "baseline_reusable_assets": _join_list(freeze.get("baseline_reusable_assets")),
             }
         ]
     )
@@ -289,20 +279,15 @@ def build_phase13a_phase13b_boundary_check(
         (
             "phase13b_allowed_next_step",
             str(boundary.get("allowed_next_step", "")),
-            "architecture roadmap spec" in str(
-                boundary.get("allowed_next_step", "")
-            ).lower(),
+            "architecture roadmap spec" in str(boundary.get("allowed_next_step", "")).lower(),
         ),
         (
             "phase13b_forbidden_next_step",
             str(boundary.get("forbidden_next_step", "")),
             (
-                "feature ingestion"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "strategy backtest"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "candidate promotion"
-                in str(boundary.get("forbidden_next_step", "")).lower()
+                "feature ingestion" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "strategy backtest" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "candidate promotion" in str(boundary.get("forbidden_next_step", "")).lower()
             ),
         ),
         (
@@ -312,21 +297,13 @@ def build_phase13a_phase13b_boundary_check(
         ),
         (
             "phase13b_may_define_feature_families",
-            _bool_value(
-                boundary.get("phase13b_may_define_feature_families", False)
-            ),
-            _bool_value(
-                boundary.get("phase13b_may_define_feature_families", False)
-            ),
+            _bool_value(boundary.get("phase13b_may_define_feature_families", False)),
+            _bool_value(boundary.get("phase13b_may_define_feature_families", False)),
         ),
         (
             "phase13b_may_define_walk_forward_design",
-            _bool_value(
-                boundary.get("phase13b_may_define_walk_forward_design", False)
-            ),
-            _bool_value(
-                boundary.get("phase13b_may_define_walk_forward_design", False)
-            ),
+            _bool_value(boundary.get("phase13b_may_define_walk_forward_design", False)),
+            _bool_value(boundary.get("phase13b_may_define_walk_forward_design", False)),
         ),
         (
             "phase13b_may_define_visual_reports",
@@ -430,11 +407,7 @@ def build_phase13a_summary(
     scope_boundary_check: pd.DataFrame,
 ) -> pd.DataFrame:
     freeze = baseline_freeze_report.iloc[0] if not baseline_freeze_report.empty else {}
-    decision = (
-        transition_decision_report.iloc[0]
-        if not transition_decision_report.empty
-        else {}
-    )
+    decision = transition_decision_report.iloc[0] if not transition_decision_report.empty else {}
 
     return pd.DataFrame(
         [
@@ -449,34 +422,20 @@ def build_phase13a_summary(
                 "phase12f_result_passed": bool(phase12f_result_check["passed"].all())
                 if not phase12f_result_check.empty
                 else False,
-                "baseline_arc_frozen": "frozen" in str(
-                    freeze.get("baseline_arc_status", "")
-                ).lower(),
-                "baseline_role_is_not_final_project": "not final project" in str(
-                    freeze.get("final_candidate_role", "")
-                ).lower(),
-                "diagnostic_score_state": str(
-                    freeze.get("diagnostic_score_state", "")
-                ),
-                "score_to_signal_created": _bool_value(
-                    freeze.get("score_to_signal_created", True)
-                ),
-                "candidate_promoted": _bool_value(
-                    freeze.get("candidate_promoted", True)
-                ),
-                "hierarchy_changed": _bool_value(
-                    freeze.get("hierarchy_changed", True)
-                ),
-                "transition_to_multifactor": "multi-factor" in str(
-                    decision.get("decision", "")
-                ).lower()
+                "baseline_arc_frozen": "frozen"
+                in str(freeze.get("baseline_arc_status", "")).lower(),
+                "baseline_role_is_not_final_project": "not final project"
+                in str(freeze.get("final_candidate_role", "")).lower(),
+                "diagnostic_score_state": str(freeze.get("diagnostic_score_state", "")),
+                "score_to_signal_created": _bool_value(freeze.get("score_to_signal_created", True)),
+                "candidate_promoted": _bool_value(freeze.get("candidate_promoted", True)),
+                "hierarchy_changed": _bool_value(freeze.get("hierarchy_changed", True)),
+                "transition_to_multifactor": "multi-factor"
+                in str(decision.get("decision", "")).lower()
                 or "multi-factor" in str(decision.get("accepted_next_step", "")).lower(),
-                "direct_score_to_signal_rejected": "score-to-signal" in str(
-                    decision.get("rejected_next_step", "")
-                ).lower(),
-                "phase13b_boundary_passed": bool(
-                    phase13b_boundary_check["passed"].all()
-                )
+                "direct_score_to_signal_rejected": "score-to-signal"
+                in str(decision.get("rejected_next_step", "")).lower(),
+                "phase13b_boundary_passed": bool(phase13b_boundary_check["passed"].all())
                 if not phase13b_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -511,8 +470,7 @@ def build_phase13a_gate_report(
     rows = [
         _gate_row(
             "Phase 12F remains passed",
-            (not gates.get("require_phase12f_passed", True))
-            or bool(row["phase12f_result_passed"]),
+            (not gates.get("require_phase12f_passed", True)) or bool(row["phase12f_result_passed"]),
             f"phase12f_result_passed={bool(row['phase12f_result_passed'])}",
         ),
         _gate_row(
@@ -681,9 +639,7 @@ def save_phase13a_baseline_research_arc_freeze_spec(
     source_report_check = build_phase13a_source_report_check(phase_config)
     phase12f_result_check = build_phase13a_phase12f_result_check(phase_config)
     baseline_freeze_report = build_phase13a_baseline_freeze_report(phase_config)
-    transition_decision_report = build_phase13a_transition_decision_report(
-        phase_config
-    )
+    transition_decision_report = build_phase13a_transition_decision_report(phase_config)
     phase13b_boundary_check = build_phase13a_phase13b_boundary_check(phase_config)
     scope_boundary_check = build_phase13a_scope_boundary_check(phase_config)
 
@@ -885,21 +841,16 @@ def build_phase13b_phase13c_boundary_check(
         (
             "phase13c_allowed_next_step",
             str(boundary.get("allowed_next_step", "")),
-            "feature-source inventory" in str(
-                boundary.get("allowed_next_step", "")
-            ).lower()
+            "feature-source inventory" in str(boundary.get("allowed_next_step", "")).lower()
             or "feature inventory" in str(boundary.get("allowed_next_step", "")).lower(),
         ),
         (
             "phase13c_forbidden_next_step",
             str(boundary.get("forbidden_next_step", "")),
             (
-                "actual feature ingestion"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "model training"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "strategy backtest"
-                in str(boundary.get("forbidden_next_step", "")).lower()
+                "actual feature ingestion" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "model training" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "strategy backtest" in str(boundary.get("forbidden_next_step", "")).lower()
             ),
         ),
         (
@@ -909,21 +860,13 @@ def build_phase13b_phase13c_boundary_check(
         ),
         (
             "phase13c_may_define_feature_contracts",
-            _bool_value(
-                boundary.get("phase13c_may_define_feature_contracts", False)
-            ),
-            _bool_value(
-                boundary.get("phase13c_may_define_feature_contracts", False)
-            ),
+            _bool_value(boundary.get("phase13c_may_define_feature_contracts", False)),
+            _bool_value(boundary.get("phase13c_may_define_feature_contracts", False)),
         ),
         (
             "phase13c_may_define_leakage_controls",
-            _bool_value(
-                boundary.get("phase13c_may_define_leakage_controls", False)
-            ),
-            _bool_value(
-                boundary.get("phase13c_may_define_leakage_controls", False)
-            ),
+            _bool_value(boundary.get("phase13c_may_define_leakage_controls", False)),
+            _bool_value(boundary.get("phase13c_may_define_leakage_controls", False)),
         ),
         (
             "phase13c_may_ingest_features",
@@ -1029,9 +972,7 @@ def build_phase13b_summary(
                 "phase_branch": str(phase_config.get("phase_branch", "")),
                 "source_phase": str(phase_config.get("source_phase", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "ultimate_goal_present": len(
-                    str(phase_config.get("ultimate_goal", "")).strip()
-                )
+                "ultimate_goal_present": len(str(phase_config.get("ultimate_goal", "")).strip())
                 > 0,
                 "phase13a_result_passed": bool(phase13a_result_check["passed"].all())
                 if not phase13a_result_check.empty
@@ -1082,8 +1023,7 @@ def build_phase13b_gate_report(
     rows = [
         _gate_row(
             "Phase 13A passed",
-            (not gates.get("require_phase13a_passed", True))
-            or bool(row["phase13a_result_passed"]),
+            (not gates.get("require_phase13a_passed", True)) or bool(row["phase13a_result_passed"]),
             f"phase13a_result_passed={bool(row['phase13a_result_passed'])}",
         ),
         _gate_row(
@@ -1095,9 +1035,7 @@ def build_phase13b_gate_report(
         _gate_row(
             "Feature family registry is complete enough",
             (not gates.get("require_feature_family_registry", True))
-            or int(row["feature_family_count"]) >= int(
-                gates.get("min_feature_families", 5)
-            ),
+            or int(row["feature_family_count"]) >= int(gates.get("min_feature_families", 5)),
             f"feature_family_count={int(row['feature_family_count'])}",
         ),
         _gate_row(
@@ -1109,19 +1047,15 @@ def build_phase13b_gate_report(
         _gate_row(
             "Architecture candidates are documented",
             (not gates.get("require_architecture_candidates", True))
-            or int(row["architecture_candidate_count"]) >= int(
-                gates.get("min_architecture_candidates", 4)
-            ),
+            or int(row["architecture_candidate_count"])
+            >= int(gates.get("min_architecture_candidates", 4)),
             f"architecture_candidate_count={int(row['architecture_candidate_count'])}",
         ),
         _gate_row(
             "Dissertation integration plan exists",
             (not gates.get("require_dissertation_integration_plan", True))
             or int(row["dissertation_integration_items"]) > 0,
-            (
-                "dissertation_integration_items="
-                f"{int(row['dissertation_integration_items'])}"
-            ),
+            (f"dissertation_integration_items={int(row['dissertation_integration_items'])}"),
         ),
         _gate_row(
             "Walk-forward design is documented",
@@ -1132,17 +1066,13 @@ def build_phase13b_gate_report(
         _gate_row(
             "Visual reporting plan is documented",
             (not gates.get("require_visual_reporting_plan", True))
-            or int(row["visual_report_count"]) >= int(
-                gates.get("min_visual_reports", 5)
-            ),
+            or int(row["visual_report_count"]) >= int(gates.get("min_visual_reports", 5)),
             f"visual_report_count={int(row['visual_report_count'])}",
         ),
         _gate_row(
             "Paper-trading readiness plan is documented",
             (not gates.get("require_paper_trading_readiness_plan", True))
-            or int(row["paper_trading_gate_count"]) >= int(
-                gates.get("min_paper_trading_gates", 5)
-            ),
+            or int(row["paper_trading_gate_count"]) >= int(gates.get("min_paper_trading_gates", 5)),
             f"paper_trading_gate_count={int(row['paper_trading_gate_count'])}",
         ),
         _gate_row(
@@ -1284,14 +1214,10 @@ def save_phase13b_multifactor_model_architecture_roadmap_spec(
     phase13a_result_check = build_phase13b_phase13a_result_check(phase_config)
     feature_family_registry = build_phase13b_feature_family_registry(phase_config)
     architecture_candidates = build_phase13b_architecture_candidates(phase_config)
-    dissertation_integration_plan = build_phase13b_dissertation_integration_plan(
-        phase_config
-    )
+    dissertation_integration_plan = build_phase13b_dissertation_integration_plan(phase_config)
     walk_forward_design = build_phase13b_walk_forward_design(phase_config)
     visual_reporting_plan = build_phase13b_visual_reporting_plan(phase_config)
-    paper_trading_readiness_plan = build_phase13b_paper_trading_readiness_plan(
-        phase_config
-    )
+    paper_trading_readiness_plan = build_phase13b_paper_trading_readiness_plan(phase_config)
     phase13c_boundary_check = build_phase13b_phase13c_boundary_check(phase_config)
     scope_boundary_check = build_phase13b_scope_boundary_check(phase_config)
 

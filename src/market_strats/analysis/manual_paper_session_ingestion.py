@@ -171,9 +171,7 @@ def _warnings_present(
     tear_sheet: pd.DataFrame,
 ) -> bool:
     if not finalist_tracking_status.empty:
-        warning_symbols = _text_value(
-            finalist_tracking_status.iloc[0].get("warning_symbols", "")
-        )
+        warning_symbols = _text_value(finalist_tracking_status.iloc[0].get("warning_symbols", ""))
         data_quality_status = _text_value(
             finalist_tracking_status.iloc[0].get("data_quality_status", "")
         )
@@ -228,8 +226,7 @@ def validate_filled_manual_session(
                     "canonical_candidate_id": "",
                     "asset": "",
                     "row_valid": False,
-                    "row_blocking_reasons": "missing_required_columns:"
-                    + ",".join(missing_columns),
+                    "row_blocking_reasons": "missing_required_columns:" + ",".join(missing_columns),
                     "manual_decision": "",
                     "manual_execution_status": "",
                     "target_notional_usd": np.nan,
@@ -274,8 +271,10 @@ def validate_filled_manual_session(
             blockers.append("tear_sheet_review_missing")
         if warnings_present and not _bool_value(row.get("warnings_acknowledged", False)):
             blockers.append("warning_acknowledgement_missing")
-        if asset == "BTC-USD" and target_weight > 0 and not _bool_value(
-            row.get("btc_caveat_acknowledged", False)
+        if (
+            asset == "BTC-USD"
+            and target_weight > 0
+            and not _bool_value(row.get("btc_caveat_acknowledged", False))
         ):
             blockers.append("btc_caveat_acknowledgement_missing")
         if decision == "pending" or not decision:
@@ -413,8 +412,7 @@ def build_ingestion_result(
         filled_session[
             filled_session["manual_execution_status"].astype(str).str.lower() == "entered"
         ]
-        if filled_session_file_present
-        and "manual_execution_status" in filled_session.columns
+        if filled_session_file_present and "manual_execution_status" in filled_session.columns
         else pd.DataFrame()
     )
     fills_complete = True
@@ -570,12 +568,8 @@ def save_phase20d_manual_paper_session_ingestion(
         section.get("source_finalist_tracking_dir"),
         reports_path / "paper_trading" / "finalist_tracking",
     )
-    filled_filename = str(
-        section.get("filled_session_filename", "manual_paper_session_filled.csv")
-    )
-    ledger_filename = str(
-        section.get("ledger_filename", "manual_paper_session_ledger.csv")
-    )
+    filled_filename = str(section.get("filled_session_filename", "manual_paper_session_filled.csv"))
+    ledger_filename = str(section.get("ledger_filename", "manual_paper_session_ledger.csv"))
     output_dir.mkdir(parents=True, exist_ok=True)
     dashboard_dir.mkdir(parents=True, exist_ok=True)
 
@@ -585,9 +579,7 @@ def save_phase20d_manual_paper_session_ingestion(
     tear_sheet_path = source_finalist_tracking_dir / "finalist_daily_tracking_tear_sheet.csv"
     tracking_status_path = dashboard_dir / "finalist_tracking_status.csv"
     ledger_path = output_dir / ledger_filename
-    rollover_status_path = (
-        source_manual_session_dir / "manual_paper_session_rollover_status.csv"
-    )
+    rollover_status_path = source_manual_session_dir / "manual_paper_session_rollover_status.csv"
     result_path = output_dir / "manual_paper_session_ingestion_result.csv"
     row_validation_path = output_dir / "manual_paper_session_row_validation.csv"
     dashboard_path = dashboard_dir / "manual_paper_session_ingestion_status.csv"
@@ -673,9 +665,7 @@ def save_phase20d_manual_paper_session_ingestion(
         if not filled_present:
             ingestion_result.loc[0, "session_ingestion_status"] = "pending_user_entries"
         else:
-            ingestion_result.loc[0, "session_ingestion_status"] = (
-                "invalid_manual_review_required"
-            )
+            ingestion_result.loc[0, "session_ingestion_status"] = "invalid_manual_review_required"
     session_valid = _bool_value(ingestion_result.iloc[0].get("session_valid", False))
     ledger = update_manual_session_ledger(
         ledger_path=ledger_path,
@@ -697,7 +687,9 @@ def save_phase20d_manual_paper_session_ingestion(
     gates = pd.DataFrame(
         [
             _gate_row("phase20c_template_exists", template_path.exists() and not template.empty),
-            _gate_row("ingestion_result_written", result_path.exists() and not ingestion_result.empty),
+            _gate_row(
+                "ingestion_result_written", result_path.exists() and not ingestion_result.empty
+            ),
             _gate_row("row_validation_written", row_validation_path.exists()),
             _gate_row("ledger_written", ledger_path.exists()),
             _gate_row("dashboard_status_written", True),
@@ -745,7 +737,9 @@ def save_phase20d_manual_paper_session_ingestion(
         "Passed" if dashboard_path.exists() else "Failed"
     )
     all_gates_passed = bool(gates["passed"].map(_bool_value).all())
-    failed_gates = _join_values(gates.loc[~gates["passed"].map(_bool_value), "gate_id"].astype(str).tolist())
+    failed_gates = _join_values(
+        gates.loc[~gates["passed"].map(_bool_value), "gate_id"].astype(str).tolist()
+    )
 
     summary = pd.DataFrame(
         [

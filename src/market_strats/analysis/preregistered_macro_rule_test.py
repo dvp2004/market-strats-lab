@@ -167,9 +167,7 @@ def _get_spy_strategy_result(
 
     if strategy_name not in strategy_results:
         available = sorted(strategy_results.keys())
-        raise ValueError(
-            f"SPY strategy {strategy_name!r} not found. Available: {available}"
-        )
+        raise ValueError(f"SPY strategy {strategy_name!r} not found. Available: {available}")
 
     return _normalise_strategy_frame(strategy_results[strategy_name], strategy_name)
 
@@ -316,9 +314,7 @@ def build_phase10f_rule_activation_frame(
                     "date": macro_panel["date"],
                     "rule_id": str(rule.get("rule_id", "")),
                     "hypothesis_id": str(rule.get("hypothesis_id", "")),
-                    "replacement_return_column": str(
-                        rule.get("replacement_return_column", "")
-                    ),
+                    "replacement_return_column": str(rule.get("replacement_return_column", "")),
                     "active": active.fillna(False).astype(bool),
                 }
             )
@@ -373,8 +369,7 @@ def build_phase10f_rule_returns(
 
         if replacement_column not in frame.columns:
             raise ValueError(
-                f"replacement_return_column {replacement_column!r} not found "
-                f"for {rule_id}"
+                f"replacement_return_column {replacement_column!r} not found for {rule_id}"
             )
 
         frame["strategy_return"] = np.where(
@@ -387,13 +382,11 @@ def build_phase10f_rule_returns(
             replacement_column,
             "candidate_return",
         )
-        frame["rule_turnover"] = (
-            frame["return_source"] != frame["return_source"].shift(1)
-        ).astype(float)
-        frame.loc[frame.index[0], "rule_turnover"] = float(frame["active"].iloc[0])
-        frame["stress_extra_cost_return"] = (
-            frame["rule_turnover"] * stress_bps / 10000.0
+        frame["rule_turnover"] = (frame["return_source"] != frame["return_source"].shift(1)).astype(
+            float
         )
+        frame.loc[frame.index[0], "rule_turnover"] = float(frame["active"].iloc[0])
+        frame["stress_extra_cost_return"] = frame["rule_turnover"] * stress_bps / 10000.0
         frame["stress_strategy_return"] = (
             frame["strategy_return"] - frame["stress_extra_cost_return"]
         )
@@ -506,9 +499,7 @@ def _metric_row(
         "end_date": pd.to_datetime(frame["date"].iloc[-1]).date().isoformat(),
         "rows": int(len(frame)),
         "active_days": int(frame["active"].sum()) if "active" in frame else 0,
-        "switch_count": int(frame["rule_turnover"].sum())
-        if "rule_turnover" in frame
-        else 0,
+        "switch_count": int(frame["rule_turnover"].sum()) if "rule_turnover" in frame else 0,
         "cagr": cagr,
         "volatility": _volatility(frame[return_column], frame["date"]),
         "max_drawdown": max_dd,
@@ -699,9 +690,7 @@ def build_phase10f_episode_metrics(
                     "calmar_delta": metric["calmar"] - baseline_metric["calmar"],
                     "rule_max_drawdown": metric["max_drawdown"],
                     "baseline_max_drawdown": baseline_metric["max_drawdown"],
-                    "drawdown_delta": (
-                        metric["max_drawdown"] - baseline_metric["max_drawdown"]
-                    ),
+                    "drawdown_delta": (metric["max_drawdown"] - baseline_metric["max_drawdown"]),
                 }
             )
 
@@ -750,19 +739,11 @@ def build_phase10f_rule_gate_report(
     friction = phase_config.get("friction", {})
 
     max_full_cagr_damage = float(gates.get("max_full_cagr_damage_pts", 0.15)) / 100.0
-    max_episode_cagr_damage = (
-        float(gates.get("max_episode_cagr_damage_pts", 0.25)) / 100.0
-    )
+    max_episode_cagr_damage = float(gates.get("max_episode_cagr_damage_pts", 0.25)) / 100.0
     max_episode_calmar_damage = float(gates.get("max_episode_calmar_damage", 0.020))
-    max_episode_dd_damage = (
-        float(gates.get("max_episode_drawdown_damage_pts", 1.00)) / 100.0
-    )
-    max_stress_cagr_damage = (
-        float(friction.get("max_stress_cagr_degradation_pts", 0.15)) / 100.0
-    )
-    max_stress_calmar_damage = float(
-        friction.get("max_stress_calmar_degradation", 0.010)
-    )
+    max_episode_dd_damage = float(gates.get("max_episode_drawdown_damage_pts", 1.00)) / 100.0
+    max_stress_cagr_damage = float(friction.get("max_stress_cagr_degradation_pts", 0.15)) / 100.0
+    max_stress_calmar_damage = float(friction.get("max_stress_calmar_degradation", 0.010))
 
     baseline_full_cagr = _lookup_metric(
         benchmark_metrics,
@@ -923,15 +904,9 @@ def build_phase10f_rule_gate_report(
 
         if not rule_episode.empty:
             episode_damage_ok = bool(
-                (
-                    rule_episode["cagr_delta"] >= -max_episode_cagr_damage
-                ).all()
-                and (
-                    rule_episode["calmar_delta"] >= -max_episode_calmar_damage
-                ).all()
-                and (
-                    rule_episode["drawdown_delta"] >= -max_episode_dd_damage
-                ).all()
+                (rule_episode["cagr_delta"] >= -max_episode_cagr_damage).all()
+                and (rule_episode["calmar_delta"] >= -max_episode_calmar_damage).all()
+                and (rule_episode["drawdown_delta"] >= -max_episode_dd_damage).all()
             )
 
         rows.append(
@@ -957,9 +932,7 @@ def build_phase10f_rule_gate_report(
             )
         )
 
-        behavioural = behavioural_metrics[
-            behavioural_metrics["rule_id"] == str(rule_id)
-        ]
+        behavioural = behavioural_metrics[behavioural_metrics["rule_id"] == str(rule_id)]
         behavioural_ok = (
             bool(behavioural.iloc[0]["behavioural_regret_not_worse"])
             if not behavioural.empty
@@ -1018,8 +991,7 @@ def build_phase10f_rule_comparison_summary(
 
     for rule_id in rule_metrics["rule_id"].drop_duplicates():
         full = rule_metrics[
-            (rule_metrics["rule_id"] == rule_id)
-            & (rule_metrics["sample"] == "full")
+            (rule_metrics["rule_id"] == rule_id) & (rule_metrics["sample"] == "full")
         ].iloc[0]
         gates = rule_gate_report[rule_gate_report["rule_id"] == rule_id]
         all_passed = bool(gates["passed"].all()) if not gates.empty else False
@@ -1035,9 +1007,7 @@ def build_phase10f_rule_comparison_summary(
                 "calmar_delta": float(full["calmar"] - baseline_full["calmar"]),
                 "baseline_max_drawdown": float(baseline_full["max_drawdown"]),
                 "rule_max_drawdown": float(full["max_drawdown"]),
-                "drawdown_delta": float(
-                    full["max_drawdown"] - baseline_full["max_drawdown"]
-                ),
+                "drawdown_delta": float(full["max_drawdown"] - baseline_full["max_drawdown"]),
                 "all_rule_gates_passed": all_passed,
                 "strategy_promotion": False,
                 "role": "Candidate for further validation only"
@@ -1056,9 +1026,7 @@ def build_phase10f_discipline_gate_report(
     rule_gate_report: pd.DataFrame,
 ) -> pd.DataFrame:
     gates = phase_config.get("gates", {})
-    registry = set(str(item) for item in _as_list(
-        phase_config.get("allowed_macro_input_registry")
-    ))
+    registry = set(str(item) for item in _as_list(phase_config.get("allowed_macro_input_registry")))
     rules = _rules(phase_config)
     rule_ids = [str(rule.get("rule_id", "")) for rule in rules]
     expected_rule_ids = [str(item) for item in _as_list(gates.get("expected_rule_ids"))]
@@ -1071,9 +1039,7 @@ def build_phase10f_discipline_gate_report(
             input_name = str(condition.get("input", ""))
             derived = str(condition.get("derived_input", ""))
             conditions_inside_registry = (
-                conditions_inside_registry
-                and input_name in registry
-                and derived in registry
+                conditions_inside_registry and input_name in registry and derived in registry
             )
             locked_thresholds = locked_thresholds and bool(
                 str(condition.get("locked_threshold_description", "")).strip()
@@ -1116,8 +1082,7 @@ def build_phase10f_discipline_gate_report(
             "gate": "No model feature creation is allowed",
             "passed": not bool(phase_config.get("allow_model_feature_creation", True)),
             "detail": (
-                "allow_model_feature_creation="
-                f"{phase_config.get('allow_model_feature_creation')}"
+                f"allow_model_feature_creation={phase_config.get('allow_model_feature_creation')}"
             ),
         },
         {
@@ -1128,10 +1093,7 @@ def build_phase10f_discipline_gate_report(
         {
             "gate": "No strategy promotion is allowed",
             "passed": not bool(phase_config.get("allow_strategy_promotion", True)),
-            "detail": (
-                "allow_strategy_promotion="
-                f"{phase_config.get('allow_strategy_promotion')}"
-            ),
+            "detail": (f"allow_strategy_promotion={phase_config.get('allow_strategy_promotion')}"),
         },
         {
             "gate": "Rule metrics were generated",

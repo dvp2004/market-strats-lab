@@ -3,6 +3,7 @@ from __future__ import annotations
 import pandas as pd
 from market_strats.strategies.accounting import calculate_allocation_strategy_returns
 
+
 def run_drawdown_tranche_strategy(
     prices: pd.DataFrame,
     initial_capital: float,

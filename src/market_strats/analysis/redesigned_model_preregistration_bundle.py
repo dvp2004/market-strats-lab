@@ -89,9 +89,7 @@ def _phase_result_check(
         and "passed" in str(conclusion.iloc[0].get("verdict", "")).lower()
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -141,9 +139,7 @@ def _normalise_list_columns(rows: list[dict[str, Any]]) -> pd.DataFrame:
 
     for col in frame.columns:
         frame[col] = frame[col].apply(
-            lambda value: "; ".join(map(str, value))
-            if isinstance(value, list)
-            else value
+            lambda value: "; ".join(map(str, value)) if isinstance(value, list) else value
         )
 
     return frame
@@ -154,9 +150,7 @@ def _boundary_check(section: dict[str, Any]) -> pd.DataFrame:
 
     for key in ["phase13al_boundary", "phase13am_boundary"]:
         boundary = section.get(key, {})
-        allowed = str(
-            boundary.get("allowed_next_step", boundary.get("allowed_future_step", ""))
-        )
+        allowed = str(boundary.get("allowed_next_step", boundary.get("allowed_future_step", "")))
         forbidden = str(
             boundary.get("forbidden_next_step", boundary.get("forbidden_future_step", ""))
         )
@@ -192,21 +186,14 @@ def _select_candidate_target(
     if screen.empty:
         return "", [], "No redesign screen was available."
 
-    preferred_order = [
-        str(item)
-        for item in _as_list(policy.get("preferred_viable_target_order"))
-    ]
+    preferred_order = [str(item) for item in _as_list(policy.get("preferred_viable_target_order"))]
 
     viable = screen[screen["viable_for_future_interpretation"].map(_bool_value)].copy()
     viable_ids = set(viable["target_variant_id"].astype(str))
 
     for target_id in preferred_order:
         if target_id in viable_ids:
-            backups = [
-                item
-                for item in preferred_order
-                if item in viable_ids and item != target_id
-            ]
+            backups = [item for item in preferred_order if item in viable_ids and item != target_id]
             return (
                 target_id,
                 backups,
@@ -225,22 +212,16 @@ def _target_detail(
     balance: pd.DataFrame,
     outcome: pd.DataFrame,
 ) -> dict[str, Any]:
-    balance_row = balance[
-        balance["target_variant_id"].astype(str).eq(target_id)
-    ]
+    balance_row = balance[balance["target_variant_id"].astype(str).eq(target_id)]
 
     train_ratio = 0.0
     validation_ratio = 0.0
 
     if not balance_row.empty:
         train_ratio = float(balance_row.iloc[0].get("train_fragile_ratio", 0.0))
-        validation_ratio = float(
-            balance_row.iloc[0].get("validation_fragile_ratio", 0.0)
-        )
+        validation_ratio = float(balance_row.iloc[0].get("validation_fragile_ratio", 0.0))
 
-    target_outcome = outcome[
-        outcome["target_variant_id"].astype(str).eq(target_id)
-    ].copy()
+    target_outcome = outcome[outcome["target_variant_id"].astype(str).eq(target_id)].copy()
 
     def outcome_mean(class_label: str, outcome_col: str) -> float:
         row = target_outcome[
@@ -277,9 +258,7 @@ def _feature_family_status(feature_families: pd.DataFrame) -> pd.DataFrame:
     out["usable_currently"] = (
         pd.to_numeric(out["value_feature_columns"], errors="coerce").fillna(0) > 0
     )
-    out["required_for_next_model_run"] = out["family_id"].astype(str).isin(
-        ["technical", "macro"]
-    )
+    out["required_for_next_model_run"] = out["family_id"].astype(str).isin(["technical", "macro"])
     return out
 
 
@@ -292,9 +271,7 @@ def _blocked_target_report(
     rows = []
 
     for target_id in sorted(blocked_ids):
-        feasible_row = feasibility[
-            feasibility["target_variant_id"].astype(str).eq(target_id)
-        ]
+        feasible_row = feasibility[feasibility["target_variant_id"].astype(str).eq(target_id)]
         screen_row = screen[screen["target_variant_id"].astype(str).eq(target_id)]
 
         feasible = (
@@ -303,9 +280,7 @@ def _blocked_target_report(
             else False
         )
         viable = (
-            _bool_value(
-                screen_row.iloc[0].get("viable_for_future_interpretation", False)
-            )
+            _bool_value(screen_row.iloc[0].get("viable_for_future_interpretation", False))
             if not screen_row.empty
             else False
         )
@@ -360,9 +335,7 @@ def save_phase13ak_target_feature_redesign_interpretation_decision(
     feasibility = _read_csv_if_exists(source_reports["feasibility_report"])
     balance = _read_csv_if_exists(source_reports["class_balance_report"])
     outcome = _read_csv_if_exists(source_reports["target_outcome_profile_report"])
-    feature_families = _read_csv_if_exists(
-        source_reports["feature_family_availability_report"]
-    )
+    feature_families = _read_csv_if_exists(source_reports["feature_family_availability_report"])
     screen = _read_csv_if_exists(source_reports["redesign_screen_report"])
 
     policy = section.get("target_decision_policy", {})
@@ -402,12 +375,8 @@ def save_phase13ak_target_feature_redesign_interpretation_decision(
     technical_available = False
     macro_available = False
     if not feature_status.empty:
-        technical_rows = feature_status[
-            feature_status["family_id"].astype(str).eq("technical")
-        ]
-        macro_rows = feature_status[
-            feature_status["family_id"].astype(str).eq("macro")
-        ]
+        technical_rows = feature_status[feature_status["family_id"].astype(str).eq("technical")]
+        macro_rows = feature_status[feature_status["family_id"].astype(str).eq("macro")]
         technical_available = (
             _bool_value(technical_rows.iloc[0].get("usable_currently", False))
             if not technical_rows.empty
@@ -494,10 +463,7 @@ def save_phase13ak_target_feature_redesign_interpretation_decision(
             _gate_row(
                 "Decision role is correct",
                 section.get("decision_role")
-                == (
-                    "Target-feature redesign interpretation and candidate "
-                    "target decision only"
-                ),
+                == ("Target-feature redesign interpretation and candidate target decision only"),
                 section.get("decision_role", ""),
             ),
         ]
@@ -509,8 +475,7 @@ def save_phase13ak_target_feature_redesign_interpretation_decision(
             {
                 "phase": "Phase 13AK",
                 "diagnostic": (
-                    "Target-feature redesign interpretation and candidate "
-                    "target decision"
+                    "Target-feature redesign interpretation and candidate target decision"
                 ),
                 "verdict": (
                     "Completed — target-feature redesign interpretation passed"
@@ -605,9 +570,7 @@ def save_phase13al_target_feature_redesign_checkpoint_audit(
         )
 
     config_check = pd.DataFrame(flags)
-    config_check["result"] = config_check["passed"].map(
-        {True: "Passed", False: "Failed"}
-    )
+    config_check["result"] = config_check["passed"].map({True: "Passed", False: "Failed"})
 
     reports = section.get("phase13ak_reports", {})
     inventory = _source_report_check(reports)
@@ -698,8 +661,7 @@ def save_phase13al_target_feature_redesign_checkpoint_audit(
             ),
             _gate_row(
                 "Audit role is correct",
-                section.get("audit_role")
-                == "Target-feature redesign checkpoint audit only",
+                section.get("audit_role") == "Target-feature redesign checkpoint audit only",
                 section.get("audit_role", ""),
             ),
         ]
@@ -790,9 +752,7 @@ def _flatten_dict_to_policy_frame(policy: dict[str, Any]) -> pd.DataFrame:
         rows.append(
             {
                 "policy_key": key,
-                "policy_value": "; ".join(map(str, value))
-                if isinstance(value, list)
-                else value,
+                "policy_value": "; ".join(map(str, value)) if isinstance(value, list) else value,
             }
         )
 
@@ -850,28 +810,18 @@ def save_phase13am_redesigned_model_run_preregistration(
     )
 
     feature_policy = _flatten_dict_to_policy_frame(section.get("feature_policy", {}))
-    preprocessing_policy = _flatten_dict_to_policy_frame(
-        section.get("preprocessing_policy", {})
-    )
-    model_families = _normalise_list_columns(
-        section.get("registered_model_families", [])
-    )
-    success_gates = _flatten_dict_to_policy_frame(
-        section.get("validation_success_gates", {})
-    )
+    preprocessing_policy = _flatten_dict_to_policy_frame(section.get("preprocessing_policy", {}))
+    model_families = _normalise_list_columns(section.get("registered_model_families", []))
+    success_gates = _flatten_dict_to_policy_frame(section.get("validation_success_gates", {}))
     boundary = _model_run_boundary_check(section)
     scope = _scope_check(section)
 
-    numeric_prefixes = tuple(
-        section.get("feature_policy", {}).get("numeric_feature_prefixes", [])
-    )
+    numeric_prefixes = tuple(section.get("feature_policy", {}).get("numeric_feature_prefixes", []))
     categorical_prefixes = tuple(
         section.get("feature_policy", {}).get("categorical_feature_prefixes", [])
     )
 
-    numeric_features = [
-        col for col in dataset.columns if str(col).startswith(numeric_prefixes)
-    ]
+    numeric_features = [col for col in dataset.columns if str(col).startswith(numeric_prefixes)]
     categorical_features = [
         col for col in dataset.columns if str(col).startswith(categorical_prefixes)
     ]
@@ -952,8 +902,7 @@ def save_phase13am_redesigned_model_run_preregistration(
             ),
             _gate_row(
                 "Spec role is correct",
-                section.get("spec_role")
-                == "Redesigned model run pre-registration spec only",
+                section.get("spec_role") == "Redesigned model run pre-registration spec only",
                 section.get("spec_role", ""),
             ),
         ]
@@ -1049,9 +998,7 @@ def _forbidden_feature_fragment_check(
     rows = []
 
     for fragment in fragments:
-        matched = [
-            col for col in feature_cols if fragment.lower() in str(col).lower()
-        ]
+        matched = [col for col in feature_cols if fragment.lower() in str(col).lower()]
         rows.append(
             {
                 "fragment": fragment,
@@ -1091,9 +1038,7 @@ def save_phase13an_redesigned_model_run_readiness_audit(
         )
 
     config_check = pd.DataFrame(flags)
-    config_check["result"] = config_check["passed"].map(
-        {True: "Passed", False: "Failed"}
-    )
+    config_check["result"] = config_check["passed"].map({True: "Passed", False: "Failed"})
 
     prereg_reports = section.get("phase13am_reports", {})
     inventory = _source_report_check(prereg_reports)
@@ -1124,14 +1069,10 @@ def save_phase13an_redesigned_model_run_readiness_audit(
     validation_label = "validation"
 
     train = combined[combined["split_label"].astype(str).eq(train_label)].copy()
-    validation = combined[
-        combined["split_label"].astype(str).eq(validation_label)
-    ].copy()
+    validation = combined[combined["split_label"].astype(str).eq(validation_label)].copy()
 
     train_ready = len(train) >= int(thresholds.get("min_train_rows", 500))
-    validation_ready = len(validation) >= int(
-        thresholds.get("min_validation_rows", 200)
-    )
+    validation_ready = len(validation) >= int(thresholds.get("min_validation_rows", 200))
 
     train_fragile_ratio = (
         float(train["redesigned_target"].eq("fragile").mean())
@@ -1144,30 +1085,24 @@ def save_phase13an_redesigned_model_run_readiness_audit(
         else 0.0
     )
 
-    target_balance_ready = (
-        train_fragile_ratio >= float(thresholds.get("min_train_fragile_ratio", 0.12))
-        and validation_fragile_ratio
-        >= float(thresholds.get("min_validation_fragile_ratio", 0.12))
-    )
+    target_balance_ready = train_fragile_ratio >= float(
+        thresholds.get("min_train_fragile_ratio", 0.12)
+    ) and validation_fragile_ratio >= float(thresholds.get("min_validation_fragile_ratio", 0.12))
 
     feature_policy = config.get(
         "phase13am_redesigned_model_run_preregistration",
         {},
     ).get("feature_policy", {})
     numeric_prefixes = tuple(feature_policy.get("numeric_feature_prefixes", []))
-    categorical_prefixes = tuple(
-        feature_policy.get("categorical_feature_prefixes", [])
-    )
+    categorical_prefixes = tuple(feature_policy.get("categorical_feature_prefixes", []))
 
     numeric_features = _prefix_columns(list(dataset.columns), numeric_prefixes)
     categorical_features = _prefix_columns(list(dataset.columns), categorical_prefixes)
     feature_cols = numeric_features + categorical_features
 
-    feature_matrix_ready = (
-        len(numeric_features) >= int(thresholds.get("min_numeric_features", 4))
-        and len(categorical_features)
-        >= int(thresholds.get("min_categorical_features", 4))
-    )
+    feature_matrix_ready = len(numeric_features) >= int(
+        thresholds.get("min_numeric_features", 4)
+    ) and len(categorical_features) >= int(thresholds.get("min_categorical_features", 4))
 
     forbidden_fragments = _as_list(feature_policy.get("forbidden_feature_fragments"))
     forbidden_feature_check = _forbidden_feature_fragment_check(
@@ -1224,9 +1159,7 @@ def save_phase13an_redesigned_model_run_readiness_audit(
                 "train_validation_rows_ready": train_ready and validation_ready,
                 "target_balance_ready": target_balance_ready,
                 "feature_matrix_ready": feature_matrix_ready,
-                "forbidden_feature_fragments_absent": bool(
-                    forbidden_feature_check["passed"].all()
-                )
+                "forbidden_feature_fragments_absent": bool(forbidden_feature_check["passed"].all())
                 if not forbidden_feature_check.empty
                 else True,
                 "holdout_locked": holdout_locked,
@@ -1281,10 +1214,7 @@ def save_phase13an_redesigned_model_run_readiness_audit(
             _gate_row(
                 "Feature matrix ready",
                 feature_matrix_ready,
-                (
-                    f"numeric={len(numeric_features)}; "
-                    f"categorical={len(categorical_features)}"
-                ),
+                (f"numeric={len(numeric_features)}; categorical={len(categorical_features)}"),
             ),
             _gate_row(
                 "Forbidden feature fragments absent",

@@ -28,8 +28,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler, label_binarize
 DEFAULT_PHASE13U_CONFIG: dict[str, Any] = {
     "enabled": False,
     "execution_role": (
-        "Registered baseline ML training execution and train/validation "
-        "evaluation only"
+        "Registered baseline ML training execution and train/validation evaluation only"
     ),
     "phase_branch": "Phase 13 multi-factor model architecture planning",
     "source_phase": "Phase 13T",
@@ -78,8 +77,7 @@ DEFAULT_PHASE13U_CONFIG: dict[str, Any] = {
         "require_no_final_candidate_change": True,
         "require_phase13v_boundary_quality_audit_only": True,
         "required_execution_role": (
-            "Registered baseline ML training execution and train/validation "
-            "evaluation only"
+            "Registered baseline ML training execution and train/validation evaluation only"
         ),
     },
 }
@@ -260,13 +258,13 @@ def build_phase13u_phase13t_result_check(
     return out
 
 
-def _feature_columns(dataset: pd.DataFrame, phase_config: dict[str, Any]) -> tuple[list[str], list[str]]:
+def _feature_columns(
+    dataset: pd.DataFrame, phase_config: dict[str, Any]
+) -> tuple[list[str], list[str]]:
     policy = phase_config.get("dataset_policy", {})
     prefixes = policy.get("feature_prefixes", {})
     numeric_prefixes = tuple(str(item) for item in _as_list(prefixes.get("numeric")))
-    categorical_prefixes = tuple(
-        str(item) for item in _as_list(prefixes.get("categorical"))
-    )
+    categorical_prefixes = tuple(str(item) for item in _as_list(prefixes.get("categorical")))
     forbidden_fragments = [
         str(item).lower() for item in _as_list(policy.get("forbidden_feature_fragments"))
     ]
@@ -854,9 +852,7 @@ def build_phase13u_baseline_comparison_report(
         return pd.DataFrame()
 
     validation = metric_report[metric_report["split_label"].astype(str).eq("validation")]
-    majority = validation[
-        validation["model_id"].astype(str).eq("baseline_majority_class")
-    ]
+    majority = validation[validation["model_id"].astype(str).eq("baseline_majority_class")]
 
     if majority.empty:
         majority_balanced_accuracy = np.nan
@@ -935,16 +931,12 @@ def build_phase13u_phase13v_boundary_check(phase_config: dict[str, Any]) -> pd.D
         (
             "phase13v_may_generate_holdout_predictions",
             _bool_value(boundary.get("phase13v_may_generate_holdout_predictions", True)),
-            not _bool_value(
-                boundary.get("phase13v_may_generate_holdout_predictions", True)
-            ),
+            not _bool_value(boundary.get("phase13v_may_generate_holdout_predictions", True)),
         ),
         (
             "phase13v_may_calculate_feature_importance",
             _bool_value(boundary.get("phase13v_may_calculate_feature_importance", True)),
-            not _bool_value(
-                boundary.get("phase13v_may_calculate_feature_importance", True)
-            ),
+            not _bool_value(boundary.get("phase13v_may_calculate_feature_importance", True)),
         ),
         (
             "phase13v_may_create_signal",
@@ -1055,20 +1047,14 @@ def build_phase13u_summary(
                 )
                 if not validation_predictions.empty
                 else False,
-                "confusion_matrix_rows": int(
-                    len(training_outputs["confusion_matrix_report"])
-                ),
+                "confusion_matrix_rows": int(len(training_outputs["confusion_matrix_report"])),
                 "calibration_rows": int(len(training_outputs["calibration_report"])),
                 "class_support_rows": int(len(training_outputs["class_support_report"])),
                 "baseline_comparison_rows": int(len(baseline_comparison_report)),
-                "forbidden_output_check_passed": bool(
-                    forbidden_output_check["passed"].all()
-                )
+                "forbidden_output_check_passed": bool(forbidden_output_check["passed"].all())
                 if not forbidden_output_check.empty
                 else False,
-                "phase13v_boundary_passed": bool(
-                    phase13v_boundary_check["passed"].all()
-                )
+                "phase13v_boundary_passed": bool(phase13v_boundary_check["passed"].all())
                 if not phase13v_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -1094,9 +1080,7 @@ def build_phase13u_gate_report(
     gates = phase_config.get("gates", {})
 
     if summary.empty:
-        return pd.DataFrame(
-            [_gate_row("Phase 13U summary exists", False, "No summary.")]
-        )
+        return pd.DataFrame([_gate_row("Phase 13U summary exists", False, "No summary.")])
 
     row = summary.iloc[0]
     required_label = str(
@@ -1108,8 +1092,7 @@ def build_phase13u_gate_report(
     required_role = str(
         gates.get(
             "required_execution_role",
-            "Registered baseline ML training execution and train/validation "
-            "evaluation only",
+            "Registered baseline ML training execution and train/validation evaluation only",
         )
     )
 
@@ -1179,8 +1162,7 @@ def build_phase13u_gate_report(
         _gate_row(
             "No forbidden outputs were created",
             bool(row["forbidden_output_check_passed"]),
-            f"forbidden_output_check_passed="
-            f"{bool(row['forbidden_output_check_passed'])}",
+            f"forbidden_output_check_passed={bool(row['forbidden_output_check_passed'])}",
         ),
         _gate_row(
             "Phase 13V boundary is quality-audit-only",
@@ -1219,8 +1201,7 @@ def build_phase13u_conclusion(gate_report: pd.DataFrame) -> pd.DataFrame:
         "backtests, deploy paper trading, promote a candidate, or change the final "
         "candidate."
         if all_passed
-        else "Phase 13U found a model-training, metric, prediction, boundary, or "
-        "scope issue."
+        else "Phase 13U found a model-training, metric, prediction, boundary, or scope issue."
     )
 
     return pd.DataFrame(
@@ -1315,15 +1296,9 @@ def save_phase13u_registered_baseline_ml_training(
         "phase13t_result_check": phase13t_result_check,
         "dataset_profile": dataset_profile,
         "feature_matrix_profile": feature_matrix_profile,
-        "model_registry_execution_report": training_outputs[
-            "model_registry_execution_report"
-        ],
-        "preprocessing_pipeline_report": training_outputs[
-            "preprocessing_pipeline_report"
-        ],
-        "train_validation_metric_report": training_outputs[
-            "train_validation_metric_report"
-        ],
+        "model_registry_execution_report": training_outputs["model_registry_execution_report"],
+        "preprocessing_pipeline_report": training_outputs["preprocessing_pipeline_report"],
+        "train_validation_metric_report": training_outputs["train_validation_metric_report"],
         "confusion_matrix_report": training_outputs["confusion_matrix_report"],
         "calibration_report": training_outputs["calibration_report"],
         "class_support_report": training_outputs["class_support_report"],
@@ -1345,18 +1320,13 @@ def save_phase13u_registered_baseline_ml_training(
         sections={
             "Dataset Profile": dataset_profile,
             "Feature Matrix Profile": feature_matrix_profile,
-            "Model Registry Execution Report": outputs[
-                "model_registry_execution_report"
-            ],
-            "Train Validation Metric Report": outputs[
-                "train_validation_metric_report"
-            ],
+            "Model Registry Execution Report": outputs["model_registry_execution_report"],
+            "Train Validation Metric Report": outputs["train_validation_metric_report"],
             "Baseline Comparison Report": baseline_comparison_report,
             "Gate Report": gate_report,
             "Conclusion": conclusion,
         },
-        output_path=reports_path
-        / "phase13u_registered_baseline_ml_training.md",
+        output_path=reports_path / "phase13u_registered_baseline_ml_training.md",
     )
 
     print("Wrote Phase 13U registered baseline ML training reports.")
@@ -1476,9 +1446,9 @@ def build_phase13v_training_output_quality_check(
         },
         {
             "check": "No model selected",
-            "passed": not model_execution.get("model_selected", pd.Series([False])).map(
-                _bool_value
-            ).any(),
+            "passed": not model_execution.get("model_selected", pd.Series([False]))
+            .map(_bool_value)
+            .any(),
             "detail": "model_selected=False",
         },
     ]
@@ -1504,14 +1474,12 @@ def build_phase13v_metrics_quality_check(
         },
         {
             "check": "Confusion matrix rows sufficient",
-            "passed": len(confusion_report)
-            >= int(thresholds.get("min_confusion_matrix_rows", 45)),
+            "passed": len(confusion_report) >= int(thresholds.get("min_confusion_matrix_rows", 45)),
             "detail": f"confusion_matrix_rows={len(confusion_report)}",
         },
         {
             "check": "Class support rows sufficient",
-            "passed": len(class_support_report)
-            >= int(thresholds.get("min_class_support_rows", 6)),
+            "passed": len(class_support_report) >= int(thresholds.get("min_class_support_rows", 6)),
             "detail": f"class_support_rows={len(class_support_report)}",
         },
         {
@@ -1607,9 +1575,7 @@ def build_phase13v_phase13w_boundary_check(phase_config: dict[str, Any]) -> pd.D
         (
             "phase13w_may_generate_holdout_predictions",
             _bool_value(boundary.get("phase13w_may_generate_holdout_predictions", True)),
-            not _bool_value(
-                boundary.get("phase13w_may_generate_holdout_predictions", True)
-            ),
+            not _bool_value(boundary.get("phase13w_may_generate_holdout_predictions", True)),
         ),
         (
             "phase13w_may_create_signal",
@@ -1682,9 +1648,7 @@ def build_phase13v_summary(
                 "phase_branch": str(phase_config.get("phase_branch", "")),
                 "source_phase": str(phase_config.get("source_phase", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "phase13u_reports_present": bool(
-                    report_inventory_check["present"].all()
-                )
+                "phase13u_reports_present": bool(report_inventory_check["present"].all())
                 if not report_inventory_check.empty
                 else False,
                 "phase13u_result_passed": bool(phase13u_result_check["passed"].all())
@@ -1701,17 +1665,13 @@ def build_phase13v_summary(
                 "metrics_quality_passed": bool(metrics_quality_check["passed"].all())
                 if not metrics_quality_check.empty
                 else False,
-                "prediction_boundary_passed": bool(
-                    prediction_boundary_check["passed"].all()
-                )
+                "prediction_boundary_passed": bool(prediction_boundary_check["passed"].all())
                 if not prediction_boundary_check.empty
                 else False,
                 "forbidden_outputs_absent": bool(forbidden_output_check["passed"].all())
                 if not forbidden_output_check.empty
                 else False,
-                "phase13w_boundary_passed": bool(
-                    phase13w_boundary_check["passed"].all()
-                )
+                "phase13w_boundary_passed": bool(phase13w_boundary_check["passed"].all())
                 if not phase13w_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -1735,9 +1695,7 @@ def build_phase13v_gate_report(
     summary: pd.DataFrame,
 ) -> pd.DataFrame:
     if summary.empty:
-        return pd.DataFrame(
-            [_gate_row("Phase 13V summary exists", False, "No summary.")]
-        )
+        return pd.DataFrame([_gate_row("Phase 13V summary exists", False, "No summary.")])
 
     row = summary.iloc[0]
     required_role = str(
@@ -1766,8 +1724,7 @@ def build_phase13v_gate_report(
         _gate_row(
             "Training outputs quality passed",
             bool(row["training_outputs_quality_passed"]),
-            f"training_outputs_quality_passed="
-            f"{bool(row['training_outputs_quality_passed'])}",
+            f"training_outputs_quality_passed={bool(row['training_outputs_quality_passed'])}",
         ),
         _gate_row(
             "Metrics quality passed",
@@ -1864,18 +1821,12 @@ def save_phase13v_ml_training_result_quality_audit(
         expected_flags=phase_config.get("expected_runtime_flags", {}),
     )
 
-    model_execution = _read_csv_if_exists(
-        reports.get("model_registry_execution_report", "")
-    )
+    model_execution = _read_csv_if_exists(reports.get("model_registry_execution_report", ""))
     metrics = _read_csv_if_exists(reports.get("train_validation_metric_report", ""))
     confusion = _read_csv_if_exists(reports.get("confusion_matrix_report", ""))
     class_support = _read_csv_if_exists(reports.get("class_support_report", ""))
-    baseline_comparison = _read_csv_if_exists(
-        reports.get("baseline_comparison_report", "")
-    )
-    validation_predictions = _read_csv_if_exists(
-        reports.get("validation_predictions", "")
-    )
+    baseline_comparison = _read_csv_if_exists(reports.get("baseline_comparison_report", ""))
+    validation_predictions = _read_csv_if_exists(reports.get("validation_predictions", ""))
 
     training_output_quality_check = build_phase13v_training_output_quality_check(
         model_execution=model_execution,
@@ -1888,9 +1839,7 @@ def save_phase13v_ml_training_result_quality_audit(
         baseline_comparison_report=baseline_comparison,
         thresholds=thresholds,
     )
-    prediction_boundary_check = build_phase13v_prediction_boundary_check(
-        validation_predictions
-    )
+    prediction_boundary_check = build_phase13v_prediction_boundary_check(validation_predictions)
     forbidden_output_check = build_phase13v_forbidden_output_check(phase_config)
     phase13w_boundary_check = build_phase13v_phase13w_boundary_check(phase_config)
     scope_boundary_check = build_phase13v_scope_boundary_check(phase_config)
@@ -1941,8 +1890,7 @@ def save_phase13v_ml_training_result_quality_audit(
             "Gate Report": gate_report,
             "Conclusion": conclusion,
         },
-        output_path=reports_path
-        / "phase13v_ml_training_result_quality_audit.md",
+        output_path=reports_path / "phase13v_ml_training_result_quality_audit.md",
     )
 
     print("Wrote Phase 13V ML training result quality audit reports.")

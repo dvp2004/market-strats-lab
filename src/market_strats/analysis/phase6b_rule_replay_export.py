@@ -46,14 +46,11 @@ def _phase_result_check(conclusion_path: str, gate_path: str, phase_name: str) -
     conclusion = _read_csv_if_exists(conclusion_path)
     gate = _read_csv_if_exists(gate_path)
 
-    conclusion_passed = (
-        not conclusion.empty
-        and _bool_value(conclusion.iloc[0].get("all_gates_passed", False))
+    conclusion_passed = not conclusion.empty and _bool_value(
+        conclusion.iloc[0].get("all_gates_passed", False)
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -82,7 +79,9 @@ def _first_existing_col(frame: pd.DataFrame, candidates: list[str]) -> str | Non
     return None
 
 
-def _required_column_check(frame: pd.DataFrame, required: list[str], frame_name: str) -> pd.DataFrame:
+def _required_column_check(
+    frame: pd.DataFrame, required: list[str], frame_name: str
+) -> pd.DataFrame:
     rows = []
     for col in required:
         rows.append(
@@ -225,7 +224,8 @@ def _scan_code_paths(section: dict[str, Any]) -> pd.DataFrame:
                         "contains_target_offensive_weight": "target_offensive_weight" in lower,
                         "contains_loose_relief": "loose_relief" in lower,
                         "contains_phase6b": "phase6b" in lower,
-                        "contains_find_final_candidate_frame": "_find_final_candidate_frame" in lower,
+                        "contains_find_final_candidate_frame": "_find_final_candidate_frame"
+                        in lower,
                     }
                 )
 
@@ -272,7 +272,15 @@ def _final_candidate_profile(frame: pd.DataFrame, section: dict[str, Any]) -> pd
     date_col = _first_existing_col(frame, ["date", "decision_date"])
     benchmark_col = _first_existing_col(
         frame,
-        ["SPY_close", "spy_close", "adj_close", "close", "SPY_return", "spy_return", "benchmark_return"],
+        [
+            "SPY_close",
+            "spy_close",
+            "adj_close",
+            "close",
+            "SPY_return",
+            "spy_return",
+            "benchmark_return",
+        ],
     )
 
     if frame.empty or date_col is None:
@@ -354,7 +362,9 @@ def _replay_requirement_report(
         and code_inventory["contains_target_offensive_weight"].map(_bool_value).any()
     )
 
-    replay_path_discovered = bool(target_present and benchmark_present and date_present and code_has_target)
+    replay_path_discovered = bool(
+        target_present and benchmark_present and date_present and code_has_target
+    )
 
     required_inputs = [
         "final candidate frame with date",
@@ -374,7 +384,10 @@ def _replay_requirement_report(
                 "module_or_file_candidates": ";".join(
                     code_inventory[
                         code_inventory["contains_target_offensive_weight"].map(_bool_value)
-                    ]["path"].drop_duplicates().head(10).tolist()
+                    ]["path"]
+                    .drop_duplicates()
+                    .head(10)
+                    .tolist()
                 )
                 if not code_inventory.empty
                 else "",
@@ -447,7 +460,9 @@ def save_phase15s_phase6b_rule_replay_source_discovery(
             {
                 "decision": decision_text,
                 "rule_replay_path_discovered": replay_path_discovered,
-                "post_endpoint_rows_available_now": int(final_profile.iloc[0]["post_endpoint_rows"]),
+                "post_endpoint_rows_available_now": int(
+                    final_profile.iloc[0]["post_endpoint_rows"]
+                ),
                 "phase15t_export_attempt_allowed_next": replay_path_discovered,
                 "phase15q_15r_rerun_allowed_next": False,
                 "paper_dry_run_preregistration_allowed_next": False,
@@ -468,11 +483,15 @@ def save_phase15s_phase6b_rule_replay_source_discovery(
                 "implementation_classification": section.get("implementation_classification", ""),
                 "phase15r_passed": bool(phase15r_check["passed"].all()),
                 "candidate_loader": loader,
-                "code_paths_scanned": len(code_inventory["path"].drop_duplicates()) if not code_inventory.empty else 0,
+                "code_paths_scanned": len(code_inventory["path"].drop_duplicates())
+                if not code_inventory.empty
+                else 0,
                 "target_offensive_weight_present": _bool_value(
                     final_profile.iloc[0]["target_offensive_weight_present"]
                 ),
-                "post_endpoint_rows_available_now": int(final_profile.iloc[0]["post_endpoint_rows"]),
+                "post_endpoint_rows_available_now": int(
+                    final_profile.iloc[0]["post_endpoint_rows"]
+                ),
                 "rule_replay_path_discovered": replay_path_discovered,
                 "decision": decision_text,
                 "candidate_stream_export": False,
@@ -492,16 +511,27 @@ def save_phase15s_phase6b_rule_replay_source_discovery(
         [
             _gate_row("Phase 15R passed", bool(phase15r_check["passed"].all()), "phase15r"),
             _gate_row("Code path inventory output exists", True, f"rows={len(code_inventory)}"),
-            _gate_row("Target column discovery output exists", len(target_discovery) > 0, "target columns"),
-            _gate_row("Replay requirement report output exists", len(replay_requirements) == 1, "requirements"),
+            _gate_row(
+                "Target column discovery output exists", len(target_discovery) > 0, "target columns"
+            ),
+            _gate_row(
+                "Replay requirement report output exists",
+                len(replay_requirements) == 1,
+                "requirements",
+            ),
             _gate_row("Discovery decision output exists", len(decision) == 1, decision_text),
-            _gate_row("Phase 15T boundary is export-only", bool(boundary["passed"].all()), "phase15t"),
+            _gate_row(
+                "Phase 15T boundary is export-only", bool(boundary["passed"].all()), "phase15t"
+            ),
             _gate_row("No candidate stream export", True, "discovery only"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Discovery role is correct",
-                section.get("discovery_role")
-                == "Phase 6B/6C rule replay source discovery only",
+                section.get("discovery_role") == "Phase 6B/6C rule replay source discovery only",
                 section.get("discovery_role", ""),
             ),
         ]
@@ -552,7 +582,9 @@ def save_phase15s_phase6b_rule_replay_source_discovery(
     return outputs
 
 
-def _normalise_benchmark(frame: pd.DataFrame, section: dict[str, Any]) -> tuple[pd.Series, pd.Series, str, str]:
+def _normalise_benchmark(
+    frame: pd.DataFrame, section: dict[str, Any]
+) -> tuple[pd.Series, pd.Series, str, str]:
     close_col = _first_existing_col(
         frame,
         list(section.get("benchmark_policy", {}).get("acceptable_close_columns", [])),
@@ -693,7 +725,11 @@ def _export_summary(stream: pd.DataFrame, loader: str, failure_reason: str) -> p
     target_weight_source_passed = (
         rows > 0
         and "target_weight_source" in stream.columns
-        and stream["target_weight_source"].astype(str).str.lower().eq("verified_project_generated").all()
+        and stream["target_weight_source"]
+        .astype(str)
+        .str.lower()
+        .eq("verified_project_generated")
+        .all()
     )
     out_of_sample_passed = (
         rows > 0
@@ -768,12 +804,16 @@ def save_phase15t_rule_generated_candidate_stream_export(
         config=config,
     )
 
-    output_file = Path(section.get("output_file", "reports/phase15t_rule_generated_candidate_stream.csv"))
+    output_file = Path(
+        section.get("output_file", "reports/phase15t_rule_generated_candidate_stream.csv")
+    )
     output_file.parent.mkdir(parents=True, exist_ok=True)
     export_stream.to_csv(output_file, index=False)
 
     handoff_file = Path(
-        section.get("handoff_file_for_phase15q", "data/fresh/phase15q_rule_generated_candidate_stream.csv")
+        section.get(
+            "handoff_file_for_phase15q", "data/fresh/phase15q_rule_generated_candidate_stream.csv"
+        )
     )
     handoff_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -851,12 +891,24 @@ def save_phase15t_rule_generated_candidate_stream_export(
         [
             _gate_row("Phase 15S passed", bool(phase15s_check["passed"].all()), "phase15s"),
             _gate_row("Export file written", output_file.exists(), str(output_file)),
-            _gate_row("Required columns present", bool(required_col_check["present"].all()), "schema"),
-            _gate_row("Pinned endpoint preserved", True, section.get("pinned_research_endpoint", "")),
+            _gate_row(
+                "Required columns present", bool(required_col_check["present"].all()), "schema"
+            ),
+            _gate_row(
+                "Pinned endpoint preserved", True, section.get("pinned_research_endpoint", "")
+            ),
             _gate_row("No canonical report mutation", True, "separate reports/data/fresh output"),
             _gate_row("Decision output exists", len(decision) == 1, decision_text),
-            _gate_row("Phase 15Q rerun boundary is conditional-only", bool(boundary["passed"].all()), "phase15q rerun"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "Phase 15Q rerun boundary is conditional-only",
+                bool(boundary["passed"].all()),
+                "phase15q rerun",
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Execution role is correct",
                 section.get("execution_role")

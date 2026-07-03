@@ -391,15 +391,14 @@ def _apply_research_period_filter_to_result(
 
     actual_end_date = filtered["date"].max().date()
 
-    if research_end_date is not None and actual_end_date > pd.to_datetime(
-        research_end_date
-    ).date():
+    if research_end_date is not None and actual_end_date > pd.to_datetime(research_end_date).date():
         raise ValueError(
             f"{strategy_name} result filter failed. "
             f"Expected end <= {research_end_date}, got {actual_end_date}."
         )
 
     return filtered
+
 
 def _apply_research_period_filter(
     prices: pd.DataFrame,
@@ -440,6 +439,7 @@ def _apply_research_period_filter(
         )
 
     return filtered.sort_values("date").reset_index(drop=True)
+
 
 def _preserve_price_data_for_outputs(price_data: pd.DataFrame) -> pd.DataFrame:
     """Return a clean copy of raw price data for downstream diagnostics.
@@ -482,6 +482,7 @@ def _preserve_price_data_for_outputs(price_data: pd.DataFrame) -> pd.DataFrame:
     preserved["adj_close"] = preserved["adj_close"].astype(float)
 
     return preserved
+
 
 def load_config(config_path: str | Path) -> dict:
     with open(config_path, "r", encoding="utf-8") as file:
@@ -556,12 +557,7 @@ def get_core_satellite_config(config: dict) -> dict | None:
 
 
 def make_safe_filename(value: str) -> str:
-    return (
-        value.replace(" ", "_")
-        .replace("/", "_")
-        .replace("\\", "_")
-        .replace(":", "_")
-    )
+    return value.replace(" ", "_").replace("/", "_").replace("\\", "_").replace(":", "_")
 
 
 def get_or_fetch_prices(ticker: str, config: dict) -> pd.DataFrame:
@@ -659,9 +655,7 @@ def run_backtest_for_ticker(
     drawdown_base_allocation = float(config["drawdown_base_allocation"])
     drawdown_tranche_allocation = float(config["drawdown_tranche_allocation"])
     drawdown_levels = [float(level) for level in config["drawdown_levels"]]
-    trend_filtered_drawdown_off_allocation = float(
-        config["trend_filtered_drawdown_off_allocation"]
-    )
+    trend_filtered_drawdown_off_allocation = float(config["trend_filtered_drawdown_off_allocation"])
 
     core_satellite_config = get_core_satellite_config(config)
 
@@ -799,9 +793,7 @@ def run_backtest_for_ticker(
         )
 
         results[core_satellite_strategy_name] = core_satellite
-        results[annual_rebalanced_core_satellite_strategy_name] = (
-            annual_rebalanced_core_satellite
-        )
+        results[annual_rebalanced_core_satellite_strategy_name] = annual_rebalanced_core_satellite
 
         rebalance_months = [
             int(month)
@@ -821,9 +813,7 @@ def run_backtest_for_ticker(
             rebalance_months=rebalance_months,
         )
 
-        rebalance_month_sensitivity_path = (
-            reports_dir / f"{ticker}_rebalance_month_sensitivity.csv"
-        )
+        rebalance_month_sensitivity_path = reports_dir / f"{ticker}_rebalance_month_sensitivity.csv"
         rebalance_month_sensitivity_markdown_path = (
             reports_dir / f"{ticker}_rebalance_month_sensitivity.md"
         )
@@ -843,9 +833,7 @@ def run_backtest_for_ticker(
         sma_window_robustness_config.get("enabled", False)
         and ticker == str(sma_window_robustness_config.get("ticker", "")).upper()
     ):
-        robustness_sma_days = [
-            int(value) for value in sma_window_robustness_config["sma_days"]
-        ]
+        robustness_sma_days = [int(value) for value in sma_window_robustness_config["sma_days"]]
 
         sma_window_robustness_df = run_sma_window_robustness(
             ticker=ticker,
@@ -862,15 +850,11 @@ def run_backtest_for_ticker(
             anchor_sma_days=int(sma_window_robustness_config.get("anchor_sma_days", 200)),
         )
 
-        sma_window_robustness_path = (
-            reports_dir / f"{ticker}_sma_window_robustness.csv"
-        )
+        sma_window_robustness_path = reports_dir / f"{ticker}_sma_window_robustness.csv"
         sma_window_robustness_summary_path = (
             reports_dir / f"{ticker}_sma_window_robustness_summary.csv"
         )
-        sma_window_robustness_markdown_path = (
-            reports_dir / f"{ticker}_sma_window_robustness.md"
-        )
+        sma_window_robustness_markdown_path = reports_dir / f"{ticker}_sma_window_robustness.md"
 
         sma_window_robustness_df.to_csv(sma_window_robustness_path, index=False)
         sma_window_robustness_summary_df.to_csv(
@@ -888,13 +872,11 @@ def run_backtest_for_ticker(
         {},
     )
 
-    if (
-        monthly_sma_window_robustness_config.get("enabled", False)
-        and ticker == monthly_sma_window_robustness_config.get("ticker")
-    ):
+    if monthly_sma_window_robustness_config.get(
+        "enabled", False
+    ) and ticker == monthly_sma_window_robustness_config.get("ticker"):
         robustness_sma_months = [
-            int(value)
-            for value in monthly_sma_window_robustness_config["sma_months"]
+            int(value) for value in monthly_sma_window_robustness_config["sma_months"]
         ]
 
         monthly_sma_window_robustness_df = run_monthly_sma_window_robustness(
@@ -907,11 +889,9 @@ def run_backtest_for_ticker(
             cash_returns=cash_returns,
         )
 
-        monthly_sma_window_robustness_summary_df = (
-            create_monthly_sma_window_robustness_summary(
-                monthly_sma_window_robustness_df,
-                anchor_sma_months=10,
-            )
+        monthly_sma_window_robustness_summary_df = create_monthly_sma_window_robustness_summary(
+            monthly_sma_window_robustness_df,
+            anchor_sma_months=10,
         )
 
         monthly_sma_window_robustness_path = (
@@ -939,10 +919,7 @@ def run_backtest_for_ticker(
         )
 
     metrics_df = pd.DataFrame(
-        [
-            calculate_metrics(result, strategy_name)
-            for strategy_name, result in results.items()
-        ]
+        [calculate_metrics(result, strategy_name) for strategy_name, result in results.items()]
     )
     metrics_df.insert(0, "ticker", ticker)
 
@@ -1000,9 +977,7 @@ def run_backtest_for_ticker(
         rolling_summary=rolling_summary_df,
     )
     strategy_purpose_path = reports_dir / f"{ticker}_strategy_purpose_classification.csv"
-    strategy_purpose_markdown_path = (
-        reports_dir / f"{ticker}_strategy_purpose_classification.md"
-    )
+    strategy_purpose_markdown_path = reports_dir / f"{ticker}_strategy_purpose_classification.md"
     strategy_purpose_df.to_csv(strategy_purpose_path, index=False)
     write_strategy_purpose_markdown(strategy_purpose_df, strategy_purpose_markdown_path)
 
@@ -1017,9 +992,7 @@ def run_backtest_for_ticker(
                 annual_rebalanced_core_satellite_strategy_name
             ),
         )
-        core_satellite_diagnostic_path = (
-            reports_dir / f"{ticker}_core_satellite_diagnostic.csv"
-        )
+        core_satellite_diagnostic_path = reports_dir / f"{ticker}_core_satellite_diagnostic.csv"
         core_satellite_diagnostic_markdown_path = (
             reports_dir / f"{ticker}_core_satellite_diagnostic.md"
         )
@@ -1048,14 +1021,12 @@ def run_backtest_for_ticker(
     momentum_robustness_markdown_path: Path | None = None
 
     if momentum_robustness_months:
-        momentum_robustness_df, momentum_robustness_rolling_df, _ = (
-            run_momentum_window_robustness(
-                prices=prices,
-                initial_capital=initial_capital,
-                lookback_months=momentum_robustness_months,
-                slippage_bps=slippage_bps,
-                cash_returns=cash_returns,
-            )
+        momentum_robustness_df, momentum_robustness_rolling_df, _ = run_momentum_window_robustness(
+            prices=prices,
+            initial_capital=initial_capital,
+            lookback_months=momentum_robustness_months,
+            slippage_bps=slippage_bps,
+            cash_returns=cash_returns,
         )
         momentum_robustness_df.insert(0, "ticker", ticker)
         momentum_robustness_rolling_df.insert(0, "ticker", ticker)
@@ -1064,9 +1035,7 @@ def run_backtest_for_ticker(
         momentum_robustness_rolling_path = (
             reports_dir / f"{ticker}_momentum_robustness_rolling_summary.csv"
         )
-        momentum_robustness_markdown_path = (
-            reports_dir / f"{ticker}_momentum_robustness.md"
-        )
+        momentum_robustness_markdown_path = reports_dir / f"{ticker}_momentum_robustness.md"
         momentum_robustness_df.to_csv(momentum_robustness_path, index=False)
         momentum_robustness_rolling_df.to_csv(
             momentum_robustness_rolling_path,
@@ -1175,36 +1144,23 @@ def run_backtest_for_ticker(
     print(f"Saved strategy scorecard to: {strategy_scorecard_path}")
     print(f"Saved strategy scorecard report to: {strategy_scorecard_markdown_path}")
     print(f"Saved strategy purpose classification to: {strategy_purpose_path}")
-    print(
-        "Saved strategy purpose classification report to: "
-        f"{strategy_purpose_markdown_path}"
-    )
+    print(f"Saved strategy purpose classification report to: {strategy_purpose_markdown_path}")
     print(f"Saved equity curve chart to: {equity_plot_path}")
     print(f"Saved drawdown chart to: {drawdown_plot_path}")
 
     if core_satellite_diagnostic_path is not None:
         print(f"Saved core-satellite diagnostic to: {core_satellite_diagnostic_path}")
         print(
-            "Saved core-satellite diagnostic report to: "
-            f"{core_satellite_diagnostic_markdown_path}"
+            f"Saved core-satellite diagnostic report to: {core_satellite_diagnostic_markdown_path}"
         )
 
     if annual_rebalance_audit_path is not None:
         print(f"Saved annual rebalance audit to: {annual_rebalance_audit_path}")
-        print(
-            "Saved annual rebalance audit summary to: "
-            f"{annual_rebalance_audit_summary_path}"
-        )
-        print(
-            "Saved annual rebalance audit report to: "
-            f"{annual_rebalance_audit_markdown_path}"
-        )
+        print(f"Saved annual rebalance audit summary to: {annual_rebalance_audit_summary_path}")
+        print(f"Saved annual rebalance audit report to: {annual_rebalance_audit_markdown_path}")
 
     if rebalance_month_sensitivity_path is not None:
-        print(
-            "Saved rebalance-month sensitivity to: "
-            f"{rebalance_month_sensitivity_path}"
-        )
+        print(f"Saved rebalance-month sensitivity to: {rebalance_month_sensitivity_path}")
         print(
             "Saved rebalance-month sensitivity report to: "
             f"{rebalance_month_sensitivity_markdown_path}"
@@ -1212,21 +1168,12 @@ def run_backtest_for_ticker(
 
     if sma_window_robustness_path is not None:
         print(f"Saved SMA window robustness to: {sma_window_robustness_path}")
-        print(
-            "Saved SMA window robustness summary to: "
-            f"{sma_window_robustness_summary_path}"
-        )
-        print(
-            "Saved SMA window robustness report to: "
-            f"{sma_window_robustness_markdown_path}"
-        )
+        print(f"Saved SMA window robustness summary to: {sma_window_robustness_summary_path}")
+        print(f"Saved SMA window robustness report to: {sma_window_robustness_markdown_path}")
 
     if momentum_robustness_path is not None:
         print(f"Saved momentum robustness to: {momentum_robustness_path}")
-        print(
-            "Saved momentum robustness rolling summary to: "
-            f"{momentum_robustness_rolling_path}"
-        )
+        print(f"Saved momentum robustness rolling summary to: {momentum_robustness_rolling_path}")
         print(f"Saved momentum robustness report to: {momentum_robustness_markdown_path}")
 
     if not monthly_sma_window_robustness_df.empty:
@@ -1283,13 +1230,9 @@ def write_cross_asset_summaries(
     combined_metrics = (
         pd.concat(full_metrics, ignore_index=True) if full_metrics else pd.DataFrame()
     )
-    combined_scorecards = (
-        pd.concat(scorecards, ignore_index=True) if scorecards else pd.DataFrame()
-    )
+    combined_scorecards = pd.concat(scorecards, ignore_index=True) if scorecards else pd.DataFrame()
     combined_rolling = (
-        pd.concat(rolling_summaries, ignore_index=True)
-        if rolling_summaries
-        else pd.DataFrame()
+        pd.concat(rolling_summaries, ignore_index=True) if rolling_summaries else pd.DataFrame()
     )
 
     if not combined_metrics.empty:
@@ -1316,9 +1259,7 @@ def write_cross_asset_summaries(
             scorecards=combined_scorecards,
         )
         expanded_diagnostic_path = reports_dir / "expanded_universe_diagnostic.csv"
-        expanded_diagnostic_markdown_path = (
-            reports_dir / "expanded_universe_diagnostic.md"
-        )
+        expanded_diagnostic_markdown_path = reports_dir / "expanded_universe_diagnostic.md"
         expanded_diagnostic.to_csv(expanded_diagnostic_path, index=False)
         write_expanded_universe_diagnostic_markdown(
             diagnostic=expanded_diagnostic,
@@ -1328,19 +1269,14 @@ def write_cross_asset_summaries(
         print("\nExpanded universe diagnostic:")
         print(expanded_diagnostic.to_string(index=False))
         print(f"Saved expanded universe diagnostic to: {expanded_diagnostic_path}")
-        print(
-            "Saved expanded universe diagnostic report to: "
-            f"{expanded_diagnostic_markdown_path}"
-        )
+        print(f"Saved expanded universe diagnostic report to: {expanded_diagnostic_markdown_path}")
 
     if not combined_metrics.empty and not combined_rolling.empty:
         strategy_purpose = classify_strategy_purpose(
             metrics=combined_metrics,
             rolling_summary=combined_rolling,
         )
-        strategy_purpose_path = (
-            reports_dir / "cross_asset_strategy_purpose_classification.csv"
-        )
+        strategy_purpose_path = reports_dir / "cross_asset_strategy_purpose_classification.csv"
         strategy_purpose_markdown_path = (
             reports_dir / "cross_asset_strategy_purpose_classification.md"
         )
@@ -1352,10 +1288,7 @@ def write_cross_asset_summaries(
 
         print("\nCross-asset strategy purpose classification:")
         print(strategy_purpose.to_string(index=False))
-        print(
-            "Saved cross-asset strategy purpose classification to: "
-            f"{strategy_purpose_path}"
-        )
+        print(f"Saved cross-asset strategy purpose classification to: {strategy_purpose_path}")
         print(
             "Saved cross-asset strategy purpose classification report to: "
             f"{strategy_purpose_markdown_path}"
@@ -1367,9 +1300,7 @@ def write_cross_asset_summaries(
             rolling_summary=combined_rolling,
         )
         diagnostic_path = reports_dir / "cross_asset_buy_hold_vs_12m_momentum.csv"
-        diagnostic_markdown_path = (
-            reports_dir / "cross_asset_buy_hold_vs_12m_momentum.md"
-        )
+        diagnostic_markdown_path = reports_dir / "cross_asset_buy_hold_vs_12m_momentum.md"
         diagnostic.to_csv(diagnostic_path, index=False)
         write_buy_hold_vs_momentum_markdown(diagnostic, diagnostic_markdown_path)
 
@@ -1460,8 +1391,9 @@ def run_dual_momentum_pair(
     )
 
     common_dates = sorted(
-        set(pd.to_datetime(asset_a_common["date"]))
-        .intersection(set(pd.to_datetime(asset_b_common["date"])))
+        set(pd.to_datetime(asset_a_common["date"])).intersection(
+            set(pd.to_datetime(asset_b_common["date"]))
+        )
     )
 
     asset_a_common = asset_a_common[
@@ -1581,27 +1513,17 @@ def run_dual_momentum_pair(
     scorecard_md_path = reports_dir / f"dual_momentum_{safe_pair_name}_scorecard.md"
     equity_plot_path = reports_dir / f"dual_momentum_{safe_pair_name}_equity_curves.png"
     drawdown_plot_path = reports_dir / f"dual_momentum_{safe_pair_name}_drawdowns.png"
-    holding_segments_path = (
-        reports_dir / f"dual_momentum_{safe_pair_name}_holding_segments.csv"
-    )
-    allocation_audit_path = (
-        reports_dir / f"dual_momentum_{safe_pair_name}_allocation_audit.csv"
-    )
+    holding_segments_path = reports_dir / f"dual_momentum_{safe_pair_name}_holding_segments.csv"
+    allocation_audit_path = reports_dir / f"dual_momentum_{safe_pair_name}_allocation_audit.csv"
     cash_reason_summary_path = (
         reports_dir / f"dual_momentum_{safe_pair_name}_cash_reason_summary.csv"
     )
-    audit_markdown_path = reports_dir / (
-        f"dual_momentum_{safe_pair_name}_allocation_audit.md"
-    )
-    opportunity_segments_path = (
-        reports_dir / f"dual_momentum_{safe_pair_name}_opportunity_cost.csv"
-    )
+    audit_markdown_path = reports_dir / (f"dual_momentum_{safe_pair_name}_allocation_audit.md")
+    opportunity_segments_path = reports_dir / f"dual_momentum_{safe_pair_name}_opportunity_cost.csv"
     opportunity_summary_path = (
         reports_dir / f"dual_momentum_{safe_pair_name}_opportunity_summary.csv"
     )
-    opportunity_markdown_path = (
-        reports_dir / f"dual_momentum_{safe_pair_name}_opportunity_cost.md"
-    )
+    opportunity_markdown_path = reports_dir / f"dual_momentum_{safe_pair_name}_opportunity_cost.md"
 
     metrics_df.to_csv(metrics_path, index=False)
     rolling_summary_df.to_csv(rolling_path, index=False)
@@ -1659,11 +1581,7 @@ def run_dual_momentum_pair(
     print(cash_reason_summary_df.to_string(index=False))
 
     print("\nDual momentum worst holding segments:")
-    print(
-        holding_segments_df.sort_values("segment_return_pct")
-        .head(10)
-        .to_string(index=False)
-    )
+    print(holding_segments_df.sort_values("segment_return_pct").head(10).to_string(index=False))
 
     print("\nDual momentum opportunity-cost summary:")
     print(opportunity_summary_df.to_string(index=False))
@@ -1722,9 +1640,7 @@ def _run_phase15wxyz_fresh_extension_pipeline(
         phase_config=phase_config,
     )
 
-    fresh_reports_dir = Path(
-        phase_config.get("fresh_reports_dir", reports_dir / "fresh_extension")
-    )
+    fresh_reports_dir = Path(phase_config.get("fresh_reports_dir", reports_dir / "fresh_extension"))
     fresh_reports_dir.mkdir(parents=True, exist_ok=True)
 
     fresh_ticker_outputs: dict[str, dict[str, pd.DataFrame]] = {}
@@ -2119,9 +2035,7 @@ def _run_phase23f_pilot_individual_equity_input_bootstrap(
     config: dict,
     reports_dir: Path,
 ) -> dict[str, pd.DataFrame]:
-    if not _phase_enabled(
-        config, "phase23f_pilot_individual_equity_input_bootstrap"
-    ):
+    if not _phase_enabled(config, "phase23f_pilot_individual_equity_input_bootstrap"):
         return {}
     return save_phase23f_pilot_individual_equity_input_bootstrap(
         config=config,
@@ -2134,9 +2048,7 @@ def _run_phase23f_pilot_individual_equity_feature_calculation(
     config: dict,
     reports_dir: Path,
 ) -> dict[str, pd.DataFrame]:
-    if not _phase_enabled(
-        config, "phase23f_pilot_individual_equity_feature_calculation"
-    ):
+    if not _phase_enabled(config, "phase23f_pilot_individual_equity_feature_calculation"):
         return {}
     return save_phase23f_pilot_individual_equity_feature_calculation(
         config=config,
@@ -2201,9 +2113,7 @@ def _run_phase23j_post_endpoint_individual_equity_extension(
     config: dict,
     reports_dir: Path,
 ) -> dict[str, pd.DataFrame]:
-    if not _phase_enabled(
-        config, "phase23j_post_endpoint_individual_equity_extension"
-    ):
+    if not _phase_enabled(config, "phase23j_post_endpoint_individual_equity_extension"):
         return {}
     return save_phase23j_post_endpoint_individual_equity_extension(
         config=config,
@@ -2554,25 +2464,17 @@ def main() -> None:
     parser.add_argument(
         "--phase23d-only",
         action="store_true",
-        help=(
-            "Run only the Phase 23D Sentiment and News Source Timestamp Audit report."
-        ),
+        help=("Run only the Phase 23D Sentiment and News Source Timestamp Audit report."),
     )
     parser.add_argument(
         "--phase23e-only",
         action="store_true",
-        help=(
-            "Run only the Phase 23E Combined Individual-Stock Feature Panel "
-            "Contract report."
-        ),
+        help=("Run only the Phase 23E Combined Individual-Stock Feature Panel Contract report."),
     )
     parser.add_argument(
         "--phase23f-inputs-only",
         action="store_true",
-        help=(
-            "Run only the controlled noncanonical Phase 23F pilot input "
-            "bootstrap."
-        ),
+        help=("Run only the controlled noncanonical Phase 23F pilot input bootstrap."),
     )
     parser.add_argument(
         "--phase23f-only",
@@ -2585,34 +2487,22 @@ def main() -> None:
     parser.add_argument(
         "--phase23g-only",
         action="store_true",
-        help=(
-            "Run only the Phase 23G interpretable cross-sectional stock-ranker "
-            "research pilot."
-        ),
+        help=("Run only the Phase 23G interpretable cross-sectional stock-ranker research pilot."),
     )
     parser.add_argument(
         "--phase23h-only",
         action="store_true",
-        help=(
-            "Run only the Phase 23H interpretable ranker robustness and "
-            "failure-mode analysis."
-        ),
+        help=("Run only the Phase 23H interpretable ranker robustness and failure-mode analysis."),
     )
     parser.add_argument(
         "--phase23i-only",
         action="store_true",
-        help=(
-            "Run only the Phase 23I frozen cost-aware individual-equity "
-            "portfolio diagnostics."
-        ),
+        help=("Run only the Phase 23I frozen cost-aware individual-equity portfolio diagnostics."),
     )
     parser.add_argument(
         "--phase23i-shadow-only",
         action="store_true",
-        help=(
-            "Run only the Phase 23I research-only prospective shadow-paper "
-            "session writer."
-        ),
+        help=("Run only the Phase 23I research-only prospective shadow-paper session writer."),
     )
     parser.add_argument(
         "--phase23j-only",
@@ -2634,8 +2524,7 @@ def main() -> None:
         "--phase23l-only",
         action="store_true",
         help=(
-            "Run only the Phase 23L operational mark-to-market and "
-            "TradingView manual paper bridge."
+            "Run only the Phase 23L operational mark-to-market and TradingView manual paper bridge."
         ),
     )
     parser.add_argument(

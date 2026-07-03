@@ -168,7 +168,9 @@ def _friction_metrics(
     for scenario_name, bps in scenarios.items():
         scenario_results = {}
         for strategy, result in results.items():
-            has_btc = "btc_usd_weight" in result.columns and float(result["btc_usd_weight"].max()) > 0.0
+            has_btc = (
+                "btc_usd_weight" in result.columns and float(result["btc_usd_weight"].max()) > 0.0
+            )
             extra_bps = btc_extra.get(scenario_name, 0.0) if has_btc else 0.0
             scenario_results[strategy] = apply_turnover_friction(
                 result,
@@ -180,7 +182,9 @@ def _friction_metrics(
         scenario_metrics = _metrics_table(scenario_results)
         scenario_metrics.insert(0, "friction_scenario", scenario_name)
         scenario_metrics.insert(1, "bps_per_turnover", float(bps))
-        scenario_metrics.insert(2, "btc_specific_extra_bps", float(btc_extra.get(scenario_name, 0.0)))
+        scenario_metrics.insert(
+            2, "btc_specific_extra_bps", float(btc_extra.get(scenario_name, 0.0))
+        )
         rows.append(scenario_metrics)
         adjusted_results[scenario_name] = scenario_results
 
@@ -384,9 +388,7 @@ def _btc_dependency_lookup(btc_sensitivity: pd.DataFrame) -> dict[str, bool]:
 
     cagr_delta = float(max_cap.iloc[0]["cagr_pct"]) - float(zero.iloc[0]["cagr_pct"])
     end_delta = float(max_cap.iloc[0]["end_value"]) - float(zero.iloc[0]["end_value"])
-    return {
-        "sf_spy_qqq_btc_capped_offensive": bool(cagr_delta >= 2.0 or end_delta > 0.0)
-    }
+    return {"sf_spy_qqq_btc_capped_offensive": bool(cagr_delta >= 2.0 or end_delta > 0.0)}
 
 
 def create_btc_weekend_gap_diagnostic(
@@ -552,9 +554,7 @@ def _rolling_relative_series(
         merged["window_trading_days"] = int(window)
         merged["candidate_rolling_cagr_pct"] = (candidate_cagr * 100.0).round(4)
         merged["benchmark_rolling_cagr_pct"] = (benchmark_cagr * 100.0).round(4)
-        merged["rolling_relative_cagr_pct"] = (
-            (candidate_cagr - benchmark_cagr) * 100.0
-        ).round(4)
+        merged["rolling_relative_cagr_pct"] = ((candidate_cagr - benchmark_cagr) * 100.0).round(4)
         rows.append(
             merged.dropna(
                 subset=[
@@ -733,12 +733,9 @@ def classify_phase17b_shortlist(
     no_cost = by_scenario.loc["no_extra_cost"]
     low = by_scenario.loc["low"]
     realistic_stress = by_scenario.loc["realistic_stress"]
-    rolling_reported = rolling_3y_beats_spy_pct is not None and pd.notna(
-        rolling_3y_beats_spy_pct
-    )
+    rolling_reported = rolling_3y_beats_spy_pct is not None and pd.notna(rolling_3y_beats_spy_pct)
     rolling_passed = bool(
-        rolling_reported
-        and float(rolling_3y_beats_spy_pct) >= ROLLING_3Y_BEAT_REFERENCE_THRESHOLD
+        rolling_reported and float(rolling_3y_beats_spy_pct) >= ROLLING_3Y_BEAT_REFERENCE_THRESHOLD
     )
 
     low_growth = (
@@ -838,9 +835,7 @@ def _shortlist_decision(
                     float(stress.iloc[0]["cagr_pct"]) if not stress.empty else pd.NA
                 ),
                 "low_candidate_minus_spy_cagr_pct": (
-                    float(low.iloc[0]["candidate_minus_spy_cagr_pct"])
-                    if not low.empty
-                    else pd.NA
+                    float(low.iloc[0]["candidate_minus_spy_cagr_pct"]) if not low.empty else pd.NA
                 ),
                 "low_drawdown_advantage_vs_spy_pct_points": (
                     float(low.iloc[0]["candidate_max_drawdown_advantage_vs_spy_pct_points"])
@@ -853,9 +848,7 @@ def _shortlist_decision(
                     else pd.NA
                 ),
                 "rolling_3y_candidate_beats_spy_pct": rolling_3y_beats,
-                "rolling_3y_beats_spy_reference_threshold": (
-                    ROLLING_3Y_BEAT_REFERENCE_THRESHOLD
-                ),
+                "rolling_3y_beats_spy_reference_threshold": (ROLLING_3Y_BEAT_REFERENCE_THRESHOLD),
                 "rolling_3y_beats_spy_reference_passed": rolling_passed,
                 "btc_cap_dependency_flag": bool(btc_dependency.get(strategy, False)),
                 "btc_weekend_gap_diagnostic_available": btc_weekend_available,

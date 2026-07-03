@@ -73,9 +73,7 @@ def _create_overlay_for_guard(
             near_high_min_trend_distance=float(
                 diagnostic_config.get("near_high_min_trend_distance", -0.01)
             ),
-            deep_drawdown_threshold=float(
-                diagnostic_config.get("deep_drawdown_threshold", -0.20)
-            ),
+            deep_drawdown_threshold=float(diagnostic_config.get("deep_drawdown_threshold", -0.20)),
         )
 
     return run_spy_trend_regime_switch_overlay(
@@ -175,8 +173,7 @@ def _create_guard_validation_summary(
                 "benchmark_cagr_pct": benchmark_row["cagr_pct"],
                 "candidate_cagr_pct": candidate_row["cagr_pct"],
                 "cagr_delta_pct_points": round(
-                    float(candidate_row["cagr_pct"])
-                    - float(benchmark_row["cagr_pct"]),
+                    float(candidate_row["cagr_pct"]) - float(benchmark_row["cagr_pct"]),
                     3,
                 ),
                 "benchmark_calmar": benchmark_row["calmar"],
@@ -195,8 +192,7 @@ def _create_guard_validation_summary(
                 "benchmark_end_value": benchmark_row["end_value"],
                 "candidate_end_value": candidate_row["end_value"],
                 "end_value_delta": round(
-                    float(candidate_row["end_value"])
-                    - float(benchmark_row["end_value"]),
+                    float(candidate_row["end_value"]) - float(benchmark_row["end_value"]),
                     2,
                 ),
                 "benchmark_trade_count": benchmark_row["trade_count"],
@@ -373,28 +369,15 @@ def _create_guard_validation_conclusion(
     holdout_cagr_delta = (
         float(holdout_row["cagr_delta_pct_points"]) if holdout_row is not None else np.nan
     )
-    holdout_calmar_delta = (
-        float(holdout_row["calmar_delta"]) if holdout_row is not None else np.nan
-    )
+    holdout_calmar_delta = float(holdout_row["calmar_delta"]) if holdout_row is not None else np.nan
     holdout_drawdown_delta = (
-        float(holdout_row["drawdown_delta_pct_points"])
-        if holdout_row is not None
-        else np.nan
+        float(holdout_row["drawdown_delta_pct_points"]) if holdout_row is not None else np.nan
     )
 
-    improves_full = (
-        full_cagr_delta > 0
-        and full_calmar_delta > 0
-        and full_drawdown_delta >= -0.5
-    )
+    improves_full = full_cagr_delta > 0 and full_calmar_delta > 0 and full_drawdown_delta >= -0.5
 
-    damages_holdout = (
-        pd.notna(holdout_cagr_delta)
-        and (
-            holdout_cagr_delta < -0.25
-            or holdout_calmar_delta < -0.025
-            or holdout_drawdown_delta < -1.0
-        )
+    damages_holdout = pd.notna(holdout_cagr_delta) and (
+        holdout_cagr_delta < -0.25 or holdout_calmar_delta < -0.025 or holdout_drawdown_delta < -1.0
     )
 
     removed_switches_bad = False
@@ -410,9 +393,7 @@ def _create_guard_validation_conclusion(
             avg_removed_20d_float = float(avg_removed_20d)
             helped_removed_20d_float = float(helped_removed_20d)
             removed_switches_bad = (
-                removed_count > 0
-                and avg_removed_20d_float < 0
-                and helped_removed_20d_float < 50
+                removed_count > 0 and avg_removed_20d_float < 0 and helped_removed_20d_float < 50
             )
             removed_interpretation = (
                 f"{candidate_guard} removed {removed_count} switches. Removed "
@@ -649,9 +630,7 @@ def save_regime_switch_overlay_guard_validation(
     metrics_path = reports_dir / "regime_switch_overlay_guard_validation_metrics.csv"
     summary_path = reports_dir / "regime_switch_overlay_guard_validation_summary.csv"
     removed_path = reports_dir / "regime_switch_overlay_removed_switch_audit.csv"
-    removed_summary_path = (
-        reports_dir / "regime_switch_overlay_removed_switch_summary.csv"
-    )
+    removed_summary_path = reports_dir / "regime_switch_overlay_removed_switch_summary.csv"
     conclusion_path = reports_dir / "phase4e_guard_validation_conclusion.csv"
     markdown_path = reports_dir / "regime_switch_overlay_guard_validation.md"
 

@@ -126,8 +126,7 @@ def _find_final_candidate_frame(
 
     if missing_columns:
         raise ValueError(
-            "Reconstructed final candidate is missing required columns: "
-            f"{sorted(missing_columns)}"
+            f"Reconstructed final candidate is missing required columns: {sorted(missing_columns)}"
         )
 
     final_candidate["date"] = pd.to_datetime(final_candidate["date"])
@@ -146,9 +145,7 @@ def _get_spy_strategy_result(
 
     if strategy_name not in strategy_results:
         available = sorted(strategy_results.keys())
-        raise ValueError(
-            f"SPY strategy result {strategy_name!r} not found. Available: {available}"
-        )
+        raise ValueError(f"SPY strategy result {strategy_name!r} not found. Available: {available}")
 
     return strategy_results[strategy_name]
 
@@ -231,9 +228,7 @@ def build_phase8c_walk_forward_windows(
     initial_train_years = int(window_config.get("initial_train_years", 5))
     test_years = int(window_config.get("test_years", 3))
     step_years = int(window_config.get("step_years", test_years))
-    include_partial_last_window = bool(
-        window_config.get("include_partial_last_window", True)
-    )
+    include_partial_last_window = bool(window_config.get("include_partial_last_window", True))
     min_test_years = float(window_config.get("min_test_years", 2.0))
 
     dates = pd.to_datetime(reference_frame["date"]).drop_duplicates().sort_values()
@@ -255,9 +250,7 @@ def build_phase8c_walk_forward_windows(
         if train_end is None:
             break
 
-        test_end_target = test_start + pd.DateOffset(years=test_years) - pd.Timedelta(
-            days=1
-        )
+        test_end_target = test_start + pd.DateOffset(years=test_years) - pd.Timedelta(days=1)
         capped_test_end_target = min(test_end_target, full_end)
         test_end = _last_date_on_or_before(dates, capped_test_end_target)
 
@@ -327,9 +320,7 @@ def _calculate_segment_metrics(
     end_date: pd.Timestamp,
     initial_capital: float,
 ) -> dict[str, Any]:
-    segment_frame = frame[
-        (frame["date"] >= start_date) & (frame["date"] <= end_date)
-    ].copy()
+    segment_frame = frame[(frame["date"] >= start_date) & (frame["date"] <= end_date)].copy()
     segment_frame = segment_frame.sort_values("date").reset_index(drop=True)
 
     if segment_frame.empty:
@@ -454,12 +445,8 @@ def build_phase8c_comparison(
                 "candidate_calmar": candidate["calmar"],
                 "spy_12m_calmar": spy_12m["calmar"],
                 "buy_hold_calmar": buy_hold["calmar"],
-                "candidate_minus_spy_12m_calmar": (
-                    candidate["calmar"] - spy_12m["calmar"]
-                ),
-                "candidate_minus_buy_hold_calmar": (
-                    candidate["calmar"] - buy_hold["calmar"]
-                ),
+                "candidate_minus_spy_12m_calmar": (candidate["calmar"] - spy_12m["calmar"]),
+                "candidate_minus_buy_hold_calmar": (candidate["calmar"] - buy_hold["calmar"]),
                 "candidate_max_drawdown": candidate["max_drawdown"],
                 "spy_12m_max_drawdown": spy_12m["max_drawdown"],
                 "buy_hold_max_drawdown": buy_hold["max_drawdown"],
@@ -471,16 +458,12 @@ def build_phase8c_comparison(
                 ),
                 "candidate_positive_cagr": candidate["cagr"] > 0,
                 "candidate_beats_spy_12m_cagr": candidate["cagr"] > spy_12m["cagr"],
-                "candidate_beats_spy_12m_calmar": (
-                    candidate["calmar"] > spy_12m["calmar"]
-                ),
+                "candidate_beats_spy_12m_calmar": (candidate["calmar"] > spy_12m["calmar"]),
                 "candidate_better_spy_12m_drawdown": (
                     candidate["max_drawdown"] > spy_12m["max_drawdown"]
                 ),
                 "candidate_beats_buy_hold_cagr": candidate["cagr"] > buy_hold["cagr"],
-                "candidate_beats_buy_hold_calmar": (
-                    candidate["calmar"] > buy_hold["calmar"]
-                ),
+                "candidate_beats_buy_hold_calmar": (candidate["calmar"] > buy_hold["calmar"]),
                 "candidate_better_buy_hold_drawdown": (
                     candidate["max_drawdown"] > buy_hold["max_drawdown"]
                 ),
@@ -507,34 +490,22 @@ def build_phase8c_summary(comparison: pd.DataFrame) -> pd.DataFrame:
     summary = {
         "test_windows": int(len(comparison)),
         "candidate_positive_cagr_rate": comparison["candidate_positive_cagr"].mean(),
-        "candidate_beats_spy12m_cagr_rate": comparison[
-            "candidate_beats_spy_12m_cagr"
-        ].mean(),
-        "candidate_beats_spy12m_calmar_rate": comparison[
-            "candidate_beats_spy_12m_calmar"
-        ].mean(),
+        "candidate_beats_spy12m_cagr_rate": comparison["candidate_beats_spy_12m_cagr"].mean(),
+        "candidate_beats_spy12m_calmar_rate": comparison["candidate_beats_spy_12m_calmar"].mean(),
         "candidate_better_spy12m_drawdown_rate": comparison[
             "candidate_better_spy_12m_drawdown"
         ].mean(),
-        "candidate_beats_buy_hold_cagr_rate": comparison[
-            "candidate_beats_buy_hold_cagr"
-        ].mean(),
+        "candidate_beats_buy_hold_cagr_rate": comparison["candidate_beats_buy_hold_cagr"].mean(),
         "candidate_beats_buy_hold_calmar_rate": comparison[
             "candidate_beats_buy_hold_calmar"
         ].mean(),
         "candidate_better_buy_hold_drawdown_rate": comparison[
             "candidate_better_buy_hold_drawdown"
         ].mean(),
-        "mean_candidate_minus_spy12m_cagr": comparison[
-            "candidate_minus_spy_12m_cagr"
-        ].mean(),
-        "median_candidate_minus_spy12m_cagr": comparison[
-            "candidate_minus_spy_12m_cagr"
-        ].median(),
+        "mean_candidate_minus_spy12m_cagr": comparison["candidate_minus_spy_12m_cagr"].mean(),
+        "median_candidate_minus_spy12m_cagr": comparison["candidate_minus_spy_12m_cagr"].median(),
         "worst_candidate_cagr": comparison["candidate_cagr"].min(),
-        "worst_candidate_minus_spy12m_cagr": comparison[
-            "candidate_minus_spy_12m_cagr"
-        ].min(),
+        "worst_candidate_minus_spy12m_cagr": comparison["candidate_minus_spy_12m_cagr"].min(),
         "worst_candidate_max_drawdown": comparison["candidate_max_drawdown"].min(),
     }
 
@@ -597,18 +568,12 @@ def build_phase8c_gate_report(
         _gate_row(
             "Candidate beats SPY 12M on Calmar often enough",
             float(row["candidate_beats_spy12m_calmar_rate"]) >= min_calmar_rate,
-            (
-                f"{row['candidate_beats_spy12m_calmar_rate']:.2%}; "
-                f"required {min_calmar_rate:.2%}"
-            ),
+            (f"{row['candidate_beats_spy12m_calmar_rate']:.2%}; required {min_calmar_rate:.2%}"),
         ),
         _gate_row(
             "Candidate has better drawdown than SPY 12M often enough",
             float(row["candidate_better_spy12m_drawdown_rate"]) >= min_dd_rate,
-            (
-                f"{row['candidate_better_spy12m_drawdown_rate']:.2%}; "
-                f"required {min_dd_rate:.2%}"
-            ),
+            (f"{row['candidate_better_spy12m_drawdown_rate']:.2%}; required {min_dd_rate:.2%}"),
         ),
         _gate_row(
             "Candidate keeps positive CAGR often enough",
@@ -618,10 +583,7 @@ def build_phase8c_gate_report(
         _gate_row(
             "Candidate does not warrant raw-CAGR promotion over Buy & Hold",
             float(row["candidate_beats_buy_hold_cagr_rate"]) <= max_bh_cagr_rate,
-            (
-                f"{row['candidate_beats_buy_hold_cagr_rate']:.2%}; "
-                f"maximum {max_bh_cagr_rate:.2%}"
-            ),
+            (f"{row['candidate_beats_buy_hold_cagr_rate']:.2%}; maximum {max_bh_cagr_rate:.2%}"),
         ),
         _gate_row(
             "Candidate beats Buy & Hold on Calmar often enough",

@@ -56,9 +56,7 @@ DEFAULT_PHASE10C_CONFIG: dict[str, Any] = {
         "require_no_strategy_test": True,
         "require_no_strategy_promotion": True,
         "require_phase10d_boundary_diagnostic_only": True,
-        "required_audit_role": (
-            "Macro source reliability and point-in-time alignment audit only"
-        ),
+        "required_audit_role": ("Macro source reliability and point-in-time alignment audit only"),
     },
 }
 
@@ -127,22 +125,16 @@ def build_phase10c_source_catalog(phase_config: dict[str, Any]) -> pd.DataFrame:
                 "release_date_policy": str(source.get("release_date_policy", "")),
                 "revision_policy": str(source.get("revision_policy", "")),
                 "source_caveat": str(source.get("source_caveat", "")),
-                "selected_for_phase10c": bool(
-                    source.get("selected_for_phase10c", False)
-                ),
+                "selected_for_phase10c": bool(source.get("selected_for_phase10c", False)),
                 "allowed_for_phase10d_diagnostic": bool(
                     source.get("allowed_for_phase10d_diagnostic", False)
                 ),
-                "allowed_for_strategy_test": bool(
-                    source.get("allowed_for_strategy_test", False)
-                ),
+                "allowed_for_strategy_test": bool(source.get("allowed_for_strategy_test", False)),
                 "series_count": len(series),
                 "release_policy_documented": bool(
                     str(source.get("release_date_policy", "")).strip()
                 ),
-                "revision_policy_documented": bool(
-                    str(source.get("revision_policy", "")).strip()
-                ),
+                "revision_policy_documented": bool(str(source.get("revision_policy", "")).strip()),
             }
         )
 
@@ -175,15 +167,11 @@ def build_phase10c_series_catalog(phase_config: dict[str, Any]) -> pd.DataFrame:
                     "has_explicit_release_dates": bool(
                         series.get("has_explicit_release_dates", False)
                     ),
-                    "has_vintage_support": bool(
-                        series.get("has_vintage_support", False)
-                    ),
+                    "has_vintage_support": bool(series.get("has_vintage_support", False)),
                     "uses_current_revised_values": bool(
                         series.get("uses_current_revised_values", False)
                     ),
-                    "revision_risk_documented": bool(
-                        series.get("revision_risk_documented", False)
-                    ),
+                    "revision_risk_documented": bool(series.get("revision_risk_documented", False)),
                 }
             )
 
@@ -303,8 +291,10 @@ def build_phase10c_raw_series_frame(
             }
         )
 
-    raw_series = pd.concat(raw_frames, ignore_index=True) if raw_frames else pd.DataFrame(
-        columns=["source_id", "series_id", "date", "value"]
+    raw_series = (
+        pd.concat(raw_frames, ignore_index=True)
+        if raw_frames
+        else pd.DataFrame(columns=["source_id", "series_id", "date", "value"])
     )
     load_report = pd.DataFrame(load_rows)
 
@@ -331,9 +321,7 @@ def _extract_trading_calendar(
                 candidate_frames.append(value)
 
         strategy_results = (
-            spy_outputs.get("strategy_results", {})
-            if isinstance(spy_outputs, dict)
-            else {}
+            spy_outputs.get("strategy_results", {}) if isinstance(spy_outputs, dict) else {}
         )
         if isinstance(strategy_results, dict):
             for value in strategy_results.values():
@@ -382,8 +370,7 @@ def build_phase10c_aligned_series_frame(
         lag_days = int(series_row["availability_lag_trading_days"])
 
         series = raw_series[
-            (raw_series["source_id"] == source_id)
-            & (raw_series["series_id"] == series_id)
+            (raw_series["source_id"] == source_id) & (raw_series["series_id"] == series_id)
         ].copy()
 
         if series.empty:
@@ -456,12 +443,10 @@ def build_phase10c_coverage_alignment_summary(
         series_id = str(series_row["series_id"])
 
         raw = raw_series[
-            (raw_series["source_id"] == source_id)
-            & (raw_series["series_id"] == series_id)
+            (raw_series["source_id"] == source_id) & (raw_series["series_id"] == series_id)
         ]
         aligned = aligned_series[
-            (aligned_series["source_id"] == source_id)
-            & (aligned_series["series_id"] == series_id)
+            (aligned_series["source_id"] == source_id) & (aligned_series["series_id"] == series_id)
         ]
 
         non_missing_aligned = int(aligned["value"].notna().sum()) if not aligned.empty else 0
@@ -484,23 +469,12 @@ def build_phase10c_coverage_alignment_summary(
                 "aligned_rows": int(len(aligned)),
                 "non_missing_aligned_rows": non_missing_aligned,
                 "aligned_availability_rate": availability_rate,
-                "availability_lag_trading_days": int(
-                    series_row["availability_lag_trading_days"]
-                ),
-                "conservative_lag_applied": int(
-                    series_row["availability_lag_trading_days"]
-                )
-                > 0,
-                "has_explicit_release_dates": bool(
-                    series_row["has_explicit_release_dates"]
-                ),
+                "availability_lag_trading_days": int(series_row["availability_lag_trading_days"]),
+                "conservative_lag_applied": int(series_row["availability_lag_trading_days"]) > 0,
+                "has_explicit_release_dates": bool(series_row["has_explicit_release_dates"]),
                 "has_vintage_support": bool(series_row["has_vintage_support"]),
-                "uses_current_revised_values": bool(
-                    series_row["uses_current_revised_values"]
-                ),
-                "revision_risk_documented": bool(
-                    series_row["revision_risk_documented"]
-                ),
+                "uses_current_revised_values": bool(series_row["uses_current_revised_values"]),
+                "revision_risk_documented": bool(series_row["revision_risk_documented"]),
             }
         )
 
@@ -544,12 +518,7 @@ def build_phase10c_phase10d_readiness(
     has_inflation = any("inflation" in role for role in ready_roles)
     has_macro = any("macro" in role for role in ready_roles)
 
-    phase10d_allowed = (
-        len(ready) >= min_ready_series
-        and has_rates
-        and has_inflation
-        and has_macro
-    )
+    phase10d_allowed = len(ready) >= min_ready_series and has_rates and has_inflation and has_macro
 
     if phase10d_allowed:
         reason = (
@@ -655,8 +624,7 @@ def build_phase10c_summary(
                 "min_aligned_availability_rate": min_availability,
                 "series_passing_availability_count": int(
                     (
-                        coverage_alignment_summary["aligned_availability_rate"]
-                        >= min_availability
+                        coverage_alignment_summary["aligned_availability_rate"] >= min_availability
                     ).sum()
                 )
                 if not coverage_alignment_summary.empty
@@ -671,15 +639,9 @@ def build_phase10c_summary(
                 )
                 if not coverage_alignment_summary.empty
                 else 0,
-                "phase10d_allowed": _bool_value(
-                    ready.get("phase10d_allowed", False)
-                ),
-                "phase10d_ready_series_count": int(
-                    ready.get("ready_series_count", 0)
-                ),
-                "phase10d_boundary_passed": bool(
-                    phase10d_boundary_check["passed"].all()
-                )
+                "phase10d_allowed": _bool_value(ready.get("phase10d_allowed", False)),
+                "phase10d_ready_series_count": int(ready.get("ready_series_count", 0)),
+                "phase10d_boundary_passed": bool(phase10d_boundary_check["passed"].all())
                 if not phase10d_boundary_check.empty
                 else False,
                 "allow_macro_signal_creation": bool(
@@ -691,12 +653,8 @@ def build_phase10c_summary(
                 "allow_model_feature_creation": bool(
                     phase_config.get("allow_model_feature_creation", False)
                 ),
-                "allow_model_training": bool(
-                    phase_config.get("allow_model_training", False)
-                ),
-                "allow_strategy_test": bool(
-                    phase_config.get("allow_strategy_test", False)
-                ),
+                "allow_model_training": bool(phase_config.get("allow_model_training", False)),
+                "allow_strategy_test": bool(phase_config.get("allow_strategy_test", False)),
                 "allow_strategy_promotion": bool(
                     phase_config.get("allow_strategy_promotion", False)
                 ),
@@ -761,17 +719,10 @@ def build_phase10c_gate_report(
         else False
     )
     load_success = (
-        int(row["loaded_series_count"]) >= min_loaded_series
-        if not load_report.empty
-        else False
+        int(row["loaded_series_count"]) >= min_loaded_series if not load_report.empty else False
     )
     availability_ok = (
-        bool(
-            (
-                coverage_alignment_summary["aligned_availability_rate"]
-                >= min_availability
-            ).all()
-        )
+        bool((coverage_alignment_summary["aligned_availability_rate"] >= min_availability).all())
         if not coverage_alignment_summary.empty
         else False
     )
@@ -796,8 +747,7 @@ def build_phase10c_gate_report(
         ),
         _gate_row(
             "Remote/local macro series load succeeded",
-            (not gates.get("require_remote_or_local_load_success", True))
-            or load_success,
+            (not gates.get("require_remote_or_local_load_success", True)) or load_success,
             f"loaded_series_count={int(row['loaded_series_count'])}; required >= {min_loaded_series}",
         ),
         _gate_row(
@@ -819,8 +769,7 @@ def build_phase10c_gate_report(
         ),
         _gate_row(
             "Conservative trading-day lag is applied",
-            (not gates.get("require_conservative_lag_applied", True))
-            or all_lagged,
+            (not gates.get("require_conservative_lag_applied", True)) or all_lagged,
             f"conservative_lagged_series_count={int(row['conservative_lagged_series_count'])}",
         ),
         _gate_row(
@@ -842,10 +791,7 @@ def build_phase10c_gate_report(
             "Inflation series is ready for diagnostic audit",
             (not gates.get("require_inflation_series_ready", True))
             or _bool_value(readiness.get("has_inflation_series_ready", False)),
-            (
-                "has_inflation_series_ready="
-                f"{readiness.get('has_inflation_series_ready', False)}"
-            ),
+            (f"has_inflation_series_ready={readiness.get('has_inflation_series_ready', False)}"),
         ),
         _gate_row(
             "Macro series is ready for diagnostic audit",
@@ -863,10 +809,7 @@ def build_phase10c_gate_report(
             "No allocation rule creation is allowed",
             (not gates.get("require_no_allocation_rule_creation", True))
             or not bool(row["allow_allocation_rule_creation"]),
-            (
-                "allow_allocation_rule_creation="
-                f"{bool(row['allow_allocation_rule_creation'])}"
-            ),
+            (f"allow_allocation_rule_creation={bool(row['allow_allocation_rule_creation'])}"),
         ),
         _gate_row(
             "No model feature creation is allowed",
@@ -1072,9 +1015,7 @@ def save_phase10c_macro_source_reliability_alignment_audit(
     raw_series, load_report = build_phase10c_raw_series_frame(
         series_catalog=series_catalog,
         allow_remote_fetch=bool(phase_config.get("allow_remote_fetch", False)),
-        remote_fetch_timeout_seconds=int(
-            phase_config.get("remote_fetch_timeout_seconds", 30)
-        ),
+        remote_fetch_timeout_seconds=int(phase_config.get("remote_fetch_timeout_seconds", 30)),
     )
     trading_calendar = _extract_trading_calendar(
         ticker_outputs=ticker_outputs,
@@ -1151,8 +1092,7 @@ def save_phase10c_macro_source_reliability_alignment_audit(
         summary=summary,
         gate_report=gate_report,
         conclusion=conclusion,
-        output_path=reports_path
-        / "phase10c_macro_source_reliability_alignment_audit.md",
+        output_path=reports_path / "phase10c_macro_source_reliability_alignment_audit.md",
     )
 
     print("Wrote Phase 10C macro source reliability/alignment audit reports.")

@@ -100,9 +100,7 @@ def _run_stability_profiles(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     phase_config = _phase7e_config(config)
 
-    block_lengths = [
-        int(value) for value in phase_config.get("block_lengths_days", [5, 21, 63])
-    ]
+    block_lengths = [int(value) for value in phase_config.get("block_lengths_days", [5, 21, 63])]
     random_seeds = [int(value) for value in phase_config.get("random_seeds", [7, 42, 123])]
     bootstrap_iterations = int(phase_config.get("bootstrap_iterations", 300))
 
@@ -373,9 +371,7 @@ def save_bootstrap_stability_audit(
 
     profiles_path = reports_dir / "phase7e_bootstrap_stability_profiles.csv"
     gates_path = reports_dir / "phase7e_bootstrap_stability_gate_report.csv"
-    probability_path = (
-        reports_dir / "phase7e_bootstrap_stability_probability_summary.csv"
-    )
+    probability_path = reports_dir / "phase7e_bootstrap_stability_probability_summary.csv"
     conclusion_path = reports_dir / "phase7e_bootstrap_stability_conclusion.csv"
     markdown_path = reports_dir / "phase7e_bootstrap_stability.md"
 

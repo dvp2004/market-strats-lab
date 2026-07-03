@@ -47,14 +47,11 @@ def _phase_result_check(conclusion_path: str, gate_path: str, phase_name: str) -
     conclusion = _read_csv_if_exists(conclusion_path)
     gate = _read_csv_if_exists(gate_path)
 
-    conclusion_passed = (
-        not conclusion.empty
-        and _bool_value(conclusion.iloc[0].get("all_gates_passed", False))
+    conclusion_passed = not conclusion.empty and _bool_value(
+        conclusion.iloc[0].get("all_gates_passed", False)
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -170,7 +167,9 @@ def _config_flag_check(config: dict[str, Any], expected: dict[str, bool]) -> pd.
     return out
 
 
-def _required_column_check(frame: pd.DataFrame, required: list[str], frame_name: str) -> pd.DataFrame:
+def _required_column_check(
+    frame: pd.DataFrame, required: list[str], frame_name: str
+) -> pd.DataFrame:
     rows = []
     for col in required:
         rows.append(
@@ -243,12 +242,22 @@ def _select_columns(frame: pd.DataFrame, policy: dict[str, Any]) -> dict[str, st
         "mode_col": _first_existing_col(frame, list(policy.get("mode_columns", []))),
         "exposure_col": _first_existing_col(frame, list(policy.get("exposure_columns", []))),
         "raw_signal_col": _first_existing_col(frame, list(policy.get("raw_signal_columns", []))),
-        "confirmed_signal_col": _first_existing_col(frame, list(policy.get("confirmed_signal_columns", []))),
-        "deep_drawdown_guard_col": _first_existing_col(frame, list(policy.get("deep_drawdown_guard_columns", []))),
-        "loose_relief_col": _first_existing_col(frame, list(policy.get("loose_relief_columns", []))),
+        "confirmed_signal_col": _first_existing_col(
+            frame, list(policy.get("confirmed_signal_columns", []))
+        ),
+        "deep_drawdown_guard_col": _first_existing_col(
+            frame, list(policy.get("deep_drawdown_guard_columns", []))
+        ),
+        "loose_relief_col": _first_existing_col(
+            frame, list(policy.get("loose_relief_columns", []))
+        ),
         "turnover_col": _first_existing_col(frame, list(policy.get("turnover_columns", []))),
-        "slippage_bps_col": _first_existing_col(frame, list(policy.get("slippage_bps_columns", []))),
-        "slippage_cost_col": _first_existing_col(frame, list(policy.get("slippage_cost_columns", []))),
+        "slippage_bps_col": _first_existing_col(
+            frame, list(policy.get("slippage_bps_columns", []))
+        ),
+        "slippage_cost_col": _first_existing_col(
+            frame, list(policy.get("slippage_cost_columns", []))
+        ),
     }
 
 
@@ -293,7 +302,9 @@ def _build_true_switch_log(
     if pd.notna(canonical_endpoint):
         frame = frame[frame["decision_date"] <= canonical_endpoint].copy()
 
-    frame = frame.sort_values("decision_date").drop_duplicates("decision_date").reset_index(drop=True)
+    frame = (
+        frame.sort_values("decision_date").drop_duplicates("decision_date").reset_index(drop=True)
+    )
 
     if frame.empty:
         return _empty_switch_log(required_columns), column_report
@@ -312,7 +323,10 @@ def _build_true_switch_log(
 
     if mode_col:
         mode = pd.Series(
-            [_normalise_mode(value, exp) for value, exp in zip(frame[mode_col], exposure, strict=False)],
+            [
+                _normalise_mode(value, exp)
+                for value, exp in zip(frame[mode_col], exposure, strict=False)
+            ],
             index=frame.index,
         )
     else:
@@ -440,8 +454,14 @@ def _switch_summary(
     slippage_coherent = (
         "applied_overlay_slippage_bps" in switch_log.columns
         and "overlay_slippage_cost_pct" in switch_log.columns
-        and pd.to_numeric(switch_log["applied_overlay_slippage_bps"], errors="coerce").fillna(0.0).ge(0.0).all()
-        and pd.to_numeric(switch_log["overlay_slippage_cost_pct"], errors="coerce").fillna(0.0).ge(0.0).all()
+        and pd.to_numeric(switch_log["applied_overlay_slippage_bps"], errors="coerce")
+        .fillna(0.0)
+        .ge(0.0)
+        .all()
+        and pd.to_numeric(switch_log["overlay_slippage_cost_pct"], errors="coerce")
+        .fillna(0.0)
+        .ge(0.0)
+        .all()
     )
 
     failure_reasons = []
@@ -563,7 +583,9 @@ def save_phase15g_true_final_switch_log_export(
                 "switch_log_file": str(output_file),
                 "switch_log_file_written": output_file.exists(),
                 "switch_event_rows": len(switch_log),
-                "switch_count_reconciled": _bool_value(switch_summary.iloc[0]["switch_count_reconciled"]),
+                "switch_count_reconciled": _bool_value(
+                    switch_summary.iloc[0]["switch_count_reconciled"]
+                ),
                 "fresh_signal_phase_allowed_next": _bool_value(
                     switch_summary.iloc[0]["fresh_signal_phase_allowed_next"]
                 ),
@@ -586,18 +608,34 @@ def save_phase15g_true_final_switch_log_export(
     gate_report = pd.DataFrame(
         [
             _gate_row("Phase 15F passed", bool(phase15f_check["passed"].all()), "phase15f"),
-            _gate_row("Final candidate reconstruction attempted", True, "_find_final_candidate_frame"),
+            _gate_row(
+                "Final candidate reconstruction attempted", True, "_find_final_candidate_frame"
+            ),
             _gate_row("Switch log file written", output_file.exists(), str(output_file)),
-            _gate_row("Required columns present", bool(required_col_check["present"].all()), "required switch columns"),
+            _gate_row(
+                "Required columns present",
+                bool(required_col_check["present"].all()),
+                "required switch columns",
+            ),
             _gate_row("Switch summary output exists", len(switch_summary) == 1, "switch summary"),
             _gate_row(
                 "No dates after canonical endpoint",
                 int(switch_summary.iloc[0]["dates_after_canonical_endpoint"]) == 0,
                 f"dates_after_endpoint={switch_summary.iloc[0]['dates_after_canonical_endpoint']}",
             ),
-            _gate_row("Intermediate diagnostic sources rejected", True, "94-row changed-switch audit not accepted"),
-            _gate_row("Phase 15H boundary is audit-only", bool(boundary["passed"].all()), "phase15h"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "Intermediate diagnostic sources rejected",
+                True,
+                "94-row changed-switch audit not accepted",
+            ),
+            _gate_row(
+                "Phase 15H boundary is audit-only", bool(boundary["passed"].all()), "phase15h"
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Execution role is correct",
                 section.get("execution_role")
@@ -619,7 +657,9 @@ def save_phase15g_true_final_switch_log_export(
                     else "Failed true switch log export implementation"
                 ),
                 "all_gates_passed": bool(gate_report["passed"].all()),
-                "switch_count_reconciled": _bool_value(switch_summary.iloc[0]["switch_count_reconciled"]),
+                "switch_count_reconciled": _bool_value(
+                    switch_summary.iloc[0]["switch_count_reconciled"]
+                ),
                 "fresh_signal_phase_allowed_next": _bool_value(
                     switch_summary.iloc[0]["fresh_signal_phase_allowed_next"]
                 ),
@@ -680,9 +720,8 @@ def _decision_report(
     section: dict[str, Any],
 ) -> pd.DataFrame:
     policy = section.get("decision_policy", {})
-    reconciled = (
-        not switch_summary.empty
-        and _bool_value(switch_summary.iloc[0].get("fresh_signal_phase_allowed_next", False))
+    reconciled = not switch_summary.empty and _bool_value(
+        switch_summary.iloc[0].get("fresh_signal_phase_allowed_next", False)
     )
 
     decision = (
@@ -784,17 +823,39 @@ def save_phase15h_switch_log_reconciliation_audit(
         [
             _gate_row("Phase 15G passed", bool(phase15g_check["passed"].all()), "phase15g"),
             _gate_row("Config flags clean", bool(flags["passed"].all()), "runtime flags"),
-            _gate_row("Switch file exists", Path(report_paths.get("switch_log", "")).exists(), "switch file"),
-            _gate_row("Required columns present", bool(required_col_check["present"].all()), "required columns"),
-            _gate_row("Switch summary exists", Path(report_paths.get("switch_summary", "")).exists(), "summary"),
-            _gate_row("Reconciliation decision output exists", len(decision) == 1, str(decision.iloc[0]["decision"])),
+            _gate_row(
+                "Switch file exists",
+                Path(report_paths.get("switch_log", "")).exists(),
+                "switch file",
+            ),
+            _gate_row(
+                "Required columns present",
+                bool(required_col_check["present"].all()),
+                "required columns",
+            ),
+            _gate_row(
+                "Switch summary exists",
+                Path(report_paths.get("switch_summary", "")).exists(),
+                "summary",
+            ),
+            _gate_row(
+                "Reconciliation decision output exists",
+                len(decision) == 1,
+                str(decision.iloc[0]["decision"]),
+            ),
             _gate_row(
                 "No paper-ready claim unless reconciled",
                 no_ready_claim_unless_reconciled,
                 "readiness gate",
             ),
-            _gate_row("Phase 15I boundary is conditional-only", bool(boundary["passed"].all()), "phase15i"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "Phase 15I boundary is conditional-only", bool(boundary["passed"].all()), "phase15i"
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Audit role is correct",
                 section.get("audit_role")

@@ -121,37 +121,19 @@ def build_phase9c_hypothesis_spec(phase_config: dict[str, Any]) -> pd.DataFrame:
                 "source_evidence": _join_list(hypothesis.get("source_evidence")),
                 "allowed_inputs": _join_list(hypothesis.get("allowed_inputs")),
                 "forbidden_inputs": _join_list(hypothesis.get("forbidden_inputs")),
-                "proposed_rule_logic": _join_list(
-                    hypothesis.get("proposed_rule_logic")
-                ),
+                "proposed_rule_logic": _join_list(hypothesis.get("proposed_rule_logic")),
                 "validation_gates": _join_list(hypothesis.get("validation_gates")),
                 "failure_conditions": _join_list(hypothesis.get("failure_conditions")),
-                "readme_wording_if_passed": str(
-                    hypothesis.get("readme_wording_if_passed", "")
-                ),
-                "readme_wording_if_mixed": str(
-                    hypothesis.get("readme_wording_if_mixed", "")
-                ),
-                "readme_wording_if_failed": str(
-                    hypothesis.get("readme_wording_if_failed", "")
-                ),
-                "promotion_constraints": _join_list(
-                    hypothesis.get("promotion_constraints")
-                ),
+                "readme_wording_if_passed": str(hypothesis.get("readme_wording_if_passed", "")),
+                "readme_wording_if_mixed": str(hypothesis.get("readme_wording_if_mixed", "")),
+                "readme_wording_if_failed": str(hypothesis.get("readme_wording_if_failed", "")),
+                "promotion_constraints": _join_list(hypothesis.get("promotion_constraints")),
                 "source_evidence_count": len(_as_list(hypothesis.get("source_evidence"))),
                 "allowed_input_count": len(_as_list(hypothesis.get("allowed_inputs"))),
-                "forbidden_input_count": len(
-                    _as_list(hypothesis.get("forbidden_inputs"))
-                ),
-                "proposed_rule_logic_count": len(
-                    _as_list(hypothesis.get("proposed_rule_logic"))
-                ),
-                "validation_gate_count": len(
-                    _as_list(hypothesis.get("validation_gates"))
-                ),
-                "failure_condition_count": len(
-                    _as_list(hypothesis.get("failure_conditions"))
-                ),
+                "forbidden_input_count": len(_as_list(hypothesis.get("forbidden_inputs"))),
+                "proposed_rule_logic_count": len(_as_list(hypothesis.get("proposed_rule_logic"))),
+                "validation_gate_count": len(_as_list(hypothesis.get("validation_gates"))),
+                "failure_condition_count": len(_as_list(hypothesis.get("failure_conditions"))),
                 "promotion_constraint_count": len(
                     _as_list(hypothesis.get("promotion_constraints"))
                 ),
@@ -268,9 +250,7 @@ def build_phase9c_summary(
     if forbidden_inputs.empty:
         forbidden_keywords_absent = True
     else:
-        forbidden_keywords_absent = not bool(
-            forbidden_inputs["present_in_hypothesis_text"].any()
-        )
+        forbidden_keywords_absent = not bool(forbidden_inputs["present_in_hypothesis_text"].any())
 
     return pd.DataFrame(
         [
@@ -358,9 +338,7 @@ def build_phase9c_gate_report(
     hypothesis_count = int(row["hypothesis_count"])
     min_hypotheses = int(gates.get("min_hypotheses", 1))
     max_hypotheses = int(gates.get("max_hypotheses", 2))
-    required_role = str(
-        gates.get("required_spec_role", "Pre-registered design spec only")
-    )
+    required_role = str(gates.get("required_spec_role", "Pre-registered design spec only"))
 
     rows = [
         _gate_row(
@@ -437,10 +415,7 @@ def build_phase9c_gate_report(
             "Spec does not allow parameter optimisation",
             (not gates.get("require_no_parameter_optimisation", True))
             or not bool(row["allow_parameter_optimisation"]),
-            (
-                "allow_parameter_optimisation="
-                f"{bool(row['allow_parameter_optimisation'])}"
-            ),
+            (f"allow_parameter_optimisation={bool(row['allow_parameter_optimisation'])}"),
         ),
         _gate_row(
             "Spec does not allow strategy promotion",
@@ -647,8 +622,7 @@ def save_phase9c_preregistered_technical_rule_design_spec(
         summary=summary,
         gate_report=gate_report,
         conclusion=conclusion,
-        output_path=reports_path
-        / "phase9c_preregistered_technical_rule_design_spec.md",
+        output_path=reports_path / "phase9c_preregistered_technical_rule_design_spec.md",
     )
 
     print("Wrote Phase 9C pre-registered technical rule design spec reports.")

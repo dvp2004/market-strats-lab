@@ -10,7 +10,9 @@ import pandas as pd
 
 PHASE20B_SECTION = "phase20b_finalist_dynamic_allocation"
 PRICE_COLUMNS = ["adj_close", "Adj Close", "close", "Close", "price"]
-DEFAULT_TEAR_SHEET = Path("reports/paper_trading/operational_hardening/daily_execution_tear_sheet.csv")
+DEFAULT_TEAR_SHEET = Path(
+    "reports/paper_trading/operational_hardening/daily_execution_tear_sheet.csv"
+)
 
 
 def _section(config: dict[str, Any]) -> dict[str, Any]:
@@ -297,7 +299,8 @@ def compute_inverse_vol_allocation(
         rows.append(
             {
                 "generated_at_utc": generated_at,
-                "selected_signal_date": selected_signal_date or latest_common_date.strftime("%Y-%m-%d"),
+                "selected_signal_date": selected_signal_date
+                or latest_common_date.strftime("%Y-%m-%d"),
                 "canonical_candidate_id": candidate_id,
                 "asset": asset,
                 "target_weight": round(final_weight, 10),
@@ -467,14 +470,10 @@ def save_phase20b_finalist_dynamic_allocation(
         diagnostic_frames.append(diagnostics)
 
     allocations = (
-        pd.concat(allocation_frames, ignore_index=True)
-        if allocation_frames
-        else pd.DataFrame()
+        pd.concat(allocation_frames, ignore_index=True) if allocation_frames else pd.DataFrame()
     )
     diagnostics = (
-        pd.concat(diagnostic_frames, ignore_index=True)
-        if diagnostic_frames
-        else pd.DataFrame()
+        pd.concat(diagnostic_frames, ignore_index=True) if diagnostic_frames else pd.DataFrame()
     )
     allocation_path = output_dir / "finalist_dynamic_allocations.csv"
     diagnostics_path = output_dir / "finalist_dynamic_allocation_diagnostics.csv"
@@ -545,16 +544,18 @@ def save_phase20b_finalist_dynamic_allocation(
                 "selected_signal_date": selected_signal_date,
                 "candidate_count": len(candidate_configs),
                 "resolved_candidate_count": int(
-                    diagnostics["allocation_status"].astype(str).eq(
-                        "dynamic_allocation_resolved"
-                    ).sum()
+                    diagnostics["allocation_status"]
+                    .astype(str)
+                    .eq("dynamic_allocation_resolved")
+                    .sum()
                 )
                 if not diagnostics.empty
                 else 0,
                 "blocked_candidate_count": int(
-                    diagnostics["allocation_status"].astype(str).eq(
-                        "dynamic_allocation_blocked"
-                    ).sum()
+                    diagnostics["allocation_status"]
+                    .astype(str)
+                    .eq("dynamic_allocation_blocked")
+                    .sum()
                 )
                 if not diagnostics.empty
                 else 0,

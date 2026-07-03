@@ -42,14 +42,11 @@ def _phase_result_check(conclusion_path: str, gate_path: str, phase_name: str) -
     conclusion = _read_csv_if_exists(conclusion_path)
     gate = _read_csv_if_exists(gate_path)
 
-    conclusion_passed = (
-        not conclusion.empty
-        and _bool_value(conclusion.iloc[0].get("all_gates_passed", False))
+    conclusion_passed = not conclusion.empty and _bool_value(
+        conclusion.iloc[0].get("all_gates_passed", False)
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -187,7 +184,9 @@ def _boundary_check(section: dict[str, Any], key: str) -> pd.DataFrame:
     return out
 
 
-def _required_column_check(frame: pd.DataFrame, required: list[str], frame_name: str) -> pd.DataFrame:
+def _required_column_check(
+    frame: pd.DataFrame, required: list[str], frame_name: str
+) -> pd.DataFrame:
     rows = []
     for col in required:
         rows.append(
@@ -237,7 +236,9 @@ def _endpoint_daily_state(
 
     exposure = pd.to_numeric(pd.Series([row.get("exposure", "")]), errors="coerce").iloc[0]
     if pd.isna(exposure):
-        exposure = pd.to_numeric(pd.Series([row.get("target_offensive_weight", "")]), errors="coerce").iloc[0]
+        exposure = pd.to_numeric(
+            pd.Series([row.get("target_offensive_weight", "")]), errors="coerce"
+        ).iloc[0]
 
     if pd.isna(exposure):
         return "", float("nan")
@@ -410,13 +411,37 @@ def save_phase15k_pinned_endpoint_signal_consistency_audit(
                 f"{latest_switch_date}: {previous_mode}->{current_mode}",
             ),
             _gate_row("Endpoint signal consistent", consistency_passed, ";".join(warnings)),
-            _gate_row("Endpoint signal file output exists", True, "phase15k_pinned_endpoint_signal_file.csv"),
-            _gate_row("Required columns present", bool(required_col_check["present"].all()), "endpoint signal columns"),
+            _gate_row(
+                "Endpoint signal file output exists",
+                True,
+                "phase15k_pinned_endpoint_signal_file.csv",
+            ),
+            _gate_row(
+                "Required columns present",
+                bool(required_col_check["present"].all()),
+                "endpoint signal columns",
+            ),
             _gate_row("Endpoint signal is preview-only", True, "preview_only=True"),
-            _gate_row("Paper dry-run blocked", not _bool_value(endpoint_signal.iloc[0]["paper_dry_run_allowed"]), "paper dry-run"),
-            _gate_row("Paper trading blocked", not _bool_value(endpoint_signal.iloc[0]["paper_trading_allowed"]), "paper trading"),
-            _gate_row("Phase 15L boundary is pre-implementation-only", bool(boundary["passed"].all()), "phase15l"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "Paper dry-run blocked",
+                not _bool_value(endpoint_signal.iloc[0]["paper_dry_run_allowed"]),
+                "paper dry-run",
+            ),
+            _gate_row(
+                "Paper trading blocked",
+                not _bool_value(endpoint_signal.iloc[0]["paper_trading_allowed"]),
+                "paper trading",
+            ),
+            _gate_row(
+                "Phase 15L boundary is pre-implementation-only",
+                bool(boundary["passed"].all()),
+                "phase15l",
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Audit role is correct",
                 section.get("audit_role")
@@ -439,7 +464,9 @@ def save_phase15k_pinned_endpoint_signal_consistency_audit(
                 ),
                 "all_gates_passed": bool(gate_report["passed"].all()),
                 "endpoint_signal_consistency_passed": consistency_passed,
-                "fresh_current_signal_preimplementation_allowed_next": bool(gate_report["passed"].all()),
+                "fresh_current_signal_preimplementation_allowed_next": bool(
+                    gate_report["passed"].all()
+                ),
                 "paper_dry_run_allowed": False,
                 "paper_trading_ready": False,
                 "paper_trading_deployment": False,
@@ -492,9 +519,7 @@ def _policy_readiness_report(
             ]
         )
 
-    combined = " ".join(
-        phase15f_policy.astype(str).fillna("").to_numpy().ravel().tolist()
-    ).lower()
+    combined = " ".join(phase15f_policy.astype(str).fillna("").to_numpy().ravel().tolist()).lower()
 
     missing = [word for word in required_keywords if word.lower() not in combined]
 
@@ -572,9 +597,7 @@ def save_phase15l_fresh_data_current_signal_preimplementation_check(
             }
         ]
     )
-    baseline_ready["result"] = baseline_ready["passed"].map(
-        {True: "Passed", False: "Failed"}
-    )
+    baseline_ready["result"] = baseline_ready["passed"].map({True: "Passed", False: "Failed"})
     fresh_data_ready = _policy_readiness_report(
         phase15f_policy=fresh_data_policy,
         required_keywords=["beyond", "timestamp", "data_as_of", "source"],
@@ -697,15 +720,37 @@ def save_phase15l_fresh_data_current_signal_preimplementation_check(
         [
             _gate_row("Phase 15K passed", bool(phase15k_check["passed"].all()), "phase15k"),
             _gate_row("Config flags clean", bool(flags["passed"].all()), "runtime flags"),
-            _gate_row("Baseline protection ready", bool(baseline_ready["passed"].all()), "baseline"),
-            _gate_row("Fresh data policy ready", bool(fresh_data_ready["passed"].all()), "fresh data"),
-            _gate_row("Current signal schema ready", bool(current_signal_schema_ready["passed"].all()), "schema"),
+            _gate_row(
+                "Baseline protection ready", bool(baseline_ready["passed"].all()), "baseline"
+            ),
+            _gate_row(
+                "Fresh data policy ready", bool(fresh_data_ready["passed"].all()), "fresh data"
+            ),
+            _gate_row(
+                "Current signal schema ready",
+                bool(current_signal_schema_ready["passed"].all()),
+                "schema",
+            ),
             _gate_row("Cadence policy ready", bool(cadence_ready["passed"].all()), "cadence"),
-            _gate_row("Failure handling ready", bool(failure_ready["passed"].all()), "failure handling"),
+            _gate_row(
+                "Failure handling ready", bool(failure_ready["passed"].all()), "failure handling"
+            ),
             _gate_row("Switch log available", not switch_log.empty, f"rows={len(switch_log)}"),
-            _gate_row("Pinned endpoint signal available", not pinned_signal.empty, f"rows={len(pinned_signal)}"),
-            _gate_row("Phase 15M boundary is signal-generation-only", bool(boundary["passed"].all()), "phase15m"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "Pinned endpoint signal available",
+                not pinned_signal.empty,
+                f"rows={len(pinned_signal)}",
+            ),
+            _gate_row(
+                "Phase 15M boundary is signal-generation-only",
+                bool(boundary["passed"].all()),
+                "phase15m",
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Check role is correct",
                 section.get("check_role")

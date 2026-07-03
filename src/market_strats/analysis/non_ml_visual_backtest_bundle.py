@@ -79,9 +79,7 @@ def _phase_result_check(conclusion_path: str, gate_path: str, phase_name: str) -
         and "passed" in str(conclusion.iloc[0].get("verdict", "")).lower()
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -169,10 +167,19 @@ def _boundary_check(section: dict[str, Any], keys: list[str]) -> pd.DataFrame:
         rows.append(
             {
                 "boundary": key,
-                "allowed": boundary.get("allowed_next_step", boundary.get("allowed_future_step", "")),
-                "forbidden": boundary.get("forbidden_next_step", boundary.get("forbidden_future_step", "")),
+                "allowed": boundary.get(
+                    "allowed_next_step", boundary.get("allowed_future_step", "")
+                ),
+                "forbidden": boundary.get(
+                    "forbidden_next_step", boundary.get("forbidden_future_step", "")
+                ),
                 "passed": bool(
-                    ("readiness" in allowed or "execution" in allowed or "audit" in allowed or "interpretation" in allowed)
+                    (
+                        "readiness" in allowed
+                        or "execution" in allowed
+                        or "audit" in allowed
+                        or "interpretation" in allowed
+                    )
                     and "live trading" in forbidden
                     and "real-money" in forbidden
                     and "feature importance" in forbidden
@@ -209,10 +216,8 @@ def save_phase14a_non_ml_visual_backtest_preregistration(
 
     selected_non_ml = (
         not route.empty
-        and str(route.iloc[0].get("selected_route_id", ""))
-        == section.get("candidate_route_id")
-        and str(route.iloc[0].get("candidate_system_id", ""))
-        == section.get("candidate_system_id")
+        and str(route.iloc[0].get("selected_route_id", "")) == section.get("candidate_route_id")
+        and str(route.iloc[0].get("candidate_system_id", "")) == section.get("candidate_system_id")
     )
 
     artefact_registry = _normalise_rows(section.get("artefact_registry", []))
@@ -249,9 +254,21 @@ def save_phase14a_non_ml_visual_backtest_preregistration(
     gate_report = pd.DataFrame(
         [
             _gate_row("Phase 13AW passed", bool(summary.iloc[0]["phase13aw_passed"]), "phase13aw"),
-            _gate_row("Selected route is non-ML overlay", selected_non_ml, str(section.get("candidate_route_id", ""))),
-            _gate_row("Artefact registry exists", len(artefact_registry) >= 8, f"rows={len(artefact_registry)}"),
-            _gate_row("Signal mapping preview policy exists", len(signal_policy) > 0, f"rows={len(signal_policy)}"),
+            _gate_row(
+                "Selected route is non-ML overlay",
+                selected_non_ml,
+                str(section.get("candidate_route_id", "")),
+            ),
+            _gate_row(
+                "Artefact registry exists",
+                len(artefact_registry) >= 8,
+                f"rows={len(artefact_registry)}",
+            ),
+            _gate_row(
+                "Signal mapping preview policy exists",
+                len(signal_policy) > 0,
+                f"rows={len(signal_policy)}",
+            ),
             _gate_row("Boundaries passed", bool(boundary["passed"].all()), "phase14b/phase14c"),
             _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()), "scope"),
             _gate_row(
@@ -333,14 +350,26 @@ def _normalise_return_series(series: pd.Series) -> pd.Series:
     return values
 
 
-def _candidate_source_score(frame: pd.DataFrame, policy: dict[str, Any]) -> tuple[int, dict[str, str | None]]:
+def _candidate_source_score(
+    frame: pd.DataFrame, policy: dict[str, Any]
+) -> tuple[int, dict[str, str | None]]:
     date_col = _first_existing_col(frame, _split_policy_list(policy.get("date_columns", "")))
-    candidate_return_col = _first_existing_col(frame, _split_policy_list(policy.get("candidate_return_columns", "")))
-    benchmark_return_col = _first_existing_col(frame, _split_policy_list(policy.get("benchmark_return_columns", "")))
-    candidate_equity_col = _first_existing_col(frame, _split_policy_list(policy.get("candidate_equity_columns", "")))
-    benchmark_equity_col = _first_existing_col(frame, _split_policy_list(policy.get("benchmark_equity_columns", "")))
+    candidate_return_col = _first_existing_col(
+        frame, _split_policy_list(policy.get("candidate_return_columns", ""))
+    )
+    benchmark_return_col = _first_existing_col(
+        frame, _split_policy_list(policy.get("benchmark_return_columns", ""))
+    )
+    candidate_equity_col = _first_existing_col(
+        frame, _split_policy_list(policy.get("candidate_equity_columns", ""))
+    )
+    benchmark_equity_col = _first_existing_col(
+        frame, _split_policy_list(policy.get("benchmark_equity_columns", ""))
+    )
     price_col = _first_existing_col(frame, _split_policy_list(policy.get("price_columns", "")))
-    exposure_col = _first_existing_col(frame, _split_policy_list(policy.get("exposure_columns", "")))
+    exposure_col = _first_existing_col(
+        frame, _split_policy_list(policy.get("exposure_columns", ""))
+    )
     mode_col = _first_existing_col(frame, _split_policy_list(policy.get("mode_columns", "")))
 
     has_candidate = bool(candidate_return_col or candidate_equity_col)
@@ -386,7 +415,12 @@ def _resolve_visual_source(
             candidates.append((name, frame.copy(), score, cols))
 
     reports_path = Path(reports_dir)
-    for pattern in ["*phase6b*loose*relief*.csv", "*loose*relief*.csv", "*final*candidate*.csv", "*relative*momentum*.csv"]:
+    for pattern in [
+        "*phase6b*loose*relief*.csv",
+        "*loose*relief*.csv",
+        "*final*candidate*.csv",
+        "*relative*momentum*.csv",
+    ]:
         for path in reports_path.glob(pattern):
             frame = _read_csv_if_exists(path)
             score, cols = _candidate_source_score(frame, policy)
@@ -551,7 +585,9 @@ def save_phase14b_non_ml_visual_backtest_readiness_audit(
                 "implementation_classification": section.get("implementation_classification", ""),
                 "phase14a_passed": bool(phase14a_check["passed"].all()),
                 "config_flags_clean": bool(flags["passed"].all()),
-                "phase14a_reports_present": bool(inventory["present"].all()) if not inventory.empty else False,
+                "phase14a_reports_present": bool(inventory["present"].all())
+                if not inventory.empty
+                else False,
                 "candidate_source_resolved": source_resolved,
                 "candidate_source_min_rows": source_min_rows,
                 "candidate_and_benchmark_returns": candidate_and_benchmark_returns,
@@ -571,13 +607,29 @@ def save_phase14b_non_ml_visual_backtest_readiness_audit(
     gate_report = pd.DataFrame(
         [
             _gate_row("Phase 14A passed", bool(summary.iloc[0]["phase14a_passed"]), "phase14a"),
-            _gate_row("Config flags clean", bool(summary.iloc[0]["config_flags_clean"]), "runtime flags"),
-            _gate_row("Phase 14A reports present", bool(summary.iloc[0]["phase14a_reports_present"]), "inventory"),
+            _gate_row(
+                "Config flags clean", bool(summary.iloc[0]["config_flags_clean"]), "runtime flags"
+            ),
+            _gate_row(
+                "Phase 14A reports present",
+                bool(summary.iloc[0]["phase14a_reports_present"]),
+                "inventory",
+            ),
             _gate_row("Candidate source resolved", source_resolved, "visual source"),
-            _gate_row("Candidate source has enough rows", source_min_rows, f"rows={len(source)}; min_rows={min_rows}"),
-            _gate_row("Candidate and benchmark returns available", candidate_and_benchmark_returns, "returns"),
+            _gate_row(
+                "Candidate source has enough rows",
+                source_min_rows,
+                f"rows={len(source)}; min_rows={min_rows}",
+            ),
+            _gate_row(
+                "Candidate and benchmark returns available",
+                candidate_and_benchmark_returns,
+                "returns",
+            ),
             _gate_row("Artefact registry complete", artefact_complete, f"rows={len(artefacts)}"),
-            _gate_row("Phase 14C boundary is execution-only", bool(boundary["passed"].all()), "phase14c"),
+            _gate_row(
+                "Phase 14C boundary is execution-only", bool(boundary["passed"].all()), "phase14c"
+            ),
             _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()), "scope"),
             _gate_row(
                 "Audit role is correct",
@@ -664,7 +716,9 @@ def _rolling_relative(equity: pd.DataFrame, window: int) -> pd.DataFrame:
     out = equity[["decision_date", "candidate_equity", "benchmark_equity"]].copy()
     out["candidate_rolling_return"] = out["candidate_equity"].pct_change(window)
     out["benchmark_rolling_return"] = out["benchmark_equity"].pct_change(window)
-    out["rolling_relative_return"] = out["candidate_rolling_return"] - out["benchmark_rolling_return"]
+    out["rolling_relative_return"] = (
+        out["candidate_rolling_return"] - out["benchmark_rolling_return"]
+    )
     return out.fillna(0.0)
 
 
@@ -693,13 +747,19 @@ def _benchmark_comparison(equity: pd.DataFrame, annualisation_days: int) -> pd.D
         cagr = _cagr(equity[equity_col], annualisation_days)
         max_dd = _max_drawdown(equity[equity_col])
         vol = float(returns.std() * math.sqrt(annualisation_days))
-        sharpe = float((returns.mean() / returns.std()) * math.sqrt(annualisation_days)) if returns.std() else 0.0
+        sharpe = (
+            float((returns.mean() / returns.std()) * math.sqrt(annualisation_days))
+            if returns.std()
+            else 0.0
+        )
         rows.append(
             {
                 "series": label,
                 "start_value": float(equity[equity_col].iloc[0]),
                 "end_value": float(equity[equity_col].iloc[-1]),
-                "total_return": float(equity[equity_col].iloc[-1] / equity[equity_col].iloc[0] - 1.0),
+                "total_return": float(
+                    equity[equity_col].iloc[-1] / equity[equity_col].iloc[0] - 1.0
+                ),
                 "cagr": cagr,
                 "annualised_volatility": vol,
                 "sharpe_zero_rf": sharpe,
@@ -715,7 +775,8 @@ def _benchmark_comparison(equity: pd.DataFrame, annualisation_days: int) -> pd.D
             "end_value": diff,
             "total_return": rows[0]["total_return"] - rows[1]["total_return"],
             "cagr": rows[0]["cagr"] - rows[1]["cagr"],
-            "annualised_volatility": rows[0]["annualised_volatility"] - rows[1]["annualised_volatility"],
+            "annualised_volatility": rows[0]["annualised_volatility"]
+            - rows[1]["annualised_volatility"],
             "sharpe_zero_rf": rows[0]["sharpe_zero_rf"] - rows[1]["sharpe_zero_rf"],
             "max_drawdown": rows[0]["max_drawdown"] - rows[1]["max_drawdown"],
             "calmar": rows[0]["calmar"] - rows[1]["calmar"],
@@ -725,7 +786,9 @@ def _benchmark_comparison(equity: pd.DataFrame, annualisation_days: int) -> pd.D
 
 
 def _switch_log(equity: pd.DataFrame) -> pd.DataFrame:
-    frame = equity[["decision_date", "exposure", "mode", "candidate_equity", "benchmark_equity"]].copy()
+    frame = equity[
+        ["decision_date", "exposure", "mode", "candidate_equity", "benchmark_equity"]
+    ].copy()
     previous_exposure = frame["exposure"].shift(1)
     previous_mode = frame["mode"].shift(1)
     switches = frame[
@@ -740,7 +803,11 @@ def _switch_log(equity: pd.DataFrame) -> pd.DataFrame:
     switches["paper_trading_action"] = np.where(
         switches["to_exposure"] > switches["from_exposure"],
         "risk_on_preview",
-        np.where(switches["to_exposure"] < switches["from_exposure"], "risk_off_preview", "mode_change_preview"),
+        np.where(
+            switches["to_exposure"] < switches["from_exposure"],
+            "risk_off_preview",
+            "mode_change_preview",
+        ),
     )
     return switches[
         [
@@ -759,7 +826,9 @@ def _switch_log(equity: pd.DataFrame) -> pd.DataFrame:
 
 def _trade_log(equity: pd.DataFrame) -> pd.DataFrame:
     frame = equity.copy()
-    change = frame["mode"].ne(frame["mode"].shift(1)) | frame["exposure"].ne(frame["exposure"].shift(1))
+    change = frame["mode"].ne(frame["mode"].shift(1)) | frame["exposure"].ne(
+        frame["exposure"].shift(1)
+    )
     frame["segment_id"] = change.cumsum()
 
     rows = []
@@ -774,10 +843,22 @@ def _trade_log(equity: pd.DataFrame) -> pd.DataFrame:
                 "exposure": float(group["exposure"].iloc[0]),
                 "entry_candidate_equity": float(group["candidate_equity"].iloc[0]),
                 "exit_candidate_equity": float(group["candidate_equity"].iloc[-1]),
-                "candidate_pnl": float(group["candidate_equity"].iloc[-1] - group["candidate_equity"].iloc[0]),
-                "benchmark_pnl": float(group["benchmark_equity"].iloc[-1] - group["benchmark_equity"].iloc[0]),
-                "candidate_segment_return": float(group["candidate_equity"].iloc[-1] / group["candidate_equity"].iloc[0] - 1.0) if group["candidate_equity"].iloc[0] else 0.0,
-                "benchmark_segment_return": float(group["benchmark_equity"].iloc[-1] / group["benchmark_equity"].iloc[0] - 1.0) if group["benchmark_equity"].iloc[0] else 0.0,
+                "candidate_pnl": float(
+                    group["candidate_equity"].iloc[-1] - group["candidate_equity"].iloc[0]
+                ),
+                "benchmark_pnl": float(
+                    group["benchmark_equity"].iloc[-1] - group["benchmark_equity"].iloc[0]
+                ),
+                "candidate_segment_return": float(
+                    group["candidate_equity"].iloc[-1] / group["candidate_equity"].iloc[0] - 1.0
+                )
+                if group["candidate_equity"].iloc[0]
+                else 0.0,
+                "benchmark_segment_return": float(
+                    group["benchmark_equity"].iloc[-1] / group["benchmark_equity"].iloc[0] - 1.0
+                )
+                if group["benchmark_equity"].iloc[0]
+                else 0.0,
             }
         )
     return pd.DataFrame(rows)
@@ -854,7 +935,16 @@ def _signal_template_preview(equity: pd.DataFrame, rows: int) -> pd.DataFrame:
     ]
 
 
-def _save_line_chart(frame: pd.DataFrame, x_col: str, y_cols: list[str], path: str | Path, title: str, width: float, height: float, dpi: int) -> None:
+def _save_line_chart(
+    frame: pd.DataFrame,
+    x_col: str,
+    y_cols: list[str],
+    path: str | Path,
+    title: str,
+    width: float,
+    height: float,
+    dpi: int,
+) -> None:
     fig, ax = plt.subplots(figsize=(width, height))
     for y_col in y_cols:
         ax.plot(pd.to_datetime(frame[x_col]), frame[y_col], label=y_col)
@@ -910,9 +1000,15 @@ def _write_visual_outputs(
     trade_log.to_csv(reports_path / "phase14c_visual_backtest_trade_log.csv", index=False)
     switch_log.to_csv(reports_path / "phase14c_visual_backtest_switch_event_log.csv", index=False)
     money.to_csv(reports_path / "phase14c_visual_backtest_money_made_lost_table.csv", index=False)
-    benchmark.to_csv(reports_path / "phase14c_visual_backtest_benchmark_comparison.csv", index=False)
-    rolling.to_csv(reports_path / "phase14c_visual_backtest_rolling_relative_performance.csv", index=False)
-    signal_preview.to_csv(reports_path / "phase14c_visual_backtest_signal_template_preview.csv", index=False)
+    benchmark.to_csv(
+        reports_path / "phase14c_visual_backtest_benchmark_comparison.csv", index=False
+    )
+    rolling.to_csv(
+        reports_path / "phase14c_visual_backtest_rolling_relative_performance.csv", index=False
+    )
+    signal_preview.to_csv(
+        reports_path / "phase14c_visual_backtest_signal_template_preview.csv", index=False
+    )
 
     _save_line_chart(
         equity,
@@ -974,7 +1070,9 @@ def save_phase14c_non_ml_visual_backtest_report_execution(
     reports_path.mkdir(parents=True, exist_ok=True)
 
     reports = section.get("source_reports", {})
-    phase14b_check = _phase_result_check(reports["phase14b_conclusion"], reports["phase14b_gate_report"], "Phase 14B")
+    phase14b_check = _phase_result_check(
+        reports["phase14b_conclusion"], reports["phase14b_gate_report"], "Phase 14B"
+    )
     visual_source_policy = _flatten_policy(_read_csv_if_exists(reports["visual_source_policy"]))
     source, source_resolution = _resolve_visual_source(
         reports_dir=reports_dir,
@@ -983,7 +1081,11 @@ def save_phase14c_non_ml_visual_backtest_report_execution(
         ticker_outputs=ticker_outputs,
     )
 
-    visual_outputs = _write_visual_outputs(source=source, reports_path=reports_path, section=section) if not source.empty else {}
+    visual_outputs = (
+        _write_visual_outputs(source=source, reports_path=reports_path, section=section)
+        if not source.empty
+        else {}
+    )
     boundary = _boundary_check(section, ["phase14d_boundary"])
     scope = _scope_check(section)
 
@@ -1006,8 +1108,12 @@ def save_phase14c_non_ml_visual_backtest_report_execution(
                 "equity_curve_rows": len(visual_outputs.get("equity_curve", pd.DataFrame())),
                 "drawdown_curve_rows": len(visual_outputs.get("drawdown_curve", pd.DataFrame())),
                 "trade_log_rows": len(visual_outputs.get("trade_log", pd.DataFrame())),
-                "switch_event_log_rows": len(visual_outputs.get("switch_event_log", pd.DataFrame())),
-                "signal_preview_rows": len(visual_outputs.get("signal_template_preview", pd.DataFrame())),
+                "switch_event_log_rows": len(
+                    visual_outputs.get("switch_event_log", pd.DataFrame())
+                ),
+                "signal_preview_rows": len(
+                    visual_outputs.get("signal_template_preview", pd.DataFrame())
+                ),
                 "chart_files_present": chart_files_present,
                 "boundary_passed": bool(boundary["passed"].all()),
                 "scope_passed": bool(scope["passed"].all()),
@@ -1024,15 +1130,54 @@ def save_phase14c_non_ml_visual_backtest_report_execution(
     gate_report = pd.DataFrame(
         [
             _gate_row("Phase 14B passed", bool(summary.iloc[0]["phase14b_passed"]), "phase14b"),
-            _gate_row("Equity curve exists", "equity_curve" in visual_outputs and len(visual_outputs["equity_curve"]) > 0, "equity"),
-            _gate_row("Drawdown curve exists", "drawdown_curve" in visual_outputs and len(visual_outputs["drawdown_curve"]) > 0, "drawdown"),
-            _gate_row("Exposure timeline exists", "exposure_timeline" in visual_outputs and len(visual_outputs["exposure_timeline"]) > 0, "exposure"),
-            _gate_row("Trade log exists", "trade_log" in visual_outputs and len(visual_outputs["trade_log"]) > 0, "trade log"),
-            _gate_row("Switch event log exists", "switch_event_log" in visual_outputs, "switch events"),
-            _gate_row("Money made/lost table exists", "money_made_lost_table" in visual_outputs and len(visual_outputs["money_made_lost_table"]) > 0, "money"),
-            _gate_row("Benchmark comparison exists", "benchmark_comparison" in visual_outputs and len(visual_outputs["benchmark_comparison"]) > 0, "benchmark"),
-            _gate_row("Rolling relative performance exists", "rolling_relative_performance" in visual_outputs and len(visual_outputs["rolling_relative_performance"]) > 0, "rolling"),
-            _gate_row("Signal template preview exists", "signal_template_preview" in visual_outputs and len(visual_outputs["signal_template_preview"]) > 0, "preview"),
+            _gate_row(
+                "Equity curve exists",
+                "equity_curve" in visual_outputs and len(visual_outputs["equity_curve"]) > 0,
+                "equity",
+            ),
+            _gate_row(
+                "Drawdown curve exists",
+                "drawdown_curve" in visual_outputs and len(visual_outputs["drawdown_curve"]) > 0,
+                "drawdown",
+            ),
+            _gate_row(
+                "Exposure timeline exists",
+                "exposure_timeline" in visual_outputs
+                and len(visual_outputs["exposure_timeline"]) > 0,
+                "exposure",
+            ),
+            _gate_row(
+                "Trade log exists",
+                "trade_log" in visual_outputs and len(visual_outputs["trade_log"]) > 0,
+                "trade log",
+            ),
+            _gate_row(
+                "Switch event log exists", "switch_event_log" in visual_outputs, "switch events"
+            ),
+            _gate_row(
+                "Money made/lost table exists",
+                "money_made_lost_table" in visual_outputs
+                and len(visual_outputs["money_made_lost_table"]) > 0,
+                "money",
+            ),
+            _gate_row(
+                "Benchmark comparison exists",
+                "benchmark_comparison" in visual_outputs
+                and len(visual_outputs["benchmark_comparison"]) > 0,
+                "benchmark",
+            ),
+            _gate_row(
+                "Rolling relative performance exists",
+                "rolling_relative_performance" in visual_outputs
+                and len(visual_outputs["rolling_relative_performance"]) > 0,
+                "rolling",
+            ),
+            _gate_row(
+                "Signal template preview exists",
+                "signal_template_preview" in visual_outputs
+                and len(visual_outputs["signal_template_preview"]) > 0,
+                "preview",
+            ),
             _gate_row("Chart files exist", chart_files_present, "png charts"),
             _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()), "scope"),
             _gate_row(
@@ -1202,9 +1347,14 @@ def save_phase14d_non_ml_visual_backtest_result_audit(
     preview_only = (
         not signal_preview.empty
         and "paper_trading_status" in signal_preview.columns
-        and signal_preview["paper_trading_status"].astype(str).eq("preview_only_not_deployment").all()
+        and signal_preview["paper_trading_status"]
+        .astype(str)
+        .eq("preview_only_not_deployment")
+        .all()
         and not signal_preview.get(live_permission_col, pd.Series([False])).map(_bool_value).any()
-        and not signal_preview.get(real_money_permission_col, pd.Series([False])).map(_bool_value).any()
+        and not signal_preview.get(real_money_permission_col, pd.Series([False]))
+        .map(_bool_value)
+        .any()
     )
 
     summary = pd.DataFrame(
@@ -1213,11 +1363,17 @@ def save_phase14d_non_ml_visual_backtest_result_audit(
                 "audit_role": section.get("audit_role", ""),
                 "implementation_classification": section.get("implementation_classification", ""),
                 "phase14c_passed": bool(phase14c_check["passed"].all()),
-                "all_required_reports_present": bool(inventory["present"].all()) if not inventory.empty else False,
-                "report_rows_non_empty": bool(inventory["passed"].all()) if not inventory.empty else False,
+                "all_required_reports_present": bool(inventory["present"].all())
+                if not inventory.empty
+                else False,
+                "report_rows_non_empty": bool(inventory["passed"].all())
+                if not inventory.empty
+                else False,
                 "chart_files_present": bool(charts["passed"].all()) if not charts.empty else False,
                 "signal_template_preview_is_preview_only": preview_only,
-                "forbidden_claims_absent": bool(forbidden["passed"].all()) if not forbidden.empty else True,
+                "forbidden_claims_absent": bool(forbidden["passed"].all())
+                if not forbidden.empty
+                else True,
                 "phase14e_boundary_passed": bool(boundary["passed"].all()),
                 "scope_passed": bool(scope["passed"].all()),
                 "live_trading": False,
@@ -1233,12 +1389,30 @@ def save_phase14d_non_ml_visual_backtest_result_audit(
     gate_report = pd.DataFrame(
         [
             _gate_row("Phase 14C passed", bool(summary.iloc[0]["phase14c_passed"]), "phase14c"),
-            _gate_row("All required reports present", bool(summary.iloc[0]["all_required_reports_present"]), "reports"),
-            _gate_row("Chart files present", bool(summary.iloc[0]["chart_files_present"]), "charts"),
-            _gate_row("Report rows non-empty", bool(summary.iloc[0]["report_rows_non_empty"]), "row counts"),
+            _gate_row(
+                "All required reports present",
+                bool(summary.iloc[0]["all_required_reports_present"]),
+                "reports",
+            ),
+            _gate_row(
+                "Chart files present", bool(summary.iloc[0]["chart_files_present"]), "charts"
+            ),
+            _gate_row(
+                "Report rows non-empty",
+                bool(summary.iloc[0]["report_rows_non_empty"]),
+                "row counts",
+            ),
             _gate_row("Signal preview is preview-only", preview_only, "signal preview"),
-            _gate_row("Forbidden claims absent", bool(summary.iloc[0]["forbidden_claims_absent"]), "claims"),
-            _gate_row("Phase 14E boundary is interpretation-only", bool(boundary["passed"].all()), "phase14e"),
+            _gate_row(
+                "Forbidden claims absent",
+                bool(summary.iloc[0]["forbidden_claims_absent"]),
+                "claims",
+            ),
+            _gate_row(
+                "Phase 14E boundary is interpretation-only",
+                bool(boundary["passed"].all()),
+                "phase14e",
+            ),
             _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()), "scope"),
             _gate_row(
                 "Audit role is correct",

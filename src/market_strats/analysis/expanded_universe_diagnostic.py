@@ -122,9 +122,7 @@ def _classify_market(
     drawdown_improvement = momentum_dd - buy_hold_dd
 
     cagr_sacrifice = buy_hold_cagr - momentum_cagr
-    cagr_sacrifice_pct_of_bh = (
-        cagr_sacrifice / buy_hold_cagr if buy_hold_cagr > 0 else 0.0
-    )
+    cagr_sacrifice_pct_of_bh = cagr_sacrifice / buy_hold_cagr if buy_hold_cagr > 0 else 0.0
 
     if cagr_delta >= -0.25 and drawdown_improvement >= 10:
         return "12M momentum candidate."
@@ -180,9 +178,7 @@ def create_expanded_universe_diagnostic(
         missing_scorecard_columns = required_scorecard_columns - set(scorecards.columns)
 
         if missing_scorecard_columns:
-            raise ValueError(
-                f"Missing scorecard columns: {sorted(missing_scorecard_columns)}"
-            )
+            raise ValueError(f"Missing scorecard columns: {sorted(missing_scorecard_columns)}")
 
     rows: list[dict] = []
 

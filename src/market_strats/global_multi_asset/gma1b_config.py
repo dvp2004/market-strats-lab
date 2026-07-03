@@ -1,4 +1,5 @@
 """GMA-1B macro/cash foundation configuration loader."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -127,7 +128,9 @@ def _must_be_false(section: dict[str, Any], key: str) -> None:
 
 def is_approved_gma1b_output_path(path: str | Path) -> bool:
     candidate = Path(path)
-    return any(candidate == prefix or prefix in candidate.parents for prefix in APPROVED_PATH_PREFIXES)
+    return any(
+        candidate == prefix or prefix in candidate.parents for prefix in APPROVED_PATH_PREFIXES
+    )
 
 
 def validate_gma1b_config(raw: dict[str, Any], *, path: Path | None = None) -> GMA1BConfig:

@@ -54,7 +54,7 @@ def _build_verdict(
             "Current leader: buy-and-hold-like compounding with materially lower "
             "drawdown and simple rules."
         )
-    
+
     if "Annual Rebalanced Core-Satellite" in strategy:
         if cagr_delta_vs_momentum >= -0.25 and max_dd_delta_vs_momentum >= -2.0:
             return (
@@ -80,10 +80,7 @@ def _build_verdict(
                 "buy-and-hold drawdown."
             )
 
-        return (
-            "Middling blend: improves drawdown but does not clearly justify added "
-            "complexity."
-        )
+        return "Middling blend: improves drawdown but does not clearly justify added complexity."
 
     return "Needs review."
 
@@ -130,9 +127,7 @@ def create_core_satellite_diagnostic(
         max_dd_improvement_vs_buy_hold = float(
             row["max_drawdown_pct"] - buy_hold["max_drawdown_pct"]
         )
-        max_dd_delta_vs_momentum = float(
-            row["max_drawdown_pct"] - momentum["max_drawdown_pct"]
-        )
+        max_dd_delta_vs_momentum = float(row["max_drawdown_pct"] - momentum["max_drawdown_pct"])
 
         diagnostic_row = {
             "strategy": strategy,
@@ -146,9 +141,7 @@ def create_core_satellite_diagnostic(
             "trade_count": int(row["trade_count"]),
             "cagr_delta_vs_buy_hold_pct_points": cagr_delta_vs_buy_hold,
             "cagr_delta_vs_12m_momentum_pct_points": cagr_delta_vs_momentum,
-            "drawdown_improvement_vs_buy_hold_pct_points": (
-                max_dd_improvement_vs_buy_hold
-            ),
+            "drawdown_improvement_vs_buy_hold_pct_points": (max_dd_improvement_vs_buy_hold),
             "drawdown_delta_vs_12m_momentum_pct_points": max_dd_delta_vs_momentum,
             "avg_3y_cagr_pct": _get_rolling_value(
                 rolling_summary,

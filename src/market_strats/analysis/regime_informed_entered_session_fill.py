@@ -117,15 +117,13 @@ def _validate_candidate_scope(template: pd.DataFrame, targets: pd.DataFrame) -> 
         missing = sorted(expected - template_candidates)
         unexpected = sorted(template_candidates - expected)
         raise EnteredSessionFillError(
-            "manual template candidate scope mismatch; "
-            f"missing={missing}, unexpected={unexpected}"
+            f"manual template candidate scope mismatch; missing={missing}, unexpected={unexpected}"
         )
     if target_candidates != expected:
         missing = sorted(expected - target_candidates)
         unexpected = sorted(target_candidates - expected)
         raise EnteredSessionFillError(
-            "paper targets candidate scope mismatch; "
-            f"missing={missing}, unexpected={unexpected}"
+            f"paper targets candidate scope mismatch; missing={missing}, unexpected={unexpected}"
         )
 
     template_keys = _candidate_asset_keys(template)
@@ -160,7 +158,9 @@ def load_latest_local_price(
     source_path = next((path for path in _price_paths(root, symbol) if path.exists()), None)
     if source_path is None:
         searched = ", ".join(str(path) for path in _price_paths(root, symbol))
-        raise EnteredSessionFillError(f"missing local price file for {symbol}; searched: {searched}")
+        raise EnteredSessionFillError(
+            f"missing local price file for {symbol}; searched: {searched}"
+        )
 
     if source_path.suffix.lower() == ".parquet":
         frame = pd.read_parquet(source_path)
@@ -171,9 +171,7 @@ def load_latest_local_price(
         raise EnteredSessionFillError(f"{source_path} is missing date column")
     price_column = "adj_close" if "adj_close" in frame.columns else "close"
     if price_column not in frame.columns:
-        raise EnteredSessionFillError(
-            f"{source_path} is missing both adj_close and close columns"
-        )
+        raise EnteredSessionFillError(f"{source_path} is missing both adj_close and close columns")
 
     prices = frame[["date", price_column]].copy()
     prices["date"] = pd.to_datetime(prices["date"], errors="coerce")
@@ -280,9 +278,7 @@ def build_entered_session(
                 f"invalid target weight for {candidate_id}/{asset}: {target_weight}"
             )
         if not _bool_value(row.get("paper_order_allowed", False)):
-            raise EnteredSessionFillError(
-                f"paper order is not allowed for {candidate_id}/{asset}"
-            )
+            raise EnteredSessionFillError(f"paper order is not allowed for {candidate_id}/{asset}")
 
         target_notional = round(paper_account_value * target_weight, 2)
         selected_signal_date = _text(target_row.get("selected_signal_date")) or _text(
@@ -303,9 +299,7 @@ def build_entered_session(
             filled.at[row_index, column] = True
         filled.at[row_index, "manual_decision"] = "enter_paper_trade"
         filled.at[row_index, "paper_account_value"] = round(paper_account_value, 2)
-        filled.at[row_index, "override_reason"] = (
-            "first_entered_regime_informed_paper_session"
-        )
+        filled.at[row_index, "override_reason"] = "first_entered_regime_informed_paper_session"
         filled.at[row_index, "notes"] = _row_notes(candidate_id, candidate_role, asset)
         for column in SAFETY_COLUMNS:
             filled.at[row_index, column] = False
@@ -337,9 +331,7 @@ def build_entered_session(
 
         deviation_usd = round(actual_notional - target_notional, 2)
         deviation_pct = (
-            round(deviation_usd / target_notional * 100.0, 4)
-            if target_notional > 0
-            else 0.0
+            round(deviation_usd / target_notional * 100.0, 4) if target_notional > 0 else 0.0
         )
         filled.at[row_index, "manual_execution_status"] = execution_status
         filled.at[row_index, "paper_fill_price"] = fill_price
@@ -400,9 +392,7 @@ def fill_regime_informed_entered_session(
     output_path = tracking_dir / FILLED_FILENAME
 
     if output_path.exists() and not force:
-        rollover_status_path = (
-            tracking_dir / "regime_informed_session_rollover_status.csv"
-        )
+        rollover_status_path = tracking_dir / "regime_informed_session_rollover_status.csv"
         replacement_allowed = False
 
         if rollover_status_path.exists() and rollover_status_path.is_file():
@@ -458,9 +448,7 @@ def fill_regime_informed_entered_session(
     try:
         effective_session_date = pd.Timestamp(effective_session_date).date().isoformat()
     except ValueError as exc:
-        raise EnteredSessionFillError(
-            f"invalid session date: {effective_session_date}"
-        ) from exc
+        raise EnteredSessionFillError(f"invalid session date: {effective_session_date}") from exc
 
     filled, audit = build_entered_session(
         template=template,

@@ -60,9 +60,7 @@ def _get_strategy_result(
 
     if strategy not in strategy_results:
         available = sorted(strategy_results.keys())
-        raise ValueError(
-            f"Strategy '{strategy}' not found for {ticker}. Available: {available}"
-        )
+        raise ValueError(f"Strategy '{strategy}' not found for {ticker}. Available: {available}")
 
     return strategy_results[strategy]
 
@@ -108,46 +106,50 @@ def _create_merged_audit_frame(
     offensive = _prepare_result(offensive_result, "offensive")
     defensive = _prepare_result(defensive_result, "defensive")
 
-    merged = overlay[
-        [
-            "date",
-            "equity",
-            "strategy_return",
-            "position",
-            "cash_position",
-            "turnover",
-            "selected_mode",
-            "trend_sma",
-            "overlay_turnover",
-            "offensive_weight",
-            "defensive_weight",
+    merged = (
+        overlay[
+            [
+                "date",
+                "equity",
+                "strategy_return",
+                "position",
+                "cash_position",
+                "turnover",
+                "selected_mode",
+                "trend_sma",
+                "overlay_turnover",
+                "offensive_weight",
+                "defensive_weight",
+            ]
         ]
-    ].merge(
-        offensive[
-            [
-                "date",
-                "adj_close",
-                "equity",
-                "strategy_return",
-                "position",
-                "cash_position",
-            ]
-        ],
-        on="date",
-        how="inner",
-        suffixes=("_overlay", "_offensive"),
-    ).merge(
-        defensive[
-            [
-                "date",
-                "equity",
-                "strategy_return",
-                "position",
-                "cash_position",
-            ]
-        ],
-        on="date",
-        how="inner",
+        .merge(
+            offensive[
+                [
+                    "date",
+                    "adj_close",
+                    "equity",
+                    "strategy_return",
+                    "position",
+                    "cash_position",
+                ]
+            ],
+            on="date",
+            how="inner",
+            suffixes=("_overlay", "_offensive"),
+        )
+        .merge(
+            defensive[
+                [
+                    "date",
+                    "equity",
+                    "strategy_return",
+                    "position",
+                    "cash_position",
+                ]
+            ],
+            on="date",
+            how="inner",
+        )
     )
 
     merged = merged.rename(
@@ -170,9 +172,7 @@ def _create_merged_audit_frame(
     ) * 100.0
 
     merged["spy_peak"] = merged["spy_adj_close"].cummax()
-    merged["spy_drawdown_pct"] = (
-        merged["spy_adj_close"] / merged["spy_peak"] - 1.0
-    ) * 100.0
+    merged["spy_drawdown_pct"] = (merged["spy_adj_close"] / merged["spy_peak"] - 1.0) * 100.0
 
     merged["spy_distance_from_200d_pct"] = (
         merged["spy_adj_close"] / merged["trend_sma"] - 1.0
@@ -201,9 +201,8 @@ def create_regime_switch_overlay_audit(
     )
 
     merged["previous_mode"] = merged["selected_mode"].shift(1)
-    switch_mask = (
-        merged["previous_mode"].notna()
-        & (merged["selected_mode"] != merged["previous_mode"])
+    switch_mask = merged["previous_mode"].notna() & (
+        merged["selected_mode"] != merged["previous_mode"]
     )
 
     switch_indices = merged.index[switch_mask].tolist()
@@ -241,9 +240,7 @@ def create_regime_switch_overlay_audit(
             "days_since_previous_switch": days_since_previous_switch,
             "days_until_next_switch": days_until_next_switch,
             "whipsaw_flag": (
-                False
-                if pd.isna(days_until_next_switch)
-                else days_until_next_switch <= whipsaw_days
+                False if pd.isna(days_until_next_switch) else days_until_next_switch <= whipsaw_days
             ),
             "overlay_equity_at_switch": row["equity_overlay"],
             "overlay_drawdown_at_switch_pct": row["overlay_drawdown_pct"],
@@ -254,12 +251,8 @@ def create_regime_switch_overlay_audit(
             "overlay_turnover_at_switch_pct": row["overlay_turnover"] * 100.0,
             "portfolio_position_at_switch_pct": row["position"] * 100.0,
             "portfolio_cash_at_switch_pct": row["cash_position"] * 100.0,
-            "defensive_allocator_position_at_switch_pct": (
-                row["position_defensive"] * 100.0
-            ),
-            "defensive_allocator_cash_at_switch_pct": (
-                row["cash_position_defensive"] * 100.0
-            ),
+            "defensive_allocator_position_at_switch_pct": (row["position_defensive"] * 100.0),
+            "defensive_allocator_cash_at_switch_pct": (row["cash_position_defensive"] * 100.0),
         }
 
         for horizon in future_return_horizons:
@@ -310,11 +303,7 @@ def create_regime_switch_overlay_audit_summary(
     offensive_switches = int((audit["to_mode"] == "offensive_spy").sum())
 
     switches_by_year = (
-        audit.groupby("switch_year")
-        .size()
-        .sort_index()
-        .rename("switch_count")
-        .reset_index()
+        audit.groupby("switch_year").size().sort_index().rename("switch_count").reset_index()
     )
 
     focus_year_switches = audit[audit["switch_year"].isin(focus_years)]
@@ -330,9 +319,7 @@ def create_regime_switch_overlay_audit_summary(
         },
         {
             "metric": "whipsaw_pct",
-            "value": whipsaw_count / total_switches * 100.0
-            if total_switches
-            else np.nan,
+            "value": whipsaw_count / total_switches * 100.0 if total_switches else np.nan,
         },
         {
             "metric": "switches_to_defensive",
@@ -383,9 +370,7 @@ def create_regime_switch_overlay_audit_summary(
 
     numeric_mask = pd.to_numeric(summary["value"], errors="coerce").notna()
     summary.loc[numeric_mask, "value"] = (
-        pd.to_numeric(summary.loc[numeric_mask, "value"], errors="coerce")
-        .round(3)
-        .astype(object)
+        pd.to_numeric(summary.loc[numeric_mask, "value"], errors="coerce").round(3).astype(object)
     )
 
     return summary
@@ -474,13 +459,10 @@ def save_regime_switch_overlay_audit(
     if defensive_allocator_name not in relative_momentum_outputs:
         available = sorted(relative_momentum_outputs.keys())
         raise ValueError(
-            f"Defensive allocator '{defensive_allocator_name}' not found. "
-            f"Available: {available}"
+            f"Defensive allocator '{defensive_allocator_name}' not found. Available: {available}"
         )
 
-    defensive_result = relative_momentum_outputs[defensive_allocator_name][
-        "allocator_result"
-    ]
+    defensive_result = relative_momentum_outputs[defensive_allocator_name]["allocator_result"]
 
     overlay_dates = list(pd.to_datetime(overlay_result["date"]))
 

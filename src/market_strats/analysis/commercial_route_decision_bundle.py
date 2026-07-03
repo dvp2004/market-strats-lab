@@ -84,9 +84,7 @@ def _phase_result_check(
         and "passed" in str(conclusion.iloc[0].get("verdict", "")).lower()
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -443,8 +441,7 @@ def save_phase13av_ml_branch_commercial_decision(
             ),
             _gate_row(
                 "Decision role is correct",
-                section.get("decision_role")
-                == "ML branch commercial kill-or-pivot decision only",
+                section.get("decision_role") == "ML branch commercial kill-or-pivot decision only",
                 section.get("decision_role", ""),
             ),
         ]
@@ -497,9 +494,7 @@ def _normalise_route_registry(rows: list[dict[str, Any]]) -> pd.DataFrame:
 
     for col in frame.columns:
         frame[col] = frame[col].apply(
-            lambda value: "; ".join(map(str, value))
-            if isinstance(value, list)
-            else value
+            lambda value: "; ".join(map(str, value)) if isinstance(value, list) else value
         )
 
     return frame
@@ -544,9 +539,7 @@ def _route_selection_report(
     requires_new_training = _bool_value(selected_row.get("requires_new_model_training", True))
 
     selected_ok = (
-        status in {"preferred", "allowed"}
-        and uses_existing_candidate
-        and not requires_new_training
+        status in {"preferred", "allowed"} and uses_existing_candidate and not requires_new_training
     )
 
     return pd.DataFrame(
@@ -584,9 +577,7 @@ def _route_comparison_report(routes: pd.DataFrame) -> pd.DataFrame:
         out[col] = pd.to_numeric(out[col], errors="coerce").fillna(99)
 
     out["route_score"] = (
-        out["paper_trading_speed_rank"]
-        + out["validation_strength_rank"]
-        + out["scope_risk_rank"]
+        out["paper_trading_speed_rank"] + out["validation_strength_rank"] + out["scope_risk_rank"]
     )
     out["fastest_responsible_path"] = out["route_score"] == out["route_score"].min()
     return out.sort_values("route_score").reset_index(drop=True)
@@ -686,9 +677,8 @@ def save_phase13aw_paper_trading_candidate_route_selection(
         else False
     )
 
-    selected_route_allowed = (
-        not selection.empty
-        and _bool_value(selection.iloc[0].get("selected", False))
+    selected_route_allowed = not selection.empty and _bool_value(
+        selection.iloc[0].get("selected", False)
     )
 
     summary = pd.DataFrame(
@@ -769,8 +759,7 @@ def save_phase13aw_paper_trading_candidate_route_selection(
             ),
             _gate_row(
                 "Decision role is correct",
-                section.get("decision_role")
-                == "Paper-trading candidate route selection only",
+                section.get("decision_role") == "Paper-trading candidate route selection only",
                 section.get("decision_role", ""),
             ),
         ]

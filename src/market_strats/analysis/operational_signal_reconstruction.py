@@ -56,14 +56,11 @@ def _phase_result_check(conclusion_path: str, gate_path: str, phase_name: str) -
     conclusion = _read_csv_if_exists(conclusion_path)
     gate = _read_csv_if_exists(gate_path)
 
-    conclusion_passed = (
-        not conclusion.empty
-        and _bool_value(conclusion.iloc[0].get("all_gates_passed", False))
+    conclusion_passed = not conclusion.empty and _bool_value(
+        conclusion.iloc[0].get("all_gates_passed", False)
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -163,7 +160,9 @@ def _boundary_check(section: dict[str, Any], key: str) -> pd.DataFrame:
     return out
 
 
-def _required_column_check(frame: pd.DataFrame, required: list[str], frame_name: str) -> pd.DataFrame:
+def _required_column_check(
+    frame: pd.DataFrame, required: list[str], frame_name: str
+) -> pd.DataFrame:
     rows = []
     for col in required:
         rows.append(
@@ -219,7 +218,9 @@ def _switches_from_daily_stream(
         return _empty_switch_log(required_cols)
 
     date_col = _first_existing_col(exported, ["decision_date", "date"])
-    exposure_col = _first_existing_col(exported, ["exposure", "current_exposure", "target_exposure"])
+    exposure_col = _first_existing_col(
+        exported, ["exposure", "current_exposure", "target_exposure"]
+    )
     mode_col = _first_existing_col(exported, ["mode", "current_mode", "regime", "state"])
     turnover_col = _first_existing_col(exported, ["turnover", "strategy_turnover"])
     bps_col = _first_existing_col(exported, ["applied_overlay_slippage_bps", "slippage_bps"])
@@ -230,8 +231,12 @@ def _switches_from_daily_stream(
 
     frame = exported.copy()
     frame["decision_date"] = pd.to_datetime(frame[date_col], errors="coerce")
-    frame = frame[frame["decision_date"].notna()].sort_values("decision_date").reset_index(drop=True)
-    frame["current_exposure"] = pd.to_numeric(frame[exposure_col], errors="coerce").ffill().fillna(0.0)
+    frame = (
+        frame[frame["decision_date"].notna()].sort_values("decision_date").reset_index(drop=True)
+    )
+    frame["current_exposure"] = (
+        pd.to_numeric(frame[exposure_col], errors="coerce").ffill().fillna(0.0)
+    )
     frame["current_mode"] = [
         _standardise_mode(value, exposure)
         for value, exposure in zip(
@@ -243,10 +248,9 @@ def _switches_from_daily_stream(
 
     frame["previous_exposure"] = frame["current_exposure"].shift(1)
     frame["previous_mode"] = frame["current_mode"].shift(1)
-    frame["switch_triggered"] = (
-        frame["current_exposure"].ne(frame["previous_exposure"])
-        | frame["current_mode"].ne(frame["previous_mode"])
-    )
+    frame["switch_triggered"] = frame["current_exposure"].ne(frame["previous_exposure"]) | frame[
+        "current_mode"
+    ].ne(frame["previous_mode"])
     frame = frame[frame["previous_exposure"].notna() & frame["switch_triggered"]].copy()
 
     if frame.empty:
@@ -299,14 +303,26 @@ def _standardise_external_switch_source(
     if date_col is None:
         return _empty_switch_log(required_cols)
 
-    prev_mode_col = _first_existing_col(source, ["previous_mode", "from_mode", "old_mode", "prior_mode"])
+    prev_mode_col = _first_existing_col(
+        source, ["previous_mode", "from_mode", "old_mode", "prior_mode"]
+    )
     curr_mode_col = _first_existing_col(source, ["current_mode", "to_mode", "new_mode", "mode"])
-    prev_exp_col = _first_existing_col(source, ["previous_exposure", "from_exposure", "old_exposure"])
-    curr_exp_col = _first_existing_col(source, ["current_exposure", "to_exposure", "new_exposure", "exposure"])
-    transition_col = _first_existing_col(source, ["transition_type", "transition", "paper_trading_action"])
-    reason_col = _first_existing_col(source, ["switch_reason", "reason", "diagnostic", "event_reason"])
+    prev_exp_col = _first_existing_col(
+        source, ["previous_exposure", "from_exposure", "old_exposure"]
+    )
+    curr_exp_col = _first_existing_col(
+        source, ["current_exposure", "to_exposure", "new_exposure", "exposure"]
+    )
+    transition_col = _first_existing_col(
+        source, ["transition_type", "transition", "paper_trading_action"]
+    )
+    reason_col = _first_existing_col(
+        source, ["switch_reason", "reason", "diagnostic", "event_reason"]
+    )
     raw_col = _first_existing_col(source, ["raw_signal", "raw_mode", "raw_signal_state"])
-    confirmed_col = _first_existing_col(source, ["confirmed_signal", "confirmed_mode", "guarded_signal"])
+    confirmed_col = _first_existing_col(
+        source, ["confirmed_signal", "confirmed_mode", "guarded_signal"]
+    )
     guard_col = _first_existing_col(source, ["deep_drawdown_guard_state", "guard_state"])
     relief_col = _first_existing_col(source, ["loose_relief_state", "relief_state"])
     turnover_col = _first_existing_col(source, ["turnover", "strategy_turnover"])
@@ -320,21 +336,15 @@ def _standardise_external_switch_source(
 
     out["switch_event_id"] = range(1, len(out) + 1)
     out["previous_exposure"] = (
-        pd.to_numeric(source[prev_exp_col], errors="coerce").fillna(0.0)
-        if prev_exp_col
-        else 0.0
+        pd.to_numeric(source[prev_exp_col], errors="coerce").fillna(0.0) if prev_exp_col else 0.0
     )
     out["current_exposure"] = (
         pd.to_numeric(source[curr_exp_col], errors="coerce").fillna(out["previous_exposure"])
         if curr_exp_col
         else out["previous_exposure"]
     )
-    out["previous_mode"] = (
-        source[prev_mode_col].astype(str) if prev_mode_col else "unknown"
-    )
-    out["current_mode"] = (
-        source[curr_mode_col].astype(str) if curr_mode_col else "unknown"
-    )
+    out["previous_mode"] = source[prev_mode_col].astype(str) if prev_mode_col else "unknown"
+    out["current_mode"] = source[curr_mode_col].astype(str) if curr_mode_col else "unknown"
     out["switch_triggered"] = True
     out["transition_type"] = (
         source[transition_col].astype(str) if transition_col else "external_switch_event"
@@ -350,15 +360,20 @@ def _standardise_external_switch_source(
     )
     out["deep_drawdown_guard_state"] = source[guard_col].astype(str) if guard_col else "unknown"
     out["loose_relief_state"] = source[relief_col].astype(str) if relief_col else "unknown"
-    out["turnover"] = pd.to_numeric(source[turnover_col], errors="coerce").fillna(0.0) if turnover_col else 0.0
-    out["applied_overlay_slippage_bps"] = pd.to_numeric(source[bps_col], errors="coerce").fillna(0.0) if bps_col else 0.0
-    out["overlay_slippage_cost_pct"] = pd.to_numeric(source[cost_col], errors="coerce").fillna(0.0) if cost_col else 0.0
+    out["turnover"] = (
+        pd.to_numeric(source[turnover_col], errors="coerce").fillna(0.0) if turnover_col else 0.0
+    )
+    out["applied_overlay_slippage_bps"] = (
+        pd.to_numeric(source[bps_col], errors="coerce").fillna(0.0) if bps_col else 0.0
+    )
+    out["overlay_slippage_cost_pct"] = (
+        pd.to_numeric(source[cost_col], errors="coerce").fillna(0.0) if cost_col else 0.0
+    )
     out["source_candidate_system_id"] = candidate_system_id
 
-    essential_unknown = (
-        out["previous_mode"].astype(str).str.lower().eq("unknown")
-        | out["current_mode"].astype(str).str.lower().eq("unknown")
-    )
+    essential_unknown = out["previous_mode"].astype(str).str.lower().eq("unknown") | out[
+        "current_mode"
+    ].astype(str).str.lower().eq("unknown")
     out["signal_validity_flag"] = np.where(essential_unknown, "fail", "pass")
 
     return out[required_cols]
@@ -524,7 +539,9 @@ def _current_signal_file(
 
     frame = exported.copy()
     frame["decision_date"] = pd.to_datetime(frame["decision_date"], errors="coerce")
-    frame = frame[frame["decision_date"].notna()].sort_values("decision_date").reset_index(drop=True)
+    frame = (
+        frame[frame["decision_date"].notna()].sort_values("decision_date").reset_index(drop=True)
+    )
 
     latest = frame.iloc[-1]
     previous = frame.iloc[-2] if len(frame) > 1 else latest
@@ -542,8 +559,14 @@ def _current_signal_file(
     within_staleness = staleness_days is not None and staleness_days <= max_staleness
     freshness_passed = bool(within_staleness and beyond_endpoint)
 
-    current_exposure = float(pd.to_numeric(pd.Series([latest.get("exposure", 0.0)]), errors="coerce").fillna(0.0).iloc[0])
-    previous_exposure = float(pd.to_numeric(pd.Series([previous.get("exposure", 0.0)]), errors="coerce").fillna(0.0).iloc[0])
+    current_exposure = float(
+        pd.to_numeric(pd.Series([latest.get("exposure", 0.0)]), errors="coerce").fillna(0.0).iloc[0]
+    )
+    previous_exposure = float(
+        pd.to_numeric(pd.Series([previous.get("exposure", 0.0)]), errors="coerce")
+        .fillna(0.0)
+        .iloc[0]
+    )
     current_mode = _standardise_mode(latest.get("mode", ""), current_exposure)
     previous_mode = _standardise_mode(previous.get("mode", ""), previous_exposure)
 
@@ -643,8 +666,12 @@ def save_phase15c_operational_switch_signal_reconstruction(
     exported = _read_csv_if_exists(exported_path)
 
     required_switch_cols = list(section.get("required_switch_event_columns", []))
-    expected_count = int(section.get("switch_reconstruction_policy", {}).get("expected_switch_count", 36))
-    tolerance = int(section.get("switch_reconstruction_policy", {}).get("switch_count_abs_tolerance", 2))
+    expected_count = int(
+        section.get("switch_reconstruction_policy", {}).get("expected_switch_count", 36)
+    )
+    tolerance = int(
+        section.get("switch_reconstruction_policy", {}).get("switch_count_abs_tolerance", 2)
+    )
 
     switch_log, switch_source_inventory = _choose_switch_reconstruction(
         exported=exported,
@@ -724,13 +751,35 @@ def save_phase15c_operational_switch_signal_reconstruction(
         [
             _gate_row("Phase 15B passed", bool(phase15b_check["passed"].all()), "phase15b"),
             _gate_row("Exported daily file present", exported_path.exists(), str(exported_path)),
-            _gate_row("Switch event log output exists", True, "phase15c_operational_switch_event_log.csv"),
-            _gate_row("Switch summary output exists", True, "phase15c_switch_reconstruction_summary.csv"),
-            _gate_row("Current signal file output exists", len(current_signal) == 1, "phase15c_current_signal_file.csv"),
-            _gate_row("Current signal required columns present", bool(signal_col_check["present"].all()), "current signal columns"),
-            _gate_row("Switch required columns present", bool(switch_col_check["present"].all()), "switch columns"),
-            _gate_row("Phase 15D boundary is audit-only", bool(boundary["passed"].all()), "phase15d"),
-            _gate_row("Scope blocks deployment/live trading/real money", bool(scope["passed"].all()), "scope"),
+            _gate_row(
+                "Switch event log output exists", True, "phase15c_operational_switch_event_log.csv"
+            ),
+            _gate_row(
+                "Switch summary output exists", True, "phase15c_switch_reconstruction_summary.csv"
+            ),
+            _gate_row(
+                "Current signal file output exists",
+                len(current_signal) == 1,
+                "phase15c_current_signal_file.csv",
+            ),
+            _gate_row(
+                "Current signal required columns present",
+                bool(signal_col_check["present"].all()),
+                "current signal columns",
+            ),
+            _gate_row(
+                "Switch required columns present",
+                bool(switch_col_check["present"].all()),
+                "switch columns",
+            ),
+            _gate_row(
+                "Phase 15D boundary is audit-only", bool(boundary["passed"].all()), "phase15d"
+            ),
+            _gate_row(
+                "Scope blocks deployment/live trading/real money",
+                bool(scope["passed"].all()),
+                "scope",
+            ),
             _gate_row(
                 "Execution role is correct",
                 section.get("execution_role")
@@ -832,13 +881,11 @@ def _decision_report(
         and _bool_value(switch_summary.iloc[0].get("switch_signal_validity_passed", False))
     )
 
-    signal_fresh = (
-        not current_signal_summary.empty
-        and _bool_value(current_signal_summary.iloc[0].get("signal_freshness_passed", False))
+    signal_fresh = not current_signal_summary.empty and _bool_value(
+        current_signal_summary.iloc[0].get("signal_freshness_passed", False)
     )
-    signal_valid = (
-        not current_signal_summary.empty
-        and _bool_value(current_signal_summary.iloc[0].get("signal_validity_passed", False))
+    signal_valid = not current_signal_summary.empty and _bool_value(
+        current_signal_summary.iloc[0].get("signal_validity_passed", False)
     )
     signal_file_valid = (
         not current_signal_file.empty
@@ -848,13 +895,17 @@ def _decision_report(
     signal_passed = bool(signal_fresh and signal_valid and signal_file_valid)
 
     if switch_passed and signal_passed:
-        decision = policy.get("decision_if_all_passed", "paper_dry_run_preregistration_allowed_next")
+        decision = policy.get(
+            "decision_if_all_passed", "paper_dry_run_preregistration_allowed_next"
+        )
     elif not switch_passed and not signal_passed:
         decision = policy.get("decision_if_both_failed", "blocked_both_switch_and_signal_failed")
     elif not switch_passed:
         decision = policy.get("decision_if_switch_failed", "blocked_switch_reconstruction_failed")
     else:
-        decision = policy.get("decision_if_signal_failed", "blocked_current_signal_stale_or_invalid")
+        decision = policy.get(
+            "decision_if_signal_failed", "blocked_current_signal_stale_or_invalid"
+        )
 
     return pd.DataFrame(
         [
@@ -865,7 +916,8 @@ def _decision_report(
                 "current_signal_validity_passed": signal_valid,
                 "current_signal_file_flags_passed": signal_file_valid,
                 "paper_dry_run_preregistration_allowed_next": bool(
-                    decision == policy.get(
+                    decision
+                    == policy.get(
                         "decision_if_all_passed",
                         "paper_dry_run_preregistration_allowed_next",
                     )
@@ -951,11 +1003,19 @@ def save_phase15d_current_signal_freshness_switch_audit(
                 "config_flags_clean": bool(flags["passed"].all()),
                 "switch_event_log_exists": Path(report_paths.get("switch_event_log", "")).exists(),
                 "switch_required_columns_present": bool(switch_col_check["present"].all()),
-                "current_signal_file_exists": Path(report_paths.get("current_signal_file", "")).exists(),
+                "current_signal_file_exists": Path(
+                    report_paths.get("current_signal_file", "")
+                ).exists(),
                 "current_signal_required_columns_present": bool(signal_col_check["present"].all()),
-                "switch_reconstruction_passed": _bool_value(decision.iloc[0]["switch_reconstruction_passed"]),
-                "current_signal_freshness_passed": _bool_value(decision.iloc[0]["current_signal_freshness_passed"]),
-                "current_signal_validity_passed": _bool_value(decision.iloc[0]["current_signal_validity_passed"]),
+                "switch_reconstruction_passed": _bool_value(
+                    decision.iloc[0]["switch_reconstruction_passed"]
+                ),
+                "current_signal_freshness_passed": _bool_value(
+                    decision.iloc[0]["current_signal_freshness_passed"]
+                ),
+                "current_signal_validity_passed": _bool_value(
+                    decision.iloc[0]["current_signal_validity_passed"]
+                ),
                 "decision": decision.iloc[0]["decision"],
                 "paper_dry_run_preregistration_allowed_next": _bool_value(
                     decision.iloc[0]["paper_dry_run_preregistration_allowed_next"]
@@ -977,18 +1037,53 @@ def save_phase15d_current_signal_freshness_switch_audit(
         [
             _gate_row("Phase 15C passed", bool(phase15c_check["passed"].all()), "phase15c"),
             _gate_row("Config flags clean", bool(flags["passed"].all()), "runtime flags"),
-            _gate_row("Switch event log exists", Path(report_paths.get("switch_event_log", "")).exists(), "switch log"),
-            _gate_row("Switch summary exists", Path(report_paths.get("switch_reconstruction_summary", "")).exists(), "switch summary"),
-            _gate_row("Switch required columns present", bool(switch_col_check["present"].all()), "switch columns"),
-            _gate_row("Current signal file exists", Path(report_paths.get("current_signal_file", "")).exists(), "current signal"),
-            _gate_row("Current signal required columns present", bool(signal_col_check["present"].all()), "signal columns"),
-            _gate_row("Readiness decision output exists", len(decision) == 1, str(decision.iloc[0]["decision"])),
-            _gate_row("No paper-ready claim unless both pass", no_ready_claim_unless_both_pass, "readiness claim gate"),
-            _gate_row("Phase 15E boundary is conditional-only", bool(boundary["passed"].all()), "phase15e"),
-            _gate_row("Scope blocks broker/live/real-money/promotion", bool(scope["passed"].all()), "scope"),
+            _gate_row(
+                "Switch event log exists",
+                Path(report_paths.get("switch_event_log", "")).exists(),
+                "switch log",
+            ),
+            _gate_row(
+                "Switch summary exists",
+                Path(report_paths.get("switch_reconstruction_summary", "")).exists(),
+                "switch summary",
+            ),
+            _gate_row(
+                "Switch required columns present",
+                bool(switch_col_check["present"].all()),
+                "switch columns",
+            ),
+            _gate_row(
+                "Current signal file exists",
+                Path(report_paths.get("current_signal_file", "")).exists(),
+                "current signal",
+            ),
+            _gate_row(
+                "Current signal required columns present",
+                bool(signal_col_check["present"].all()),
+                "signal columns",
+            ),
+            _gate_row(
+                "Readiness decision output exists",
+                len(decision) == 1,
+                str(decision.iloc[0]["decision"]),
+            ),
+            _gate_row(
+                "No paper-ready claim unless both pass",
+                no_ready_claim_unless_both_pass,
+                "readiness claim gate",
+            ),
+            _gate_row(
+                "Phase 15E boundary is conditional-only", bool(boundary["passed"].all()), "phase15e"
+            ),
+            _gate_row(
+                "Scope blocks broker/live/real-money/promotion",
+                bool(scope["passed"].all()),
+                "scope",
+            ),
             _gate_row(
                 "Audit role is correct",
-                section.get("audit_role") == "Current signal freshness and switch mechanics audit only",
+                section.get("audit_role")
+                == "Current signal freshness and switch mechanics audit only",
                 section.get("audit_role", ""),
             ),
         ]
@@ -1007,9 +1102,15 @@ def save_phase15d_current_signal_freshness_switch_audit(
                 ),
                 "all_gates_passed": bool(gate_report["passed"].all()),
                 "decision": decision.iloc[0]["decision"],
-                "switch_reconstruction_passed": _bool_value(decision.iloc[0]["switch_reconstruction_passed"]),
-                "current_signal_freshness_passed": _bool_value(decision.iloc[0]["current_signal_freshness_passed"]),
-                "current_signal_validity_passed": _bool_value(decision.iloc[0]["current_signal_validity_passed"]),
+                "switch_reconstruction_passed": _bool_value(
+                    decision.iloc[0]["switch_reconstruction_passed"]
+                ),
+                "current_signal_freshness_passed": _bool_value(
+                    decision.iloc[0]["current_signal_freshness_passed"]
+                ),
+                "current_signal_validity_passed": _bool_value(
+                    decision.iloc[0]["current_signal_validity_passed"]
+                ),
                 "paper_dry_run_preregistration_allowed_next": _bool_value(
                     decision.iloc[0]["paper_dry_run_preregistration_allowed_next"]
                 ),

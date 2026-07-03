@@ -15,7 +15,9 @@ DEFAULT_NOTIONAL = 10000.0
 DEFAULT_OUTPUT_DIR = Path("reports/strategy_factory/transactions")
 DEFAULT_CHART_DIR = DEFAULT_OUTPUT_DIR / "charts"
 DEFAULT_ALLOCATION_FILE = Path("reports/strategy_factory/allocation_timeline.csv")
-DEFAULT_WATCHLIST_FILE = Path("reports/strategy_factory/watchlist/phase17c_watchlist_candidates.csv")
+DEFAULT_WATCHLIST_FILE = Path(
+    "reports/strategy_factory/watchlist/phase17c_watchlist_candidates.csv"
+)
 DEFAULT_PRICE_DATA_DIR = Path("data/fresh/processed")
 FACTORY_ASSETS = ["SPY", "QQQ", "GLD", "TLT", "BTC-USD", "CASH"]
 
@@ -130,8 +132,12 @@ def create_transaction_ledger(
                         "is_buy": bool(asset != "CASH" and change > 0.0),
                         "is_sell": bool(asset != "CASH" and change < 0.0),
                         "is_rebalance": True,
-                        "is_entry": bool(asset != "CASH" and previous_weight <= 0.0 and target_weight > 0.0),
-                        "is_exit": bool(asset != "CASH" and target_weight <= 0.0 and previous_weight > 0.0),
+                        "is_entry": bool(
+                            asset != "CASH" and previous_weight <= 0.0 and target_weight > 0.0
+                        ),
+                        "is_exit": bool(
+                            asset != "CASH" and target_weight <= 0.0 and previous_weight > 0.0
+                        ),
                         "transaction_data_available": True,
                         "notes": (
                             "Inferred from target allocation weight change; not a broker fill."
@@ -227,11 +233,7 @@ def _normalise_asset_returns(asset_returns: pd.DataFrame) -> pd.DataFrame:
     returns = asset_returns.copy()
     returns["date"] = pd.to_datetime(returns["date"], errors="coerce")
     returns = returns.dropna(subset=["date"]).sort_values("date")
-    rename = {
-        column: _normalise_asset(column)
-        for column in returns.columns
-        if column != "date"
-    }
+    rename = {column: _normalise_asset(column) for column in returns.columns if column != "date"}
     returns = returns.rename(columns=rename)
     for column in returns.columns:
         if column != "date":
@@ -289,7 +291,9 @@ def _returns_available_for_targets(
         return False, f"missing_asset_returns:{','.join(missing_assets)}"
 
     positive_assets = [
-        asset for asset in FACTORY_ASSETS if asset != "CASH" and target_weights[asset].abs().max() > 1e-10
+        asset
+        for asset in FACTORY_ASSETS
+        if asset != "CASH" and target_weights[asset].abs().max() > 1e-10
     ]
     if not positive_assets:
         return True, ""
@@ -539,9 +543,9 @@ def create_latest_allocations(allocation: pd.DataFrame) -> pd.DataFrame:
     latest_dates = work.groupby("strategy")["date"].transform("max")
     latest = work.loc[work["date"] == latest_dates].copy()
     latest["date"] = latest["date"].dt.date.astype(str)
-    return latest.rename(
-        columns={"strategy": "strategy_id", "date": "allocation_date"}
-    )[["strategy_id", "allocation_date", "asset", "weight"]]
+    return latest.rename(columns={"strategy": "strategy_id", "date": "allocation_date"})[
+        ["strategy_id", "allocation_date", "asset", "weight"]
+    ]
 
 
 def _asset_allocation_long(allocation: pd.DataFrame) -> pd.DataFrame:
@@ -563,7 +567,9 @@ def _watchlist_strategies(path: Path) -> list[str] | None:
 
 
 def _plot_allocation_timeline(allocation: pd.DataFrame, strategies: list[str], path: Path) -> None:
-    fig, axes = plt.subplots(len(strategies), 1, figsize=(11, max(4, 3 * len(strategies))), sharex=True)
+    fig, axes = plt.subplots(
+        len(strategies), 1, figsize=(11, max(4, 3 * len(strategies))), sharex=True
+    )
     if len(strategies) == 1:
         axes = [axes]
     for ax, strategy in zip(axes, strategies, strict=False):
@@ -613,7 +619,9 @@ def _plot_transaction_count_by_asset(ledger: pd.DataFrame, path: Path) -> None:
 
 
 def _plot_latest_allocations(latest: pd.DataFrame, strategies: list[str], path: Path) -> None:
-    pivot = latest.pivot_table(index="strategy_id", columns="asset", values="weight", fill_value=0.0)
+    pivot = latest.pivot_table(
+        index="strategy_id", columns="asset", values="weight", fill_value=0.0
+    )
     pivot = pivot.reindex(strategies).dropna(how="all")
     fig, ax = plt.subplots(figsize=(10, 5))
     pivot.plot(kind="bar", stacked=True, ax=ax)
@@ -720,8 +728,7 @@ def _plot_spy_qqq_60_40_rebalance_timeline(
         part = pd.DataFrame()
     else:
         part = valid[
-            (valid["strategy_id"] == strategy)
-            & (valid["asset"].isin(["SPY", "QQQ"]))
+            (valid["strategy_id"] == strategy) & (valid["asset"].isin(["SPY", "QQQ"]))
         ].copy()
     fig, ax = plt.subplots(figsize=(11, 5))
     if part.empty:

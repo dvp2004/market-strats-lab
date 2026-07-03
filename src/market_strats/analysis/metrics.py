@@ -109,6 +109,7 @@ def calculate_calmar_ratio(cagr_pct: float, max_drawdown_pct: float) -> float:
 
     return cagr_pct / abs(max_drawdown_pct)
 
+
 def calculate_metrics(result: pd.DataFrame, strategy_name: str) -> dict:
     """
     Calculate performance metrics for a strategy result.
@@ -188,5 +189,3 @@ def calculate_metrics(result: pd.DataFrame, strategy_name: str) -> dict:
         "trade_count": trade_count,
         "time_underwater_pct": round(time_underwater * 100.0, 2),
     }
-
-

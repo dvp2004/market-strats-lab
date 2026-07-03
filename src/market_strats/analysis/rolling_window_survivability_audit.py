@@ -48,9 +48,7 @@ def _load_input_returns(
     missing = required_columns - set(returns.columns)
 
     if missing:
-        raise ValueError(
-            f"Rolling-window input returns missing columns: {sorted(missing)}"
-        )
+        raise ValueError(f"Rolling-window input returns missing columns: {sorted(missing)}")
 
     for column in required_columns - {"date"}:
         returns[column] = pd.to_numeric(returns[column], errors="coerce")
@@ -222,40 +220,30 @@ def _create_window_survivability_summary(
                 "trading_days": int(group["trading_days"].iloc[0]),
                 "window_count": int(len(group)),
                 "candidate_beats_spy_12m_cagr_share": round(
-                    _share_true(
-                        group["candidate_cagr_pct"] > group["spy_12m_cagr_pct"]
-                    ),
+                    _share_true(group["candidate_cagr_pct"] > group["spy_12m_cagr_pct"]),
                     4,
                 ),
                 "candidate_beats_spy_12m_calmar_share": round(
-                    _share_true(
-                        group["candidate_calmar"] > group["spy_12m_calmar"]
-                    ),
+                    _share_true(group["candidate_calmar"] > group["spy_12m_calmar"]),
                     4,
                 ),
                 "candidate_beats_spy_12m_drawdown_share": round(
                     _share_true(
-                        group["candidate_max_drawdown_pct"]
-                        > group["spy_12m_max_drawdown_pct"]
+                        group["candidate_max_drawdown_pct"] > group["spy_12m_max_drawdown_pct"]
                     ),
                     4,
                 ),
                 "candidate_beats_buy_hold_cagr_share": round(
-                    _share_true(
-                        group["candidate_cagr_pct"] > group["buy_hold_cagr_pct"]
-                    ),
+                    _share_true(group["candidate_cagr_pct"] > group["buy_hold_cagr_pct"]),
                     4,
                 ),
                 "candidate_beats_buy_hold_calmar_share": round(
-                    _share_true(
-                        group["candidate_calmar"] > group["buy_hold_calmar"]
-                    ),
+                    _share_true(group["candidate_calmar"] > group["buy_hold_calmar"]),
                     4,
                 ),
                 "candidate_beats_buy_hold_drawdown_share": round(
                     _share_true(
-                        group["candidate_max_drawdown_pct"]
-                        > group["buy_hold_max_drawdown_pct"]
+                        group["candidate_max_drawdown_pct"] > group["buy_hold_max_drawdown_pct"]
                     ),
                     4,
                 ),
@@ -350,19 +338,13 @@ def _create_worst_window_report(
                     "end_date": selected["end_date"],
                     "candidate_cagr_pct": selected["candidate_cagr_pct"],
                     "candidate_calmar": selected["candidate_calmar"],
-                    "candidate_max_drawdown_pct": selected[
-                        "candidate_max_drawdown_pct"
-                    ],
+                    "candidate_max_drawdown_pct": selected["candidate_max_drawdown_pct"],
                     "buy_hold_cagr_pct": selected["buy_hold_cagr_pct"],
                     "buy_hold_calmar": selected["buy_hold_calmar"],
-                    "buy_hold_max_drawdown_pct": selected[
-                        "buy_hold_max_drawdown_pct"
-                    ],
+                    "buy_hold_max_drawdown_pct": selected["buy_hold_max_drawdown_pct"],
                     "spy_12m_cagr_pct": selected["spy_12m_cagr_pct"],
                     "spy_12m_calmar": selected["spy_12m_calmar"],
-                    "spy_12m_max_drawdown_pct": selected[
-                        "spy_12m_max_drawdown_pct"
-                    ],
+                    "spy_12m_max_drawdown_pct": selected["spy_12m_max_drawdown_pct"],
                     "candidate_minus_spy_12m_cagr_pct_points": selected[
                         "candidate_minus_spy_12m_cagr_pct_points"
                     ],
@@ -402,12 +384,8 @@ def _create_survivability_gate_report(
             0.50,
         )
     )
-    worst_3y_cagr_floor = float(
-        phase_config.get("max_allowed_worst_3y_candidate_cagr_pct", 0.0)
-    )
-    worst_5y_cagr_floor = float(
-        phase_config.get("max_allowed_worst_5y_candidate_cagr_pct", 0.0)
-    )
+    worst_3y_cagr_floor = float(phase_config.get("max_allowed_worst_3y_candidate_cagr_pct", 0.0))
+    worst_5y_cagr_floor = float(phase_config.get("max_allowed_worst_5y_candidate_cagr_pct", 0.0))
 
     rows: list[dict] = []
 
@@ -484,9 +462,7 @@ def _create_survivability_gate_report(
                     "threshold": check["threshold"],
                     "operator": check["operator"],
                     "interpretation": (
-                        "Rolling-window gate passed."
-                        if passed
-                        else "Rolling-window gate failed."
+                        "Rolling-window gate passed." if passed else "Rolling-window gate failed."
                     ),
                 }
             )
@@ -502,12 +478,8 @@ def _create_survivability_conclusion(
 
     failed = gate_report[gate_report["status"] == "Failed"]
 
-    spy_12m_failed = failed[
-        failed["claim"].str.contains("SPY 12M", case=False, na=False)
-    ]
-    buy_hold_failed = failed[
-        failed["claim"].str.contains("Buy & Hold", case=False, na=False)
-    ]
+    spy_12m_failed = failed[failed["claim"].str.contains("SPY 12M", case=False, na=False)]
+    buy_hold_failed = failed[failed["claim"].str.contains("Buy & Hold", case=False, na=False)]
     worst_cagr_failed = failed[
         failed["claim"].str.contains("worst rolling CAGR", case=False, na=False)
     ]

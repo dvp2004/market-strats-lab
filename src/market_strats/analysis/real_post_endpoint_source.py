@@ -45,14 +45,11 @@ def _phase_result_check(conclusion_path: str, gate_path: str, phase_name: str) -
     conclusion = _read_csv_if_exists(conclusion_path)
     gate = _read_csv_if_exists(gate_path)
 
-    conclusion_passed = (
-        not conclusion.empty
-        and _bool_value(conclusion.iloc[0].get("all_gates_passed", False))
+    conclusion_passed = not conclusion.empty and _bool_value(
+        conclusion.iloc[0].get("all_gates_passed", False)
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -81,7 +78,9 @@ def _first_existing_col(frame: pd.DataFrame, candidates: list[str]) -> str | Non
     return None
 
 
-def _required_column_check(frame: pd.DataFrame, required: list[str], frame_name: str) -> pd.DataFrame:
+def _required_column_check(
+    frame: pd.DataFrame, required: list[str], frame_name: str
+) -> pd.DataFrame:
     rows = []
     for col in required:
         rows.append(
@@ -287,10 +286,14 @@ def _endpoint_context(section: dict[str, Any]) -> tuple[float, str]:
     if endpoint.empty:
         return 0.0, "defensive_or_cash"
 
-    exposure = pd.to_numeric(
-        pd.Series([endpoint.iloc[0].get("endpoint_exposure", 0.0)]),
-        errors="coerce",
-    ).fillna(0.0).iloc[0]
+    exposure = (
+        pd.to_numeric(
+            pd.Series([endpoint.iloc[0].get("endpoint_exposure", 0.0)]),
+            errors="coerce",
+        )
+        .fillna(0.0)
+        .iloc[0]
+    )
     mode = str(endpoint.iloc[0].get("endpoint_mode", _mode_from_exposure(float(exposure))))
     return float(exposure), mode
 
@@ -384,9 +387,7 @@ def _build_phase15q_stream(section: dict[str, Any]) -> tuple[pd.DataFrame, pd.Da
     current_exposure_numeric = pd.to_numeric(current_exposure, errors="coerce")
     previous_exposure_numeric = pd.to_numeric(previous_exposure, errors="coerce")
 
-    switch_triggered = current_exposure_numeric.round(10).ne(
-        previous_exposure_numeric.round(10)
-    )
+    switch_triggered = current_exposure_numeric.round(10).ne(previous_exposure_numeric.round(10))
     switch_triggered = switch_triggered.fillna(False)
 
     timestamp_col = _first_existing_col(
@@ -400,10 +401,7 @@ def _build_phase15q_stream(section: dict[str, Any]) -> tuple[pd.DataFrame, pd.Da
     )
 
     benchmark_ok = close.notna() | returns.notna()
-    target_ok = (
-        current_exposure_numeric.notna()
-        & current_exposure_numeric.between(0.0, 1.0)
-    )
+    target_ok = current_exposure_numeric.notna() & current_exposure_numeric.between(0.0, 1.0)
 
     blocking_warnings = []
     for idx in source.index:
@@ -432,7 +430,9 @@ def _build_phase15q_stream(section: dict[str, Any]) -> tuple[pd.DataFrame, pd.Da
             "data_source": source_path or source_type,
             "data_source_timestamp": timestamp,
             "target_weight_source": target_source,
-            "target_weight_source_valid_flag": target_source_valid.map({True: "pass", False: "fail"}),
+            "target_weight_source_valid_flag": target_source_valid.map(
+                {True: "pass", False: "fail"}
+            ),
             "pinned_research_endpoint": section.get("pinned_research_endpoint", ""),
             "is_out_of_sample_extension": True,
             "benchmark_update_flag": benchmark_ok.map({True: "pass", False: "fail"}),
@@ -770,8 +770,10 @@ def _validation_audit(stream: pd.DataFrame, section: dict[str, Any]) -> pd.DataF
     missing_for_audit = [col for col in required_for_audit if col not in stream.columns]
 
     if stream.empty or missing_for_audit:
-        failure_reason = "candidate_stream_empty" if stream.empty else (
-            "missing_audit_columns:" + ",".join(missing_for_audit)
+        failure_reason = (
+            "candidate_stream_empty"
+            if stream.empty
+            else ("missing_audit_columns:" + ",".join(missing_for_audit))
         )
         return pd.DataFrame(
             [
@@ -802,11 +804,7 @@ def _validation_audit(stream: pd.DataFrame, section: dict[str, Any]) -> pd.DataF
         stream["benchmark_update_flag"].astype(str).str.lower().eq("pass").all()
     )
     target_weight_source_passed = bool(
-        stream["target_weight_source_valid_flag"]
-        .astype(str)
-        .str.lower()
-        .eq("pass")
-        .all()
+        stream["target_weight_source_valid_flag"].astype(str).str.lower().eq("pass").all()
     )
     target_exposure_present_passed = bool(target.notna().all())
     target_exposure_range_passed = bool(target.between(0.0, 1.0).all())
@@ -847,6 +845,7 @@ def _validation_audit(stream: pd.DataFrame, section: dict[str, Any]) -> pd.DataF
         ]
     )
 
+
 def save_phase15r_real_post_endpoint_stream_validation(
     *,
     config: dict[str, Any],
@@ -879,7 +878,9 @@ def save_phase15r_real_post_endpoint_stream_validation(
     audit = _validation_audit(stream, section)
     all_valid = _bool_value(audit.iloc[0]["all_validation_gates_passed"])
 
-    handoff_file = Path(section.get("handoff_file_for_phase15o", "data/fresh/phase15o_manual_candidate_stream.csv"))
+    handoff_file = Path(
+        section.get("handoff_file_for_phase15o", "data/fresh/phase15o_manual_candidate_stream.csv")
+    )
     handoff_ready = bool(all_valid and handoff_file.exists())
 
     decision_text = (
@@ -949,16 +950,44 @@ def save_phase15r_real_post_endpoint_stream_validation(
             _gate_row("Phase 15Q passed", bool(phase15q_check["passed"].all()), "phase15q"),
             _gate_row("Config flags clean", bool(flags["passed"].all()), "runtime flags"),
             _gate_row("Candidate stream file existence audited", True, f"rows={len(stream)}"),
-            _gate_row("Required columns present", bool(required_col_check["present"].all()), "schema"),
-            _gate_row("Post-endpoint rows audited", True, str(audit.iloc[0]["post_endpoint_rows_passed"])),
-            _gate_row("Benchmark update audited", True, str(audit.iloc[0]["benchmark_update_passed"])),
-            _gate_row("Target weight source audited", True, str(audit.iloc[0]["target_weight_source_passed"])),
-            _gate_row("Target exposure audited", True, str(audit.iloc[0]["target_exposure_range_passed"])),
-            _gate_row("Out-of-sample label audited", True, str(audit.iloc[0]["out_of_sample_label_passed"])),
+            _gate_row(
+                "Required columns present", bool(required_col_check["present"].all()), "schema"
+            ),
+            _gate_row(
+                "Post-endpoint rows audited", True, str(audit.iloc[0]["post_endpoint_rows_passed"])
+            ),
+            _gate_row(
+                "Benchmark update audited", True, str(audit.iloc[0]["benchmark_update_passed"])
+            ),
+            _gate_row(
+                "Target weight source audited",
+                True,
+                str(audit.iloc[0]["target_weight_source_passed"]),
+            ),
+            _gate_row(
+                "Target exposure audited", True, str(audit.iloc[0]["target_exposure_range_passed"])
+            ),
+            _gate_row(
+                "Out-of-sample label audited",
+                True,
+                str(audit.iloc[0]["out_of_sample_label_passed"]),
+            ),
             _gate_row("Decision output exists", len(decision) == 1, decision_text),
-            _gate_row("No paper-ready claim", not _bool_value(decision.iloc[0]["paper_trading_ready"]), "paper_trading_ready=False"),
-            _gate_row("Phase 15O rerun boundary is conditional-only", bool(boundary["passed"].all()), "phase15o rerun"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "No paper-ready claim",
+                not _bool_value(decision.iloc[0]["paper_trading_ready"]),
+                "paper_trading_ready=False",
+            ),
+            _gate_row(
+                "Phase 15O rerun boundary is conditional-only",
+                bool(boundary["passed"].all()),
+                "phase15o rerun",
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Audit role is correct",
                 section.get("audit_role")

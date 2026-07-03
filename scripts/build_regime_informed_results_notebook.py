@@ -13,9 +13,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_NOTEBOOK = ROOT / "notebooks" / "regime_informed_results_dashboard.ipynb"
-DEFAULT_VISUALS_DIR = (
-    ROOT / "reports" / "paper_trading" / "regime_informed_tracking" / "visuals"
-)
+DEFAULT_VISUALS_DIR = ROOT / "reports" / "paper_trading" / "regime_informed_tracking" / "visuals"
 
 DATA_SOURCES = {
     "candidate_summary": Path(
@@ -25,19 +23,14 @@ DATA_SOURCES = {
         "reports/strategy_factory/regime_stress/phase21a_regime_robustness_scores.csv"
     ),
     "score_components": Path(
-        "reports/strategy_factory/regime_stress/"
-        "phase21a_regime_robustness_score_components.csv"
+        "reports/strategy_factory/regime_stress/phase21a_regime_robustness_score_components.csv"
     ),
-    "regime_metrics": Path(
-        "reports/strategy_factory/regime_stress/phase21a_regime_metrics.csv"
-    ),
+    "regime_metrics": Path("reports/strategy_factory/regime_stress/phase21a_regime_metrics.csv"),
     "shortlist": Path(
-        "reports/strategy_factory/regime_reconciliation/"
-        "phase21b_paper_shortlist_recommendation.csv"
+        "reports/strategy_factory/regime_reconciliation/phase21b_paper_shortlist_recommendation.csv"
     ),
     "targets": Path(
-        "reports/paper_trading/regime_informed_tracking/"
-        "regime_informed_paper_targets.csv"
+        "reports/paper_trading/regime_informed_tracking/regime_informed_paper_targets.csv"
     ),
     "tear_sheet": Path(
         "reports/paper_trading/regime_informed_tracking/"
@@ -48,12 +41,10 @@ DATA_SOURCES = {
         "regime_informed_session_discipline_summary.csv"
     ),
     "ledger": Path(
-        "reports/paper_trading/regime_informed_tracking/"
-        "regime_informed_manual_session_ledger.csv"
+        "reports/paper_trading/regime_informed_tracking/regime_informed_manual_session_ledger.csv"
     ),
     "session_ingestion_status": Path(
-        "reports/paper_trading/dashboard/"
-        "regime_informed_session_ingestion_status.csv"
+        "reports/paper_trading/dashboard/regime_informed_session_ingestion_status.csv"
     ),
     "daily_runtime": Path("reports/paper_trading/dashboard/daily_paper_runtime_status.csv"),
 }
@@ -157,12 +148,8 @@ def _save_scatter(
         return
     plot_frame = frame[list(required)].copy()
     plot_frame["mean_total_return_pct"] = _as_numeric(plot_frame["mean_total_return_pct"])
-    plot_frame["worst_max_drawdown_pct"] = _as_numeric(
-        plot_frame["worst_max_drawdown_pct"]
-    )
-    plot_frame = plot_frame.dropna(
-        subset=["mean_total_return_pct", "worst_max_drawdown_pct"]
-    )
+    plot_frame["worst_max_drawdown_pct"] = _as_numeric(plot_frame["worst_max_drawdown_pct"])
+    plot_frame = plot_frame.dropna(subset=["mean_total_return_pct", "worst_max_drawdown_pct"])
     if plot_frame.empty:
         _placeholder_chart(output_path, title, "No numeric return/drawdown values available")
         return
@@ -305,11 +292,11 @@ def _generate_visuals(root: Path, visuals_dir: Path) -> dict[str, Path]:
     visuals_dir.mkdir(parents=True, exist_ok=True)
     paths = {name: visuals_dir / filename for name, filename in EXPECTED_PNGS.items()}
 
-    robustness = data["robustness_scores"].sort_values(
-        "regime_robustness_score", ascending=False
-    ) if "regime_robustness_score" in data["robustness_scores"].columns else data[
-        "robustness_scores"
-    ]
+    robustness = (
+        data["robustness_scores"].sort_values("regime_robustness_score", ascending=False)
+        if "regime_robustness_score" in data["robustness_scores"].columns
+        else data["robustness_scores"]
+    )
     _save_bar_chart(
         robustness,
         label_col="canonical_candidate_id",
@@ -433,8 +420,7 @@ def _notebook_json(root: Path, visuals: dict[str, Path]) -> dict[str, Any]:
             "targets[['canonical_candidate_id','candidate_role','asset','target_weight','candidate_caveats']].head(40) if {'canonical_candidate_id','candidate_role','asset','target_weight','candidate_caveats'}.issubset(targets.columns) else targets.head()"
         ),
         _markdown_cell(
-            "## 5. Regime Robustness Scores\n\n"
-            + _image_markdown(root, visuals["robustness"])
+            "## 5. Regime Robustness Scores\n\n" + _image_markdown(root, visuals["robustness"])
         ),
         _markdown_cell(
             "## 6. Worst Drawdown Comparison\n\n"
@@ -443,16 +429,13 @@ def _notebook_json(root: Path, visuals: dict[str, Path]) -> dict[str, Any]:
             + _image_markdown(root, visuals["scatter"])
         ),
         _markdown_cell(
-            "## 7. Regime Return Heatmap\n\n"
-            + _image_markdown(root, visuals["return_heatmap"])
+            "## 7. Regime Return Heatmap\n\n" + _image_markdown(root, visuals["return_heatmap"])
         ),
         _markdown_cell(
-            "## 8. Regime Drawdown Heatmap\n\n"
-            + _image_markdown(root, visuals["drawdown_heatmap"])
+            "## 8. Regime Drawdown Heatmap\n\n" + _image_markdown(root, visuals["drawdown_heatmap"])
         ),
         _markdown_cell(
-            "## 9. Current Target Allocations\n\n"
-            + _image_markdown(root, visuals["allocations"])
+            "## 9. Current Target Allocations\n\n" + _image_markdown(root, visuals["allocations"])
         ),
         _markdown_cell("## 10. Paper Discipline / Ledger Status"),
         _code_cell(

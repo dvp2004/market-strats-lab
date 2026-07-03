@@ -178,9 +178,7 @@ def build_phase9e_phase9d_failure_check(
     no_passed_rules = True
 
     if not gate_report.empty and "all_rule_gates_passed" in gate_report.columns:
-        no_passed_rules = not gate_report["all_rule_gates_passed"].map(
-            _bool_value
-        ).any()
+        no_passed_rules = not gate_report["all_rule_gates_passed"].map(_bool_value).any()
 
     if passed_rules and passed_rules.lower() not in {"nan", "none"}:
         no_passed_rules = False
@@ -188,18 +186,19 @@ def build_phase9e_phase9d_failure_check(
     no_strategy_promotion = True
 
     if not comparison.empty and "strategy_promotion" in comparison.columns:
-        no_strategy_promotion = not comparison["strategy_promotion"].map(
-            _bool_value
-        ).any()
+        no_strategy_promotion = not comparison["strategy_promotion"].map(_bool_value).any()
 
     role_bounded = True
 
     if not comparison.empty and "role" in comparison.columns:
         role_bounded = bool(
-            comparison["role"].astype(str).str.contains(
+            comparison["role"]
+            .astype(str)
+            .str.contains(
                 "Candidate for further validation only",
                 regex=False,
-            ).all()
+            )
+            .all()
         )
 
     rows = [
@@ -242,19 +241,13 @@ def build_phase9e_closeout_summary(
     required_wording = phase_config.get("required_closeout_wording", [])
 
     reports_passed = (
-        bool(report_inventory_check["passed"].all())
-        if not report_inventory_check.empty
-        else False
+        bool(report_inventory_check["passed"].all()) if not report_inventory_check.empty else False
     )
     config_passed = (
-        bool(config_flag_check["passed"].all())
-        if not config_flag_check.empty
-        else False
+        bool(config_flag_check["passed"].all()) if not config_flag_check.empty else False
     )
     phase9d_checks_passed = (
-        bool(phase9d_failure_check["passed"].all())
-        if not phase9d_failure_check.empty
-        else False
+        bool(phase9d_failure_check["passed"].all()) if not phase9d_failure_check.empty else False
     )
 
     successor_created = bool(scope.get("successor_candidate_created", False))
@@ -323,14 +316,10 @@ def build_phase9e_gate_report(
     row = closeout_summary.iloc[0]
 
     reports_passed = (
-        bool(report_inventory_check["passed"].all())
-        if not report_inventory_check.empty
-        else False
+        bool(report_inventory_check["passed"].all()) if not report_inventory_check.empty else False
     )
     config_passed = (
-        bool(config_flag_check["passed"].all())
-        if not config_flag_check.empty
-        else False
+        bool(config_flag_check["passed"].all()) if not config_flag_check.empty else False
     )
 
     phase9d_checks = {
@@ -341,14 +330,12 @@ def build_phase9e_gate_report(
     rows = [
         _gate_row(
             "Expected Phase 9 reports are present",
-            (not gates.get("require_expected_reports_present", True))
-            or reports_passed,
+            (not gates.get("require_expected_reports_present", True)) or reports_passed,
             f"missing_prefixes={(~report_inventory_check['passed']).sum()}",
         ),
         _gate_row(
             "Config flags match closeout state",
-            (not gates.get("require_config_flags_match", True))
-            or config_passed,
+            (not gates.get("require_config_flags_match", True)) or config_passed,
             f"flag_failures={(~config_flag_check['passed']).sum()}",
         ),
         _gate_row(
@@ -449,10 +436,7 @@ def write_phase9e_markdown(
             "Phase 9D pre-registered rule test failed."
         ),
         "",
-        (
-            "It does not create a new rule, tune a failed rule, or promote a "
-            "successor candidate."
-        ),
+        ("It does not create a new rule, tune a failed rule, or promote a successor candidate."),
         "",
         "## Report Inventory Check",
         "",
@@ -575,8 +559,7 @@ def save_phase9e_technical_extension_closeout_audit(
         closeout_summary=closeout_summary,
         gate_report=gate_report,
         conclusion=conclusion,
-        output_path=reports_path
-        / "phase9e_technical_extension_closeout_audit.md",
+        output_path=reports_path / "phase9e_technical_extension_closeout_audit.md",
     )
 
     print("Wrote Phase 9E technical extension closeout audit reports.")

@@ -215,9 +215,7 @@ def _find_close_column(frame: pd.DataFrame, candidates: list[str]) -> str | None
         if col in frame.columns:
             return str(col)
 
-    numeric_cols = [
-        col for col in frame.columns if pd.api.types.is_numeric_dtype(frame[col])
-    ]
+    numeric_cols = [col for col in frame.columns if pd.api.types.is_numeric_dtype(frame[col])]
     return str(numeric_cols[0]) if numeric_cols else None
 
 
@@ -521,19 +519,17 @@ def build_phase13m_macro_repair_panel(
 
     frame = macro_frame.copy().sort_values("as_of_date").reset_index(drop=True)
     frame["macro_dgs2_level"] = pd.to_numeric(frame["DGS2"], errors="coerce")
-    frame["macro_dgs10_minus_dgs2"] = (
-        pd.to_numeric(frame["DGS10"], errors="coerce")
-        - pd.to_numeric(frame["DGS2"], errors="coerce")
-    )
+    frame["macro_dgs10_minus_dgs2"] = pd.to_numeric(
+        frame["DGS10"], errors="coerce"
+    ) - pd.to_numeric(frame["DGS2"], errors="coerce")
     frame["macro_cpi_yoy"] = (
         pd.to_numeric(frame["CPIAUCSL"], errors="coerce")
         / pd.to_numeric(frame["CPIAUCSL"], errors="coerce").shift(252)
         - 1
     )
-    frame["macro_unrate_3m_change"] = (
-        pd.to_numeric(frame["UNRATE"], errors="coerce")
-        - pd.to_numeric(frame["UNRATE"], errors="coerce").shift(63)
-    )
+    frame["macro_unrate_3m_change"] = pd.to_numeric(
+        frame["UNRATE"], errors="coerce"
+    ) - pd.to_numeric(frame["UNRATE"], errors="coerce").shift(63)
 
     rows = []
 
@@ -778,9 +774,7 @@ def build_phase13m_target_frame(
         ["supportive", "fragile"],
         default="neutral",
     )
-    frame.loc[frame["future_return_63d"].isna(), "future_63d_spy_return_state"] = (
-        "unavailable"
-    )
+    frame.loc[frame["future_return_63d"].isna(), "future_63d_spy_return_state"] = "unavailable"
 
     frame["future_window_max_drawdown_63d"] = _future_window_max_drawdown(
         frame["adjusted_close"].to_numpy(dtype=float),
@@ -853,9 +847,7 @@ def build_phase13m_assembled_dataset(
 
     start = pd.Timestamp(policy.get("common_start_date", "1900-01-01"))
     end = pd.Timestamp(policy.get("canonical_endpoint", "2100-01-01"))
-    dataset = dataset[
-        pd.to_datetime(dataset["decision_date"]).between(start, end)
-    ].copy()
+    dataset = dataset[pd.to_datetime(dataset["decision_date"]).between(start, end)].copy()
 
     dataset["dataset_id"] = str(policy.get("dataset_id", "phase13m_dataset"))
     dataset["dataset_label"] = str(macro_guard_report.iloc[0]["dataset_label"])
@@ -972,9 +964,7 @@ def build_phase13m_dataset_metadata(
 
     value_columns = [col for col in dataset.columns if col.startswith("value__")]
     state_columns = [col for col in dataset.columns if col.startswith("state__")]
-    missingness_columns = [
-        col for col in dataset.columns if col.startswith("missingness__")
-    ]
+    missingness_columns = [col for col in dataset.columns if col.startswith("missingness__")]
 
     return pd.DataFrame(
         [
@@ -1053,7 +1043,10 @@ def build_phase13m_phase13n_boundary_check(
         ),
     ]
     out = pd.DataFrame(
-        [{"boundary_item": item, "value": value, "passed": passed} for item, value, passed in checks]
+        [
+            {"boundary_item": item, "value": value, "passed": passed}
+            for item, value, passed in checks
+        ]
     )
     out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
     return out
@@ -1120,9 +1113,7 @@ def build_phase13m_summary(
                 if not input_source_check.empty
                 else False,
                 "macro_guard_rows": int(len(macro_guard_report)),
-                "macro_repaired": _bool_value(
-                    macro_guard_report.iloc[0]["repaired_successfully"]
-                )
+                "macro_repaired": _bool_value(macro_guard_report.iloc[0]["repaired_successfully"])
                 if not macro_guard_report.empty
                 else False,
                 "macro_blocked": _bool_value(
@@ -1137,9 +1128,7 @@ def build_phase13m_summary(
                 "target_summary_rows": int(len(target_summary)),
                 "split_summary_rows": int(len(split_summary)),
                 "leakage_flag_count": leakage_count,
-                "phase13n_boundary_passed": bool(
-                    phase13n_boundary_check["passed"].all()
-                )
+                "phase13n_boundary_passed": bool(phase13n_boundary_check["passed"].all())
                 if not phase13n_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -1192,8 +1181,7 @@ def build_phase13m_gate_report(
     rows = [
         _gate_row(
             "Phase 13L passed",
-            (not gates.get("require_phase13l_passed", True))
-            or bool(row["phase13l_result_passed"]),
+            (not gates.get("require_phase13l_passed", True)) or bool(row["phase13l_result_passed"]),
             f"phase13l_result_passed={bool(row['phase13l_result_passed'])}",
         ),
         _gate_row(
@@ -1209,8 +1197,7 @@ def build_phase13m_gate_report(
         ),
         _gate_row(
             "Macro guard report exists",
-            (not gates.get("require_macro_guard_report", True))
-            or int(row["macro_guard_rows"]) > 0,
+            (not gates.get("require_macro_guard_report", True)) or int(row["macro_guard_rows"]) > 0,
             f"macro_guard_rows={int(row['macro_guard_rows'])}",
         ),
         _gate_row(
@@ -1223,14 +1210,12 @@ def build_phase13m_gate_report(
         ),
         _gate_row(
             "Dataset was created",
-            (not gates.get("require_dataset_created", True))
-            or int(row["dataset_rows"]) > 0,
+            (not gates.get("require_dataset_created", True)) or int(row["dataset_rows"]) > 0,
             f"dataset_rows={int(row['dataset_rows'])}",
         ),
         _gate_row(
             "Dataset label is honest",
-            (not gates.get("require_dataset_honest_label", True))
-            or _dataset_label_is_honest(row),
+            (not gates.get("require_dataset_honest_label", True)) or _dataset_label_is_honest(row),
             f"dataset_label={row['dataset_label']}",
         ),
         _gate_row(
@@ -1448,8 +1433,7 @@ def save_phase13m_ml_dataset_assembly_execution(
             "Gate Report": gate_report,
             "Conclusion": conclusion,
         },
-        output_path=reports_path
-        / "phase13m_ml_dataset_assembly_macro_guard.md",
+        output_path=reports_path / "phase13m_ml_dataset_assembly_macro_guard.md",
     )
 
     print("Wrote Phase 13M ML dataset assembly reports.")
@@ -1715,10 +1699,8 @@ def build_phase13n_phase13o_boundary_check(
         (
             "phase13o_forbidden_next_step",
             str(boundary.get("forbidden_next_step", "")),
-            "model training execution"
-            in str(boundary.get("forbidden_next_step", "")).lower()
-            and "signal creation"
-            in str(boundary.get("forbidden_next_step", "")).lower(),
+            "model training execution" in str(boundary.get("forbidden_next_step", "")).lower()
+            and "signal creation" in str(boundary.get("forbidden_next_step", "")).lower(),
         ),
         (
             "phase13o_may_preregister_model_training",
@@ -1757,7 +1739,10 @@ def build_phase13n_phase13o_boundary_check(
         ),
     ]
     out = pd.DataFrame(
-        [{"boundary_item": item, "value": value, "passed": passed} for item, value, passed in checks]
+        [
+            {"boundary_item": item, "value": value, "passed": passed}
+            for item, value, passed in checks
+        ]
     )
     out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
     return out
@@ -1784,9 +1769,7 @@ def build_phase13n_summary(
                 "phase_branch": str(phase_config.get("phase_branch", "")),
                 "source_phase": str(phase_config.get("source_phase", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "phase13m_reports_present": bool(
-                    report_inventory_check["present"].all()
-                )
+                "phase13m_reports_present": bool(report_inventory_check["present"].all())
                 if not report_inventory_check.empty
                 else False,
                 "phase13m_result_passed": bool(phase13m_result_check["passed"].all())
@@ -1804,19 +1787,13 @@ def build_phase13n_summary(
                 "split_quality_passed": bool(split_quality_check["passed"].all())
                 if not split_quality_check.empty
                 else False,
-                "macro_guard_quality_passed": bool(
-                    macro_guard_quality_check["passed"].all()
-                )
+                "macro_guard_quality_passed": bool(macro_guard_quality_check["passed"].all())
                 if not macro_guard_quality_check.empty
                 else False,
-                "forbidden_column_check_passed": bool(
-                    forbidden_column_check["passed"].all()
-                )
+                "forbidden_column_check_passed": bool(forbidden_column_check["passed"].all())
                 if not forbidden_column_check.empty
                 else False,
-                "phase13o_boundary_passed": bool(
-                    phase13o_boundary_check["passed"].all()
-                )
+                "phase13o_boundary_passed": bool(phase13o_boundary_check["passed"].all())
                 if not phase13o_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -1896,8 +1873,7 @@ def build_phase13n_gate_report(
         _gate_row(
             "No forbidden model/signal/backtest columns exist",
             bool(row["forbidden_column_check_passed"]),
-            f"forbidden_column_check_passed="
-            f"{bool(row['forbidden_column_check_passed'])}",
+            f"forbidden_column_check_passed={bool(row['forbidden_column_check_passed'])}",
         ),
         _gate_row(
             "Phase 13O boundary is pre-registration-only",
@@ -1988,9 +1964,7 @@ def save_phase13n_ml_dataset_quality_leakage_audit(
         thresholds=thresholds,
     )
     split_quality_check = build_phase13n_split_quality_check(dataset)
-    macro_guard_quality_check = build_phase13n_macro_guard_quality_check(
-        macro_guard_report
-    )
+    macro_guard_quality_check = build_phase13n_macro_guard_quality_check(macro_guard_report)
     forbidden_column_check = build_phase13n_forbidden_column_check(
         dataset=dataset,
         forbidden_columns=_as_list(thresholds.get("forbidden_columns")),

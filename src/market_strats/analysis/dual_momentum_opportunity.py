@@ -116,16 +116,10 @@ def create_opportunity_cost_segments(
             "cash_return_pct": cash_return * 100.0,
             "best_available_asset": best_available_asset,
             "best_available_return_pct": best_available_return * 100.0,
-            f"missed_return_vs_{asset_a}_pct_points": (asset_a_return - strategy_return)
-            * 100.0,
-            f"missed_return_vs_{asset_b}_pct_points": (asset_b_return - strategy_return)
-            * 100.0,
-            "missed_return_vs_cash_pct_points": (cash_return - strategy_return)
-            * 100.0,
-            "missed_return_vs_best_pct_points": (
-                best_available_return - strategy_return
-            )
-            * 100.0,
+            f"missed_return_vs_{asset_a}_pct_points": (asset_a_return - strategy_return) * 100.0,
+            f"missed_return_vs_{asset_b}_pct_points": (asset_b_return - strategy_return) * 100.0,
+            "missed_return_vs_cash_pct_points": (cash_return - strategy_return) * 100.0,
+            "missed_return_vs_best_pct_points": (best_available_return - strategy_return) * 100.0,
         }
 
         rows.append(row)

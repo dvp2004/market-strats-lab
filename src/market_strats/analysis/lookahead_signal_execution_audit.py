@@ -69,9 +69,7 @@ def _validate_required_columns(
     config: dict,
 ) -> pd.DataFrame:
     phase_config = _phase7b_config(config)
-    required_columns = [
-        str(column) for column in phase_config.get("required_columns", [])
-    ]
+    required_columns = [str(column) for column in phase_config.get("required_columns", [])]
 
     rows: list[dict] = []
 
@@ -99,12 +97,8 @@ def _create_trend_sma_audit(
 
     trend_sma_days = int(overlay_config.get("trend_sma_days", 200))
     tolerance = float(phase_config.get("trend_sma_tolerance", 0.000001))
-    ignored_warmup_rows = int(
-        phase_config.get("ignored_initial_sma_warmup_rows", trend_sma_days)
-    )
-    max_allowed_mismatches = int(
-        phase_config.get("max_allowed_trend_sma_mismatches", 0)
-    )
+    ignored_warmup_rows = int(phase_config.get("ignored_initial_sma_warmup_rows", trend_sma_days))
+    max_allowed_mismatches = int(phase_config.get("max_allowed_trend_sma_mismatches", 0))
 
     result = overlay_result.copy()
 
@@ -149,8 +143,7 @@ def _create_trend_sma_audit(
         )
 
     comparable["abs_diff"] = (
-        comparable["trend_sma"].astype(float)
-        - comparable["computed_trend_sma"].astype(float)
+        comparable["trend_sma"].astype(float) - comparable["computed_trend_sma"].astype(float)
     ).abs()
 
     mismatch_count = int((comparable["abs_diff"] > tolerance).sum())
@@ -192,12 +185,12 @@ def _reconstruct_raw_defensive_state(
     above_trend = signal_price > trend_sma
     below_trend = signal_price < trend_sma
 
-    confirmed_above = (
-        above_trend.rolling(confirmation_days).sum() >= confirmation_days
-    ).fillna(False)
-    confirmed_below = (
-        below_trend.rolling(confirmation_days).sum() >= confirmation_days
-    ).fillna(False)
+    confirmed_above = (above_trend.rolling(confirmation_days).sum() >= confirmation_days).fillna(
+        False
+    )
+    confirmed_below = (below_trend.rolling(confirmation_days).sum() >= confirmation_days).fillna(
+        False
+    )
 
     state = False
     states: list[bool] = []
@@ -221,9 +214,7 @@ def _create_confirmation_reconstruction_audit(
     overlay_config = config.get("regime_switch_overlay", {})
 
     confirmation_days = int(overlay_config.get("confirmation_days", 3))
-    max_allowed_mismatches = int(
-        phase_config.get("max_allowed_confirmation_mismatches", 0)
-    )
+    max_allowed_mismatches = int(phase_config.get("max_allowed_confirmation_mismatches", 0))
 
     required = {
         "signal_price",
@@ -249,9 +240,7 @@ def _create_confirmation_reconstruction_audit(
         overlay_result=overlay_result,
         confirmation_days=confirmation_days,
     )
-    reported = overlay_result["raw_signal_use_defensive"].astype(bool).reset_index(
-        drop=True
-    )
+    reported = overlay_result["raw_signal_use_defensive"].astype(bool).reset_index(drop=True)
 
     mismatch_mask = reconstructed.astype(bool).ne(reported)
     mismatch_count = int(mismatch_mask.sum())
@@ -260,9 +249,9 @@ def _create_confirmation_reconstruction_audit(
 
     if mismatch_count:
         first_mismatch_idx = int(np.flatnonzero(mismatch_mask.to_numpy())[0])
-        first_mismatch_date = pd.to_datetime(
-            overlay_result.loc[first_mismatch_idx, "date"]
-        ).date().isoformat()
+        first_mismatch_date = (
+            pd.to_datetime(overlay_result.loc[first_mismatch_idx, "date"]).date().isoformat()
+        )
 
     passed = mismatch_count <= max_allowed_mismatches
 
@@ -323,15 +312,12 @@ def _create_switch_timing_audit(
 
     result = overlay_result.copy()
     result["date"] = pd.to_datetime(result["date"])
-    result["selected_defensive"] = _selected_mode_to_defensive_state(
-        result["selected_mode"]
-    )
+    result["selected_defensive"] = _selected_mode_to_defensive_state(result["selected_mode"])
     result["previous_selected_mode"] = result["selected_mode"].shift(1)
     result["previous_selected_defensive"] = result["selected_defensive"].shift(1)
 
-    switch_mask = (
-        result["previous_selected_defensive"].notna()
-        & result["selected_defensive"].ne(result["previous_selected_defensive"])
+    switch_mask = result["previous_selected_defensive"].notna() & result["selected_defensive"].ne(
+        result["previous_selected_defensive"]
     )
 
     rows: list[dict] = []
@@ -340,9 +326,7 @@ def _create_switch_timing_audit(
         prior_idx = int(idx) - 1
 
         prior_guarded_signal = (
-            bool(result.loc[prior_idx, "guarded_signal_use_defensive"])
-            if prior_idx >= 0
-            else None
+            bool(result.loc[prior_idx, "guarded_signal_use_defensive"]) if prior_idx >= 0 else None
         )
         current_guarded_signal = bool(row["guarded_signal_use_defensive"])
         current_selected_defensive = bool(row["selected_defensive"])
@@ -353,9 +337,7 @@ def _create_switch_timing_audit(
             if prior_guarded_signal is not None
             else False
         )
-        current_signal_matches_new_mode = (
-            current_guarded_signal == current_selected_defensive
-        )
+        current_signal_matches_new_mode = current_guarded_signal == current_selected_defensive
 
         status = "Passed" if trend_available else "Failed"
 
@@ -434,23 +416,17 @@ def _create_slippage_turnover_audit(
 
     result = overlay_result.copy()
     result["date"] = pd.to_datetime(result["date"])
-    result["selected_mode_changed"] = result["selected_mode"].ne(
-        result["selected_mode"].shift(1)
-    )
+    result["selected_mode_changed"] = result["selected_mode"].ne(result["selected_mode"].shift(1))
     result.loc[result.index[0], "selected_mode_changed"] = False
 
     result["overlay_turnover"] = result["overlay_turnover"].astype(float)
     result["overlay_slippage_cost"] = result["overlay_slippage_cost"].astype(float)
-    result["applied_overlay_slippage_bps"] = result[
-        "applied_overlay_slippage_bps"
-    ].astype(float)
+    result["applied_overlay_slippage_bps"] = result["applied_overlay_slippage_bps"].astype(float)
 
     slippage_rows = result[result["overlay_slippage_cost"] > 0].copy()
     turnover_rows = result[result["overlay_turnover"] > 0].copy()
 
-    slippage_without_turnover = slippage_rows[
-        slippage_rows["overlay_turnover"] <= 0
-    ]
+    slippage_without_turnover = slippage_rows[slippage_rows["overlay_turnover"] <= 0]
     positive_bps_without_cost_or_turnover = result[
         (result["applied_overlay_slippage_bps"] > 0)
         & (result["overlay_turnover"] <= 0)
@@ -461,9 +437,7 @@ def _create_slippage_turnover_audit(
         [
             {
                 "audit": "slippage_turnover_alignment",
-                "status": "Passed"
-                if slippage_without_turnover.empty
-                else "Failed",
+                "status": "Passed" if slippage_without_turnover.empty else "Failed",
                 "row_count_checked": int(len(result)),
                 "mode_switch_rows": int(result["selected_mode_changed"].sum()),
                 "slippage_rows": int(len(slippage_rows)),
@@ -491,13 +465,9 @@ def _create_lookahead_conclusion(
 ) -> pd.DataFrame:
     column_failed = column_audit[column_audit["status"] == "Failed"]
     trend_failed = trend_sma_audit[trend_sma_audit["status"] == "Failed"]
-    confirmation_failed = confirmation_audit[
-        confirmation_audit["status"] == "Failed"
-    ]
+    confirmation_failed = confirmation_audit[confirmation_audit["status"] == "Failed"]
     switch_failed = switch_timing_audit[switch_timing_audit["status"] == "Failed"]
-    slippage_failed = slippage_turnover_audit[
-        slippage_turnover_audit["status"] == "Failed"
-    ]
+    slippage_failed = slippage_turnover_audit[slippage_turnover_audit["status"] == "Failed"]
 
     core_passed = (
         column_failed.empty

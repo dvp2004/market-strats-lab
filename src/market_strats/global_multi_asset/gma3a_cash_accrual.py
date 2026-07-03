@@ -26,8 +26,10 @@ def build_tournament_cash_accrual(raw_path: Path, output_root: Path) -> None:
     spy_dates = sorted(spy_df["date"].tolist())
 
     dgs3mo = dgs3mo[~dgs3mo["value"].isna() & (dgs3mo["value"] != ".")]
-    dgs3mo["value_float"] = pd.to_numeric(dgs3mo["value"], errors='coerce')
-    dgs3mo = dgs3mo.dropna(subset=["value_float"]).sort_values("observation_date").reset_index(drop=True)
+    dgs3mo["value_float"] = pd.to_numeric(dgs3mo["value"], errors="coerce")
+    dgs3mo = (
+        dgs3mo.dropna(subset=["value_float"]).sort_values("observation_date").reset_index(drop=True)
+    )
 
     rows: list[dict[str, Any]] = []
 
@@ -57,22 +59,24 @@ def build_tournament_cash_accrual(raw_path: Path, output_root: Path) -> None:
         annual_yield = val / 100.0
         period_return = annual_yield * accrual_days / 365.0
 
-        rows.append({
-            "observation_date": start_date,
-            "availability_timestamp_utc": f"{start_date} 23:59:59+00:00",
-            "annual_yield": annual_yield,
-            "yield_convention": "investment_yield_percent",
-            "annualisation_day_count": "actual_365",
-            "accrual_start": start_date,
-            "accrual_end": end_date,
-            "accrual_days": accrual_days,
-            "period_return": period_return,
-            "source_series": "DGS3MO",
-            "source_realtime_start": row["realtime_start"],
-            "source_vintage": row["realtime_start"],
-            "source_manifest_sha256": "live_raw_file",
-            "cash_status": "available_after_timestamp",
-        })
+        rows.append(
+            {
+                "observation_date": start_date,
+                "availability_timestamp_utc": f"{start_date} 23:59:59+00:00",
+                "annual_yield": annual_yield,
+                "yield_convention": "investment_yield_percent",
+                "annualisation_day_count": "actual_365",
+                "accrual_start": start_date,
+                "accrual_end": end_date,
+                "accrual_days": accrual_days,
+                "period_return": period_return,
+                "source_series": "DGS3MO",
+                "source_realtime_start": row["realtime_start"],
+                "source_vintage": row["realtime_start"],
+                "source_manifest_sha256": "live_raw_file",
+                "cash_status": "available_after_timestamp",
+            }
+        )
 
     df = pd.DataFrame(rows)
     df = df[df["observation_date"] <= "2026-05-01"]
@@ -88,12 +92,15 @@ def build_tournament_cash_accrual(raw_path: Path, output_root: Path) -> None:
         "start_date": df["observation_date"].min(),
         "end_date": df["observation_date"].max(),
         "row_count": len(df),
-        "point_in_time_eligibility_audit": "passed"
+        "point_in_time_eligibility_audit": "passed",
     }
     out_json.write_text(json.dumps(manifest, indent=2))
     print(f"Built cash accrual with {len(df)} rows.")
 
+
 if __name__ == "__main__":
-    raw_path = Path("data/global_multi_asset_alpha/macro_raw/fred/live/20260617T071827176928Z/macro_observations_live.csv")
+    raw_path = Path(
+        "data/global_multi_asset_alpha/macro_raw/fred/live/20260617T071827176928Z/macro_observations_live.csv"
+    )
     out_root = Path("data/global_multi_asset_alpha/gma3a_tournament_cash")
     build_tournament_cash_accrual(raw_path, out_root)

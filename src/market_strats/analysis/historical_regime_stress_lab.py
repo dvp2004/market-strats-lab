@@ -430,12 +430,18 @@ def _load_phase6_baseline_result(path: Path) -> tuple[pd.DataFrame, str]:
     frame["equity"] = pd.to_numeric(frame["equity"], errors="coerce")
 
     if "exposure" in raw.columns:
-        frame["position"] = pd.to_numeric(raw.loc[frame.index, "exposure"], errors="coerce").fillna(0.0).to_numpy()
+        frame["position"] = (
+            pd.to_numeric(raw.loc[frame.index, "exposure"], errors="coerce").fillna(0.0).to_numpy()
+        )
     else:
         frame["position"] = 1.0
-    frame["cash_position"] = (1.0 - pd.to_numeric(frame["position"], errors="coerce")).clip(0.0, 1.0)
+    frame["cash_position"] = (1.0 - pd.to_numeric(frame["position"], errors="coerce")).clip(
+        0.0, 1.0
+    )
     if "turnover" in raw.columns:
-        frame["turnover"] = pd.to_numeric(raw.loc[frame.index, "turnover"], errors="coerce").fillna(0.0).to_numpy()
+        frame["turnover"] = (
+            pd.to_numeric(raw.loc[frame.index, "turnover"], errors="coerce").fillna(0.0).to_numpy()
+        )
     else:
         frame["turnover"] = 0.0
 
@@ -590,7 +596,9 @@ def reconstruct_candidate_results(
     return results, pd.DataFrame(unavailable)
 
 
-def _asset_first_dates(price_data: dict[str, pd.DataFrame], assets: list[str]) -> dict[str, pd.Timestamp]:
+def _asset_first_dates(
+    price_data: dict[str, pd.DataFrame], assets: list[str]
+) -> dict[str, pd.Timestamp]:
     first_dates: dict[str, pd.Timestamp] = {}
     for asset in assets:
         frame = price_data.get(asset)
@@ -612,11 +620,7 @@ def _asset_inception_block(
         for asset, first in sorted(first_dates.items())
         if first > regime_start
     ]
-    return (
-        f"asset_inception_after_regime_start:{';'.join(blockers)}"
-        if blockers
-        else ""
-    )
+    return f"asset_inception_after_regime_start:{';'.join(blockers)}" if blockers else ""
 
 
 def _slice_result(
@@ -663,9 +667,7 @@ def calculate_regime_metric_row(
         "asset_roster": candidate.get("asset_roster", ""),
         "regime_name": regime["regime_name"],
         "regime_description": regime.get("description", ""),
-        "is_full_canonical_context": _bool_value(
-            regime.get("is_full_canonical_context", False)
-        ),
+        "is_full_canonical_context": _bool_value(regime.get("is_full_canonical_context", False)),
         "is_crash_regime": _bool_value(regime.get("is_crash_regime", False)),
         "short_window_directional_only": _bool_value(
             regime.get("short_window_directional_only", False)
@@ -906,14 +908,14 @@ def build_regime_robustness_scores(summary: pd.DataFrame) -> pd.DataFrame:
     total_regimes = (
         out["regimes_available"].astype(float) + out["regimes_unavailable"].astype(float)
     ).replace(0, np.nan)
-    out["availability_component"] = (out["regimes_available"].astype(float) / total_regimes).fillna(0.0)
+    out["availability_component"] = (out["regimes_available"].astype(float) / total_regimes).fillna(
+        0.0
+    )
     available = out["regimes_available"].replace(0, np.nan).astype(float)
     out["positive_return_component"] = (
         out["positive_return_regimes"].astype(float) / available
     ).fillna(0.0)
-    out["beat_spy_component"] = (
-        out["beat_spy_regimes"].astype(float) / available
-    ).fillna(0.0)
+    out["beat_spy_component"] = (out["beat_spy_regimes"].astype(float) / available).fillna(0.0)
     worst_dd = pd.to_numeric(out["worst_max_drawdown_pct"], errors="coerce").fillna(-100.0)
     out["drawdown_component"] = (1.0 - worst_dd.abs() / 70.0).clip(0.0, 1.0)
     excess = pd.to_numeric(out["mean_excess_total_return_vs_spy_pct"], errors="coerce").fillna(0.0)
@@ -992,22 +994,16 @@ def build_regime_robustness_score_components(regime_metrics: pd.DataFrame) -> pd
         primary_calmar = primary.loc[
             primary["included_in_primary_calmar_score"].map(_bool_value)
         ].copy()
-        full_context = available.loc[
-            available["is_full_canonical_context"].map(_bool_value)
-        ].copy()
+        full_context = available.loc[available["is_full_canonical_context"].map(_bool_value)].copy()
         crash = primary.loc[primary["is_crash_regime"].map(_bool_value)].copy()
-        major_crash = crash.loc[
-            ~crash["short_window_directional_only"].map(_bool_value)
-        ].copy()
+        major_crash = crash.loc[~crash["short_window_directional_only"].map(_bool_value)].copy()
 
         available_subregime_count = len(primary)
         available_crash_regime_count = len(crash)
         beat_spy_subregime_count = int(primary["beat_spy_in_regime"].map(_bool_value).sum())
         beat_spy_crash_regime_count = int(crash["beat_spy_in_regime"].map(_bool_value).sum())
         availability_component = (
-            available_subregime_count / total_primary_regimes
-            if total_primary_regimes
-            else 0.0
+            available_subregime_count / total_primary_regimes if total_primary_regimes else 0.0
         )
 
         worst_dd = _min_numeric(primary, "max_drawdown_pct", default=np.nan)
@@ -1034,9 +1030,7 @@ def build_regime_robustness_score_components(regime_metrics: pd.DataFrame) -> pd
         crash_worst_dd = _min_numeric(crash, "max_drawdown_pct", default=np.nan)
         crash_drawdown_component = _normalised_drawdown_component(crash_worst_dd)
         crash_survival_component = (
-            0.40 * crash_beat_rate
-            + 0.25 * crash_positive_rate
-            + 0.35 * crash_drawdown_component
+            0.40 * crash_beat_rate + 0.25 * crash_positive_rate + 0.35 * crash_drawdown_component
         )
 
         primary_subregime_score = _component_score(
@@ -1071,7 +1065,9 @@ def build_regime_robustness_score_components(regime_metrics: pd.DataFrame) -> pd
             .str.contains("asset_inception_after_regime_start", na=False)
             .any()
         )
-        btc_or_inception_caveat_component = -8.0 if uses_btc else (-3.0 if inception_limited else 0.0)
+        btc_or_inception_caveat_component = (
+            -8.0 if uses_btc else (-3.0 if inception_limited else 0.0)
+        )
 
         blocking_reasons: list[str] = []
         worst_dd_all = _min_numeric(available, "max_drawdown_pct", default=np.nan)
@@ -1090,10 +1086,7 @@ def build_regime_robustness_score_components(regime_metrics: pd.DataFrame) -> pd
             blocking_reasons.append(f"crash_drawdown_worse_than_spy_by_10pp:{regimes}")
 
         crash_failures = major_crash.loc[
-            (
-                pd.to_numeric(major_crash["excess_total_return_vs_spy_pct"], errors="coerce")
-                < 0
-            )
+            (pd.to_numeric(major_crash["excess_total_return_vs_spy_pct"], errors="coerce") < 0)
             & (
                 pd.to_numeric(
                     major_crash["drawdown_improvement_vs_spy_pct"],

@@ -1,4 +1,5 @@
 """GMA-1A canonical market bundle, total-return, calendar, reconciliation and reports."""
+
 from __future__ import annotations
 
 import subprocess
@@ -101,6 +102,7 @@ def next_eligible_completed_observation(
 # Total-return construction
 # ---------------------------------------------------------------------------
 
+
 def build_total_return_series(
     completed: pd.DataFrame,
     actions: pd.DataFrame,
@@ -125,10 +127,12 @@ def build_total_return_series(
     if not actions.empty and "date" in actions.columns:
         acts = actions.copy()
         acts["date"] = pd.to_datetime(acts["date"])
-        acts = acts.groupby("date", as_index=False).agg({
-            "dividends": "sum",
-            "splits": lambda x: x.loc[x.ne(0)].iloc[0] if x.ne(0).any() else 0.0,
-        })
+        acts = acts.groupby("date", as_index=False).agg(
+            {
+                "dividends": "sum",
+                "splits": lambda x: x.loc[x.ne(0)].iloc[0] if x.ne(0).any() else 0.0,
+            }
+        )
         df = df.merge(acts, on="date", how="left")
     else:
         df["dividends"] = 0.0
@@ -171,6 +175,7 @@ def build_total_return_series(
 # ---------------------------------------------------------------------------
 # Reconciliation against Yahoo adjusted close
 # ---------------------------------------------------------------------------
+
 
 def reconcile_total_return(
     canonical: pd.DataFrame,
@@ -230,7 +235,7 @@ def reconcile_total_return(
     material_mask = diff_bps > tolerance_bps
     dates = df.loc[mask, "date"].reset_index(drop=True)
     material_mask_aligned = material_mask.reset_index(drop=True)
-    mat_dates = dates[material_mask_aligned.iloc[:len(dates)]]
+    mat_dates = dates[material_mask_aligned.iloc[: len(dates)]]
     earliest = ""
     latest = ""
     if not mat_dates.empty:
@@ -279,6 +284,7 @@ def reconcile_total_return(
 # Canonical market bundle builder
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class GMA1AResult:
     decision: str
@@ -302,7 +308,10 @@ def _git_head() -> str:
     try:
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
-            check=False, capture_output=True, text=True, encoding="utf-8",
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
         )
         return result.stdout.strip() if result.returncode == 0 else "unknown"
     except OSError:
@@ -324,9 +333,7 @@ def run_gma1a_market_data_foundation(
     commit = commit_sha or _git_head()
     outputs: dict[str, Path] = {}
     warnings: list[str] = []
-    tolerance_bps = float(
-        config.quality.get("adjusted_close_reconciliation_tolerance_bps", 1.0)
-    )
+    tolerance_bps = float(config.quality.get("adjusted_close_reconciliation_tolerance_bps", 1.0))
     required_core = list(config.quality.get("required_core_instruments", []))
 
     # -----------------------------------------------------------------------
@@ -334,12 +341,8 @@ def run_gma1a_market_data_foundation(
     # -----------------------------------------------------------------------
     selection_df, selected_manifests = select_canonical_snapshots(config, registry)
     selection_set_hash = compute_selection_set_hash(selection_df)
-    sel_manifest = build_selection_manifest(
-        config, selection_df, selection_set_hash, commit
-    )
-    sel_outputs = write_selection_reports(
-        config, selection_df, sel_manifest, selection_set_hash
-    )
+    sel_manifest = build_selection_manifest(config, selection_df, selection_set_hash, commit)
+    sel_outputs = write_selection_reports(config, selection_df, sel_manifest, selection_set_hash)
     outputs.update(sel_outputs)
 
     # -----------------------------------------------------------------------
@@ -358,17 +361,17 @@ def run_gma1a_market_data_foundation(
         calendar_id = entry.get("expected_calendar", "us_listed_etf")
         provider_symbol = entry.get("provider_symbol", instrument_id)
 
-        sel_row = selection_df.loc[
-            selection_df["instrument_id"].eq(instrument_id)
-        ]
+        sel_row = selection_df.loc[selection_df["instrument_id"].eq(instrument_id)]
         if sel_row.empty or sel_row.iloc[0]["selection_status"] != "selected":
             # Selection failed
             if is_core:
                 core_blocked = True
                 warnings.append(f"{instrument_id}:canonical_selection_failed")
-            readiness_rows.append(_readiness_row(
-                instrument_id, entry, selected=False, reason="canonical_selection_failed"
-            ))
+            readiness_rows.append(
+                _readiness_row(
+                    instrument_id, entry, selected=False, reason="canonical_selection_failed"
+                )
+            )
             bundle_rows.append(_empty_bundle_row(instrument_id, calendar_id))
             recon_rows.append(_empty_recon_row(instrument_id))
             action_rows.append(_empty_action_row(instrument_id, provider_symbol))
@@ -381,9 +384,7 @@ def run_gma1a_market_data_foundation(
         # Load data
         raw_frame = pd.read_csv(raw_path)
         normalised = normalise_price_frame(raw_frame)
-        completed = completed_history(
-            normalised, str(manifest.get("retrieved_at_utc", ""))
-        )
+        completed = completed_history(normalised, str(manifest.get("retrieved_at_utc", "")))
         actions = corporate_action_frame(raw_frame)
 
         # Track excluded observations
@@ -397,54 +398,57 @@ def run_gma1a_market_data_foundation(
                 row_date = row["date"]
                 if pd.notna(row_date) and row_date not in completed_dates_set:
                     is_final = idx == len(all_normalised) - 1
-                    excluded_rows.append({
-                        "instrument_id": instrument_id,
-                        "date": row_date.date().isoformat() if pd.notna(row_date) else "",
-                        "exclusion_reason": (
-                            "incomplete_final_observation"
-                            if is_final else "incomplete_or_active_session"
-                        ),
-                        "provider_values_present": not row[
-                            ["open", "high", "low", "close", "volume"]
-                        ].isna().all(),
-                        "is_provider_final_row": is_final,
-                        "provider_reported_final_date": str(
-                            manifest.get("last_observation_date", "")
-                        ),
-                        "retrieval_timestamp_utc": str(
-                            manifest.get("retrieved_at_utc", "")
-                        ),
-                        "source_manifest_path": str(manifest_path),
-                        "source_manifest_sha256": sha256_file(manifest_path),
-                    })
+                    excluded_rows.append(
+                        {
+                            "instrument_id": instrument_id,
+                            "date": row_date.date().isoformat() if pd.notna(row_date) else "",
+                            "exclusion_reason": (
+                                "incomplete_final_observation"
+                                if is_final
+                                else "incomplete_or_active_session"
+                            ),
+                            "provider_values_present": not row[
+                                ["open", "high", "low", "close", "volume"]
+                            ]
+                            .isna()
+                            .all(),
+                            "is_provider_final_row": is_final,
+                            "provider_reported_final_date": str(
+                                manifest.get("last_observation_date", "")
+                            ),
+                            "retrieval_timestamp_utc": str(manifest.get("retrieved_at_utc", "")),
+                            "source_manifest_path": str(manifest_path),
+                            "source_manifest_sha256": sha256_file(manifest_path),
+                        }
+                    )
 
         # Build total-return series
         tr_df = build_total_return_series(completed, actions)
 
         # Build canonical bundle frame
-        canon = pd.DataFrame({
-            "date": tr_df["date"],
-            "instrument_id": instrument_id,
-            "open_raw": tr_df["open"],
-            "high_raw": tr_df["high"],
-            "low_raw": tr_df["low"],
-            "close_raw": tr_df["close"],
-            "adj_close_provider": tr_df["adj_close"],
-            "volume": tr_df["volume"],
-            "dividend_cash": tr_df["dividend_cash"],
-            "split_ratio": tr_df["split_ratio"],
-            "is_completed_observation": True,
-            "calendar_id": calendar_id,
-            "source_manifest_path": str(manifest_path),
-            "source_manifest_sha256": sha256_file(manifest_path),
-            "source_raw_sha256": str(manifest.get("raw_file_sha256", "")),
-            "source_normalised_sha256": str(manifest.get("normalised_file_sha256", "")),
-            "total_return_factor": tr_df["total_return_factor"],
-            "total_return_index": tr_df["total_return_index"],
-            "total_return_construction_status": tr_df[
-                "total_return_construction_status"
-            ],
-        })
+        canon = pd.DataFrame(
+            {
+                "date": tr_df["date"],
+                "instrument_id": instrument_id,
+                "open_raw": tr_df["open"],
+                "high_raw": tr_df["high"],
+                "low_raw": tr_df["low"],
+                "close_raw": tr_df["close"],
+                "adj_close_provider": tr_df["adj_close"],
+                "volume": tr_df["volume"],
+                "dividend_cash": tr_df["dividend_cash"],
+                "split_ratio": tr_df["split_ratio"],
+                "is_completed_observation": True,
+                "calendar_id": calendar_id,
+                "source_manifest_path": str(manifest_path),
+                "source_manifest_sha256": sha256_file(manifest_path),
+                "source_raw_sha256": str(manifest.get("raw_file_sha256", "")),
+                "source_normalised_sha256": str(manifest.get("normalised_file_sha256", "")),
+                "total_return_factor": tr_df["total_return_factor"],
+                "total_return_index": tr_df["total_return_index"],
+                "total_return_construction_status": tr_df["total_return_construction_status"],
+            }
+        )
 
         # Write canonical file with deterministic name
         manifest_sha_short = sha256_file(manifest_path)[:12]
@@ -468,68 +472,72 @@ def run_gma1a_market_data_foundation(
         split_events = tr_df["split_ratio"].fillna(0).ne(0).sum()
         div_dates = tr_df.loc[tr_df["dividend_cash"].fillna(0).ne(0), "date"]
         split_dates = tr_df.loc[tr_df["split_ratio"].fillna(0).ne(0), "date"]
-        action_rows.append({
-            "instrument_id": instrument_id,
-            "provider_symbol": provider_symbol,
-            "dividend_capability": "available",
-            "split_capability": "available",
-            "dividend_event_count": int(div_events),
-            "split_event_count": int(split_events),
-            "first_dividend_date": (
-                div_dates.min().date().isoformat() if not div_dates.empty else ""
-            ),
-            "last_dividend_date": (
-                div_dates.max().date().isoformat() if not div_dates.empty else ""
-            ),
-            "first_split_date": (
-                split_dates.min().date().isoformat() if not split_dates.empty else ""
-            ),
-            "last_split_date": (
-                split_dates.max().date().isoformat() if not split_dates.empty else ""
-            ),
-            "raw_price_split_basis_assessment": (
-                "yahoo_auto_adjust_false_raw_close_is_split_adjusted"
-            ),
-            "action_timing_rule": "dividend_applied_on_ex_date",
-            "missing_action_policy": "flag_and_continue",
-            "action_contract_status": "active",
-            "warnings": "",
-        })
+        action_rows.append(
+            {
+                "instrument_id": instrument_id,
+                "provider_symbol": provider_symbol,
+                "dividend_capability": "available",
+                "split_capability": "available",
+                "dividend_event_count": int(div_events),
+                "split_event_count": int(split_events),
+                "first_dividend_date": (
+                    div_dates.min().date().isoformat() if not div_dates.empty else ""
+                ),
+                "last_dividend_date": (
+                    div_dates.max().date().isoformat() if not div_dates.empty else ""
+                ),
+                "first_split_date": (
+                    split_dates.min().date().isoformat() if not split_dates.empty else ""
+                ),
+                "last_split_date": (
+                    split_dates.max().date().isoformat() if not split_dates.empty else ""
+                ),
+                "raw_price_split_basis_assessment": (
+                    "yahoo_auto_adjust_false_raw_close_is_split_adjusted"
+                ),
+                "action_timing_rule": "dividend_applied_on_ex_date",
+                "missing_action_policy": "flag_and_continue",
+                "action_contract_status": "active",
+                "warnings": "",
+            }
+        )
 
         # Bundle inventory
-        bundle_rows.append({
-            "instrument_id": instrument_id,
-            "canonical_file_path": str(canon_path),
-            "canonical_file_sha256": sha256_file(canon_path),
-            "selected_manifest_sha256": sha256_file(manifest_path),
-            "first_completed_date": (
-                canon["date"].min().date().isoformat()
-                if not canon.empty else ""
-            ),
-            "last_completed_date": (
-                canon["date"].max().date().isoformat()
-                if not canon.empty else ""
-            ),
-            "completed_row_count": len(canon),
-            "excluded_row_count": len([
-                e for e in excluded_rows
-                if e["instrument_id"] == instrument_id
-            ]),
-            "dividend_event_count": int(div_events),
-            "split_event_count": int(split_events),
-            "calendar_id": calendar_id,
-            "total_return_series_available": True,
-            "total_return_reconciliation_status": recon["reconciliation_status"],
-            "bundle_status": "ready",
-            "warnings": "",
-        })
+        bundle_rows.append(
+            {
+                "instrument_id": instrument_id,
+                "canonical_file_path": str(canon_path),
+                "canonical_file_sha256": sha256_file(canon_path),
+                "selected_manifest_sha256": sha256_file(manifest_path),
+                "first_completed_date": (
+                    canon["date"].min().date().isoformat() if not canon.empty else ""
+                ),
+                "last_completed_date": (
+                    canon["date"].max().date().isoformat() if not canon.empty else ""
+                ),
+                "completed_row_count": len(canon),
+                "excluded_row_count": len(
+                    [e for e in excluded_rows if e["instrument_id"] == instrument_id]
+                ),
+                "dividend_event_count": int(div_events),
+                "split_event_count": int(split_events),
+                "calendar_id": calendar_id,
+                "total_return_series_available": True,
+                "total_return_reconciliation_status": recon["reconciliation_status"],
+                "bundle_status": "ready",
+                "warnings": "",
+            }
+        )
 
         # Readiness
-        readiness_rows.append(_readiness_row(
-            instrument_id, entry,
-            selected=True,
-            recon_status=recon["reconciliation_status"],
-        ))
+        readiness_rows.append(
+            _readiness_row(
+                instrument_id,
+                entry,
+                selected=True,
+                recon_status=recon["reconciliation_status"],
+            )
+        )
 
     # -----------------------------------------------------------------------
     # 3. Write all reports
@@ -538,11 +546,21 @@ def run_gma1a_market_data_foundation(
         pd.DataFrame(bundle_rows), report_root / "canonical_market_bundle_inventory.csv"
     )
     outputs["excluded_observations"] = _write_csv(
-        pd.DataFrame(excluded_rows) if excluded_rows else pd.DataFrame(columns=[
-            "instrument_id", "date", "exclusion_reason", "provider_values_present",
-            "is_provider_final_row", "provider_reported_final_date",
-            "retrieval_timestamp_utc", "source_manifest_path", "source_manifest_sha256",
-        ]),
+        pd.DataFrame(excluded_rows)
+        if excluded_rows
+        else pd.DataFrame(
+            columns=[
+                "instrument_id",
+                "date",
+                "exclusion_reason",
+                "provider_values_present",
+                "is_provider_final_row",
+                "provider_reported_final_date",
+                "retrieval_timestamp_utc",
+                "source_manifest_path",
+                "source_manifest_sha256",
+            ]
+        ),
         report_root / "excluded_observations.csv",
     )
     outputs["total_return_reconciliation"] = _write_csv(
@@ -560,44 +578,83 @@ def run_gma1a_market_data_foundation(
 
     # Cash data contract
     cash_rows = [
-        {"field_name": "availability_timestamp", "data_type": "datetime",
-         "meaning": "When the rate observation became publicly available",
-         "availability_requirement": "point_in_time", "point_in_time_requirement": True,
-         "future_source": "FRED_or_ALFRED_treasury_bill_rate",
-         "implemented_in_phase": "gma1b", "status": "deferred",
-         "notes": "authoritative_cash_data_available_in_gma1a = false"},
-        {"field_name": "observation_date", "data_type": "date",
-         "meaning": "The date the rate observation applies to",
-         "availability_requirement": "daily_or_weekly", "point_in_time_requirement": True,
-         "future_source": "FRED_or_ALFRED_treasury_bill_rate",
-         "implemented_in_phase": "gma1b", "status": "deferred",
-         "notes": "cash_return_calculation_deferred_to_gma1b = true"},
-        {"field_name": "annual_yield", "data_type": "float",
-         "meaning": "Annualised yield of the cash instrument",
-         "availability_requirement": "required", "point_in_time_requirement": True,
-         "future_source": "FRED_or_ALFRED_treasury_bill_rate",
-         "implemented_in_phase": "gma1b", "status": "deferred", "notes": ""},
-        {"field_name": "period_return", "data_type": "float",
-         "meaning": "Return for the observation period",
-         "availability_requirement": "derived", "point_in_time_requirement": False,
-         "future_source": "computed_from_annual_yield",
-         "implemented_in_phase": "gma1b", "status": "deferred", "notes": ""},
-        {"field_name": "source_series", "data_type": "string",
-         "meaning": "Identifier for the source data series",
-         "availability_requirement": "required", "point_in_time_requirement": False,
-         "future_source": "FRED_series_id",
-         "implemented_in_phase": "gma1b", "status": "deferred", "notes": ""},
-        {"field_name": "source_vintage", "data_type": "string",
-         "meaning": "Vintage or revision tag of the source data",
-         "availability_requirement": "required_for_vintage_aware",
-         "point_in_time_requirement": True,
-         "future_source": "ALFRED_vintage_date",
-         "implemented_in_phase": "gma1b", "status": "deferred", "notes": ""},
-        {"field_name": "publication_timestamp", "data_type": "datetime",
-         "meaning": "Exact publication timestamp from the source",
-         "availability_requirement": "required", "point_in_time_requirement": True,
-         "future_source": "FRED_release_calendar",
-         "implemented_in_phase": "gma1b", "status": "deferred", "notes": ""},
+        {
+            "field_name": "availability_timestamp",
+            "data_type": "datetime",
+            "meaning": "When the rate observation became publicly available",
+            "availability_requirement": "point_in_time",
+            "point_in_time_requirement": True,
+            "future_source": "FRED_or_ALFRED_treasury_bill_rate",
+            "implemented_in_phase": "gma1b",
+            "status": "deferred",
+            "notes": "authoritative_cash_data_available_in_gma1a = false",
+        },
+        {
+            "field_name": "observation_date",
+            "data_type": "date",
+            "meaning": "The date the rate observation applies to",
+            "availability_requirement": "daily_or_weekly",
+            "point_in_time_requirement": True,
+            "future_source": "FRED_or_ALFRED_treasury_bill_rate",
+            "implemented_in_phase": "gma1b",
+            "status": "deferred",
+            "notes": "cash_return_calculation_deferred_to_gma1b = true",
+        },
+        {
+            "field_name": "annual_yield",
+            "data_type": "float",
+            "meaning": "Annualised yield of the cash instrument",
+            "availability_requirement": "required",
+            "point_in_time_requirement": True,
+            "future_source": "FRED_or_ALFRED_treasury_bill_rate",
+            "implemented_in_phase": "gma1b",
+            "status": "deferred",
+            "notes": "",
+        },
+        {
+            "field_name": "period_return",
+            "data_type": "float",
+            "meaning": "Return for the observation period",
+            "availability_requirement": "derived",
+            "point_in_time_requirement": False,
+            "future_source": "computed_from_annual_yield",
+            "implemented_in_phase": "gma1b",
+            "status": "deferred",
+            "notes": "",
+        },
+        {
+            "field_name": "source_series",
+            "data_type": "string",
+            "meaning": "Identifier for the source data series",
+            "availability_requirement": "required",
+            "point_in_time_requirement": False,
+            "future_source": "FRED_series_id",
+            "implemented_in_phase": "gma1b",
+            "status": "deferred",
+            "notes": "",
+        },
+        {
+            "field_name": "source_vintage",
+            "data_type": "string",
+            "meaning": "Vintage or revision tag of the source data",
+            "availability_requirement": "required_for_vintage_aware",
+            "point_in_time_requirement": True,
+            "future_source": "ALFRED_vintage_date",
+            "implemented_in_phase": "gma1b",
+            "status": "deferred",
+            "notes": "",
+        },
+        {
+            "field_name": "publication_timestamp",
+            "data_type": "datetime",
+            "meaning": "Exact publication timestamp from the source",
+            "availability_requirement": "required",
+            "point_in_time_requirement": True,
+            "future_source": "FRED_release_calendar",
+            "implemented_in_phase": "gma1b",
+            "status": "deferred",
+            "notes": "",
+        },
     ]
     outputs["cash_data_contract"] = _write_csv(
         pd.DataFrame(cash_rows), report_root / "cash_data_contract.csv"
@@ -610,9 +667,7 @@ def run_gma1a_market_data_foundation(
 
     # Isolation gate
     gate_df = _build_gate_report(config, outputs, selection_set_hash, core_blocked)
-    outputs["gma1a_gate_report"] = _write_csv(
-        gate_df, report_root / "gma1a_gate_report.csv"
-    )
+    outputs["gma1a_gate_report"] = _write_csv(gate_df, report_root / "gma1a_gate_report.csv")
 
     # Decision
     gate_all_passed = gate_df["passed"].all()
@@ -623,10 +678,7 @@ def run_gma1a_market_data_foundation(
     else:
         # Check for any instrument requiring documented review
         review_statuses = {"action_timing_review", "provider_basis_review"}
-        any_reviews = [
-            r for r in recon_rows
-            if r.get("reconciliation_status") in review_statuses
-        ]
+        any_reviews = [r for r in recon_rows if r.get("reconciliation_status") in review_statuses]
         if any_reviews:
             decision = "gma1a_feasible_with_instrument_reviews"
         else:
@@ -658,9 +710,27 @@ def _readiness_row(
     recon_status: str = "",
 ) -> dict[str, Any]:
     is_core = instrument_id in [
-        "SPY", "QQQ", "IWM", "RSP", "EFA", "VGK", "EWJ", "EEM",
-        "SHY", "IEF", "TLT", "TIP", "AGG", "LQD", "HYG", "EMB",
-        "GLD", "DBC", "VNQ", "UUP", "BIL",
+        "SPY",
+        "QQQ",
+        "IWM",
+        "RSP",
+        "EFA",
+        "VGK",
+        "EWJ",
+        "EEM",
+        "SHY",
+        "IEF",
+        "TLT",
+        "TIP",
+        "AGG",
+        "LQD",
+        "HYG",
+        "EMB",
+        "GLD",
+        "DBC",
+        "VNQ",
+        "UUP",
+        "BIL",
     ]
     is_benchmark = bool(entry.get("is_benchmark_only", False))
     is_satellite = not is_core and not is_benchmark
@@ -742,9 +812,7 @@ def _empty_recon_row(instrument_id: str) -> dict[str, Any]:
     }
 
 
-def _empty_action_row(
-    instrument_id: str, provider_symbol: str
-) -> dict[str, Any]:
+def _empty_action_row(instrument_id: str, provider_symbol: str) -> dict[str, Any]:
     return {
         "instrument_id": instrument_id,
         "provider_symbol": provider_symbol,
@@ -771,26 +839,34 @@ def _build_gate_report(
     core_blocked: bool,
 ) -> pd.DataFrame:
     rows = [
-        ("track_id_is_gma_alpha",
-         config.track.get("track_id") == "gma_alpha", ""),
-        ("phase_id_is_gma1a_market_data_foundation",
-         config.track.get("phase_id") == "gma1a_market_data_foundation", ""),
-        ("live_trading_disabled",
-         not bool(config.track.get("live_trading_allowed")), ""),
-        ("real_money_disabled",
-         not bool(config.track.get("real_money_allowed")), ""),
-        ("broker_api_integration_disabled",
-         not bool(config.track.get("broker_api_integration_allowed")), ""),
-        ("gma0_accepted_conclusion_present", True,
-         "verified_gma0_feasible_proceed_to_data_foundation"),
+        ("track_id_is_gma_alpha", config.track.get("track_id") == "gma_alpha", ""),
+        (
+            "phase_id_is_gma1a_market_data_foundation",
+            config.track.get("phase_id") == "gma1a_market_data_foundation",
+            "",
+        ),
+        ("live_trading_disabled", not bool(config.track.get("live_trading_allowed")), ""),
+        ("real_money_disabled", not bool(config.track.get("real_money_allowed")), ""),
+        (
+            "broker_api_integration_disabled",
+            not bool(config.track.get("broker_api_integration_allowed")),
+            "",
+        ),
+        (
+            "gma0_accepted_conclusion_present",
+            True,
+            "verified_gma0_feasible_proceed_to_data_foundation",
+        ),
         ("gma0_source_selection_uses_immutable_manifests", True, ""),
         ("all_selected_raw_hashes_validate", True, "validated_during_selection"),
         ("all_selected_normalised_hashes_validate", True, "validated_during_selection"),
-        ("selection_set_hash_is_deterministic",
-         bool(selection_set_hash), selection_set_hash),
+        ("selection_set_hash_is_deterministic", bool(selection_set_hash), selection_set_hash),
         ("no_mutable_latest_source_is_authoritative", True, ""),
-        ("all_generated_outputs_in_approved_gma_paths",
-         all(is_approved_gma_path(str(p)) for p in outputs.values()), ""),
+        (
+            "all_generated_outputs_in_approved_gma_paths",
+            all(is_approved_gma_path(str(p)) for p in outputs.values()),
+            "",
+        ),
         ("no_frozen_config_modified", True, ""),
         ("no_frozen_source_module_modified", True, ""),
         ("no_frozen_report_or_data_path_written", True, ""),
@@ -800,15 +876,11 @@ def _build_gate_report(
         ("no_benchmark_performance_generated", True, ""),
         ("no_order_or_paper_trade_output_generated", True, ""),
         ("no_tradingview_or_broker_artifact_generated", True, ""),
-        ("required_core_total_return_reconciliation_passed",
-         not core_blocked, ""),
+        ("required_core_total_return_reconciliation_passed", not core_blocked, ""),
         ("calendar_contract_passed", True, ""),
-        ("cash_source_not_fabricated", True,
-         "BIL_is_tradable_proxy_only_not_authoritative_cash"),
+        ("cash_source_not_fabricated", True, "BIL_is_tradable_proxy_only_not_authoritative_cash"),
     ]
-    return pd.DataFrame([
-        {"gate": g, "passed": bool(p), "detail": d} for g, p, d in rows
-    ])
+    return pd.DataFrame([{"gate": g, "passed": bool(p), "detail": d} for g, p, d in rows])
 
 
 def _price_basis_contract_text() -> str:
@@ -951,8 +1023,8 @@ Decision: `{decision}`
 
 {recon_text}
 
-Failed instruments: {', '.join(failed) or 'none'}
-Reviewed instruments: {', '.join(reviewed) or 'none'}
+Failed instruments: {", ".join(failed) or "none"}
+Reviewed instruments: {", ".join(reviewed) or "none"}
 
 ## Calendar Contract
 

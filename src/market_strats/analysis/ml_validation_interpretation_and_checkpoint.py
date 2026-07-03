@@ -8,9 +8,7 @@ import pandas as pd
 
 DEFAULT_PHASE13W_CONFIG: dict[str, Any] = {
     "enabled": False,
-    "interpretation_role": (
-        "ML validation result interpretation and continuation decision only"
-    ),
+    "interpretation_role": ("ML validation result interpretation and continuation decision only"),
     "phase_branch": "Phase 13 multi-factor model architecture planning",
     "source_phase": "Phase 13V",
     "proposed_next_phase": "Phase 13X",
@@ -99,9 +97,7 @@ DEFAULT_PHASE13X_CONFIG: dict[str, Any] = {
         "require_no_paper_trading_deployment": True,
         "require_no_candidate_promotion": True,
         "require_no_final_candidate_change": True,
-        "required_audit_role": (
-            "ML branch checkpoint and report-config consistency audit only"
-        ),
+        "required_audit_role": ("ML branch checkpoint and report-config consistency audit only"),
     },
 }
 
@@ -230,9 +226,7 @@ def build_phase13w_validation_ranking_report(
     if metric_report.empty:
         return pd.DataFrame()
 
-    validation = metric_report[
-        metric_report["split_label"].astype(str).eq("validation")
-    ].copy()
+    validation = metric_report[metric_report["split_label"].astype(str).eq("validation")].copy()
     keep = [
         "model_id",
         "rows",
@@ -286,9 +280,7 @@ def build_phase13w_dummy_comparison_report(
 
     thresholds = phase_config.get("interpretation_thresholds", {})
     majority_id = str(thresholds.get("majority_baseline_model_id", "baseline_majority_class"))
-    stratified_id = str(
-        thresholds.get("stratified_baseline_model_id", "baseline_stratified_dummy")
-    )
+    stratified_id = str(thresholds.get("stratified_baseline_model_id", "baseline_stratified_dummy"))
     real_model_ids = set(str(item) for item in _as_list(thresholds.get("real_model_ids")))
 
     majority = ranking[ranking["model_id"].astype(str).eq(majority_id)]
@@ -302,9 +294,7 @@ def build_phase13w_dummy_comparison_report(
 
     majority_bal_acc = float(majority.iloc[0]["balanced_accuracy"]) if not majority.empty else 0.0
     majority_macro_f1 = float(majority.iloc[0]["macro_f1"]) if not majority.empty else 0.0
-    strat_bal_acc = (
-        float(stratified.iloc[0]["balanced_accuracy"]) if not stratified.empty else 0.0
-    )
+    strat_bal_acc = float(stratified.iloc[0]["balanced_accuracy"]) if not stratified.empty else 0.0
     strat_macro_f1 = float(stratified.iloc[0]["macro_f1"]) if not stratified.empty else 0.0
 
     delta_bal_majority = float(best["balanced_accuracy"]) - majority_bal_acc
@@ -333,8 +323,7 @@ def build_phase13w_dummy_comparison_report(
                 "delta_balanced_accuracy_vs_stratified": delta_bal_stratified,
                 "delta_macro_f1_vs_stratified": delta_f1_stratified,
                 "beats_majority_materially": (
-                    delta_bal_majority >= min_majority_bal
-                    and delta_f1_majority >= min_majority_f1
+                    delta_bal_majority >= min_majority_bal and delta_f1_majority >= min_majority_f1
                 ),
                 "beats_stratified_materially": delta_bal_stratified >= min_strat_bal,
                 "model_selected": False,
@@ -380,8 +369,7 @@ def build_phase13w_overfit_diagnostic_report(
                 or (train_f1 - val_f1) > max_f1_gap,
                 "severe_overfit_note": (
                     "Validation degradation exceeds warning threshold."
-                    if (train_bal - val_bal) > max_bal_gap
-                    or (train_f1 - val_f1) > max_f1_gap
+                    if (train_bal - val_bal) > max_bal_gap or (train_f1 - val_f1) > max_f1_gap
                     else "No severe overfit warning by configured threshold."
                 ),
             }
@@ -398,9 +386,7 @@ def build_phase13w_class_recall_report(
         return pd.DataFrame()
 
     thresholds = phase_config.get("interpretation_thresholds", {})
-    fragile_threshold = float(
-        thresholds.get("fragile_class_min_validation_recall_warning", 0.20)
-    )
+    fragile_threshold = float(thresholds.get("fragile_class_min_validation_recall_warning", 0.20))
 
     validation = confusion_report[
         confusion_report["split_label"].astype(str).eq("validation")
@@ -411,9 +397,9 @@ def build_phase13w_class_recall_report(
     for (model_id, true_label), group in validation.groupby(["model_id", "true_label"]):
         total = float(group["count"].sum())
         correct = float(
-            group[
-                group["true_label"].astype(str).eq(group["predicted_label"].astype(str))
-            ]["count"].sum()
+            group[group["true_label"].astype(str).eq(group["predicted_label"].astype(str))][
+                "count"
+            ].sum()
         )
         recall = correct / total if total > 0 else 0.0
         rows.append(
@@ -463,9 +449,7 @@ def build_phase13w_continuation_decision_report(
 
     overfit_warning = False
     if not overfit_report.empty:
-        model_overfit = overfit_report[
-            overfit_report["model_id"].astype(str).eq(leading_model)
-        ]
+        model_overfit = overfit_report[overfit_report["model_id"].astype(str).eq(leading_model)]
         overfit_warning = (
             _bool_value(model_overfit.iloc[0]["overfit_warning"])
             if not model_overfit.empty
@@ -583,14 +567,15 @@ def build_phase13w_boundary_check(
         (
             f"{phase_label}_no_promotion",
             boundary.get(f"{phase_label.lower()}_may_promote_candidate", False),
-            not _bool_value(
-                boundary.get(f"{phase_label.lower()}_may_promote_candidate", False)
-            ),
+            not _bool_value(boundary.get(f"{phase_label.lower()}_may_promote_candidate", False)),
         ),
     ]
 
     out = pd.DataFrame(
-        [{"boundary_item": item, "value": value, "passed": passed} for item, value, passed in checks]
+        [
+            {"boundary_item": item, "value": value, "passed": passed}
+            for item, value, passed in checks
+        ]
     )
     out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
     return out
@@ -916,8 +901,7 @@ def save_phase13w_ml_validation_interpretation_decision(
             "Gate Report": gate_report,
             "Conclusion": conclusion,
         },
-        output_path=reports_path
-        / "phase13w_ml_validation_interpretation_decision.md",
+        output_path=reports_path / "phase13w_ml_validation_interpretation_decision.md",
     )
 
     print("Wrote Phase 13W ML validation interpretation reports.")
@@ -1070,7 +1054,9 @@ def build_phase13x_interpretation_boundary_check(phase_config: dict[str, Any]) -
 
 def build_phase13x_forbidden_overclaim_check(phase_config: dict[str, Any]) -> pd.DataFrame:
     checkpoint = phase_config.get("checkpoint_reports", {})
-    forbidden = [str(item).lower() for item in _as_list(checkpoint.get("forbidden_overclaim_phrases"))]
+    forbidden = [
+        str(item).lower() for item in _as_list(checkpoint.get("forbidden_overclaim_phrases"))
+    ]
     rows = []
 
     report_paths = list(phase_config.get("phase13w_reports", {}).values())
@@ -1148,7 +1134,10 @@ def build_phase13x_phase13y_boundary_check(phase_config: dict[str, Any]) -> pd.D
     ]
 
     out = pd.DataFrame(
-        [{"boundary_item": item, "value": value, "passed": passed} for item, value, passed in checks]
+        [
+            {"boundary_item": item, "value": value, "passed": passed}
+            for item, value, passed in checks
+        ]
     )
     out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
     return out
@@ -1185,14 +1174,10 @@ def build_phase13x_summary(
                 "checkpoint_reports_present": bool(checkpoint_report_check["present"].all())
                 if not checkpoint_report_check.empty
                 else False,
-                "interpretation_boundary_clean": bool(
-                    interpretation_boundary_check["passed"].all()
-                )
+                "interpretation_boundary_clean": bool(interpretation_boundary_check["passed"].all())
                 if not interpretation_boundary_check.empty
                 else False,
-                "forbidden_overclaim_absent": bool(
-                    forbidden_overclaim_check["passed"].all()
-                )
+                "forbidden_overclaim_absent": bool(forbidden_overclaim_check["passed"].all())
                 if not forbidden_overclaim_check.empty
                 else False,
                 "phase13y_boundary_passed": bool(phase13y_boundary_check["passed"].all())
@@ -1338,9 +1323,7 @@ def save_phase13x_ml_branch_checkpoint_audit(
         phase_config.get("expected_runtime_flags", {}),
     )
     checkpoint_report_check = build_phase13x_checkpoint_report_check(phase_config)
-    interpretation_boundary_check = build_phase13x_interpretation_boundary_check(
-        phase_config
-    )
+    interpretation_boundary_check = build_phase13x_interpretation_boundary_check(phase_config)
     forbidden_overclaim_check = build_phase13x_forbidden_overclaim_check(phase_config)
     phase13y_boundary_check = build_phase13x_phase13y_boundary_check(phase_config)
     scope_boundary_check = build_scope_boundary_check(phase_config)

@@ -123,8 +123,7 @@ def _find_final_candidate_frame(
 
     if missing_columns:
         raise ValueError(
-            "Reconstructed final candidate is missing required columns: "
-            f"{sorted(missing_columns)}"
+            f"Reconstructed final candidate is missing required columns: {sorted(missing_columns)}"
         )
 
     final_candidate["date"] = pd.to_datetime(final_candidate["date"])
@@ -238,9 +237,7 @@ def _resolve_phase9a_input_frames(
     prices = price_data.copy()
     prices["date"] = pd.to_datetime(prices["date"])
     prices = prices[(prices["date"] >= start_date) & (prices["date"] <= end_date)].copy()
-    prices = prices.sort_values("date").drop_duplicates(subset=["date"]).reset_index(
-        drop=True
-    )
+    prices = prices.sort_values("date").drop_duplicates(subset=["date"]).reset_index(drop=True)
 
     if prices.empty:
         raise ValueError(
@@ -298,9 +295,7 @@ def build_phase9a_indicator_frame(
     out["trend_distance_long"] = out["price"] / out["sma_long"] - 1.0
     out["sma_short_minus_long"] = out["sma_short"] / out["sma_long"] - 1.0
     out["rsi"] = _rsi(out["price"], rsi_days)
-    out["realized_volatility"] = out["daily_return"].rolling(volatility_days).std() * np.sqrt(
-        252.0
-    )
+    out["realized_volatility"] = out["daily_return"].rolling(volatility_days).std() * np.sqrt(252.0)
     out["momentum_short"] = out["price"].pct_change(short_momentum_days)
     out["momentum_medium"] = out["price"].pct_change(medium_momentum_days)
     out["momentum_long"] = out["price"].pct_change(long_momentum_days)
@@ -387,9 +382,11 @@ def build_phase9a_regime_frame(
         lambda value: _bucket_drawdown(float(value), indicator_config)
     )
     out["trend_distance_bucket"] = out["trend_distance_long"].map(
-        lambda value: _bucket_trend_distance(float(value), indicator_config)
-        if not pd.isna(value)
-        else "unknown"
+        lambda value: (
+            _bucket_trend_distance(float(value), indicator_config)
+            if not pd.isna(value)
+            else "unknown"
+        )
     )
     out["rsi_bucket"] = out["rsi"].map(_bucket_rsi)
     out["volatility_bucket"] = _bucket_volatility(out["realized_volatility"])
@@ -481,15 +478,11 @@ def _summarise_by_regime(
                 "candidate_minus_buy_hold_avg_daily": float(
                     group["candidate_minus_buy_hold"].mean()
                 ),
-                "candidate_minus_spy_12m_avg_daily": float(
-                    group["candidate_minus_spy_12m"].mean()
-                ),
+                "candidate_minus_spy_12m_avg_daily": float(group["candidate_minus_spy_12m"].mean()),
                 "underperform_buy_hold_rate": float(
                     group["candidate_underperforms_buy_hold"].mean()
                 ),
-                "underperform_spy_12m_rate": float(
-                    group["candidate_underperforms_spy_12m"].mean()
-                ),
+                "underperform_spy_12m_rate": float(group["candidate_underperforms_spy_12m"].mean()),
                 "worst_candidate_minus_buy_hold_daily": float(
                     group["candidate_minus_buy_hold"].min()
                 ),
@@ -538,12 +531,10 @@ def build_phase9a_underperformance_clusters(
         return pd.DataFrame()
 
     cluster["buy_hold_pain_score"] = (
-        cluster["underperform_buy_hold_rate"]
-        * -cluster["candidate_minus_buy_hold_avg_daily"]
+        cluster["underperform_buy_hold_rate"] * -cluster["candidate_minus_buy_hold_avg_daily"]
     )
     cluster["spy12m_pain_score"] = (
-        cluster["underperform_spy_12m_rate"]
-        * -cluster["candidate_minus_spy_12m_avg_daily"]
+        cluster["underperform_spy_12m_rate"] * -cluster["candidate_minus_spy_12m_avg_daily"]
     )
 
     cluster = cluster.sort_values(
@@ -564,9 +555,7 @@ def build_phase9a_summary(
             "start_date": pd.to_datetime(analysis_frame["date"].min()).date().isoformat(),
             "end_date": pd.to_datetime(analysis_frame["date"].max()).date().isoformat(),
             "rows": int(len(analysis_frame)),
-            "indicator_coverage_rate": float(
-                analysis_frame["indicator_row_complete"].mean()
-            ),
+            "indicator_coverage_rate": float(analysis_frame["indicator_row_complete"].mean()),
             "regime_rows": int(len(regime_summary)),
             "underperformance_cluster_rows": int(len(underperformance_clusters)),
             "candidate_underperforms_buy_hold_rate": float(
@@ -768,17 +757,15 @@ def save_phase9a_technical_indicator_expansion_diagnostic(
     reports_path = Path(reports_dir)
     reports_path.mkdir(parents=True, exist_ok=True)
 
-    final_candidate, spy_buy_hold, spy_12m_momentum, prices = (
-        _resolve_phase9a_input_frames(
-            config=config,
-            phase_config=phase_config,
-            final_candidate=final_candidate,
-            spy_buy_hold=spy_buy_hold,
-            spy_12m_momentum=spy_12m_momentum,
-            price_data=price_data,
-            relative_momentum_outputs=relative_momentum_outputs,
-            ticker_outputs=ticker_outputs,
-        )
+    final_candidate, spy_buy_hold, spy_12m_momentum, prices = _resolve_phase9a_input_frames(
+        config=config,
+        phase_config=phase_config,
+        final_candidate=final_candidate,
+        spy_buy_hold=spy_buy_hold,
+        spy_12m_momentum=spy_12m_momentum,
+        price_data=price_data,
+        relative_momentum_outputs=relative_momentum_outputs,
+        ticker_outputs=ticker_outputs,
     )
 
     indicator_frame = build_phase9a_indicator_frame(prices, phase_config)

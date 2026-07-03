@@ -97,9 +97,7 @@ def create_candidate_portfolio_warmup_audit(
                 "expected_warmup_end_date": warmup_end_date.date().isoformat(),
                 "first_risky_position_date": _first_risky_position_date(df),
                 "active_before_expected_warmup": active_before_expected_warmup,
-                "common_start_before_warmup_completed": (
-                    common_start_before_warmup_completed
-                ),
+                "common_start_before_warmup_completed": (common_start_before_warmup_completed),
                 "position_at_common_start": position_at_common_start,
                 "cash_position_at_common_start": cash_at_common_start,
                 "warmup_status": status,

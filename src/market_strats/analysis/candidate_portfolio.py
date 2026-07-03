@@ -29,14 +29,9 @@ from market_strats.analysis.candidate_portfolio_warmup_audit import (
     write_candidate_portfolio_warmup_audit_markdown,
 )
 
+
 def _safe_filename(value: str) -> str:
-    return (
-        value.lower()
-        .replace(" ", "_")
-        .replace("/", "_")
-        .replace("\\", "_")
-        .replace(":", "_")
-    )
+    return value.lower().replace(" ", "_").replace("/", "_").replace("\\", "_").replace(":", "_")
 
 
 def _get_strategy_result(
@@ -56,9 +51,7 @@ def _get_strategy_result(
 
     if strategy not in strategy_results:
         available = sorted(strategy_results.keys())
-        raise ValueError(
-            f"Strategy {strategy} not found for {ticker}. Available: {available}"
-        )
+        raise ValueError(f"Strategy {strategy} not found for {ticker}. Available: {available}")
 
     return strategy_results[strategy]
 
@@ -112,9 +105,7 @@ def run_candidate_portfolio_report(
         ticker = str(component["ticker"]).upper()
         strategy = str(component["strategy"])
         component_name = f"{ticker} {strategy}"
-        expected_warmups[component_name] = int(
-            component.get("expected_warmup_trading_days", 0)
-        )
+        expected_warmups[component_name] = int(component.get("expected_warmup_trading_days", 0))
 
     warmup_audit = create_candidate_portfolio_warmup_audit(
         component_results=component_results,
@@ -136,9 +127,7 @@ def run_candidate_portfolio_report(
     )
 
     benchmark_ticker = str(candidate_config["benchmark_ticker"]).upper()
-    benchmark_strategies = [
-        str(strategy) for strategy in candidate_config["benchmark_strategies"]
-    ]
+    benchmark_strategies = [str(strategy) for strategy in candidate_config["benchmark_strategies"]]
 
     comparison_results: dict[str, pd.DataFrame] = {
         portfolio_name: portfolio_result,
@@ -181,9 +170,7 @@ def run_candidate_portfolio_report(
                 )
             ),
             min_cagr_pct=float(decision_config.get("min_cagr_pct", 9.50)),
-            max_drawdown_floor_pct=float(
-                decision_config.get("max_drawdown_floor_pct", -28.0)
-            ),
+            max_drawdown_floor_pct=float(decision_config.get("max_drawdown_floor_pct", -28.0)),
             require_calmar_above_benchmark=bool(
                 decision_config.get("require_calmar_above_benchmark", True)
             ),
@@ -194,12 +181,8 @@ def run_candidate_portfolio_report(
     safe_name = _safe_filename(portfolio_name)
 
     metrics_path = reports_dir / f"candidate_portfolio_{safe_name}_metrics.csv"
-    rolling_summary_path = (
-        reports_dir / f"candidate_portfolio_{safe_name}_rolling_summary.csv"
-    )
-    portfolio_result_path = (
-        reports_dir / f"candidate_portfolio_{safe_name}_daily_result.csv"
-    )
+    rolling_summary_path = reports_dir / f"candidate_portfolio_{safe_name}_rolling_summary.csv"
+    portfolio_result_path = reports_dir / f"candidate_portfolio_{safe_name}_daily_result.csv"
     markdown_path = reports_dir / f"candidate_portfolio_{safe_name}.md"
     equity_plot_path = reports_dir / f"candidate_portfolio_{safe_name}_equity_curves.png"
     drawdown_plot_path = reports_dir / f"candidate_portfolio_{safe_name}_drawdowns.png"
@@ -207,24 +190,16 @@ def run_candidate_portfolio_report(
     sleeve_attribution_path = (
         reports_dir / f"candidate_portfolio_{safe_name}_sleeve_attribution.csv"
     )
-    sleeve_summary_path = (
-        reports_dir / f"candidate_portfolio_{safe_name}_sleeve_summary.csv"
-    )
+    sleeve_summary_path = reports_dir / f"candidate_portfolio_{safe_name}_sleeve_summary.csv"
     sleeve_attribution_markdown_path = (
         reports_dir / f"candidate_portfolio_{safe_name}_sleeve_attribution.md"
     )
-    decision_report_path = (
-        reports_dir / f"candidate_portfolio_{safe_name}_decision_report.csv"
-    )
+    decision_report_path = reports_dir / f"candidate_portfolio_{safe_name}_decision_report.csv"
     decision_report_markdown_path = (
         reports_dir / f"candidate_portfolio_{safe_name}_decision_report.md"
     )
-    warmup_audit_path = (
-        reports_dir / f"candidate_portfolio_{safe_name}_warmup_audit.csv"
-    )
-    warmup_audit_markdown_path = (
-        reports_dir / f"candidate_portfolio_{safe_name}_warmup_audit.md"
-    )
+    warmup_audit_path = reports_dir / f"candidate_portfolio_{safe_name}_warmup_audit.csv"
+    warmup_audit_markdown_path = reports_dir / f"candidate_portfolio_{safe_name}_warmup_audit.md"
 
     metrics.to_csv(metrics_path, index=False)
     rolling_summary.to_csv(rolling_summary_path, index=False)
@@ -285,19 +260,16 @@ def run_candidate_portfolio_report(
     print(f"Saved candidate portfolio report to: {markdown_path}")
     print(f"Saved candidate portfolio sleeve attribution to: {sleeve_attribution_path}")
     print(f"Saved candidate portfolio sleeve summary to: {sleeve_summary_path}")
-    print("Saved candidate portfolio sleeve attribution report to: "f"{sleeve_attribution_markdown_path}")
+    print(
+        "Saved candidate portfolio sleeve attribution report to: "
+        f"{sleeve_attribution_markdown_path}"
+    )
     print(f"Saved candidate portfolio equity chart to: {equity_plot_path}")
     print(f"Saved candidate portfolio drawdown chart to: {drawdown_plot_path}")
     print(f"Saved candidate portfolio decision report to: {decision_report_path}")
-    print(
-        "Saved candidate portfolio decision report markdown to: "
-        f"{decision_report_markdown_path}"
-    )
+    print(f"Saved candidate portfolio decision report markdown to: {decision_report_markdown_path}")
     print(f"Saved candidate portfolio warmup audit to: {warmup_audit_path}")
-    print(
-        "Saved candidate portfolio warmup audit markdown to: "
-        f"{warmup_audit_markdown_path}"
-    )
+    print(f"Saved candidate portfolio warmup audit markdown to: {warmup_audit_markdown_path}")
 
     return {
         "metrics": metrics,

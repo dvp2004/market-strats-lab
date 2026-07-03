@@ -97,9 +97,7 @@ def _slice_episode(
     start = pd.Timestamp(start_date)
     end = pd.Timestamp(end_date)
 
-    out = analysis_frame[
-        (analysis_frame["date"] >= start) & (analysis_frame["date"] <= end)
-    ].copy()
+    out = analysis_frame[(analysis_frame["date"] >= start) & (analysis_frame["date"] <= end)].copy()
     out["episode"] = episode_name
 
     return out
@@ -155,12 +153,8 @@ def _cluster_metric_row(
         "candidate_minus_spy_12m_avg_daily": avg_vs_spy_12m,
         "direction_vs_buy_hold": _direction(avg_vs_buy_hold),
         "direction_vs_spy_12m": _direction(avg_vs_spy_12m),
-        "underperform_buy_hold_rate": float(
-            group["candidate_underperforms_buy_hold"].mean()
-        ),
-        "underperform_spy_12m_rate": float(
-            group["candidate_underperforms_spy_12m"].mean()
-        ),
+        "underperform_buy_hold_rate": float(group["candidate_underperforms_buy_hold"].mean()),
+        "underperform_spy_12m_rate": float(group["candidate_underperforms_spy_12m"].mean()),
         "worst_candidate_minus_buy_hold_daily": float(candidate_minus_buy_hold.min()),
         "worst_candidate_minus_spy_12m_daily": float(candidate_minus_spy_12m.min()),
     }
@@ -269,12 +263,10 @@ def build_phase9b_stability_summary(
         )
 
         stable_vs_buy_hold = (
-            episode_count >= min_episode_coverage
-            and buy_hold_consistency >= min_consistency
+            episode_count >= min_episode_coverage and buy_hold_consistency >= min_consistency
         )
         stable_vs_spy12m = (
-            episode_count >= min_episode_coverage
-            and spy12m_consistency >= min_consistency
+            episode_count >= min_episode_coverage and spy12m_consistency >= min_consistency
         )
 
         rows.append(
@@ -590,17 +582,15 @@ def save_phase9b_technical_regime_cluster_stability_audit(
 
     phase9a_config = _get_phase9a_config(config)
 
-    final_candidate, spy_buy_hold, spy_12m_momentum, prices = (
-        _resolve_phase9a_input_frames(
-            config=config,
-            phase_config=phase9a_config,
-            final_candidate=final_candidate,
-            spy_buy_hold=spy_buy_hold,
-            spy_12m_momentum=spy_12m_momentum,
-            price_data=price_data,
-            relative_momentum_outputs=relative_momentum_outputs,
-            ticker_outputs=ticker_outputs,
-        )
+    final_candidate, spy_buy_hold, spy_12m_momentum, prices = _resolve_phase9a_input_frames(
+        config=config,
+        phase_config=phase9a_config,
+        final_candidate=final_candidate,
+        spy_buy_hold=spy_buy_hold,
+        spy_12m_momentum=spy_12m_momentum,
+        price_data=price_data,
+        relative_momentum_outputs=relative_momentum_outputs,
+        ticker_outputs=ticker_outputs,
     )
 
     indicator_frame = build_phase9a_indicator_frame(prices, phase9a_config)
@@ -622,9 +612,7 @@ def save_phase9b_technical_regime_cluster_stability_audit(
         phase_config,
     )
     instability_report = build_phase9b_instability_report(stability_summary)
-    helpful_stability_report = build_phase9b_helpful_stability_report(
-        stability_summary
-    )
+    helpful_stability_report = build_phase9b_helpful_stability_report(stability_summary)
     summary = build_phase9b_summary(
         cluster_episode_metrics,
         stability_summary,
@@ -678,8 +666,7 @@ def save_phase9b_technical_regime_cluster_stability_audit(
         helpful_stability_report=helpful_stability_report,
         gate_report=gate_report,
         conclusion=conclusion,
-        output_path=reports_path
-        / "phase9b_technical_regime_cluster_stability_audit.md",
+        output_path=reports_path / "phase9b_technical_regime_cluster_stability_audit.md",
     )
 
     print("Wrote Phase 9B technical regime cluster stability audit reports.")

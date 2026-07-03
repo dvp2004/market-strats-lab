@@ -72,8 +72,7 @@ def _add_failure_attribution_buckets(events: pd.DataFrame) -> pd.DataFrame:
 
     if missing_columns:
         raise ValueError(
-            "switch-effectiveness events missing attribution columns: "
-            f"{sorted(missing_columns)}"
+            f"switch-effectiveness events missing attribution columns: {sorted(missing_columns)}"
         )
 
     output["spy_drawdown_pct_numeric"] = _to_numeric(output["spy_drawdown_pct"])
@@ -84,15 +83,11 @@ def _add_failure_attribution_buckets(events: pd.DataFrame) -> pd.DataFrame:
         output["applied_overlay_slippage_bps"]
     )
 
-    output["slippage_bucket"] = output["applied_overlay_slippage_bps_numeric"].map(
-        _bucket_slippage
+    output["slippage_bucket"] = output["applied_overlay_slippage_bps_numeric"].map(_bucket_slippage)
+    output["spy_drawdown_bucket"] = output["spy_drawdown_pct_numeric"].map(_bucket_spy_drawdown)
+    output["trend_distance_bucket"] = output["spy_distance_from_trend_pct_numeric"].map(
+        _bucket_trend_distance
     )
-    output["spy_drawdown_bucket"] = output["spy_drawdown_pct_numeric"].map(
-        _bucket_spy_drawdown
-    )
-    output["trend_distance_bucket"] = output[
-        "spy_distance_from_trend_pct_numeric"
-    ].map(_bucket_trend_distance)
 
     return output
 
@@ -239,8 +234,7 @@ def _find_worst_group(
         return None
 
     candidates = summary[
-        (summary["group_dimension"] != "all")
-        & (_to_numeric(summary[valid_column]) >= 3)
+        (summary["group_dimension"] != "all") & (_to_numeric(summary[valid_column]) >= 3)
     ].copy()
 
     if candidates.empty:
@@ -261,10 +255,7 @@ def _get_group_row(
     group_dimension: str,
     group: str,
 ) -> pd.Series | None:
-    rows = summary[
-        (summary["group_dimension"] == group_dimension)
-        & (summary["group"] == group)
-    ]
+    rows = summary[(summary["group_dimension"] == group_dimension) & (summary["group"] == group)]
 
     if rows.empty:
         return None
@@ -481,9 +472,7 @@ def save_regime_switch_overlay_switch_failure_attribution(
         return outputs
 
     events_path = reports_dir / "regime_switch_overlay_switch_failure_attribution.csv"
-    summary_path = (
-        reports_dir / "regime_switch_overlay_switch_failure_attribution_summary.csv"
-    )
+    summary_path = reports_dir / "regime_switch_overlay_switch_failure_attribution_summary.csv"
     conclusion_path = reports_dir / "phase4c_switch_failure_conclusion.csv"
     markdown_path = reports_dir / "regime_switch_overlay_switch_failure_attribution.md"
 

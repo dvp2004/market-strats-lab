@@ -58,9 +58,7 @@ DEFAULT_PHASE13E_CONFIG: dict[str, Any] = {
         "require_no_paper_trading_deployment": True,
         "require_no_candidate_promotion": True,
         "require_no_final_candidate_change": True,
-        "required_spec_role": (
-            "Technical and macro feature-contract schema design spec only"
-        ),
+        "required_spec_role": ("Technical and macro feature-contract schema design spec only"),
     },
 }
 
@@ -105,9 +103,7 @@ DEFAULT_PHASE13F_CONFIG: dict[str, Any] = {
         "require_no_paper_trading_deployment": True,
         "require_no_candidate_promotion": True,
         "require_no_final_candidate_change": True,
-        "required_audit_role": (
-            "Feature schema readiness and visual report template audit only"
-        ),
+        "required_audit_role": ("Feature schema readiness and visual report template audit only"),
     },
 }
 
@@ -265,9 +261,7 @@ def build_phase13e_feature_schema(
                 "revision_policy": str(item.get("revision_policy", "")),
                 "missingness_policy": str(item.get("missingness_policy", "")),
                 "allowed_states": _join_list(item.get("allowed_states")),
-                "ml_feature_engineering_role": str(
-                    item.get("ml_feature_engineering_role", "")
-                ),
+                "ml_feature_engineering_role": str(item.get("ml_feature_engineering_role", "")),
                 "calculate_now": _bool_value(item.get("calculate_now", True)),
             }
         )
@@ -306,15 +300,11 @@ def build_phase13e_feature_state_policy(phase_config: dict[str, Any]) -> pd.Data
     return pd.DataFrame(
         [
             {
-                "allowed_feature_states": _join_list(
-                    policy.get("allowed_feature_states")
-                ),
+                "allowed_feature_states": _join_list(policy.get("allowed_feature_states")),
                 "state_direction_required": _bool_value(
                     policy.get("state_direction_required", False)
                 ),
-                "state_reason_required": _bool_value(
-                    policy.get("state_reason_required", False)
-                ),
+                "state_reason_required": _bool_value(policy.get("state_reason_required", False)),
                 "no_state_may_directly_create_trade": _bool_value(
                     policy.get("no_state_may_directly_create_trade", False)
                 ),
@@ -357,12 +347,9 @@ def build_phase13e_phase13f_boundary_check(
             "phase13f_forbidden_next_step",
             str(boundary.get("forbidden_next_step", "")),
             (
-                "feature ingestion"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "model training"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "strategy backtest"
-                in str(boundary.get("forbidden_next_step", "")).lower()
+                "feature ingestion" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "model training" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "strategy backtest" in str(boundary.get("forbidden_next_step", "")).lower()
             ),
         ),
         (
@@ -377,12 +364,8 @@ def build_phase13e_phase13f_boundary_check(
         ),
         (
             "phase13f_may_audit_ml_feature_engineering_policy",
-            _bool_value(
-                boundary.get("phase13f_may_audit_ml_feature_engineering_policy", False)
-            ),
-            _bool_value(
-                boundary.get("phase13f_may_audit_ml_feature_engineering_policy", False)
-            ),
+            _bool_value(boundary.get("phase13f_may_audit_ml_feature_engineering_policy", False)),
+            _bool_value(boundary.get("phase13f_may_audit_ml_feature_engineering_policy", False)),
         ),
         (
             "phase13f_may_ingest_features",
@@ -421,7 +404,10 @@ def build_phase13e_phase13f_boundary_check(
         ),
     ]
     out = pd.DataFrame(
-        [{"boundary_item": item, "value": value, "passed": passed} for item, value, passed in checks]
+        [
+            {"boundary_item": item, "value": value, "passed": passed}
+            for item, value, passed in checks
+        ]
     )
     out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
     return out
@@ -468,7 +454,9 @@ def build_phase13e_summary(
     phase13f_boundary_check: pd.DataFrame,
     scope_boundary_check: pd.DataFrame,
 ) -> pd.DataFrame:
-    ml_policy_text = " ".join(transform_policy.get("ml_principle", pd.Series(dtype=str)).astype(str))
+    ml_policy_text = " ".join(
+        transform_policy.get("ml_principle", pd.Series(dtype=str)).astype(str)
+    )
     ml_principles_present = (
         "leakage" in ml_policy_text.lower()
         and "overfitting" in ml_policy_text.lower()
@@ -495,7 +483,9 @@ def build_phase13e_summary(
                 if not phase13d_result_check.empty
                 else False,
                 "universal_column_count": int(len(universal_panel_schema)),
-                "universal_required": bool(universal_panel_schema["required"].map(_bool_value).all())
+                "universal_required": bool(
+                    universal_panel_schema["required"].map(_bool_value).all()
+                )
                 if not universal_panel_schema.empty
                 else False,
                 "technical_feature_count": int(len(technical_feature_schema)),
@@ -511,11 +501,15 @@ def build_phase13e_summary(
                 if not macro_feature_schema.empty
                 else False,
                 "transform_policy_count": int(len(transform_policy)),
-                "transform_policy_required": bool(transform_policy["required"].map(_bool_value).all())
+                "transform_policy_required": bool(
+                    transform_policy["required"].map(_bool_value).all()
+                )
                 if not transform_policy.empty
                 else False,
                 "missingness_policy_count": int(len(missingness_policy)),
-                "missingness_policy_required": bool(missingness_policy["required"].map(_bool_value).all())
+                "missingness_policy_required": bool(
+                    missingness_policy["required"].map(_bool_value).all()
+                )
                 if not missingness_policy.empty
                 else False,
                 "feature_state_policy_clean": feature_state_clean,
@@ -611,7 +605,8 @@ def build_phase13e_gate_report(
             "Missingness policy is complete enough",
             (not gates.get("require_missingness_policy", True))
             or (
-                int(row["missingness_policy_count"]) >= int(gates.get("min_missingness_policies", 5))
+                int(row["missingness_policy_count"])
+                >= int(gates.get("min_missingness_policies", 5))
                 and bool(row["missingness_policy_required"])
             ),
             f"missingness_policy_count={int(row['missingness_policy_count'])}",
@@ -842,8 +837,7 @@ def save_phase13e_technical_macro_feature_schema_design_spec(
         summary=summary,
         gate_report=gate_report,
         conclusion=conclusion,
-        output_path=reports_path
-        / "phase13e_technical_macro_feature_schema_design_spec.md",
+        output_path=reports_path / "phase13e_technical_macro_feature_schema_design_spec.md",
     )
 
     print("Wrote Phase 13E technical/macro feature schema design reports.")
@@ -1047,7 +1041,9 @@ def build_phase13f_visual_template_check(
         },
         {
             "check": "Visual templates are not calculated now",
-            "passed": bool(visual_report_templates["calculate_now"].map(_bool_value).eq(False).all())
+            "passed": bool(
+                visual_report_templates["calculate_now"].map(_bool_value).eq(False).all()
+            )
             if not visual_report_templates.empty
             else False,
             "detail": f"template_rows={len(visual_report_templates)}",
@@ -1067,7 +1063,10 @@ def build_phase13f_ml_policy_check(transform_policy: pd.DataFrame) -> pd.DataFra
         ("Target leakage prevention present", "target leakage" in joined.lower()),
     ]
     out = pd.DataFrame(
-        [{"check": name, "passed": passed, "result": "Passed" if passed else "Failed"} for name, passed in checks]
+        [
+            {"check": name, "passed": passed, "result": "Passed" if passed else "Failed"}
+            for name, passed in checks
+        ]
     )
     return out
 
@@ -1086,12 +1085,9 @@ def build_phase13f_phase13g_boundary_check(
             "phase13g_forbidden_next_step",
             str(boundary.get("forbidden_next_step", "")),
             (
-                "direct feature calculation"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "model training"
-                in str(boundary.get("forbidden_next_step", "")).lower()
-                and "strategy backtest"
-                in str(boundary.get("forbidden_next_step", "")).lower()
+                "direct feature calculation" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "model training" in str(boundary.get("forbidden_next_step", "")).lower()
+                and "strategy backtest" in str(boundary.get("forbidden_next_step", "")).lower()
             ),
         ),
         (
@@ -1131,7 +1127,10 @@ def build_phase13f_phase13g_boundary_check(
         ),
     ]
     out = pd.DataFrame(
-        [{"boundary_item": item, "value": value, "passed": passed} for item, value, passed in checks]
+        [
+            {"boundary_item": item, "value": value, "passed": passed}
+            for item, value, passed in checks
+        ]
     )
     out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
     return out
@@ -1246,8 +1245,7 @@ def build_phase13f_gate_report(
         ),
         _gate_row(
             "Schema coverage passed",
-            (not gates.get("require_schema_coverage", True))
-            or bool(row["schema_coverage_passed"]),
+            (not gates.get("require_schema_coverage", True)) or bool(row["schema_coverage_passed"]),
             f"schema_coverage_passed={bool(row['schema_coverage_passed'])}",
         ),
         _gate_row(
@@ -1258,8 +1256,7 @@ def build_phase13f_gate_report(
         ),
         _gate_row(
             "ML feature-engineering policy is ready",
-            (not gates.get("require_ml_policy_ready", True))
-            or bool(row["ml_policy_ready"]),
+            (not gates.get("require_ml_policy_ready", True)) or bool(row["ml_policy_ready"]),
             f"ml_policy_ready={bool(row['ml_policy_ready'])}",
         ),
         _gate_row(
@@ -1400,18 +1397,12 @@ def save_phase13f_feature_schema_readiness_visual_template_audit(
     readiness_claims_check = build_phase13f_readiness_claims_check(phase_config)
 
     reports = phase_config.get("phase13e_reports", {})
-    universal_panel_schema = _read_csv_if_exists(
-        reports.get("universal_panel_schema", "")
-    )
-    technical_feature_schema = _read_csv_if_exists(
-        reports.get("technical_feature_schema", "")
-    )
+    universal_panel_schema = _read_csv_if_exists(reports.get("universal_panel_schema", ""))
+    technical_feature_schema = _read_csv_if_exists(reports.get("technical_feature_schema", ""))
     macro_feature_schema = _read_csv_if_exists(reports.get("macro_feature_schema", ""))
     transform_policy = _read_csv_if_exists(reports.get("transform_policy", ""))
     missingness_policy = _read_csv_if_exists(reports.get("missingness_policy", ""))
-    visual_report_templates = _read_csv_if_exists(
-        reports.get("visual_report_templates", "")
-    )
+    visual_report_templates = _read_csv_if_exists(reports.get("visual_report_templates", ""))
 
     schema_coverage_check = build_phase13f_schema_coverage_check(
         universal_panel_schema=universal_panel_schema,
@@ -1420,9 +1411,7 @@ def save_phase13f_feature_schema_readiness_visual_template_audit(
         transform_policy=transform_policy,
         missingness_policy=missingness_policy,
     )
-    visual_template_check = build_phase13f_visual_template_check(
-        visual_report_templates
-    )
+    visual_template_check = build_phase13f_visual_template_check(visual_report_templates)
     ml_policy_check = build_phase13f_ml_policy_check(transform_policy)
     phase13g_boundary_check = build_phase13f_phase13g_boundary_check(phase_config)
     scope_boundary_check = build_phase13_scope_boundary_check(phase_config)
@@ -1476,8 +1465,7 @@ def save_phase13f_feature_schema_readiness_visual_template_audit(
         summary=summary,
         gate_report=gate_report,
         conclusion=conclusion,
-        output_path=reports_path
-        / "phase13f_feature_schema_readiness_visual_template_audit.md",
+        output_path=reports_path / "phase13f_feature_schema_readiness_visual_template_audit.md",
     )
 
     print("Wrote Phase 13F feature schema readiness / visual template audit reports.")

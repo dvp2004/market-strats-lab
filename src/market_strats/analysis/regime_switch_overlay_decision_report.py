@@ -17,9 +17,7 @@ DECISION_ROWS = [
         ),
     },
     {
-        "source_file": (
-            "regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv"
-        ),
+        "source_file": ("regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv"),
         "strategy": "SPY Trend Regime Switch Overlay 3D Confirmed",
         "classification": "Current best overall system candidate",
         "final_verdict": (
@@ -29,9 +27,7 @@ DECISION_ROWS = [
         ),
     },
     {
-        "source_file": (
-            "regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv"
-        ),
+        "source_file": ("regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv"),
         "strategy": "SPY Buy and Hold",
         "classification": "Raw wealth benchmark",
         "final_verdict": (
@@ -40,9 +36,7 @@ DECISION_ROWS = [
         ),
     },
     {
-        "source_file": (
-            "regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv"
-        ),
+        "source_file": ("regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv"),
         "strategy": "SPY 12-Month Absolute Momentum",
         "classification": "Phase 1 defensive timing benchmark",
         "final_verdict": (
@@ -51,9 +45,7 @@ DECISION_ROWS = [
         ),
     },
     {
-        "source_file": (
-            "regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv"
-        ),
+        "source_file": ("regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv"),
         "strategy": "Top 3 Equal Weight Trend Confirmed Relative Momentum Allocator",
         "classification": "Best standalone balanced allocator",
         "final_verdict": (
@@ -62,12 +54,8 @@ DECISION_ROWS = [
         ),
     },
     {
-        "source_file": (
-            "regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv"
-        ),
-        "strategy": (
-            "Top 3 Equal Weight Trend Confirmed Constrained Relative Momentum Allocator"
-        ),
+        "source_file": ("regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv"),
+        "strategy": ("Top 3 Equal Weight Trend Confirmed Constrained Relative Momentum Allocator"),
         "classification": "Best standalone defensive allocator",
         "final_verdict": (
             "Best standalone defensive allocator, but the 3D confirmed overlay now has much "
@@ -149,9 +137,7 @@ def _load_strategy_row(
 
     if row.empty:
         available = sorted(df["strategy"].dropna().unique())
-        raise ValueError(
-            f"Strategy '{strategy}' not found in {path}. Available: {available}"
-        )
+        raise ValueError(f"Strategy '{strategy}' not found in {path}. Available: {available}")
 
     return row.iloc[0]
 
@@ -198,17 +184,13 @@ def create_regime_switch_overlay_decision_report(
 
     spy_12m_row = _load_strategy_row(
         reports_dir=reports_dir,
-        source_file=(
-            "regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv"
-        ),
+        source_file=("regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv"),
         strategy="SPY 12-Month Absolute Momentum",
     )
 
     spy_buy_hold_row = _load_strategy_row(
         reports_dir=reports_dir,
-        source_file=(
-            "regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv"
-        ),
+        source_file=("regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv"),
         strategy="SPY Buy and Hold",
     )
 
@@ -339,9 +321,7 @@ def write_regime_switch_overlay_decision_markdown(
         column for column in decision_columns if column in decision_report.columns
     ]
 
-    decision_table = decision_report[available_decision_columns].to_markdown(
-        index=False
-    )
+    decision_table = decision_report[available_decision_columns].to_markdown(index=False)
     claim_table = claim_report.to_markdown(index=False)
 
     content = f"""# Regime Switch Overlay Decision Report
@@ -394,9 +374,7 @@ def save_regime_switch_overlay_decision_report(
     reports_dir = Path(reports_dir)
     reports_dir.mkdir(parents=True, exist_ok=True)
 
-    decision_report = create_regime_switch_overlay_decision_report(
-        reports_dir=reports_dir
-    )
+    decision_report = create_regime_switch_overlay_decision_report(reports_dir=reports_dir)
     claim_report = create_regime_switch_overlay_claim_report()
 
     decision_csv_path = reports_dir / "regime_switch_overlay_decision_report.csv"

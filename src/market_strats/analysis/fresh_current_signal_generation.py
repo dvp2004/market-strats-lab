@@ -59,14 +59,11 @@ def _phase_result_check(conclusion_path: str, gate_path: str, phase_name: str) -
     conclusion = _read_csv_if_exists(conclusion_path)
     gate = _read_csv_if_exists(gate_path)
 
-    conclusion_passed = (
-        not conclusion.empty
-        and _bool_value(conclusion.iloc[0].get("all_gates_passed", False))
+    conclusion_passed = not conclusion.empty and _bool_value(
+        conclusion.iloc[0].get("all_gates_passed", False)
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -95,7 +92,9 @@ def _first_existing_col(frame: pd.DataFrame, candidates: list[str]) -> str | Non
     return None
 
 
-def _required_column_check(frame: pd.DataFrame, required: list[str], frame_name: str) -> pd.DataFrame:
+def _required_column_check(
+    frame: pd.DataFrame, required: list[str], frame_name: str
+) -> pd.DataFrame:
     rows = []
     for col in required:
         rows.append(
@@ -330,18 +329,18 @@ def _load_candidate_frame(
 
     file_candidates.extend(
         [
-        (
-            "preferred_phase15o_stream_file",
-            str(sources.get("preferred_phase15o_stream_file", "")),
-        ),
-        (
-            "preferred_existing_fresh_candidate_stream_file",
-            str(sources.get("preferred_existing_fresh_candidate_stream_file", "")),
-        ),
-        (
-            "preferred_fresh_candidate_stream_file",
-            str(legacy_policy.get("preferred_fresh_candidate_stream_file", "")),
-        ),
+            (
+                "preferred_phase15o_stream_file",
+                str(sources.get("preferred_phase15o_stream_file", "")),
+            ),
+            (
+                "preferred_existing_fresh_candidate_stream_file",
+                str(sources.get("preferred_existing_fresh_candidate_stream_file", "")),
+            ),
+            (
+                "preferred_fresh_candidate_stream_file",
+                str(legacy_policy.get("preferred_fresh_candidate_stream_file", "")),
+            ),
         ]
     )
 
@@ -356,7 +355,9 @@ def _load_candidate_frame(
     allow_in_memory = _bool_value(
         sources.get(
             "allow_in_memory_final_candidate_frame_if_post_endpoint_rows_exist",
-            legacy_policy.get("allow_in_memory_final_candidate_frame_if_post_endpoint_rows_exist", False),
+            legacy_policy.get(
+                "allow_in_memory_final_candidate_frame_if_post_endpoint_rows_exist", False
+            ),
         )
     )
     if allow_in_memory:
@@ -516,7 +517,9 @@ def _build_current_signal(
     if previous is not None:
         previous_exposure = float(previous["fresh_exposure"])
     elif not endpoint_signal.empty:
-        previous_exposure = float(endpoint_signal.iloc[0].get("endpoint_exposure", current_exposure))
+        previous_exposure = float(
+            endpoint_signal.iloc[0].get("endpoint_exposure", current_exposure)
+        )
     else:
         previous_exposure = current_exposure
 
@@ -556,9 +559,13 @@ def _build_current_signal(
 
     all_signal_checks_passed = bool(freshness_passed and benchmark_ok and signal_validity_passed)
 
-    timestamp_col = _first_existing_col(work, ["data_source_timestamp", "source_timestamp", "updated_at"])
+    timestamp_col = _first_existing_col(
+        work, ["data_source_timestamp", "source_timestamp", "updated_at"]
+    )
     data_source_timestamp = (
-        str(latest[timestamp_col]) if timestamp_col and pd.notna(latest[timestamp_col]) else data_as_of_date.strftime("%Y-%m-%d")
+        str(latest[timestamp_col])
+        if timestamp_col and pd.notna(latest[timestamp_col])
+        else data_as_of_date.strftime("%Y-%m-%d")
     )
 
     signal = pd.DataFrame(
@@ -628,10 +635,14 @@ def _generation_summary(
                 "selected_exposure_transform": transform,
                 "signal_file_generated": True,
                 "data_as_of_date": row.get("data_as_of_date", ""),
-                "is_out_of_sample_extension": _bool_value(row.get("is_out_of_sample_extension", False)),
-                "signal_validity_passed": str(row.get("signal_validity_flag", "")).lower() == "pass",
+                "is_out_of_sample_extension": _bool_value(
+                    row.get("is_out_of_sample_extension", False)
+                ),
+                "signal_validity_passed": str(row.get("signal_validity_flag", "")).lower()
+                == "pass",
                 "data_freshness_passed": str(row.get("data_freshness_flag", "")).lower() == "pass",
-                "benchmark_update_passed": str(row.get("benchmark_update_flag", "")).lower() == "pass",
+                "benchmark_update_passed": str(row.get("benchmark_update_flag", "")).lower()
+                == "pass",
                 "paper_dry_run_allowed": False,
                 "paper_trading_ready": False,
                 "blocking_warnings": row.get("blocking_warnings", ""),
@@ -651,7 +662,9 @@ def _upstream_result_check(section: dict[str, Any]) -> tuple[str, pd.DataFrame]:
         "phase15l_gate_report",
         "",
     )
-    return upstream_label, _phase_result_check(upstream_conclusion, upstream_gate_report, upstream_label)
+    return upstream_label, _phase_result_check(
+        upstream_conclusion, upstream_gate_report, upstream_label
+    )
 
 
 def save_phase15m_fresh_current_signal_generation(
@@ -704,9 +717,15 @@ def save_phase15m_fresh_current_signal_generation(
                 "signal_file_written": output_file.exists(),
                 "post_endpoint_rows": int(generation_summary.iloc[0]["post_endpoint_rows"]),
                 "data_source": generation_summary.iloc[0]["data_source"],
-                "signal_validity_passed": _bool_value(generation_summary.iloc[0]["signal_validity_passed"]),
-                "data_freshness_passed": _bool_value(generation_summary.iloc[0]["data_freshness_passed"]),
-                "benchmark_update_passed": _bool_value(generation_summary.iloc[0]["benchmark_update_passed"]),
+                "signal_validity_passed": _bool_value(
+                    generation_summary.iloc[0]["signal_validity_passed"]
+                ),
+                "data_freshness_passed": _bool_value(
+                    generation_summary.iloc[0]["data_freshness_passed"]
+                ),
+                "benchmark_update_passed": _bool_value(
+                    generation_summary.iloc[0]["benchmark_update_passed"]
+                ),
                 "is_out_of_sample_extension": _bool_value(
                     generation_summary.iloc[0]["is_out_of_sample_extension"]
                 ),
@@ -729,12 +748,28 @@ def save_phase15m_fresh_current_signal_generation(
         [
             _gate_row(f"{upstream_label} passed", upstream_passed, upstream_label),
             _gate_row("Signal file written", output_file.exists(), str(output_file)),
-            _gate_row("Required columns present", bool(required_col_check["present"].all()), "schema"),
-            _gate_row("Canonical endpoint preserved", True, section.get("pinned_research_endpoint", "")),
-            _gate_row("Out-of-sample label present", _bool_value(current_signal.iloc[0]["is_out_of_sample_extension"]), "post-endpoint"),
-            _gate_row("No canonical report mutation", True, "fresh signal output uses separate file"),
-            _gate_row("Phase 15N boundary is audit-only", bool(boundary["passed"].all()), "phase15n"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "Required columns present", bool(required_col_check["present"].all()), "schema"
+            ),
+            _gate_row(
+                "Canonical endpoint preserved", True, section.get("pinned_research_endpoint", "")
+            ),
+            _gate_row(
+                "Out-of-sample label present",
+                _bool_value(current_signal.iloc[0]["is_out_of_sample_extension"]),
+                "post-endpoint",
+            ),
+            _gate_row(
+                "No canonical report mutation", True, "fresh signal output uses separate file"
+            ),
+            _gate_row(
+                "Phase 15N boundary is audit-only", bool(boundary["passed"].all()), "phase15n"
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Execution role is correct",
                 section.get("execution_role") == "Fresh current signal generation only",
@@ -757,9 +792,15 @@ def save_phase15m_fresh_current_signal_generation(
                 "all_gates_passed": bool(gate_report["passed"].all()),
                 "upstream_phase_label": upstream_label,
                 "upstream_phase_passed": upstream_passed,
-                "signal_validity_passed": _bool_value(generation_summary.iloc[0]["signal_validity_passed"]),
-                "data_freshness_passed": _bool_value(generation_summary.iloc[0]["data_freshness_passed"]),
-                "benchmark_update_passed": _bool_value(generation_summary.iloc[0]["benchmark_update_passed"]),
+                "signal_validity_passed": _bool_value(
+                    generation_summary.iloc[0]["signal_validity_passed"]
+                ),
+                "data_freshness_passed": _bool_value(
+                    generation_summary.iloc[0]["data_freshness_passed"]
+                ),
+                "benchmark_update_passed": _bool_value(
+                    generation_summary.iloc[0]["benchmark_update_passed"]
+                ),
                 "paper_dry_run_allowed": False,
                 "paper_trading_ready": False,
                 "paper_trading_deployment": False,
@@ -953,7 +994,9 @@ def save_phase15n_fresh_signal_audit_paper_dry_run_eligibility(
                 "config_flags_clean": bool(flags["passed"].all()),
                 "current_signal_file_exists": not current_signal.empty,
                 "required_columns_present": bool(required_col_check["present"].all()),
-                "post_endpoint_data_passed": _bool_value(audit.iloc[0]["post_endpoint_data_passed"]),
+                "post_endpoint_data_passed": _bool_value(
+                    audit.iloc[0]["post_endpoint_data_passed"]
+                ),
                 "signal_validity_passed": _bool_value(audit.iloc[0]["signal_validity_passed"]),
                 "data_freshness_passed": _bool_value(audit.iloc[0]["data_freshness_passed"]),
                 "benchmark_update_passed": _bool_value(audit.iloc[0]["benchmark_update_passed"]),
@@ -977,19 +1020,34 @@ def save_phase15n_fresh_signal_audit_paper_dry_run_eligibility(
             _gate_row("Phase 15M passed", bool(phase15m_check["passed"].all()), "phase15m"),
             _gate_row("Config flags clean", bool(flags["passed"].all()), "runtime flags"),
             _gate_row("Current signal file exists", not current_signal.empty, "current signal"),
-            _gate_row("Required columns present", bool(required_col_check["present"].all()), "schema"),
-            _gate_row("Post-endpoint data audited", True, str(audit.iloc[0]["post_endpoint_data_passed"])),
-            _gate_row("Signal validity audited", True, str(audit.iloc[0]["signal_validity_passed"])),
+            _gate_row(
+                "Required columns present", bool(required_col_check["present"].all()), "schema"
+            ),
+            _gate_row(
+                "Post-endpoint data audited", True, str(audit.iloc[0]["post_endpoint_data_passed"])
+            ),
+            _gate_row(
+                "Signal validity audited", True, str(audit.iloc[0]["signal_validity_passed"])
+            ),
             _gate_row("Data freshness audited", True, str(audit.iloc[0]["data_freshness_passed"])),
-            _gate_row("Benchmark update audited", True, str(audit.iloc[0]["benchmark_update_passed"])),
+            _gate_row(
+                "Benchmark update audited", True, str(audit.iloc[0]["benchmark_update_passed"])
+            ),
             _gate_row("Switch context audited", True, str(audit.iloc[0]["switch_context_present"])),
             _gate_row("Decision output exists", len(decision) == 1, decision_text),
             _gate_row("No paper-ready claim", no_paper_ready_claim, "paper_trading_ready=False"),
-            _gate_row("Phase 15O boundary is conditional-only", bool(boundary["passed"].all()), "phase15o"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "Phase 15O boundary is conditional-only", bool(boundary["passed"].all()), "phase15o"
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Audit role is correct",
-                section.get("audit_role") == "Fresh signal audit and paper dry-run eligibility decision only",
+                section.get("audit_role")
+                == "Fresh signal audit and paper dry-run eligibility decision only",
                 section.get("audit_role", ""),
             ),
         ]

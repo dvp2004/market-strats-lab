@@ -10,12 +10,10 @@ import pandas as pd
 DEFAULT_PHASE23E_CONFIG: dict[str, Any] = {
     "enabled": False,
     "output_dir": (
-        "reports/individual_equity_decision_system/"
-        "phase23e_combined_feature_panel_contract"
+        "reports/individual_equity_decision_system/phase23e_combined_feature_panel_contract"
     ),
     "dashboard_status_path": (
-        "reports/paper_trading/dashboard/"
-        "phase23e_combined_feature_panel_contract_status.csv"
+        "reports/paper_trading/dashboard/phase23e_combined_feature_panel_contract_status.csv"
     ),
     "audit_as_of_date": "2026-06-13",
     "required_start_date": "2006-04-28",
@@ -140,9 +138,7 @@ def _gate(name: str, passed: bool, detail: str) -> dict[str, Any]:
     }
 
 
-def _resolve_configured_path(
-    *, configured_path: str | Path, reports_dir: str | Path
-) -> Path:
+def _resolve_configured_path(*, configured_path: str | Path, reports_dir: str | Path) -> Path:
     """Resolve paths without creating a duplicated ``reports/reports`` prefix."""
 
     reports_root = Path(reports_dir)
@@ -392,34 +388,139 @@ def build_initial_feature_manifest() -> pd.DataFrame:
         ("momentum_21d", "technical", "21-trading-day total return", "cross_sectional_zscore"),
         ("momentum_63d", "technical", "63-trading-day total return", "cross_sectional_zscore"),
         ("momentum_252d_skip21d", "technical", "12-1 month momentum", "cross_sectional_zscore"),
-        ("trend_distance_200d", "technical", "price relative to 200-day mean", "cross_sectional_zscore"),
-        ("realized_volatility_21d", "technical", "21-day realized volatility", "cross_sectional_zscore"),
-        ("volume_surprise_20d", "technical", "volume versus trailing baseline", "cross_sectional_zscore"),
-        ("revenue_growth_yoy", "fundamental", "as-filed revenue year-over-year growth", "sector_relative_zscore"),
-        ("gross_margin", "fundamental", "as-filed gross profit divided by revenue", "sector_relative_zscore"),
-        ("operating_margin", "fundamental", "as-filed operating income divided by revenue", "sector_relative_zscore"),
-        ("free_cash_flow_margin", "fundamental", "as-filed FCF divided by revenue", "sector_relative_zscore"),
-        ("return_on_assets", "fundamental", "TTM income divided by average assets", "sector_relative_zscore"),
-        ("accruals_to_assets", "fundamental", "income less operating cash flow over assets", "sector_relative_zscore"),
-        ("debt_to_assets", "fundamental", "point-in-time debt divided by assets", "sector_relative_zscore"),
-        ("asset_growth_yoy", "fundamental", "asset growth versus prior year", "sector_relative_zscore"),
-        ("news_sentiment_1d", "sentiment_news", "issuer news sentiment over one day", "cross_sectional_zscore"),
-        ("news_sentiment_5d", "sentiment_news", "issuer news sentiment over five days", "cross_sectional_zscore"),
-        ("news_volume_surprise", "sentiment_news", "issuer event volume versus baseline", "cross_sectional_zscore"),
-        ("negative_event_intensity", "sentiment_news", "negative event taxonomy intensity", "cross_sectional_zscore"),
-        ("filing_tone", "sentiment_news", "as-filed regulatory text tone", "sector_relative_zscore"),
+        (
+            "trend_distance_200d",
+            "technical",
+            "price relative to 200-day mean",
+            "cross_sectional_zscore",
+        ),
+        (
+            "realized_volatility_21d",
+            "technical",
+            "21-day realized volatility",
+            "cross_sectional_zscore",
+        ),
+        (
+            "volume_surprise_20d",
+            "technical",
+            "volume versus trailing baseline",
+            "cross_sectional_zscore",
+        ),
+        (
+            "revenue_growth_yoy",
+            "fundamental",
+            "as-filed revenue year-over-year growth",
+            "sector_relative_zscore",
+        ),
+        (
+            "gross_margin",
+            "fundamental",
+            "as-filed gross profit divided by revenue",
+            "sector_relative_zscore",
+        ),
+        (
+            "operating_margin",
+            "fundamental",
+            "as-filed operating income divided by revenue",
+            "sector_relative_zscore",
+        ),
+        (
+            "free_cash_flow_margin",
+            "fundamental",
+            "as-filed FCF divided by revenue",
+            "sector_relative_zscore",
+        ),
+        (
+            "return_on_assets",
+            "fundamental",
+            "TTM income divided by average assets",
+            "sector_relative_zscore",
+        ),
+        (
+            "accruals_to_assets",
+            "fundamental",
+            "income less operating cash flow over assets",
+            "sector_relative_zscore",
+        ),
+        (
+            "debt_to_assets",
+            "fundamental",
+            "point-in-time debt divided by assets",
+            "sector_relative_zscore",
+        ),
+        (
+            "asset_growth_yoy",
+            "fundamental",
+            "asset growth versus prior year",
+            "sector_relative_zscore",
+        ),
+        (
+            "news_sentiment_1d",
+            "sentiment_news",
+            "issuer news sentiment over one day",
+            "cross_sectional_zscore",
+        ),
+        (
+            "news_sentiment_5d",
+            "sentiment_news",
+            "issuer news sentiment over five days",
+            "cross_sectional_zscore",
+        ),
+        (
+            "news_volume_surprise",
+            "sentiment_news",
+            "issuer event volume versus baseline",
+            "cross_sectional_zscore",
+        ),
+        (
+            "negative_event_intensity",
+            "sentiment_news",
+            "negative event taxonomy intensity",
+            "cross_sectional_zscore",
+        ),
+        (
+            "filing_tone",
+            "sentiment_news",
+            "as-filed regulatory text tone",
+            "sector_relative_zscore",
+        ),
         ("macro_growth_regime", "macro", "vintage-aware growth regime score", "none"),
         ("macro_inflation_regime", "macro", "vintage-aware inflation regime score", "none"),
         ("policy_rate_change_63d", "macro", "policy-rate change over 63 days", "none"),
         ("credit_spread_change_21d", "cross_asset", "credit spread change over 21 days", "none"),
         ("vix_term_structure", "cross_asset", "volatility term-structure slope", "none"),
         ("market_breadth_200d", "market_stress", "eligible members above 200-day mean", "none"),
-        ("cross_sectional_dispersion_21d", "market_stress", "eligible-stock return dispersion", "none"),
-        ("average_dollar_volume_20d", "liquidity_risk", "20-day average dollar volume", "log_cross_sectional_zscore"),
+        (
+            "cross_sectional_dispersion_21d",
+            "market_stress",
+            "eligible-stock return dispersion",
+            "none",
+        ),
+        (
+            "average_dollar_volume_20d",
+            "liquidity_risk",
+            "20-day average dollar volume",
+            "log_cross_sectional_zscore",
+        ),
         ("beta_252d", "liquidity_risk", "rolling market beta", "cross_sectional_zscore"),
-        ("days_to_next_earnings", "event_corporate_action", "calendar days to known earnings event", "none"),
-        ("feature_missing_count", "missingness_quality", "count of unavailable predictor values", "none"),
-        ("oldest_feature_age_days", "missingness_quality", "age of oldest source observation", "none"),
+        (
+            "days_to_next_earnings",
+            "event_corporate_action",
+            "calendar days to known earnings event",
+            "none",
+        ),
+        (
+            "feature_missing_count",
+            "missingness_quality",
+            "count of unavailable predictor values",
+            "none",
+        ),
+        (
+            "oldest_feature_age_days",
+            "missingness_quality",
+            "age of oldest source observation",
+            "none",
+        ),
     ]
     columns = ["feature_name", "feature_family", "definition", "normalization"]
     frame = pd.DataFrame(rows, columns=columns)
@@ -528,41 +629,133 @@ def build_target_registry(phase_config: dict[str, Any]) -> pd.DataFrame:
 
 def build_availability_join_policy() -> pd.DataFrame:
     rows = [
-        ("A1", "maximum_family_clock", "Every family records its latest contributing availability timestamp."),
-        ("A2", "cutoff_enforcement", "All family availability timestamps must be less than or equal to model_cutoff_timestamp_utc."),
-        ("A3", "max_clock_reconciliation", "feature_max_available_timestamp_utc equals the maximum non-null family availability clock."),
-        ("A4", "membership_knowledge", "membership_known_timestamp_utc must be less than or equal to the decision cutoff."),
-        ("A5", "asof_join_only", "Slow-moving data use backward as-of joins on knowledge timestamps, never period-end or future revisions."),
-        ("A6", "same_market_close_alignment", "Market features use observations completed by the decision cutoff with explicit timezone alignment."),
-        ("A7", "no_future_metadata", "Future ticker, sector, constituent, event, and corporate-action attributes are prohibited."),
-        ("A8", "lineage_reproducibility", "Every row links to immutable source and feature manifests."),
+        (
+            "A1",
+            "maximum_family_clock",
+            "Every family records its latest contributing availability timestamp.",
+        ),
+        (
+            "A2",
+            "cutoff_enforcement",
+            "All family availability timestamps must be less than or equal to model_cutoff_timestamp_utc.",
+        ),
+        (
+            "A3",
+            "max_clock_reconciliation",
+            "feature_max_available_timestamp_utc equals the maximum non-null family availability clock.",
+        ),
+        (
+            "A4",
+            "membership_knowledge",
+            "membership_known_timestamp_utc must be less than or equal to the decision cutoff.",
+        ),
+        (
+            "A5",
+            "asof_join_only",
+            "Slow-moving data use backward as-of joins on knowledge timestamps, never period-end or future revisions.",
+        ),
+        (
+            "A6",
+            "same_market_close_alignment",
+            "Market features use observations completed by the decision cutoff with explicit timezone alignment.",
+        ),
+        (
+            "A7",
+            "no_future_metadata",
+            "Future ticker, sector, constituent, event, and corporate-action attributes are prohibited.",
+        ),
+        (
+            "A8",
+            "lineage_reproducibility",
+            "Every row links to immutable source and feature manifests.",
+        ),
     ]
     return pd.DataFrame(rows, columns=["rule_id", "policy", "requirement"])
 
 
 def build_missingness_policy() -> pd.DataFrame:
     rows = [
-        ("M1", "missing_is_information", "Preserve explicit missing flags and feature age rather than hiding source gaps."),
-        ("M2", "no_future_backfill", "Never backward-fill a historical row using a fact, article, classification, or price observed later."),
-        ("M3", "no_universal_zero_fill", "Zero is used only when the feature definition makes zero economically meaningful."),
-        ("M4", "train_only_imputer", "Any fitted imputer is learned only from the training fold and applied unchanged to validation/test."),
-        ("M5", "cross_sectional_imputation", "Same-date median or sector-median imputation may be tested only with missing indicators."),
-        ("M6", "coverage_gate", "Rows exceeding registered missingness or stale-data thresholds are training-ineligible."),
-        ("M7", "new_listing_warmup", "New listings remain in the universe but unavailable long-lookback features stay missing until warm-up."),
-        ("M8", "family_ablation", "Optional feature families may be removed as an ablation; required families may not be silently omitted."),
+        (
+            "M1",
+            "missing_is_information",
+            "Preserve explicit missing flags and feature age rather than hiding source gaps.",
+        ),
+        (
+            "M2",
+            "no_future_backfill",
+            "Never backward-fill a historical row using a fact, article, classification, or price observed later.",
+        ),
+        (
+            "M3",
+            "no_universal_zero_fill",
+            "Zero is used only when the feature definition makes zero economically meaningful.",
+        ),
+        (
+            "M4",
+            "train_only_imputer",
+            "Any fitted imputer is learned only from the training fold and applied unchanged to validation/test.",
+        ),
+        (
+            "M5",
+            "cross_sectional_imputation",
+            "Same-date median or sector-median imputation may be tested only with missing indicators.",
+        ),
+        (
+            "M6",
+            "coverage_gate",
+            "Rows exceeding registered missingness or stale-data thresholds are training-ineligible.",
+        ),
+        (
+            "M7",
+            "new_listing_warmup",
+            "New listings remain in the universe but unavailable long-lookback features stay missing until warm-up.",
+        ),
+        (
+            "M8",
+            "family_ablation",
+            "Optional feature families may be removed as an ablation; required families may not be silently omitted.",
+        ),
     ]
     return pd.DataFrame(rows, columns=["rule_id", "policy", "requirement"])
 
 
 def build_cross_sectional_normalization_policy() -> pd.DataFrame:
     rows = [
-        ("N1", "same_date_eligible_universe", "Cross-sectional transforms use only securities eligible at that decision timestamp."),
-        ("N2", "no_survivor_reference_set", "Ranks and z-scores never use a modern survivor list as the historical reference set."),
-        ("N3", "sector_relative_asof", "Sector-relative transforms use sector_asof, not current sector classifications."),
-        ("N4", "point_in_time_winsorization", "Per-date quantile clipping uses only the current eligible cross-section."),
-        ("N5", "train_only_global_parameters", "Any global scaler or imputer parameters are fit inside the training fold only."),
-        ("N6", "minimum_cross_section", "Cross-sectional features are invalid when the eligible count is below the configured minimum."),
-        ("N7", "versioned_transforms", "Transform definitions and parameters are stored with feature_set_version."),
+        (
+            "N1",
+            "same_date_eligible_universe",
+            "Cross-sectional transforms use only securities eligible at that decision timestamp.",
+        ),
+        (
+            "N2",
+            "no_survivor_reference_set",
+            "Ranks and z-scores never use a modern survivor list as the historical reference set.",
+        ),
+        (
+            "N3",
+            "sector_relative_asof",
+            "Sector-relative transforms use sector_asof, not current sector classifications.",
+        ),
+        (
+            "N4",
+            "point_in_time_winsorization",
+            "Per-date quantile clipping uses only the current eligible cross-section.",
+        ),
+        (
+            "N5",
+            "train_only_global_parameters",
+            "Any global scaler or imputer parameters are fit inside the training fold only.",
+        ),
+        (
+            "N6",
+            "minimum_cross_section",
+            "Cross-sectional features are invalid when the eligible count is below the configured minimum.",
+        ),
+        (
+            "N7",
+            "versioned_transforms",
+            "Transform definitions and parameters are stored with feature_set_version.",
+        ),
     ]
     return pd.DataFrame(rows, columns=["rule_id", "policy", "requirement"])
 
@@ -689,22 +882,50 @@ def build_dependency_readiness_matrix() -> pd.DataFrame:
 
 def build_validation_plan() -> pd.DataFrame:
     rows = [
-        ("V1", "schema completeness", "all required predictor, availability, identity, and lineage columns present"),
+        (
+            "V1",
+            "schema completeness",
+            "all required predictor, availability, identity, and lineage columns present",
+        ),
         ("V2", "row uniqueness", "panel_row_id and decision/security/universe grain are unique"),
-        ("V3", "membership validity", "row belongs to a point-in-time active universe and was knowable by cutoff"),
+        (
+            "V3",
+            "membership validity",
+            "row belongs to a point-in-time active universe and was knowable by cutoff",
+        ),
         ("V4", "availability cutoff", "all predictor-family clocks are on or before model cutoff"),
-        ("V5", "maximum clock reconciliation", "feature_max_available_timestamp equals maximum family clock"),
-        ("V6", "execution ordering", "execution date is after the signal date under the registered calendar"),
+        (
+            "V5",
+            "maximum clock reconciliation",
+            "feature_max_available_timestamp equals maximum family clock",
+        ),
+        (
+            "V6",
+            "execution ordering",
+            "execution date is after the signal date under the registered calendar",
+        ),
         ("V7", "identity continuity", "ticker/sector changes preserve permanent identifiers"),
-        ("V8", "feature manifest coverage", "every predictor column has formula, source, clock, version, and missingness policy"),
+        (
+            "V8",
+            "feature manifest coverage",
+            "every predictor column has formula, source, clock, version, and missingness policy",
+        ),
         ("V9", "target separation", "forward labels are absent from predictor artifacts"),
         ("V10", "target horizon ordering", "target availability occurs only after its period end"),
         ("V11", "split purity", "one decision timestamp appears in one split only"),
         ("V12", "purge and embargo", "fold boundaries respect maximum target horizon"),
         ("V13", "cross-section size", "normalization occurs only above the minimum eligible count"),
         ("V14", "delisting retention", "failed and removed securities remain in rows and targets"),
-        ("V15", "reproducibility", "source snapshot and feature/target versions reproduce identical rows"),
-        ("V16", "safety boundary", "no model training, backtest, paper order, live order, or broker integration"),
+        (
+            "V15",
+            "reproducibility",
+            "source snapshot and feature/target versions reproduce identical rows",
+        ),
+        (
+            "V16",
+            "safety boundary",
+            "no model training, backtest, paper order, live order, or broker integration",
+        ),
     ]
     return pd.DataFrame(rows, columns=["test_id", "test", "acceptance_rule"])
 
@@ -712,13 +933,37 @@ def build_validation_plan() -> pd.DataFrame:
 def build_phase23f_pilot_plan() -> pd.DataFrame:
     rows = [
         (1, "Select a small point-in-time pilot universe and approved date window", "not_started"),
-        (2, "Acquire delisting-aware stock price, volume, split, and dividend samples", "not_started"),
-        (3, "Ingest point-in-time membership and permanent security identifiers", "blocked_by_phase23b_acquisition"),
-        (4, "Calculate technical, liquidity, cross-asset, and market-stress features", "blocked_by_market_data_acquisition"),
+        (
+            2,
+            "Acquire delisting-aware stock price, volume, split, and dividend samples",
+            "not_started",
+        ),
+        (
+            3,
+            "Ingest point-in-time membership and permanent security identifiers",
+            "blocked_by_phase23b_acquisition",
+        ),
+        (
+            4,
+            "Calculate technical, liquidity, cross-asset, and market-stress features",
+            "blocked_by_market_data_acquisition",
+        ),
         (5, "Join a small as-filed SEC fundamental sample", "blocked_by_phase23c_acquisition"),
-        (6, "Join filing-text and optional news sentiment samples", "blocked_by_phase23d_acquisition"),
-        (7, "Build panel and target tables with full timestamp validation", "blocked_by_steps_1_to_6"),
-        (8, "Run coverage, missingness, leakage, and reproducibility audits", "blocked_by_panel_build"),
+        (
+            6,
+            "Join filing-text and optional news sentiment samples",
+            "blocked_by_phase23d_acquisition",
+        ),
+        (
+            7,
+            "Build panel and target tables with full timestamp validation",
+            "blocked_by_steps_1_to_6",
+        ),
+        (
+            8,
+            "Run coverage, missingness, leakage, and reproducibility audits",
+            "blocked_by_panel_build",
+        ),
         (9, "Approve or reject readiness for Phase23G baseline ranking", "not_started"),
     ]
     return pd.DataFrame(rows, columns=["priority", "action", "status"])
@@ -788,9 +1033,7 @@ def validate_feature_panel_frame(panel: pd.DataFrame) -> pd.DataFrame:
     rows.append(_gate("panel_row_ids_unique", unique_row_id, f"rows={len(working)}"))
 
     unique_grain = not bool(
-        working.duplicated(
-            ["decision_timestamp_utc", "universe_id", "permanent_security_id"]
-        ).any()
+        working.duplicated(["decision_timestamp_utc", "universe_id", "permanent_security_id"]).any()
     )
     rows.append(_gate("decision_security_universe_grain_unique", unique_grain, "row grain"))
 
@@ -920,9 +1163,7 @@ def validate_target_frame(
         return report
 
     working = targets.copy()
-    unique_targets = not bool(
-        working.duplicated(["panel_row_id", "target_name"]).any()
-    )
+    unique_targets = not bool(working.duplicated(["panel_row_id", "target_name"]).any())
     rows.append(_gate("panel_target_pairs_unique", unique_targets, f"rows={len(working)}"))
 
     horizons = pd.to_numeric(working["target_horizon_trading_days"], errors="coerce")
@@ -931,9 +1172,7 @@ def validate_target_frame(
 
     start = pd.to_datetime(working["target_period_start_date"], errors="coerce")
     end = pd.to_datetime(working["target_period_end_date"], errors="coerce")
-    available = pd.to_datetime(
-        working["target_available_timestamp_utc"], utc=True, errors="coerce"
-    )
+    available = pd.to_datetime(working["target_available_timestamp_utc"], utc=True, errors="coerce")
     dates_parse = bool(start.notna().all() and end.notna().all() and available.notna().all())
     rows.append(_gate("target_dates_parse", dates_parse, f"rows={len(working)}"))
 
@@ -963,9 +1202,7 @@ def validate_target_frame(
         panel_lookup = panel[["panel_row_id", "decision_timestamp_utc"]].drop_duplicates()
         merged = working.merge(panel_lookup, on="panel_row_id", how="left")
         panel_ids_valid = bool(merged["decision_timestamp_utc"].notna().all())
-        decision = pd.to_datetime(
-            merged["decision_timestamp_utc"], utc=True, errors="coerce"
-        )
+        decision = pd.to_datetime(merged["decision_timestamp_utc"], utc=True, errors="coerce")
         target_after_decision = bool(
             panel_ids_valid and decision.notna().all() and (available > decision).all()
         )
@@ -1006,21 +1243,78 @@ def build_gate_report(
     registered_targets = set(target_registry["target_name"])
     gates = [
         _gate("phase_enabled", bool(phase_config["enabled"]), "Phase23E explicitly enabled"),
-        _gate("panel_grain_contract_complete", len(panel_grain_contract) >= 6, f"rules={len(panel_grain_contract)}"),
-        _gate("panel_schema_complete", set(FEATURE_PANEL_REQUIRED_COLUMNS).issubset(schema_columns), f"columns={len(schema_columns)}"),
-        _gate("feature_manifest_schema_complete", len(feature_manifest_schema) >= 14, f"columns={len(feature_manifest_schema)}"),
-        _gate("all_required_feature_families_registered", VALID_FEATURE_FAMILIES.issubset(manifest_families), ";".join(sorted(manifest_families))),
-        _gate("primary_target_registered", phase_config["primary_target"] in registered_targets, phase_config["primary_target"]),
-        _gate("target_table_separated", not bool(target_registry["predictor_table_allowed"].any()), "targets prohibited from predictor table"),
-        _gate("availability_policy_complete", len(availability_policy) >= 8, f"rules={len(availability_policy)}"),
-        _gate("missingness_policy_complete", len(missingness_policy) >= 8, f"rules={len(missingness_policy)}"),
-        _gate("normalization_policy_complete", len(normalization_policy) >= 7, f"rules={len(normalization_policy)}"),
-        _gate("purge_and_embargo_cover_max_horizon", int(phase_config["purge_window_trading_days"]) >= int(phase_config["maximum_target_horizon_trading_days"]) and int(phase_config["embargo_window_trading_days"]) >= int(phase_config["maximum_target_horizon_trading_days"]), f"max_horizon={phase_config['maximum_target_horizon_trading_days']}"),
-        _gate("dependency_matrix_fail_closed", not bool(dependency_matrix["data_ready_now"].any()), "upstream data acquisition remains pending"),
-        _gate("validation_plan_complete", len(validation_plan) >= 16, f"tests={len(validation_plan)}"),
+        _gate(
+            "panel_grain_contract_complete",
+            len(panel_grain_contract) >= 6,
+            f"rules={len(panel_grain_contract)}",
+        ),
+        _gate(
+            "panel_schema_complete",
+            set(FEATURE_PANEL_REQUIRED_COLUMNS).issubset(schema_columns),
+            f"columns={len(schema_columns)}",
+        ),
+        _gate(
+            "feature_manifest_schema_complete",
+            len(feature_manifest_schema) >= 14,
+            f"columns={len(feature_manifest_schema)}",
+        ),
+        _gate(
+            "all_required_feature_families_registered",
+            VALID_FEATURE_FAMILIES.issubset(manifest_families),
+            ";".join(sorted(manifest_families)),
+        ),
+        _gate(
+            "primary_target_registered",
+            phase_config["primary_target"] in registered_targets,
+            phase_config["primary_target"],
+        ),
+        _gate(
+            "target_table_separated",
+            not bool(target_registry["predictor_table_allowed"].any()),
+            "targets prohibited from predictor table",
+        ),
+        _gate(
+            "availability_policy_complete",
+            len(availability_policy) >= 8,
+            f"rules={len(availability_policy)}",
+        ),
+        _gate(
+            "missingness_policy_complete",
+            len(missingness_policy) >= 8,
+            f"rules={len(missingness_policy)}",
+        ),
+        _gate(
+            "normalization_policy_complete",
+            len(normalization_policy) >= 7,
+            f"rules={len(normalization_policy)}",
+        ),
+        _gate(
+            "purge_and_embargo_cover_max_horizon",
+            int(phase_config["purge_window_trading_days"])
+            >= int(phase_config["maximum_target_horizon_trading_days"])
+            and int(phase_config["embargo_window_trading_days"])
+            >= int(phase_config["maximum_target_horizon_trading_days"]),
+            f"max_horizon={phase_config['maximum_target_horizon_trading_days']}",
+        ),
+        _gate(
+            "dependency_matrix_fail_closed",
+            not bool(dependency_matrix["data_ready_now"].any()),
+            "upstream data acquisition remains pending",
+        ),
+        _gate(
+            "validation_plan_complete", len(validation_plan) >= 16, f"tests={len(validation_plan)}"
+        ),
         _gate("phase23f_pilot_plan_defined", len(pilot_plan) >= 9, f"actions={len(pilot_plan)}"),
-        _gate("research_only_boundary_enforced", bool(scope_boundary["passed"].all()), f"controls={len(scope_boundary)}"),
-        _gate("family_contract_matches_manifest", set(feature_family_contract["feature_family"]) == manifest_families, "family registry alignment"),
+        _gate(
+            "research_only_boundary_enforced",
+            bool(scope_boundary["passed"].all()),
+            f"controls={len(scope_boundary)}",
+        ),
+        _gate(
+            "family_contract_matches_manifest",
+            set(feature_family_contract["feature_family"]) == manifest_families,
+            "family registry alignment",
+        ),
     ]
     report = pd.DataFrame(gates)
     report["all_gates_passed"] = bool(report["passed"].all())
@@ -1053,7 +1347,9 @@ def build_summary(
                 "feature_panel_contract_ready": execution_passed,
                 "feature_panel_data_ready": data_ready,
                 "registered_feature_count": int(len(initial_feature_manifest)),
-                "registered_feature_family_count": int(initial_feature_manifest["feature_family"].nunique()),
+                "registered_feature_family_count": int(
+                    initial_feature_manifest["feature_family"].nunique()
+                ),
                 "registered_target_count": int(len(target_registry)),
                 "required_dependency_count": int(dependency_matrix["required_for_baseline"].sum()),
                 "ready_dependency_count": int(dependency_matrix["data_ready_now"].sum()),
@@ -1066,9 +1362,7 @@ def build_summary(
                     "maximum_target_horizon_trading_days"
                 ],
                 "purge_window_trading_days": phase_config["purge_window_trading_days"],
-                "embargo_window_trading_days": phase_config[
-                    "embargo_window_trading_days"
-                ],
+                "embargo_window_trading_days": phase_config["embargo_window_trading_days"],
                 "panel_build_allowed": False,
                 "feature_calculation_allowed": False,
                 "target_calculation_allowed": False,
@@ -1102,9 +1396,7 @@ def build_conclusion(summary: pd.DataFrame) -> pd.DataFrame:
                     if bool(row["phase_execution_gates_passed"])
                     else "Phase 23E failed: the combined feature-panel contract is incomplete."
                 ),
-                "feature_panel_contract_ready": bool(
-                    row["feature_panel_contract_ready"]
-                ),
+                "feature_panel_contract_ready": bool(row["feature_panel_contract_ready"]),
                 "feature_panel_data_ready": bool(row["feature_panel_data_ready"]),
                 "allowed_next_step": (
                     "acquire approved pilot inputs and build a small timestamp-validated panel"

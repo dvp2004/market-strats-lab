@@ -1,4 +1,5 @@
 """GMA-1A canonical snapshot selection and validation."""
+
 from __future__ import annotations
 
 import json
@@ -106,9 +107,7 @@ def select_canonical_snapshots(
         for manifest in all_candidates:
             if manifest.get("provider_symbol") != provider_symbol:
                 continue
-            valid, reason = _is_valid_live_yahoo_candidate(
-                manifest, instrument_id, provider_symbol
-            )
+            valid, reason = _is_valid_live_yahoo_candidate(manifest, instrument_id, provider_symbol)
             if valid:
                 candidates.append(manifest)
             else:
@@ -116,25 +115,27 @@ def select_canonical_snapshots(
                 reject_reasons.append(reason)
 
         if not candidates:
-            rows.append({
-                "instrument_id": instrument_id,
-                "provider": "",
-                "provider_symbol": provider_symbol,
-                "selected_manifest_path": "",
-                "selected_manifest_sha256": "",
-                "selected_raw_snapshot_path": "",
-                "selected_normalised_snapshot_path": "",
-                "retrieved_at_utc": "",
-                "raw_sha256": "",
-                "normalised_sha256": "",
-                "first_completed_date": "",
-                "last_completed_date": "",
-                "completed_row_count": 0,
-                "selection_reason": "no_valid_candidates",
-                "selection_status": "failed",
-                "rejected_candidate_count": rejected_count,
-                "selection_warning": ";".join(sorted(set(reject_reasons))),
-            })
+            rows.append(
+                {
+                    "instrument_id": instrument_id,
+                    "provider": "",
+                    "provider_symbol": provider_symbol,
+                    "selected_manifest_path": "",
+                    "selected_manifest_sha256": "",
+                    "selected_raw_snapshot_path": "",
+                    "selected_normalised_snapshot_path": "",
+                    "retrieved_at_utc": "",
+                    "raw_sha256": "",
+                    "normalised_sha256": "",
+                    "first_completed_date": "",
+                    "last_completed_date": "",
+                    "completed_row_count": 0,
+                    "selection_reason": "no_valid_candidates",
+                    "selection_status": "failed",
+                    "rejected_candidate_count": rejected_count,
+                    "selection_warning": ";".join(sorted(set(reject_reasons))),
+                }
+            )
             continue
 
         # Deterministic selection: latest retrieved_at_utc, then manifest path hash
@@ -157,9 +158,7 @@ def select_canonical_snapshots(
         )
 
         normalised_frame = normalise_price_frame(pd.read_csv(normalised_path))
-        completed = completed_history(
-            normalised_frame, str(selected.get("retrieved_at_utc", ""))
-        )
+        completed = completed_history(normalised_frame, str(selected.get("retrieved_at_utc", "")))
         first_date = ""
         last_date = ""
         completed_count = 0
@@ -171,25 +170,27 @@ def select_canonical_snapshots(
 
         selected_manifests[instrument_id] = selected
 
-        rows.append({
-            "instrument_id": instrument_id,
-            "provider": str(selected.get("provider", "")),
-            "provider_symbol": provider_symbol,
-            "selected_manifest_path": str(manifest_path),
-            "selected_manifest_sha256": sha256_file(manifest_path),
-            "selected_raw_snapshot_path": str(raw_path),
-            "selected_normalised_snapshot_path": str(normalised_path),
-            "retrieved_at_utc": str(selected.get("retrieved_at_utc", "")),
-            "raw_sha256": str(selected.get("raw_file_sha256", "")),
-            "normalised_sha256": str(selected.get("normalised_file_sha256", "")),
-            "first_completed_date": first_date,
-            "last_completed_date": last_date,
-            "completed_row_count": completed_count,
-            "selection_reason": "latest_valid_live_yahoo_snapshot",
-            "selection_status": "selected",
-            "rejected_candidate_count": rejected_count,
-            "selection_warning": "",
-        })
+        rows.append(
+            {
+                "instrument_id": instrument_id,
+                "provider": str(selected.get("provider", "")),
+                "provider_symbol": provider_symbol,
+                "selected_manifest_path": str(manifest_path),
+                "selected_manifest_sha256": sha256_file(manifest_path),
+                "selected_raw_snapshot_path": str(raw_path),
+                "selected_normalised_snapshot_path": str(normalised_path),
+                "retrieved_at_utc": str(selected.get("retrieved_at_utc", "")),
+                "raw_sha256": str(selected.get("raw_file_sha256", "")),
+                "normalised_sha256": str(selected.get("normalised_file_sha256", "")),
+                "first_completed_date": first_date,
+                "last_completed_date": last_date,
+                "completed_row_count": completed_count,
+                "selection_reason": "latest_valid_live_yahoo_snapshot",
+                "selection_status": "selected",
+                "rejected_candidate_count": rejected_count,
+                "selection_warning": "",
+            }
+        )
 
     return pd.DataFrame(rows), selected_manifests
 
@@ -202,12 +203,14 @@ def compute_selection_set_hash(
     for _, row in selection_df.iterrows():
         if row.get("selection_status") != "selected":
             continue
-        identity_records.append({
-            "instrument_id": str(row["instrument_id"]),
-            "raw_sha256": str(row["raw_sha256"]),
-            "normalised_sha256": str(row["normalised_sha256"]),
-            "selected_manifest_sha256": str(row["selected_manifest_sha256"]),
-        })
+        identity_records.append(
+            {
+                "instrument_id": str(row["instrument_id"]),
+                "raw_sha256": str(row["raw_sha256"]),
+                "normalised_sha256": str(row["normalised_sha256"]),
+                "selected_manifest_sha256": str(row["selected_manifest_sha256"]),
+            }
+        )
     identity_records.sort(key=lambda r: r["instrument_id"])
     return sha256_bytes(canonical_json(identity_records).encode("utf-8"))
 
@@ -219,9 +222,7 @@ def build_selection_manifest(
     commit_sha: str,
 ) -> dict[str, Any]:
     """Build the canonical selection manifest JSON structure."""
-    config_hash = sha256_bytes(
-        canonical_json(config.raw).encode("utf-8")
-    )
+    config_hash = sha256_bytes(canonical_json(config.raw).encode("utf-8"))
     sources: dict[str, dict[str, str]] = {}
     for _, row in selection_df.iterrows():
         sources[str(row["instrument_id"])] = {

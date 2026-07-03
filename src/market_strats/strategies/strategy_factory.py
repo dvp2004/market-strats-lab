@@ -72,10 +72,7 @@ def build_strategy_factory_price_panel(
         aligned_cash = cash_returns.copy()
         aligned_cash.index = pd.to_datetime(aligned_cash.index)
         panel["CASH_return"] = (
-            aligned_cash.reindex(pd.to_datetime(panel["date"]))
-            .ffill()
-            .fillna(0.0)
-            .to_numpy()
+            aligned_cash.reindex(pd.to_datetime(panel["date"])).ffill().fillna(0.0).to_numpy()
         )
 
     return panel
@@ -260,13 +257,12 @@ def run_sf_spy_qqq_tactical_momentum(
         spy_momentum = _momentum(panel, "SPY", int(idx), config.momentum_lookback_days)
         qqq_momentum = _momentum(panel, "QQQ", int(idx), config.momentum_lookback_days)
 
-        if np.nan_to_num(spy_momentum, nan=-np.inf) < 0 and np.nan_to_num(
-            qqq_momentum, nan=-np.inf
-        ) < 0:
-            monthly_weights[int(idx)] = _cash_weight_row()
-        elif np.nan_to_num(qqq_momentum, nan=-np.inf) > np.nan_to_num(
-            spy_momentum, nan=-np.inf
+        if (
+            np.nan_to_num(spy_momentum, nan=-np.inf) < 0
+            and np.nan_to_num(qqq_momentum, nan=-np.inf) < 0
         ):
+            monthly_weights[int(idx)] = _cash_weight_row()
+        elif np.nan_to_num(qqq_momentum, nan=-np.inf) > np.nan_to_num(spy_momentum, nan=-np.inf):
             monthly_weights[int(idx)] = _cash_weight_row(QQQ=1.0)
         else:
             monthly_weights[int(idx)] = _cash_weight_row(SPY=1.0)

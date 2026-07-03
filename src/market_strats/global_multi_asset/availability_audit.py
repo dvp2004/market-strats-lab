@@ -109,7 +109,9 @@ def _current_changed_paths() -> set[str]:
 
 def _is_approved_path(path: str) -> bool:
     candidate = Path(path)
-    return any(candidate == prefix or prefix in candidate.parents for prefix in APPROVED_WRITE_PREFIXES)
+    return any(
+        candidate == prefix or prefix in candidate.parents for prefix in APPROVED_WRITE_PREFIXES
+    )
 
 
 def _join(values: list[str] | set[str]) -> str:
@@ -186,7 +188,9 @@ def _availability_row(
     dates = pd.to_datetime(completed["date"]).sort_values().reset_index(drop=True)
     first_return_date = dates.iloc[1].date().isoformat() if len(dates) >= 2 else ""
     raw_open_dates = completed.loc[completed["open"].notna() & completed["open"].gt(0), "date"]
-    first_raw_open = _date_or_empty(pd.to_datetime(raw_open_dates).min()) if not raw_open_dates.empty else ""
+    first_raw_open = (
+        _date_or_empty(pd.to_datetime(raw_open_dates).min()) if not raw_open_dates.empty else ""
+    )
     is_benchmark_only = bool(instrument["is_benchmark_only"])
     if is_benchmark_only:
         warmup_complete = ""
@@ -222,7 +226,9 @@ def _availability_row(
     }
 
 
-def _max_date_with_bottlenecks(frame: pd.DataFrame, instruments: list[str], column: str) -> tuple[str, str]:
+def _max_date_with_bottlenecks(
+    frame: pd.DataFrame, instruments: list[str], column: str
+) -> tuple[str, str]:
     subset = frame.loc[frame["instrument_id"].isin(instruments)].copy()
     subset[column] = pd.to_datetime(subset[column], errors="coerce")
     if subset[column].isna().any() or subset.empty:
@@ -259,24 +265,21 @@ def _replay_start_assessment(config: GMAConfig, price_availability: pd.DataFrame
         for instrument_id, instrument in config.instruments.items()
         if bool(instrument.get("is_benchmark_only"))
     ]
-    acwi_return_date, acwi_bottlenecks = _max_date_with_bottlenecks(
-        price_availability, acwi_ids, "first_return_eligible_date"
-    ) if acwi_ids else ("", "")
-    benchmark_common_candidates = [
-        value for value in [core_execution, acwi_return_date] if value
-    ]
+    acwi_return_date, acwi_bottlenecks = (
+        _max_date_with_bottlenecks(price_availability, acwi_ids, "first_return_eligible_date")
+        if acwi_ids
+        else ("", "")
+    )
+    benchmark_common_candidates = [value for value in [core_execution, acwi_return_date] if value]
     benchmark_date = (
-        max(pd.Timestamp(value) for value in benchmark_common_candidates)
-        .date()
-        .isoformat()
+        max(pd.Timestamp(value) for value in benchmark_common_candidates).date().isoformat()
         if benchmark_common_candidates
         else ""
     )
     expanded_ids = [
         instrument_id
         for instrument_id, instrument in config.instruments.items()
-        if not bool(instrument.get("is_benchmark_only"))
-        and instrument_id != "BTC-USD"
+        if not bool(instrument.get("is_benchmark_only")) and instrument_id != "BTC-USD"
     ]
     expanded_non_crypto_date, expanded_bottlenecks = _max_date_with_bottlenecks(
         price_availability,
@@ -298,10 +301,14 @@ def _replay_start_assessment(config: GMAConfig, price_availability: pd.DataFrame
         "warmup_complete_date",
     )
     if bitcoin_date and full_allocator_date:
-        full_allocator_date = max(
-            pd.Timestamp(full_allocator_date),
-            pd.Timestamp(bitcoin_date),
-        ).date().isoformat()
+        full_allocator_date = (
+            max(
+                pd.Timestamp(full_allocator_date),
+                pd.Timestamp(bitcoin_date),
+            )
+            .date()
+            .isoformat()
+        )
     provisional = str(config.replay_start.get("provisional_first_signal_rule", ""))
     return pd.DataFrame(
         [
@@ -321,8 +328,12 @@ def _replay_start_assessment(config: GMAConfig, price_availability: pd.DataFrame
                 "legacy_earliest_expanded_universe_date_deprecated": True,
                 "legacy_earliest_expanded_universe_date_definition": "deprecated_alias_for_earliest_expanded_non_crypto_allocator_date",
                 "core_participating_instruments": _participants(config, core),
-                "expanded_non_crypto_participating_instruments": _participants(config, expanded_ids),
-                "full_allocator_including_bitcoin_participating_instruments": _participants(config, full_allocator_ids),
+                "expanded_non_crypto_participating_instruments": _participants(
+                    config, expanded_ids
+                ),
+                "full_allocator_including_bitcoin_participating_instruments": _participants(
+                    config, full_allocator_ids
+                ),
                 "benchmark_comparison_participating_instruments": _join(["core_replay", *acwi_ids]),
                 "acwi_first_return_eligible_date": acwi_return_date,
                 "acwi_benchmark_warmup_exempt": True,
@@ -432,7 +443,9 @@ def _conclusion_text(
         reduced_universe.loc[
             reduced_universe["universe_action"].astype(str).eq("excluded"),
             "instrument_id",
-        ].astype(str).tolist()
+        ]
+        .astype(str)
+        .tolist()
         if not reduced_universe.empty and "universe_action" in reduced_universe.columns
         else []
     )
@@ -440,15 +453,17 @@ def _conclusion_text(
         reduced_universe.loc[
             reduced_universe["universe_action"].astype(str).eq("deferred"),
             "instrument_id",
-        ].astype(str).tolist()
+        ]
+        .astype(str)
+        .tolist()
         if not reduced_universe.empty and "universe_action" in reduced_universe.columns
         else []
     )
     material_revisions = (
         reproducibility[
-            reproducibility["reproducibility_classification"].astype(str).eq(
-                "material_completed_history_revision"
-            )
+            reproducibility["reproducibility_classification"]
+            .astype(str)
+            .eq("material_completed_history_revision")
         ]
         if not reproducibility.empty
         else pd.DataFrame()
@@ -527,7 +542,9 @@ def _isolation_gate(
     baseline: dict[str, set[str]],
     manifests: list[Path],
 ) -> pd.DataFrame:
-    baseline_paths = _changed_paths_from_status(baseline["status"]) | baseline["diff"] | baseline["cached"]
+    baseline_paths = (
+        _changed_paths_from_status(baseline["status"]) | baseline["diff"] | baseline["cached"]
+    )
     current_paths = _current_changed_paths()
     introduced_paths = current_paths - baseline_paths
     unexpected_paths = sorted(path for path in introduced_paths if not _is_approved_path(path))
@@ -538,21 +555,43 @@ def _isolation_gate(
         normalised_path = Path(manifest.get("normalised_file_path", ""))
         if not raw_path.exists() or manifest.get("raw_file_sha256") != sha256_file(raw_path):
             manifest_hash_failures.append(str(manifest_path))
-        if not normalised_path.exists() or manifest.get("normalised_file_sha256") != sha256_file(normalised_path):
+        if not normalised_path.exists() or manifest.get("normalised_file_sha256") != sha256_file(
+            normalised_path
+        ):
             manifest_hash_failures.append(str(manifest_path))
     rows = [
-        ("all_outputs_inside_approved_gma_paths", all(_is_approved_path(str(path)) for path in outputs.values()), ""),
-        ("no_existing_frozen_config_modified_by_gma0", not unexpected_paths, _join(unexpected_paths)),
-        ("no_existing_frozen_source_module_modified_by_gma0", not unexpected_paths, _join(unexpected_paths)),
+        (
+            "all_outputs_inside_approved_gma_paths",
+            all(_is_approved_path(str(path)) for path in outputs.values()),
+            "",
+        ),
+        (
+            "no_existing_frozen_config_modified_by_gma0",
+            not unexpected_paths,
+            _join(unexpected_paths),
+        ),
+        (
+            "no_existing_frozen_source_module_modified_by_gma0",
+            not unexpected_paths,
+            _join(unexpected_paths),
+        ),
         ("no_frozen_report_or_data_path_written", not unexpected_paths, _join(unexpected_paths)),
         ("track_id_is_gma_alpha", config.track["track_id"] == TRACK_ID, ""),
         ("phase_id_is_gma0_feasibility", config.track["phase_id"] == PHASE_ID, ""),
         ("live_trading_disabled", not bool(config.track["live_trading_allowed"]), ""),
         ("real_money_disabled", not bool(config.track["real_money_allowed"]), ""),
-        ("broker_api_integration_disabled", not bool(config.track["broker_api_integration_allowed"]), ""),
+        (
+            "broker_api_integration_disabled",
+            not bool(config.track["broker_api_integration_allowed"]),
+            "",
+        ),
         ("no_strategy_or_performance_output_generated", True, ""),
         ("all_raw_files_have_manifests", len(manifests) > 0, ""),
-        ("all_manifests_have_valid_hashes", len(manifest_hash_failures) == 0, _join(manifest_hash_failures)),
+        (
+            "all_manifests_have_valid_hashes",
+            len(manifest_hash_failures) == 0,
+            _join(manifest_hash_failures),
+        ),
     ]
     return pd.DataFrame(
         [
@@ -757,7 +796,9 @@ def _diff_date_range(overlap: pd.DataFrame, mask: pd.Series) -> tuple[str, str]:
     return dates.min().date().isoformat(), dates.max().date().isoformat()
 
 
-def _action_differences(first: dict[str, Any], second: dict[str, Any], completed_dates: set[pd.Timestamp]) -> tuple[int, int]:
+def _action_differences(
+    first: dict[str, Any], second: dict[str, Any], completed_dates: set[pd.Timestamp]
+) -> tuple[int, int]:
     first_actions = corporate_action_frame(_raw_from_manifest(first))
     second_actions = corporate_action_frame(_raw_from_manifest(second))
     if first_actions.empty and second_actions.empty:
@@ -772,7 +813,9 @@ def _action_differences(first: dict[str, Any], second: dict[str, Any], completed
     )
     if overlap.empty:
         return 0, 0
-    dividend_diff = _numeric_difference_mask(overlap["dividends_first"], overlap["dividends_second"])
+    dividend_diff = _numeric_difference_mask(
+        overlap["dividends_first"], overlap["dividends_second"]
+    )
     split_diff = _numeric_difference_mask(overlap["splits_first"], overlap["splits_second"])
     return int(dividend_diff.sum()), int(split_diff.sum())
 
@@ -846,17 +889,27 @@ def _snapshot_pair_reproducibility(
     )
     earliest_adj, latest_adj = _diff_date_range(completed_overlap, adj_exact_mask)
 
-    full_adj_mask = _numeric_difference_mask(full_overlap["adj_close_first"], full_overlap["adj_close_second"])
-    full_diff_dates = set(pd.to_datetime(full_overlap.loc[full_adj_mask, "date"], errors="coerce").dropna())
+    full_adj_mask = _numeric_difference_mask(
+        full_overlap["adj_close_first"], full_overlap["adj_close_second"]
+    )
+    full_diff_dates = set(
+        pd.to_datetime(full_overlap.loc[full_adj_mask, "date"], errors="coerce").dropna()
+    )
     completed_dates = set(pd.to_datetime(completed_overlap["date"], errors="coerce").dropna())
-    incomplete_dates = set(pd.to_datetime(full_overlap["date"], errors="coerce").dropna()) - completed_dates
+    incomplete_dates = (
+        set(pd.to_datetime(full_overlap["date"], errors="coerce").dropna()) - completed_dates
+    )
     final_provider_date = pd.to_datetime(full_overlap["date"], errors="coerce").max()
     final_provider_dates = {final_provider_date} if pd.notna(final_provider_date) else set()
     confined_to_final = bool(full_diff_dates and full_diff_dates <= final_provider_dates)
     confined_to_incomplete = bool(full_diff_dates and full_diff_dates <= incomplete_dates)
 
-    first_factor = adj_left / pd.to_numeric(completed_overlap["close_first"], errors="coerce").replace(0.0, np.nan)
-    second_factor = adj_right / pd.to_numeric(completed_overlap["close_second"], errors="coerce").replace(0.0, np.nan)
+    first_factor = adj_left / pd.to_numeric(
+        completed_overlap["close_first"], errors="coerce"
+    ).replace(0.0, np.nan)
+    second_factor = adj_right / pd.to_numeric(
+        completed_overlap["close_second"], errors="coerce"
+    ).replace(0.0, np.nan)
     factor_abs_diff = (first_factor - second_factor).abs()
     factor_diff_count = _threshold_count(factor_abs_diff, 1e-12)
     material_factor_diff_count = _threshold_count(factor_abs_diff, 1e-8)
@@ -866,8 +919,12 @@ def _snapshot_pair_reproducibility(
     adj_gt_1e_8 = _threshold_count(adj_abs_diff, 1e-8)
     adj_gt_0_1_bps = _threshold_count(adj_abs_bps, 0.1)
     adj_gt_1_bps = _threshold_count(adj_abs_bps, 1.0)
-    raw_value_diff_count = sum(exact_counts[column] for column in ["open", "high", "low", "close", "volume"])
-    action_or_factor_diff = material_factor_diff_count > 0 or dividend_diff_count > 0 or split_diff_count > 0
+    raw_value_diff_count = sum(
+        exact_counts[column] for column in ["open", "high", "low", "close", "volume"]
+    )
+    action_or_factor_diff = (
+        material_factor_diff_count > 0 or dividend_diff_count > 0 or split_diff_count > 0
+    )
     incomplete_only = exact_counts["adj_close"] == 0 and confined_to_incomplete
     noise_only = (
         exact_counts["adj_close"] > 0
@@ -876,10 +933,7 @@ def _snapshot_pair_reproducibility(
         and not action_or_factor_diff
     )
     corporate_action_update = action_or_factor_diff and raw_value_diff_count == 0
-    material_revision = (
-        adj_gt_0_1_bps > 0
-        or raw_value_diff_count > 0
-    ) and not incomplete_only
+    material_revision = (adj_gt_0_1_bps > 0 or raw_value_diff_count > 0) and not incomplete_only
 
     if total_exact_count == 0 and not full_diff_dates and not action_or_factor_diff:
         classification = "exact_match"
@@ -912,7 +966,8 @@ def _snapshot_pair_reproducibility(
         "second_raw_snapshot_path": str(second.get("raw_file_path", "")),
         "first_normalised_snapshot_path": str(first.get("normalised_file_path", "")),
         "second_normalised_snapshot_path": str(second.get("normalised_file_path", "")),
-        "new_immutable_snapshot_paths_created": first.get("raw_file_path") != second.get("raw_file_path"),
+        "new_immutable_snapshot_paths_created": first.get("raw_file_path")
+        != second.get("raw_file_path"),
         "earlier_snapshot_overwritten": not Path(str(first.get("raw_file_path", ""))).exists(),
         "hashes_valid": _manifest_hashes_valid(first) and _manifest_hashes_valid(second),
         "historical_overlap_row_count": int(len(completed_overlap)),
@@ -1021,11 +1076,15 @@ def _adjusted_close_reconciliation_text(reproducibility: pd.DataFrame) -> str:
                 f"split diffs={row.get('split_event_difference_count', 0)}"
             )
         affected = "\n".join(affected_rows)
-    material = reproducibility[
-        reproducibility["reproducibility_classification"].astype(str).eq(
-            "material_completed_history_revision"
-        )
-    ] if not reproducibility.empty else pd.DataFrame()
+    material = (
+        reproducibility[
+            reproducibility["reproducibility_classification"]
+            .astype(str)
+            .eq("material_completed_history_revision")
+        ]
+        if not reproducibility.empty
+        else pd.DataFrame()
+    )
     material_text = (
         "Material completed-history revisions were detected and require manual review."
         if not material.empty
@@ -1072,9 +1131,10 @@ def _augmented_gate_report(
     replay_row = replay_start.iloc[0] if not replay_start.empty else pd.Series(dtype=object)
     material_revision = bool(
         not reproducibility.empty
-        and reproducibility["reproducibility_classification"].astype(str).eq(
-            "material_completed_history_revision"
-        ).any()
+        and reproducibility["reproducibility_classification"]
+        .astype(str)
+        .eq("material_completed_history_revision")
+        .any()
     )
     has_reduction = bool(
         not reduced_universe.empty
@@ -1082,7 +1142,9 @@ def _augmented_gate_report(
     )
     full_allocator = str(replay_row.get("earliest_full_allocator_including_bitcoin_date", ""))
     bitcoin = str(replay_row.get("earliest_bitcoin_eligible_date", ""))
-    bitcoin_order_ok = not full_allocator or not bitcoin or pd.Timestamp(full_allocator) >= pd.Timestamp(bitcoin)
+    bitcoin_order_ok = (
+        not full_allocator or not bitcoin or pd.Timestamp(full_allocator) >= pd.Timestamp(bitcoin)
+    )
     rows = [
         {
             "gate": "gma0r_no_material_completed_history_revision",
@@ -1092,7 +1154,9 @@ def _augmented_gate_report(
         {
             "gate": "gma0r_reduced_universe_documented_if_used",
             "passed": True,
-            "detail": "reduced_universe_applied" if has_reduction else "no_reduced_universe_applied",
+            "detail": "reduced_universe_applied"
+            if has_reduction
+            else "no_reduced_universe_applied",
         },
         {
             "gate": "gma0r_benchmark_warmup_exemption_applied",
@@ -1113,10 +1177,9 @@ def _manifest_hashes_valid(manifest: dict[str, Any]) -> bool:
     normalised_path = Path(str(manifest.get("normalised_file_path", "")))
     if not raw_path.exists() or not normalised_path.exists():
         return False
-    return (
-        str(manifest.get("raw_file_sha256", "")) == sha256_file(raw_path)
-        and str(manifest.get("normalised_file_sha256", "")) == sha256_file(normalised_path)
-    )
+    return str(manifest.get("raw_file_sha256", "")) == sha256_file(raw_path) and str(
+        manifest.get("normalised_file_sha256", "")
+    ) == sha256_file(normalised_path)
 
 
 def run_gma0_availability_audit(
@@ -1131,7 +1194,9 @@ def run_gma0_availability_audit(
     outputs["reuse_map"] = _write_text(_reuse_map_text(), report_root / "reuse_map.md")
     registry = registry_frame(config.instruments)
     outputs["instrument_registry"] = _write_csv(registry, report_root / "instrument_registry.csv")
-    outputs["calendar_registry"] = _write_csv(calendar_frame(), report_root / "calendar_registry.csv")
+    outputs["calendar_registry"] = _write_csv(
+        calendar_frame(), report_root / "calendar_registry.csv"
+    )
     outputs["macro_series_registry"] = _write_csv(
         macro_series_frame(),
         report_root / "macro_series_registry.csv",
@@ -1169,7 +1234,10 @@ def run_gma0_availability_audit(
                     snapshot=snapshot,
                     completed=validation.completed,
                     audit=validation.audit,
-                    warmup_months=int(instrument.get("minimum_warmup_months") or config.replay_start["minimum_warmup_months"]),
+                    warmup_months=int(
+                        instrument.get("minimum_warmup_months")
+                        or config.replay_start["minimum_warmup_months"]
+                    ),
                     audit_mode=audit_mode,
                 )
             )
@@ -1226,7 +1294,9 @@ def run_gma0_availability_audit(
     liquidity = pd.DataFrame(liquidity_rows)
     replay_start = _replay_start_assessment(config, price_availability)
 
-    outputs["price_availability"] = _write_csv(price_availability, report_root / "price_availability.csv")
+    outputs["price_availability"] = _write_csv(
+        price_availability, report_root / "price_availability.csv"
+    )
     outputs["corporate_action_availability"] = _write_csv(
         corporate_actions,
         report_root / "corporate_action_availability.csv",
@@ -1272,9 +1342,10 @@ def run_gma0_availability_audit(
     ]
     material_revision = bool(
         not reproducibility.empty
-        and reproducibility["reproducibility_classification"].astype(str).eq(
-            "material_completed_history_revision"
-        ).any()
+        and reproducibility["reproducibility_classification"]
+        .astype(str)
+        .eq("material_completed_history_revision")
+        .any()
     )
     reduced_universe_applied = bool(
         not reduced_universe.empty

@@ -144,9 +144,7 @@ def build_signal_date_policy_report(
                     configured_ts.strftime("%Y-%m-%d") if pd.notna(configured_ts) else ""
                 ),
                 "latest_fresh_stream_date": (
-                    latest_fresh_date.strftime("%Y-%m-%d")
-                    if pd.notna(latest_fresh_date)
-                    else ""
+                    latest_fresh_date.strftime("%Y-%m-%d") if pd.notna(latest_fresh_date) else ""
                 ),
                 "selected_signal_date": (
                     selected.strftime("%Y-%m-%d") if pd.notna(selected) else ""
@@ -424,7 +422,9 @@ def build_watchlist_paper_preview(
 
     rows: list[dict[str, Any]] = []
     for candidate_id in include:
-        candidate = candidates.loc[candidates.get("candidate_id", pd.Series(dtype=str)) == candidate_id]
+        candidate = candidates.loc[
+            candidates.get("candidate_id", pd.Series(dtype=str)) == candidate_id
+        ]
         candidate_row = candidate.iloc[0] if not candidate.empty else pd.Series(dtype=object)
         role = _text_value(candidate_row.get("watchlist_role", "watchlist_candidate"))
         candidate_alloc = allocations[allocations["strategy_id"] == candidate_id]
@@ -494,9 +494,7 @@ def _watchlist_preview_row(
         "real_money_allowed": False,
         "broker_api_integration_allowed": False,
         "blocking_warnings": warning,
-        "source_paper_watchlist_only": _bool_value(
-            candidate_row.get("paper_watchlist_only", True)
-        ),
+        "source_paper_watchlist_only": _bool_value(candidate_row.get("paper_watchlist_only", True)),
         "source_promotion_allowed": _bool_value(candidate_row.get("promotion_allowed", False)),
     }
 
@@ -554,7 +552,9 @@ def _format_candidate_allocations(preview: pd.DataFrame) -> str:
         return "not_available"
     allocations: list[str] = []
     for candidate_id, group in preview.groupby("candidate_id", sort=True):
-        nonzero = group[pd.to_numeric(group["target_weight"], errors="coerce").fillna(0).abs() > 1e-10]
+        nonzero = group[
+            pd.to_numeric(group["target_weight"], errors="coerce").fillna(0).abs() > 1e-10
+        ]
         if nonzero.empty:
             asset_text = "all target weights are zero"
         else:
@@ -649,9 +649,7 @@ def build_daily_execution_tear_sheet(
 
     warning_symbols = _symbols_with_text(data_quality, "warnings")
     blocked_symbols = _symbols_with_text(data_quality, "blocking_failures")
-    if not preview.empty and {"candidate_id", "asset", "target_weight"}.issubset(
-        preview.columns
-    ):
+    if not preview.empty and {"candidate_id", "asset", "target_weight"}.issubset(preview.columns):
         target_weight = pd.to_numeric(preview["target_weight"], errors="coerce").fillna(0.0)
         btc_candidates = preview[
             preview["candidate_id"].astype(str).str.contains("btc", case=False, na=False)
@@ -853,10 +851,7 @@ def build_daily_execution_tear_sheet(
                 "- Configured audit date capped run: "
                 f"{_format_bool(policy.get('configured_audit_date_capped_run', False))}"
             ),
-            (
-                "- Stale audit-date warning: "
-                f"{_text_value(policy.get('warning', '')) or 'none'}"
-            ),
+            (f"- Stale audit-date warning: {_text_value(policy.get('warning', '')) or 'none'}"),
             (
                 "- Latest fresh stream date: "
                 f"{_text_value(policy.get('latest_fresh_stream_date', ''))}"
@@ -1006,9 +1001,7 @@ def save_phase18a_paper_signal_operational_hardening(
         ].iloc[0]
     )
 
-    safety_failed = any(
-        [live_trading_allowed, real_money_allowed, broker_api_integration_allowed]
-    )
+    safety_failed = any([live_trading_allowed, real_money_allowed, broker_api_integration_allowed])
     data_quality_blocked = bool(
         not data_quality.empty
         and data_quality["blocking_failures"].astype(str).str.len().gt(0).any()
@@ -1081,9 +1074,7 @@ def save_phase18a_paper_signal_operational_hardening(
                 "watchlist_preview_rows": len(preview),
                 "watchlist_preview_order_rows": len(preview_orders),
                 "daily_execution_tear_sheet_written": daily_execution_tear_sheet_written,
-                "daily_execution_tear_sheet_md_written": (
-                    daily_execution_tear_sheet_md_written
-                ),
+                "daily_execution_tear_sheet_md_written": (daily_execution_tear_sheet_md_written),
                 "final_manual_action": final_manual_action,
                 "config_hash_rows": len(config_hash),
                 "live_trading_allowed": False,
@@ -1106,9 +1097,7 @@ def save_phase18a_paper_signal_operational_hardening(
                 "manual_preview_only": True,
                 "paper_watchlist_preview_written": watchlist_preview_written,
                 "daily_execution_tear_sheet_written": daily_execution_tear_sheet_written,
-                "daily_execution_tear_sheet_md_written": (
-                    daily_execution_tear_sheet_md_written
-                ),
+                "daily_execution_tear_sheet_md_written": (daily_execution_tear_sheet_md_written),
                 "final_manual_action": final_manual_action,
                 "live_trading_allowed": False,
                 "real_money_allowed": False,

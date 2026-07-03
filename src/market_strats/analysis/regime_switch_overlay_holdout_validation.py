@@ -27,9 +27,7 @@ def _get_strategy_result(
 
     if strategy not in strategy_results:
         available = sorted(strategy_results.keys())
-        raise ValueError(
-            f"Strategy '{strategy}' not found for {ticker}. Available: {available}"
-        )
+        raise ValueError(f"Strategy '{strategy}' not found for {ticker}. Available: {available}")
 
     return strategy_results[strategy]
 
@@ -240,9 +238,7 @@ def create_regime_switch_overlay_holdout_validation_summary(
             ascending=True,
         ).iloc[0]
 
-        spy_12m = period_df[
-            period_df["strategy"] == "SPY 12-Month Absolute Momentum"
-        ]
+        spy_12m = period_df[period_df["strategy"] == "SPY 12-Month Absolute Momentum"]
 
         overlay = period_df[
             period_df["strategy"].str.contains(
@@ -412,9 +408,7 @@ def save_regime_switch_overlay_holdout_validation_report(
             "summary": pd.DataFrame(),
         }
 
-    summary = create_regime_switch_overlay_holdout_validation_summary(
-        validation_report
-    )
+    summary = create_regime_switch_overlay_holdout_validation_summary(validation_report)
 
     report_path = reports_dir / "regime_switch_overlay_holdout_validation.csv"
     summary_path = reports_dir / "regime_switch_overlay_holdout_validation_summary.csv"

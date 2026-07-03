@@ -186,17 +186,13 @@ def create_buy_hold_vs_momentum_diagnostic(
             "avg_3y_cagr_delta_pct_points": momentum_avg_3y - buy_hold_avg_3y,
             "buy_hold_worst_3y_cagr_pct": buy_hold_worst_3y,
             "momentum_worst_3y_cagr_pct": momentum_worst_3y,
-            "worst_3y_cagr_improvement_pct_points": (
-                momentum_worst_3y - buy_hold_worst_3y
-            ),
+            "worst_3y_cagr_improvement_pct_points": (momentum_worst_3y - buy_hold_worst_3y),
             "buy_hold_avg_5y_cagr_pct": buy_hold_avg_5y,
             "momentum_avg_5y_cagr_pct": momentum_avg_5y,
             "avg_5y_cagr_delta_pct_points": momentum_avg_5y - buy_hold_avg_5y,
             "buy_hold_worst_5y_cagr_pct": buy_hold_worst_5y,
             "momentum_worst_5y_cagr_pct": momentum_worst_5y,
-            "worst_5y_cagr_improvement_pct_points": (
-                momentum_worst_5y - buy_hold_worst_5y
-            ),
+            "worst_5y_cagr_improvement_pct_points": (momentum_worst_5y - buy_hold_worst_5y),
             "momentum_exposure_time_pct": float(momentum["exposure_time_pct"]),
             "momentum_trade_count": int(momentum["trade_count"]),
         }

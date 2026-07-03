@@ -117,10 +117,7 @@ def run_independent_weighted_portfolio(
         for name, result in component_results.items()
     }
 
-    sleeve_values = {
-        name: initial_capital * weights[name]
-        for name in component_results
-    }
+    sleeve_values = {name: initial_capital * weights[name] for name in component_results}
 
     rows: list[dict] = []
     previous_total_equity = initial_capital
@@ -152,11 +149,7 @@ def run_independent_weighted_portfolio(
             weighted_cash_position += current_weight * float(component_row["cash_position"])
             weighted_turnover += current_weight * float(component_row["turnover"])
 
-        strategy_return = (
-            0.0
-            if index == 0
-            else (total_equity / previous_total_equity) - 1.0
-        )
+        strategy_return = 0.0 if index == 0 else (total_equity / previous_total_equity) - 1.0
 
         representative_component = next(iter(prepared_components.values()))
         representative_row = representative_component[
@@ -175,16 +168,9 @@ def run_independent_weighted_portfolio(
         }
 
         for name in component_results:
-            safe_name = (
-                name.lower()
-                .replace(" ", "_")
-                .replace("/", "_")
-                .replace("-", "_")
-            )
+            safe_name = name.lower().replace(" ", "_").replace("/", "_").replace("-", "_")
             row[f"{safe_name}_sleeve_value"] = current_sleeve_values[name]
-            row[f"{safe_name}_current_weight"] = (
-                current_sleeve_values[name] / total_equity
-            )
+            row[f"{safe_name}_current_weight"] = current_sleeve_values[name] / total_equity
 
         rows.append(row)
         previous_total_equity = total_equity

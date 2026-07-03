@@ -255,7 +255,9 @@ def _endpoint_policy_frame(
                     signal_is_stale
                     or (
                         canonical_endpoint_issue
-                        and _bool_value(policy.get("block_readiness_if_latest_signal_is_not_current", True))
+                        and _bool_value(
+                            policy.get("block_readiness_if_latest_signal_is_not_current", True)
+                        )
                     )
                 ),
                 "warning": (
@@ -418,7 +420,9 @@ def save_phase15a_paper_trading_workflow_preregistration(
                 "daily_signal_schema_fields": len(daily_signal_schema),
                 "current_signal_schema_fields": len(current_signal_schema),
                 "switch_reconstruction_required": _bool_value(
-                    switch_policy.iloc[0].get("require_switch_reconstruction_before_readiness", True)
+                    switch_policy.iloc[0].get(
+                        "require_switch_reconstruction_before_readiness", True
+                    )
                 ),
                 "switch_mechanics_block_readiness": _bool_value(
                     switch_policy.iloc[0].get("blocks_paper_trading_readiness", True)
@@ -442,22 +446,69 @@ def save_phase15a_paper_trading_workflow_preregistration(
 
     gate_report = pd.DataFrame(
         [
-            _gate_row("Phase 14H allows workflow pre-registration", bool(phase14h_check["passed"].all()), "phase14h"),
-            _gate_row("Daily signal file schema exists", len(daily_signal_schema) > 0, f"fields={len(daily_signal_schema)}"),
-            _gate_row("Current signal state fields exist", len(current_signal_schema) > 0, f"fields={len(current_signal_schema)}"),
+            _gate_row(
+                "Phase 14H allows workflow pre-registration",
+                bool(phase14h_check["passed"].all()),
+                "phase14h",
+            ),
+            _gate_row(
+                "Daily signal file schema exists",
+                len(daily_signal_schema) > 0,
+                f"fields={len(daily_signal_schema)}",
+            ),
+            _gate_row(
+                "Current signal state fields exist",
+                len(current_signal_schema) > 0,
+                f"fields={len(current_signal_schema)}",
+            ),
             _gate_row("Operational switch policy exists", len(switch_policy) == 1, "switch policy"),
-            _gate_row("Endpoint freshness policy exists", len(endpoint_policy) == 1, "endpoint policy"),
-            _gate_row("Manual paper broker template exists", len(manual_broker_template) > 0, f"fields={len(manual_broker_template)}"),
-            _gate_row("Monitoring dashboard schema exists", len(monitoring_dashboard) > 0, f"panels={len(monitoring_dashboard)}"),
-            _gate_row("Execution checklist exists", len(execution_checklist) > 0, f"checks={len(execution_checklist)}"),
-            _gate_row("Journal template exists", len(journal_template) > 0, f"fields={len(journal_template)}"),
-            _gate_row("Stop conditions exist", len(stop_conditions) > 0, f"conditions={len(stop_conditions)}"),
-            _gate_row("Benchmark update rules exist", len(benchmark_rules) > 0, f"rules={len(benchmark_rules)}"),
-            _gate_row("Phase 15B boundary is readiness-audit-only", bool(boundary["passed"].all()), "phase15b"),
-            _gate_row("Scope blocks deployment/live trading/readiness claim", bool(scope["passed"].all()), "scope"),
+            _gate_row(
+                "Endpoint freshness policy exists", len(endpoint_policy) == 1, "endpoint policy"
+            ),
+            _gate_row(
+                "Manual paper broker template exists",
+                len(manual_broker_template) > 0,
+                f"fields={len(manual_broker_template)}",
+            ),
+            _gate_row(
+                "Monitoring dashboard schema exists",
+                len(monitoring_dashboard) > 0,
+                f"panels={len(monitoring_dashboard)}",
+            ),
+            _gate_row(
+                "Execution checklist exists",
+                len(execution_checklist) > 0,
+                f"checks={len(execution_checklist)}",
+            ),
+            _gate_row(
+                "Journal template exists",
+                len(journal_template) > 0,
+                f"fields={len(journal_template)}",
+            ),
+            _gate_row(
+                "Stop conditions exist",
+                len(stop_conditions) > 0,
+                f"conditions={len(stop_conditions)}",
+            ),
+            _gate_row(
+                "Benchmark update rules exist",
+                len(benchmark_rules) > 0,
+                f"rules={len(benchmark_rules)}",
+            ),
+            _gate_row(
+                "Phase 15B boundary is readiness-audit-only",
+                bool(boundary["passed"].all()),
+                "phase15b",
+            ),
+            _gate_row(
+                "Scope blocks deployment/live trading/readiness claim",
+                bool(scope["passed"].all()),
+                "scope",
+            ),
             _gate_row(
                 "Preregistration role is correct",
-                section.get("preregistration_role") == "Paper-trading workflow pre-registration only",
+                section.get("preregistration_role")
+                == "Paper-trading workflow pre-registration only",
                 section.get("preregistration_role", ""),
             ),
         ]
@@ -554,7 +605,9 @@ def _readiness_decision(
         switch_ready
         and endpoint_ready
         and no_failure_conditions_triggered
-        and not _bool_value(readiness_policy.get("block_readiness_if_any_required_condition_fails", True))
+        and not _bool_value(
+            readiness_policy.get("block_readiness_if_any_required_condition_fails", True)
+        )
     )
 
     # If strict policy is enabled, readiness is only true when all required conditions clear.
@@ -672,9 +725,15 @@ def save_phase15b_paper_trading_workflow_readiness_audit(
                 "implementation_classification": section.get("implementation_classification", ""),
                 "phase15a_passed": bool(phase15a_check["passed"].iloc[0]),
                 "config_flags_clean": bool(flags["passed"].all()),
-                "workflow_reports_present": bool(inventory["present"].all()) if not inventory.empty else False,
-                "workflow_report_rows_non_empty": bool(inventory["passed"].all()) if not inventory.empty else False,
-                "operational_blockers_present": bool(operational_blockers["present"].map(_bool_value).any()),
+                "workflow_reports_present": bool(inventory["present"].all())
+                if not inventory.empty
+                else False,
+                "workflow_report_rows_non_empty": bool(inventory["passed"].all())
+                if not inventory.empty
+                else False,
+                "operational_blockers_present": bool(
+                    operational_blockers["present"].map(_bool_value).any()
+                ),
                 "paper_trading_ready": _bool_value(readiness.iloc[0]["paper_trading_ready"]),
                 "readiness_decision": readiness.iloc[0]["decision"],
                 "boundary_passed": bool(boundary["passed"].all()),
@@ -693,12 +752,34 @@ def save_phase15b_paper_trading_workflow_readiness_audit(
         [
             _gate_row("Phase 15A passed", bool(phase15a_check["passed"].iloc[0]), "phase15a"),
             _gate_row("Config flags clean", bool(flags["passed"].all()), "runtime flags"),
-            _gate_row("All workflow reports present", bool(inventory["present"].all()) if not inventory.empty else False, "inventory"),
-            _gate_row("Operational blockers identified", bool(operational_blockers["present"].map(_bool_value).any()), "blockers"),
-            _gate_row("Readiness decision report exists", len(readiness) == 1, str(readiness.iloc[0]["decision"])),
-            _gate_row("Readiness false when blockers exist", readiness_false_when_blockers_exist, "readiness gate"),
-            _gate_row("Phase 15C boundary is conditional-only", bool(boundary["passed"].all()), "phase15c"),
-            _gate_row("Scope blocks deployment/live trading/promotion", bool(scope["passed"].all()), "scope"),
+            _gate_row(
+                "All workflow reports present",
+                bool(inventory["present"].all()) if not inventory.empty else False,
+                "inventory",
+            ),
+            _gate_row(
+                "Operational blockers identified",
+                bool(operational_blockers["present"].map(_bool_value).any()),
+                "blockers",
+            ),
+            _gate_row(
+                "Readiness decision report exists",
+                len(readiness) == 1,
+                str(readiness.iloc[0]["decision"]),
+            ),
+            _gate_row(
+                "Readiness false when blockers exist",
+                readiness_false_when_blockers_exist,
+                "readiness gate",
+            ),
+            _gate_row(
+                "Phase 15C boundary is conditional-only", bool(boundary["passed"].all()), "phase15c"
+            ),
+            _gate_row(
+                "Scope blocks deployment/live trading/promotion",
+                bool(scope["passed"].all()),
+                "scope",
+            ),
             _gate_row(
                 "Audit role is correct",
                 section.get("audit_role") == "Paper-trading workflow readiness audit only",

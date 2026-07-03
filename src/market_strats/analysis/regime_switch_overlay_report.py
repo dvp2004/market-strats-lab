@@ -20,13 +20,7 @@ from market_strats.strategies.regime_switch_overlay import (
 
 
 def _safe_filename(value: str) -> str:
-    return (
-        value.lower()
-        .replace(" ", "_")
-        .replace("/", "_")
-        .replace("\\", "_")
-        .replace(":", "_")
-    )
+    return value.lower().replace(" ", "_").replace("/", "_").replace("\\", "_").replace(":", "_")
 
 
 def _get_strategy_result(
@@ -46,9 +40,7 @@ def _get_strategy_result(
 
     if strategy not in strategy_results:
         available = sorted(strategy_results.keys())
-        raise ValueError(
-            f"Strategy '{strategy}' not found for {ticker}. Available: {available}"
-        )
+        raise ValueError(f"Strategy '{strategy}' not found for {ticker}. Available: {available}")
 
     return strategy_results[strategy]
 
@@ -69,8 +61,7 @@ def _create_mode_summary(overlay_result: pd.DataFrame) -> pd.DataFrame:
                 "worst_daily_return_pct": returns.min() * 100.0,
                 "avg_position_pct": group["position"].astype(float).mean() * 100.0,
                 "avg_cash_pct": group["cash_position"].astype(float).mean() * 100.0,
-                "avg_overlay_turnover_pct": group["overlay_turnover"].astype(float).mean()
-                * 100.0,
+                "avg_overlay_turnover_pct": group["overlay_turnover"].astype(float).mean() * 100.0,
             }
         )
 
@@ -190,13 +181,10 @@ def run_regime_switch_overlay_report(
     if defensive_allocator_name not in relative_momentum_outputs:
         available = sorted(relative_momentum_outputs.keys())
         raise ValueError(
-            f"Defensive allocator '{defensive_allocator_name}' not found. "
-            f"Available: {available}"
+            f"Defensive allocator '{defensive_allocator_name}' not found. Available: {available}"
         )
 
-    defensive_result = relative_momentum_outputs[defensive_allocator_name][
-        "allocator_result"
-    ]
+    defensive_result = relative_momentum_outputs[defensive_allocator_name]["allocator_result"]
 
     defensive_dates = list(pd.to_datetime(defensive_result["date"]))
 

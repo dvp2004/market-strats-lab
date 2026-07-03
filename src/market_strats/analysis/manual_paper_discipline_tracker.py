@@ -127,11 +127,7 @@ def _join_values(values: list[str]) -> str:
 
 
 def _unique_join(series: pd.Series) -> str:
-    values = [
-        _text_value(value)
-        for value in series.dropna().tolist()
-        if _text_value(value) != ""
-    ]
+    values = [_text_value(value) for value in series.dropna().tolist() if _text_value(value) != ""]
     return _join_values(values)
 
 
@@ -143,8 +139,7 @@ def _source_paths(
     dashboard_dir: Path,
 ) -> dict[str, Path]:
     return {
-        "manual_paper_session_ledger": manual_session_dir
-        / "manual_paper_session_ledger.csv",
+        "manual_paper_session_ledger": manual_session_dir / "manual_paper_session_ledger.csv",
         "manual_paper_session_ingestion_result": manual_session_dir
         / "manual_paper_session_ingestion_result.csv",
         "manual_paper_session_row_validation": manual_session_dir
@@ -158,11 +153,7 @@ def _source_paths(
 
 
 def _missing_sources(source_paths: dict[str, Path]) -> list[str]:
-    return [
-        str(path)
-        for path in source_paths.values()
-        if not path.exists() or path.is_dir()
-    ]
+    return [str(path) for path in source_paths.values() if not path.exists() or path.is_dir()]
 
 
 def _warning_symbols_for_session(
@@ -176,9 +167,7 @@ def _warning_symbols_for_session(
 ) -> list[str]:
     if not cycle_history.empty:
         history = cycle_history.copy()
-        if {"cycle_date", "selected_signal_date", "warning_symbols"}.issubset(
-            history.columns
-        ):
+        if {"cycle_date", "selected_signal_date", "warning_symbols"}.issubset(history.columns):
             matches = history[
                 (history["cycle_date"].astype(str) == session_date)
                 & (history["selected_signal_date"].astype(str) == selected_signal_date)
@@ -207,9 +196,7 @@ def _blocking_symbols_for_session(
 ) -> list[str]:
     if not cycle_history.empty:
         history = cycle_history.copy()
-        if {"cycle_date", "selected_signal_date", "blocking_symbols"}.issubset(
-            history.columns
-        ):
+        if {"cycle_date", "selected_signal_date", "blocking_symbols"}.issubset(history.columns):
             matches = history[
                 (history["cycle_date"].astype(str) == session_date)
                 & (history["selected_signal_date"].astype(str) == selected_signal_date)
@@ -350,9 +337,7 @@ def build_manual_paper_discipline_history(
             else False
         )
         all_tear_reviewed = (
-            session_rows.get("tear_sheet_reviewed", pd.Series(dtype=bool))
-            .map(_bool_value)
-            .all()
+            session_rows.get("tear_sheet_reviewed", pd.Series(dtype=bool)).map(_bool_value).all()
         )
         warnings_ack = True
         if warning_symbols:
@@ -445,9 +430,7 @@ def build_manual_paper_discipline_history(
             }
         )
     history = pd.DataFrame(rows, columns=HISTORY_COLUMNS)
-    return history.sort_values(["session_date", "selected_signal_date"]).reset_index(
-        drop=True
-    )
+    return history.sort_values(["session_date", "selected_signal_date"]).reset_index(drop=True)
 
 
 def _current_streak(values: pd.Series) -> int:
@@ -563,9 +546,7 @@ def build_manual_paper_candidate_discipline_summary(
         ]
         btc_ack = True
         if not btc_positive_rows.empty:
-            btc_ack = bool(
-                btc_positive_rows["btc_caveat_acknowledged"].map(_bool_value).all()
-            )
+            btc_ack = bool(btc_positive_rows["btc_caveat_acknowledged"].map(_bool_value).all())
         valid_rows = (
             int(candidate_validations["row_valid"].map(_bool_value).sum())
             if not candidate_validations.empty and "row_valid" in candidate_validations
@@ -601,9 +582,9 @@ def build_manual_paper_candidate_discipline_summary(
             {
                 "canonical_candidate_id": candidate_id_text,
                 "candidate_role": _text_value(candidate_rows.iloc[-1].get("candidate_role", "")),
-                "sessions_seen": candidate_rows[
-                    ["session_date", "selected_signal_date"]
-                ].drop_duplicates().shape[0],
+                "sessions_seen": candidate_rows[["session_date", "selected_signal_date"]]
+                .drop_duplicates()
+                .shape[0],
                 "rows_seen": len(candidate_rows),
                 "entered_count": int(statuses.eq("entered").sum()),
                 "skipped_count": int(statuses.eq("skipped").sum()),
@@ -612,9 +593,7 @@ def build_manual_paper_candidate_discipline_summary(
                 "valid_rows": valid_rows,
                 "invalid_rows": invalid_rows,
                 "latest_manual_decision": _unique_join(latest_rows["manual_decision"]),
-                "latest_execution_status": _unique_join(
-                    latest_rows["manual_execution_status"]
-                ),
+                "latest_execution_status": _unique_join(latest_rows["manual_execution_status"]),
                 "latest_session_date": latest_session_date,
                 "btc_positive_seen": bool(not btc_positive_rows.empty),
                 "btc_acknowledged_when_required": btc_ack,

@@ -10,12 +10,10 @@ import pandas as pd
 DEFAULT_PHASE23C_CONFIG: dict[str, Any] = {
     "enabled": False,
     "output_dir": (
-        "reports/individual_equity_decision_system/"
-        "phase23c_fundamental_data_source_audit"
+        "reports/individual_equity_decision_system/phase23c_fundamental_data_source_audit"
     ),
     "dashboard_status_path": (
-        "reports/paper_trading/dashboard/"
-        "phase23c_fundamental_data_source_audit_status.csv"
+        "reports/paper_trading/dashboard/phase23c_fundamental_data_source_audit_status.csv"
     ),
     "audit_as_of_date": "2026-06-13",
     "required_start_date": "2006-04-28",
@@ -104,9 +102,7 @@ def _gate(name: str, passed: bool, detail: str) -> dict[str, Any]:
     }
 
 
-def _resolve_configured_path(
-    *, configured_path: str | Path, reports_dir: str | Path
-) -> Path:
+def _resolve_configured_path(*, configured_path: str | Path, reports_dir: str | Path) -> Path:
     """Resolve a configured output path without creating reports/reports.
 
     Paths beginning with ``reports`` are anchored at the supplied reports root.
@@ -152,8 +148,7 @@ def build_source_registry() -> pd.DataFrame:
             ),
             "audit_status": "approved_contract_source_download_not_run_in_phase23c",
             "evidence_reference": (
-                "https://www.sec.gov/search-filings/"
-                "edgar-application-programming-interfaces"
+                "https://www.sec.gov/search-filings/edgar-application-programming-interfaces"
             ),
         },
         {
@@ -177,8 +172,7 @@ def build_source_registry() -> pd.DataFrame:
             ),
             "audit_status": "approved_contract_source_concept_and_context_audit_pending",
             "evidence_reference": (
-                "https://www.sec.gov/search-filings/"
-                "edgar-application-programming-interfaces"
+                "https://www.sec.gov/search-filings/edgar-application-programming-interfaces"
             ),
         },
         {
@@ -274,16 +268,27 @@ def build_source_registry() -> pd.DataFrame:
 def build_source_scorecard(source_registry: pd.DataFrame) -> pd.DataFrame:
     frame = source_registry.copy()
     frame["authority_score"] = frame["official_provider"].astype(bool).astype(int) * 3
-    frame["automation_score"] = frame["programmatic_access"].map(
-        {True: 2, False: 0, "varies": 1}
-    ).fillna(1)
-    frame["timestamp_score"] = frame["accepted_timestamp_available"].map(
-        {True: 3, False: 0, "join_to_accession_metadata": 2,
-         "join_to_submissions_or_index_headers": 2, "field_audit_required": 1}
-    ).fillna(0)
-    frame["version_score"] = frame["amended_filings_available"].map(
-        {True: 2, False: 0, "vintage_history_required": 1}
-    ).fillna(0)
+    frame["automation_score"] = (
+        frame["programmatic_access"].map({True: 2, False: 0, "varies": 1}).fillna(1)
+    )
+    frame["timestamp_score"] = (
+        frame["accepted_timestamp_available"]
+        .map(
+            {
+                True: 3,
+                False: 0,
+                "join_to_accession_metadata": 2,
+                "join_to_submissions_or_index_headers": 2,
+                "field_audit_required": 1,
+            }
+        )
+        .fillna(0)
+    )
+    frame["version_score"] = (
+        frame["amended_filings_available"]
+        .map({True: 2, False: 0, "vintage_history_required": 1})
+        .fillna(0)
+    )
     frame["fact_score"] = frame["standardized_facts_available"].astype(bool).astype(int) * 2
     frame["audit_score"] = frame[
         [
@@ -490,7 +495,6 @@ def build_restatement_policy() -> pd.DataFrame:
     return pd.DataFrame(rows, columns=["rule_id", "policy", "requirement"])
 
 
-
 def build_pre_xbrl_coverage_policy(phase_config: dict[str, Any]) -> pd.DataFrame:
     rows = [
         {
@@ -525,33 +529,118 @@ def build_pre_xbrl_coverage_policy(phase_config: dict[str, Any]) -> pd.DataFrame
     ]
     return pd.DataFrame(rows)
 
+
 def build_feature_concept_registry() -> pd.DataFrame:
     rows = [
         ("revenue", "growth", "Revenues; SalesRevenueNet", "duration", "quarterly_and_ttm"),
         ("gross_profit", "profitability", "GrossProfit", "duration", "quarterly_and_ttm"),
-        ("operating_income", "profitability", "OperatingIncomeLoss", "duration", "quarterly_and_ttm"),
-        ("net_income", "profitability", "NetIncomeLoss; ProfitLoss", "duration", "quarterly_and_ttm"),
+        (
+            "operating_income",
+            "profitability",
+            "OperatingIncomeLoss",
+            "duration",
+            "quarterly_and_ttm",
+        ),
+        (
+            "net_income",
+            "profitability",
+            "NetIncomeLoss; ProfitLoss",
+            "duration",
+            "quarterly_and_ttm",
+        ),
         ("eps_diluted", "profitability", "EarningsPerShareDiluted", "duration", "quarterly"),
-        ("operating_cash_flow", "cash_flow", "NetCashProvidedByUsedInOperatingActivities", "duration", "quarterly_and_ttm"),
-        ("capital_expenditure", "investment", "PaymentsToAcquirePropertyPlantAndEquipment", "duration", "quarterly_and_ttm"),
-        ("free_cash_flow", "cash_flow", "derived: operating_cash_flow-capital_expenditure", "derived", "quarterly_and_ttm"),
-        ("research_and_development", "investment", "ResearchAndDevelopmentExpense", "duration", "quarterly_and_ttm"),
-        ("selling_general_admin", "efficiency", "SellingGeneralAndAdministrativeExpense", "duration", "quarterly_and_ttm"),
+        (
+            "operating_cash_flow",
+            "cash_flow",
+            "NetCashProvidedByUsedInOperatingActivities",
+            "duration",
+            "quarterly_and_ttm",
+        ),
+        (
+            "capital_expenditure",
+            "investment",
+            "PaymentsToAcquirePropertyPlantAndEquipment",
+            "duration",
+            "quarterly_and_ttm",
+        ),
+        (
+            "free_cash_flow",
+            "cash_flow",
+            "derived: operating_cash_flow-capital_expenditure",
+            "derived",
+            "quarterly_and_ttm",
+        ),
+        (
+            "research_and_development",
+            "investment",
+            "ResearchAndDevelopmentExpense",
+            "duration",
+            "quarterly_and_ttm",
+        ),
+        (
+            "selling_general_admin",
+            "efficiency",
+            "SellingGeneralAndAdministrativeExpense",
+            "duration",
+            "quarterly_and_ttm",
+        ),
         ("assets", "balance_sheet", "Assets", "instant", "quarter_end"),
         ("current_assets", "liquidity", "AssetsCurrent", "instant", "quarter_end"),
-        ("cash_and_equivalents", "liquidity", "CashAndCashEquivalentsAtCarryingValue", "instant", "quarter_end"),
+        (
+            "cash_and_equivalents",
+            "liquidity",
+            "CashAndCashEquivalentsAtCarryingValue",
+            "instant",
+            "quarter_end",
+        ),
         ("inventory", "working_capital", "InventoryNet", "instant", "quarter_end"),
-        ("receivables", "working_capital", "AccountsReceivableNetCurrent", "instant", "quarter_end"),
+        (
+            "receivables",
+            "working_capital",
+            "AccountsReceivableNetCurrent",
+            "instant",
+            "quarter_end",
+        ),
         ("liabilities", "balance_sheet", "Liabilities", "instant", "quarter_end"),
         ("current_liabilities", "liquidity", "LiabilitiesCurrent", "instant", "quarter_end"),
-        ("debt", "leverage", "LongTermDebtAndFinanceLeaseObligationsCurrent+Noncurrent", "derived", "quarter_end"),
+        (
+            "debt",
+            "leverage",
+            "LongTermDebtAndFinanceLeaseObligationsCurrent+Noncurrent",
+            "derived",
+            "quarter_end",
+        ),
         ("stockholders_equity", "balance_sheet", "StockholdersEquity", "instant", "quarter_end"),
-        ("shares_diluted", "capital_structure", "WeightedAverageNumberOfDilutedSharesOutstanding", "duration", "quarterly"),
-        ("gross_margin", "profitability", "derived: gross_profit/revenue", "derived", "quarterly_and_ttm"),
-        ("operating_margin", "profitability", "derived: operating_income/revenue", "derived", "quarterly_and_ttm"),
+        (
+            "shares_diluted",
+            "capital_structure",
+            "WeightedAverageNumberOfDilutedSharesOutstanding",
+            "duration",
+            "quarterly",
+        ),
+        (
+            "gross_margin",
+            "profitability",
+            "derived: gross_profit/revenue",
+            "derived",
+            "quarterly_and_ttm",
+        ),
+        (
+            "operating_margin",
+            "profitability",
+            "derived: operating_income/revenue",
+            "derived",
+            "quarterly_and_ttm",
+        ),
         ("return_on_assets", "quality", "derived: ttm_net_income/average_assets", "derived", "ttm"),
         ("accruals", "quality", "derived: net_income-operating_cash_flow", "derived", "ttm"),
-        ("asset_growth", "investment", "derived: assets/assets_lagged-1", "derived", "annual_or_quarterly"),
+        (
+            "asset_growth",
+            "investment",
+            "derived: assets/assets_lagged-1",
+            "derived",
+            "annual_or_quarterly",
+        ),
     ]
     frame = pd.DataFrame(
         rows,
@@ -573,15 +662,51 @@ def build_feature_concept_registry() -> pd.DataFrame:
 def build_context_selection_rules() -> pd.DataFrame:
     rows = [
         ("C1", "accession_bound", "Facts cannot be selected without accession-level provenance."),
-        ("C2", "consolidated_preferred", "Prefer consolidated entity-wide contexts over segments unless feature explicitly requires segments."),
-        ("C3", "duration_alignment", "Quarterly and TTM features require explicit start/end duration checks."),
-        ("C4", "instant_alignment", "Balance-sheet facts must align to the intended report-period instant."),
-        ("C5", "unit_consistency", "Concept mappings specify accepted units and reject silent unit conversion."),
-        ("C6", "dimension_deduplication", "Dimensions are part of context identity; duplicate-looking facts are not collapsed blindly."),
-        ("C7", "fiscal_calendar_aware", "Issuer fiscal calendars are retained; calendar-frame labels are not treated as exact periods."),
-        ("C8", "custom_tag_mapping_review", "Custom tags require audited mapping and cannot be auto-merged by label similarity alone."),
-        ("C9", "taxonomy_version_recorded", "Taxonomy namespace/version is preserved for every source fact."),
-        ("C10", "no_latest_fact_shortcut", "The latest available value today may not be backfilled through prior decision dates."),
+        (
+            "C2",
+            "consolidated_preferred",
+            "Prefer consolidated entity-wide contexts over segments unless feature explicitly requires segments.",
+        ),
+        (
+            "C3",
+            "duration_alignment",
+            "Quarterly and TTM features require explicit start/end duration checks.",
+        ),
+        (
+            "C4",
+            "instant_alignment",
+            "Balance-sheet facts must align to the intended report-period instant.",
+        ),
+        (
+            "C5",
+            "unit_consistency",
+            "Concept mappings specify accepted units and reject silent unit conversion.",
+        ),
+        (
+            "C6",
+            "dimension_deduplication",
+            "Dimensions are part of context identity; duplicate-looking facts are not collapsed blindly.",
+        ),
+        (
+            "C7",
+            "fiscal_calendar_aware",
+            "Issuer fiscal calendars are retained; calendar-frame labels are not treated as exact periods.",
+        ),
+        (
+            "C8",
+            "custom_tag_mapping_review",
+            "Custom tags require audited mapping and cannot be auto-merged by label similarity alone.",
+        ),
+        (
+            "C9",
+            "taxonomy_version_recorded",
+            "Taxonomy namespace/version is preserved for every source fact.",
+        ),
+        (
+            "C10",
+            "no_latest_fact_shortcut",
+            "The latest available value today may not be backfilled through prior decision dates.",
+        ),
     ]
     return pd.DataFrame(rows, columns=["rule_id", "rule", "requirement"])
 
@@ -596,11 +721,27 @@ def build_validation_plan() -> pd.DataFrame:
         ("V6", "form whitelist", "form belongs to approved periodic/event filing set"),
         ("V7", "amendment consistency", "/A forms agree with is_amendment"),
         ("V8", "accession uniqueness", "fact identity is unique within accession/context/unit"),
-        ("V9", "canonical provenance", "canonical facts originate from SEC public-official or approved licensed data"),
-        ("V10", "as-filed replay", "historical feature values reproduce accession vintages at decision times"),
-        ("V11", "taxonomy drift", "standard and custom tag mappings are versioned and test-covered"),
+        (
+            "V9",
+            "canonical provenance",
+            "canonical facts originate from SEC public-official or approved licensed data",
+        ),
+        (
+            "V10",
+            "as-filed replay",
+            "historical feature values reproduce accession vintages at decision times",
+        ),
+        (
+            "V11",
+            "taxonomy drift",
+            "standard and custom tag mappings are versioned and test-covered",
+        ),
         ("V12", "restatement replay", "amended values appear only after amendment knowledge time"),
-        ("V13", "filing sample reconciliation", "selected facts reconcile to filing HTML/XBRL documents"),
+        (
+            "V13",
+            "filing sample reconciliation",
+            "selected facts reconcile to filing HTML/XBRL documents",
+        ),
         ("V14", "coverage", "issuer/period coverage is quantified by universe and year"),
         ("V15", "raw immutability", "raw bytes, checksums and retrieval metadata are preserved"),
     ]
@@ -721,9 +862,7 @@ def validate_fundamental_fact_frame(facts: pd.DataFrame) -> pd.DataFrame:
         if column not in {"value", "is_amendment", "is_canonical"}
     ]
     required_nonblank = working[nonblank_columns].fillna("").astype(str)
-    nonblank = bool(
-        required_nonblank.apply(lambda column: column.str.strip().ne("")).all().all()
-    )
+    nonblank = bool(required_nonblank.apply(lambda column: column.str.strip().ne("")).all().all())
     rows.append(_gate("required_values_nonblank", nonblank, f"rows={len(working)}"))
 
     forms_valid = bool(working["form"].astype(str).isin(VALID_FORMS).all())
@@ -736,18 +875,10 @@ def validate_fundamental_fact_frame(facts: pd.DataFrame) -> pd.DataFrame:
     )
 
     filing_date = pd.to_datetime(working["filing_date"], utc=True, errors="coerce")
-    accepted = pd.to_datetime(
-        working["accepted_timestamp_utc"], utc=True, errors="coerce"
-    )
-    knowledge = pd.to_datetime(
-        working["knowledge_timestamp_utc"], utc=True, errors="coerce"
-    )
-    report_period = pd.to_datetime(
-        working["report_period_end"], utc=True, errors="coerce"
-    )
-    retrieved = pd.to_datetime(
-        working["source_retrieved_at_utc"], utc=True, errors="coerce"
-    )
+    accepted = pd.to_datetime(working["accepted_timestamp_utc"], utc=True, errors="coerce")
+    knowledge = pd.to_datetime(working["knowledge_timestamp_utc"], utc=True, errors="coerce")
+    report_period = pd.to_datetime(working["report_period_end"], utc=True, errors="coerce")
+    retrieved = pd.to_datetime(working["source_retrieved_at_utc"], utc=True, errors="coerce")
     timestamps_parse = bool(
         filing_date.notna().all()
         and accepted.notna().all()
@@ -757,9 +888,7 @@ def validate_fundamental_fact_frame(facts: pd.DataFrame) -> pd.DataFrame:
     )
     rows.append(_gate("timestamps_parse", timestamps_parse, f"rows={len(working)}"))
 
-    report_before_filing = (
-        bool((report_period <= filing_date).all()) if timestamps_parse else False
-    )
+    report_before_filing = bool((report_period <= filing_date).all()) if timestamps_parse else False
     rows.append(
         _gate(
             "report_period_not_after_filing_date",
@@ -835,9 +964,7 @@ def validate_fundamental_fact_frame(facts: pd.DataFrame) -> pd.DataFrame:
     if not canonical_rows.empty:
         providers = canonical_rows["source_provider"].astype(str).str.lower()
         license_class = canonical_rows["license_class"].astype(str).str.lower()
-        provider_safe = providers.str.contains("sec").fillna(False) | license_class.eq(
-            "licensed"
-        )
+        provider_safe = providers.str.contains("sec").fillna(False) | license_class.eq("licensed")
         license_safe = license_class.isin({"public_official", "licensed"})
         canonical_safe = bool((provider_safe & license_safe).all())
     rows.append(
@@ -997,9 +1124,7 @@ def build_summary(
                     source_scorecard["canonical_data_ready_now"].sum()
                 ),
                 "required_start_date": phase_config["required_start_date"],
-                "standardized_xbrl_start_date": phase_config[
-                    "standardized_xbrl_start_date"
-                ],
+                "standardized_xbrl_start_date": phase_config["standardized_xbrl_start_date"],
                 "required_end_date": phase_config["required_end_date"],
                 "pre_xbrl_gap_requires_parser_or_vendor": True,
                 "conservative_processing_delay_minutes": int(
@@ -1036,9 +1161,7 @@ def build_conclusion(summary: pd.DataFrame) -> pd.DataFrame:
                     if bool(row["phase_execution_gates_passed"])
                     else "Phase 23C failed: the fundamental source or timing contract is incomplete."
                 ),
-                "fundamental_source_contract_ready": bool(
-                    row["fundamental_source_contract_ready"]
-                ),
+                "fundamental_source_contract_ready": bool(row["fundamental_source_contract_ready"]),
                 "fundamental_data_ready": bool(row["fundamental_data_ready"]),
                 "allowed_next_step": (
                     "audit sentiment/news sources and prepare a small SEC acquisition pilot"

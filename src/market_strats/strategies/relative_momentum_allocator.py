@@ -81,9 +81,7 @@ def _calculate_selected_weights(
         return {ticker: equal_weight for ticker in selected}
 
     if weighting != "inverse_volatility":
-        raise ValueError(
-            "weighting must be one of: 'equal', 'inverse_volatility'"
-        )
+        raise ValueError("weighting must be one of: 'equal', 'inverse_volatility'")
 
     if volatility_row is None:
         equal_weight = risk_budget / len(selected)
@@ -101,6 +99,7 @@ def _calculate_selected_weights(
     weights = weights * risk_budget
 
     return weights.to_dict()
+
 
 def run_relative_momentum_allocator(
     price_data_by_ticker: dict[str, pd.DataFrame],
@@ -189,11 +188,7 @@ def run_relative_momentum_allocator(
             trend_confirmed = price_row > sma_row
             trend_confirmed = trend_confirmed.fillna(False)
 
-            eligible = eligible[
-                eligible.index.isin(
-                    trend_confirmed[trend_confirmed].index
-                )
-            ]
+            eligible = eligible[eligible.index.isin(trend_confirmed[trend_confirmed].index)]
 
         selected = eligible.sort_values(ascending=False).head(top_n).index.tolist()
 
@@ -232,11 +227,7 @@ def run_relative_momentum_allocator(
 
     slippage_cost = turnover * (slippage_bps / 10_000.0)
 
-    strategy_return = (
-        portfolio_asset_return
-        + cash_weight * aligned_cash_returns
-        - slippage_cost
-    )
+    strategy_return = portfolio_asset_return + cash_weight * aligned_cash_returns - slippage_cost
     strategy_return.iloc[0] = 0.0
 
     equity = initial_capital * (1.0 + strategy_return).cumprod()
@@ -250,9 +241,7 @@ def run_relative_momentum_allocator(
             "position": risky_weight.values,
             "cash_position": cash_weight.values,
             "turnover": turnover.values,
-            "selected_assets": [
-                _safe_selected_assets(row) for _, row in held_weights.iterrows()
-            ],
+            "selected_assets": [_safe_selected_assets(row) for _, row in held_weights.iterrows()],
         }
     )
 
@@ -269,9 +258,7 @@ def run_relative_momentum_allocator(
     result["trend_filter_enabled"] = trend_filter_enabled
     result["trend_sma_days"] = trend_sma_days
 
-    result["max_asset_weight"] = (
-        np.nan if max_asset_weight is None else float(max_asset_weight)
-    )
+    result["max_asset_weight"] = np.nan if max_asset_weight is None else float(max_asset_weight)
 
     if asset_group_caps:
         result["asset_group_caps_enabled"] = True
@@ -284,6 +271,7 @@ def run_relative_momentum_allocator(
         result[column] = result[column].astype(float)
 
     return result.reset_index(drop=True)
+
 
 def _normalise_asset_groups(
     asset_groups: dict[str, list[str]] | None,
@@ -307,10 +295,7 @@ def _apply_max_asset_weight(
     if max_asset_weight <= 0 or max_asset_weight > 1:
         raise ValueError("max_asset_weight must be in the range (0, 1]")
 
-    return {
-        asset: min(float(weight), max_asset_weight)
-        for asset, weight in weights.items()
-    }
+    return {asset: min(float(weight), max_asset_weight) for asset, weight in weights.items()}
 
 
 def _apply_asset_group_caps(
@@ -333,8 +318,7 @@ def _apply_asset_group_caps(
 
         group_assets = normalised_groups.get(str(group_name), [])
         present_assets = [
-            asset for asset in group_assets
-            if asset in adjusted and adjusted[asset] > 0
+            asset for asset in group_assets if asset in adjusted and adjusted[asset] > 0
         ]
 
         if not present_assets:

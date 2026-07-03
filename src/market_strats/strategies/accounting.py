@@ -39,9 +39,7 @@ def calculate_allocation_strategy_returns(
     slippage_cost = turnover * (slippage_bps / 10_000.0)
 
     strategy_return = (
-        held_position * asset_return
-        + cash_position * aligned_cash_returns
-        - slippage_cost
+        held_position * asset_return + cash_position * aligned_cash_returns - slippage_cost
     )
 
     if not strategy_return.empty:

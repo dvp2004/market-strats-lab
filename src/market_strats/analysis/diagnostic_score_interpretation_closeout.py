@@ -54,12 +54,9 @@ DEFAULT_PHASE12F_CONFIG: dict[str, Any] = {
     "audit_role": "Final Phase 12 diagnostic score checkpoint audit only",
     "phase_branch": "Phase 12 diagnostic regime score branch",
     "checkpoint_status": (
-        "Phase 12 closed — diagnostic regime score calculated, audited, "
-        "interpreted, and bounded"
+        "Phase 12 closed — diagnostic regime score calculated, audited, interpreted, and bounded"
     ),
-    "next_allowed_step": (
-        "Separate future score-to-signal pre-registration spec only, if pursued"
-    ),
+    "next_allowed_step": ("Separate future score-to-signal pre-registration spec only, if pursued"),
     "allow_signal_creation": False,
     "allow_allocation_rule_creation": False,
     "allow_strategy_backtest": False,
@@ -243,9 +240,7 @@ def build_phase12e_score_interpretation(
     components = (
         "; ".join(
             component_state_panel.apply(
-                lambda row: (
-                    f"{row.get('component_id')}={row.get('diagnostic_state')}"
-                ),
+                lambda row: f"{row.get('component_id')}={row.get('diagnostic_state')}",
                 axis=1,
             ).tolist()
         )
@@ -356,9 +351,7 @@ def build_phase12e_phase12f_boundary_check(
         (
             "phase12f_may_assign_empirical_weights",
             _bool_value(boundary.get("phase12f_may_assign_empirical_weights", True)),
-            not _bool_value(
-                boundary.get("phase12f_may_assign_empirical_weights", True)
-            ),
+            not _bool_value(boundary.get("phase12f_may_assign_empirical_weights", True)),
         ),
         (
             "phase12f_may_train_model",
@@ -520,8 +513,7 @@ def build_phase12e_gate_report(
         ),
         _gate_row(
             "Phase 12D remains passed",
-            (not gates.get("require_phase12d_passed", True))
-            or bool(row["phase12d_result_passed"]),
+            (not gates.get("require_phase12d_passed", True)) or bool(row["phase12d_result_passed"]),
             f"phase12d_result_passed={bool(row['phase12d_result_passed'])}",
         ),
         _gate_row(
@@ -813,9 +805,7 @@ def build_phase12f_phase_conclusion_check(
 
         if not frame.empty:
             verdict = str(frame.iloc[0].get("verdict", ""))
-            all_gates_passed = _bool_value(
-                frame.iloc[0].get("all_gates_passed", False)
-            )
+            all_gates_passed = _bool_value(frame.iloc[0].get("all_gates_passed", False))
 
         required_fragment = str(required_fragments.get(phase_id, "")).lower()
         fragment_present = required_fragment in verdict.lower()
@@ -1054,9 +1044,7 @@ def build_phase12f_summary(
                 "phase_gate_reports_passed": bool(phase_gate_report_check["passed"].all())
                 if not phase_gate_report_check.empty
                 else False,
-                "branch_closure_claims_locked": bool(
-                    branch_closure_claims_check["passed"].all()
-                )
+                "branch_closure_claims_locked": bool(branch_closure_claims_check["passed"].all())
                 if not branch_closure_claims_check.empty
                 else False,
                 "future_phase13_boundary_passed": bool(
@@ -1268,12 +1256,8 @@ def save_phase12f_final_diagnostic_score_checkpoint_audit(
     )
     phase_conclusion_check = build_phase12f_phase_conclusion_check(phase_config)
     phase_gate_report_check = build_phase12f_phase_gate_report_check(phase_config)
-    branch_closure_claims_check = build_phase12f_branch_closure_claims_check(
-        phase_config
-    )
-    future_phase13_boundary_check = build_phase12f_future_phase13_boundary_check(
-        phase_config
-    )
+    branch_closure_claims_check = build_phase12f_branch_closure_claims_check(phase_config)
+    future_phase13_boundary_check = build_phase12f_future_phase13_boundary_check(phase_config)
     scope_boundary_check = build_phase12f_scope_boundary_check(phase_config)
 
     summary = build_phase12f_summary(

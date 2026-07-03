@@ -60,9 +60,7 @@ def _phase_config(config: dict[str, Any]) -> dict[str, Any]:
     return _deep_merge(DEFAULT_PHASE23G_CONFIG, config.get(PHASE23G_SECTION, {}))
 
 
-def _resolve_reports_path(
-    *, configured_path: str | Path, reports_dir: str | Path
-) -> Path:
+def _resolve_reports_path(*, configured_path: str | Path, reports_dir: str | Path) -> Path:
     reports_root = Path(reports_dir)
     path = Path(configured_path)
     if path.is_absolute():
@@ -104,7 +102,9 @@ def _gate(name: str, passed: bool, detail: str) -> dict[str, Any]:
 
 
 def _safe_spearman(x: pd.Series, y: pd.Series) -> float:
-    frame = pd.concat([pd.to_numeric(x, errors="coerce"), pd.to_numeric(y, errors="coerce")], axis=1).dropna()
+    frame = pd.concat(
+        [pd.to_numeric(x, errors="coerce"), pd.to_numeric(y, errors="coerce")], axis=1
+    ).dropna()
     if len(frame) < 3:
         return np.nan
     if frame.iloc[:, 0].nunique() < 2 or frame.iloc[:, 1].nunique() < 2:
@@ -160,20 +160,28 @@ def _prepare_joined_panel(
     )
     joined["decision_timestamp_utc"] = pd.to_datetime(joined["decision_timestamp_utc"], utc=True)
     joined["signal_date"] = pd.to_datetime(joined["signal_date"])
-    joined["target_available_timestamp_utc"] = pd.to_datetime(joined["target_available_timestamp_utc"], utc=True)
+    joined["target_available_timestamp_utc"] = pd.to_datetime(
+        joined["target_available_timestamp_utc"], utc=True
+    )
     joined["target_period_end_date"] = pd.to_datetime(joined["target_period_end_date"])
     joined["training_eligible"] = joined["training_eligible"].map(_bool_value)
-    return joined.sort_values(["decision_timestamp_utc", "permanent_security_id"]).reset_index(drop=True)
+    return joined.sort_values(["decision_timestamp_utc", "permanent_security_id"]).reset_index(
+        drop=True
+    )
 
 
 def _alpha_value(config: dict[str, Any]) -> float:
-    grid = [float(value) for value in config.get("ridge_alpha_grid", [config.get("ridge_alpha", 1.0)])]
+    grid = [
+        float(value) for value in config.get("ridge_alpha_grid", [config.get("ridge_alpha", 1.0)])
+    ]
     requested = float(config.get("ridge_alpha", grid[0] if grid else 1.0))
     return requested if requested in grid else grid[0]
 
 
 def _folds_for_dates(joined: pd.DataFrame, config: dict[str, Any]) -> list[dict[str, Any]]:
-    decision_dates = pd.DatetimeIndex(sorted(pd.to_datetime(joined["decision_timestamp_utc"].dropna().unique())))
+    decision_dates = pd.DatetimeIndex(
+        sorted(pd.to_datetime(joined["decision_timestamp_utc"].dropna().unique()))
+    )
     folds: list[dict[str, Any]] = []
     min_dates = int(config["minimum_training_decision_dates"])
     min_rows = int(config["minimum_training_rows"])
@@ -223,7 +231,9 @@ def _preprocess_train_test(
     stds = x_train.std().replace(0, 1.0).fillna(1.0)
     x_train_scaled = ((x_train - means) / stds).to_numpy(dtype=float)
     x_test_scaled = ((x_test - means) / stds).to_numpy(dtype=float)
-    y_train = pd.to_numeric(train["target_value"], errors="coerce").fillna(0.0).to_numpy(dtype=float)
+    y_train = (
+        pd.to_numeric(train["target_value"], errors="coerce").fillna(0.0).to_numpy(dtype=float)
+    )
     metadata = {
         feature: {
             "train_median_after_cross_sectional_zscore": float(medians[feature]),
@@ -248,8 +258,12 @@ def _baseline_scores(test: pd.DataFrame, features: list[str]) -> dict[str, pd.Se
     available = [column for column in composite_inputs if column in test_cs.columns]
     composite = test_cs[available].mean(axis=1) if available else pd.Series(0.0, index=test.index)
     return {
-        "baseline_63d_momentum_rank": pd.to_numeric(test["momentum_63d"], errors="coerce").fillna(0.0),
-        "baseline_12_1_momentum_rank": pd.to_numeric(test["momentum_252d_skip21d"], errors="coerce").fillna(0.0),
+        "baseline_63d_momentum_rank": pd.to_numeric(test["momentum_63d"], errors="coerce").fillna(
+            0.0
+        ),
+        "baseline_12_1_momentum_rank": pd.to_numeric(
+            test["momentum_252d_skip21d"], errors="coerce"
+        ).fillna(0.0),
         "baseline_equal_weight_technical_composite": composite.fillna(0.0),
         "baseline_universe_average_null": pd.Series(0.0, index=test.index),
     }
@@ -322,7 +336,9 @@ def run_walk_forward_ranker(
             )
         score_sets = {model_version: pd.Series(ridge_scores, index=test.index)}
         score_sets.update(_baseline_scores(test, features))
-        actual_rank = pd.to_numeric(test["target_value"], errors="coerce").rank(ascending=False, method="first")
+        actual_rank = pd.to_numeric(test["target_value"], errors="coerce").rank(
+            ascending=False, method="first"
+        )
         for version, scores in score_sets.items():
             predicted_rank = scores.rank(ascending=False, method="first")
             for idx, row in test.iterrows():
@@ -391,11 +407,20 @@ def _metrics_from_predictions(predictions: pd.DataFrame, top_k: int) -> dict[str
                 "model_version": model,
                 "decision_timestamp_utc": date,
                 "top_k": top_k,
-                "top_k_average_forward_excess_return": float(top["actual_20d_excess_return"].mean()),
-                "bottom_k_average_forward_excess_return": float(bottom["actual_20d_excess_return"].mean()),
-                "top_minus_bottom_rank_spread": float(top["actual_20d_excess_return"].mean() - bottom["actual_20d_excess_return"].mean()),
+                "top_k_average_forward_excess_return": float(
+                    top["actual_20d_excess_return"].mean()
+                ),
+                "bottom_k_average_forward_excess_return": float(
+                    bottom["actual_20d_excess_return"].mean()
+                ),
+                "top_minus_bottom_rank_spread": float(
+                    top["actual_20d_excess_return"].mean()
+                    - bottom["actual_20d_excess_return"].mean()
+                ),
                 "top_k_positive_alpha_hit_rate": float(top["positive_alpha_indicator"].mean()),
-                "top_stock_positive_alpha_hit": bool(top.iloc[0]["positive_alpha_indicator"]) if not top.empty else False,
+                "top_stock_positive_alpha_hit": bool(top.iloc[0]["positive_alpha_indicator"])
+                if not top.empty
+                else False,
             }
         )
         rows_coverage.append(
@@ -422,14 +447,38 @@ def _metrics_from_predictions(predictions: pd.DataFrame, top_k: int) -> dict[str
                 "mean_ic": float(values.mean()) if not values.empty else np.nan,
                 "median_ic": float(values.median()) if not values.empty else np.nan,
                 "ic_std": float(values.std()) if len(values) > 1 else np.nan,
-                "ic_information_ratio": float(values.mean() / values.std()) if len(values) > 1 and values.std() else np.nan,
-                "positive_ic_date_fraction": float((values > 0).mean()) if not values.empty else np.nan,
-                "top_stock_positive_alpha_hit_rate": float(spread_group["top_stock_positive_alpha_hit"].mean()) if not spread_group.empty else np.nan,
-                "top_k_positive_alpha_hit_rate": float(spread_group["top_k_positive_alpha_hit_rate"].mean()) if not spread_group.empty else np.nan,
-                "top_k_average_forward_excess_return": float(spread_group["top_k_average_forward_excess_return"].mean()) if not spread_group.empty else np.nan,
-                "top_minus_bottom_rank_spread": float(spread_group["top_minus_bottom_rank_spread"].mean()) if not spread_group.empty else np.nan,
+                "ic_information_ratio": float(values.mean() / values.std())
+                if len(values) > 1 and values.std()
+                else np.nan,
+                "positive_ic_date_fraction": float((values > 0).mean())
+                if not values.empty
+                else np.nan,
+                "top_stock_positive_alpha_hit_rate": float(
+                    spread_group["top_stock_positive_alpha_hit"].mean()
+                )
+                if not spread_group.empty
+                else np.nan,
+                "top_k_positive_alpha_hit_rate": float(
+                    spread_group["top_k_positive_alpha_hit_rate"].mean()
+                )
+                if not spread_group.empty
+                else np.nan,
+                "top_k_average_forward_excess_return": float(
+                    spread_group["top_k_average_forward_excess_return"].mean()
+                )
+                if not spread_group.empty
+                else np.nan,
+                "top_minus_bottom_rank_spread": float(
+                    spread_group["top_minus_bottom_rank_spread"].mean()
+                )
+                if not spread_group.empty
+                else np.nan,
                 "model_rank_turnover": turnover,
-                "prediction_coverage": float(coverage.loc[coverage["model_version"].eq(model), "prediction_coverage"].mean()) if not coverage.empty else np.nan,
+                "prediction_coverage": float(
+                    coverage.loc[coverage["model_version"].eq(model), "prediction_coverage"].mean()
+                )
+                if not coverage.empty
+                else np.nan,
                 "number_of_test_dates": int(group["decision_timestamp_utc"].nunique()),
                 "average_securities_per_test_date": float(group["security_count"].mean()),
             }
@@ -443,7 +492,9 @@ def _metrics_from_predictions(predictions: pd.DataFrame, top_k: int) -> dict[str
                 "model_version": model,
                 "calendar_year": int(year),
                 "mean_actual_excess_return": float(group["actual_20d_excess_return"].mean()),
-                "mean_top_rank_actual_excess_return": float(group.loc[group["predicted_rank"].le(top_k), "actual_20d_excess_return"].mean()),
+                "mean_top_rank_actual_excess_return": float(
+                    group.loc[group["predicted_rank"].le(top_k), "actual_20d_excess_return"].mean()
+                ),
                 "prediction_rows": len(group),
             }
         )
@@ -464,7 +515,9 @@ def _rank_turnover(predictions: pd.DataFrame, top_k: int) -> float:
     if predictions.empty:
         return np.nan
     sets = []
-    for _date, group in predictions.sort_values("decision_timestamp_utc").groupby("decision_timestamp_utc"):
+    for _date, group in predictions.sort_values("decision_timestamp_utc").groupby(
+        "decision_timestamp_utc"
+    ):
         sets.append(set(group.sort_values("predicted_rank").head(top_k)["permanent_security_id"]))
     if len(sets) < 2:
         return np.nan
@@ -489,7 +542,9 @@ def _coefficient_stability(coefficients: pd.DataFrame) -> pd.DataFrame:
                 "std_coefficient": float(coeff.std()) if len(coeff) > 1 else np.nan,
                 "positive_sign_fraction": float((coeff > 0).mean()) if not coeff.empty else np.nan,
                 "negative_sign_fraction": float((coeff < 0).mean()) if not coeff.empty else np.nan,
-                "coefficient_sign_consistency": float(max((coeff > 0).mean(), (coeff < 0).mean())) if not coeff.empty else np.nan,
+                "coefficient_sign_consistency": float(max((coeff > 0).mean(), (coeff < 0).mean()))
+                if not coeff.empty
+                else np.nan,
             }
         )
     return pd.DataFrame(rows)
@@ -515,7 +570,9 @@ def _feature_missingness(panel: pd.DataFrame) -> pd.DataFrame:
                 "feature_name": feature,
                 "missing_count": int(values.isna().sum()),
                 "missing_rate": float(values.isna().mean()),
-                "finite_rate": float(np.isfinite(values.dropna()).mean()) if values.notna().any() else 0.0,
+                "finite_rate": float(np.isfinite(values.dropna()).mean())
+                if values.notna().any()
+                else 0.0,
                 "available": True,
             }
         )
@@ -533,10 +590,37 @@ def _integrity_audit(
 ) -> pd.DataFrame:
     phase23f_validation = validate_pilot_panel(panel, targets)
     rows = []
-    rows.append(_gate("valid_phase23f_panel", bool(phase23f_validation["passed"].all()), "Phase23F validation gates"))
-    rows.append(_gate("nonblank_identifiers_and_tickers", "ticker" in panel.columns and panel["ticker"].astype(str).str.strip().ne("").all(), "ticker and IDs populated"))
-    rows.append(_gate("valid_panel_target_joins", not joined.empty and joined["panel_row_id"].isin(panel["panel_row_id"]).all(), "primary target joined"))
-    rows.append(_gate("no_target_leakage", not any(column.startswith("forward_") or column.startswith("target_") for column in panel.columns), "predictor panel excludes target columns"))
+    rows.append(
+        _gate(
+            "valid_phase23f_panel",
+            bool(phase23f_validation["passed"].all()),
+            "Phase23F validation gates",
+        )
+    )
+    rows.append(
+        _gate(
+            "nonblank_identifiers_and_tickers",
+            "ticker" in panel.columns and panel["ticker"].astype(str).str.strip().ne("").all(),
+            "ticker and IDs populated",
+        )
+    )
+    rows.append(
+        _gate(
+            "valid_panel_target_joins",
+            not joined.empty and joined["panel_row_id"].isin(panel["panel_row_id"]).all(),
+            "primary target joined",
+        )
+    )
+    rows.append(
+        _gate(
+            "no_target_leakage",
+            not any(
+                column.startswith("forward_") or column.startswith("target_")
+                for column in panel.columns
+            ),
+            "predictor panel excludes target columns",
+        )
+    )
     if not folds.empty:
         chronological = bool(
             (
@@ -547,18 +631,85 @@ def _integrity_audit(
         )
     else:
         chronological = False
-    rows.append(_gate("valid_chronological_ordering", chronological, "walk-forward folds are chronological"))
-    rows.append(_gate("purge_and_embargo_enforced", not folds.empty and (folds["purge_window_trading_days"].astype(int) >= int(config["purge_window_trading_days"])).all(), "63-trading-day purge/embargo policy recorded"))
-    rows.append(_gate("all_predictions_out_of_sample", not predictions.empty and predictions["prediction_is_out_of_sample"].map(_bool_value).all(), "prediction flag"))
-    rows.append(_gate("sufficient_training_history", not folds.empty and folds["sufficient_training_history"].map(_bool_value).all(), "minimum training rows/dates"))
-    rows.append(_gate("sufficient_test_date_coverage", not predictions.empty and predictions["decision_timestamp_utc"].nunique() >= int(config["minimum_test_dates"]), "minimum OOS dates"))
-    rows.append(_gate("deterministic_rerun_consistency", True, "deterministic NumPy Ridge and deterministic folds"))
-    rows.append(_gate("no_paper_live_or_order_outputs", True, "Phase23G writes research diagnostics only"))
-    rows.append(_gate("research_only_and_noncanonical_warnings_present", True, NONCANONICAL_WARNING))
-    rows.append(_gate("live_trading_disabled", not _bool_value(config.get("live_trading_allowed", False)), "no live trading"))
-    rows.append(_gate("real_money_disabled", not _bool_value(config.get("real_money_allowed", False)), "no real money"))
-    rows.append(_gate("broker_api_disabled", not _bool_value(config.get("broker_api_integration_allowed", False)), "no broker/API"))
-    rows.append(_gate("promotion_disabled", not _bool_value(config.get("promotion_allowed", False)), "no promotion"))
+    rows.append(
+        _gate("valid_chronological_ordering", chronological, "walk-forward folds are chronological")
+    )
+    rows.append(
+        _gate(
+            "purge_and_embargo_enforced",
+            not folds.empty
+            and (
+                folds["purge_window_trading_days"].astype(int)
+                >= int(config["purge_window_trading_days"])
+            ).all(),
+            "63-trading-day purge/embargo policy recorded",
+        )
+    )
+    rows.append(
+        _gate(
+            "all_predictions_out_of_sample",
+            not predictions.empty
+            and predictions["prediction_is_out_of_sample"].map(_bool_value).all(),
+            "prediction flag",
+        )
+    )
+    rows.append(
+        _gate(
+            "sufficient_training_history",
+            not folds.empty and folds["sufficient_training_history"].map(_bool_value).all(),
+            "minimum training rows/dates",
+        )
+    )
+    rows.append(
+        _gate(
+            "sufficient_test_date_coverage",
+            not predictions.empty
+            and predictions["decision_timestamp_utc"].nunique()
+            >= int(config["minimum_test_dates"]),
+            "minimum OOS dates",
+        )
+    )
+    rows.append(
+        _gate(
+            "deterministic_rerun_consistency",
+            True,
+            "deterministic NumPy Ridge and deterministic folds",
+        )
+    )
+    rows.append(
+        _gate("no_paper_live_or_order_outputs", True, "Phase23G writes research diagnostics only")
+    )
+    rows.append(
+        _gate("research_only_and_noncanonical_warnings_present", True, NONCANONICAL_WARNING)
+    )
+    rows.append(
+        _gate(
+            "live_trading_disabled",
+            not _bool_value(config.get("live_trading_allowed", False)),
+            "no live trading",
+        )
+    )
+    rows.append(
+        _gate(
+            "real_money_disabled",
+            not _bool_value(config.get("real_money_allowed", False)),
+            "no real money",
+        )
+    )
+    rows.append(
+        _gate(
+            "broker_api_disabled",
+            not _bool_value(config.get("broker_api_integration_allowed", False)),
+            "no broker/API",
+        )
+    )
+    rows.append(
+        _gate(
+            "promotion_disabled",
+            not _bool_value(config.get("promotion_allowed", False)),
+            "no promotion",
+        )
+    )
     audit = pd.DataFrame(rows)
     audit["all_gates_passed"] = bool(audit["passed"].all())
     return audit
@@ -731,8 +882,18 @@ def _blocked_outputs(
     _write_csv(audit, output_dir / "phase23g_integrity_audit.csv")
     _write_csv(conclusion, output_dir / "phase23g_conclusion.csv")
     _write_csv(dashboard, dashboard_path)
-    _write_markdown(path=output_dir / "phase23g_interpretable_stock_ranker.md", summary=summary, metrics=pd.DataFrame(), audit=audit)
-    return {"summary": summary, "gate_report": audit, "conclusion": conclusion, "dashboard": dashboard}
+    _write_markdown(
+        path=output_dir / "phase23g_interpretable_stock_ranker.md",
+        summary=summary,
+        metrics=pd.DataFrame(),
+        audit=audit,
+    )
+    return {
+        "summary": summary,
+        "gate_report": audit,
+        "conclusion": conclusion,
+        "dashboard": dashboard,
+    }
 
 
 def save_phase23g_interpretable_stock_ranker(
@@ -758,11 +919,7 @@ def save_phase23g_interpretable_stock_ranker(
     panel = _read_csv(panel_path)
     targets = _read_csv(targets_path)
     phase23f_summary = _read_csv(summary_path)
-    missing = [
-        str(path)
-        for path in [panel_path, targets_path, summary_path]
-        if not path.exists()
-    ]
+    missing = [str(path) for path in [panel_path, targets_path, summary_path] if not path.exists()]
     if missing:
         return _blocked_outputs(
             config=phase_config,
@@ -816,7 +973,11 @@ def save_phase23g_interpretable_stock_ranker(
     gates_passed = bool(audit["passed"].all())
     metrics = metrics_outputs["cross_sectional_metrics"]
     ridge_row = metrics.loc[metrics["model_version"].eq(phase_config["model_version"])]
-    mean_ic = float(ridge_row["mean_ic"].iloc[0]) if not ridge_row.empty and pd.notna(ridge_row["mean_ic"].iloc[0]) else np.nan
+    mean_ic = (
+        float(ridge_row["mean_ic"].iloc[0])
+        if not ridge_row.empty and pd.notna(ridge_row["mean_ic"].iloc[0])
+        else np.nan
+    )
     decision = (
         "phase23g_interpretable_ranker_completed_research_only"
         if gates_passed and pd.notna(mean_ic) and mean_ic > 0
@@ -835,7 +996,9 @@ def save_phase23g_interpretable_stock_ranker(
                 "phase": "Phase 23G",
                 "phase23g_decision": decision,
                 "all_gates_passed": gates_passed,
-                "phase23f_decision": phase23f_summary.iloc[0].get("phase23f_decision", "") if not phase23f_summary.empty else "",
+                "phase23f_decision": phase23f_summary.iloc[0].get("phase23f_decision", "")
+                if not phase23f_summary.empty
+                else "",
                 "model_version": phase_config["model_version"],
                 "primary_target": phase_config["primary_target"],
                 "oos_prediction_rows": len(predictions),

@@ -43,9 +43,7 @@ def _get_price_data(
     missing_columns = required_columns - set(price_data.columns)
 
     if missing_columns:
-        raise ValueError(
-            f"Ticker {ticker} price data missing columns: {sorted(missing_columns)}"
-        )
+        raise ValueError(f"Ticker {ticker} price data missing columns: {sorted(missing_columns)}")
 
     output = price_data[["date", "adj_close"]].copy()
     output["date"] = pd.to_datetime(output["date"])
@@ -69,12 +67,9 @@ def _create_risk_asset_breadth_frame(
         prices = _get_price_data(ticker_outputs=ticker_outputs, ticker=ticker)
         ticker_upper = ticker.upper()
 
-        prices[f"{ticker_upper}_sma"] = prices["adj_close"].rolling(
-            breadth_sma_days
-        ).mean()
-        prices[f"{ticker_upper}_above_sma"] = (
-            prices[f"{ticker_upper}_sma"].notna()
-            & (prices["adj_close"] > prices[f"{ticker_upper}_sma"])
+        prices[f"{ticker_upper}_sma"] = prices["adj_close"].rolling(breadth_sma_days).mean()
+        prices[f"{ticker_upper}_above_sma"] = prices[f"{ticker_upper}_sma"].notna() & (
+            prices["adj_close"] > prices[f"{ticker_upper}_sma"]
         )
 
         frames.append(prices[["date", f"{ticker_upper}_above_sma"]])
@@ -170,17 +165,11 @@ def _create_breadth_guard_series(
         near_high_min_trend_distance=float(
             guarded_config.get("near_high_min_trend_distance", -0.01)
         ),
-        deep_drawdown_threshold=float(
-            guarded_config.get("deep_drawdown_threshold", -0.20)
-        ),
+        deep_drawdown_threshold=float(guarded_config.get("deep_drawdown_threshold", -0.20)),
     )
 
-    defensive_breadth_condition = breadth <= float(
-        phase_config.get("defensive_breadth_max", 0.50)
-    )
-    offensive_breadth_condition = breadth >= float(
-        phase_config.get("offensive_breadth_min", 0.50)
-    )
+    defensive_breadth_condition = breadth <= float(phase_config.get("defensive_breadth_max", 0.50))
+    offensive_breadth_condition = breadth >= float(phase_config.get("offensive_breadth_min", 0.50))
 
     defensive_breadth_condition.index = offensive["date"]
     offensive_breadth_condition.index = offensive["date"]
@@ -367,8 +356,7 @@ def _create_breadth_confirmation_summary(
                 ),
                 "max_drawdown_pct": row["max_drawdown_pct"],
                 "drawdown_delta_vs_benchmark_pct_points": round(
-                    float(row["max_drawdown_pct"])
-                    - float(benchmark_row["max_drawdown_pct"]),
+                    float(row["max_drawdown_pct"]) - float(benchmark_row["max_drawdown_pct"]),
                     3,
                 ),
                 "end_value": row["end_value"],
@@ -394,9 +382,7 @@ def _create_breadth_confirmation_gate_report(
         return pd.DataFrame()
 
     phase_config = config.get("phase5_breadth_confirmation", {})
-    benchmark_variant = str(
-        phase_config.get("benchmark_variant", "phase4_execution_candidate")
-    )
+    benchmark_variant = str(phase_config.get("benchmark_variant", "phase4_execution_candidate"))
 
     full = summary[summary["period"] == "full"].copy()
     holdout = summary[summary["period"] == "holdout"].copy()
@@ -424,17 +410,11 @@ def _create_breadth_confirmation_gate_report(
     max_holdout_cagr_damage = float(
         phase_config.get("max_allowed_holdout_cagr_damage_pct_points", -0.50)
     )
-    max_holdout_calmar_damage = float(
-        phase_config.get("max_allowed_holdout_calmar_damage", -0.05)
-    )
-    max_drawdown_damage = float(
-        phase_config.get("max_allowed_drawdown_damage_pct_points", -1.00)
-    )
+    max_holdout_calmar_damage = float(phase_config.get("max_allowed_holdout_calmar_damage", -0.05))
+    max_drawdown_damage = float(phase_config.get("max_allowed_drawdown_damage_pct_points", -1.00))
 
     improves_full = (
-        full_cagr_delta > 0
-        and full_calmar_delta > 0
-        and full_drawdown_delta >= max_drawdown_damage
+        full_cagr_delta > 0 and full_calmar_delta > 0 and full_drawdown_delta >= max_drawdown_damage
     )
 
     holdout_damage = False
@@ -442,13 +422,9 @@ def _create_breadth_confirmation_gate_report(
 
     if not best_holdout.empty:
         holdout_row = best_holdout.iloc[0]
-        holdout_cagr_delta = float(
-            holdout_row["cagr_delta_vs_benchmark_pct_points"]
-        )
+        holdout_cagr_delta = float(holdout_row["cagr_delta_vs_benchmark_pct_points"])
         holdout_calmar_delta = float(holdout_row["calmar_delta_vs_benchmark"])
-        holdout_drawdown_delta = float(
-            holdout_row["drawdown_delta_vs_benchmark_pct_points"]
-        )
+        holdout_drawdown_delta = float(holdout_row["drawdown_delta_vs_benchmark_pct_points"])
 
         holdout_damage = (
             holdout_cagr_delta < max_holdout_cagr_damage
@@ -462,9 +438,7 @@ def _create_breadth_confirmation_gate_report(
             f"{holdout_drawdown_delta} versus {benchmark_variant}."
         )
 
-    benchmark_events = event_summary[
-        event_summary["variant_name"] == benchmark_variant
-    ]
+    benchmark_events = event_summary[event_summary["variant_name"] == benchmark_variant]
     candidate_events = event_summary[event_summary["variant_name"] == best_variant]
 
     switch_interpretation = "Switch-count comparison unavailable."
@@ -476,8 +450,7 @@ def _create_breadth_confirmation_gate_report(
         )
         excessive_churn = switch_delta > 10
         switch_interpretation = (
-            f"{best_variant} changed switch count by {switch_delta} versus "
-            f"{benchmark_variant}."
+            f"{best_variant} changed switch count by {switch_delta} versus {benchmark_variant}."
         )
 
     candidate_passes = improves_full and not holdout_damage and not excessive_churn
@@ -526,9 +499,7 @@ def _create_breadth_confirmation_conclusion(
     if gate_report.empty:
         return pd.DataFrame()
 
-    final_gate = gate_report[
-        gate_report["gate"] == "Breadth confirmation is ready for promotion."
-    ]
+    final_gate = gate_report[gate_report["gate"] == "Breadth confirmation is ready for promotion."]
 
     final_status = final_gate.iloc[0]["status"] if not final_gate.empty else "Not yet"
 
@@ -674,9 +645,7 @@ def create_regime_switch_overlay_breadth_confirmation(
     event_summary = _create_event_summary(variant_events)
     summary = _create_breadth_confirmation_summary(
         metrics=metrics,
-        benchmark_variant=str(
-            phase_config.get("benchmark_variant", "phase4_execution_candidate")
-        ),
+        benchmark_variant=str(phase_config.get("benchmark_variant", "phase4_execution_candidate")),
     )
     gate_report = _create_breadth_confirmation_gate_report(
         summary=summary,

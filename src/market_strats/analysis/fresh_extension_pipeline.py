@@ -6,6 +6,7 @@ from typing import Any
 
 import pandas as pd
 
+
 def _bool_value(value: Any) -> bool:
     if isinstance(value, bool):
         return value
@@ -31,7 +32,9 @@ def _gate_row(gate: str, passed: bool, detail: str) -> dict[str, Any]:
     }
 
 
-def _required_column_check(frame: pd.DataFrame, required: list[str], frame_name: str) -> pd.DataFrame:
+def _required_column_check(
+    frame: pd.DataFrame, required: list[str], frame_name: str
+) -> pd.DataFrame:
     rows = []
     for col in required:
         rows.append(
@@ -78,8 +81,11 @@ def build_phase15w_fresh_extension_config(
                 "original_root_end_date": original_root_end,
                 "original_research_period_end_date": original_research_end,
                 "fresh_root_end_date": fresh_config.get("end_date"),
-                "fresh_research_period_end_date": fresh_config.get("research_period", {}).get("end_date"),
-                "pinned_research_endpoint_preserved_in_original": original_research_end == phase_config.get("pinned_research_endpoint"),
+                "fresh_research_period_end_date": fresh_config.get("research_period", {}).get(
+                    "end_date"
+                ),
+                "pinned_research_endpoint_preserved_in_original": original_research_end
+                == phase_config.get("pinned_research_endpoint"),
                 "fresh_config_is_copy": fresh_config is not config,
                 "canonical_report_mutation": False,
             }
@@ -207,7 +213,9 @@ def build_phase15y_post_endpoint_stream(
             "SPY_close": close,
             "SPY_return": returns,
             "target_offensive_weight": target,
-            "target_weight_source": phase_config.get("target_weight_source", "verified_project_generated"),
+            "target_weight_source": phase_config.get(
+                "target_weight_source", "verified_project_generated"
+            ),
             "data_source_timestamp": frame["date"].dt.strftime("%Y-%m-%d"),
             "pinned_research_endpoint": phase_config.get("pinned_research_endpoint", "2026-05-01"),
             "is_out_of_sample_extension": True,
@@ -248,7 +256,11 @@ def _export_summary(
     target_source_passed = (
         rows > 0
         and "target_weight_source" in stream.columns
-        and stream["target_weight_source"].astype(str).str.lower().eq("verified_project_generated").all()
+        and stream["target_weight_source"]
+        .astype(str)
+        .str.lower()
+        .eq("verified_project_generated")
+        .all()
     )
     out_of_sample_passed = (
         rows > 0
@@ -312,12 +324,16 @@ def save_phase15wxyz_reports(
         phase_config=phase_config,
     )
 
-    output_file = Path(phase_config.get("output_file", "reports/phase15y_post_endpoint_final_candidate_stream.csv"))
+    output_file = Path(
+        phase_config.get("output_file", "reports/phase15y_post_endpoint_final_candidate_stream.csv")
+    )
     output_file.parent.mkdir(parents=True, exist_ok=True)
     stream.to_csv(output_file, index=False)
 
     handoff_file = Path(
-        phase_config.get("handoff_file_for_phase15q", "data/fresh/phase15q_rule_generated_candidate_stream.csv")
+        phase_config.get(
+            "handoff_file_for_phase15q", "data/fresh/phase15q_rule_generated_candidate_stream.csv"
+        )
     )
     handoff_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -394,11 +410,17 @@ def save_phase15wxyz_reports(
     gate_report = pd.DataFrame(
         [
             _gate_row("Fresh config built", len(fresh_config_report) == 1, "phase15w"),
-            _gate_row("Fresh pipeline execution attempted", len(fresh_pipeline_report) == 1, "phase15x"),
+            _gate_row(
+                "Fresh pipeline execution attempted", len(fresh_pipeline_report) == 1, "phase15x"
+            ),
             _gate_row("Output file written", output_file.exists(), str(output_file)),
-            _gate_row("Required columns present", bool(required_check["present"].all()), "phase15y schema"),
+            _gate_row(
+                "Required columns present", bool(required_check["present"].all()), "phase15y schema"
+            ),
             _gate_row("Decision output exists", len(decision) == 1, decision_text),
-            _gate_row("No canonical report mutation", True, "fresh reports dir + handoff file only"),
+            _gate_row(
+                "No canonical report mutation", True, "fresh reports dir + handoff file only"
+            ),
             _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()), "scope"),
         ]
     )

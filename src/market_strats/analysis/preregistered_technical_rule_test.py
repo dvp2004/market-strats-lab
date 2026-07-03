@@ -438,9 +438,7 @@ def build_phase9d_stress_metrics(
             period=f"stress_{scenario_name}",
             initial_capital=initial_capital,
         )
-        row["total_stress_extra_cost_return"] = float(
-            stressed["stress_extra_cost_return"].sum()
-        )
+        row["total_stress_extra_cost_return"] = float(stressed["stress_extra_cost_return"].sum())
         rows.append(row)
 
     return pd.DataFrame(rows)
@@ -498,8 +496,7 @@ def build_phase9d_behavioural_metrics(
 
 def _baseline_row(metrics: pd.DataFrame, period: str) -> pd.Series:
     rows = metrics[
-        (metrics["rule_id"] == "baseline_final_candidate")
-        & (metrics["period"] == period)
+        (metrics["rule_id"] == "baseline_final_candidate") & (metrics["period"] == period)
     ]
 
     if rows.empty:
@@ -510,8 +507,7 @@ def _baseline_row(metrics: pd.DataFrame, period: str) -> pd.Series:
 
 def _candidate_rows(metrics: pd.DataFrame, period: str) -> pd.DataFrame:
     return metrics[
-        (metrics["rule_id"] != "baseline_final_candidate")
-        & (metrics["period"] == period)
+        (metrics["rule_id"] != "baseline_final_candidate") & (metrics["period"] == period)
     ].copy()
 
 
@@ -536,9 +532,7 @@ def build_phase9d_comparison_summary(
             (metrics["rule_id"] == rule_id) & (metrics["period"] == "holdout")
         ].iloc[0]
         stress_row = stress_metrics[stress_metrics["rule_id"] == rule_id].iloc[0]
-        behaviour_row = behavioural_metrics[
-            behavioural_metrics["rule_id"] == rule_id
-        ].iloc[0]
+        behaviour_row = behavioural_metrics[behavioural_metrics["rule_id"] == rule_id].iloc[0]
 
         episode_rows = metrics[
             (metrics["rule_id"] == rule_id) & metrics["period"].str.startswith("episode_")
@@ -569,35 +563,21 @@ def build_phase9d_comparison_summary(
                 "full_cagr_delta": float(full_row["cagr"] - baseline_full["cagr"]),
                 "full_calmar": float(full_row["calmar"]),
                 "baseline_full_calmar": float(baseline_full["calmar"]),
-                "full_calmar_delta": float(
-                    full_row["calmar"] - baseline_full["calmar"]
-                ),
+                "full_calmar_delta": float(full_row["calmar"] - baseline_full["calmar"]),
                 "full_max_drawdown": float(full_row["max_drawdown"]),
                 "baseline_full_max_drawdown": float(baseline_full["max_drawdown"]),
                 "full_max_drawdown_delta": float(
                     full_row["max_drawdown"] - baseline_full["max_drawdown"]
                 ),
-                "holdout_cagr_delta": float(
-                    holdout_row["cagr"] - baseline_holdout["cagr"]
-                ),
-                "holdout_calmar_delta": float(
-                    holdout_row["calmar"] - baseline_holdout["calmar"]
-                ),
+                "holdout_cagr_delta": float(holdout_row["cagr"] - baseline_holdout["cagr"]),
+                "holdout_calmar_delta": float(holdout_row["calmar"] - baseline_holdout["calmar"]),
                 "holdout_max_drawdown_delta": float(
                     holdout_row["max_drawdown"] - baseline_holdout["max_drawdown"]
                 ),
-                "worst_episode_cagr_delta": float(
-                    episode_compare["episode_cagr_delta"].min()
-                ),
-                "worst_episode_calmar_delta": float(
-                    episode_compare["episode_calmar_delta"].min()
-                ),
-                "stress_cagr_delta": float(
-                    stress_row["cagr"] - baseline_stress["cagr"]
-                ),
-                "stress_calmar_delta": float(
-                    stress_row["calmar"] - baseline_stress["calmar"]
-                ),
+                "worst_episode_cagr_delta": float(episode_compare["episode_cagr_delta"].min()),
+                "worst_episode_calmar_delta": float(episode_compare["episode_calmar_delta"].min()),
+                "stress_cagr_delta": float(stress_row["cagr"] - baseline_stress["cagr"]),
+                "stress_calmar_delta": float(stress_row["calmar"] - baseline_stress["calmar"]),
                 "stress_max_drawdown_delta": float(
                     stress_row["max_drawdown"] - baseline_stress["max_drawdown"]
                 ),
@@ -633,13 +613,9 @@ def build_phase9d_gate_report(
 ) -> pd.DataFrame:
     gates = phase_config.get("gates", {})
 
-    max_cagr_reduction = (
-        float(gates.get("max_full_cagr_reduction_pts_vs_baseline", 0.15)) / 100.0
-    )
+    max_cagr_reduction = float(gates.get("max_full_cagr_reduction_pts_vs_baseline", 0.15)) / 100.0
     min_calmar_delta = float(gates.get("min_full_calmar_delta_vs_baseline", 0.0001))
-    max_episode_cagr_damage = (
-        float(gates.get("max_episode_cagr_damage_pts", 0.25)) / 100.0
-    )
+    max_episode_cagr_damage = float(gates.get("max_episode_cagr_damage_pts", 0.25)) / 100.0
     max_episode_calmar_damage = float(gates.get("max_episode_calmar_damage", 0.02))
     max_role = str(gates.get("max_allowed_role", "Candidate for further validation only"))
 
@@ -883,17 +859,15 @@ def save_phase9d_preregistered_technical_rule_test(
 
     phase9a_config = _get_phase9a_config(config)
 
-    final_candidate, spy_buy_hold, spy_12m_momentum, prices = (
-        _resolve_phase9a_input_frames(
-            config=config,
-            phase_config=phase9a_config,
-            final_candidate=final_candidate,
-            spy_buy_hold=spy_buy_hold,
-            spy_12m_momentum=spy_12m_momentum,
-            price_data=price_data,
-            relative_momentum_outputs=relative_momentum_outputs,
-            ticker_outputs=ticker_outputs,
-        )
+    final_candidate, spy_buy_hold, spy_12m_momentum, prices = _resolve_phase9a_input_frames(
+        config=config,
+        phase_config=phase9a_config,
+        final_candidate=final_candidate,
+        spy_buy_hold=spy_buy_hold,
+        spy_12m_momentum=spy_12m_momentum,
+        price_data=price_data,
+        relative_momentum_outputs=relative_momentum_outputs,
+        ticker_outputs=ticker_outputs,
     )
 
     indicator_frame = build_phase9a_indicator_frame(prices, phase9a_config)

@@ -151,15 +151,12 @@ def _asset_filter_frame(scores_for_signal: pd.DataFrame) -> pd.DataFrame:
     frame["rank"] = frame["raw_score"].rank(method="first", ascending=False)
     frame["eligible_before_filters"] = frame["raw_score"].notna()
     frame["blocked_by_missing_data"] = (
-        frame["raw_score"].isna()
-        | pd.to_numeric(frame["volatility_63d"], errors="coerce").isna()
+        frame["raw_score"].isna() | pd.to_numeric(frame["volatility_63d"], errors="coerce").isna()
     )
     frame["blocked_by_negative_score"] = frame["raw_score"] <= 0
     vol = pd.to_numeric(frame["volatility_63d"], errors="coerce")
     vol_cutoff = vol.quantile(0.90) if vol.notna().any() else np.nan
-    frame["blocked_by_volatility_filter"] = (
-        vol > vol_cutoff
-    ) & frame["symbol"].ne("BTC-USD")
+    frame["blocked_by_volatility_filter"] = (vol > vol_cutoff) & frame["symbol"].ne("BTC-USD")
     frame["blocked_by_drawdown_filter"] = (
         pd.to_numeric(frame["drawdown_from_252d_high"], errors="coerce") < -0.35
     )
@@ -181,7 +178,11 @@ def _market_risk_on(scores_for_signal: pd.DataFrame) -> bool:
 def _defensive_basket(scores_for_signal: pd.DataFrame, weight: float) -> pd.Series:
     if weight <= 0:
         return pd.Series(dtype=float)
-    available = [asset for asset in DEFENSIVE_ASSETS if asset == "CASH" or asset in set(scores_for_signal["symbol"])]
+    available = [
+        asset
+        for asset in DEFENSIVE_ASSETS
+        if asset == "CASH" or asset in set(scores_for_signal["symbol"])
+    ]
     if not available:
         return pd.Series({"CASH": weight})
     risk_assets = [asset for asset in available if asset != "CASH"]
@@ -278,14 +279,21 @@ def _apply_sticky_overlay(
 ) -> pd.Series:
     if previous.empty or previous.get("CASH", 0.0) > 0.95:
         return desired
-    previous_assets = [asset for asset, weight in previous.items() if asset != "CASH" and weight > 1e-6]
-    desired_assets = [asset for asset, weight in desired.items() if asset != "CASH" and weight > 1e-6]
+    previous_assets = [
+        asset for asset, weight in previous.items() if asset != "CASH" and weight > 1e-6
+    ]
+    desired_assets = [
+        asset for asset, weight in desired.items() if asset != "CASH" and weight > 1e-6
+    ]
     score_lookup = scores_for_signal.set_index("symbol")["opportunity_score"].to_dict()
     held_scores = [float(score_lookup.get(asset, -np.inf)) for asset in previous_assets]
     weakest_held = min(held_scores) if held_scores else -np.inf
     changed = False
     for asset in desired_assets:
-        if asset not in previous_assets and float(score_lookup.get(asset, -np.inf)) > weakest_held + min_score_improvement:
+        if (
+            asset not in previous_assets
+            and float(score_lookup.get(asset, -np.inf)) > weakest_held + min_score_improvement
+        ):
             changed = True
             break
     if not changed:
@@ -299,10 +307,9 @@ def _apply_sticky_overlay(
             return adjusted / adjusted.sum()
         return previous
     combined_index = sorted(set(previous.index) | set(desired.index))
-    blended = (
-        0.65 * previous.reindex(combined_index).fillna(0.0)
-        + 0.35 * desired.reindex(combined_index).fillna(0.0)
-    )
+    blended = 0.65 * previous.reindex(combined_index).fillna(0.0) + 0.35 * desired.reindex(
+        combined_index
+    ).fillna(0.0)
     return blended / blended.sum() if blended.sum() > 0 else desired
 
 
@@ -332,7 +339,9 @@ def _weights_for_signal_v1(
             raw.loc["CASH"] = raw.get("CASH", 0.0) + 0.40
         return _cap_weights(raw, spec)
 
-    opportunity = _base_opportunity_weights(scores_for_signal, spec, allow_negative=spec.mode == "balanced")
+    opportunity = _base_opportunity_weights(
+        scores_for_signal, spec, allow_negative=spec.mode == "balanced"
+    )
     if opportunity.empty:
         return pd.Series({"CASH": 1.0})
 
@@ -426,9 +435,21 @@ def simulate_v1_strategy(
                 "strategy_name": spec.strategy_name,
                 "signal_date": signal_date.date().isoformat(),
                 "execution_date": execution_date.date().isoformat(),
-                "selected_assets": ",".join([asset for asset in target_weights.index if asset != "CASH" and target_weights.loc[asset] > 1e-6]),
-                "target_weights": ";".join(f"{asset}:{weight:.6f}" for asset, weight in target_weights.items()),
-                "asset_turnover": ";".join(f"{asset}:{value:.6f}" for asset, value in asset_turnover.items() if value > 1e-9),
+                "selected_assets": ",".join(
+                    [
+                        asset
+                        for asset in target_weights.index
+                        if asset != "CASH" and target_weights.loc[asset] > 1e-6
+                    ]
+                ),
+                "target_weights": ";".join(
+                    f"{asset}:{weight:.6f}" for asset, weight in target_weights.items()
+                ),
+                "asset_turnover": ";".join(
+                    f"{asset}:{value:.6f}"
+                    for asset, value in asset_turnover.items()
+                    if value > 1e-9
+                ),
                 "turnover": turnover,
                 "transaction_cost_bps": transaction_cost_bps,
                 "transaction_cost_usd": cost,
@@ -438,7 +459,9 @@ def simulate_v1_strategy(
         )
         current_weights = target_weights
         next_execution = pairs[index + 1][1] if index + 1 < len(pairs) else returns.index[-1]
-        period_dates = returns.index[(returns.index >= execution_date) & (returns.index < next_execution)]
+        period_dates = returns.index[
+            (returns.index >= execution_date) & (returns.index < next_execution)
+        ]
         for date in period_dates:
             daily_return = float(
                 (
@@ -480,7 +503,9 @@ def _metrics(equity: pd.DataFrame, events: pd.DataFrame, weights: pd.DataFrame) 
     max_dd = float(_drawdown(series).min())
     annualized_vol = float(returns.std() * np.sqrt(252)) if not returns.empty else 0.0
     sharpe = float(returns.mean() / returns.std() * np.sqrt(252)) if returns.std() else np.nan
-    turnover_value = pd.to_numeric(events.get("turnover", pd.Series(dtype=float)), errors="coerce").mean()
+    turnover_value = pd.to_numeric(
+        events.get("turnover", pd.Series(dtype=float)), errors="coerce"
+    ).mean()
     turnover = float(turnover_value) if pd.notna(turnover_value) else 0.0
     btc_max = _max_weight(weights, "BTC-USD")
     oil_max = _max_weight(weights, "USO")
@@ -538,7 +563,10 @@ def _build_score_to_weight_audit(
     events = pd.concat(event_frames, ignore_index=True) if event_frames else pd.DataFrame()
     if scores.empty or events.empty:
         return pd.DataFrame()
-    score_by_date = {pd.Timestamp(date): group.copy() for date, group in scores.groupby(pd.to_datetime(scores["date"]))}
+    score_by_date = {
+        pd.Timestamp(date): group.copy()
+        for date, group in scores.groupby(pd.to_datetime(scores["date"]))
+    }
     latest_score_date = pd.to_datetime(scores["date"]).max()
     score_counts = scores.groupby(pd.to_datetime(scores["date"]))["symbol"].nunique()
     latest_multi_asset_score_date = (
@@ -549,7 +577,9 @@ def _build_score_to_weight_audit(
     latest_top3_weights = pd.Series(dtype=float)
     top3_events = events.loc[events["strategy_name"] == "dynamic_top3_technical_opportunity_v0"]
     if not top3_events.empty:
-        latest_top3_weights = _parse_target_weights(top3_events.sort_values("signal_date").iloc[-1].get("target_weights", ""))
+        latest_top3_weights = _parse_target_weights(
+            top3_events.sort_values("signal_date").iloc[-1].get("target_weights", "")
+        )
     sample_events = []
     for strategy, group in events.groupby("strategy_name"):
         group = group.sort_values("signal_date")
@@ -569,7 +599,9 @@ def _build_score_to_weight_audit(
             final_weight = float(target_weights.get(asset, 0.0))
             cash_weight = float(target_weights.get("CASH", 0.0))
             rank = int(row.rank) if pd.notna(row.rank) else 999
-            blocked_by_market = (not risk_on) and asset not in set(DEFENSIVE_ASSETS) and final_weight == 0
+            blocked_by_market = (
+                (not risk_on) and asset not in set(DEFENSIVE_ASSETS) and final_weight == 0
+            )
             blocked_by_cap = bool(asset in chosen and final_weight < 1.0 / max(top_n, 1) * 0.75)
             if final_weight > 0:
                 explanation = "selected; final weight reflects inverse-vol sizing and caps"
@@ -595,7 +627,8 @@ def _build_score_to_weight_audit(
                     "raw_score": row.raw_score,
                     "rank": rank,
                     "eligible_before_filters": bool(row.eligible_before_filters),
-                    "eligible_after_filters": bool(row.eligible_after_filters) and not blocked_by_market,
+                    "eligible_after_filters": bool(row.eligible_after_filters)
+                    and not blocked_by_market,
                     "blocked_by_market_risk_filter": blocked_by_market,
                     "blocked_by_asset_cap": blocked_by_cap,
                     "blocked_by_missing_data": bool(row.blocked_by_missing_data),
@@ -635,12 +668,18 @@ def _build_score_to_weight_audit(
     if latest_multi_asset_score_date in score_by_date:
         signal_scores = score_by_date[latest_multi_asset_score_date]
         filter_frame = _asset_filter_frame(signal_scores)
-        for row in filter_frame.sort_values("raw_score", ascending=False).head(15).itertuples(index=False):
+        for row in (
+            filter_frame.sort_values("raw_score", ascending=False).head(15).itertuples(index=False)
+        ):
             asset = str(row.symbol)
-            held_weight = float(latest_top3_weights.get(asset, 0.0)) if not latest_top3_weights.empty else 0.0
+            held_weight = (
+                float(latest_top3_weights.get(asset, 0.0)) if not latest_top3_weights.empty else 0.0
+            )
             rows.append(
                 {
-                    "rebalance_date": pd.Timestamp(latest_multi_asset_score_date).date().isoformat(),
+                    "rebalance_date": pd.Timestamp(latest_multi_asset_score_date)
+                    .date()
+                    .isoformat(),
                     "strategy": "latest_multi_asset_score_panel_no_rebalance",
                     "asset": asset,
                     "raw_score": row.raw_score,
@@ -656,7 +695,9 @@ def _build_score_to_weight_audit(
                     "pre_cap_weight": np.nan,
                     "post_cap_weight": held_weight,
                     "final_weight": held_weight,
-                    "cash_weight_after_filters": float(latest_top3_weights.get("CASH", 0.0)) if not latest_top3_weights.empty else np.nan,
+                    "cash_weight_after_filters": float(latest_top3_weights.get("CASH", 0.0))
+                    if not latest_top3_weights.empty
+                    else np.nan,
                     "allocation_explanation": (
                         "latest multi-asset score panel; not itself a rebalance event. "
                         "Held v0 weights came from the latest scheduled signal date, which may differ because signals update monthly."
@@ -686,9 +727,15 @@ def _cash_audit(weights: pd.DataFrame, events: pd.DataFrame) -> pd.DataFrame:
             over = cash_group.loc[cash_group["weight"] > 0.50]
             over_50 = len(over)
             examples = ",".join(over["date"].dt.date.astype(str).tail(5).tolist())
-        event_group = events.loc[events["strategy_name"] == strategy] if not events.empty else pd.DataFrame()
+        event_group = (
+            events.loc[events["strategy_name"] == strategy] if not events.empty else pd.DataFrame()
+        )
         risk_off_count = (
-            int((~event_group.get("market_risk_on_flag", pd.Series(dtype=bool)).map(_bool_value)).sum())
+            int(
+                (
+                    ~event_group.get("market_risk_on_flag", pd.Series(dtype=bool)).map(_bool_value)
+                ).sum()
+            )
             if not event_group.empty
             else 0
         )
@@ -746,7 +793,9 @@ def _turnover_diagnostics(
         end = pd.to_datetime(group["execution_date"]).max()
         years = max((end - start).days / 365.25, 1 / 365.25)
         turnover = pd.to_numeric(group["turnover"], errors="coerce").dropna()
-        tc_group = tc.loc[tc["strategy_name"] == strategy].copy() if not tc.empty else pd.DataFrame()
+        tc_group = (
+            tc.loc[tc["strategy_name"] == strategy].copy() if not tc.empty else pd.DataFrame()
+        )
         final_by_cost = {
             int(row.transaction_cost_bps): float(row.final_value)
             for row in tc_group.itertuples(index=False)
@@ -798,15 +847,27 @@ def _asset_contribution_summary(
     weights_frame["date"] = pd.to_datetime(weights_frame["date"])
     rows = []
     for strategy, group in weights_frame.groupby("strategy_name"):
-        pivot = group.pivot_table(index="date", columns="asset", values="weight", aggfunc="last").sort_index()
+        pivot = group.pivot_table(
+            index="date", columns="asset", values="weight", aggfunc="last"
+        ).sort_index()
         aligned_returns = returns.reindex(pivot.index).fillna(0.0)
-        event_group = events.loc[events["strategy_name"] == strategy] if not events.empty else pd.DataFrame()
+        event_group = (
+            events.loc[events["strategy_name"] == strategy] if not events.empty else pd.DataFrame()
+        )
         for asset in sorted(set(pivot.columns)):
             asset_weight = pd.to_numeric(pivot[asset], errors="coerce").fillna(0.0)
-            asset_return = aligned_returns[asset] if asset in aligned_returns.columns else pd.Series(0.0, index=pivot.index)
+            asset_return = (
+                aligned_returns[asset]
+                if asset in aligned_returns.columns
+                else pd.Series(0.0, index=pivot.index)
+            )
             contribution = asset_weight.shift(1).fillna(asset_weight) * asset_return.fillna(0.0)
             event_count = (
-                event_group["selected_assets"].fillna("").astype(str).str.contains(asset, regex=False).sum()
+                event_group["selected_assets"]
+                .fillna("")
+                .astype(str)
+                .str.contains(asset, regex=False)
+                .sum()
                 if not event_group.empty and "selected_assets" in event_group.columns
                 else 0
             )
@@ -819,7 +880,9 @@ def _asset_contribution_summary(
                     "days_held": int((asset_weight > 1e-6).sum()),
                     "rebalance_count_in_asset": int(event_count),
                     "approx_return_contribution": float(contribution.sum() * 100),
-                    "approx_drawdown_contribution": float(contribution.loc[contribution < 0].sum() * 100),
+                    "approx_drawdown_contribution": float(
+                        contribution.loc[contribution < 0].sum() * 100
+                    ),
                     "notes": "approximate daily weight times asset-return contribution; not broker-level attribution",
                 }
             )
@@ -896,7 +959,9 @@ def _common_comparison_extended(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     frames = []
     benchmark = _read_csv(benchmark_equity_path)
-    if not benchmark.empty and {"date", "canonical_candidate_id", "portfolio_value"}.issubset(benchmark.columns):
+    if not benchmark.empty and {"date", "canonical_candidate_id", "portfolio_value"}.issubset(
+        benchmark.columns
+    ):
         bench = benchmark.rename(columns={"canonical_candidate_id": "strategy_name"})
         frames.append(bench[["date", "strategy_name", "portfolio_value"]])
     for frame in equity_frames:
@@ -906,7 +971,11 @@ def _common_comparison_extended(
         return pd.DataFrame(), pd.DataFrame()
     all_equity = pd.concat(frames, ignore_index=True)
     all_equity["date"] = pd.to_datetime(all_equity["date"])
-    date_sets = [set(group["date"]) for _name, group in all_equity.groupby("strategy_name") if not group.empty]
+    date_sets = [
+        set(group["date"])
+        for _name, group in all_equity.groupby("strategy_name")
+        if not group.empty
+    ]
     common_dates = sorted(set.intersection(*date_sets)) if date_sets else []
     if len(common_dates) < 2:
         return pd.DataFrame(), all_equity
@@ -915,7 +984,12 @@ def _common_comparison_extended(
         turnover_lookup = turnover_diagnostics.set_index("strategy")["average_turnover"].to_dict()
     cost_drag_lookup = {}
     if not tc.empty:
-        pivot = tc.pivot_table(index="strategy_name", columns="transaction_cost_bps", values="final_value", aggfunc="last")
+        pivot = tc.pivot_table(
+            index="strategy_name",
+            columns="transaction_cost_bps",
+            values="final_value",
+            aggfunc="last",
+        )
         for strategy, row in pivot.iterrows():
             if 0 in row.index and 25 in row.index and row[0]:
                 cost_drag_lookup[strategy] = (row[0] - row[25]) / row[0] * 100
@@ -945,7 +1019,11 @@ def _common_comparison_extended(
         )
     common_equity = pd.concat(common_frames, ignore_index=True)
     for strategy, group in common_equity.groupby("strategy_name"):
-        series = group.sort_values("date").set_index(pd.to_datetime(group["date"]))["portfolio_value"].astype(float)
+        series = (
+            group.sort_values("date")
+            .set_index(pd.to_datetime(group["date"]))["portfolio_value"]
+            .astype(float)
+        )
         returns = series.pct_change().dropna()
         years = max((series.index.max() - series.index.min()).days / 365.25, 1 / 365.25)
         final_value = float(series.iloc[-1])
@@ -953,7 +1031,9 @@ def _common_comparison_extended(
         max_dd = float(_drawdown(series).min())
         annual_vol = float(returns.std() * np.sqrt(252)) if not returns.empty else 0.0
         sharpe = float(returns.mean() / returns.std() * np.sqrt(252)) if returns.std() else np.nan
-        worst_12m = float((series / series.shift(252) - 1.0).min() * 100) if len(series) > 252 else np.nan
+        worst_12m = (
+            float((series / series.shift(252) - 1.0).min() * 100) if len(series) > 252 else np.nan
+        )
         rolling_win = _rolling_3y_win_rate(series, spy_normalized)
         rows.append(
             {
@@ -1069,17 +1149,29 @@ def _write_charts(
         visuals_dir / "phase22b_asset_contribution_bar.png",
         visuals_dir / "phase22b_v1_latest_weights_bar.png",
     ]
-    _plot_lines(common_equity, "portfolio_value", paths[0], "Phase22B Equity Curves", "Portfolio value")
+    _plot_lines(
+        common_equity, "portfolio_value", paths[0], "Phase22B Equity Curves", "Portfolio value"
+    )
     _plot_lines(drawdowns, "drawdown_pct", paths[1], "Phase22B Drawdowns", "Drawdown (%)")
     _plot_bar(comparison, "strategy_name", "final_value", paths[2], "Phase22B Final Value")
     _plot_scatter(comparison, paths[3])
     _plot_bar(turnover, "strategy", "annualized_turnover", paths[4], "Annualized Turnover")
     _plot_bar(turnover, "strategy", "cost_drag_25bps_pct", paths[5], "25 bps Cost Drag (%)")
-    latest_plot = latest_audit.loc[latest_audit["strategy"].astype(str).str.contains("top", case=False, na=False)].head(15)
+    latest_plot = latest_audit.loc[
+        latest_audit["strategy"].astype(str).str.contains("top", case=False, na=False)
+    ].head(15)
     _plot_bar(latest_plot, "asset", "final_weight", paths[6], "Latest Score-to-Weight")
     _plot_bar(cash_audit, "strategy", "latest_cash_weight", paths[7], "Latest Cash Weight")
-    positive_contrib = contribution.sort_values("approx_return_contribution", ascending=False).head(15)
-    _plot_bar(positive_contrib, "asset", "approx_return_contribution", paths[8], "Approx Return Contribution")
+    positive_contrib = contribution.sort_values("approx_return_contribution", ascending=False).head(
+        15
+    )
+    _plot_bar(
+        positive_contrib,
+        "asset",
+        "approx_return_contribution",
+        paths[8],
+        "Approx Return Contribution",
+    )
     _plot_bar(latest_weights, "asset", "weight", paths[9], "Latest V1 Weights")
     return paths
 
@@ -1108,16 +1200,22 @@ def _write_research_summary(
         f"Decision: `{decision}`",
         "",
         "Score-to-weight audit:",
-        score_audit.head(25).to_markdown(index=False) if not score_audit.empty else "No score-to-weight audit available.",
+        score_audit.head(25).to_markdown(index=False)
+        if not score_audit.empty
+        else "No score-to-weight audit available.",
         "",
         "Cash allocation audit:",
         cash_audit.to_markdown(index=False) if not cash_audit.empty else "No cash audit available.",
         "",
         "Turnover diagnostics:",
-        turnover.to_markdown(index=False) if not turnover.empty else "No turnover diagnostics available.",
+        turnover.to_markdown(index=False)
+        if not turnover.empty
+        else "No turnover diagnostics available.",
         "",
         "Approximate asset contribution summary:",
-        contribution.sort_values("approx_return_contribution", ascending=False).head(20).to_markdown(index=False)
+        contribution.sort_values("approx_return_contribution", ascending=False)
+        .head(20)
+        .to_markdown(index=False)
         if not contribution.empty
         else "No contribution summary available.",
         "",
@@ -1125,7 +1223,9 @@ def _write_research_summary(
         metrics.to_markdown(index=False) if not metrics.empty else "No v1 metrics available.",
         "",
         "Comparison vs current table:",
-        comparison.to_markdown(index=False) if not comparison.empty else "No benchmark comparison available.",
+        comparison.to_markdown(index=False)
+        if not comparison.empty
+        else "No benchmark comparison available.",
         "",
         "Interpretation: Phase22B remains a technical/risk-only research prototype. It is not an adoption, promotion, or paper-tracking change.",
     ]
@@ -1203,7 +1303,12 @@ def _write_missing_sources(
         f"Decision: `{decision}`\n\nMissing sources: {', '.join(missing)}\n",
         encoding="utf-8",
     )
-    return {"summary": summary, "gate_report": gates, "conclusion": conclusion, "dashboard": dashboard}
+    return {
+        "summary": summary,
+        "gate_report": gates,
+        "conclusion": conclusion,
+        "dashboard": dashboard,
+    }
 
 
 def save_phase22b_dynamic_opportunity_diagnostics(
@@ -1247,10 +1352,14 @@ def save_phase22b_dynamic_opportunity_diagnostics(
     ]
     missing = [str(path) for path in required_inputs if not path.exists()]
     if missing:
-        return _write_missing_sources(output_dir=output_dir, dashboard_dir=dashboard_dir, missing=missing)
+        return _write_missing_sources(
+            output_dir=output_dir, dashboard_dir=dashboard_dir, missing=missing
+        )
 
     starting_cash = float(section.get("starting_cash", 10_000))
-    transaction_cost_cases = [int(value) for value in section.get("transaction_cost_bps_cases", [0, 10, 25])]
+    transaction_cost_cases = [
+        int(value) for value in section.get("transaction_cost_bps_cases", [0, 10, 25])
+    ]
     if 0 not in transaction_cost_cases:
         transaction_cost_cases.insert(0, 0)
 
@@ -1273,22 +1382,41 @@ def save_phase22b_dynamic_opportunity_diagnostics(
         transaction_cost_cases=transaction_cost_cases,
     )
     v1_drawdowns = _daily_drawdowns(v1_equity) if not v1_equity.empty else pd.DataFrame()
-    combined_equity = pd.concat([v0_equity, v1_equity], ignore_index=True) if not v0_equity.empty else v1_equity
-    combined_weights = pd.concat([v0_weights, v1_weights], ignore_index=True) if not v0_weights.empty else v1_weights
-    combined_events = pd.concat([v0_events, v1_events], ignore_index=True) if not v0_events.empty else v1_events
+    combined_equity = (
+        pd.concat([v0_equity, v1_equity], ignore_index=True) if not v0_equity.empty else v1_equity
+    )
+    combined_weights = (
+        pd.concat([v0_weights, v1_weights], ignore_index=True)
+        if not v0_weights.empty
+        else v1_weights
+    )
+    combined_events = (
+        pd.concat([v0_events, v1_events], ignore_index=True) if not v0_events.empty else v1_events
+    )
     combined_tc = pd.concat([v0_tc, v1_tc], ignore_index=True) if not v0_tc.empty else v1_tc
 
-    score_audit = _build_score_to_weight_audit(scores=scores, v0_events=v0_events, v1_events=v1_events)
+    score_audit = _build_score_to_weight_audit(
+        scores=scores, v0_events=v0_events, v1_events=v1_events
+    )
     filter_audit = score_audit.copy()
     cash_audit = _cash_audit(combined_weights, combined_events)
     turnover = _turnover_diagnostics(events=combined_events, tc=combined_tc)
-    contribution = _asset_contribution_summary(weights=combined_weights, prices=prices, events=combined_events)
+    contribution = _asset_contribution_summary(
+        weights=combined_weights, prices=prices, events=combined_events
+    )
     rebalance_diagnostics = combined_events.copy()
     if not rebalance_diagnostics.empty:
         rebalance_diagnostics["rebalance_explanation"] = (
             "signal_date uses month-end feature data; execution_date is the next available trading date"
         )
-    benchmark_path = root / "reports" / "paper_trading" / "regime_informed_tracking" / "performance" / "regime_informed_historical_daily_equity.csv"
+    benchmark_path = (
+        root
+        / "reports"
+        / "paper_trading"
+        / "regime_informed_tracking"
+        / "performance"
+        / "regime_informed_historical_daily_equity.csv"
+    )
     comparison, common_equity = _common_comparison_extended(
         benchmark_equity_path=benchmark_path,
         equity_frames=[v0_equity, v1_equity],
@@ -1331,12 +1459,16 @@ def save_phase22b_dynamic_opportunity_diagnostics(
     _write_csv(v1_events, output_dir / "phase22b_v1_rebalance_event_log.csv")
     _write_csv(v1_tc, output_dir / "phase22b_v1_transaction_cost_sensitivity.csv")
     _write_csv(comparison, output_dir / "phase22b_v1_benchmark_comparison.csv")
-    _write_csv(candidate_comparison, output_dir / "phase22b_v1_candidate_comparison_vs_current_table.csv")
+    _write_csv(
+        candidate_comparison, output_dir / "phase22b_v1_candidate_comparison_vs_current_table.csv"
+    )
 
     chart_paths = _write_charts(
         visuals_dir=visuals_dir,
         common_equity=common_equity,
-        drawdowns=_daily_drawdowns(combined_equity) if not combined_equity.empty else pd.DataFrame(),
+        drawdowns=_daily_drawdowns(combined_equity)
+        if not combined_equity.empty
+        else pd.DataFrame(),
         comparison=comparison,
         turnover=turnover,
         latest_audit=latest_score_audit,
@@ -1345,8 +1477,16 @@ def save_phase22b_dynamic_opportunity_diagnostics(
         latest_weights=latest_weights,
     )
 
-    best_v0 = comparison.loc[comparison["strategy_name"].isin(V0_STRATEGIES), "final_value"].max() if not comparison.empty else np.nan
-    best_v1 = comparison.loc[comparison["strategy_name"].isin(V1_STRATEGIES), "final_value"].max() if not comparison.empty else np.nan
+    best_v0 = (
+        comparison.loc[comparison["strategy_name"].isin(V0_STRATEGIES), "final_value"].max()
+        if not comparison.empty
+        else np.nan
+    )
+    best_v1 = (
+        comparison.loc[comparison["strategy_name"].isin(V1_STRATEGIES), "final_value"].max()
+        if not comparison.empty
+        else np.nan
+    )
     decision = (
         "phase22b_v1_candidates_improved_but_not_promoted"
         if pd.notna(best_v0) and pd.notna(best_v1) and best_v1 > best_v0

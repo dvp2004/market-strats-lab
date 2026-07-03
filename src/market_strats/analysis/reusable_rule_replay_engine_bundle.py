@@ -46,14 +46,11 @@ def _phase_result_check(conclusion_path: str, gate_path: str, phase_name: str) -
     conclusion = _read_csv_if_exists(conclusion_path)
     gate = _read_csv_if_exists(gate_path)
 
-    conclusion_passed = (
-        not conclusion.empty
-        and _bool_value(conclusion.iloc[0].get("all_gates_passed", False))
+    conclusion_passed = not conclusion.empty and _bool_value(
+        conclusion.iloc[0].get("all_gates_passed", False)
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -74,7 +71,9 @@ def _phase_result_check(conclusion_path: str, gate_path: str, phase_name: str) -
     return out
 
 
-def _required_column_check(frame: pd.DataFrame, required: list[str], frame_name: str) -> pd.DataFrame:
+def _required_column_check(
+    frame: pd.DataFrame, required: list[str], frame_name: str
+) -> pd.DataFrame:
     rows = []
     for col in required:
         rows.append(
@@ -210,9 +209,11 @@ def save_phase15u_reusable_phase6b_rule_replay_engine(
                 "module_path": contract.get("module_path", ""),
                 "function_name": contract.get("function_name", ""),
                 "target_weight_source": contract.get("target_weight_source", ""),
-                "valid_target_weight_source": contract.get("target_weight_source", "") == VALID_TARGET_WEIGHT_SOURCE,
+                "valid_target_weight_source": contract.get("target_weight_source", "")
+                == VALID_TARGET_WEIGHT_SOURCE,
                 "rejects_manual_fill": "manual_fill" in contract.get("rejected_inputs", []),
-                "rejects_carry_forward_only": "carry_forward_only" in contract.get("rejected_inputs", []),
+                "rejects_carry_forward_only": "carry_forward_only"
+                in contract.get("rejected_inputs", []),
                 "rejects_guessed": "guessed" in contract.get("rejected_inputs", []),
                 "rejects_unknown": "unknown" in contract.get("rejected_inputs", []),
                 "engine_function_exposed": callable(replay_phase6b_loose_relief_target_weights),
@@ -251,15 +252,34 @@ def save_phase15u_reusable_phase6b_rule_replay_engine(
     gate_report = pd.DataFrame(
         [
             _gate_row("Phase 15T passed", bool(phase15t_check["passed"].all()), "phase15t"),
-            _gate_row("Replay engine function exposed", True, "replay_phase6b_loose_relief_target_weights"),
+            _gate_row(
+                "Replay engine function exposed", True, "replay_phase6b_loose_relief_target_weights"
+            ),
             _gate_row("Target weight source is valid", True, VALID_TARGET_WEIGHT_SOURCE),
-            _gate_row("Manual/guessed/carry-forward sources rejected", True, "hardcoded rejection contract"),
-            _gate_row("Engine output schema exists", len(engine_output_schema) == len(required_outputs), "schema"),
-            _gate_row("Phase 15V boundary is stream-generation-only", bool(boundary["passed"].all()), "phase15v"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "Manual/guessed/carry-forward sources rejected",
+                True,
+                "hardcoded rejection contract",
+            ),
+            _gate_row(
+                "Engine output schema exists",
+                len(engine_output_schema) == len(required_outputs),
+                "schema",
+            ),
+            _gate_row(
+                "Phase 15V boundary is stream-generation-only",
+                bool(boundary["passed"].all()),
+                "phase15v",
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Execution role is correct",
-                section.get("execution_role") == "Reusable Phase 6B/6C rule replay engine extraction only",
+                section.get("execution_role")
+                == "Reusable Phase 6B/6C rule replay engine extraction only",
                 section.get("execution_role", ""),
             ),
         ]
@@ -337,20 +357,25 @@ def save_phase15v_post_endpoint_rule_based_candidate_stream(
     replay_summary = replay_result.summary.copy()
     replay_summary["rule_input_source"] = rule_input_source
 
-    output_file = Path(section.get("output_file", "reports/phase15v_rule_based_candidate_stream.csv"))
+    output_file = Path(
+        section.get("output_file", "reports/phase15v_rule_based_candidate_stream.csv")
+    )
     output_file.parent.mkdir(parents=True, exist_ok=True)
     stream.to_csv(output_file, index=False)
 
     required_cols = list(section.get("required_export_columns", []))
-    required_col_check = _required_column_check(stream, required_cols, "phase15v_rule_based_candidate_stream")
+    required_col_check = _required_column_check(
+        stream, required_cols, "phase15v_rule_based_candidate_stream"
+    )
 
-    stream_valid = (
-        not replay_summary.empty
-        and _bool_value(replay_summary.iloc[0].get("rule_replay_stream_valid", False))
+    stream_valid = not replay_summary.empty and _bool_value(
+        replay_summary.iloc[0].get("rule_replay_stream_valid", False)
     )
 
     handoff_file = Path(
-        section.get("handoff_file_for_phase15q", "data/fresh/phase15q_rule_generated_candidate_stream.csv")
+        section.get(
+            "handoff_file_for_phase15q", "data/fresh/phase15q_rule_generated_candidate_stream.csv"
+        )
     )
     handoff_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -385,7 +410,9 @@ def save_phase15v_post_endpoint_rule_based_candidate_stream(
                 "paper_trading_ready": False,
                 "candidate_promotion": False,
                 "final_candidate_changed": False,
-                "failure_reason": replay_summary.iloc[0].get("failure_reason", "") if not replay_summary.empty else "missing_replay_summary",
+                "failure_reason": replay_summary.iloc[0].get("failure_reason", "")
+                if not replay_summary.empty
+                else "missing_replay_summary",
             }
         ]
     )
@@ -403,7 +430,9 @@ def save_phase15v_post_endpoint_rule_based_candidate_stream(
                 "rule_input_rows": len(rule_input),
                 "output_file_written": output_file.exists(),
                 "handoff_file_written": handoff_written,
-                "post_endpoint_rows": int(replay_summary.iloc[0].get("post_endpoint_rows", 0)) if not replay_summary.empty else 0,
+                "post_endpoint_rows": int(replay_summary.iloc[0].get("post_endpoint_rows", 0))
+                if not replay_summary.empty
+                else 0,
                 "rule_replay_stream_valid": stream_valid,
                 "decision": decision_text,
                 "current_signal_generation": False,
@@ -423,14 +452,25 @@ def save_phase15v_post_endpoint_rule_based_candidate_stream(
             _gate_row("Phase 15U passed", bool(phase15u_check["passed"].all()), "phase15u"),
             _gate_row("Rule input loading attempted", True, rule_input_source),
             _gate_row("Output file written", output_file.exists(), str(output_file)),
-            _gate_row("Required columns present", bool(required_col_check["present"].all()), "schema"),
+            _gate_row(
+                "Required columns present", bool(required_col_check["present"].all()), "schema"
+            ),
             _gate_row("Target source is replay engine", True, VALID_TARGET_WEIGHT_SOURCE),
             _gate_row("Decision output exists", len(decision) == 1, decision_text),
-            _gate_row("Phase 15Q rerun boundary is conditional-only", bool(boundary["passed"].all()), "phase15q"),
-            _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()) if not scope.empty else True, "scope"),
+            _gate_row(
+                "Phase 15Q rerun boundary is conditional-only",
+                bool(boundary["passed"].all()),
+                "phase15q",
+            ),
+            _gate_row(
+                "Scope blocks forbidden actions",
+                bool(scope["passed"].all()) if not scope.empty else True,
+                "scope",
+            ),
             _gate_row(
                 "Execution role is correct",
-                section.get("execution_role") == "Post-endpoint rule-based candidate stream generation only",
+                section.get("execution_role")
+                == "Post-endpoint rule-based candidate stream generation only",
                 section.get("execution_role", ""),
             ),
         ]

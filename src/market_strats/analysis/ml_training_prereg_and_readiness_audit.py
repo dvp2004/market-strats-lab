@@ -8,9 +8,7 @@ import pandas as pd
 
 DEFAULT_PHASE13S_CONFIG: dict[str, Any] = {
     "enabled": False,
-    "spec_role": (
-        "ML model training pre-registration and baseline model design spec only"
-    ),
+    "spec_role": ("ML model training pre-registration and baseline model design spec only"),
     "phase_branch": "Phase 13 multi-factor model architecture planning",
     "source_phase": "Phase 13R",
     "proposed_next_phase": "Phase 13T",
@@ -264,9 +262,7 @@ def build_phase13s_dataset_schema_profile(
     value_cols = [col for col in dataset.columns if str(col).startswith("value__")]
     macro_value_cols = [col for col in value_cols if "macro_" in str(col)]
     state_cols = [col for col in dataset.columns if str(col).startswith("state__")]
-    missingness_cols = [
-        col for col in dataset.columns if str(col).startswith("missingness__")
-    ]
+    missingness_cols = [col for col in dataset.columns if str(col).startswith("missingness__")]
     target_cols = [
         col
         for col in dataset.columns
@@ -363,8 +359,7 @@ def build_phase13s_dataset_requirement_check(
         ),
         (
             "Dataset has enough value feature columns",
-            int(row["value_feature_columns"])
-            >= int(req.get("min_value_feature_columns", 8)),
+            int(row["value_feature_columns"]) >= int(req.get("min_value_feature_columns", 8)),
             f"value_feature_columns={int(row['value_feature_columns'])}",
         ),
         (
@@ -412,9 +407,7 @@ def build_phase13s_target_policy(phase_config: dict[str, Any]) -> pd.DataFrame:
                 "unavailable_class": str(target.get("unavailable_class", "")),
                 "optimisation_role": str(target.get("optimisation_role", "")),
                 "training_rows_allowed": str(target.get("training_rows_allowed", "")),
-                "validation_rows_allowed": str(
-                    target.get("validation_rows_allowed", "")
-                ),
+                "validation_rows_allowed": str(target.get("validation_rows_allowed", "")),
                 "holdout_rows_allowed": str(target.get("holdout_rows_allowed", "")),
             }
         )
@@ -456,9 +449,7 @@ def build_phase13s_preprocessing_policy(
                 "categorical_encoding": str(policy.get("categorical_encoding", "")),
                 "numeric_scaling": str(policy.get("numeric_scaling", "")),
                 "imputation": str(policy.get("imputation", "")),
-                "class_imbalance_policy": str(
-                    policy.get("class_imbalance_policy", "")
-                ),
+                "class_imbalance_policy": str(policy.get("class_imbalance_policy", "")),
                 "leakage_controls": _join_list(policy.get("leakage_controls")),
                 "training_execution_now": False,
             }
@@ -585,10 +576,8 @@ def build_phase13s_phase13t_boundary_check(
         (
             "phase13t_forbidden_next_step",
             str(boundary.get("forbidden_next_step", "")),
-            "model training execution"
-            in str(boundary.get("forbidden_next_step", "")).lower()
-            and "signal creation"
-            in str(boundary.get("forbidden_next_step", "")).lower(),
+            "model training execution" in str(boundary.get("forbidden_next_step", "")).lower()
+            and "signal creation" in str(boundary.get("forbidden_next_step", "")).lower(),
         ),
         (
             "phase13t_may_audit_training_protocol",
@@ -683,9 +672,7 @@ def build_phase13s_summary(
                 if not phase13r_result_check.empty
                 else False,
                 "dataset_schema_profile_rows": int(len(dataset_schema_profile)),
-                "dataset_requirements_passed": bool(
-                    dataset_requirement_check["passed"].all()
-                )
+                "dataset_requirements_passed": bool(dataset_requirement_check["passed"].all())
                 if not dataset_requirement_check.empty
                 else False,
                 "target_policy_rows": int(len(target_policy)),
@@ -695,14 +682,10 @@ def build_phase13s_summary(
                 "primary_metric_count": primary_metrics,
                 "calibration_metric_count": calibration_metrics,
                 "report_template_rows": int(len(report_template_registry)),
-                "forbidden_action_check_passed": bool(
-                    forbidden_action_check["passed"].all()
-                )
+                "forbidden_action_check_passed": bool(forbidden_action_check["passed"].all())
                 if not forbidden_action_check.empty
                 else False,
-                "phase13t_boundary_passed": bool(
-                    phase13t_boundary_check["passed"].all()
-                )
+                "phase13t_boundary_passed": bool(phase13t_boundary_check["passed"].all())
                 if not phase13t_boundary_check.empty
                 else False,
                 "model_training": False,
@@ -726,9 +709,7 @@ def build_phase13s_gate_report(
     gates = phase_config.get("gates", {})
 
     if summary.empty:
-        return pd.DataFrame(
-            [_gate_row("Phase 13S summary exists", False, "No summary.")]
-        )
+        return pd.DataFrame([_gate_row("Phase 13S summary exists", False, "No summary.")])
 
     row = summary.iloc[0]
     required_role = str(
@@ -757,8 +738,7 @@ def build_phase13s_gate_report(
         _gate_row(
             "Dataset requirements passed",
             bool(row["dataset_requirements_passed"]),
-            f"dataset_requirements_passed="
-            f"{bool(row['dataset_requirements_passed'])}",
+            f"dataset_requirements_passed={bool(row['dataset_requirements_passed'])}",
         ),
         _gate_row(
             "Target policy exists",
@@ -767,8 +747,7 @@ def build_phase13s_gate_report(
         ),
         _gate_row(
             "Model family registry is sufficient",
-            int(row["allowed_model_count"])
-            >= int(gates.get("min_allowed_model_families", 4)),
+            int(row["allowed_model_count"]) >= int(gates.get("min_allowed_model_families", 4)),
             f"allowed_model_count={int(row['allowed_model_count'])}",
         ),
         _gate_row(
@@ -783,8 +762,7 @@ def build_phase13s_gate_report(
         ),
         _gate_row(
             "Metric registry is sufficient",
-            int(row["primary_metric_count"]) >= 3
-            and int(row["calibration_metric_count"]) >= 1,
+            int(row["primary_metric_count"]) >= 3 and int(row["calibration_metric_count"]) >= 1,
             f"primary_metrics={int(row['primary_metric_count'])}; "
             f"calibration_metrics={int(row['calibration_metric_count'])}",
         ),
@@ -801,8 +779,7 @@ def build_phase13s_gate_report(
         _gate_row(
             "Scope blocks model/signal/backtest/promotion",
             bool(row["forbidden_action_check_passed"]),
-            f"forbidden_action_check_passed="
-            f"{bool(row['forbidden_action_check_passed'])}",
+            f"forbidden_action_check_passed={bool(row['forbidden_action_check_passed'])}",
         ),
         _gate_row(
             "Spec role is correct",
@@ -830,8 +807,7 @@ def build_phase13s_conclusion(gate_report: pd.DataFrame) -> pd.DataFrame:
         "predictions, calculate feature importance, create signals, run backtests, "
         "deploy paper trading, promote a candidate, or change the final candidate."
         if all_passed
-        else "Phase 13S found a dataset, target, model-family, metric, boundary, "
-        "or scope issue."
+        else "Phase 13S found a dataset, target, model-family, metric, boundary, or scope issue."
     )
 
     return pd.DataFrame(
@@ -960,8 +936,7 @@ def save_phase13s_ml_model_training_preregistration_spec(
             "Gate Report": gate_report,
             "Conclusion": conclusion,
         },
-        output_path=reports_path
-        / "phase13s_ml_model_training_preregistration_spec.md",
+        output_path=reports_path / "phase13s_ml_model_training_preregistration_spec.md",
     )
 
     print("Wrote Phase 13S ML model training pre-registration reports.")
@@ -1074,8 +1049,7 @@ def build_phase13t_dataset_readiness_check(
     checks = [
         (
             "Dataset label is technical + macro",
-            str(row.get("dataset_label", ""))
-            == str(thresholds.get("required_dataset_label", "")),
+            str(row.get("dataset_label", "")) == str(thresholds.get("required_dataset_label", "")),
             f"dataset_label={row.get('dataset_label', '')}",
         ),
         (
@@ -1132,8 +1106,7 @@ def build_phase13t_training_protocol_check(
             .str.contains("confusion", case=False, na=False)
             .sum()
         )
-        if not report_template_registry.empty
-        and "report_name" in report_template_registry.columns
+        if not report_template_registry.empty and "report_name" in report_template_registry.columns
         else 0
     )
 
@@ -1150,8 +1123,7 @@ def build_phase13t_training_protocol_check(
         ),
         (
             "Calibration template exists",
-            (not thresholds.get("require_calibration_template", True))
-            or calibration_templates > 0,
+            (not thresholds.get("require_calibration_template", True)) or calibration_templates > 0,
             f"calibration_template_count={calibration_templates}",
         ),
         (
@@ -1256,8 +1228,7 @@ def build_phase13t_phase13u_boundary_check(
             "phase13u_forbidden_next_step",
             str(boundary.get("forbidden_next_step", "")),
             "signal creation" in str(boundary.get("forbidden_next_step", "")).lower()
-            and "strategy backtest"
-            in str(boundary.get("forbidden_next_step", "")).lower(),
+            and "strategy backtest" in str(boundary.get("forbidden_next_step", "")).lower(),
         ),
         (
             "phase13u_may_train_registered_models",
@@ -1267,9 +1238,7 @@ def build_phase13t_phase13u_boundary_check(
         (
             "phase13u_may_generate_holdout_predictions",
             _bool_value(boundary.get("phase13u_may_generate_holdout_predictions", True)),
-            not _bool_value(
-                boundary.get("phase13u_may_generate_holdout_predictions", True)
-            ),
+            not _bool_value(boundary.get("phase13u_may_generate_holdout_predictions", True)),
         ),
         (
             "phase13u_may_create_signal",
@@ -1352,9 +1321,7 @@ def build_phase13t_summary(
                 "phase_branch": str(phase_config.get("phase_branch", "")),
                 "source_phase": str(phase_config.get("source_phase", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "phase13s_reports_present": bool(
-                    report_inventory_check["present"].all()
-                )
+                "phase13s_reports_present": bool(report_inventory_check["present"].all())
                 if not report_inventory_check.empty
                 else False,
                 "phase13s_result_passed": bool(phase13s_result_check["passed"].all())
@@ -1363,27 +1330,19 @@ def build_phase13t_summary(
                 "config_flags_clean_for_run": bool(config_flag_check["passed"].all())
                 if not config_flag_check.empty
                 else False,
-                "dataset_readiness_passed": bool(
-                    dataset_readiness_check["passed"].all()
-                )
+                "dataset_readiness_passed": bool(dataset_readiness_check["passed"].all())
                 if not dataset_readiness_check.empty
                 else False,
-                "training_protocol_passed": bool(
-                    training_protocol_check["passed"].all()
-                )
+                "training_protocol_passed": bool(training_protocol_check["passed"].all())
                 if not training_protocol_check.empty
                 else False,
-                "leakage_boundary_passed": bool(
-                    leakage_boundary_check["passed"].all()
-                )
+                "leakage_boundary_passed": bool(leakage_boundary_check["passed"].all())
                 if not leakage_boundary_check.empty
                 else False,
                 "forbidden_outputs_absent": bool(forbidden_output_check["passed"].all())
                 if not forbidden_output_check.empty
                 else False,
-                "phase13u_boundary_passed": bool(
-                    phase13u_boundary_check["passed"].all()
-                )
+                "phase13u_boundary_passed": bool(phase13u_boundary_check["passed"].all())
                 if not phase13u_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -1408,9 +1367,7 @@ def build_phase13t_gate_report(
     summary: pd.DataFrame,
 ) -> pd.DataFrame:
     if summary.empty:
-        return pd.DataFrame(
-            [_gate_row("Phase 13T summary exists", False, "No summary.")]
-        )
+        return pd.DataFrame([_gate_row("Phase 13T summary exists", False, "No summary.")])
 
     row = summary.iloc[0]
     required_role = str(
@@ -1536,19 +1493,11 @@ def save_phase13t_ml_training_readiness_leakage_audit(
         expected_flags=phase_config.get("expected_runtime_flags", {}),
     )
 
-    dataset_schema_profile = _read_csv_if_exists(
-        reports.get("dataset_schema_profile", "")
-    )
-    model_family_registry = _read_csv_if_exists(
-        reports.get("model_family_registry", "")
-    )
+    dataset_schema_profile = _read_csv_if_exists(reports.get("dataset_schema_profile", ""))
+    model_family_registry = _read_csv_if_exists(reports.get("model_family_registry", ""))
     metric_registry = _read_csv_if_exists(reports.get("metric_registry", ""))
-    report_template_registry = _read_csv_if_exists(
-        reports.get("report_template_registry", "")
-    )
-    preprocessing_policy = _read_csv_if_exists(
-        reports.get("preprocessing_policy", "")
-    )
+    report_template_registry = _read_csv_if_exists(reports.get("report_template_registry", ""))
+    preprocessing_policy = _read_csv_if_exists(reports.get("preprocessing_policy", ""))
     split_usage_policy = _read_csv_if_exists(reports.get("split_usage_policy", ""))
 
     dataset_readiness_check = build_phase13t_dataset_readiness_check(
@@ -1617,8 +1566,7 @@ def save_phase13t_ml_training_readiness_leakage_audit(
             "Gate Report": gate_report,
             "Conclusion": conclusion,
         },
-        output_path=reports_path
-        / "phase13t_ml_training_readiness_leakage_audit.md",
+        output_path=reports_path / "phase13t_ml_training_readiness_leakage_audit.md",
     )
 
     print("Wrote Phase 13T ML training readiness/leakage audit reports.")

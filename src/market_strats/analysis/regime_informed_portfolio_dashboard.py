@@ -217,7 +217,9 @@ def _monthly_rebalanced_equity(
     return equity, weights
 
 
-def _monthly_dates(index: pd.DatetimeIndex, min_start: pd.Timestamp | None = None) -> pd.DatetimeIndex:
+def _monthly_dates(
+    index: pd.DatetimeIndex, min_start: pd.Timestamp | None = None
+) -> pd.DatetimeIndex:
     usable = index if min_start is None else index[index >= min_start]
     if len(usable) == 0:
         return pd.DatetimeIndex([])
@@ -305,7 +307,9 @@ def _inverse_vol_candidate(root: Path) -> CandidateCurve:
     prices = _load_price_frame(root, symbols)
     returns = prices.pct_change().dropna()
     lookback = 63
-    rebalance_dates = _monthly_dates(returns.index, min_start=returns.index[min(lookback, len(returns) - 1)])
+    rebalance_dates = _monthly_dates(
+        returns.index, min_start=returns.index[min(lookback, len(returns) - 1)]
+    )
     weight_rows: list[pd.Series] = []
     for date in rebalance_dates:
         history = returns.loc[returns.index < date].tail(lookback)
@@ -515,16 +519,12 @@ def _daily_equity(curves: list[CandidateCurve]) -> pd.DataFrame:
     frames = [curve.equity for curve in curves if not curve.equity.empty]
     if not frames:
         return pd.DataFrame()
-    return pd.concat(frames, ignore_index=True).sort_values(
-        ["canonical_candidate_id", "date"]
-    )
+    return pd.concat(frames, ignore_index=True).sort_values(["canonical_candidate_id", "date"])
 
 
 def _daily_drawdowns(daily_equity: pd.DataFrame) -> pd.DataFrame:
     if daily_equity.empty:
-        return pd.DataFrame(
-            columns=["date", "canonical_candidate_id", "drawdown", "drawdown_pct"]
-        )
+        return pd.DataFrame(columns=["date", "canonical_candidate_id", "drawdown", "drawdown_pct"])
     rows = []
     for candidate_id, group in daily_equity.groupby("canonical_candidate_id"):
         values = group.sort_values("date").set_index("date")["portfolio_value"]
@@ -625,7 +625,9 @@ def _build_trade_blotter(ledger: pd.DataFrame) -> pd.DataFrame:
                 if pd.notna(fill_price) and pd.notna(fill_quantity)
                 else actual_notional
             )
-            action = "BUY" if pd.notna(actual_notional) and actual_notional > 0 else "HOLD/REBALANCE"
+            action = (
+                "BUY" if pd.notna(actual_notional) and actual_notional > 0 else "HOLD/REBALANCE"
+            )
             cash_effect = -float(actual_notional) if pd.notna(actual_notional) else np.nan
         else:
             action = decision.upper() if decision else "UNKNOWN"
@@ -643,9 +645,7 @@ def _build_trade_blotter(ledger: pd.DataFrame) -> pd.DataFrame:
                 "target_notional_usd": row.get("target_notional_usd", ""),
                 "fill_price": "" if pd.isna(fill_price) else float(fill_price),
                 "fill_quantity": "" if pd.isna(fill_quantity) else float(fill_quantity),
-                "actual_notional_usd": ""
-                if pd.isna(actual_notional)
-                else float(actual_notional),
+                "actual_notional_usd": "" if pd.isna(actual_notional) else float(actual_notional),
                 "cash_effect_usd": cash_effect,
                 "manual_execution_status": row.get("manual_execution_status", ""),
                 "paper_fill_timestamp_utc": timestamp,
@@ -726,7 +726,9 @@ def _paper_holdings(ledger: pd.DataFrame) -> pd.DataFrame:
     for row in entered.to_dict("records"):
         fill_price = pd.to_numeric(row.get("paper_fill_price"), errors="coerce")
         quantity = pd.to_numeric(row.get("paper_fill_quantity"), errors="coerce")
-        market_value = float(fill_price * quantity) if pd.notna(fill_price) and pd.notna(quantity) else np.nan
+        market_value = (
+            float(fill_price * quantity) if pd.notna(fill_price) and pd.notna(quantity) else np.nan
+        )
         rows.append(
             {
                 "session_date": row.get("session_date", ""),
@@ -763,18 +765,26 @@ def _write_csvs(
     cash = _paper_cash_ledger(ledger)
     holdings = _paper_holdings(ledger)
     sessions = int(ledger["session_date"].nunique()) if not ledger.empty else 0
-    entered_sessions = int(
-        ledger.loc[
-            ledger["manual_execution_status"].astype(str).str.lower() == "entered",
-            "session_date",
-        ].nunique()
-    ) if not ledger.empty else 0
-    skipped_sessions = int(
-        ledger.loc[
-            ledger["manual_execution_status"].astype(str).str.lower() == "skipped",
-            "session_date",
-        ].nunique()
-    ) if not ledger.empty else 0
+    entered_sessions = (
+        int(
+            ledger.loc[
+                ledger["manual_execution_status"].astype(str).str.lower() == "entered",
+                "session_date",
+            ].nunique()
+        )
+        if not ledger.empty
+        else 0
+    )
+    skipped_sessions = (
+        int(
+            ledger.loc[
+                ledger["manual_execution_status"].astype(str).str.lower() == "skipped",
+                "session_date",
+            ].nunique()
+        )
+        if not ledger.empty
+        else 0
+    )
     paper_positions_exist = not holdings.empty
     status = pd.DataFrame(
         [
@@ -981,8 +991,22 @@ def _write_visuals(outputs: dict[str, pd.DataFrame], visuals_dir: Path) -> dict[
     weights = outputs["daily_weights"]
     cash = outputs["cash_ledger"]
     blotter = outputs["trade_blotter"]
-    _plot_bar(native, "candidate_id", "final_value", paths["native_final"], "Native Period Final Value", "USD")
-    _plot_bar(common, "candidate_id", "final_value", paths["common_final"], "Common Period Final Value", "USD")
+    _plot_bar(
+        native,
+        "candidate_id",
+        "final_value",
+        paths["native_final"],
+        "Native Period Final Value",
+        "USD",
+    )
+    _plot_bar(
+        common,
+        "candidate_id",
+        "final_value",
+        paths["common_final"],
+        "Common Period Final Value",
+        "USD",
+    )
     _plot_risk_return(native, paths["risk_return"])
     if not common.empty:
         common_dates = (common["common_start_date"].iloc[0], common["common_end_date"].iloc[0])
@@ -997,25 +1021,85 @@ def _write_visuals(outputs: dict[str, pd.DataFrame], visuals_dir: Path) -> dict[
                 group["portfolio_value"] / group["portfolio_value"].iloc[0] * INITIAL_CAPITAL
             )
             normalized_rows.append(group)
-        common_equity = pd.concat(normalized_rows, ignore_index=True) if normalized_rows else pd.DataFrame()
+        common_equity = (
+            pd.concat(normalized_rows, ignore_index=True) if normalized_rows else pd.DataFrame()
+        )
         common_drawdowns = _daily_drawdowns(common_equity)
     else:
         common_equity = pd.DataFrame()
         common_drawdowns = pd.DataFrame()
-    _plot_lines(common_equity, value_col="portfolio_value", path=paths["common_equity"], title="Common Period Equity Curves", ylabel="USD")
-    _plot_lines(common_drawdowns, value_col="drawdown_pct", path=paths["common_drawdown"], title="Common Period Drawdowns", ylabel="Drawdown (%)")
+    _plot_lines(
+        common_equity,
+        value_col="portfolio_value",
+        path=paths["common_equity"],
+        title="Common Period Equity Curves",
+        ylabel="USD",
+    )
+    _plot_lines(
+        common_drawdowns,
+        value_col="drawdown_pct",
+        path=paths["common_drawdown"],
+        title="Common Period Drawdowns",
+        ylabel="Drawdown (%)",
+    )
     for candidate_id, equity_key, drawdown_key, weight_key, title in [
         (PHASE6_ID, "phase6_equity", "phase6_drawdown", "phase6_exposure", "Phase6 Loose Relief"),
-        (MULTI_ASSET_ID, "multi_equity", "multi_drawdown", "multi_weights", "SPY/QQQ/GLD/TLT 50/30/10/10"),
-        (BTC_INV_VOL_ID, "btc_equity", "btc_drawdown", "btc_weights", "Inverse-Vol SPY/QQQ/BTC 5% Cap"),
-        (SPY_QQQ_60_40_ID, "spy_qqq_equity", "spy_qqq_drawdown", "spy_qqq_weights", "SPY/QQQ 60/40"),
+        (
+            MULTI_ASSET_ID,
+            "multi_equity",
+            "multi_drawdown",
+            "multi_weights",
+            "SPY/QQQ/GLD/TLT 50/30/10/10",
+        ),
+        (
+            BTC_INV_VOL_ID,
+            "btc_equity",
+            "btc_drawdown",
+            "btc_weights",
+            "Inverse-Vol SPY/QQQ/BTC 5% Cap",
+        ),
+        (
+            SPY_QQQ_60_40_ID,
+            "spy_qqq_equity",
+            "spy_qqq_drawdown",
+            "spy_qqq_weights",
+            "SPY/QQQ 60/40",
+        ),
     ]:
-        _plot_lines(equity, value_col="portfolio_value", path=paths[equity_key], title=f"{title} Equity Curve", ylabel="USD", candidates=[candidate_id])
-        _plot_lines(drawdowns, value_col="drawdown_pct", path=paths[drawdown_key], title=f"{title} Drawdown", ylabel="Drawdown (%)", candidates=[candidate_id])
+        _plot_lines(
+            equity,
+            value_col="portfolio_value",
+            path=paths[equity_key],
+            title=f"{title} Equity Curve",
+            ylabel="USD",
+            candidates=[candidate_id],
+        )
+        _plot_lines(
+            drawdowns,
+            value_col="drawdown_pct",
+            path=paths[drawdown_key],
+            title=f"{title} Drawdown",
+            ylabel="Drawdown (%)",
+            candidates=[candidate_id],
+        )
         _plot_weights(weights, candidate_id, paths[weight_key], f"{title} Weights")
-    _plot_bar(cash, "canonical_candidate_id", "cash_remaining", paths["cash"], "Paper Cash Remaining by Candidate", "USD")
+    _plot_bar(
+        cash,
+        "canonical_candidate_id",
+        "cash_remaining",
+        paths["cash"],
+        "Paper Cash Remaining by Candidate",
+        "USD",
+    )
     _plot_entered_skipped(cash, paths["entered_skipped"])
-    _plot_bar(cash, "canonical_candidate_id", "total_portfolio_value", paths["paper_value"], "Paper Portfolio Value by Candidate", "USD")
+    _plot_bar(
+        cash,
+        "canonical_candidate_id",
+        "total_portfolio_value",
+        paths["paper_value"],
+        "Paper Portfolio Value by Candidate",
+        "USD",
+    )
     _plot_blotter(blotter, paths["blotter"])
     return paths
 
@@ -1094,25 +1178,77 @@ def _write_notebook(root: Path, notebook_path: Path, visuals: dict[str, Path]) -
             "Benchmark: SPY Buy & Hold. The benchmark is historical comparison only "
             "and is not paper-tracked."
         ),
-        _code_cell("native[['candidate_id','start_date','end_date','notes']] if 'candidate_id' in native.columns else native"),
-        _markdown_cell("## Historical performance: native periods\n\n" + _md_image(root, visuals["native_final"])),
+        _code_cell(
+            "native[['candidate_id','start_date','end_date','notes']] if 'candidate_id' in native.columns else native"
+        ),
+        _markdown_cell(
+            "## Historical performance: native periods\n\n"
+            + _md_image(root, visuals["native_final"])
+        ),
         _code_cell("native"),
-        _markdown_cell("## Historical performance: common overlap period\n\n" + _md_image(root, visuals["common_equity"]) + "\n\n" + _md_image(root, visuals["common_drawdown"]) + "\n\n" + _md_image(root, visuals["common_final"]) + "\n\nCommon overlap is restricted by the latest-inception candidate, including BTC where present."),
+        _markdown_cell(
+            "## Historical performance: common overlap period\n\n"
+            + _md_image(root, visuals["common_equity"])
+            + "\n\n"
+            + _md_image(root, visuals["common_drawdown"])
+            + "\n\n"
+            + _md_image(root, visuals["common_final"])
+            + "\n\nCommon overlap is restricted by the latest-inception candidate, including BTC where present."
+        ),
         _code_cell("common"),
-        _markdown_cell("## Strategy 1 - Phase6 loose relief overlay\n\n" + _md_image(root, visuals["phase6_equity"]) + "\n\n" + _md_image(root, visuals["phase6_drawdown"]) + "\n\n" + _md_image(root, visuals["phase6_exposure"])),
-        _markdown_cell("## Strategy 2 - SPY/QQQ/GLD/TLT 50/30/10/10\n\n" + _md_image(root, visuals["multi_equity"]) + "\n\n" + _md_image(root, visuals["multi_drawdown"]) + "\n\n" + _md_image(root, visuals["multi_weights"])),
-        _markdown_cell("## Strategy 3 - Inverse-vol SPY/QQQ/BTC 5% cap\n\nBTC is post-inception/high-caveat only.\n\n" + _md_image(root, visuals["btc_equity"]) + "\n\n" + _md_image(root, visuals["btc_drawdown"]) + "\n\n" + _md_image(root, visuals["btc_weights"])),
-        _markdown_cell("## Strategy 4 - SPY/QQQ 60/40 reference\n\nReference-only growth benchmark, not a promoted strategy.\n\n" + _md_image(root, visuals["spy_qqq_equity"]) + "\n\n" + _md_image(root, visuals["spy_qqq_drawdown"]) + "\n\n" + _md_image(root, visuals["spy_qqq_weights"])),
+        _markdown_cell(
+            "## Strategy 1 - Phase6 loose relief overlay\n\n"
+            + _md_image(root, visuals["phase6_equity"])
+            + "\n\n"
+            + _md_image(root, visuals["phase6_drawdown"])
+            + "\n\n"
+            + _md_image(root, visuals["phase6_exposure"])
+        ),
+        _markdown_cell(
+            "## Strategy 2 - SPY/QQQ/GLD/TLT 50/30/10/10\n\n"
+            + _md_image(root, visuals["multi_equity"])
+            + "\n\n"
+            + _md_image(root, visuals["multi_drawdown"])
+            + "\n\n"
+            + _md_image(root, visuals["multi_weights"])
+        ),
+        _markdown_cell(
+            "## Strategy 3 - Inverse-vol SPY/QQQ/BTC 5% cap\n\nBTC is post-inception/high-caveat only.\n\n"
+            + _md_image(root, visuals["btc_equity"])
+            + "\n\n"
+            + _md_image(root, visuals["btc_drawdown"])
+            + "\n\n"
+            + _md_image(root, visuals["btc_weights"])
+        ),
+        _markdown_cell(
+            "## Strategy 4 - SPY/QQQ 60/40 reference\n\nReference-only growth benchmark, not a promoted strategy.\n\n"
+            + _md_image(root, visuals["spy_qqq_equity"])
+            + "\n\n"
+            + _md_image(root, visuals["spy_qqq_drawdown"])
+            + "\n\n"
+            + _md_image(root, visuals["spy_qqq_weights"])
+        ),
         _markdown_cell("## Paper trading sessions"),
         _code_cell("status"),
-        _markdown_cell("## Paper cash ledger\n\n" + _md_image(root, visuals["cash"]) + "\n\n" + _md_image(root, visuals["entered_skipped"]) + "\n\n" + _md_image(root, visuals["paper_value"])),
+        _markdown_cell(
+            "## Paper cash ledger\n\n"
+            + _md_image(root, visuals["cash"])
+            + "\n\n"
+            + _md_image(root, visuals["entered_skipped"])
+            + "\n\n"
+            + _md_image(root, visuals["paper_value"])
+        ),
         _code_cell("cash"),
         _markdown_cell("## Trade blotter\n\n" + _md_image(root, visuals["blotter"])),
         _code_cell("blotter"),
         _markdown_cell("## Current holdings"),
         _code_cell("holdings if not holdings.empty else 'No entered paper positions exist yet.'"),
-        _markdown_cell("## What changed today\n\nThe dashboard now distinguishes research-selection output from portfolio/performance visibility and makes skipped paper cycles explicit."),
-        _markdown_cell("## Next action\n\nReview warnings, BTC caveats, and manual paper-session status before any future paper entry. Do not use live trading, real money, broker/API, or strategy promotion."),
+        _markdown_cell(
+            "## What changed today\n\nThe dashboard now distinguishes research-selection output from portfolio/performance visibility and makes skipped paper cycles explicit."
+        ),
+        _markdown_cell(
+            "## Next action\n\nReview warnings, BTC caveats, and manual paper-session status before any future paper entry. Do not use live trading, real money, broker/API, or strategy promotion."
+        ),
     ]
     notebook = {
         "cells": cells,
@@ -1157,16 +1293,19 @@ def build_regime_informed_portfolio_dashboard(
         "notebook": notebook_path,
         "performance_dir": performance_dir,
         "visuals_dir": visuals_dir,
-        **{f"csv_{key}": performance_dir / filename for key, filename in {
-            "native_summary": "regime_informed_historical_native_summary.csv",
-            "common_summary": "regime_informed_historical_common_summary.csv",
-            "daily_equity": "regime_informed_historical_daily_equity.csv",
-            "daily_drawdowns": "regime_informed_historical_daily_drawdowns.csv",
-            "daily_weights": "regime_informed_historical_daily_weights.csv",
-            "trade_blotter": "regime_informed_trade_blotter.csv",
-            "cash_ledger": "regime_informed_paper_cash_ledger.csv",
-            "holdings": "regime_informed_paper_holdings.csv",
-            "status": "regime_informed_performance_dashboard_status.csv",
-        }.items()},
+        **{
+            f"csv_{key}": performance_dir / filename
+            for key, filename in {
+                "native_summary": "regime_informed_historical_native_summary.csv",
+                "common_summary": "regime_informed_historical_common_summary.csv",
+                "daily_equity": "regime_informed_historical_daily_equity.csv",
+                "daily_drawdowns": "regime_informed_historical_daily_drawdowns.csv",
+                "daily_weights": "regime_informed_historical_daily_weights.csv",
+                "trade_blotter": "regime_informed_trade_blotter.csv",
+                "cash_ledger": "regime_informed_paper_cash_ledger.csv",
+                "holdings": "regime_informed_paper_holdings.csv",
+                "status": "regime_informed_performance_dashboard_status.csv",
+            }.items()
+        },
         **{f"chart_{key}": path for key, path in visuals.items()},
     }

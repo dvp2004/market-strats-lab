@@ -111,9 +111,7 @@ def build_phase10a_family_spec(phase_config: dict[str, Any]) -> pd.DataFrame:
                 "role": str(family.get("role", "")),
                 "candidate_priority": int(family.get("candidate_priority", 999)),
                 "rationale": _join_list(family.get("rationale")),
-                "allowed_feature_examples": _join_list(
-                    family.get("allowed_feature_examples")
-                ),
+                "allowed_feature_examples": _join_list(family.get("allowed_feature_examples")),
                 "data_requirement_count": len(_as_list(family.get("data_requirements"))),
                 "leakage_control_count": len(_as_list(family.get("leakage_controls"))),
                 "validation_requirement_count": len(
@@ -142,9 +140,7 @@ def build_phase10a_data_requirements(phase_config: dict[str, Any]) -> pd.DataFra
                     "family_id": family_id,
                     "data_type": str(requirement.get("data_type", "")),
                     "frequency": str(requirement.get("frequency", "")),
-                    "timing_requirement": str(
-                        requirement.get("timing_requirement", "")
-                    ),
+                    "timing_requirement": str(requirement.get("timing_requirement", "")),
                     "revision_policy": str(requirement.get("revision_policy", "")),
                     "minimum_history_requirement": str(
                         requirement.get("minimum_history_requirement", "")
@@ -193,8 +189,7 @@ def build_phase10a_validation_requirements(
 
 def build_phase10a_scorecard(phase_config: dict[str, Any]) -> pd.DataFrame:
     weights = {
-        str(key): float(value)
-        for key, value in phase_config.get("scoring_weights", {}).items()
+        str(key): float(value) for key, value in phase_config.get("scoring_weights", {}).items()
     }
     rows: list[dict[str, Any]] = []
 
@@ -252,9 +247,7 @@ def build_phase10a_recommendation(
                 {
                     "recommended_family_id": "",
                     "recommended_family_name": "",
-                    "expected_first_family": str(
-                        phase_config.get("expected_first_family", "")
-                    ),
+                    "expected_first_family": str(phase_config.get("expected_first_family", "")),
                     "matches_expected_first_family": False,
                     "recommended_family_active_disqualifiers": "",
                     "recommended_family_has_active_disqualifier": True,
@@ -320,9 +313,7 @@ def build_phase10a_summary(
                 "leakage_control_rows": int(len(leakage_controls)),
                 "validation_requirement_rows": int(len(validation_requirements)),
                 "scorecard_rows": int(len(scorecard)),
-                "recommended_family_id": str(
-                    recommended.get("recommended_family_id", "")
-                ),
+                "recommended_family_id": str(recommended.get("recommended_family_id", "")),
                 "matches_expected_first_family": _bool_value(
                     recommended.get("matches_expected_first_family", False)
                 ),
@@ -332,15 +323,9 @@ def build_phase10a_summary(
                         True,
                     )
                 ),
-                "allow_data_ingestion": bool(
-                    phase_config.get("allow_data_ingestion", False)
-                ),
-                "allow_model_training": bool(
-                    phase_config.get("allow_model_training", False)
-                ),
-                "allow_strategy_test": bool(
-                    phase_config.get("allow_strategy_test", False)
-                ),
+                "allow_data_ingestion": bool(phase_config.get("allow_data_ingestion", False)),
+                "allow_model_training": bool(phase_config.get("allow_model_training", False)),
+                "allow_strategy_test": bool(phase_config.get("allow_strategy_test", False)),
                 "allow_strategy_promotion": bool(
                     phase_config.get("allow_strategy_promotion", False)
                 ),
@@ -391,9 +376,7 @@ def build_phase10a_gate_report(
     family_count = int(row["family_count"])
     min_families = int(gates.get("min_feature_families", 4))
     max_families = int(gates.get("max_feature_families", 4))
-    required_role = str(
-        gates.get("required_spec_role", "Feature-family feasibility spec only")
-    )
+    required_role = str(gates.get("required_spec_role", "Feature-family feasibility spec only"))
 
     rows = [
         _gate_row(
@@ -550,10 +533,7 @@ def write_phase10a_markdown(
             "next. It is a specification only."
         ),
         "",
-        (
-            "It does not ingest data, train a model, test a strategy, or promote a "
-            "candidate."
-        ),
+        ("It does not ingest data, train a model, test a strategy, or promote a candidate."),
         "",
         "## Family Spec",
         "",

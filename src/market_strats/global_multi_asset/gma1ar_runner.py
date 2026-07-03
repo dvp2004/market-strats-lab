@@ -2,6 +2,7 @@
 GMA-1A-R: Required-Core Reconciliation and Split-Basis Verification
 Generates all seven mandatory output reports.
 """
+
 from __future__ import annotations
 
 import glob
@@ -16,17 +17,53 @@ REPORT_DIR = Path("reports/global_multi_asset_alpha/data_foundation")
 CANONICAL_DIR = Path("data/global_multi_asset_alpha/canonical_market")
 
 REQUIRED_CORE: set[str] = {
-    "SPY", "QQQ", "IWM", "RSP", "EFA", "VGK", "EWJ", "EEM",
-    "SHY", "IEF", "TLT", "TIP", "AGG", "LQD", "HYG", "EMB",
-    "GLD", "DBC", "VNQ", "UUP", "BIL",
+    "SPY",
+    "QQQ",
+    "IWM",
+    "RSP",
+    "EFA",
+    "VGK",
+    "EWJ",
+    "EEM",
+    "SHY",
+    "IEF",
+    "TLT",
+    "TIP",
+    "AGG",
+    "LQD",
+    "HYG",
+    "EMB",
+    "GLD",
+    "DBC",
+    "VNQ",
+    "UUP",
+    "BIL",
 }
 BENCHMARK_ONLY: set[str] = {"ACWI"}
 
 ACTION_TIMING_INSTRUMENTS: list[str] = [
-    "SPY", "IWM", "RSP", "IEF", "TLT", "TIP", "LQD", "EMB", "DBA", "DBB", "UUP",
+    "SPY",
+    "IWM",
+    "RSP",
+    "IEF",
+    "TLT",
+    "TIP",
+    "LQD",
+    "EMB",
+    "DBA",
+    "DBB",
+    "UUP",
 ]
 PROVIDER_BASIS_INSTRUMENTS: list[str] = [
-    "EFA", "VGK", "EWJ", "EEM", "VWO", "HYG", "DBC", "VNQ", "ACWI",
+    "EFA",
+    "VGK",
+    "EWJ",
+    "EEM",
+    "VWO",
+    "HYG",
+    "DBC",
+    "VNQ",
+    "ACWI",
 ]
 
 # Tolerance for material return difference (bps) used in reconciliation
@@ -38,6 +75,7 @@ DIVIDEND_METHOD_CAUSE = (
 
 
 # ── helpers ────────────────────────────────────────────────────────────────────
+
 
 def _load_canonical(sym: str) -> pd.DataFrame | None:
     key = sym.replace("-", "_")
@@ -60,22 +98,14 @@ def _return_diffs(df: pd.DataFrame) -> pd.DataFrame:
     c = _completed(df)
     c = c.copy()
     c["close_previous"] = c["close_raw"].shift(1)
-    c["constructed_return"] = (
-        c["close_raw"] + c["dividend_cash"].fillna(0.0)
-    ) / c["close_previous"]
-    c["provider_adjusted_return"] = (
-        c["adj_close_provider"] / c["adj_close_provider"].shift(1)
-    )
+    c["constructed_return"] = (c["close_raw"] + c["dividend_cash"].fillna(0.0)) / c[
+        "close_previous"
+    ]
+    c["provider_adjusted_return"] = c["adj_close_provider"] / c["adj_close_provider"].shift(1)
     c["adj_ret"] = c["provider_adjusted_return"]
-    c["provider_adjustment_factor_current"] = (
-        c["adj_close_provider"] / c["close_raw"]
-    )
-    c["provider_adjustment_factor_previous"] = c[
-        "provider_adjustment_factor_current"
-    ].shift(1)
-    c["diff_bps"] = (
-        c["constructed_return"] - c["provider_adjusted_return"]
-    ).abs() * 10000
+    c["provider_adjustment_factor_current"] = c["adj_close_provider"] / c["close_raw"]
+    c["provider_adjustment_factor_previous"] = c["provider_adjustment_factor_current"].shift(1)
+    c["diff_bps"] = (c["constructed_return"] - c["provider_adjusted_return"]).abs() * 10000
     return c
 
 
@@ -115,6 +145,7 @@ def _round_or_none(value: Any, digits: int = 6) -> float | None:
 
 # ── Section 1: Reviewed instrument inventory ──────────────────────────────────
 
+
 def build_inventory() -> pd.DataFrame:
     recon = pd.read_csv(REPORT_DIR / "total_return_reconciliation.csv")
     ready = pd.read_csv(REPORT_DIR / "core_instrument_readiness.csv")
@@ -125,17 +156,26 @@ def build_inventory() -> pd.DataFrame:
         on="instrument_id",
     )
     cols = [
-        "instrument_id", "is_required_core", "is_benchmark_only",
-        "is_dynamic_satellite", "reconciliation_status", "overlap_rows",
-        "median_return_difference_bps", "maximum_return_difference_bps",
+        "instrument_id",
+        "is_required_core",
+        "is_benchmark_only",
+        "is_dynamic_satellite",
+        "reconciliation_status",
+        "overlap_rows",
+        "median_return_difference_bps",
+        "maximum_return_difference_bps",
         "return_difference_count_gt_tolerance",
-        "earliest_material_difference_date", "latest_material_difference_date",
-        "dividend_event_count", "split_event_count", "ready_for_replay_engine",
+        "earliest_material_difference_date",
+        "latest_material_difference_date",
+        "dividend_event_count",
+        "split_event_count",
+        "ready_for_replay_engine",
     ]
     return merged[cols]
 
 
 # ── Section 2: Split-basis evidence ───────────────────────────────────────────
+
 
 def build_split_evidence(actions: pd.DataFrame) -> pd.DataFrame:
     split_syms = actions.loc[actions["split_event_count"] > 0, "instrument_id"].tolist()
@@ -147,17 +187,17 @@ def build_split_evidence(actions: pd.DataFrame) -> pd.DataFrame:
             rows.append({"instrument_id": sym, "evidence_status": "canonical_not_found"})
             continue
 
-        split_rows = df[
-            (df["split_ratio"] != 0.0) & (df["split_ratio"] != 1.0)
-        ].copy()
+        split_rows = df[(df["split_ratio"] != 0.0) & (df["split_ratio"] != 1.0)].copy()
 
         if split_rows.empty:
-            rows.append({
-                "instrument_id": sym,
-                "split_date": "",
-                "reported_split_ratio": "",
-                "evidence_status": "no_usable_split_rows_in_canonical",
-            })
+            rows.append(
+                {
+                    "instrument_id": sym,
+                    "split_date": "",
+                    "reported_split_ratio": "",
+                    "evidence_status": "no_usable_split_rows_in_canonical",
+                }
+            )
             continue
 
         for _, sr in split_rows.iterrows():
@@ -166,11 +206,13 @@ def build_split_evidence(actions: pd.DataFrame) -> pd.DataFrame:
             after = df[df["date"] >= split_dt].head(1)
 
             if before.empty or after.empty:
-                rows.append({
-                    "instrument_id": sym,
-                    "split_date": str(split_dt.date()),
-                    "evidence_status": "insufficient_window",
-                })
+                rows.append(
+                    {
+                        "instrument_id": sym,
+                        "split_date": str(split_dt.date()),
+                        "evidence_status": "insufficient_window",
+                    }
+                )
                 continue
 
             cb = float(before["close_raw"].iloc[0])
@@ -203,15 +245,10 @@ def build_split_evidence(actions: pd.DataFrame) -> pd.DataFrame:
             for field in ["open", "high", "low", "close"]:
                 before_value = float(before[f"{field}_raw"].iloc[0])
                 after_value = float(after[f"{field}_raw"].iloc[0])
-                ratios[field] = (
-                    round(after_value / before_value, 6)
-                    if before_value != 0
-                    else None
-                )
+                ratios[field] = round(after_value / before_value, 6) if before_value != 0 else None
             tol = 0.15
             raw_already = all(
-                ratio is not None and abs(float(ratio) - 1.0) < tol
-                for ratio in ratios.values()
+                ratio is not None and abs(float(ratio) - 1.0) < tol for ratio in ratios.values()
             )
             if any(ratio is None for ratio in ratios.values()):
                 ev = "raw_ohlc_before_zero"
@@ -222,33 +259,36 @@ def build_split_evidence(actions: pd.DataFrame) -> pd.DataFrame:
             raw_ratio = ratios["close"]
             double_count = False
 
-            rows.append({
-                "instrument_id": sym,
-                "split_date": str(split_dt.date()),
-                "reported_split_ratio": reported,
-                "open_ratio_across_split": ratios["open"],
-                "high_ratio_across_split": ratios["high"],
-                "low_ratio_across_split": ratios["low"],
-                "close_ratio_across_split": ratios["close"],
-                "expected_unadjusted_ratio": expected_unadjusted_ratio,
-                "all_raw_ohlc_consistent_with_split_adjustment": raw_already,
-                "applying_split_again_would_double_count": bool(raw_already),
-                "raw_close_before": round(cb, 6),
-                "raw_close_on_or_after": round(ca, 6),
-                "raw_price_ratio": raw_ratio,
-                "adj_close_before": round(ab, 6),
-                "adj_close_on_or_after": round(aa, 6),
-                "provider_adjustment_factor_before": paf_before,
-                "provider_adjustment_factor_after": paf_after,
-                "raw_already_split_adjusted": raw_already,
-                "applying_split_ratio_would_double_count": double_count,
-                "evidence_status": ev,
-            })
+            rows.append(
+                {
+                    "instrument_id": sym,
+                    "split_date": str(split_dt.date()),
+                    "reported_split_ratio": reported,
+                    "open_ratio_across_split": ratios["open"],
+                    "high_ratio_across_split": ratios["high"],
+                    "low_ratio_across_split": ratios["low"],
+                    "close_ratio_across_split": ratios["close"],
+                    "expected_unadjusted_ratio": expected_unadjusted_ratio,
+                    "all_raw_ohlc_consistent_with_split_adjustment": raw_already,
+                    "applying_split_again_would_double_count": bool(raw_already),
+                    "raw_close_before": round(cb, 6),
+                    "raw_close_on_or_after": round(ca, 6),
+                    "raw_price_ratio": raw_ratio,
+                    "adj_close_before": round(ab, 6),
+                    "adj_close_on_or_after": round(aa, 6),
+                    "provider_adjustment_factor_before": paf_before,
+                    "provider_adjustment_factor_after": paf_after,
+                    "raw_already_split_adjusted": raw_already,
+                    "applying_split_ratio_would_double_count": double_count,
+                    "evidence_status": ev,
+                }
+            )
 
     return pd.DataFrame(rows)
 
 
 # ── Section 3: Action-timing resolution ───────────────────────────────────────
+
 
 def build_action_timing_resolution(recon: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
@@ -282,76 +322,93 @@ def build_action_timing_resolution(recon: pd.DataFrame) -> pd.DataFrame:
                 cause = "no_dividend_no_split_on_difference_date_unidentified"
                 resolution = "unresolved_action_timing"
 
-            rows.append({
-                "instrument_id": sym,
-                "event_date": str(date.date()),
-                "event_type": "dividend" if div_val > 0 else ("split" if spl_val not in (0.0, 1.0) else "unknown"),
-                "close_previous": _round_or_none(r.get("close_previous"), 6),
-                "close_current": _round_or_none(r.get("close_raw"), 6),
-                "dividend_cash": round(div_val, 6),
-                "provider_dividend": round(div_val, 6),
-                "constructed_dividend": round(div_val, 6),
-                "provider_adjusted_return": _round_or_none(
-                    r.get("provider_adjusted_return"), 8,
-                ),
-                "provider_return": _round_or_none(r.get("adj_ret"), 8),
-                "constructed_return": _round_or_none(
-                    r.get("constructed_return"), 8,
-                ),
-                "difference_bps": round(diff, 4),
-                "provider_adjustment_factor_previous": _round_or_none(
-                    r.get("provider_adjustment_factor_previous"), 8,
-                ),
-                "provider_adjustment_factor_current": _round_or_none(
-                    r.get("provider_adjustment_factor_current"), 8,
-                ),
-                "difference_on_previous_date_bps": round(
-                    _adjacent_diff_bps(rd, date, -1), 4,
-                ),
-                "difference_on_next_date_bps": round(
-                    _adjacent_diff_bps(rd, date, 1), 4,
-                ),
-                "date_offset_evidence": has_adjacent_offset_evidence,
-                "difference_cause": cause,
-                "maximum_impact_bps": round(max_diff, 4),
-                "review_resolution": resolution,
-            })
+            rows.append(
+                {
+                    "instrument_id": sym,
+                    "event_date": str(date.date()),
+                    "event_type": "dividend"
+                    if div_val > 0
+                    else ("split" if spl_val not in (0.0, 1.0) else "unknown"),
+                    "close_previous": _round_or_none(r.get("close_previous"), 6),
+                    "close_current": _round_or_none(r.get("close_raw"), 6),
+                    "dividend_cash": round(div_val, 6),
+                    "provider_dividend": round(div_val, 6),
+                    "constructed_dividend": round(div_val, 6),
+                    "provider_adjusted_return": _round_or_none(
+                        r.get("provider_adjusted_return"),
+                        8,
+                    ),
+                    "provider_return": _round_or_none(r.get("adj_ret"), 8),
+                    "constructed_return": _round_or_none(
+                        r.get("constructed_return"),
+                        8,
+                    ),
+                    "difference_bps": round(diff, 4),
+                    "provider_adjustment_factor_previous": _round_or_none(
+                        r.get("provider_adjustment_factor_previous"),
+                        8,
+                    ),
+                    "provider_adjustment_factor_current": _round_or_none(
+                        r.get("provider_adjustment_factor_current"),
+                        8,
+                    ),
+                    "difference_on_previous_date_bps": round(
+                        _adjacent_diff_bps(rd, date, -1),
+                        4,
+                    ),
+                    "difference_on_next_date_bps": round(
+                        _adjacent_diff_bps(rd, date, 1),
+                        4,
+                    ),
+                    "date_offset_evidence": has_adjacent_offset_evidence,
+                    "difference_cause": cause,
+                    "maximum_impact_bps": round(max_diff, 4),
+                    "review_resolution": resolution,
+                }
+            )
 
         if mat.empty:
             # No material diffs found above threshold — immaterial
-            rows.append({
-                "instrument_id": sym,
-                "event_date": "",
-                "event_type": "none_above_threshold",
-                "close_previous": None,
-                "close_current": None,
-                "dividend_cash": 0,
-                "provider_dividend": 0,
-                "constructed_dividend": 0,
-                "provider_adjusted_return": 1.0,
-                "provider_return": 1.0,
-                "constructed_return": 1.0,
-                "difference_bps": 0.0,
-                "provider_adjustment_factor_previous": None,
-                "provider_adjustment_factor_current": None,
-                "difference_on_previous_date_bps": 0.0,
-                "difference_on_next_date_bps": 0.0,
-                "date_offset_evidence": False,
-                "difference_cause": "all_differences_below_0.5bps_threshold",
-                "maximum_impact_bps": 0.0,
-                "review_resolution": "resolved_immaterial_difference",
-            })
+            rows.append(
+                {
+                    "instrument_id": sym,
+                    "event_date": "",
+                    "event_type": "none_above_threshold",
+                    "close_previous": None,
+                    "close_current": None,
+                    "dividend_cash": 0,
+                    "provider_dividend": 0,
+                    "constructed_dividend": 0,
+                    "provider_adjusted_return": 1.0,
+                    "provider_return": 1.0,
+                    "constructed_return": 1.0,
+                    "difference_bps": 0.0,
+                    "provider_adjustment_factor_previous": None,
+                    "provider_adjustment_factor_current": None,
+                    "difference_on_previous_date_bps": 0.0,
+                    "difference_on_next_date_bps": 0.0,
+                    "date_offset_evidence": False,
+                    "difference_cause": "all_differences_below_0.5bps_threshold",
+                    "maximum_impact_bps": 0.0,
+                    "review_resolution": "resolved_immaterial_difference",
+                }
+            )
 
     return pd.DataFrame(rows)
 
 
 # ── Section 4: Provider-basis resolution ──────────────────────────────────────
 
+
 def build_provider_basis_resolution(recon: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
 
     for sym in PROVIDER_BASIS_INSTRUMENTS:
-        recon_row = recon[recon["instrument_id"] == sym].iloc[0] if len(recon[recon["instrument_id"] == sym]) > 0 else pd.Series()
+        recon_row = (
+            recon[recon["instrument_id"] == sym].iloc[0]
+            if len(recon[recon["instrument_id"] == sym]) > 0
+            else pd.Series()
+        )
         df = _load_canonical(sym)
         if df is None:
             rows.append({"instrument_id": sym, "review_resolution": "canonical_not_found"})
@@ -374,7 +431,9 @@ def build_provider_basis_resolution(recon: pd.DataFrame) -> pd.DataFrame:
         no_div_rows = rd[rd["dividend_cash"].fillna(0) == 0].copy()
         no_div_rows["close_ret"] = no_div_rows["close_raw"] / no_div_rows["close_raw"].shift(1)
         no_div_rows["diff_no_div"] = (no_div_rows["close_ret"] - no_div_rows["adj_ret"]).abs()
-        raw_consistent = bool(no_div_rows["diff_no_div"].median() < 0.001) if len(no_div_rows) > 5 else True
+        raw_consistent = (
+            bool(no_div_rows["diff_no_div"].median() < 0.001) if len(no_div_rows) > 5 else True
+        )
 
         # Day-of-week pattern for FX-related instruments
         if n > 0:
@@ -414,28 +473,31 @@ def build_provider_basis_resolution(recon: pd.DataFrame) -> pd.DataFrame:
                 "Within immaterial range."
             )
 
-        rows.append({
-            "instrument_id": sym,
-            "difference_date_count": n_gt_tol,
-            "median_difference_bps": round(med_bps, 4),
-            "maximum_difference_bps": round(max_bps, 4),
-            "differences_concentrated_on_action_dates": conc_on_action,
-            "differences_concentrated_on_fx_or_foreign_market_dates": mon_frac > 0.35,
-            "raw_close_consistent": raw_consistent,
-            "dividend_series_consistent": True,
-            "split_series_consistent": True,
-            "off_dividend_date_difference_count": off_div,
-            "provider_basis_cause": (
-                DIVIDEND_METHOD_CAUSE if resolution.startswith("resolved") else ""
-            ),
-            "provider_basis_explanation": explanation,
-            "review_resolution": resolution,
-        })
+        rows.append(
+            {
+                "instrument_id": sym,
+                "difference_date_count": n_gt_tol,
+                "median_difference_bps": round(med_bps, 4),
+                "maximum_difference_bps": round(max_bps, 4),
+                "differences_concentrated_on_action_dates": conc_on_action,
+                "differences_concentrated_on_fx_or_foreign_market_dates": mon_frac > 0.35,
+                "raw_close_consistent": raw_consistent,
+                "dividend_series_consistent": True,
+                "split_series_consistent": True,
+                "off_dividend_date_difference_count": off_div,
+                "provider_basis_cause": (
+                    DIVIDEND_METHOD_CAUSE if resolution.startswith("resolved") else ""
+                ),
+                "provider_basis_explanation": explanation,
+                "review_resolution": resolution,
+            }
+        )
 
     return pd.DataFrame(rows)
 
 
 # ── Section 5: Core readiness reassessment ────────────────────────────────────
+
 
 def build_core_readiness(
     inventory: pd.DataFrame,
@@ -474,13 +536,16 @@ def build_core_readiness(
             pb_res_map[sym] = sym_rows["review_resolution"].iloc[0]
 
     # Split basis overall
-    usable_split_rows = split_evidence[
-        split_evidence["evidence_status"].notna()
-        & split_evidence["evidence_status"].ne("no_usable_split_rows_in_canonical")
-    ] if not split_evidence.empty else pd.DataFrame()
-    split_basis_proven = (
-        not usable_split_rows.empty
-        and bool(usable_split_rows["all_raw_ohlc_consistent_with_split_adjustment"].all())
+    usable_split_rows = (
+        split_evidence[
+            split_evidence["evidence_status"].notna()
+            & split_evidence["evidence_status"].ne("no_usable_split_rows_in_canonical")
+        ]
+        if not split_evidence.empty
+        else pd.DataFrame()
+    )
+    split_basis_proven = not usable_split_rows.empty and bool(
+        usable_split_rows["all_raw_ohlc_consistent_with_split_adjustment"].all()
     )
 
     for _, inv_row in inventory.iterrows():
@@ -556,34 +621,37 @@ def build_core_readiness(
         has_split = int(inv_row.get("split_event_count", 0)) > 0
         split_basis_ok = split_basis_proven or not has_split
 
-        rows.append({
-            "instrument_id": sym,
-            "is_required_core": is_core,
-            "is_benchmark_only": is_bench,
-            "is_dynamic_satellite": is_sat,
-            "original_reconciliation_status": status,
-            "review_resolution": resolution,
-            "split_basis_proven": split_basis_proven if has_split else "not_applicable",
-            "split_basis_ok": split_basis_ok,
-            "ready_for_replay_engine": new_ready,
-            "blocking_reason": blocking,
-            "warnings": warning,
-            "review_state": review_state,
-            "resolved_historical_review_note": (
-                review_state == "resolved_historical_review_note"
-            ),
-            "unresolved_instrument_review": (
-                review_state in ("deferred_instrument", "blocking_instrument")
-            ),
-            "restricted_instrument": False,
-            "deferred_instrument": review_state == "deferred_instrument",
-            "blocking_instrument": review_state == "blocking_instrument",
-        })
+        rows.append(
+            {
+                "instrument_id": sym,
+                "is_required_core": is_core,
+                "is_benchmark_only": is_bench,
+                "is_dynamic_satellite": is_sat,
+                "original_reconciliation_status": status,
+                "review_resolution": resolution,
+                "split_basis_proven": split_basis_proven if has_split else "not_applicable",
+                "split_basis_ok": split_basis_ok,
+                "ready_for_replay_engine": new_ready,
+                "blocking_reason": blocking,
+                "warnings": warning,
+                "review_state": review_state,
+                "resolved_historical_review_note": (
+                    review_state == "resolved_historical_review_note"
+                ),
+                "unresolved_instrument_review": (
+                    review_state in ("deferred_instrument", "blocking_instrument")
+                ),
+                "restricted_instrument": False,
+                "deferred_instrument": review_state == "deferred_instrument",
+                "blocking_instrument": review_state == "blocking_instrument",
+            }
+        )
 
     return pd.DataFrame(rows)
 
 
 # ── Section 6: Gate report ────────────────────────────────────────────────────
+
 
 def build_gate_report(
     readiness: pd.DataFrame,
@@ -595,83 +663,113 @@ def build_gate_report(
     all_core_ready = bool(core["ready_for_replay_engine"].all())
 
     unresolved_core_at = [
-        sym for sym in ACTION_TIMING_INSTRUMENTS
+        sym
+        for sym in ACTION_TIMING_INSTRUMENTS
         if sym in REQUIRED_CORE
         and not readiness.loc[readiness["instrument_id"] == sym, "ready_for_replay_engine"].all()
     ]
     unresolved_core_pb = [
-        sym for sym in PROVIDER_BASIS_INSTRUMENTS
+        sym
+        for sym in PROVIDER_BASIS_INSTRUMENTS
         if sym in REQUIRED_CORE
         and not readiness.loc[readiness["instrument_id"] == sym, "ready_for_replay_engine"].all()
     ]
 
     # Split basis
-    usable_split_rows = split_evidence[
-        split_evidence["evidence_status"].notna()
-        & split_evidence["evidence_status"].ne("no_usable_split_rows_in_canonical")
-    ] if not split_evidence.empty else pd.DataFrame()
-    split_basis_proven = (
-        not usable_split_rows.empty
-        and bool(usable_split_rows["all_raw_ohlc_consistent_with_split_adjustment"].all())
+    usable_split_rows = (
+        split_evidence[
+            split_evidence["evidence_status"].notna()
+            & split_evidence["evidence_status"].ne("no_usable_split_rows_in_canonical")
+        ]
+        if not split_evidence.empty
+        else pd.DataFrame()
+    )
+    split_basis_proven = not usable_split_rows.empty and bool(
+        usable_split_rows["all_raw_ohlc_consistent_with_split_adjustment"].all()
     )
 
     # All action-timing resolved
-    at_all_resolved = not at_resolution["review_resolution"].isin(["unresolved_action_timing"]).any()
+    at_all_resolved = (
+        not at_resolution["review_resolution"].isin(["unresolved_action_timing"]).any()
+    )
     # All provider-basis resolved
-    pb_all_resolved = not pb_resolution["review_resolution"].isin(["unresolved_provider_basis"]).any()
+    pb_all_resolved = (
+        not pb_resolution["review_resolution"].isin(["unresolved_provider_basis"]).any()
+    )
 
     # Non-core unresolved
-    active_review_states = {"unresolved_instrument_review", "restricted_instrument",
-                            "deferred_instrument", "blocking_instrument"}
+    active_review_states = {
+        "unresolved_instrument_review",
+        "restricted_instrument",
+        "deferred_instrument",
+        "blocking_instrument",
+    }
     if "review_state" in readiness.columns:
         active_reviews = readiness[readiness["review_state"].isin(active_review_states)]
     else:
         active_reviews = readiness[readiness["blocking_reason"] != ""]
     noncore_unresolved = active_reviews[
-        (~active_reviews["is_required_core"]) &
-        (~active_reviews["is_benchmark_only"])
+        (~active_reviews["is_required_core"]) & (~active_reviews["is_benchmark_only"])
     ]["instrument_id"].tolist()
 
     gates = [
-        ("all_required_core_ready_for_replay_engine",
-         all_core_ready,
-         f"unresolved_core={unresolved_core_at + unresolved_core_pb}" if not all_core_ready else "all_core_ready"),
-        ("split_basis_proven_from_actual_evidence",
-         split_basis_proven,
-         "raw_ohlc_already_split_adjusted_confirmed_for_all_split_instruments" if split_basis_proven else "insufficient_evidence"),
-        ("action_timing_reviews_all_resolved",
-         at_all_resolved,
-         "resolved_immaterial_difference_with_dividend_methodology_cause" if at_all_resolved else "unresolved_action_timing_present"),
-        ("provider_basis_reviews_all_resolved",
-         pb_all_resolved,
-         "resolved_provider_multiplicative_dividend_methodology_or_immaterial" if pb_all_resolved else "unresolved_provider_basis_present"),
-        ("no_failed_reconciliation_instruments",
-         not (readiness["original_reconciliation_status"] == "failed_reconciliation").any(),
-         "confirmed"),
-        ("unresolved_reviews_confined_to_non_core",
-         len(unresolved_core_at) == 0 and len(unresolved_core_pb) == 0,
-         f"non_core_unresolved={noncore_unresolved}" if noncore_unresolved else "none"),
-        ("benchmark_only_acwi_review_documented",
-         True,
-         "ACWI_provider_basis_review_resolved_provider_multiplicative_dividend_methodology"),
-        ("no_gma1b_or_later_phase_work",
-         True,
-         "confirmed"),
-        ("no_network_retrieval",
-         True,
-         "confirmed_all_data_from_local_immutable_snapshots"),
-        ("all_outputs_in_approved_gma_paths",
-         True,
-         "reports/global_multi_asset_alpha/data_foundation only"),
+        (
+            "all_required_core_ready_for_replay_engine",
+            all_core_ready,
+            f"unresolved_core={unresolved_core_at + unresolved_core_pb}"
+            if not all_core_ready
+            else "all_core_ready",
+        ),
+        (
+            "split_basis_proven_from_actual_evidence",
+            split_basis_proven,
+            "raw_ohlc_already_split_adjusted_confirmed_for_all_split_instruments"
+            if split_basis_proven
+            else "insufficient_evidence",
+        ),
+        (
+            "action_timing_reviews_all_resolved",
+            at_all_resolved,
+            "resolved_immaterial_difference_with_dividend_methodology_cause"
+            if at_all_resolved
+            else "unresolved_action_timing_present",
+        ),
+        (
+            "provider_basis_reviews_all_resolved",
+            pb_all_resolved,
+            "resolved_provider_multiplicative_dividend_methodology_or_immaterial"
+            if pb_all_resolved
+            else "unresolved_provider_basis_present",
+        ),
+        (
+            "no_failed_reconciliation_instruments",
+            not (readiness["original_reconciliation_status"] == "failed_reconciliation").any(),
+            "confirmed",
+        ),
+        (
+            "unresolved_reviews_confined_to_non_core",
+            len(unresolved_core_at) == 0 and len(unresolved_core_pb) == 0,
+            f"non_core_unresolved={noncore_unresolved}" if noncore_unresolved else "none",
+        ),
+        (
+            "benchmark_only_acwi_review_documented",
+            True,
+            "ACWI_provider_basis_review_resolved_provider_multiplicative_dividend_methodology",
+        ),
+        ("no_gma1b_or_later_phase_work", True, "confirmed"),
+        ("no_network_retrieval", True, "confirmed_all_data_from_local_immutable_snapshots"),
+        (
+            "all_outputs_in_approved_gma_paths",
+            True,
+            "reports/global_multi_asset_alpha/data_foundation only",
+        ),
     ]
 
-    return pd.DataFrame([
-        {"gate": g, "passed": p, "detail": str(d)}
-        for g, p, d in gates
-    ])
+    return pd.DataFrame([{"gate": g, "passed": p, "detail": str(d)} for g, p, d in gates])
 
 
 # ── Section 7: Final decision ─────────────────────────────────────────────────
+
 
 def determine_decision(
     readiness: pd.DataFrame,
@@ -694,8 +792,12 @@ def determine_decision(
         blocked = core.loc[~core["ready_for_replay_engine"], "instrument_id"].tolist()
         return "gma1a_blocked_total_return_reconciliation", [f"core_not_ready:{b}" for b in blocked]
 
-    active_states = {"unresolved_instrument_review", "restricted_instrument",
-                     "deferred_instrument", "blocking_instrument"}
+    active_states = {
+        "unresolved_instrument_review",
+        "restricted_instrument",
+        "deferred_instrument",
+        "blocking_instrument",
+    }
     if "review_state" in readiness.columns:
         active_reviews = readiness[readiness["review_state"].isin(active_states)]
     else:
@@ -703,8 +805,7 @@ def determine_decision(
 
     if not active_reviews.empty:
         warnings += [
-            f"{r.review_state}:{r.instrument_id}"
-            for r in active_reviews.itertuples(index=False)
+            f"{r.review_state}:{r.instrument_id}" for r in active_reviews.itertuples(index=False)
         ]
         return "gma1a_feasible_with_instrument_reviews", warnings
 
@@ -712,6 +813,7 @@ def determine_decision(
 
 
 # ── Section 8: Conclusion text ────────────────────────────────────────────────
+
 
 def _conclusion_text(
     decision: str,
@@ -723,18 +825,24 @@ def _conclusion_text(
     gate_df: pd.DataFrame,
     warnings: list[str],
 ) -> str:
-    reviewed = inventory[inventory["reconciliation_status"].isin(
-        ["action_timing_review", "provider_basis_review"]
-    )]
+    reviewed = inventory[
+        inventory["reconciliation_status"].isin(["action_timing_review", "provider_basis_review"])
+    ]
     core_reviewed = reviewed[reviewed["is_required_core"]]["instrument_id"].tolist()
     bench_reviewed = reviewed[reviewed["is_benchmark_only"]]["instrument_id"].tolist()
     sat_reviewed = reviewed[reviewed["is_dynamic_satellite"]]["instrument_id"].tolist()
     other_reviewed = reviewed[
-        ~reviewed["is_required_core"] & ~reviewed["is_benchmark_only"] & ~reviewed["is_dynamic_satellite"]
+        ~reviewed["is_required_core"]
+        & ~reviewed["is_benchmark_only"]
+        & ~reviewed["is_dynamic_satellite"]
     ]["instrument_id"].tolist()
 
-    at_syms = reviewed[reviewed["reconciliation_status"] == "action_timing_review"]["instrument_id"].tolist()
-    pb_syms = reviewed[reviewed["reconciliation_status"] == "provider_basis_review"]["instrument_id"].tolist()
+    at_syms = reviewed[reviewed["reconciliation_status"] == "action_timing_review"][
+        "instrument_id"
+    ].tolist()
+    pb_syms = reviewed[reviewed["reconciliation_status"] == "provider_basis_review"][
+        "instrument_id"
+    ].tolist()
 
     at_core = [s for s in at_syms if s in REQUIRED_CORE]
     pb_core = [s for s in pb_syms if s in REQUIRED_CORE]
@@ -862,7 +970,9 @@ def _conclusion_text(
             lines.append(f"- {sym}: no resolution data")
         else:
             r = pb_rows.iloc[0]
-            lines.append(f"- {sym}: n={r['difference_date_count']}, max={r['maximum_difference_bps']:.3f}bps, off_div={r['off_dividend_date_difference_count']}, resolution={r['review_resolution']}")
+            lines.append(
+                f"- {sym}: n={r['difference_date_count']}, max={r['maximum_difference_bps']:.3f}bps, off_div={r['off_dividend_date_difference_count']}, resolution={r['review_resolution']}"
+            )
 
     lines += [
         "",
@@ -925,6 +1035,7 @@ def _conclusion_text(
 
 # ── Main entry point ───────────────────────────────────────────────────────────
 
+
 def run_gma1ar() -> str:
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     print("GMA-1A-R: Loading existing GMA-1A reports...")
@@ -968,8 +1079,14 @@ def run_gma1ar() -> str:
 
     print("Writing conclusion...")
     conclusion = _conclusion_text(
-        decision, inventory, at_resolution, pb_resolution,
-        readiness, split_evidence, gate_df, warnings,
+        decision,
+        inventory,
+        at_resolution,
+        pb_resolution,
+        readiness,
+        split_evidence,
+        gate_df,
+        warnings,
     )
     (REPORT_DIR / "gma1ar_conclusion.md").write_text(conclusion, encoding="utf-8")
     print("  Written: gma1ar_conclusion.md")

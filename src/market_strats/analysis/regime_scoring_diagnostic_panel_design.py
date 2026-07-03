@@ -111,9 +111,7 @@ def build_phase11d_source_rulebook(phase_config: dict[str, Any]) -> pd.DataFrame
                 "source_spec": str(source.get("source_spec", "")),
                 "rulebook_status": str(source.get("rulebook_status", "")),
                 "rationale": str(source.get("rationale", "")),
-                "source_rulebook_present": bool(
-                    str(source.get("source_spec", "")).strip()
-                ),
+                "source_rulebook_present": bool(str(source.get("source_spec", "")).strip()),
                 "source_phase": str(phase_config.get("source_phase", "")),
             }
         ]
@@ -131,12 +129,8 @@ def build_phase11d_panel_layout_spec(phase_config: dict[str, Any]) -> pd.DataFra
                 "report_name": str(panel.get("report_name", "")),
                 "purpose": str(panel.get("purpose", "")),
                 "required": bool(panel.get("required", False)),
-                "allowed_to_use_returns": bool(
-                    panel.get("allowed_to_use_returns", True)
-                ),
-                "allowed_to_create_signal": bool(
-                    panel.get("allowed_to_create_signal", True)
-                ),
+                "allowed_to_use_returns": bool(panel.get("allowed_to_use_returns", True)),
+                "allowed_to_create_signal": bool(panel.get("allowed_to_create_signal", True)),
                 "required_column_count": int(len(required_columns)),
                 "required_columns": _join_list(required_columns),
             }
@@ -178,11 +172,8 @@ def build_phase11d_component_availability_spec(
                 "family": str(component.get("family", "")),
                 "expected_status": str(component.get("expected_status", "")),
                 "source_dependency": str(component.get("source_dependency", "")),
-                "future_unblock_requirement": str(
-                    component.get("future_unblock_requirement", "")
-                ),
-                "is_blocked": str(component.get("expected_status", "")).lower()
-                == "blocked",
+                "future_unblock_requirement": str(component.get("future_unblock_requirement", "")),
+                "is_blocked": str(component.get("expected_status", "")).lower() == "blocked",
             }
         )
 
@@ -236,9 +227,7 @@ def build_phase11d_weighting_policy_spec(
             {
                 "policy_id": str(policy.get("policy_id", "")),
                 "policy": str(policy.get("policy", "")),
-                "numeric_weight_allowed": bool(
-                    policy.get("numeric_weight_allowed", True)
-                ),
+                "numeric_weight_allowed": bool(policy.get("numeric_weight_allowed", True)),
                 "empirical_return_weight_allowed": bool(
                     policy.get("empirical_return_weight_allowed", True)
                 ),
@@ -260,9 +249,7 @@ def build_phase11d_blocked_family_spec(phase_config: dict[str, Any]) -> pd.DataF
                 "blocked_reason": str(family.get("blocked_reason", "")),
                 "unblock_requires": str(family.get("unblock_requires", "")),
                 "current_use_allowed": bool(family.get("current_use_allowed", True)),
-                "score_component_allowed": bool(
-                    family.get("score_component_allowed", True)
-                ),
+                "score_component_allowed": bool(family.get("score_component_allowed", True)),
             }
         )
 
@@ -278,17 +265,13 @@ def build_phase11d_phase11e_boundary_check(
         {
             "boundary_item": "phase11e_allowed_next_step",
             "value": str(boundary.get("allowed_next_step", "")),
-            "passed": "implementation audit" in str(
-                boundary.get("allowed_next_step", "")
-            ).lower(),
+            "passed": "implementation audit" in str(boundary.get("allowed_next_step", "")).lower(),
         },
         {
             "boundary_item": "phase11e_forbidden_next_step",
             "value": str(boundary.get("forbidden_next_step", "")),
             "passed": (
-                "score calculation" in str(
-                    boundary.get("forbidden_next_step", "")
-                ).lower()
+                "score calculation" in str(boundary.get("forbidden_next_step", "")).lower()
                 and "strategy" in str(boundary.get("forbidden_next_step", "")).lower()
                 and "promotion" in str(boundary.get("forbidden_next_step", "")).lower()
             ),
@@ -296,9 +279,7 @@ def build_phase11d_phase11e_boundary_check(
         {
             "boundary_item": "phase11e_may_build_empty_panel_templates",
             "value": bool(boundary.get("phase11e_may_build_empty_panel_templates", False)),
-            "passed": bool(
-                boundary.get("phase11e_may_build_empty_panel_templates", False)
-            ),
+            "passed": bool(boundary.get("phase11e_may_build_empty_panel_templates", False)),
         },
         {
             "boundary_item": "phase11e_may_calculate_scores",
@@ -433,9 +414,7 @@ def build_phase11d_summary(
                 "phase_branch": str(phase_config.get("phase_branch", "")),
                 "source_phase": str(phase_config.get("source_phase", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "source_rulebook_present": bool(
-                    source_rulebook.iloc[0]["source_rulebook_present"]
-                )
+                "source_rulebook_present": bool(source_rulebook.iloc[0]["source_rulebook_present"])
                 if not source_rulebook.empty
                 else False,
                 "panel_section_count": int(len(panel_layout_spec)),
@@ -445,15 +424,11 @@ def build_phase11d_summary(
                 "conceptual_direction_rows": int(len(conceptual_direction_spec)),
                 "conceptual_directions_non_trading": directions_non_trading,
                 "missingness_policy_count": int(len(missingness_policy_spec)),
-                "required_missingness_policy_count": int(
-                    missingness_policy_spec["required"].sum()
-                )
+                "required_missingness_policy_count": int(missingness_policy_spec["required"].sum())
                 if not missingness_policy_spec.empty
                 else 0,
                 "weighting_policy_count": int(len(weighting_policy_spec)),
-                "required_weighting_policy_count": int(
-                    weighting_policy_spec["required"].sum()
-                )
+                "required_weighting_policy_count": int(weighting_policy_spec["required"].sum())
                 if not weighting_policy_spec.empty
                 else 0,
                 "weighting_non_empirical": weighting_non_empirical,
@@ -461,9 +436,7 @@ def build_phase11d_summary(
                 "blocked_families_clean": blocked_families_clean,
                 "all_panels_no_returns": all_panels_no_returns,
                 "all_panels_non_signal": all_panels_non_signal,
-                "phase11e_boundary_passed": bool(
-                    phase11e_boundary_check["passed"].all()
-                )
+                "phase11e_boundary_passed": bool(phase11e_boundary_check["passed"].all())
                 if not phase11e_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -560,8 +533,7 @@ def build_phase11d_gate_report(
             "Weighting policy spec is documented",
             (not gates.get("require_weighting_policy_spec", True))
             or (
-                int(row["weighting_policy_count"])
-                >= int(gates.get("min_weighting_policies", 5))
+                int(row["weighting_policy_count"]) >= int(gates.get("min_weighting_policies", 5))
                 and bool(row["weighting_non_empirical"])
             ),
             (
@@ -573,8 +545,7 @@ def build_phase11d_gate_report(
             "Blocked family spec is documented",
             (not gates.get("require_blocked_family_spec", True))
             or (
-                int(row["blocked_family_count"])
-                >= int(gates.get("min_blocked_families", 2))
+                int(row["blocked_family_count"]) >= int(gates.get("min_blocked_families", 2))
                 and bool(row["blocked_families_clean"])
             ),
             (
@@ -610,10 +581,7 @@ def build_phase11d_gate_report(
             "No numeric score weights are allowed",
             (not gates.get("require_no_numeric_score_weights", True))
             or not bool(phase_config.get("allow_numeric_score_weights", True)),
-            (
-                "allow_numeric_score_weights="
-                f"{phase_config.get('allow_numeric_score_weights')}"
-            ),
+            (f"allow_numeric_score_weights={phase_config.get('allow_numeric_score_weights')}"),
         ),
         _gate_row(
             "No empirical return weights are allowed",
@@ -838,9 +806,7 @@ def save_phase11d_regime_scoring_diagnostic_panel_design(
     source_rulebook = build_phase11d_source_rulebook(phase_config)
     panel_layout_spec = build_phase11d_panel_layout_spec(phase_config)
     required_columns_spec = build_phase11d_required_columns_spec(phase_config)
-    component_availability_spec = build_phase11d_component_availability_spec(
-        phase_config
-    )
+    component_availability_spec = build_phase11d_component_availability_spec(phase_config)
     conceptual_direction_spec = build_phase11d_conceptual_direction_spec(phase_config)
     missingness_policy_spec = build_phase11d_missingness_policy_spec(phase_config)
     weighting_policy_spec = build_phase11d_weighting_policy_spec(phase_config)
@@ -933,8 +899,7 @@ def save_phase11d_regime_scoring_diagnostic_panel_design(
         summary=summary,
         gate_report=gate_report,
         conclusion=conclusion,
-        output_path=reports_path
-        / "phase11d_regime_scoring_diagnostic_panel_design.md",
+        output_path=reports_path / "phase11d_regime_scoring_diagnostic_panel_design.md",
     )
 
     print("Wrote Phase 11D regime scoring diagnostic panel design reports.")

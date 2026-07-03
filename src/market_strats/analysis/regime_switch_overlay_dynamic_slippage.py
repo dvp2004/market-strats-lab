@@ -40,9 +40,7 @@ def _create_dynamic_slippage_series(
 
     slippage = pd.Series(float(normal_bps), index=offensive.index)
 
-    slippage.loc[below_200d] = slippage.loc[below_200d].clip(
-        lower=float(below_200d_bps)
-    )
+    slippage.loc[below_200d] = slippage.loc[below_200d].clip(lower=float(below_200d_bps))
     slippage.loc[drawdown <= -0.10] = slippage.loc[drawdown <= -0.10].clip(
         lower=float(drawdown_10_bps)
     )
@@ -132,17 +130,13 @@ def _create_trade_event_audit(
 
     if missing_columns:
         raise ValueError(
-            "overlay result missing columns for trade-event audit: "
-            f"{sorted(missing_columns)}"
+            f"overlay result missing columns for trade-event audit: {sorted(missing_columns)}"
         )
 
     target_defensive = result["target_defensive_weight"].astype(float)
     previous_target_defensive = target_defensive.shift(1)
 
-    switch_mask = (
-        previous_target_defensive.notna()
-        & target_defensive.ne(previous_target_defensive)
-    )
+    switch_mask = previous_target_defensive.notna() & target_defensive.ne(previous_target_defensive)
 
     event_rows: list[dict] = []
 
@@ -153,30 +147,19 @@ def _create_trade_event_audit(
 
     for idx, row in result.loc[switch_mask].iterrows():
         from_mode = (
-            "defensive_allocator"
-            if previous_target_defensive.loc[idx] >= 0.5
-            else "offensive_spy"
+            "defensive_allocator" if previous_target_defensive.loc[idx] >= 0.5 else "offensive_spy"
         )
 
-        to_mode = (
-            "defensive_allocator"
-            if target_defensive.loc[idx] >= 0.5
-            else "offensive_spy"
-        )
+        to_mode = "defensive_allocator" if target_defensive.loc[idx] >= 0.5 else "offensive_spy"
 
         event = {
             "switch_date": row["date"].date().isoformat(),
             "from_mode": from_mode,
             "to_mode": to_mode,
             "signal_price": round(float(row["signal_price"]), 4),
-            "trend_sma": round(float(row["trend_sma"]), 4)
-            if pd.notna(row["trend_sma"])
-            else "",
+            "trend_sma": round(float(row["trend_sma"]), 4) if pd.notna(row["trend_sma"]) else "",
             "spy_distance_from_trend_pct": round(
-                (
-                    (float(row["signal_price"]) / float(row["trend_sma"])) - 1.0
-                )
-                * 100.0,
+                ((float(row["signal_price"]) / float(row["trend_sma"])) - 1.0) * 100.0,
                 3,
             )
             if pd.notna(row["trend_sma"]) and float(row["trend_sma"]) != 0
@@ -373,8 +356,7 @@ def create_phase4_execution_realism_conclusion(
         return pd.DataFrame()
 
     full_dynamic = sensitivity[
-        (sensitivity["period"] == "full")
-        & (sensitivity["scenario"] == "dynamic_stress_slippage")
+        (sensitivity["period"] == "full") & (sensitivity["scenario"] == "dynamic_stress_slippage")
     ]
 
     full_summary = summary[summary["period"] == "full"]
@@ -397,8 +379,7 @@ def create_phase4_execution_realism_conclusion(
     spy_12m_drawdown_gate = -33.72
 
     preserves_defensive_profile = (
-        dynamic_calmar > spy_12m_calmar_gate
-        and dynamic_drawdown > spy_12m_drawdown_gate
+        dynamic_calmar > spy_12m_calmar_gate and dynamic_drawdown > spy_12m_drawdown_gate
     )
 
     survives_spy_12m_triple_gate = (
@@ -413,12 +394,9 @@ def create_phase4_execution_realism_conclusion(
         [
             {
                 "claim": (
-                    "The 3D overlay preserves its defensive profile under "
-                    "dynamic stress slippage."
+                    "The 3D overlay preserves its defensive profile under dynamic stress slippage."
                 ),
-                "status": (
-                    "Survived" if preserves_defensive_profile else "Failed"
-                ),
+                "status": ("Survived" if preserves_defensive_profile else "Failed"),
                 "evidence_quality": (
                     "Compared dynamic stress result against pinned SPY 12M "
                     "Calmar and drawdown gates"
@@ -435,9 +413,7 @@ def create_phase4_execution_realism_conclusion(
                     "The 3D overlay still beats SPY 12M on the strict "
                     "full-period triple gate under dynamic stress slippage."
                 ),
-                "status": (
-                    "Survived" if survives_spy_12m_triple_gate else "Failed"
-                ),
+                "status": ("Survived" if survives_spy_12m_triple_gate else "Failed"),
                 "evidence_quality": (
                     "Compared dynamic stress result against pinned SPY 12M "
                     "CAGR, Calmar, and drawdown gates"
@@ -453,9 +429,7 @@ def create_phase4_execution_realism_conclusion(
             {
                 "claim": "Dynamic stress slippage has limited impact.",
                 "status": "Survived" if limited_impact else "Failed",
-                "evidence_quality": (
-                    "Compared dynamic stress slippage to flat 5 bps baseline"
-                ),
+                "evidence_quality": ("Compared dynamic stress slippage to flat 5 bps baseline"),
                 "interpretation": (
                     f"Dynamic slippage changed CAGR by {cagr_delta} percentage "
                     f"points, Calmar by {calmar_delta}, and max drawdown by "
@@ -466,9 +440,7 @@ def create_phase4_execution_realism_conclusion(
             {
                 "claim": "Execution realism is no longer a major concern.",
                 "status": "Failed",
-                "evidence_quality": (
-                    "Execution costs still require stress-aware modelling"
-                ),
+                "evidence_quality": ("Execution costs still require stress-aware modelling"),
                 "interpretation": (
                     "This test improves realism, but still does not model actual "
                     "bid-ask spreads, market impact, taxes, fund-level liquidity, "

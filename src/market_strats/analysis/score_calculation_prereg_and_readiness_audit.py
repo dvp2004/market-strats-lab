@@ -192,12 +192,8 @@ def build_phase12a_eligible_components(phase_config: dict[str, Any]) -> pd.DataF
                 "eligibility": str(item.get("eligibility", "")),
                 "source_basis": str(item.get("source_basis", "")),
                 "allowed_states": _join_list(item.get("allowed_states")),
-                "may_affect_future_score": _bool_value(
-                    item.get("may_affect_future_score", False)
-                ),
-                "may_create_signal_now": _bool_value(
-                    item.get("may_create_signal_now", True)
-                ),
+                "may_affect_future_score": _bool_value(item.get("may_affect_future_score", False)),
+                "may_create_signal_now": _bool_value(item.get("may_create_signal_now", True)),
             }
         )
     return pd.DataFrame(rows)
@@ -212,9 +208,7 @@ def build_phase12a_blocked_components(phase_config: dict[str, Any]) -> pd.DataFr
                 "family": str(item.get("family", "")),
                 "blocked_reason": str(item.get("blocked_reason", "")),
                 "unblock_requires": str(item.get("unblock_requires", "")),
-                "may_affect_future_score": _bool_value(
-                    item.get("may_affect_future_score", True)
-                ),
+                "may_affect_future_score": _bool_value(item.get("may_affect_future_score", True)),
             }
         )
     return pd.DataFrame(rows)
@@ -228,9 +222,7 @@ def build_phase12a_formula_structure(phase_config: dict[str, Any]) -> pd.DataFra
                 "formula_id": str(formula.get("formula_id", "")),
                 "formula_role": str(formula.get("formula_role", "")),
                 "aggregation_policy": str(formula.get("aggregation_policy", "")),
-                "allowed_component_states": _join_list(
-                    formula.get("allowed_component_states")
-                ),
+                "allowed_component_states": _join_list(formula.get("allowed_component_states")),
                 "score_state_output": _join_list(formula.get("score_state_output")),
                 "numeric_score_values_defined": _bool_value(
                     formula.get("numeric_score_values_defined", True)
@@ -254,18 +246,12 @@ def build_phase12a_weighting_policy(phase_config: dict[str, Any]) -> pd.DataFram
             {
                 "policy_id": str(policy.get("policy_id", "")),
                 "policy_type": str(policy.get("policy_type", "")),
-                "eligible_component_scope": str(
-                    policy.get("eligible_component_scope", "")
-                ),
+                "eligible_component_scope": str(policy.get("eligible_component_scope", "")),
                 "empirical_return_weighting_allowed": _bool_value(
                     policy.get("empirical_return_weighting_allowed", True)
                 ),
-                "optimisation_allowed": _bool_value(
-                    policy.get("optimisation_allowed", True)
-                ),
-                "cutoff_search_allowed": _bool_value(
-                    policy.get("cutoff_search_allowed", True)
-                ),
+                "optimisation_allowed": _bool_value(policy.get("optimisation_allowed", True)),
+                "cutoff_search_allowed": _bool_value(policy.get("cutoff_search_allowed", True)),
                 "numeric_weights_assigned_now": _bool_value(
                     policy.get("numeric_weights_assigned_now", True)
                 ),
@@ -283,16 +269,10 @@ def build_phase12a_missingness_policy(phase_config: dict[str, Any]) -> pd.DataFr
         [
             {
                 "policy_id": str(policy.get("policy_id", "")),
-                "no_return_inference": _bool_value(
-                    policy.get("no_return_inference", False)
-                ),
+                "no_return_inference": _bool_value(policy.get("no_return_inference", False)),
                 "no_silent_fill": _bool_value(policy.get("no_silent_fill", False)),
-                "unavailable_component_action": str(
-                    policy.get("unavailable_component_action", "")
-                ),
-                "blocked_component_action": str(
-                    policy.get("blocked_component_action", "")
-                ),
+                "unavailable_component_action": str(policy.get("unavailable_component_action", "")),
+                "blocked_component_action": str(policy.get("blocked_component_action", "")),
                 "validation_risk_missing_action": str(
                     policy.get("validation_risk_missing_action", "")
                 ),
@@ -474,9 +454,7 @@ def build_phase12a_summary(
         and _bool_value(missingness_policy.iloc[0]["no_return_inference"])
         and _bool_value(missingness_policy.iloc[0]["no_silent_fill"])
         and not _bool_value(
-            missingness_policy.iloc[0][
-                "score_calculation_allowed_with_missing_validation_risk"
-            ]
+            missingness_policy.iloc[0]["score_calculation_allowed_with_missing_validation_risk"]
         )
     )
     states_non_trading = (
@@ -505,7 +483,9 @@ def build_phase12a_summary(
                 "phase_branch": str(phase_config.get("phase_branch", "")),
                 "source_phase": str(phase_config.get("source_phase", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "source_inputs_present": bool(source_input_check["present"].all()) if not source_input_check.empty else False,
+                "source_inputs_present": bool(source_input_check["present"].all())
+                if not source_input_check.empty
+                else False,
                 "eligible_component_count": int(len(eligible_components)),
                 "eligible_components_non_signal": eligible_non_signal,
                 "blocked_component_count": int(len(blocked_components)),
@@ -517,8 +497,12 @@ def build_phase12a_summary(
                 "score_states_non_trading": states_non_trading,
                 "future_validation_gate_count": int(len(future_validation_gates)),
                 "failure_condition_count": int(len(failure_conditions)),
-                "phase12b_boundary_passed": bool(phase12b_boundary_check["passed"].all()) if not phase12b_boundary_check.empty else False,
-                "scope_boundary_passed": bool(scope_boundary_check["passed"].all()) if not scope_boundary_check.empty else False,
+                "phase12b_boundary_passed": bool(phase12b_boundary_check["passed"].all())
+                if not phase12b_boundary_check.empty
+                else False,
+                "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
+                if not scope_boundary_check.empty
+                else False,
                 "strategy_promotion": False,
                 "candidate_promotion": False,
             }
@@ -541,20 +525,89 @@ def build_phase12a_gate_report(
     )
 
     rows = [
-        _gate_row("Source inputs are present", (not gates.get("require_source_inputs", True)) or bool(row["source_inputs_present"]), f"source_inputs_present={bool(row['source_inputs_present'])}"),
-        _gate_row("Eligible components are locked", (not gates.get("require_eligible_components", True)) or int(row["eligible_component_count"]) >= int(gates.get("min_eligible_components", 3)), f"eligible_component_count={int(row['eligible_component_count'])}"),
-        _gate_row("Eligible components are non-signal", bool(row["eligible_components_non_signal"]), f"eligible_components_non_signal={bool(row['eligible_components_non_signal'])}"),
-        _gate_row("Blocked components are locked", (not gates.get("require_blocked_components", True)) or int(row["blocked_component_count"]) >= int(gates.get("min_blocked_components", 2)), f"blocked_component_count={int(row['blocked_component_count'])}"),
-        _gate_row("Blocked components cannot affect future score", bool(row["blocked_components_clean"]), f"blocked_components_clean={bool(row['blocked_components_clean'])}"),
-        _gate_row("Formula structure is clean", (not gates.get("require_formula_structure", True)) or bool(row["formula_structure_clean"]), f"formula_structure_clean={bool(row['formula_structure_clean'])}"),
-        _gate_row("Weighting policy is non-return based", (not gates.get("require_non_return_weighting_policy", True)) or bool(row["weighting_policy_clean"]), f"weighting_policy_clean={bool(row['weighting_policy_clean'])}"),
-        _gate_row("Missingness policy is clean", (not gates.get("require_missingness_policy", True)) or bool(row["missingness_policy_clean"]), f"missingness_policy_clean={bool(row['missingness_policy_clean'])}"),
-        _gate_row("Score states are non-trading", (not gates.get("require_score_state_interpretation", True)) or (int(row["score_state_count"]) >= int(gates.get("min_score_states", 3)) and bool(row["score_states_non_trading"])), f"score_state_count={int(row['score_state_count'])}; score_states_non_trading={bool(row['score_states_non_trading'])}"),
-        _gate_row("Future validation gates are documented", (not gates.get("require_future_validation_gates", True)) or int(row["future_validation_gate_count"]) >= int(gates.get("min_future_validation_gates", 6)), f"future_validation_gate_count={int(row['future_validation_gate_count'])}"),
-        _gate_row("Failure conditions are documented", (not gates.get("require_failure_conditions", True)) or int(row["failure_condition_count"]) >= int(gates.get("min_failure_conditions", 6)), f"failure_condition_count={int(row['failure_condition_count'])}"),
-        _gate_row("Phase 12B boundary is readiness-only", (not gates.get("require_phase12b_boundary_readiness_only", True)) or bool(row["phase12b_boundary_passed"]), f"phase12b_boundary_passed={bool(row['phase12b_boundary_passed'])}"),
-        _gate_row("No score calculation/output/signal/backtest/model/data/promotion is allowed", bool(row["scope_boundary_passed"]), f"scope_boundary_passed={bool(row['scope_boundary_passed'])}"),
-        _gate_row("Spec role is correct", str(row["spec_role"]) == required_role, f"spec_role={row['spec_role']}"),
+        _gate_row(
+            "Source inputs are present",
+            (not gates.get("require_source_inputs", True)) or bool(row["source_inputs_present"]),
+            f"source_inputs_present={bool(row['source_inputs_present'])}",
+        ),
+        _gate_row(
+            "Eligible components are locked",
+            (not gates.get("require_eligible_components", True))
+            or int(row["eligible_component_count"]) >= int(gates.get("min_eligible_components", 3)),
+            f"eligible_component_count={int(row['eligible_component_count'])}",
+        ),
+        _gate_row(
+            "Eligible components are non-signal",
+            bool(row["eligible_components_non_signal"]),
+            f"eligible_components_non_signal={bool(row['eligible_components_non_signal'])}",
+        ),
+        _gate_row(
+            "Blocked components are locked",
+            (not gates.get("require_blocked_components", True))
+            or int(row["blocked_component_count"]) >= int(gates.get("min_blocked_components", 2)),
+            f"blocked_component_count={int(row['blocked_component_count'])}",
+        ),
+        _gate_row(
+            "Blocked components cannot affect future score",
+            bool(row["blocked_components_clean"]),
+            f"blocked_components_clean={bool(row['blocked_components_clean'])}",
+        ),
+        _gate_row(
+            "Formula structure is clean",
+            (not gates.get("require_formula_structure", True))
+            or bool(row["formula_structure_clean"]),
+            f"formula_structure_clean={bool(row['formula_structure_clean'])}",
+        ),
+        _gate_row(
+            "Weighting policy is non-return based",
+            (not gates.get("require_non_return_weighting_policy", True))
+            or bool(row["weighting_policy_clean"]),
+            f"weighting_policy_clean={bool(row['weighting_policy_clean'])}",
+        ),
+        _gate_row(
+            "Missingness policy is clean",
+            (not gates.get("require_missingness_policy", True))
+            or bool(row["missingness_policy_clean"]),
+            f"missingness_policy_clean={bool(row['missingness_policy_clean'])}",
+        ),
+        _gate_row(
+            "Score states are non-trading",
+            (not gates.get("require_score_state_interpretation", True))
+            or (
+                int(row["score_state_count"]) >= int(gates.get("min_score_states", 3))
+                and bool(row["score_states_non_trading"])
+            ),
+            f"score_state_count={int(row['score_state_count'])}; score_states_non_trading={bool(row['score_states_non_trading'])}",
+        ),
+        _gate_row(
+            "Future validation gates are documented",
+            (not gates.get("require_future_validation_gates", True))
+            or int(row["future_validation_gate_count"])
+            >= int(gates.get("min_future_validation_gates", 6)),
+            f"future_validation_gate_count={int(row['future_validation_gate_count'])}",
+        ),
+        _gate_row(
+            "Failure conditions are documented",
+            (not gates.get("require_failure_conditions", True))
+            or int(row["failure_condition_count"]) >= int(gates.get("min_failure_conditions", 6)),
+            f"failure_condition_count={int(row['failure_condition_count'])}",
+        ),
+        _gate_row(
+            "Phase 12B boundary is readiness-only",
+            (not gates.get("require_phase12b_boundary_readiness_only", True))
+            or bool(row["phase12b_boundary_passed"]),
+            f"phase12b_boundary_passed={bool(row['phase12b_boundary_passed'])}",
+        ),
+        _gate_row(
+            "No score calculation/output/signal/backtest/model/data/promotion is allowed",
+            bool(row["scope_boundary_passed"]),
+            f"scope_boundary_passed={bool(row['scope_boundary_passed'])}",
+        ),
+        _gate_row(
+            "Spec role is correct",
+            str(row["spec_role"]) == required_role,
+            f"spec_role={row['spec_role']}",
+        ),
     ]
 
     gate_report = pd.DataFrame(rows)
@@ -783,7 +836,9 @@ def build_phase12b_phase12a_result_check(phase_config: dict[str, Any]) -> pd.Dat
         {
             "check": "Phase 12A conclusion passed",
             "passed": conclusion_passed,
-            "detail": str(conclusion.iloc[0].get("verdict", "")) if not conclusion.empty else "missing",
+            "detail": str(conclusion.iloc[0].get("verdict", ""))
+            if not conclusion.empty
+            else "missing",
         },
         {
             "check": "Phase 12A gate report passed",
@@ -854,7 +909,8 @@ def build_phase12b_phase12c_boundary_check(phase_config: dict[str, Any]) -> pd.D
         {
             "boundary_item": "phase12c_allowed_next_step",
             "value": str(boundary.get("allowed_next_step", "")),
-            "passed": "diagnostic score calculation" in str(boundary.get("allowed_next_step", "")).lower(),
+            "passed": "diagnostic score calculation"
+            in str(boundary.get("allowed_next_step", "")).lower(),
         },
         {
             "boundary_item": "phase12c_forbidden_next_step",
@@ -922,12 +978,24 @@ def build_phase12b_summary(
                 "phase_branch": str(phase_config.get("phase_branch", "")),
                 "source_phase": str(phase_config.get("source_phase", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "phase12a_reports_present": bool(report_inventory_check["present"].all()) if not report_inventory_check.empty else False,
-                "phase12a_result_passed": bool(phase12a_result_check["passed"].all()) if not phase12a_result_check.empty else False,
-                "config_flags_clean_for_run": bool(config_flag_check["passed"].all()) if not config_flag_check.empty else False,
-                "readiness_claims_locked": bool(readiness_claims_check["passed"].all()) if not readiness_claims_check.empty else False,
-                "phase12c_boundary_passed": bool(phase12c_boundary_check["passed"].all()) if not phase12c_boundary_check.empty else False,
-                "scope_boundary_passed": bool(scope_boundary_check["passed"].all()) if not scope_boundary_check.empty else False,
+                "phase12a_reports_present": bool(report_inventory_check["present"].all())
+                if not report_inventory_check.empty
+                else False,
+                "phase12a_result_passed": bool(phase12a_result_check["passed"].all())
+                if not phase12a_result_check.empty
+                else False,
+                "config_flags_clean_for_run": bool(config_flag_check["passed"].all())
+                if not config_flag_check.empty
+                else False,
+                "readiness_claims_locked": bool(readiness_claims_check["passed"].all())
+                if not readiness_claims_check.empty
+                else False,
+                "phase12c_boundary_passed": bool(phase12c_boundary_check["passed"].all())
+                if not phase12c_boundary_check.empty
+                else False,
+                "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
+                if not scope_boundary_check.empty
+                else False,
                 "strategy_promotion": False,
                 "candidate_promotion": False,
             }
@@ -948,13 +1016,52 @@ def build_phase12b_gate_report(
     required_role = str(gates.get("required_audit_role", "Score-calculation readiness audit only"))
 
     rows = [
-        _gate_row("Phase 12A reports are present", (not gates.get("require_phase12a_reports_present", True)) or bool(row["phase12a_reports_present"]), f"phase12a_reports_present={bool(row['phase12a_reports_present'])}"),
-        _gate_row("Phase 12A conclusion and gates passed", ((not gates.get("require_phase12a_conclusion_passed", True)) or bool(row["phase12a_result_passed"])) and ((not gates.get("require_phase12a_gate_report_passed", True)) or bool(row["phase12a_result_passed"])), f"phase12a_result_passed={bool(row['phase12a_result_passed'])}"),
-        _gate_row("Config flags are clean for combined run", (not gates.get("require_config_flags_clean_for_run", True)) or bool(row["config_flags_clean_for_run"]), f"config_flags_clean_for_run={bool(row['config_flags_clean_for_run'])}"),
-        _gate_row("Readiness claims are locked", (not gates.get("require_readiness_claims_locked", True)) or bool(row["readiness_claims_locked"]), f"readiness_claims_locked={bool(row['readiness_claims_locked'])}"),
-        _gate_row("Phase 12C boundary is diagnostic-only", (not gates.get("require_phase12c_boundary_diagnostic_only", True)) or bool(row["phase12c_boundary_passed"]), f"phase12c_boundary_passed={bool(row['phase12c_boundary_passed'])}"),
-        _gate_row("No score output/signal/backtest/model/data/promotion is allowed", bool(row["scope_boundary_passed"]), f"scope_boundary_passed={bool(row['scope_boundary_passed'])}"),
-        _gate_row("Audit role is correct", str(row["audit_role"]) == required_role, f"audit_role={row['audit_role']}"),
+        _gate_row(
+            "Phase 12A reports are present",
+            (not gates.get("require_phase12a_reports_present", True))
+            or bool(row["phase12a_reports_present"]),
+            f"phase12a_reports_present={bool(row['phase12a_reports_present'])}",
+        ),
+        _gate_row(
+            "Phase 12A conclusion and gates passed",
+            (
+                (not gates.get("require_phase12a_conclusion_passed", True))
+                or bool(row["phase12a_result_passed"])
+            )
+            and (
+                (not gates.get("require_phase12a_gate_report_passed", True))
+                or bool(row["phase12a_result_passed"])
+            ),
+            f"phase12a_result_passed={bool(row['phase12a_result_passed'])}",
+        ),
+        _gate_row(
+            "Config flags are clean for combined run",
+            (not gates.get("require_config_flags_clean_for_run", True))
+            or bool(row["config_flags_clean_for_run"]),
+            f"config_flags_clean_for_run={bool(row['config_flags_clean_for_run'])}",
+        ),
+        _gate_row(
+            "Readiness claims are locked",
+            (not gates.get("require_readiness_claims_locked", True))
+            or bool(row["readiness_claims_locked"]),
+            f"readiness_claims_locked={bool(row['readiness_claims_locked'])}",
+        ),
+        _gate_row(
+            "Phase 12C boundary is diagnostic-only",
+            (not gates.get("require_phase12c_boundary_diagnostic_only", True))
+            or bool(row["phase12c_boundary_passed"]),
+            f"phase12c_boundary_passed={bool(row['phase12c_boundary_passed'])}",
+        ),
+        _gate_row(
+            "No score output/signal/backtest/model/data/promotion is allowed",
+            bool(row["scope_boundary_passed"]),
+            f"scope_boundary_passed={bool(row['scope_boundary_passed'])}",
+        ),
+        _gate_row(
+            "Audit role is correct",
+            str(row["audit_role"]) == required_role,
+            f"audit_role={row['audit_role']}",
+        ),
     ]
 
     gate_report = pd.DataFrame(rows)

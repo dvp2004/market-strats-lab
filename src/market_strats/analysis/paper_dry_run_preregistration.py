@@ -316,9 +316,7 @@ def _write_dashboard_index(
         "",
     ]
     for row in manifest.to_dict(orient="records"):
-        lines.append(
-            f"- {row['panel_id']}: {row['status']} ({row['artifact_path']})"
-        )
+        lines.append(f"- {row['panel_id']}: {row['status']} ({row['artifact_path']})")
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -375,18 +373,23 @@ def save_phase16a_paper_dry_run_preregistration(
     safety = _paper_safety_flags(section)
     upstream_safety = _upstream_safety_flags(decision_row)
     exposure = _parse_exposure(latest_signal_raw.get("current_exposure", ""))
-    signal_required_fields_present = all(
-        _text_value(latest_signal_raw.get(column, ""))
-        for column in ["current_mode", "current_exposure", "target_action"]
-    ) and exposure is not None
-    candidate_system_matches = (
-        not _text_value(section.get("candidate_system_id", ""))
-        or _text_value(latest_signal_raw.get("candidate_system_id", ""))
-        == _text_value(section.get("candidate_system_id", ""))
+    signal_required_fields_present = (
+        all(
+            _text_value(latest_signal_raw.get(column, ""))
+            for column in ["current_mode", "current_exposure", "target_action"]
+        )
+        and exposure is not None
+    )
+    candidate_system_matches = not _text_value(
+        section.get("candidate_system_id", "")
+    ) or _text_value(latest_signal_raw.get("candidate_system_id", "")) == _text_value(
+        section.get("candidate_system_id", "")
     )
 
     gate_rows = [
-        _gate_row("phase15n_decision_report_present", not decision_report.empty, str(decision_path)),
+        _gate_row(
+            "phase15n_decision_report_present", not decision_report.empty, str(decision_path)
+        ),
         _gate_row(
             "phase15n_required_decision",
             _text_value(decision_row.get("decision", "")) == required_decision,
@@ -397,7 +400,9 @@ def save_phase16a_paper_dry_run_preregistration(
             _bool_value(decision_row.get("paper_dry_run_preregistration_allowed_next", False)),
             str(decision_row.get("paper_dry_run_preregistration_allowed_next", "")),
         ),
-        _gate_row("phase15m_current_signal_present", not current_signal_file.empty, str(signal_path)),
+        _gate_row(
+            "phase15m_current_signal_present", not current_signal_file.empty, str(signal_path)
+        ),
         _gate_row(
             "latest_signal_required_fields_present",
             signal_required_fields_present,

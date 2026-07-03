@@ -113,12 +113,8 @@ def build_phase10e_hypothesis_spec(phase_config: dict[str, Any]) -> pd.DataFrame
                 "name": str(hypothesis.get("name", "")),
                 "source_phase": str(hypothesis.get("source_phase", "")),
                 "source_evidence": _join_list(hypothesis.get("source_evidence")),
-                "allowed_macro_inputs": _join_list(
-                    hypothesis.get("allowed_macro_inputs")
-                ),
-                "allowed_macro_input_count": len(
-                    _as_list(hypothesis.get("allowed_macro_inputs"))
-                ),
+                "allowed_macro_inputs": _join_list(hypothesis.get("allowed_macro_inputs")),
+                "allowed_macro_input_count": len(_as_list(hypothesis.get("allowed_macro_inputs"))),
                 "fixed_macro_thresholds": "; ".join(
                     f"{key}={value}" for key, value in fixed_thresholds.items()
                 ),
@@ -128,24 +124,12 @@ def build_phase10e_hypothesis_spec(phase_config: dict[str, Any]) -> pd.DataFrame
                 ),
                 "forbidden_tuning": _join_list(hypothesis.get("forbidden_tuning")),
                 "validation_gates": _join_list(hypothesis.get("validation_gates")),
-                "validation_gate_count": len(
-                    _as_list(hypothesis.get("validation_gates"))
-                ),
-                "failure_conditions": _join_list(
-                    hypothesis.get("failure_conditions")
-                ),
-                "failure_condition_count": len(
-                    _as_list(hypothesis.get("failure_conditions"))
-                ),
-                "readme_wording_if_passed": str(
-                    hypothesis.get("readme_wording_if_passed", "")
-                ),
-                "readme_wording_if_mixed": str(
-                    hypothesis.get("readme_wording_if_mixed", "")
-                ),
-                "readme_wording_if_failed": str(
-                    hypothesis.get("readme_wording_if_failed", "")
-                ),
+                "validation_gate_count": len(_as_list(hypothesis.get("validation_gates"))),
+                "failure_conditions": _join_list(hypothesis.get("failure_conditions")),
+                "failure_condition_count": len(_as_list(hypothesis.get("failure_conditions"))),
+                "readme_wording_if_passed": str(hypothesis.get("readme_wording_if_passed", "")),
+                "readme_wording_if_mixed": str(hypothesis.get("readme_wording_if_mixed", "")),
+                "readme_wording_if_failed": str(hypothesis.get("readme_wording_if_failed", "")),
                 "max_allowed_role_after_phase10f": str(
                     hypothesis.get(
                         "max_allowed_role_after_phase10f",
@@ -333,9 +317,7 @@ def build_phase10e_summary(
                 "validation_gate_rows": int(len(validation_gates)),
                 "failure_condition_rows": int(len(failure_conditions)),
                 "readme_wording_complete": readme_wording_complete,
-                "phase10f_boundary_passed": bool(
-                    phase10f_boundary_check["passed"].all()
-                )
+                "phase10f_boundary_passed": bool(phase10f_boundary_check["passed"].all())
                 if not phase10f_boundary_check.empty
                 else False,
                 "allow_macro_signal_creation": bool(
@@ -347,12 +329,8 @@ def build_phase10e_summary(
                 "allow_model_feature_creation": bool(
                     phase_config.get("allow_model_feature_creation", False)
                 ),
-                "allow_model_training": bool(
-                    phase_config.get("allow_model_training", False)
-                ),
-                "allow_strategy_test": bool(
-                    phase_config.get("allow_strategy_test", False)
-                ),
+                "allow_model_training": bool(phase_config.get("allow_model_training", False)),
+                "allow_strategy_test": bool(phase_config.get("allow_strategy_test", False)),
                 "allow_strategy_promotion": bool(
                     phase_config.get("allow_strategy_promotion", False)
                 ),
@@ -405,21 +383,16 @@ def build_phase10e_gate_report(
         if not hypothesis_spec.empty
         else False
     )
-    allowed_inputs_complete = (
-        int(row["allowed_input_rows"]) > 0
-        and bool(row["allowed_inputs_all_registered"])
+    allowed_inputs_complete = int(row["allowed_input_rows"]) > 0 and bool(
+        row["allowed_inputs_all_registered"]
     )
     fixed_thresholds_complete = (
         bool((hypothesis_spec["fixed_threshold_count"] > 0).all())
         if not hypothesis_spec.empty
         else False
     )
-    validation_gates_complete = int(row["validation_gate_rows"]) >= int(
-        row["hypothesis_count"]
-    )
-    failure_conditions_complete = int(row["failure_condition_rows"]) >= int(
-        row["hypothesis_count"]
-    )
+    validation_gates_complete = int(row["validation_gate_rows"]) >= int(row["hypothesis_count"])
+    failure_conditions_complete = int(row["failure_condition_rows"]) >= int(row["hypothesis_count"])
 
     rows = [
         _gate_row(
@@ -429,14 +402,12 @@ def build_phase10e_gate_report(
         ),
         _gate_row(
             "Source evidence is documented",
-            (not gates.get("require_source_evidence", True))
-            or source_evidence_complete,
+            (not gates.get("require_source_evidence", True)) or source_evidence_complete,
             "Each hypothesis must document Phase 10D evidence.",
         ),
         _gate_row(
             "Allowed macro inputs are documented",
-            (not gates.get("require_allowed_inputs", True))
-            or int(row["allowed_input_rows"]) > 0,
+            (not gates.get("require_allowed_inputs", True)) or int(row["allowed_input_rows"]) > 0,
             f"allowed_input_rows={int(row['allowed_input_rows'])}",
         ),
         _gate_row(
@@ -453,26 +424,22 @@ def build_phase10e_gate_report(
         ),
         _gate_row(
             "Fixed thresholds are documented",
-            (not gates.get("require_fixed_thresholds", True))
-            or fixed_thresholds_complete,
+            (not gates.get("require_fixed_thresholds", True)) or fixed_thresholds_complete,
             "Each hypothesis must lock fixed macro thresholds.",
         ),
         _gate_row(
             "Validation gates are documented",
-            (not gates.get("require_validation_gates", True))
-            or validation_gates_complete,
+            (not gates.get("require_validation_gates", True)) or validation_gates_complete,
             f"validation_gate_rows={int(row['validation_gate_rows'])}",
         ),
         _gate_row(
             "Failure conditions are documented",
-            (not gates.get("require_failure_conditions", True))
-            or failure_conditions_complete,
+            (not gates.get("require_failure_conditions", True)) or failure_conditions_complete,
             f"failure_condition_rows={int(row['failure_condition_rows'])}",
         ),
         _gate_row(
             "README wording outcomes are documented",
-            (not gates.get("require_readme_wording", True))
-            or bool(row["readme_wording_complete"]),
+            (not gates.get("require_readme_wording", True)) or bool(row["readme_wording_complete"]),
             f"readme_wording_complete={bool(row['readme_wording_complete'])}",
         ),
         _gate_row(
@@ -730,8 +697,7 @@ def save_phase10e_preregistered_macro_hypothesis_spec(
         summary=summary,
         gate_report=gate_report,
         conclusion=conclusion,
-        output_path=reports_path
-        / "phase10e_preregistered_macro_hypothesis_spec.md",
+        output_path=reports_path / "phase10e_preregistered_macro_hypothesis_spec.md",
     )
 
     print("Wrote Phase 10E pre-registered macro hypothesis spec reports.")

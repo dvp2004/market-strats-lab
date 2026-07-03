@@ -98,13 +98,11 @@ def _source_paths(section: dict[str, Any], reports_dir: Path) -> dict[str, Path]
         )
     )
     return {
-        "phase21b_shortlist": reconciliation_dir
-        / "phase21b_paper_shortlist_recommendation.csv",
+        "phase21b_shortlist": reconciliation_dir / "phase21b_paper_shortlist_recommendation.csv",
         "phase21b_current": reconciliation_dir
         / "phase21b_current_paper_candidate_reconciliation.csv",
         "phase21a_master": regime_dir / "phase21a_master_strategy_candidates.csv",
-        "phase21a_components": regime_dir
-        / "phase21a_regime_robustness_score_components.csv",
+        "phase21a_components": regime_dir / "phase21a_regime_robustness_score_components.csv",
         "dynamic_allocations": dynamic_dir / "finalist_dynamic_allocations.csv",
         "tear_sheet": hardening_dir / "daily_execution_tear_sheet.csv",
         "fresh_data_quality": Path(
@@ -175,7 +173,12 @@ def _data_quality_by_symbol(quality: pd.DataFrame) -> dict[str, dict[str, Any]]:
             or status in {"block", "blocked", "failed", "failure"}
             or _bool_value(row.get("outlier_block", False))
         )
-        rows[symbol] = {"warning": warning, "block": block, "warnings": warnings, "blocking": blocking}
+        rows[symbol] = {
+            "warning": warning,
+            "block": block,
+            "warnings": warnings,
+            "blocking": blocking,
+        }
     return rows
 
 
@@ -318,10 +321,7 @@ def build_regime_informed_targets(
                 == candidate_id
             ].copy()
             statuses = dyn.get("allocation_status", pd.Series(dtype=str)).astype(str)
-            valid = (
-                not dyn.empty
-                and statuses.eq("dynamic_allocation_resolved").all()
-            )
+            valid = not dyn.empty and statuses.eq("dynamic_allocation_resolved").all()
             if not valid:
                 rows.append(
                     _make_target_row(
@@ -349,10 +349,16 @@ def build_regime_informed_targets(
                 pd.to_numeric(
                     dyn.loc[dyn["asset"].astype(str) == "BTC-USD", "target_weight"],
                     errors="coerce",
-                ).fillna(0.0).sum()
+                )
+                .fillna(0.0)
+                .sum()
             )
             for dyn_row in dyn.to_dict("records"):
-                weight = float(pd.to_numeric(pd.Series([dyn_row.get("target_weight")]), errors="coerce").fillna(0.0).iloc[0])
+                weight = float(
+                    pd.to_numeric(pd.Series([dyn_row.get("target_weight")]), errors="coerce")
+                    .fillna(0.0)
+                    .iloc[0]
+                )
                 rows.append(
                     _make_target_row(
                         tracking_date=tracking_date,
@@ -380,9 +386,7 @@ def build_regime_informed_targets(
         if allocation is None:
             continue
         blocked_assets = [
-            asset
-            for asset in allocation
-            if quality.get(asset, {}).get("block", False)
+            asset for asset in allocation if quality.get(asset, {}).get("block", False)
         ]
         allowed = not blocked_assets
         status = "static_allocation_resolved" if allowed else "asset_data_quality_block"
@@ -427,7 +431,9 @@ def build_order_preview(targets: pd.DataFrame) -> pd.DataFrame:
                 "asset": row.get("asset"),
                 "target_weight": row.get("target_weight"),
                 "target_notional_usd": row.get("target_notional_usd"),
-                "preview_action": "PAPER_TARGET_WEIGHT_ONLY" if allowed else "PAPER_PREVIEW_BLOCKED",
+                "preview_action": "PAPER_TARGET_WEIGHT_ONLY"
+                if allowed
+                else "PAPER_PREVIEW_BLOCKED",
                 "execution_instruction": "manual_paper_preview_only",
                 "paper_order_allowed": allowed,
                 "paper_order_blocking_reason": blocking_reason,
@@ -557,8 +563,9 @@ def build_adoption_status(
     requires_manual_adoption: bool,
 ) -> pd.DataFrame:
     candidate_allowed = (
-        targets.groupby("canonical_candidate_id")["paper_preview_allowed"]
-        .apply(lambda values: bool(pd.Series(values).map(_bool_value).all()))
+        targets.groupby("canonical_candidate_id")["paper_preview_allowed"].apply(
+            lambda values: bool(pd.Series(values).map(_bool_value).all())
+        )
         if not targets.empty
         else pd.Series(dtype=bool)
     )
@@ -590,7 +597,9 @@ def build_adoption_status(
     )
 
 
-def _empty_outputs(output_dir: Path, dashboard_dir: Path, decision: str, missing: list[str]) -> dict[str, Path]:
+def _empty_outputs(
+    output_dir: Path, dashboard_dir: Path, decision: str, missing: list[str]
+) -> dict[str, Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
     dashboard_dir.mkdir(parents=True, exist_ok=True)
     summary = pd.DataFrame(
@@ -764,8 +773,9 @@ def save_phase21c_regime_informed_paper_tracking(
         else "regime_informed_paper_tracking_failed_safety_gate"
     )
     candidate_allowed = (
-        targets.groupby("canonical_candidate_id")["paper_preview_allowed"]
-        .apply(lambda values: bool(pd.Series(values).map(_bool_value).all()))
+        targets.groupby("canonical_candidate_id")["paper_preview_allowed"].apply(
+            lambda values: bool(pd.Series(values).map(_bool_value).all())
+        )
         if not targets.empty
         else pd.Series(dtype=bool)
     )

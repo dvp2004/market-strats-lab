@@ -314,14 +314,11 @@ def build_phase13o_macro_source_schema_profile(
     date_candidates = [
         str(col)
         for col in macro_source.columns
-        if "date" in str(col).lower() or str(col) in _as_list(
-            phase_config.get("macro_sources", {}).get("date_column_candidates")
-        )
+        if "date" in str(col).lower()
+        or str(col) in _as_list(phase_config.get("macro_sources", {}).get("date_column_candidates"))
     ]
     numeric_cols = [
-        str(col)
-        for col in macro_source.columns
-        if pd.api.types.is_numeric_dtype(macro_source[col])
+        str(col) for col in macro_source.columns if pd.api.types.is_numeric_dtype(macro_source[col])
     ]
     object_cols = [
         str(col)
@@ -399,12 +396,12 @@ def build_phase13o_macro_long_format_diagnostic(
     phase_config: dict[str, Any],
 ) -> pd.DataFrame:
     macro_sources = phase_config.get("macro_sources", {})
-    series_candidates = _as_list(
-        macro_sources.get("long_format_series_column_candidates")
-    )
+    series_candidates = _as_list(macro_sources.get("long_format_series_column_candidates"))
     value_candidates = _as_list(macro_sources.get("long_format_value_column_candidates"))
 
-    series_col = _find_alias_column(macro_source, series_candidates) if not macro_source.empty else ""
+    series_col = (
+        _find_alias_column(macro_source, series_candidates) if not macro_source.empty else ""
+    )
     value_col = _find_alias_column(macro_source, value_candidates) if not macro_source.empty else ""
 
     unique_series = []
@@ -463,16 +460,12 @@ def build_phase13o_existing_repair_panel_profile(
                 "feature_id": str(feature_id),
                 "rows": int(len(group)),
                 "feature_value_non_null": int(
-                    pd.to_numeric(group.get("feature_value"), errors="coerce")
-                    .notna()
-                    .sum()
+                    pd.to_numeric(group.get("feature_value"), errors="coerce").notna().sum()
                 )
                 if "feature_value" in group.columns
                 else 0,
                 "raw_inputs_available_true": int(
-                    group.get("raw_inputs_available", pd.Series(dtype=bool))
-                    .map(_bool_value)
-                    .sum()
+                    group.get("raw_inputs_available", pd.Series(dtype=bool)).map(_bool_value).sum()
                 )
                 if "raw_inputs_available" in group.columns
                 else 0,
@@ -524,29 +517,24 @@ def build_phase13o_root_cause_report(
     repair_panel_profile: pd.DataFrame,
     macro_guard_profile: pd.DataFrame,
 ) -> pd.DataFrame:
-    source_found = (
-        not macro_source_inventory.empty
-        and bool(macro_source_inventory["present"].map(_bool_value).any())
+    source_found = not macro_source_inventory.empty and bool(
+        macro_source_inventory["present"].map(_bool_value).any()
     )
-    all_columns_numeric = (
-        not column_mapping_report.empty
-        and bool(column_mapping_report["numeric_usable"].map(_bool_value).all())
+    all_columns_numeric = not column_mapping_report.empty and bool(
+        column_mapping_report["numeric_usable"].map(_bool_value).all()
     )
-    any_columns_numeric = (
-        not column_mapping_report.empty
-        and bool(column_mapping_report["numeric_usable"].map(_bool_value).any())
+    any_columns_numeric = not column_mapping_report.empty and bool(
+        column_mapping_report["numeric_usable"].map(_bool_value).any()
     )
-    long_format_detected = (
-        not long_format_diagnostic.empty
-        and _bool_value(long_format_diagnostic.iloc[0].get("long_format_detected", False))
+    long_format_detected = not long_format_diagnostic.empty and _bool_value(
+        long_format_diagnostic.iloc[0].get("long_format_detected", False)
     )
     repair_panel_available = (
         not repair_panel_profile.empty
         and float(repair_panel_profile["available_ratio"].max()) > 0.0
     )
-    macro_blocked = (
-        not macro_guard_profile.empty
-        and _bool_value(macro_guard_profile.iloc[0].get("macro_blocked_for_dataset_v1", True))
+    macro_blocked = not macro_guard_profile.empty and _bool_value(
+        macro_guard_profile.iloc[0].get("macro_blocked_for_dataset_v1", True)
     )
 
     if not source_found:
@@ -642,7 +630,10 @@ def build_phase13o_phase13p_boundary_check(
     ]
 
     out = pd.DataFrame(
-        [{"boundary_item": item, "value": value, "passed": passed} for item, value, passed in checks]
+        [
+            {"boundary_item": item, "value": value, "passed": passed}
+            for item, value, passed in checks
+        ]
     )
     out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
     return out
@@ -722,9 +713,7 @@ def build_phase13o_summary(
                 "recommended_action": str(root_cause_report.iloc[0]["recommended_action"])
                 if not root_cause_report.empty
                 else "",
-                "phase13p_boundary_passed": bool(
-                    phase13p_boundary_check["passed"].all()
-                )
+                "phase13p_boundary_passed": bool(phase13p_boundary_check["passed"].all())
                 if not phase13p_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -763,8 +752,7 @@ def build_phase13o_gate_report(
     rows = [
         _gate_row(
             "Phase 13N passed",
-            (not gates.get("require_phase13n_passed", True))
-            or bool(row["phase13n_result_passed"]),
+            (not gates.get("require_phase13n_passed", True)) or bool(row["phase13n_result_passed"]),
             f"phase13n_result_passed={bool(row['phase13n_result_passed'])}",
         ),
         _gate_row(
@@ -781,8 +769,7 @@ def build_phase13o_gate_report(
         ),
         _gate_row(
             "Macro guard was loaded",
-            (not gates.get("require_macro_guard_loaded", True))
-            or int(row["macro_guard_rows"]) > 0,
+            (not gates.get("require_macro_guard_loaded", True)) or int(row["macro_guard_rows"]) > 0,
             f"macro_guard_rows={int(row['macro_guard_rows'])}",
         ),
         _gate_row(
@@ -799,8 +786,7 @@ def build_phase13o_gate_report(
         ),
         _gate_row(
             "Root-cause report exists",
-            (not gates.get("require_root_cause_report", True))
-            or int(row["root_cause_rows"]) > 0,
+            (not gates.get("require_root_cause_report", True)) or int(row["root_cause_rows"]) > 0,
             f"root_cause={row['root_cause']}",
         ),
         _gate_row(
@@ -971,8 +957,7 @@ def save_phase13o_macro_availability_root_cause_diagnostic(
             "Gate Report": gate_report,
             "Conclusion": conclusion,
         },
-        output_path=reports_path
-        / "phase13o_macro_availability_root_cause_diagnostic.md",
+        output_path=reports_path / "phase13o_macro_availability_root_cause_diagnostic.md",
     )
 
     print("Wrote Phase 13O macro availability root-cause reports.")
@@ -1178,7 +1163,10 @@ def build_phase13p_phase13q_boundary_check(
     ]
 
     out = pd.DataFrame(
-        [{"boundary_item": item, "value": value, "passed": passed} for item, value, passed in checks]
+        [
+            {"boundary_item": item, "value": value, "passed": passed}
+            for item, value, passed in checks
+        ]
     )
     out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
     return out
@@ -1232,9 +1220,7 @@ def build_phase13p_summary(
                 "phase_branch": str(phase_config.get("phase_branch", "")),
                 "source_phase": str(phase_config.get("source_phase", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "phase13o_reports_present": bool(
-                    report_inventory_check["present"].all()
-                )
+                "phase13o_reports_present": bool(report_inventory_check["present"].all())
                 if not report_inventory_check.empty
                 else False,
                 "phase13o_result_passed": bool(phase13o_result_check["passed"].all())
@@ -1250,9 +1236,7 @@ def build_phase13p_summary(
                 )
                 if not repair_decision.empty
                 else "",
-                "phase13q_boundary_passed": bool(
-                    phase13q_boundary_check["passed"].all()
-                )
+                "phase13q_boundary_passed": bool(phase13q_boundary_check["passed"].all())
                 if not phase13q_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -1320,8 +1304,7 @@ def build_phase13p_gate_report(
         ),
         _gate_row(
             "Repair spec exists",
-            (not gates.get("require_repair_spec", True))
-            or int(row["repair_spec_rows"]) > 0,
+            (not gates.get("require_repair_spec", True)) or int(row["repair_spec_rows"]) > 0,
             f"repair_spec_rows={int(row['repair_spec_rows'])}",
         ),
         _gate_row(

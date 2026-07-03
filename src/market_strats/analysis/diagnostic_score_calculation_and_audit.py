@@ -28,9 +28,7 @@ DEFAULT_PHASE12C_CONFIG: dict[str, Any] = {
         "allowed_states": ["supportive", "neutral", "fragile"],
         "formula_source": "Phase 12A pre-registered formula grammar",
         "calculation_scope": "static_branch_level_diagnostic_score",
-        "aggregation_method": (
-            "categorical_equal_vote_with_validation_risk_control"
-        ),
+        "aggregation_method": ("categorical_equal_vote_with_validation_risk_control"),
         "empirical_weights_allowed": False,
         "numeric_weights_allowed": False,
         "returns_used": False,
@@ -95,9 +93,7 @@ DEFAULT_PHASE12D_CONFIG: dict[str, Any] = {
         "require_no_empirical_weight_columns": True,
         "require_no_candidate_promotion": True,
         "require_phase12e_boundary_interpretation_only": True,
-        "required_audit_role": (
-            "Diagnostic score distribution and content audit only"
-        ),
+        "required_audit_role": ("Diagnostic score distribution and content audit only"),
     },
 }
 
@@ -283,8 +279,7 @@ def _apply_validation_risk_control(
         return raw_state, "validation_risk_control_disabled"
 
     validation_rows = component_state_panel[
-        component_state_panel["component_id"].astype(str)
-        == "validation_risk_context"
+        component_state_panel["component_id"].astype(str) == "validation_risk_context"
     ]
 
     if validation_rows.empty:
@@ -346,9 +341,7 @@ def build_phase12c_aggregate_score(
                 "empirical_weights_allowed": _bool_value(
                     policy.get("empirical_weights_allowed", True)
                 ),
-                "numeric_weights_allowed": _bool_value(
-                    policy.get("numeric_weights_allowed", True)
-                ),
+                "numeric_weights_allowed": _bool_value(policy.get("numeric_weights_allowed", True)),
                 "returns_used": _bool_value(policy.get("returns_used", True)),
                 "trading_signal_created": False,
                 "strategy_backtest_run": False,
@@ -366,9 +359,7 @@ def build_phase12c_phase12d_boundary_check(
         {
             "boundary_item": "phase12d_allowed_next_step",
             "value": str(boundary.get("allowed_next_step", "")),
-            "passed": "distribution" in str(
-                boundary.get("allowed_next_step", "")
-            ).lower()
+            "passed": "distribution" in str(boundary.get("allowed_next_step", "")).lower()
             and "audit" in str(boundary.get("allowed_next_step", "")).lower(),
         },
         {
@@ -376,64 +367,43 @@ def build_phase12c_phase12d_boundary_check(
             "value": str(boundary.get("forbidden_next_step", "")),
             "passed": (
                 "strategy" in str(boundary.get("forbidden_next_step", "")).lower()
-                and "promotion"
-                in str(boundary.get("forbidden_next_step", "")).lower()
+                and "promotion" in str(boundary.get("forbidden_next_step", "")).lower()
             ),
         },
         {
             "boundary_item": "phase12d_may_audit_score_distribution",
-            "value": _bool_value(
-                boundary.get("phase12d_may_audit_score_distribution", False)
-            ),
-            "passed": _bool_value(
-                boundary.get("phase12d_may_audit_score_distribution", False)
-            ),
+            "value": _bool_value(boundary.get("phase12d_may_audit_score_distribution", False)),
+            "passed": _bool_value(boundary.get("phase12d_may_audit_score_distribution", False)),
         },
         {
             "boundary_item": "phase12d_may_create_signal",
             "value": _bool_value(boundary.get("phase12d_may_create_signal", True)),
-            "passed": not _bool_value(
-                boundary.get("phase12d_may_create_signal", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase12d_may_create_signal", True)),
         },
         {
             "boundary_item": "phase12d_may_test_strategy",
             "value": _bool_value(boundary.get("phase12d_may_test_strategy", True)),
-            "passed": not _bool_value(
-                boundary.get("phase12d_may_test_strategy", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase12d_may_test_strategy", True)),
         },
         {
             "boundary_item": "phase12d_may_assign_empirical_weights",
-            "value": _bool_value(
-                boundary.get("phase12d_may_assign_empirical_weights", True)
-            ),
-            "passed": not _bool_value(
-                boundary.get("phase12d_may_assign_empirical_weights", True)
-            ),
+            "value": _bool_value(boundary.get("phase12d_may_assign_empirical_weights", True)),
+            "passed": not _bool_value(boundary.get("phase12d_may_assign_empirical_weights", True)),
         },
         {
             "boundary_item": "phase12d_may_train_model",
             "value": _bool_value(boundary.get("phase12d_may_train_model", True)),
-            "passed": not _bool_value(
-                boundary.get("phase12d_may_train_model", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase12d_may_train_model", True)),
         },
         {
             "boundary_item": "phase12d_may_ingest_new_data",
             "value": _bool_value(boundary.get("phase12d_may_ingest_new_data", True)),
-            "passed": not _bool_value(
-                boundary.get("phase12d_may_ingest_new_data", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase12d_may_ingest_new_data", True)),
         },
         {
             "boundary_item": "phase12d_may_promote_candidate",
-            "value": _bool_value(
-                boundary.get("phase12d_may_promote_candidate", True)
-            ),
-            "passed": not _bool_value(
-                boundary.get("phase12d_may_promote_candidate", True)
-            ),
+            "value": _bool_value(boundary.get("phase12d_may_promote_candidate", True)),
+            "passed": not _bool_value(boundary.get("phase12d_may_promote_candidate", True)),
         },
     ]
     out = pd.DataFrame(rows)
@@ -479,26 +449,18 @@ def build_phase12c_summary(
     scope_boundary_check: pd.DataFrame,
 ) -> pd.DataFrame:
     allowed_states = set(
-        str(item) for item in _as_list(
-            phase_config.get("scoring_policy", {}).get("allowed_states")
-        )
+        str(item) for item in _as_list(phase_config.get("scoring_policy", {}).get("allowed_states"))
     )
-    actual_states = set(
-        component_state_panel["diagnostic_state"].dropna().astype(str).tolist()
-    )
+    actual_states = set(component_state_panel["diagnostic_state"].dropna().astype(str).tolist())
     aggregate_state = (
-        str(aggregate_score.iloc[0]["diagnostic_score_state"])
-        if not aggregate_score.empty
-        else ""
+        str(aggregate_score.iloc[0]["diagnostic_score_state"]) if not aggregate_score.empty else ""
     )
     blocked_ids = (
         set(blocked_components["component_id"].dropna().astype(str).tolist())
         if not blocked_components.empty
         else set()
     )
-    used_component_ids = set(
-        component_state_panel["component_id"].dropna().astype(str).tolist()
-    )
+    used_component_ids = set(component_state_panel["component_id"].dropna().astype(str).tolist())
 
     return pd.DataFrame(
         [
@@ -517,8 +479,7 @@ def build_phase12c_summary(
                 "component_states_allowed": actual_states.issubset(allowed_states),
                 "aggregate_score_state": aggregate_state,
                 "aggregate_score_allowed": aggregate_state in allowed_states,
-                "blocked_components_excluded": len(blocked_ids & used_component_ids)
-                == 0,
+                "blocked_components_excluded": len(blocked_ids & used_component_ids) == 0,
                 "existing_project_sources_only": bool(
                     component_state_panel["source_is_existing_project_report"]
                     .map(_bool_value)
@@ -527,14 +488,8 @@ def build_phase12c_summary(
                 if not component_state_panel.empty
                 else False,
                 "component_rows_non_signal": bool(
-                    component_state_panel["trading_allowed"]
-                    .map(_bool_value)
-                    .eq(False)
-                    .all()
-                    and component_state_panel["signal_allowed"]
-                    .map(_bool_value)
-                    .eq(False)
-                    .all()
+                    component_state_panel["trading_allowed"].map(_bool_value).eq(False).all()
+                    and component_state_panel["signal_allowed"].map(_bool_value).eq(False).all()
                 )
                 if not component_state_panel.empty
                 else False,
@@ -555,16 +510,12 @@ def build_phase12c_summary(
                 else False,
                 "aggregate_no_signal_backtest_promotion": bool(
                     not _bool_value(aggregate_score.iloc[0]["trading_signal_created"])
-                    and not _bool_value(
-                        aggregate_score.iloc[0]["strategy_backtest_run"]
-                    )
+                    and not _bool_value(aggregate_score.iloc[0]["strategy_backtest_run"])
                     and not _bool_value(aggregate_score.iloc[0]["candidate_promoted"])
                 )
                 if not aggregate_score.empty
                 else False,
-                "phase12d_boundary_passed": bool(
-                    phase12d_boundary_check["passed"].all()
-                )
+                "phase12d_boundary_passed": bool(phase12d_boundary_check["passed"].all())
                 if not phase12d_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -587,9 +538,7 @@ def build_phase12c_gate_report(
         return pd.DataFrame([_gate_row("Phase 12C summary exists", False, "No summary.")])
 
     row = summary.iloc[0]
-    required_role = str(
-        gates.get("required_calculation_role", "Diagnostic score calculation only")
-    )
+    required_role = str(gates.get("required_calculation_role", "Diagnostic score calculation only"))
 
     rows = [
         _gate_row(
@@ -600,8 +549,7 @@ def build_phase12c_gate_report(
         ),
         _gate_row(
             "Phase 12B remains passed",
-            (not gates.get("require_phase12b_passed", True))
-            or bool(row["phase12b_result_passed"]),
+            (not gates.get("require_phase12b_passed", True)) or bool(row["phase12b_result_passed"]),
             f"phase12b_result_passed={bool(row['phase12b_result_passed'])}",
         ),
         _gate_row(
@@ -630,10 +578,7 @@ def build_phase12c_gate_report(
             "Only existing project sources are used",
             (not gates.get("require_existing_project_sources_only", True))
             or bool(row["existing_project_sources_only"]),
-            (
-                "existing_project_sources_only="
-                f"{bool(row['existing_project_sources_only'])}"
-            ),
+            (f"existing_project_sources_only={bool(row['existing_project_sources_only'])}"),
         ),
         _gate_row(
             "No numeric score output / empirical weights / returns are used",
@@ -913,16 +858,10 @@ def build_phase12d_distribution_check(
     aggregate_score: pd.DataFrame,
     phase_config: dict[str, Any],
 ) -> pd.DataFrame:
-    expected_states = set(
-        str(item) for item in _as_list(phase_config.get("expected_score_states"))
-    )
-    component_states = set(
-        component_state_panel["diagnostic_state"].dropna().astype(str).tolist()
-    )
+    expected_states = set(str(item) for item in _as_list(phase_config.get("expected_score_states")))
+    component_states = set(component_state_panel["diagnostic_state"].dropna().astype(str).tolist())
     aggregate_state = (
-        str(aggregate_score.iloc[0]["diagnostic_score_state"])
-        if not aggregate_score.empty
-        else ""
+        str(aggregate_score.iloc[0]["diagnostic_score_state"]) if not aggregate_score.empty else ""
     )
 
     rows = [
@@ -1036,9 +975,7 @@ def build_phase12d_phase12e_boundary_check(
         {
             "boundary_item": "phase12e_allowed_next_step",
             "value": str(boundary.get("allowed_next_step", "")),
-            "passed": "interpretation" in str(
-                boundary.get("allowed_next_step", "")
-            ).lower()
+            "passed": "interpretation" in str(boundary.get("allowed_next_step", "")).lower()
             and "audit" in str(boundary.get("allowed_next_step", "")).lower(),
         },
         {
@@ -1046,8 +983,7 @@ def build_phase12d_phase12e_boundary_check(
             "value": str(boundary.get("forbidden_next_step", "")),
             "passed": (
                 "strategy" in str(boundary.get("forbidden_next_step", "")).lower()
-                and "promotion"
-                in str(boundary.get("forbidden_next_step", "")).lower()
+                and "promotion" in str(boundary.get("forbidden_next_step", "")).lower()
             ),
         },
         {
@@ -1062,48 +998,32 @@ def build_phase12d_phase12e_boundary_check(
         {
             "boundary_item": "phase12e_may_create_signal",
             "value": _bool_value(boundary.get("phase12e_may_create_signal", True)),
-            "passed": not _bool_value(
-                boundary.get("phase12e_may_create_signal", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase12e_may_create_signal", True)),
         },
         {
             "boundary_item": "phase12e_may_test_strategy",
             "value": _bool_value(boundary.get("phase12e_may_test_strategy", True)),
-            "passed": not _bool_value(
-                boundary.get("phase12e_may_test_strategy", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase12e_may_test_strategy", True)),
         },
         {
             "boundary_item": "phase12e_may_assign_empirical_weights",
-            "value": _bool_value(
-                boundary.get("phase12e_may_assign_empirical_weights", True)
-            ),
-            "passed": not _bool_value(
-                boundary.get("phase12e_may_assign_empirical_weights", True)
-            ),
+            "value": _bool_value(boundary.get("phase12e_may_assign_empirical_weights", True)),
+            "passed": not _bool_value(boundary.get("phase12e_may_assign_empirical_weights", True)),
         },
         {
             "boundary_item": "phase12e_may_train_model",
             "value": _bool_value(boundary.get("phase12e_may_train_model", True)),
-            "passed": not _bool_value(
-                boundary.get("phase12e_may_train_model", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase12e_may_train_model", True)),
         },
         {
             "boundary_item": "phase12e_may_ingest_new_data",
             "value": _bool_value(boundary.get("phase12e_may_ingest_new_data", True)),
-            "passed": not _bool_value(
-                boundary.get("phase12e_may_ingest_new_data", True)
-            ),
+            "passed": not _bool_value(boundary.get("phase12e_may_ingest_new_data", True)),
         },
         {
             "boundary_item": "phase12e_may_promote_candidate",
-            "value": _bool_value(
-                boundary.get("phase12e_may_promote_candidate", True)
-            ),
-            "passed": not _bool_value(
-                boundary.get("phase12e_may_promote_candidate", True)
-            ),
+            "value": _bool_value(boundary.get("phase12e_may_promote_candidate", True)),
+            "passed": not _bool_value(boundary.get("phase12e_may_promote_candidate", True)),
         },
     ]
     out = pd.DataFrame(rows)
@@ -1127,29 +1047,19 @@ def build_phase12d_summary(
                 "phase_branch": str(phase_config.get("phase_branch", "")),
                 "source_phase": str(phase_config.get("source_phase", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "phase12c_reports_present": bool(
-                    source_score_report_check["present"].all()
-                )
+                "phase12c_reports_present": bool(source_score_report_check["present"].all())
                 if not source_score_report_check.empty
                 else False,
-                "phase12c_result_passed": bool(
-                    phase12c_result_check["passed"].all()
-                )
+                "phase12c_result_passed": bool(phase12c_result_check["passed"].all())
                 if not phase12c_result_check.empty
                 else False,
-                "distribution_check_passed": bool(
-                    distribution_check["passed"].all()
-                )
+                "distribution_check_passed": bool(distribution_check["passed"].all())
                 if not distribution_check.empty
                 else False,
-                "forbidden_column_check_passed": bool(
-                    forbidden_column_check["passed"].all()
-                )
+                "forbidden_column_check_passed": bool(forbidden_column_check["passed"].all())
                 if not forbidden_column_check.empty
                 else False,
-                "phase12e_boundary_passed": bool(
-                    phase12e_boundary_check["passed"].all()
-                )
+                "phase12e_boundary_passed": bool(phase12e_boundary_check["passed"].all())
                 if not phase12e_boundary_check.empty
                 else False,
                 "strategy_promotion": False,
@@ -1197,10 +1107,7 @@ def build_phase12d_gate_report(
         _gate_row(
             "No forbidden score/signal/backtest/weight columns exist",
             bool(row["forbidden_column_check_passed"]),
-            (
-                "forbidden_column_check_passed="
-                f"{bool(row['forbidden_column_check_passed'])}"
-            ),
+            (f"forbidden_column_check_passed={bool(row['forbidden_column_check_passed'])}"),
         ),
         _gate_row(
             "Phase 12E boundary is interpretation-audit only",
@@ -1311,17 +1218,13 @@ def save_phase12d_diagnostic_score_distribution_audit(
     reports_path.mkdir(parents=True, exist_ok=True)
 
     reports = phase_config.get("source_score_reports", {})
-    component_state_panel = _read_csv_if_exists(
-        reports.get("component_state_panel", "")
-    )
+    component_state_panel = _read_csv_if_exists(reports.get("component_state_panel", ""))
     component_state_distribution = _read_csv_if_exists(
         reports.get("component_state_distribution", "")
     )
     aggregate_score = _read_csv_if_exists(reports.get("aggregate_score", ""))
 
-    source_score_report_check = build_phase12d_source_score_report_check(
-        phase_config
-    )
+    source_score_report_check = build_phase12d_source_score_report_check(phase_config)
     phase12c_result_check = build_phase12d_phase12c_result_check(phase_config)
     distribution_check = build_phase12d_distribution_check(
         component_state_panel=component_state_panel,

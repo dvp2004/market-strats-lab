@@ -288,9 +288,7 @@ def build_phase13q_macro_source_check(
     )
     required = set(str(item) for item in _as_list(input_data.get("required_macro_series")))
     present_series = (
-        set(macro_source[series_col].dropna().astype(str).unique())
-        if series_col
-        else set()
+        set(macro_source[series_col].dropna().astype(str).unique()) if series_col else set()
     )
 
     required_present = required.issubset(present_series)
@@ -469,17 +467,16 @@ def build_phase13q_macro_repair_panel(
     frame = macro_wide_panel.copy().sort_values("as_of_date").reset_index(drop=True)
 
     frame["macro_dgs2_level"] = pd.to_numeric(frame["DGS2"], errors="coerce")
-    frame["macro_dgs10_minus_dgs2"] = (
-        pd.to_numeric(frame["DGS10"], errors="coerce")
-        - pd.to_numeric(frame["DGS2"], errors="coerce")
-    )
+    frame["macro_dgs10_minus_dgs2"] = pd.to_numeric(
+        frame["DGS10"], errors="coerce"
+    ) - pd.to_numeric(frame["DGS2"], errors="coerce")
     cpi = pd.to_numeric(frame["CPIAUCSL"], errors="coerce")
     frame["macro_cpi_yoy"] = (
         cpi / cpi.shift(int(policy.get("cpi_yoy_lookback_trading_days", 252))) - 1.0
     )
     unrate = pd.to_numeric(frame["UNRATE"], errors="coerce")
-    frame["macro_unrate_3m_change"] = (
-        unrate - unrate.shift(int(policy.get("unrate_change_lookback_trading_days", 63)))
+    frame["macro_unrate_3m_change"] = unrate - unrate.shift(
+        int(policy.get("unrate_change_lookback_trading_days", 63))
     )
 
     rows = []
@@ -507,8 +504,7 @@ def build_phase13q_macro_repair_panel(
 
     state, reason = _state_simple(
         frame["macro_dgs10_minus_dgs2"],
-        frame["macro_dgs10_minus_dgs2"]
-        > float(policy.get("yield_curve_supportive_above", 0.50)),
+        frame["macro_dgs10_minus_dgs2"] > float(policy.get("yield_curve_supportive_above", 0.50)),
         frame["macro_dgs10_minus_dgs2"].between(
             float(policy.get("yield_curve_neutral_lower", -0.50)),
             float(policy.get("yield_curve_neutral_upper", 0.50)),
@@ -551,16 +547,11 @@ def build_phase13q_macro_repair_panel(
     labour_state = pd.Series("neutral", index=frame.index, dtype="object")
     labour_reason = pd.Series("labour state inside neutral band", index=frame.index)
 
-    supportive = (
-        (unrate < float(policy.get("unrate_supportive_below", 5.00)))
-        & (frame["macro_unrate_3m_change"] <= 0.00)
+    supportive = (unrate < float(policy.get("unrate_supportive_below", 5.00))) & (
+        frame["macro_unrate_3m_change"] <= 0.00
     )
-    fragile = (
-        (unrate >= float(policy.get("unrate_fragile_above_or_equal", 6.00)))
-        | (
-            frame["macro_unrate_3m_change"]
-            > float(policy.get("unrate_3m_fragile_change_above", 0.50))
-        )
+    fragile = (unrate >= float(policy.get("unrate_fragile_above_or_equal", 6.00))) | (
+        frame["macro_unrate_3m_change"] > float(policy.get("unrate_3m_fragile_change_above", 0.50))
     )
     unavailable = unrate.isna() | frame["macro_unrate_3m_change"].isna()
 
@@ -616,9 +607,7 @@ def build_phase13q_macro_availability_report(
                     "feature_id": feature_id,
                     "rows": int(len(group)),
                     "value_non_null_ratio": float(
-                        pd.to_numeric(group["feature_value"], errors="coerce")
-                        .notna()
-                        .mean()
+                        pd.to_numeric(group["feature_value"], errors="coerce").notna().mean()
                     ),
                     "available_ratio": float(
                         group["missingness_state"].astype(str).eq("available").mean()
@@ -627,9 +616,8 @@ def build_phase13q_macro_availability_report(
             )
 
     feature_profile = pd.DataFrame(feature_profiles)
-    all_feature_non_null_ok = (
-        not feature_profile.empty
-        and bool((feature_profile["value_non_null_ratio"] >= non_null_threshold).all())
+    all_feature_non_null_ok = not feature_profile.empty and bool(
+        (feature_profile["value_non_null_ratio"] >= non_null_threshold).all()
     )
     repair_passed = ratio >= threshold and all_feature_non_null_ok
 
@@ -787,17 +775,13 @@ def build_phase13q_target_frame(
     )
     frame["future_63d_spy_return_state"] = np.select(
         [
-            frame["future_return_63d"]
-            > float(policy.get("primary_supportive_threshold", 0.05)),
-            frame["future_return_63d"]
-            < float(policy.get("primary_fragile_threshold", -0.05)),
+            frame["future_return_63d"] > float(policy.get("primary_supportive_threshold", 0.05)),
+            frame["future_return_63d"] < float(policy.get("primary_fragile_threshold", -0.05)),
         ],
         ["supportive", "fragile"],
         default="neutral",
     )
-    frame.loc[frame["future_return_63d"].isna(), "future_63d_spy_return_state"] = (
-        "unavailable"
-    )
+    frame.loc[frame["future_return_63d"].isna(), "future_63d_spy_return_state"] = "unavailable"
 
     frame["future_window_max_drawdown_63d"] = _future_window_max_drawdown(
         frame["adjusted_close"].to_numpy(dtype=float),
@@ -873,9 +857,7 @@ def build_phase13q_reassembled_dataset(
     dataset = wide.merge(target, on="decision_date", how="left")
     start = pd.Timestamp(policy.get("common_start_date", "1900-01-01"))
     end = pd.Timestamp(policy.get("canonical_endpoint", "2100-01-01"))
-    dataset = dataset[
-        pd.to_datetime(dataset["decision_date"]).between(start, end)
-    ].copy()
+    dataset = dataset[pd.to_datetime(dataset["decision_date"]).between(start, end)].copy()
 
     dataset["split_label"] = _assign_split_label(dataset["decision_date"], policy)
     dataset["dataset_id"] = str(policy.get("dataset_id", "phase13q_ml_feature_dataset_v1"))
@@ -933,7 +915,9 @@ def build_phase13q_target_summary(dataset: pd.DataFrame) -> pd.DataFrame:
             {
                 "rows": int(len(dataset)),
                 "target_available_rows": int(dataset["target_available"].map(_bool_value).sum()),
-                "target_available_ratio": float(dataset["target_available"].map(_bool_value).mean()),
+                "target_available_ratio": float(
+                    dataset["target_available"].map(_bool_value).mean()
+                ),
                 "primary_target_classes": "; ".join(
                     sorted(dataset["future_63d_spy_return_state"].dropna().astype(str).unique())
                 ),
@@ -1043,7 +1027,10 @@ def build_phase13q_phase13r_boundary_check(phase_config: dict[str, Any]) -> pd.D
     ]
 
     out = pd.DataFrame(
-        [{"boundary_item": item, "value": value, "passed": passed} for item, value, passed in checks]
+        [
+            {"boundary_item": item, "value": value, "passed": passed}
+            for item, value, passed in checks
+        ]
     )
     out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
     return out
@@ -1440,8 +1427,7 @@ def save_phase13q_macro_long_to_wide_repair_execution(
             "Gate Report": gate_report,
             "Conclusion": conclusion,
         },
-        output_path=reports_path
-        / "phase13q_macro_long_to_wide_repair_execution.md",
+        output_path=reports_path / "phase13q_macro_long_to_wide_repair_execution.md",
     )
 
     print("Wrote Phase 13Q macro long-to-wide repair reports.")
@@ -1595,9 +1581,10 @@ def build_phase13r_dataset_quality_check(
         {
             "check": "Dataset has honest label",
             "passed": "dataset_label" in dataset.columns
-            and dataset["dataset_label"].astype(str).eq(
-                str(thresholds.get("required_dataset_label"))
-            ).all(),
+            and dataset["dataset_label"]
+            .astype(str)
+            .eq(str(thresholds.get("required_dataset_label")))
+            .all(),
             "detail": "dataset_label check",
         },
     ]
@@ -1704,8 +1691,7 @@ def build_phase13r_phase13s_boundary_check(phase_config: dict[str, Any]) -> pd.D
         (
             "phase13s_forbidden_next_step",
             str(boundary.get("forbidden_next_step", "")),
-            "model training execution"
-            in str(boundary.get("forbidden_next_step", "")).lower()
+            "model training execution" in str(boundary.get("forbidden_next_step", "")).lower()
             and "signal creation" in str(boundary.get("forbidden_next_step", "")).lower(),
         ),
         (
@@ -1736,7 +1722,10 @@ def build_phase13r_phase13s_boundary_check(phase_config: dict[str, Any]) -> pd.D
     ]
 
     out = pd.DataFrame(
-        [{"boundary_item": item, "value": value, "passed": passed} for item, value, passed in checks]
+        [
+            {"boundary_item": item, "value": value, "passed": passed}
+            for item, value, passed in checks
+        ]
     )
     out["result"] = out["passed"].map({True: "Passed", False: "Failed"})
     return out
@@ -1772,9 +1761,7 @@ def build_phase13r_summary(
                 "config_flags_clean_for_run": bool(config_flag_check["passed"].all())
                 if not config_flag_check.empty
                 else False,
-                "macro_repair_quality_passed": bool(
-                    macro_repair_quality_check["passed"].all()
-                )
+                "macro_repair_quality_passed": bool(macro_repair_quality_check["passed"].all())
                 if not macro_repair_quality_check.empty
                 else False,
                 "dataset_quality_passed": bool(dataset_quality_check["passed"].all())
@@ -1786,9 +1773,7 @@ def build_phase13r_summary(
                 "split_quality_passed": bool(split_quality_check["passed"].all())
                 if not split_quality_check.empty
                 else False,
-                "forbidden_column_check_passed": bool(
-                    forbidden_column_check["passed"].all()
-                )
+                "forbidden_column_check_passed": bool(forbidden_column_check["passed"].all())
                 if not forbidden_column_check.empty
                 else False,
                 "phase13s_boundary_passed": bool(phase13s_boundary_check["passed"].all())
@@ -1944,9 +1929,7 @@ def save_phase13r_repaired_macro_dataset_quality_audit(
     )
 
     dataset = _read_csv_if_exists(reports.get("reassembled_dataset", ""))
-    macro_availability_report = _read_csv_if_exists(
-        reports.get("macro_availability_report", "")
-    )
+    macro_availability_report = _read_csv_if_exists(reports.get("macro_availability_report", ""))
     dataset_metadata = _read_csv_if_exists(reports.get("dataset_metadata", ""))
 
     macro_repair_quality_check = build_phase13r_macro_repair_quality_check(
@@ -2020,8 +2003,7 @@ def save_phase13r_repaired_macro_dataset_quality_audit(
             "Gate Report": gate_report,
             "Conclusion": conclusion,
         },
-        output_path=reports_path
-        / "phase13r_repaired_macro_dataset_quality_audit.md",
+        output_path=reports_path / "phase13r_repaired_macro_dataset_quality_audit.md",
     )
 
     print("Wrote Phase 13R repaired macro dataset quality audit reports.")

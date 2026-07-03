@@ -110,8 +110,7 @@ def _find_final_candidate_frame(
 
     if missing_columns:
         raise ValueError(
-            "Reconstructed final candidate is missing required columns: "
-            f"{sorted(missing_columns)}"
+            f"Reconstructed final candidate is missing required columns: {sorted(missing_columns)}"
         )
 
     final_candidate["date"] = pd.to_datetime(final_candidate["date"])
@@ -130,9 +129,7 @@ def _get_spy_strategy_result(
 
     if strategy_name not in strategy_results:
         available = sorted(strategy_results.keys())
-        raise ValueError(
-            f"SPY strategy result {strategy_name!r} not found. Available: {available}"
-        )
+        raise ValueError(f"SPY strategy result {strategy_name!r} not found. Available: {available}")
 
     return strategy_results[strategy_name]
 
@@ -268,9 +265,7 @@ def build_phase8d_daily_regret(
             initial_capital,
         )
         merged["benchmark"] = benchmark_name
-        merged["relative_wealth"] = (
-            merged["candidate_equity"] / merged["benchmark_equity"]
-        )
+        merged["relative_wealth"] = merged["candidate_equity"] / merged["benchmark_equity"]
         merged["relative_wealth_minus_one"] = merged["relative_wealth"] - 1.0
         merged["relative_drawdown"] = (
             merged["relative_wealth"] / merged["relative_wealth"].cummax() - 1.0
@@ -410,11 +405,9 @@ def build_phase8d_rolling_regret(
                 candidate_cagr = _cagr(candidate_start, candidate_end, actual_years)
                 benchmark_cagr = _cagr(benchmark_start, benchmark_end, actual_years)
                 active_cagr = candidate_cagr - benchmark_cagr
-                relative_wealth_change = (
-                    (candidate_end / candidate_start)
-                    / (benchmark_end / benchmark_start)
-                    - 1.0
-                )
+                relative_wealth_change = (candidate_end / candidate_start) / (
+                    benchmark_end / benchmark_start
+                ) - 1.0
 
                 rows.append(
                     {
@@ -455,12 +448,8 @@ def build_phase8d_rolling_summary(rolling_regret: pd.DataFrame) -> pd.DataFrame:
                 "median_active_cagr": float(group["active_cagr"].median()),
                 "worst_active_cagr": float(group["active_cagr"].min()),
                 "best_active_cagr": float(group["active_cagr"].max()),
-                "mean_relative_wealth_change": float(
-                    group["relative_wealth_change"].mean()
-                ),
-                "worst_relative_wealth_change": float(
-                    group["relative_wealth_change"].min()
-                ),
+                "mean_relative_wealth_change": float(group["relative_wealth_change"].mean()),
+                "worst_relative_wealth_change": float(group["relative_wealth_change"].min()),
             }
         )
 
@@ -498,8 +487,7 @@ def _rolling_summary_value(
 
     if row.empty:
         raise ValueError(
-            f"Missing rolling summary for benchmark={benchmark!r}, "
-            f"window_years={window_years}."
+            f"Missing rolling summary for benchmark={benchmark!r}, window_years={window_years}."
         )
 
     return float(row.iloc[0][column])
@@ -519,17 +507,13 @@ def build_phase8d_gate_report(
     min_terminal_bh = float(gates.get("min_terminal_relative_wealth_vs_buy_hold", 0.80))
     max_lag_bh = float(gates.get("max_time_lagging_buy_hold_rate", 0.75))
     max_rel_dd_bh = float(gates.get("max_relative_drawdown_vs_buy_hold", 0.35))
-    max_streak_bh = float(
-        gates.get("max_longest_lagging_streak_years_vs_buy_hold", 7.0)
-    )
+    max_streak_bh = float(gates.get("max_longest_lagging_streak_years_vs_buy_hold", 7.0))
     min_terminal_12m = float(gates.get("min_terminal_relative_wealth_vs_spy12m", 1.00))
     max_lag_12m = float(gates.get("max_time_lagging_spy12m_rate", 0.60))
     max_rolling_3y_under_bh = float(
         gates.get("max_rolling_3y_underperformance_rate_vs_buy_hold", 0.80)
     )
-    min_worst_3y_active_bh = float(
-        gates.get("min_worst_3y_active_cagr_vs_buy_hold", -0.10)
-    )
+    min_worst_3y_active_bh = float(gates.get("min_worst_3y_active_cagr_vs_buy_hold", -0.10))
 
     terminal_bh = _summary_value(summary, buy_hold_name, "terminal_relative_wealth")
     lag_bh = _summary_value(summary, buy_hold_name, "time_lagging_rate")

@@ -50,14 +50,10 @@ def _create_component_return_frame(
     missing_defensive = required_columns - set(defensive.columns)
 
     if missing_offensive:
-        raise ValueError(
-            f"offensive_result missing columns: {sorted(missing_offensive)}"
-        )
+        raise ValueError(f"offensive_result missing columns: {sorted(missing_offensive)}")
 
     if missing_defensive:
-        raise ValueError(
-            f"defensive_result missing columns: {sorted(missing_defensive)}"
-        )
+        raise ValueError(f"defensive_result missing columns: {sorted(missing_defensive)}")
 
     return offensive[["date", "strategy_return"]].merge(
         defensive[["date", "strategy_return"]],
@@ -107,10 +103,7 @@ def _create_switch_effectiveness_events(
     target_defensive = merged["target_defensive_weight"].astype(float)
     previous_target_defensive = target_defensive.shift(1)
 
-    switch_mask = (
-        previous_target_defensive.notna()
-        & target_defensive.ne(previous_target_defensive)
-    )
+    switch_mask = previous_target_defensive.notna() & target_defensive.ne(previous_target_defensive)
 
     equity = merged["equity"].astype(float)
     signal_price = merged["signal_price"].astype(float)
@@ -124,15 +117,9 @@ def _create_switch_effectiveness_events(
             continue
 
         from_mode = (
-            "defensive_allocator"
-            if previous_target_defensive.loc[idx] >= 0.5
-            else "offensive_spy"
+            "defensive_allocator" if previous_target_defensive.loc[idx] >= 0.5 else "offensive_spy"
         )
-        to_mode = (
-            "defensive_allocator"
-            if target_defensive.loc[idx] >= 0.5
-            else "offensive_spy"
-        )
+        to_mode = "defensive_allocator" if target_defensive.loc[idx] >= 0.5 else "offensive_spy"
 
         counterfactual_return_column = _mode_to_return_column(from_mode)
 
@@ -142,14 +129,9 @@ def _create_switch_effectiveness_events(
             "to_mode": to_mode,
             "transition": f"{from_mode}_to_{to_mode}",
             "signal_price": round(float(row["signal_price"]), 4),
-            "trend_sma": round(float(row["trend_sma"]), 4)
-            if pd.notna(row["trend_sma"])
-            else "",
+            "trend_sma": round(float(row["trend_sma"]), 4) if pd.notna(row["trend_sma"]) else "",
             "spy_distance_from_trend_pct": round(
-                (
-                    (float(row["signal_price"]) / float(row["trend_sma"])) - 1.0
-                )
-                * 100.0,
+                ((float(row["signal_price"]) / float(row["trend_sma"])) - 1.0) * 100.0,
                 3,
             )
             if pd.notna(row["trend_sma"]) and float(row["trend_sma"]) != 0
@@ -241,10 +223,7 @@ def _summarise_switch_effectiveness(
             value_column = f"switch_value_added_{horizon}d_pct_points"
             helped_column = f"switch_helped_{horizon}d"
 
-            valid = group_df[
-                group_df[value_column].ne("")
-                & group_df[helped_column].ne("")
-            ].copy()
+            valid = group_df[group_df[value_column].ne("") & group_df[helped_column].ne("")].copy()
 
             if valid.empty:
                 row[f"valid_{horizon}d_events"] = 0

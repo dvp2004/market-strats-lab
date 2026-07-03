@@ -1,4 +1,5 @@
 """Report-only GMA TradingView manual fill validation."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -151,7 +152,9 @@ def _validate_fill_row(
         reasons.append("account_name_missing")
     elif not _account_is_manual_paper(account_name):
         reasons.append("account_not_tradingview_manual_paper")
-    if _flag_true(row, ["live_trading_allowed", "live_trading", "live_order", "live_order_submitted"]):
+    if _flag_true(
+        row, ["live_trading_allowed", "live_trading", "live_order", "live_order_submitted"]
+    ):
         reasons.append("live_trading_flag_present")
     if _flag_true(row, ["real_money_allowed", "real_money", "real_money_order"]):
         reasons.append("real_money_flag_present")
@@ -268,7 +271,9 @@ def _write_markdown(path: Path, summary_row: dict[str, Any], reconciliation: pd.
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def validate_gma3a_manual_fills(config: GMA3AConfig, fills_path: Path) -> GMA3AManualFillValidationResult:
+def validate_gma3a_manual_fills(
+    config: GMA3AConfig, fills_path: Path
+) -> GMA3AManualFillValidationResult:
     out = config.paths["output_root"]
     out.mkdir(parents=True, exist_ok=True)
     readiness = run_gma3a_paper_readiness(config)
@@ -298,8 +303,16 @@ def validate_gma3a_manual_fills(config: GMA3AConfig, fills_path: Path) -> GMA3AM
                 }
             )
     row_validation = pd.DataFrame(row_records)
-    accepted = row_validation[row_validation["row_valid"]].copy() if not row_validation.empty else pd.DataFrame()
-    rejected = row_validation[~row_validation["row_valid"]].copy() if not row_validation.empty else pd.DataFrame()
+    accepted = (
+        row_validation[row_validation["row_valid"]].copy()
+        if not row_validation.empty
+        else pd.DataFrame()
+    )
+    rejected = (
+        row_validation[~row_validation["row_valid"]].copy()
+        if not row_validation.empty
+        else pd.DataFrame()
+    )
     reconciliation = _build_reconciliation(packet, accepted)
 
     blocking_reasons: list[str] = []
@@ -311,7 +324,13 @@ def validate_gma3a_manual_fills(config: GMA3AConfig, fills_path: Path) -> GMA3AM
         blocking_reasons.append("one_or_more_fill_rows_rejected")
     if fills.empty:
         blocking_reasons.append("fills_file_empty")
-    session_valid = fills_path.exists() and not fills.empty and manual_entry_active and rejected.empty and not accepted.empty
+    session_valid = (
+        fills_path.exists()
+        and not fills.empty
+        and manual_entry_active
+        and rejected.empty
+        and not accepted.empty
+    )
     status = "valid_manual_paper_fills" if session_valid else "manual_fill_validation_blocked"
     summary_row = {
         "fills_path": str(fills_path),
@@ -324,7 +343,9 @@ def validate_gma3a_manual_fills(config: GMA3AConfig, fills_path: Path) -> GMA3AM
         "fill_rows_received": int(len(fills)),
         "accepted_fill_rows": int(len(accepted)),
         "rejected_fill_rows": int(len(rejected)),
-        "cash_impact_estimate": float(accepted["cash_impact_estimate"].sum()) if not accepted.empty else 0.0,
+        "cash_impact_estimate": float(accepted["cash_impact_estimate"].sum())
+        if not accepted.empty
+        else 0.0,
         "blocking_reason": ";".join(dict.fromkeys(blocking_reasons)),
         "manual_paper_only": True,
         "live_trading_allowed": False,

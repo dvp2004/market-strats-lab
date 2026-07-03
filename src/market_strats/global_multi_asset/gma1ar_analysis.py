@@ -1,4 +1,5 @@
 """GMA-1A-R analysis scripts — run in project root."""
+
 import glob
 import os
 
@@ -10,9 +11,27 @@ RAW_DIR = "data/global_multi_asset_alpha/raw/yahoo_yfinance"
 
 # ── helpers ────────────────────────────────────────────────────────────────────
 REQUIRED_CORE = {
-    "SPY","QQQ","IWM","RSP","EFA","VGK","EWJ","EEM",
-    "SHY","IEF","TLT","TIP","AGG","LQD","HYG","EMB",
-    "GLD","DBC","VNQ","UUP","BIL",
+    "SPY",
+    "QQQ",
+    "IWM",
+    "RSP",
+    "EFA",
+    "VGK",
+    "EWJ",
+    "EEM",
+    "SHY",
+    "IEF",
+    "TLT",
+    "TIP",
+    "AGG",
+    "LQD",
+    "HYG",
+    "EMB",
+    "GLD",
+    "DBC",
+    "VNQ",
+    "UUP",
+    "BIL",
 }
 BENCHMARK_ONLY = {"ACWI"}
 
@@ -42,9 +61,14 @@ def load_raw(sym: str) -> pd.DataFrame | None:
     df.columns = [c.strip().lower().replace(" ", "_") for c in df.columns]
     # Rename Yahoo columns
     rename = {
-        "open": "open", "high": "high", "low": "low", "close": "close",
-        "adj_close": "adj_close", "volume": "volume",
-        "dividends": "dividends", "stock_splits": "split_ratio",
+        "open": "open",
+        "high": "high",
+        "low": "low",
+        "close": "close",
+        "adj_close": "adj_close",
+        "volume": "volume",
+        "dividends": "dividends",
+        "stock_splits": "split_ratio",
         "capital_gains": "capital_gains",
     }
     df = df.rename(columns=rename)
@@ -64,12 +88,20 @@ def build_inventory():
         on="instrument_id",
     )
     cols = [
-        "instrument_id", "is_required_core", "is_benchmark_only",
-        "is_dynamic_satellite", "reconciliation_status", "overlap_rows",
-        "median_return_difference_bps", "maximum_return_difference_bps",
+        "instrument_id",
+        "is_required_core",
+        "is_benchmark_only",
+        "is_dynamic_satellite",
+        "reconciliation_status",
+        "overlap_rows",
+        "median_return_difference_bps",
+        "maximum_return_difference_bps",
         "return_difference_count_gt_tolerance",
-        "earliest_material_difference_date", "latest_material_difference_date",
-        "dividend_event_count", "split_event_count", "ready_for_replay_engine",
+        "earliest_material_difference_date",
+        "latest_material_difference_date",
+        "dividend_event_count",
+        "split_event_count",
+        "ready_for_replay_engine",
     ]
     return merged[cols]
 
@@ -84,23 +116,25 @@ def build_split_evidence(actions: pd.DataFrame) -> pd.DataFrame:
             rows.append({"instrument_id": sym, "evidence_status": "canonical_not_found"})
             continue
         split_rows = df[
-            df["split_ratio"].notna() &
-            (df["split_ratio"] != 0) &
-            (df["split_ratio"] != 1.0)
+            df["split_ratio"].notna() & (df["split_ratio"] != 0) & (df["split_ratio"] != 1.0)
         ].copy()
         if split_rows.empty:
-            rows.append({"instrument_id": sym, "evidence_status": "no_usable_split_rows_in_canonical"})
+            rows.append(
+                {"instrument_id": sym, "evidence_status": "no_usable_split_rows_in_canonical"}
+            )
             continue
         for _, srow in split_rows.iterrows():
             split_dt = srow["date"]
             before = df[df["date"] < split_dt].tail(3)
             on_or_after = df[df["date"] >= split_dt].head(3)
             if before.empty or on_or_after.empty:
-                rows.append({
-                    "instrument_id": sym,
-                    "split_date": str(split_dt.date()),
-                    "evidence_status": "insufficient_window",
-                })
+                rows.append(
+                    {
+                        "instrument_id": sym,
+                        "split_date": str(split_dt.date()),
+                        "evidence_status": "insufficient_window",
+                    }
+                )
                 continue
             close_before = before["close_raw"].iloc[-1]
             close_after = on_or_after["close_raw"].iloc[0]
@@ -111,13 +145,9 @@ def build_split_evidence(actions: pd.DataFrame) -> pd.DataFrame:
             # If raw_price_ratio ≈ 1/reported, raw prices are NOT already split-adjusted
             # If raw_price_ratio ≈ 1.0, raw prices ARE already split-adjusted
             tol = 0.05
-            raw_already_adjusted = (
-                raw_price_ratio is not None and abs(raw_price_ratio - 1.0) < tol
-            )
+            raw_already_adjusted = raw_price_ratio is not None and abs(raw_price_ratio - 1.0) < tol
             double_count_risk = (
-                raw_price_ratio is not None and
-                not raw_already_adjusted and
-                reported != 1.0
+                raw_price_ratio is not None and not raw_already_adjusted and reported != 1.0
             )
             if raw_price_ratio is None:
                 evidence = "close_before_is_zero"
@@ -125,31 +155,55 @@ def build_split_evidence(actions: pd.DataFrame) -> pd.DataFrame:
                 evidence = "raw_close_already_split_adjusted_confirmed"
             else:
                 evidence = "raw_close_NOT_pre_adjusted_ratio_differs_from_1"
-            rows.append({
-                "instrument_id": sym,
-                "split_date": str(split_dt.date()),
-                "reported_split_ratio": reported,
-                "raw_close_before": round(close_before, 6),
-                "raw_close_on_or_after": round(close_after, 6),
-                "raw_price_ratio": round(raw_price_ratio, 6) if raw_price_ratio else None,
-                "adj_close_before": round(adj_before, 6),
-                "adj_close_on_or_after": round(adj_after, 6),
-                "provider_adj_factor_before": round(adj_before / close_before, 6) if close_before != 0 else None,
-                "provider_adj_factor_after": round(adj_after / close_after, 6) if close_after != 0 else None,
-                "raw_already_split_adjusted": raw_already_adjusted,
-                "applying_split_ratio_would_double_count": double_count_risk,
-                "evidence_status": evidence,
-            })
+            rows.append(
+                {
+                    "instrument_id": sym,
+                    "split_date": str(split_dt.date()),
+                    "reported_split_ratio": reported,
+                    "raw_close_before": round(close_before, 6),
+                    "raw_close_on_or_after": round(close_after, 6),
+                    "raw_price_ratio": round(raw_price_ratio, 6) if raw_price_ratio else None,
+                    "adj_close_before": round(adj_before, 6),
+                    "adj_close_on_or_after": round(adj_after, 6),
+                    "provider_adj_factor_before": round(adj_before / close_before, 6)
+                    if close_before != 0
+                    else None,
+                    "provider_adj_factor_after": round(adj_after / close_after, 6)
+                    if close_after != 0
+                    else None,
+                    "raw_already_split_adjusted": raw_already_adjusted,
+                    "applying_split_ratio_would_double_count": double_count_risk,
+                    "evidence_status": evidence,
+                }
+            )
     return pd.DataFrame(rows)
 
 
 # ── Step 3: action-timing resolution ──────────────────────────────────────────
 ACTION_TIMING_INSTRUMENTS = [
-    "SPY","IWM","RSP","IEF","TLT","TIP","LQD","EMB","DBA","DBB","UUP",
+    "SPY",
+    "IWM",
+    "RSP",
+    "IEF",
+    "TLT",
+    "TIP",
+    "LQD",
+    "EMB",
+    "DBA",
+    "DBB",
+    "UUP",
 ]
 
 PROVIDER_BASIS_INSTRUMENTS = [
-    "EFA","VGK","EWJ","EEM","VWO","HYG","DBC","VNQ","ACWI",
+    "EFA",
+    "VGK",
+    "EWJ",
+    "EEM",
+    "VWO",
+    "HYG",
+    "DBC",
+    "VNQ",
+    "ACWI",
 ]
 
 
@@ -175,10 +229,7 @@ def resolve_action_timing(sym: str, recon_row: pd.Series) -> list[dict]:
     mat = df2[df2["diff_bps"] > tol_bps].copy()
 
     # Join dividend info
-    mat = mat.merge(
-        df[["date","dividend_cash","split_ratio"]],
-        on="date", how="left"
-    )
+    mat = mat.merge(df[["date", "dividend_cash", "split_ratio"]], on="date", how="left")
 
     rows = []
     for _, r in mat.iterrows():
@@ -201,33 +252,41 @@ def resolve_action_timing(sym: str, recon_row: pd.Series) -> list[dict]:
         else:
             resolution = "resolved_ex_date_convention"
 
-        rows.append({
-            "instrument_id": sym,
-            "event_date": str(r["date"].date()) if hasattr(r["date"], "date") else str(r["date"]),
-            "event_type": "dividend" if div_on_date > 0 else ("split" if split_on_date not in (1.0, 0.0) else "timing"),
-            "provider_dividend": round(div_on_date, 6),
-            "constructed_dividend": round(div_on_date, 6),
-            "provider_return": round(float(r.get("adj_return", 1)), 8),
-            "constructed_return": round(float(r.get("constructed_return", 1)), 8),
-            "difference_bps": round(diff, 4),
-            "difference_cause": cause,
-            "maximum_impact_bps": round(diff, 4),
-            "review_resolution": resolution,
-        })
+        rows.append(
+            {
+                "instrument_id": sym,
+                "event_date": str(r["date"].date())
+                if hasattr(r["date"], "date")
+                else str(r["date"]),
+                "event_type": "dividend"
+                if div_on_date > 0
+                else ("split" if split_on_date not in (1.0, 0.0) else "timing"),
+                "provider_dividend": round(div_on_date, 6),
+                "constructed_dividend": round(div_on_date, 6),
+                "provider_return": round(float(r.get("adj_return", 1)), 8),
+                "constructed_return": round(float(r.get("constructed_return", 1)), 8),
+                "difference_bps": round(diff, 4),
+                "difference_cause": cause,
+                "maximum_impact_bps": round(diff, 4),
+                "review_resolution": resolution,
+            }
+        )
     if not rows:
-        rows.append({
-            "instrument_id": sym,
-            "event_date": "",
-            "event_type": "no_material_differences_found_above_threshold",
-            "provider_dividend": 0,
-            "constructed_dividend": 0,
-            "provider_return": 1.0,
-            "constructed_return": 1.0,
-            "difference_bps": 0.0,
-            "difference_cause": "none",
-            "maximum_impact_bps": float(recon_row.get("maximum_return_difference_bps", 0)),
-            "review_resolution": "resolved_immaterial_difference",
-        })
+        rows.append(
+            {
+                "instrument_id": sym,
+                "event_date": "",
+                "event_type": "no_material_differences_found_above_threshold",
+                "provider_dividend": 0,
+                "constructed_dividend": 0,
+                "provider_return": 1.0,
+                "constructed_return": 1.0,
+                "difference_bps": 0.0,
+                "difference_cause": "none",
+                "maximum_impact_bps": float(recon_row.get("maximum_return_difference_bps", 0)),
+                "review_resolution": "resolved_immaterial_difference",
+            }
+        )
     return rows
 
 

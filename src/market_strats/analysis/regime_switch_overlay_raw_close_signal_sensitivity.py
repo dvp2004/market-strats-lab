@@ -30,9 +30,7 @@ def _get_strategy_result(
 
     if strategy not in strategy_results:
         available = sorted(strategy_results.keys())
-        raise ValueError(
-            f"Strategy '{strategy}' not found for {ticker}. Available: {available}"
-        )
+        raise ValueError(f"Strategy '{strategy}' not found for {ticker}. Available: {available}")
 
     return strategy_results[strategy]
 
@@ -76,11 +74,7 @@ def _find_raw_close_frame(
                 return output.reset_index(drop=True)
 
     searched_columns = sorted(
-        {
-            column
-            for frame in candidate_frames
-            for column in getattr(frame, "columns", [])
-        }
+        {column for frame in candidate_frames for column in getattr(frame, "columns", [])}
     )
 
     raise ValueError(
@@ -170,13 +164,10 @@ def _build_overlay_inputs(
     if defensive_allocator_name not in relative_momentum_outputs:
         available = sorted(relative_momentum_outputs.keys())
         raise ValueError(
-            f"Defensive allocator '{defensive_allocator_name}' not found. "
-            f"Available: {available}"
+            f"Defensive allocator '{defensive_allocator_name}' not found. Available: {available}"
         )
 
-    defensive_result = relative_momentum_outputs[defensive_allocator_name][
-        "allocator_result"
-    ]
+    defensive_result = relative_momentum_outputs[defensive_allocator_name]["allocator_result"]
 
     common_dates = list(pd.to_datetime(defensive_result["date"]))
 
@@ -259,8 +250,7 @@ def _create_raw_close_unavailable_report(
             "strategy": overlay_name,
             "available": False,
             "reason": (
-                f"Raw close unavailable. Reference end date was {reference_end_date}. "
-                f"{reason}"
+                f"Raw close unavailable. Reference end date was {reference_end_date}. {reason}"
             ),
             "start_date": "",
             "end_date": "",
@@ -281,8 +271,7 @@ def _create_raw_close_unavailable_report(
             "strategy": overlay_name,
             "available": False,
             "reason": (
-                f"Raw close unavailable. Holdout start date was {holdout_start_date}. "
-                f"{reason}"
+                f"Raw close unavailable. Holdout start date was {holdout_start_date}. {reason}"
             ),
             "start_date": "",
             "end_date": "",
@@ -300,6 +289,7 @@ def _create_raw_close_unavailable_report(
     ]
 
     return pd.DataFrame(rows)
+
 
 def create_regime_switch_overlay_raw_close_signal_sensitivity(
     relative_momentum_outputs: dict[str, dict[str, pd.DataFrame]],
@@ -459,9 +449,7 @@ def create_regime_switch_overlay_raw_close_signal_sensitivity_summary(
     rows: list[dict] = []
 
     for period, period_df in sensitivity.groupby("period"):
-        adjusted = period_df[
-            period_df["signal_type"] == "adjusted_close_signal"
-        ]
+        adjusted = period_df[period_df["signal_type"] == "adjusted_close_signal"]
         raw = period_df[period_df["signal_type"] == "raw_close_signal"]
 
         if adjusted.empty or raw.empty:
@@ -485,13 +473,10 @@ def create_regime_switch_overlay_raw_close_signal_sensitivity_summary(
                     float(raw_row["calmar"]) - float(adjusted_row["calmar"]),
                     3,
                 ),
-                "adjusted_signal_max_drawdown_pct": adjusted_row[
-                    "max_drawdown_pct"
-                ],
+                "adjusted_signal_max_drawdown_pct": adjusted_row["max_drawdown_pct"],
                 "raw_signal_max_drawdown_pct": raw_row["max_drawdown_pct"],
                 "raw_minus_adjusted_drawdown_pct_points": round(
-                    float(raw_row["max_drawdown_pct"])
-                    - float(adjusted_row["max_drawdown_pct"]),
+                    float(raw_row["max_drawdown_pct"]) - float(adjusted_row["max_drawdown_pct"]),
                     3,
                 ),
                 "adjusted_signal_end_value": adjusted_row["end_value"],
@@ -587,20 +572,11 @@ def save_regime_switch_overlay_raw_close_signal_sensitivity(
             "summary": pd.DataFrame(),
         }
 
-    summary = create_regime_switch_overlay_raw_close_signal_sensitivity_summary(
-        sensitivity
-    )
+    summary = create_regime_switch_overlay_raw_close_signal_sensitivity_summary(sensitivity)
 
-    sensitivity_path = (
-        reports_dir / "regime_switch_overlay_raw_close_signal_sensitivity.csv"
-    )
-    summary_path = (
-        reports_dir
-        / "regime_switch_overlay_raw_close_signal_sensitivity_summary.csv"
-    )
-    markdown_path = (
-        reports_dir / "regime_switch_overlay_raw_close_signal_sensitivity.md"
-    )
+    sensitivity_path = reports_dir / "regime_switch_overlay_raw_close_signal_sensitivity.csv"
+    summary_path = reports_dir / "regime_switch_overlay_raw_close_signal_sensitivity_summary.csv"
+    markdown_path = reports_dir / "regime_switch_overlay_raw_close_signal_sensitivity.md"
 
     sensitivity.to_csv(sensitivity_path, index=False)
     summary.to_csv(summary_path, index=False)
@@ -617,18 +593,9 @@ def save_regime_switch_overlay_raw_close_signal_sensitivity(
     print("\nRegime switch overlay raw-close signal sensitivity summary:")
     print(summary.to_string(index=False))
 
-    print(
-        "\nSaved regime switch overlay raw-close signal sensitivity to: "
-        f"{sensitivity_path}"
-    )
-    print(
-        "Saved regime switch overlay raw-close signal sensitivity summary to: "
-        f"{summary_path}"
-    )
-    print(
-        "Saved regime switch overlay raw-close signal sensitivity markdown to: "
-        f"{markdown_path}"
-    )
+    print(f"\nSaved regime switch overlay raw-close signal sensitivity to: {sensitivity_path}")
+    print(f"Saved regime switch overlay raw-close signal sensitivity summary to: {summary_path}")
+    print(f"Saved regime switch overlay raw-close signal sensitivity markdown to: {markdown_path}")
 
     return {
         "sensitivity": sensitivity,

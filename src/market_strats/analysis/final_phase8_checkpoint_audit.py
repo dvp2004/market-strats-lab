@@ -220,7 +220,9 @@ def build_phase8g_canonical_check(
         {
             "item": "final_candidate_caveat_stack",
             "expected": "; ".join(caveat_phrases),
-            "passed": all(_contains_case_insensitive(readme_text, phrase) for phrase in caveat_phrases),
+            "passed": all(
+                _contains_case_insensitive(readme_text, phrase) for phrase in caveat_phrases
+            ),
         },
     ]
 
@@ -253,12 +255,8 @@ def build_phase8g_gate_report(
 ) -> pd.DataFrame:
     gates = phase_config.get("gates", {})
 
-    required_rows = readme_phrase_check[
-        readme_phrase_check["check_type"] == "required_phrase"
-    ]
-    forbidden_rows = readme_phrase_check[
-        readme_phrase_check["check_type"] == "forbidden_phrase"
-    ]
+    required_rows = readme_phrase_check[readme_phrase_check["check_type"] == "required_phrase"]
+    forbidden_rows = readme_phrase_check[readme_phrase_check["check_type"] == "forbidden_phrase"]
 
     required_passed = bool(required_rows["passed"].all()) if not required_rows.empty else True
     forbidden_passed = bool(forbidden_rows["passed"].all()) if not forbidden_rows.empty else True
@@ -266,9 +264,7 @@ def build_phase8g_gate_report(
         bool(config_flag_check["passed"].all()) if not config_flag_check.empty else False
     )
     reports_passed = (
-        bool(report_inventory_check["passed"].all())
-        if not report_inventory_check.empty
-        else False
+        bool(report_inventory_check["passed"].all()) if not report_inventory_check.empty else False
     )
 
     caveat_row = canonical_check[canonical_check["item"] == "final_candidate_caveat_stack"]
@@ -432,9 +428,7 @@ def save_phase8g_final_phase8_checkpoint_audit(
 
     readme_phrase_check = build_phase8g_readme_phrase_check(
         readme_text=readme_text,
-        required_phrases=[
-            str(value) for value in phase_config.get("required_readme_phrases", [])
-        ],
+        required_phrases=[str(value) for value in phase_config.get("required_readme_phrases", [])],
         forbidden_phrases=[
             str(value) for value in phase_config.get("forbidden_readme_phrases", [])
         ],

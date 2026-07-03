@@ -322,12 +322,9 @@ def build_phase13g_phase13h_boundary_check(
         (
             "phase13h_forbidden_next_step",
             str(boundary.get("forbidden_next_step", "")),
-            "feature calculation"
-            in str(boundary.get("forbidden_next_step", "")).lower()
-            and "model training"
-            in str(boundary.get("forbidden_next_step", "")).lower()
-            and "strategy backtest"
-            in str(boundary.get("forbidden_next_step", "")).lower(),
+            "feature calculation" in str(boundary.get("forbidden_next_step", "")).lower()
+            and "model training" in str(boundary.get("forbidden_next_step", "")).lower()
+            and "strategy backtest" in str(boundary.get("forbidden_next_step", "")).lower(),
         ),
         (
             "phase13h_may_audit_formula_registry",
@@ -439,12 +436,9 @@ def build_phase13g_summary(
         "output_state_column",
         "output_value_column",
     ]
-    exact_formula_fields_present = (
-        not calculation_registry.empty
-        and all(
-            calculation_registry[col].astype(str).str.len().gt(0).all()
-            for col in required_formula_columns
-        )
+    exact_formula_fields_present = not calculation_registry.empty and all(
+        calculation_registry[col].astype(str).str.len().gt(0).all()
+        for col in required_formula_columns
     )
 
     return pd.DataFrame(
@@ -464,10 +458,7 @@ def build_phase13g_summary(
                 "technical_macro_present": {"technical", "macro"}.issubset(families),
                 "exact_formula_fields_present": exact_formula_fields_present,
                 "no_calculate_now": bool(
-                    calculation_registry["calculate_now"]
-                    .map(_bool_value)
-                    .eq(False)
-                    .all()
+                    calculation_registry["calculate_now"].map(_bool_value).eq(False).all()
                 )
                 if not calculation_registry.empty
                 else False,
@@ -484,23 +475,17 @@ def build_phase13g_summary(
                 if not missingness_behaviour.empty
                 else False,
                 "leakage_check_count": int(len(leakage_checks)),
-                "leakage_checks_required": bool(
-                    leakage_checks["required"].map(_bool_value).all()
-                )
+                "leakage_checks_required": bool(leakage_checks["required"].map(_bool_value).all())
                 if not leakage_checks.empty
                 else False,
                 "visual_check_count": int(len(visual_checks)),
-                "visual_checks_required": bool(
-                    visual_checks["required"].map(_bool_value).all()
-                )
+                "visual_checks_required": bool(visual_checks["required"].map(_bool_value).all())
                 if not visual_checks.empty
                 else False,
                 "ml_lock_ready": bool(ml_feature_engineering_lock["passed"].all())
                 if not ml_feature_engineering_lock.empty
                 else False,
-                "phase13h_boundary_passed": bool(
-                    phase13h_boundary_check["passed"].all()
-                )
+                "phase13h_boundary_passed": bool(phase13h_boundary_check["passed"].all())
                 if not phase13h_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -539,15 +524,13 @@ def build_phase13g_gate_report(
     rows = [
         _gate_row(
             "Phase 13F passed",
-            (not gates.get("require_phase13f_passed", True))
-            or bool(row["phase13f_result_passed"]),
+            (not gates.get("require_phase13f_passed", True)) or bool(row["phase13f_result_passed"]),
             f"phase13f_result_passed={bool(row['phase13f_result_passed'])}",
         ),
         _gate_row(
             "Calculation registry is complete enough",
             (not gates.get("require_calculation_registry", True))
-            or int(row["registered_feature_count"])
-            >= int(gates.get("min_registered_features", 8)),
+            or int(row["registered_feature_count"]) >= int(gates.get("min_registered_features", 8)),
             f"registered_feature_count={int(row['registered_feature_count'])}",
         ),
         _gate_row(
@@ -564,8 +547,7 @@ def build_phase13g_gate_report(
         ),
         _gate_row(
             "No feature is calculated now",
-            (not gates.get("require_no_calculate_now", True))
-            or bool(row["no_calculate_now"]),
+            (not gates.get("require_no_calculate_now", True)) or bool(row["no_calculate_now"]),
             f"no_calculate_now={bool(row['no_calculate_now'])}",
         ),
         _gate_row(
@@ -581,8 +563,7 @@ def build_phase13g_gate_report(
             "Missingness behaviour is locked",
             (not gates.get("require_missingness_behaviour", True))
             or (
-                int(row["missingness_rule_count"])
-                >= int(gates.get("min_missingness_rules", 5))
+                int(row["missingness_rule_count"]) >= int(gates.get("min_missingness_rules", 5))
                 and bool(row["missingness_rules_required"])
             ),
             f"missingness_rule_count={int(row['missingness_rule_count'])}",
@@ -591,8 +572,7 @@ def build_phase13g_gate_report(
             "Leakage checks are locked",
             (not gates.get("require_leakage_checks", True))
             or (
-                int(row["leakage_check_count"])
-                >= int(gates.get("min_leakage_checks", 6))
+                int(row["leakage_check_count"]) >= int(gates.get("min_leakage_checks", 6))
                 and bool(row["leakage_checks_required"])
             ),
             f"leakage_check_count={int(row['leakage_check_count'])}",
@@ -714,9 +694,7 @@ def save_phase13g_feature_calculation_preregistration_spec(
         "visual_check_id",
         "check",
     )
-    ml_feature_engineering_lock = build_phase13g_ml_feature_engineering_lock(
-        phase_config
-    )
+    ml_feature_engineering_lock = build_phase13g_ml_feature_engineering_lock(phase_config)
     phase13h_boundary_check = build_phase13g_phase13h_boundary_check(phase_config)
     scope_boundary_check = build_phase13_scope_boundary_check(phase_config)
 
@@ -885,9 +863,7 @@ def build_phase13h_readiness_claims_check(
     rows: list[dict[str, Any]] = []
     for claim in expected_true:
         actual = _bool_value(claims.get(claim, False))
-        rows.append(
-            {"claim": claim, "expected": True, "actual": actual, "passed": actual}
-        )
+        rows.append({"claim": claim, "expected": True, "actual": actual, "passed": actual})
     for claim in expected_false:
         actual = _bool_value(claims.get(claim, True))
         rows.append(
@@ -945,11 +921,8 @@ def build_phase13h_formula_registry_lock_check(
         },
         {
             "check": "No registered formula calculates now",
-            "passed": bool(
-                calculation_registry["calculate_now"].map(_bool_value).eq(False).all()
-            )
-            if not calculation_registry.empty
-            and "calculate_now" in calculation_registry.columns
+            "passed": bool(calculation_registry["calculate_now"].map(_bool_value).eq(False).all())
+            if not calculation_registry.empty and "calculate_now" in calculation_registry.columns
             else False,
             "detail": "calculate_now must be false for every row",
         },
@@ -1054,16 +1027,14 @@ def build_phase13h_phase13i_boundary_check(
         (
             "phase13i_allowed_next_step",
             str(boundary.get("allowed_next_step", "")),
-            "feature calculation execution"
-            in str(boundary.get("allowed_next_step", "")).lower(),
+            "feature calculation execution" in str(boundary.get("allowed_next_step", "")).lower(),
         ),
         (
             "phase13i_forbidden_next_step",
             str(boundary.get("forbidden_next_step", "")),
             "signal creation" in str(boundary.get("forbidden_next_step", "")).lower()
             and "model training" in str(boundary.get("forbidden_next_step", "")).lower()
-            and "strategy backtest"
-            in str(boundary.get("forbidden_next_step", "")).lower(),
+            and "strategy backtest" in str(boundary.get("forbidden_next_step", "")).lower(),
         ),
         (
             "phase13i_may_calculate_features",
@@ -1131,9 +1102,7 @@ def build_phase13h_summary(
                 "phase_branch": str(phase_config.get("phase_branch", "")),
                 "source_phase": str(phase_config.get("source_phase", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "phase13g_reports_present": bool(
-                    report_inventory_check["present"].all()
-                )
+                "phase13g_reports_present": bool(report_inventory_check["present"].all())
                 if not report_inventory_check.empty
                 else False,
                 "phase13g_result_passed": bool(phase13g_result_check["passed"].all())
@@ -1142,27 +1111,19 @@ def build_phase13h_summary(
                 "config_flags_clean_for_run": bool(config_flag_check["passed"].all())
                 if not config_flag_check.empty
                 else False,
-                "readiness_claims_locked": bool(
-                    readiness_claims_check["passed"].all()
-                )
+                "readiness_claims_locked": bool(readiness_claims_check["passed"].all())
                 if not readiness_claims_check.empty
                 else False,
-                "formula_registry_locked": bool(
-                    formula_registry_lock_check["passed"].all()
-                )
+                "formula_registry_locked": bool(formula_registry_lock_check["passed"].all())
                 if not formula_registry_lock_check.empty
                 else False,
                 "output_schema_locked": bool(output_schema_lock_check["passed"].all())
                 if not output_schema_lock_check.empty
                 else False,
-                "missingness_leakage_visual_ml_locked": bool(
-                    lock_rows_check["passed"].all()
-                )
+                "missingness_leakage_visual_ml_locked": bool(lock_rows_check["passed"].all())
                 if not lock_rows_check.empty
                 else False,
-                "phase13i_boundary_passed": bool(
-                    phase13i_boundary_check["passed"].all()
-                )
+                "phase13i_boundary_passed": bool(phase13i_boundary_check["passed"].all())
                 if not phase13i_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -1282,8 +1243,7 @@ def build_phase13h_conclusion(gate_report: pd.DataFrame) -> pd.DataFrame:
         "calculate features, create signals, run backtests, train models, deploy "
         "paper trading, promote a candidate, or change the final candidate."
         if all_passed
-        else "Phase 13H found a readiness, formula, output-schema, lock, boundary, "
-        "or scope issue."
+        else "Phase 13H found a readiness, formula, output-schema, lock, boundary, or scope issue."
     )
     return pd.DataFrame(
         [
@@ -1332,12 +1292,8 @@ def save_phase13h_feature_calculation_readiness_audit(
         reports.get("ml_feature_engineering_lock", "")
     )
 
-    formula_registry_lock_check = build_phase13h_formula_registry_lock_check(
-        calculation_registry
-    )
-    output_schema_lock_check = build_phase13h_output_schema_lock_check(
-        output_column_schema
-    )
+    formula_registry_lock_check = build_phase13h_formula_registry_lock_check(calculation_registry)
+    output_schema_lock_check = build_phase13h_output_schema_lock_check(output_column_schema)
     lock_rows_check = build_phase13h_lock_rows_check(
         missingness_behaviour=missingness_behaviour,
         leakage_checks=leakage_checks,

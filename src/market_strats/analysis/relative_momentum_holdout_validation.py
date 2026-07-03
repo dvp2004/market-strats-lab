@@ -27,9 +27,7 @@ def _get_strategy_result(
 
     if strategy not in strategy_results:
         available = sorted(strategy_results.keys())
-        raise ValueError(
-            f"Strategy '{strategy}' not found for {ticker}. Available: {available}"
-        )
+        raise ValueError(f"Strategy '{strategy}' not found for {ticker}. Available: {available}")
 
     return strategy_results[strategy]
 
@@ -238,9 +236,7 @@ def create_relative_momentum_holdout_validation_summary(
             ascending=True,
         ).iloc[0]
 
-        spy_12m = period_df[
-            period_df["strategy"] == "SPY 12-Month Absolute Momentum"
-        ]
+        spy_12m = period_df[period_df["strategy"] == "SPY 12-Month Absolute Momentum"]
 
         if spy_12m.empty:
             spy_12m_cagr = float("nan")

@@ -256,7 +256,11 @@ def _role_is_reference(row: dict[str, Any]) -> bool:
 def _role_is_inception_limited(row: dict[str, Any]) -> bool:
     role = _text_value(row.get("candidate_role", "")).lower()
     caveats = _text_value(row.get("candidate_caveats", "")).lower()
-    return "inception_limited" in role or "inception limited" in caveats or "inception-limited" in caveats
+    return (
+        "inception_limited" in role
+        or "inception limited" in caveats
+        or "inception-limited" in caveats
+    )
 
 
 def _validate_required_sources(
@@ -353,7 +357,9 @@ def validate_regime_informed_filled_session(
         candidate_role = _text_value(
             row.get("candidate_role", template_row.get("candidate_role", ""))
         )
-        target_weight = _numeric(row.get("target_weight", template_row.get("target_weight", np.nan)))
+        target_weight = _numeric(
+            row.get("target_weight", template_row.get("target_weight", np.nan))
+        )
         target_notional = _numeric(
             row.get("target_notional_usd", template_row.get("target_notional_usd", np.nan))
         )
@@ -503,7 +509,9 @@ def build_session_validation_summary(
     if "row_blocking_reasons" in row_validation.columns:
         for value in row_validation["row_blocking_reasons"].tolist():
             blockers.extend(_split_values(value))
-    session_valid = filled_file_present and rows_received > 0 and rows_invalid == 0 and not source_blockers
+    session_valid = (
+        filled_file_present and rows_received > 0 and rows_invalid == 0 and not source_blockers
+    )
     if not filled_file_present and not source_blockers:
         status = "pending_user_entries"
     elif session_valid:
@@ -662,7 +670,9 @@ def build_regime_informed_discipline_summary(
                 "blocked": bool(statuses.eq("blocked").any()),
             }
         )
-    latest = sorted(sessions, key=lambda row: (row["session_date"], row["selected_signal_date"]))[-1]
+    latest = sorted(sessions, key=lambda row: (row["session_date"], row["selected_signal_date"]))[
+        -1
+    ]
     latest_rows = ledger[
         (ledger["session_date"].astype(str) == latest["session_date"])
         & (ledger["selected_signal_date"].astype(str) == latest["selected_signal_date"])
@@ -673,6 +683,7 @@ def build_regime_informed_discipline_summary(
         else False
     )
     ack_source = filled_session if session_valid and not filled_session.empty else latest_rows
+
     def ack_all(column: str) -> bool:
         return bool(column in ack_source.columns and ack_source[column].map(_bool_value).all())
 
@@ -802,9 +813,7 @@ def save_phase21e_regime_informed_session_ingestion(
             filled_session=filled_session,
             template=template,
             warnings_present=warnings_present,
-            require_tear_sheet_review=_bool_value(
-                section.get("require_tear_sheet_review", True)
-            ),
+            require_tear_sheet_review=_bool_value(section.get("require_tear_sheet_review", True)),
             require_warning_acknowledgement=_bool_value(
                 section.get("require_warning_acknowledgement", True)
             ),
@@ -904,7 +913,10 @@ def save_phase21e_regime_informed_session_ingestion(
     failed_gates = _join_values(
         gates.loc[~gates["passed"].map(_bool_value), "gate_id"].astype(str).tolist()
     )
-    if not all_gates_passed and decision != "regime_informed_session_ingestion_failed_missing_adoption_or_template":
+    if (
+        not all_gates_passed
+        and decision != "regime_informed_session_ingestion_failed_missing_adoption_or_template"
+    ):
         decision = "regime_informed_session_ingested_invalid_manual_review_required"
         dashboard.loc[0, "phase21e_decision"] = decision
         _write_csv(dashboard, dashboard_path)

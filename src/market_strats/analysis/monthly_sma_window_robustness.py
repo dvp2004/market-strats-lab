@@ -92,9 +92,7 @@ def run_monthly_sma_window_robustness(
         rolling_summary = create_rolling_summary(rolling_metrics)
 
         cagr_delta = float(metrics["cagr_pct"]) - buy_hold_cagr
-        drawdown_improvement = (
-            float(metrics["max_drawdown_pct"]) - buy_hold_max_drawdown
-        )
+        drawdown_improvement = float(metrics["max_drawdown_pct"]) - buy_hold_max_drawdown
 
         rows.append(
             {
@@ -191,31 +189,18 @@ def create_monthly_sma_window_robustness_summary(
                     2,
                 ),
                 "neighbour_avg_drawdown_improvement_pct_points": round(
-                    float(
-                        neighbouring[
-                            "drawdown_improvement_vs_buy_hold_pct_points"
-                        ].mean()
-                    ),
+                    float(neighbouring["drawdown_improvement_vs_buy_hold_pct_points"].mean()),
                     2,
                 ),
                 "neighbour_min_drawdown_improvement_pct_points": round(
-                    float(
-                        neighbouring[
-                            "drawdown_improvement_vs_buy_hold_pct_points"
-                        ].min()
-                    ),
+                    float(neighbouring["drawdown_improvement_vs_buy_hold_pct_points"].min()),
                     2,
                 ),
                 "windows_with_positive_cagr_delta": int(
                     (robustness["cagr_delta_vs_buy_hold_pct_points"] > 0).sum()
                 ),
                 "windows_with_drawdown_improvement_gt_10pts": int(
-                    (
-                        robustness[
-                            "drawdown_improvement_vs_buy_hold_pct_points"
-                        ]
-                        >= 10
-                    ).sum()
+                    (robustness["drawdown_improvement_vs_buy_hold_pct_points"] >= 10).sum()
                 ),
             }
         ]
@@ -256,9 +241,7 @@ def write_monthly_sma_window_robustness_markdown(
     available_columns = [column for column in display_columns if column in robustness]
 
     robustness_table = robustness[available_columns].to_markdown(index=False)
-    summary_table = (
-        summary.to_markdown(index=False) if not summary.empty else "No summary data."
-    )
+    summary_table = summary.to_markdown(index=False) if not summary.empty else "No summary data."
 
     content = f"""# Monthly SMA Window Robustness
 

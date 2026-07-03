@@ -107,21 +107,15 @@ def _apply_cash_yield_scenario(
 ) -> pd.DataFrame:
     df = _prepare_overlay_result(overlay_result)
 
-    baseline_daily_cash_return = _annual_yield_to_daily_return(
-        baseline_cash_annual_yield_pct
-    )
-    scenario_daily_cash_return = _annual_yield_to_daily_return(
-        scenario_cash_annual_yield_pct
-    )
+    baseline_daily_cash_return = _annual_yield_to_daily_return(baseline_cash_annual_yield_pct)
+    scenario_daily_cash_return = _annual_yield_to_daily_return(scenario_cash_annual_yield_pct)
 
     cash_return_delta = scenario_daily_cash_return - baseline_daily_cash_return
 
     df["cash_return_delta"] = cash_return_delta
     df["cash_return_adjustment"] = df["cash_position"] * cash_return_delta
 
-    df["strategy_return"] = (
-        df["strategy_return"].astype(float) + df["cash_return_adjustment"]
-    )
+    df["strategy_return"] = df["strategy_return"].astype(float) + df["cash_return_adjustment"]
 
     df.loc[df.index[0], "strategy_return"] = 0.0
     df["equity"] = initial_capital * (1.0 + df["strategy_return"]).cumprod()
@@ -160,8 +154,7 @@ def create_regime_switch_overlay_cash_sensitivity(
     )
 
     cash_yield_multipliers = [
-        float(value)
-        for value in sensitivity_config.get("cash_yield_multipliers", [0.0, 0.5, 1.0])
+        float(value) for value in sensitivity_config.get("cash_yield_multipliers", [0.0, 0.5, 1.0])
     ]
 
     reference_end_date = str(sensitivity_config["reference_end_date"])
@@ -179,9 +172,7 @@ def create_regime_switch_overlay_cash_sensitivity(
             scenario_cash_annual_yield_pct=scenario_cash_annual_yield_pct,
         )
 
-        strategy_name = (
-            f"{overlay_name} @ {scenario_cash_annual_yield_pct:g}% cash yield"
-        )
+        strategy_name = f"{overlay_name} @ {scenario_cash_annual_yield_pct:g}% cash yield"
 
         for period in _period_definitions(reference_end_date, holdout_start_date):
             sliced = _slice_and_rebase_result(
@@ -215,9 +206,7 @@ def create_regime_switch_overlay_cash_sensitivity(
                     "worst_month_pct": metrics["worst_month_pct"],
                     "exposure_time_pct": metrics["exposure_time_pct"],
                     "trade_count": metrics["trade_count"],
-                    "avg_cash_position_pct": (
-                        sliced["cash_position"].astype(float).mean() * 100.0
-                    ),
+                    "avg_cash_position_pct": (sliced["cash_position"].astype(float).mean() * 100.0),
                 }
             )
 
@@ -256,9 +245,7 @@ def create_regime_switch_overlay_cash_sensitivity_summary(
         if baseline.empty:
             baseline = period_df.sort_values("cash_yield_multiplier").iloc[[0]]
 
-        zero_cash = period_df[
-            np.isclose(period_df["cash_yield_multiplier"].astype(float), 0.0)
-        ]
+        zero_cash = period_df[np.isclose(period_df["cash_yield_multiplier"].astype(float), 0.0)]
 
         if zero_cash.empty:
             zero_cash = period_df.sort_values("cash_yield_multiplier").iloc[[0]]
@@ -269,17 +256,12 @@ def create_regime_switch_overlay_cash_sensitivity_summary(
         rows.append(
             {
                 "period": period,
-                "baseline_cash_yield_pct": baseline_row[
-                    "scenario_cash_annual_yield_pct"
-                ],
-                "zero_cash_yield_pct": zero_cash_row[
-                    "scenario_cash_annual_yield_pct"
-                ],
+                "baseline_cash_yield_pct": baseline_row["scenario_cash_annual_yield_pct"],
+                "zero_cash_yield_pct": zero_cash_row["scenario_cash_annual_yield_pct"],
                 "baseline_cagr_pct": baseline_row["cagr_pct"],
                 "zero_cash_cagr_pct": zero_cash_row["cagr_pct"],
                 "zero_cash_cagr_drag_pct_points": round(
-                    float(zero_cash_row["cagr_pct"])
-                    - float(baseline_row["cagr_pct"]),
+                    float(zero_cash_row["cagr_pct"]) - float(baseline_row["cagr_pct"]),
                     3,
                 ),
                 "baseline_calmar": baseline_row["calmar"],
@@ -298,8 +280,7 @@ def create_regime_switch_overlay_cash_sensitivity_summary(
                 "baseline_end_value": baseline_row["end_value"],
                 "zero_cash_end_value": zero_cash_row["end_value"],
                 "zero_cash_end_value_delta": round(
-                    float(zero_cash_row["end_value"])
-                    - float(baseline_row["end_value"]),
+                    float(zero_cash_row["end_value"]) - float(baseline_row["end_value"]),
                     2,
                 ),
                 "avg_cash_position_pct": baseline_row["avg_cash_position_pct"],

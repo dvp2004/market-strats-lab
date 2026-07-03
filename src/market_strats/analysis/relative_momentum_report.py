@@ -20,13 +20,7 @@ from market_strats.strategies.relative_momentum_allocator import (
 
 
 def _safe_filename(value: str) -> str:
-    return (
-        value.lower()
-        .replace(" ", "_")
-        .replace("/", "_")
-        .replace("\\", "_")
-        .replace(":", "_")
-    )
+    return value.lower().replace(" ", "_").replace("/", "_").replace("\\", "_").replace(":", "_")
 
 
 def _get_strategy_result(
@@ -46,9 +40,7 @@ def _get_strategy_result(
 
     if strategy not in strategy_results:
         available = sorted(strategy_results.keys())
-        raise ValueError(
-            f"Strategy '{strategy}' not found for {ticker}. Available: {available}"
-        )
+        raise ValueError(f"Strategy '{strategy}' not found for {ticker}. Available: {available}")
 
     return strategy_results[strategy]
 
@@ -220,8 +212,7 @@ def _run_single_relative_momentum_variant(
     universe = [str(ticker).upper() for ticker in allocator_config["universe"]]
 
     price_data_by_ticker = {
-        ticker: _get_price_data_from_buy_and_hold(ticker_outputs, ticker)
-        for ticker in universe
+        ticker: _get_price_data_from_buy_and_hold(ticker_outputs, ticker) for ticker in universe
     }
 
     benchmark_ticker = "SPY"
@@ -236,12 +227,8 @@ def _run_single_relative_momentum_variant(
         slippage_bps=float(config.get("slippage_bps", 0.0)),
         cash_returns=cash_returns,
         weighting=str(variant_config.get("weighting", "equal")),
-        volatility_lookback_days=int(
-            variant_config.get("volatility_lookback_days", 63)
-        ),
-        trend_filter_enabled=bool(
-            variant_config.get("trend_filter_enabled", False)
-        ),
+        volatility_lookback_days=int(variant_config.get("volatility_lookback_days", 63)),
+        trend_filter_enabled=bool(variant_config.get("trend_filter_enabled", False)),
         trend_sma_days=int(variant_config.get("trend_sma_days", 200)),
         max_asset_weight=(
             None
@@ -298,12 +285,8 @@ def _run_single_relative_momentum_variant(
 
     result_path = reports_dir / f"relative_momentum_{safe_name}_daily_result.csv"
     metrics_path = reports_dir / f"relative_momentum_{safe_name}_metrics.csv"
-    rolling_summary_path = (
-        reports_dir / f"relative_momentum_{safe_name}_rolling_summary.csv"
-    )
-    allocation_summary_path = (
-        reports_dir / f"relative_momentum_{safe_name}_allocation_summary.csv"
-    )
+    rolling_summary_path = reports_dir / f"relative_momentum_{safe_name}_rolling_summary.csv"
+    allocation_summary_path = reports_dir / f"relative_momentum_{safe_name}_allocation_summary.csv"
     markdown_path = reports_dir / f"relative_momentum_{safe_name}.md"
     equity_plot_path = reports_dir / f"relative_momentum_{safe_name}_equity_curves.png"
     drawdown_plot_path = reports_dir / f"relative_momentum_{safe_name}_drawdowns.png"
@@ -340,10 +323,7 @@ def _run_single_relative_momentum_variant(
     print(f"\nSaved relative momentum allocator daily result to: {result_path}")
     print(f"Saved relative momentum allocator metrics to: {metrics_path}")
     print(f"Saved relative momentum allocator rolling summary to: {rolling_summary_path}")
-    print(
-        "Saved relative momentum allocator allocation summary to: "
-        f"{allocation_summary_path}"
-    )
+    print(f"Saved relative momentum allocator allocation summary to: {allocation_summary_path}")
     print(f"Saved relative momentum allocator report to: {markdown_path}")
     print(f"Saved relative momentum allocator equity chart to: {equity_plot_path}")
     print(f"Saved relative momentum allocator drawdown chart to: {drawdown_plot_path}")

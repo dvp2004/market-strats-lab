@@ -89,9 +89,7 @@ def _phase_result_check(
         and "passed" in str(conclusion.iloc[0].get("verdict", "")).lower()
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -141,9 +139,7 @@ def _normalise_registry_rows(rows: list[dict[str, Any]]) -> pd.DataFrame:
 
     for col in frame.columns:
         frame[col] = frame[col].apply(
-            lambda value: "; ".join(map(str, value))
-            if isinstance(value, list)
-            else value
+            lambda value: "; ".join(map(str, value)) if isinstance(value, list) else value
         )
 
     return frame
@@ -154,9 +150,7 @@ def _boundary_check(section: dict[str, Any]) -> pd.DataFrame:
 
     for key in ["phase13ah_boundary", "phase13ai_boundary"]:
         boundary = section.get(key, {})
-        allowed = str(
-            boundary.get("allowed_next_step", boundary.get("allowed_future_step", ""))
-        )
+        allowed = str(boundary.get("allowed_next_step", boundary.get("allowed_future_step", "")))
         forbidden = str(
             boundary.get(
                 "forbidden_next_step",
@@ -170,10 +164,7 @@ def _boundary_check(section: dict[str, Any]) -> pd.DataFrame:
                 "allowed": allowed,
                 "forbidden": forbidden,
                 "passed": bool(
-                    (
-                        "readiness" in allowed.lower()
-                        or "panel execution" in allowed.lower()
-                    )
+                    ("readiness" in allowed.lower() or "panel execution" in allowed.lower())
                     and "model training" in forbidden.lower()
                     and "holdout prediction" in forbidden.lower()
                     and "feature importance" in forbidden.lower()
@@ -208,35 +199,25 @@ def save_phase13ag_target_feature_redesign_preregistration(
         source_reports["phase13af_gate_report"],
         "Phase 13AF",
     )
-    architecture_decision = _read_csv_if_exists(
-        source_reports["architecture_decision_report"]
-    )
+    architecture_decision = _read_csv_if_exists(source_reports["architecture_decision_report"])
 
     decision_is_redesign = (
         not architecture_decision.empty
-        and str(
-            architecture_decision.iloc[0].get("architecture_decision", "")
-        )
+        and str(architecture_decision.iloc[0].get("architecture_decision", ""))
         == "pivot_to_target_feature_redesign_preregistration"
     )
 
-    target_registry = _normalise_registry_rows(
-        section.get("target_variant_registry", [])
-    )
+    target_registry = _normalise_registry_rows(section.get("target_variant_registry", []))
     target_quality_policy = pd.DataFrame(
         [
             {
                 "policy_key": key,
-                "policy_value": "; ".join(map(str, value))
-                if isinstance(value, list)
-                else value,
+                "policy_value": "; ".join(map(str, value)) if isinstance(value, list) else value,
             }
             for key, value in section.get("target_quality_policy", {}).items()
         ]
     )
-    feature_family_registry = _normalise_registry_rows(
-        section.get("feature_family_registry", [])
-    )
+    feature_family_registry = _normalise_registry_rows(section.get("feature_family_registry", []))
     diagnostic_panel_policy = pd.DataFrame(
         [
             {"policy_key": key, "policy_value": value}
@@ -318,8 +299,7 @@ def save_phase13ag_target_feature_redesign_preregistration(
             ),
             _gate_row(
                 "Spec role is correct",
-                section.get("spec_role")
-                == "Target-feature redesign pre-registration spec only",
+                section.get("spec_role") == "Target-feature redesign pre-registration spec only",
                 section.get("spec_role", ""),
             ),
         ]
@@ -393,9 +373,7 @@ def save_phase13ah_target_feature_redesign_readiness_audit(
         )
 
     config_check = pd.DataFrame(flag_rows)
-    config_check["result"] = config_check["passed"].map(
-        {True: "Passed", False: "Failed"}
-    )
+    config_check["result"] = config_check["passed"].map({True: "Passed", False: "Failed"})
 
     reports = section.get("phase13ag_reports", {})
     inventory = _source_report_check(reports)
@@ -557,13 +535,12 @@ def _label_target_variant(
         supportive_drawdown_min = float(row.get("supportive_drawdown_min", -0.08))
 
         labels = pd.Series(["neutral"] * len(dataset), index=dataset.index)
-        labels.loc[
-            (returns <= fragile_return_max) | (drawdowns <= fragile_drawdown_max)
-        ] = "fragile"
-        labels.loc[
-            (returns >= supportive_return_min)
-            & (drawdowns >= supportive_drawdown_min)
-        ] = "supportive"
+        labels.loc[(returns <= fragile_return_max) | (drawdowns <= fragile_drawdown_max)] = (
+            "fragile"
+        )
+        labels.loc[(returns >= supportive_return_min) & (drawdowns >= supportive_drawdown_min)] = (
+            "supportive"
+        )
         labels.loc[returns.isna() | drawdowns.isna()] = "unavailable"
         return labels, True, ""
 
@@ -579,10 +556,9 @@ def _label_target_variant(
 
         labels = pd.Series(["neutral"] * len(dataset), index=dataset.index)
         labels.loc[drawdowns <= fragile_drawdown_max] = "fragile"
-        labels.loc[
-            (returns >= supportive_return_min)
-            & (drawdowns >= supportive_drawdown_min)
-        ] = "supportive"
+        labels.loc[(returns >= supportive_return_min) & (drawdowns >= supportive_drawdown_min)] = (
+            "supportive"
+        )
         labels.loc[returns.isna() | drawdowns.isna()] = "unavailable"
         return labels, True, ""
 
@@ -654,9 +630,7 @@ def _target_distribution(
                         "class_label": class_label,
                         "rows": int(count),
                         "split_rows": int(split_rows),
-                        "class_ratio": float(count / split_rows)
-                        if split_rows
-                        else 0.0,
+                        "class_ratio": float(count / split_rows) if split_rows else 0.0,
                     }
                 )
 
@@ -685,12 +659,8 @@ def _class_balance_report(
     max_validation = float(
         _policy_value(target_quality_policy, "max_validation_fragile_ratio", 0.35)
     )
-    min_train = float(
-        _policy_value(target_quality_policy, "min_train_fragile_ratio", 0.12)
-    )
-    max_train = float(
-        _policy_value(target_quality_policy, "max_train_fragile_ratio", 0.35)
-    )
+    min_train = float(_policy_value(target_quality_policy, "min_train_fragile_ratio", 0.12))
+    max_train = float(_policy_value(target_quality_policy, "max_train_fragile_ratio", 0.35))
 
     rows = []
 
@@ -705,9 +675,7 @@ def _class_balance_report(
         ]
 
         train_ratio = (
-            float(train_fragile.iloc[0]["class_ratio"])
-            if not train_fragile.empty
-            else 0.0
+            float(train_fragile.iloc[0]["class_ratio"]) if not train_fragile.empty else 0.0
         )
         validation_ratio = (
             float(validation_fragile.iloc[0]["class_ratio"])
@@ -721,9 +689,7 @@ def _class_balance_report(
                 "train_fragile_ratio": train_ratio,
                 "validation_fragile_ratio": validation_ratio,
                 "train_balance_passed": min_train <= train_ratio <= max_train,
-                "validation_balance_passed": min_validation
-                <= validation_ratio
-                <= max_validation,
+                "validation_balance_passed": min_validation <= validation_ratio <= max_validation,
                 "target_variant_selected": False,
             }
         )
@@ -793,16 +759,10 @@ def _feature_family_availability(
         state_prefixes = _split_semicolon(row.get("state_prefixes", ""))
         missingness_prefixes = _split_semicolon(row.get("missingness_prefixes", ""))
 
-        value_cols = [
-            col for col in dataset.columns if str(col).startswith(tuple(value_prefixes))
-        ]
-        state_cols = [
-            col for col in dataset.columns if str(col).startswith(tuple(state_prefixes))
-        ]
+        value_cols = [col for col in dataset.columns if str(col).startswith(tuple(value_prefixes))]
+        state_cols = [col for col in dataset.columns if str(col).startswith(tuple(state_prefixes))]
         missingness_cols = [
-            col
-            for col in dataset.columns
-            if str(col).startswith(tuple(missingness_prefixes))
+            col for col in dataset.columns if str(col).startswith(tuple(missingness_prefixes))
         ]
 
         available_cells = 0
@@ -845,15 +805,14 @@ def _feature_target_separation(
     numeric_features = [
         col
         for col in dataset.columns
-        if str(col).startswith("value__technical_")
-        or str(col).startswith("value__macro_")
+        if str(col).startswith("value__technical_") or str(col).startswith("value__macro_")
     ]
 
     rows = []
 
-    for variant_id in feasible[
-        feasible["feasible"].map(_bool_value)
-    ]["target_variant_id"].astype(str):
+    for variant_id in feasible[feasible["feasible"].map(_bool_value)]["target_variant_id"].astype(
+        str
+    ):
         labels = assignment[variant_id].astype(str)
 
         for feature_col in numeric_features:
@@ -869,9 +828,7 @@ def _feature_target_separation(
                         "feature_column": feature_col,
                         "class_label": class_label,
                         "class_rows": int(len(class_values)),
-                        "class_mean": float(class_values.mean())
-                        if len(class_values)
-                        else 0.0,
+                        "class_mean": float(class_values.mean()) if len(class_values) else 0.0,
                         "non_class_mean": float(non_class_values.mean())
                         if len(non_class_values)
                         else 0.0,
@@ -920,18 +877,14 @@ def _redesign_screen(
         ]
         drawdown_profile = outcome_profile[
             outcome_profile["target_variant_id"].astype(str).eq(variant_id)
-            & outcome_profile["outcome_column"].astype(str).eq(
-                "future_window_max_drawdown_63d"
-            )
+            & outcome_profile["outcome_column"].astype(str).eq("future_window_max_drawdown_63d")
         ]
 
         return_map = {
-            str(item["class_label"]): float(item["mean"])
-            for _, item in return_profile.iterrows()
+            str(item["class_label"]): float(item["mean"]) for _, item in return_profile.iterrows()
         }
         drawdown_map = {
-            str(item["class_label"]): float(item["mean"])
-            for _, item in drawdown_profile.iterrows()
+            str(item["class_label"]): float(item["mean"]) for _, item in drawdown_profile.iterrows()
         }
 
         economic_return_ordering = (
@@ -939,9 +892,7 @@ def _redesign_screen(
             < return_map.get("neutral", 0.0)
             < return_map.get("supportive", 0.0)
         )
-        drawdown_ordering = drawdown_map.get("fragile", 0.0) < drawdown_map.get(
-            "neutral", 0.0
-        )
+        drawdown_ordering = drawdown_map.get("fragile", 0.0) < drawdown_map.get("neutral", 0.0)
 
         feasible_flag = _bool_value(row["feasible"])
         economically_meaningful = economic_return_ordering and drawdown_ordering
@@ -1023,12 +974,8 @@ def save_phase13ai_target_feature_diagnostic_panel_execution(
 
     dataset = _read_csv_if_exists(source_reports["dataset"])
     target_registry = _read_csv_if_exists(source_reports["target_variant_registry"])
-    target_quality_policy = _read_csv_if_exists(
-        source_reports["target_quality_policy"]
-    )
-    feature_family_registry = _read_csv_if_exists(
-        source_reports["feature_family_registry"]
-    )
+    target_quality_policy = _read_csv_if_exists(source_reports["target_quality_policy"])
+    feature_family_registry = _read_csv_if_exists(source_reports["feature_family_registry"])
 
     feasibility, assignment = _target_variant_feasibility(dataset, target_registry)
     distribution = _target_distribution(assignment, feasibility)
@@ -1056,9 +1003,7 @@ def save_phase13ai_target_feature_diagnostic_panel_execution(
                 "phase13ah_passed": bool(phase13ah_check["passed"].all()),
                 "dataset_rows": len(dataset),
                 "target_variant_rows": len(target_registry),
-                "feasible_target_variants": int(
-                    feasibility["feasible"].map(_bool_value).sum()
-                )
+                "feasible_target_variants": int(feasibility["feasible"].map(_bool_value).sum())
                 if not feasibility.empty
                 else 0,
                 "target_assignment_rows": len(assignment),
@@ -1145,8 +1090,7 @@ def save_phase13ai_target_feature_diagnostic_panel_execution(
             ),
             _gate_row(
                 "Execution role is correct",
-                section.get("execution_role")
-                == "Target-feature diagnostic panel execution only",
+                section.get("execution_role") == "Target-feature diagnostic panel execution only",
                 section.get("execution_role", ""),
             ),
         ]
@@ -1234,16 +1178,13 @@ def save_phase13aj_target_feature_diagnostic_result_audit(
             }
         )
     forbidden = pd.DataFrame(forbidden_rows)
-    forbidden["result"] = forbidden["passed"].map(
-        {True: "Passed", False: "Failed"}
-    )
+    forbidden["result"] = forbidden["passed"].map({True: "Passed", False: "Failed"})
 
     feasible_target_exists = (
         not feasibility.empty and feasibility["feasible"].map(_bool_value).any()
     )
     viable_variant_exists = (
-        not screen.empty
-        and screen["viable_for_future_interpretation"].map(_bool_value).any()
+        not screen.empty and screen["viable_for_future_interpretation"].map(_bool_value).any()
     )
     boundary = _next_boundary_check(section)
     scope = _scope_check(section)
@@ -1319,8 +1260,7 @@ def save_phase13aj_target_feature_diagnostic_result_audit(
             ),
             _gate_row(
                 "Audit role is correct",
-                section.get("audit_role")
-                == "Target-feature diagnostic result audit only",
+                section.get("audit_role") == "Target-feature diagnostic result audit only",
                 section.get("audit_role", ""),
             ),
         ]

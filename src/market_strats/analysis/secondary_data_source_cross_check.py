@@ -67,8 +67,7 @@ def fetch_stooq_daily_prices(
         ) from error
     except URLError as error:
         raise ValueError(
-            f"Stooq URL error for {ticker} using symbol {symbol}: "
-            f"{error.reason}. URL: {url}"
+            f"Stooq URL error for {ticker} using symbol {symbol}: {error.reason}. URL: {url}"
         ) from error
     except TimeoutError as error:
         raise ValueError(
@@ -79,8 +78,7 @@ def fetch_stooq_daily_prices(
 
     if not cleaned_text:
         raise ValueError(
-            f"Stooq returned an empty response for {ticker} using symbol {symbol}. "
-            f"URL: {url}"
+            f"Stooq returned an empty response for {ticker} using symbol {symbol}. URL: {url}"
         )
 
     if "No data" in cleaned_text or "Brak danych" in cleaned_text:
@@ -207,9 +205,7 @@ def _prepare_primary_price_data(
     missing_columns = required_columns - set(price_data.columns)
 
     if missing_columns:
-        raise ValueError(
-            f"Primary price data missing required columns: {sorted(missing_columns)}"
-        )
+        raise ValueError(f"Primary price data missing required columns: {sorted(missing_columns)}")
 
     primary = price_data[["date", "close"]].copy()
     primary["date"] = pd.to_datetime(primary["date"])
@@ -249,9 +245,7 @@ def create_price_cross_check_for_ticker(
     merged["primary_return"] = merged["primary_close"].pct_change()
     merged["secondary_return"] = merged["secondary_close"].pct_change()
     merged["return_diff"] = merged["primary_return"] - merged["secondary_return"]
-    merged = merged.dropna(
-        subset=["primary_return", "secondary_return", "return_diff"]
-    )
+    merged = merged.dropna(subset=["primary_return", "secondary_return", "return_diff"])
 
     if merged.empty:
         return {
@@ -262,9 +256,7 @@ def create_price_cross_check_for_ticker(
 
     return_correlation = merged["primary_return"].corr(merged["secondary_return"])
 
-    median_abs_daily_return_diff_bps = (
-        merged["return_diff"].abs().median() * 10_000.0
-    )
+    median_abs_daily_return_diff_bps = merged["return_diff"].abs().median() * 10_000.0
     mean_abs_daily_return_diff_bps = merged["return_diff"].abs().mean() * 10_000.0
     max_abs_daily_return_diff_bps = merged["return_diff"].abs().max() * 10_000.0
 
@@ -293,9 +285,7 @@ def create_price_cross_check_for_ticker(
         "overlapping_days": int(len(merged)),
         "primary_cagr_pct": primary_cagr,
         "secondary_cagr_pct": secondary_cagr,
-        "cagr_delta_primary_minus_secondary_pct_points": (
-            primary_cagr - secondary_cagr
-        ),
+        "cagr_delta_primary_minus_secondary_pct_points": (primary_cagr - secondary_cagr),
         "primary_max_drawdown_pct": primary_max_drawdown,
         "secondary_max_drawdown_pct": secondary_max_drawdown,
         "max_drawdown_delta_primary_minus_secondary_pct_points": (
@@ -346,8 +336,7 @@ def create_secondary_data_source_cross_check(
         )
 
     tickers = [
-        str(ticker).upper()
-        for ticker in cross_check_config.get("tickers", ticker_outputs.keys())
+        str(ticker).upper() for ticker in cross_check_config.get("tickers", ticker_outputs.keys())
     ]
 
     start_date = cross_check_config.get("start_date")
@@ -442,9 +431,7 @@ def create_secondary_data_source_cross_check_summary(
 
     classification_counts = available["classification"].value_counts().to_dict()
 
-    potential_issue_count = int(
-        classification_counts.get("Potential data issue", 0)
-    )
+    potential_issue_count = int(classification_counts.get("Potential data issue", 0))
     review_count = int(classification_counts.get("Review difference", 0))
 
     if potential_issue_count > 0:

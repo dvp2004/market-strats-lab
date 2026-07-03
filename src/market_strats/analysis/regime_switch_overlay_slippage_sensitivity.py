@@ -30,9 +30,7 @@ def _get_strategy_result(
 
     if strategy not in strategy_results:
         available = sorted(strategy_results.keys())
-        raise ValueError(
-            f"Strategy '{strategy}' not found for {ticker}. Available: {available}"
-        )
+        raise ValueError(f"Strategy '{strategy}' not found for {ticker}. Available: {available}")
 
     return strategy_results[strategy]
 
@@ -116,13 +114,10 @@ def _build_overlay_inputs(
     if defensive_allocator_name not in relative_momentum_outputs:
         available = sorted(relative_momentum_outputs.keys())
         raise ValueError(
-            f"Defensive allocator '{defensive_allocator_name}' not found. "
-            f"Available: {available}"
+            f"Defensive allocator '{defensive_allocator_name}' not found. Available: {available}"
         )
 
-    defensive_result = relative_momentum_outputs[defensive_allocator_name][
-        "allocator_result"
-    ]
+    defensive_result = relative_momentum_outputs[defensive_allocator_name]["allocator_result"]
 
     common_dates = list(pd.to_datetime(defensive_result["date"]))
 
@@ -172,8 +167,7 @@ def create_regime_switch_overlay_slippage_sensitivity(
     holdout_start_date = str(sensitivity_config["holdout_start_date"])
 
     slippage_values = [
-        float(value)
-        for value in sensitivity_config.get("slippage_bps_values", [0, 5, 10, 25, 50])
+        float(value) for value in sensitivity_config.get("slippage_bps_values", [0, 5, 10, 25, 50])
     ]
 
     rows: list[dict] = []
@@ -262,27 +256,21 @@ def create_regime_switch_overlay_slippage_sensitivity_summary(
             {
                 "period": period,
                 "baseline_slippage_bps": float(baseline_row["slippage_bps"]),
-                "highest_tested_slippage_bps": float(
-                    worst_slippage_row["slippage_bps"]
-                ),
+                "highest_tested_slippage_bps": float(worst_slippage_row["slippage_bps"]),
                 "baseline_cagr_pct": baseline_row["cagr_pct"],
                 "highest_slippage_cagr_pct": worst_slippage_row["cagr_pct"],
                 "cagr_drag_pct_points": round(
-                    float(worst_slippage_row["cagr_pct"])
-                    - float(baseline_row["cagr_pct"]),
+                    float(worst_slippage_row["cagr_pct"]) - float(baseline_row["cagr_pct"]),
                     3,
                 ),
                 "baseline_calmar": baseline_row["calmar"],
                 "highest_slippage_calmar": worst_slippage_row["calmar"],
                 "calmar_delta": round(
-                    float(worst_slippage_row["calmar"])
-                    - float(baseline_row["calmar"]),
+                    float(worst_slippage_row["calmar"]) - float(baseline_row["calmar"]),
                     3,
                 ),
                 "baseline_max_drawdown_pct": baseline_row["max_drawdown_pct"],
-                "highest_slippage_max_drawdown_pct": worst_slippage_row[
-                    "max_drawdown_pct"
-                ],
+                "highest_slippage_max_drawdown_pct": worst_slippage_row["max_drawdown_pct"],
                 "drawdown_delta_pct_points": round(
                     float(worst_slippage_row["max_drawdown_pct"])
                     - float(baseline_row["max_drawdown_pct"]),
@@ -291,8 +279,7 @@ def create_regime_switch_overlay_slippage_sensitivity_summary(
                 "baseline_end_value": baseline_row["end_value"],
                 "highest_slippage_end_value": worst_slippage_row["end_value"],
                 "end_value_delta": round(
-                    float(worst_slippage_row["end_value"])
-                    - float(baseline_row["end_value"]),
+                    float(worst_slippage_row["end_value"]) - float(baseline_row["end_value"]),
                     2,
                 ),
             }

@@ -189,7 +189,9 @@ def _selected_candidates(
     out = recommended_tracking_set.copy()
     if include_candidates:
         out = out[
-            out["canonical_candidate_id"].astype(str).isin([str(item) for item in include_candidates])
+            out["canonical_candidate_id"]
+            .astype(str)
+            .isin([str(item) for item in include_candidates])
         ]
     return out.reset_index(drop=True)
 
@@ -250,7 +252,11 @@ def _dynamic_allocation_source(
 def _is_btc_capable(row: pd.Series) -> bool:
     canonical_id = _text_value(row.get("canonical_candidate_id", ""))
     active_assets = _text_value(row.get("active_assets", ""))
-    return _bool_value(row.get("uses_btc", False)) or "BTC-USD" in active_assets or "btc" in canonical_id.lower()
+    return (
+        _bool_value(row.get("uses_btc", False))
+        or "BTC-USD" in active_assets
+        or "btc" in canonical_id.lower()
+    )
 
 
 def _candidate_btc_weight(frame: pd.DataFrame) -> Any:
@@ -435,7 +441,9 @@ def build_finalist_paper_orders_preview(
         if _bool_value(target.get("broker_api_integration_allowed", False)):
             blocking_reasons.append("broker_api_flag_true")
 
-        allowed = bool(not blocking_reasons and _bool_value(target.get("paper_preview_allowed", False)))
+        allowed = bool(
+            not blocking_reasons and _bool_value(target.get("paper_preview_allowed", False))
+        )
         rows.append(
             {
                 "tracking_date": target.get("tracking_date", ""),
@@ -558,7 +566,11 @@ def build_finalist_daily_tracking_tear_sheet(
     cycle_date = _text_value(cycle_row.get("cycle_date", _generated_date()))
     final_instruction = _final_instruction(warning_symbols, blocking_symbols)
     data_quality_status = _quality_status(warning_symbols, blocking_symbols)
-    candidates = sorted(targets["canonical_candidate_id"].astype(str).unique().tolist()) if not targets.empty else []
+    candidates = (
+        sorted(targets["canonical_candidate_id"].astype(str).unique().tolist())
+        if not targets.empty
+        else []
+    )
     blocked_candidates = sorted(
         orders.loc[~orders["paper_order_allowed"].map(_bool_value), "canonical_candidate_id"]
         .astype(str)
@@ -596,7 +608,17 @@ def build_finalist_daily_tracking_tear_sheet(
         _tear_row("finalists", "target_allocations", _format_allocations(targets)),
         _tear_row("finalists", "preview_orders", _format_preview_orders(orders)),
         _tear_row("finalists", "blocked_candidates", _join_values(blocked_candidates)),
-        _tear_row("finalists", "candidate_caveats", _join_values(_split_values(";".join(targets.get("candidate_caveats", pd.Series(dtype=str)).astype(str).tolist())))),
+        _tear_row(
+            "finalists",
+            "candidate_caveats",
+            _join_values(
+                _split_values(
+                    ";".join(
+                        targets.get("candidate_caveats", pd.Series(dtype=str)).astype(str).tolist()
+                    )
+                )
+            ),
+        ),
         _tear_row("finalists", "btc_specific_caveats", btc_caveats or "none"),
         _tear_row("final_action", "final_instruction", final_instruction),
     ]
@@ -609,7 +631,9 @@ def build_finalist_daily_tracking_tear_sheet(
             orders.loc[
                 orders["canonical_candidate_id"].astype(str) == str(candidate_id),
                 "paper_order_allowed",
-            ].map(_bool_value).all()
+            ]
+            .map(_bool_value)
+            .all()
         )
         candidate_lines.append(f"- `{candidate_id}` ({role}): preview_allowed={allowed}")
         for row in group.to_dict(orient="records"):
@@ -667,7 +691,9 @@ def build_finalist_daily_tracking_tear_sheet(
     return tear_sheet, markdown
 
 
-def _tear_row(category: str, key: str, value: Any, status: str = "", notes: str = "") -> dict[str, Any]:
+def _tear_row(
+    category: str, key: str, value: Any, status: str = "", notes: str = ""
+) -> dict[str, Any]:
     return {
         "category": category,
         "key": key,
@@ -691,14 +717,22 @@ def build_dashboard_status(
     broker_api_integration_allowed: bool,
     notes: str,
 ) -> pd.DataFrame:
-    candidates = sorted(targets["canonical_candidate_id"].astype(str).unique().tolist()) if not targets.empty else []
-    allowed_candidates = sorted(
-        orders.groupby("canonical_candidate_id")["paper_order_allowed"]
-        .apply(lambda values: bool(values.map(_bool_value).all()))
-        .loc[lambda values: values]
-        .index.astype(str)
-        .tolist()
-    ) if not orders.empty else []
+    candidates = (
+        sorted(targets["canonical_candidate_id"].astype(str).unique().tolist())
+        if not targets.empty
+        else []
+    )
+    allowed_candidates = (
+        sorted(
+            orders.groupby("canonical_candidate_id")["paper_order_allowed"]
+            .apply(lambda values: bool(values.map(_bool_value).all()))
+            .loc[lambda values: values]
+            .index.astype(str)
+            .tolist()
+        )
+        if not orders.empty
+        else []
+    )
     blocked_candidate_count = max(0, len(candidates) - len(allowed_candidates))
     safety_flags_clear = not any(
         [live_trading_allowed, real_money_allowed, broker_api_integration_allowed]
@@ -783,9 +817,11 @@ def save_phase20a_paper_finalist_tracking(
     source_paths = {
         "recommended_tracking_set": finalist_dir / REQUIRED_INPUTS["recommended_tracking_set"],
         "paper_candidate_shortlist": finalist_dir / REQUIRED_INPUTS["paper_candidate_shortlist"],
-        "entity_roster_recommendation": finalist_dir / REQUIRED_INPUTS["entity_roster_recommendation"],
+        "entity_roster_recommendation": finalist_dir
+        / REQUIRED_INPUTS["entity_roster_recommendation"],
         "daily_execution_tear_sheet": hardening_dir / REQUIRED_INPUTS["daily_execution_tear_sheet"],
-        "daily_execution_tear_sheet_md": hardening_dir / REQUIRED_INPUTS["daily_execution_tear_sheet_md"],
+        "daily_execution_tear_sheet_md": hardening_dir
+        / REQUIRED_INPUTS["daily_execution_tear_sheet_md"],
         "fresh_data_quality_report": hardening_dir / REQUIRED_INPUTS["fresh_data_quality_report"],
         "paper_cycle_latest": cycle_dir / REQUIRED_INPUTS["paper_cycle_latest"],
     }
@@ -878,18 +914,46 @@ def save_phase20a_paper_finalist_tracking(
 
     gates = pd.DataFrame(
         [
-            _gate_row("phase19b_recommended_tracking_set_exists", source_paths["recommended_tracking_set"].exists()),
-            _gate_row("phase19b_paper_candidate_shortlist_exists", source_paths["paper_candidate_shortlist"].exists()),
-            _gate_row("phase19b_entity_roster_recommendation_exists", source_paths["entity_roster_recommendation"].exists()),
-            _gate_row("phase18a_tear_sheet_csv_exists", source_paths["daily_execution_tear_sheet"].exists()),
-            _gate_row("phase18a_tear_sheet_md_exists", source_paths["daily_execution_tear_sheet_md"].exists()),
-            _gate_row("fresh_data_quality_report_exists", source_paths["fresh_data_quality_report"].exists()),
+            _gate_row(
+                "phase19b_recommended_tracking_set_exists",
+                source_paths["recommended_tracking_set"].exists(),
+            ),
+            _gate_row(
+                "phase19b_paper_candidate_shortlist_exists",
+                source_paths["paper_candidate_shortlist"].exists(),
+            ),
+            _gate_row(
+                "phase19b_entity_roster_recommendation_exists",
+                source_paths["entity_roster_recommendation"].exists(),
+            ),
+            _gate_row(
+                "phase18a_tear_sheet_csv_exists",
+                source_paths["daily_execution_tear_sheet"].exists(),
+            ),
+            _gate_row(
+                "phase18a_tear_sheet_md_exists",
+                source_paths["daily_execution_tear_sheet_md"].exists(),
+            ),
+            _gate_row(
+                "fresh_data_quality_report_exists",
+                source_paths["fresh_data_quality_report"].exists(),
+            ),
             _gate_row("phase18b_latest_cycle_exists", source_paths["paper_cycle_latest"].exists()),
             _gate_row("finalist_target_file_written", target_path.exists() and not targets.empty),
-            _gate_row("finalist_order_preview_file_written", orders_path.exists() and not orders.empty),
-            _gate_row("finalist_tear_sheet_csv_written", tear_path.exists() and not tear_sheet_out.empty),
-            _gate_row("finalist_tear_sheet_md_written", tear_md_path.exists() and tear_md_path.stat().st_size > 0),
-            _gate_row("finalist_journal_template_written", journal_path.exists() and not journal_template.empty),
+            _gate_row(
+                "finalist_order_preview_file_written", orders_path.exists() and not orders.empty
+            ),
+            _gate_row(
+                "finalist_tear_sheet_csv_written", tear_path.exists() and not tear_sheet_out.empty
+            ),
+            _gate_row(
+                "finalist_tear_sheet_md_written",
+                tear_md_path.exists() and tear_md_path.stat().st_size > 0,
+            ),
+            _gate_row(
+                "finalist_journal_template_written",
+                journal_path.exists() and not journal_template.empty,
+            ),
             _gate_row("dashboard_status_written", dashboard_path.parent.exists()),
             _gate_row("live_trading_disabled", not live_trading_allowed),
             _gate_row("real_money_disabled", not real_money_allowed),

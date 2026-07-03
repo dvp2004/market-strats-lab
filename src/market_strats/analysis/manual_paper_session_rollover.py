@@ -120,12 +120,8 @@ def _ledger_contains_filled_session(*, ledger: pd.DataFrame, filled: pd.DataFram
         return False
     if not set(required).issubset(filled.columns):
         return False
-    ledger_keys = set(
-        ledger[required].fillna("").astype(str).itertuples(index=False, name=None)
-    )
-    filled_keys = set(
-        filled[required].fillna("").astype(str).itertuples(index=False, name=None)
-    )
+    ledger_keys = set(ledger[required].fillna("").astype(str).itertuples(index=False, name=None))
+    filled_keys = set(filled[required].fillna("").astype(str).itertuples(index=False, name=None))
     return bool(filled_keys) and filled_keys.issubset(ledger_keys)
 
 
@@ -234,12 +230,8 @@ def save_phase20f_manual_paper_session_rollover(
         section.get("archive_dir"),
         reports_path / "paper_trading" / "manual_sessions" / "archive",
     )
-    filled_filename = str(
-        section.get("filled_session_filename", "manual_paper_session_filled.csv")
-    )
-    template_filename = str(
-        section.get("template_filename", "manual_paper_session_template.csv")
-    )
+    filled_filename = str(section.get("filled_session_filename", "manual_paper_session_filled.csv"))
+    template_filename = str(section.get("template_filename", "manual_paper_session_template.csv"))
     archive_completed = _bool_value(section.get("archive_completed_valid_sessions", True))
     stale_policy = str(section.get("stale_filled_file_policy", "block_current_ingestion"))
     live_trading_allowed = _bool_value(section.get("live_trading_allowed", False))
@@ -268,9 +260,7 @@ def save_phase20f_manual_paper_session_rollover(
     template_signal_date = _first_available(template, "selected_signal_date")
     filled_present = filled_path.exists() and filled_path.is_file()
     filled_session_date = _first_available(filled, "session_date") if filled_present else ""
-    filled_signal_date = (
-        _first_available(filled, "selected_signal_date") if filled_present else ""
-    )
+    filled_signal_date = _first_available(filled, "selected_signal_date") if filled_present else ""
     matches_current = bool(
         filled_present
         and filled_session_date == template_session_date

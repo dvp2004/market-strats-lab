@@ -10,9 +10,7 @@ def _get_metric_row(metrics: pd.DataFrame, strategy: str) -> pd.Series:
 
     if row.empty:
         available = sorted(metrics["strategy"].unique())
-        raise ValueError(
-            f"Strategy '{strategy}' not found in metrics. Available: {available}"
-        )
+        raise ValueError(f"Strategy '{strategy}' not found in metrics. Available: {available}")
 
     return row.iloc[0]
 
@@ -77,9 +75,7 @@ def create_candidate_portfolio_decision_report(
                 "benchmark_strategy": benchmark_strategy,
                 "portfolio_cagr_pct": portfolio_cagr,
                 "benchmark_cagr_pct": benchmark_cagr,
-                "cagr_delta_vs_benchmark_pct_points": (
-                    portfolio_cagr - benchmark_cagr
-                ),
+                "cagr_delta_vs_benchmark_pct_points": (portfolio_cagr - benchmark_cagr),
                 "min_required_cagr_pct": min_cagr_pct,
                 "cagr_gate_pass": cagr_gate_pass,
                 "portfolio_max_drawdown_pct": portfolio_drawdown,

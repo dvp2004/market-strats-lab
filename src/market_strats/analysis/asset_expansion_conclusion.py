@@ -34,9 +34,7 @@ def create_asset_expansion_conclusion(
         [
             {
                 "claim": "Adding USO improves the standalone allocator.",
-                "status": "Survived"
-                if bool(row.get("allocator_pass", False))
-                else "Failed",
+                "status": "Survived" if bool(row.get("allocator_pass", False)) else "Failed",
                 "evidence_quality": "Supported by allocator full-period comparison",
                 "interpretation": (
                     f"Base allocator CAGR was {row.get('baseline_allocator_cagr_pct')}%, "
@@ -48,9 +46,7 @@ def create_asset_expansion_conclusion(
             },
             {
                 "claim": "Adding USO improves the full-period 3D overlay.",
-                "status": "Survived"
-                if bool(row.get("overlay_full_pass", False))
-                else "Failed",
+                "status": "Survived" if bool(row.get("overlay_full_pass", False)) else "Failed",
                 "evidence_quality": "Supported by full-period overlay comparison",
                 "interpretation": (
                     f"Base overlay CAGR was {row.get('baseline_overlay_full_cagr_pct')}%, "

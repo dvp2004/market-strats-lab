@@ -18,13 +18,7 @@ from market_strats.strategies.regime_switch_overlay import (
 
 
 def _safe_name(value: str) -> str:
-    return (
-        value.lower()
-        .replace(" ", "_")
-        .replace("+", "plus")
-        .replace("/", "_")
-        .replace("-", "_")
-    )
+    return value.lower().replace(" ", "_").replace("+", "plus").replace("/", "_").replace("-", "_")
 
 
 def _get_price_data(
@@ -50,9 +44,7 @@ def _get_price_data(
     missing_columns = required_columns - set(price_data.columns)
 
     if missing_columns:
-        raise ValueError(
-            f"{ticker} price data missing required columns: {sorted(missing_columns)}"
-        )
+        raise ValueError(f"{ticker} price data missing required columns: {sorted(missing_columns)}")
 
     frame = price_data[["date", "adj_close"]].copy()
     frame["date"] = pd.to_datetime(frame["date"])
@@ -74,14 +66,8 @@ def _get_strategy_result(
     strategy_results = ticker_outputs[ticker].get("strategy_results")
 
     if strategy_results is None or strategy not in strategy_results:
-        available = (
-            sorted(strategy_results.keys())
-            if isinstance(strategy_results, dict)
-            else []
-        )
-        raise ValueError(
-            f"Strategy '{strategy}' missing for {ticker}. Available: {available}"
-        )
+        available = sorted(strategy_results.keys()) if isinstance(strategy_results, dict) else []
+        raise ValueError(f"Strategy '{strategy}' missing for {ticker}. Available: {available}")
 
     return strategy_results[strategy]
 
@@ -136,9 +122,7 @@ def _apply_constraints(
 
     for group_name, cap in group_caps.items():
         group_assets = [
-            asset
-            for asset in weights.index
-            if asset_groups.get(asset, "other") == group_name
+            asset for asset in weights.index if asset_groups.get(asset, "other") == group_name
         ]
 
         if not group_assets:
@@ -172,9 +156,7 @@ def _run_constrained_trend_confirmed_allocator(
     trend_sma = close_panel.rolling(trend_sma_days).mean()
     above_trend = close_panel > trend_sma
 
-    monthly_last_dates = (
-        close_panel.resample("ME").last().dropna(how="all").index
-    )
+    monthly_last_dates = close_panel.resample("ME").last().dropna(how="all").index
     monthly_close = close_panel.loc[close_panel.index.isin(monthly_last_dates)]
 
     trailing_returns = monthly_close.pct_change(lookback_months)
@@ -206,10 +188,7 @@ def _run_constrained_trend_confirmed_allocator(
         ]
 
         ranked_assets = (
-            momentum_row.loc[eligible]
-            .sort_values(ascending=False)
-            .head(top_n)
-            .index.tolist()
+            momentum_row.loc[eligible].sort_values(ascending=False).head(top_n).index.tolist()
         )
 
         weights = _apply_constraints(
@@ -617,14 +596,10 @@ def _create_decision_rows(
         )
     elif not added_asset_used:
         final_classification = "Added asset ignored"
-        final_verdict = (
-            "Oil received too little allocation to matter under the current rules."
-        )
+        final_verdict = "Oil received too little allocation to matter under the current rules."
     else:
         final_classification = "Expansion rejected"
-        final_verdict = (
-            "Oil did not improve the system enough to justify inclusion."
-        )
+        final_verdict = "Oil did not improve the system enough to justify inclusion."
 
     return pd.DataFrame(
         [
@@ -635,7 +610,6 @@ def _create_decision_rows(
                 "added_asset_days_held": added_asset_days_held,
                 "added_asset_pct_days_held": round(added_asset_pct_days_held, 3),
                 "added_asset_final_weight_pct": round(added_asset_final_weight, 3),
-
                 "baseline_allocator_cagr_pct": _safe_metric(
                     base_allocator_full,
                     "cagr_pct",
@@ -645,7 +619,6 @@ def _create_decision_rows(
                     "cagr_pct",
                 ),
                 "allocator_cagr_delta_pct_points": allocator_cagr_delta,
-
                 "baseline_allocator_calmar": _safe_metric(
                     base_allocator_full,
                     "calmar",
@@ -655,7 +628,6 @@ def _create_decision_rows(
                     "calmar",
                 ),
                 "allocator_calmar_delta": allocator_calmar_delta,
-
                 "baseline_allocator_max_drawdown_pct": _safe_metric(
                     base_allocator_full,
                     "max_drawdown_pct",
@@ -665,7 +637,6 @@ def _create_decision_rows(
                     "max_drawdown_pct",
                 ),
                 "allocator_drawdown_delta_pct_points": allocator_drawdown_delta,
-
                 "baseline_overlay_full_cagr_pct": _safe_metric(
                     base_overlay_full,
                     "cagr_pct",
@@ -675,7 +646,6 @@ def _create_decision_rows(
                     "cagr_pct",
                 ),
                 "overlay_full_cagr_delta_pct_points": overlay_full_cagr_delta,
-
                 "baseline_overlay_full_calmar": _safe_metric(
                     base_overlay_full,
                     "calmar",
@@ -685,7 +655,6 @@ def _create_decision_rows(
                     "calmar",
                 ),
                 "overlay_full_calmar_delta": overlay_full_calmar_delta,
-
                 "baseline_overlay_full_max_drawdown_pct": _safe_metric(
                     base_overlay_full,
                     "max_drawdown_pct",
@@ -695,7 +664,6 @@ def _create_decision_rows(
                     "max_drawdown_pct",
                 ),
                 "overlay_full_drawdown_delta_pct_points": overlay_full_drawdown_delta,
-
                 "baseline_overlay_reference_cagr_pct": _safe_metric(
                     base_overlay_reference,
                     "cagr_pct",
@@ -704,10 +672,7 @@ def _create_decision_rows(
                     expanded_overlay_reference,
                     "cagr_pct",
                 ),
-                "overlay_reference_cagr_delta_pct_points": (
-                    overlay_reference_cagr_delta
-                ),
-
+                "overlay_reference_cagr_delta_pct_points": (overlay_reference_cagr_delta),
                 "baseline_overlay_reference_calmar": _safe_metric(
                     base_overlay_reference,
                     "calmar",
@@ -717,7 +682,6 @@ def _create_decision_rows(
                     "calmar",
                 ),
                 "overlay_reference_calmar_delta": overlay_reference_calmar_delta,
-
                 "baseline_overlay_holdout_cagr_pct": _safe_metric(
                     base_overlay_holdout,
                     "cagr_pct",
@@ -727,7 +691,6 @@ def _create_decision_rows(
                     "cagr_pct",
                 ),
                 "overlay_holdout_cagr_delta_pct_points": overlay_holdout_cagr_delta,
-
                 "baseline_overlay_holdout_calmar": _safe_metric(
                     base_overlay_holdout,
                     "calmar",
@@ -737,11 +700,7 @@ def _create_decision_rows(
                     "calmar",
                 ),
                 "overlay_holdout_calmar_delta": overlay_holdout_calmar_delta,
-
-                "overlay_holdout_volatility_delta_pct_points": (
-                    overlay_holdout_volatility_delta
-                ),
-
+                "overlay_holdout_volatility_delta_pct_points": (overlay_holdout_volatility_delta),
                 "allocator_pass": allocator_pass,
                 "overlay_full_pass": overlay_full_pass,
                 "overlay_holdout_material_pass": overlay_holdout_material_pass,
@@ -769,15 +728,9 @@ def create_asset_expansion_diagnostic(
 
     initial_capital = float(config["initial_capital"])
     baseline_universe_name = str(diagnostic_config.get("baseline_universe_name", "Base"))
-    expanded_universe_name = str(
-        diagnostic_config.get("expanded_universe_name", "Base + Oil")
-    )
-    baseline_assets = [
-        str(asset).upper() for asset in diagnostic_config["baseline_assets"]
-    ]
-    expanded_assets = [
-        str(asset).upper() for asset in diagnostic_config["expanded_assets"]
-    ]
+    expanded_universe_name = str(diagnostic_config.get("expanded_universe_name", "Base + Oil"))
+    baseline_assets = [str(asset).upper() for asset in diagnostic_config["baseline_assets"]]
+    expanded_assets = [str(asset).upper() for asset in diagnostic_config["expanded_assets"]]
 
     top_n = int(diagnostic_config.get("top_n", 3))
     lookback_months = int(diagnostic_config.get("lookback_months", 12))
@@ -785,8 +738,7 @@ def create_asset_expansion_diagnostic(
     confirmation_days = int(diagnostic_config.get("confirmation_days", 3))
     max_asset_weight = float(diagnostic_config.get("max_asset_weight", 1.0 / top_n))
     group_caps = {
-        str(group): float(cap)
-        for group, cap in diagnostic_config.get("group_caps", {}).items()
+        str(group): float(cap) for group, cap in diagnostic_config.get("group_caps", {}).items()
     }
     asset_groups = {
         str(asset).upper(): str(group)
@@ -861,9 +813,7 @@ def create_asset_expansion_diagnostic(
         offensive_result=offensive_spy,
         defensive_result=baseline_allocator,
         initial_capital=initial_capital,
-        trend_sma_days=int(
-            config.get("regime_switch_overlay", {}).get("trend_sma_days", 200)
-        ),
+        trend_sma_days=int(config.get("regime_switch_overlay", {}).get("trend_sma_days", 200)),
         slippage_bps=float(config.get("slippage_bps", 0.0)),
         confirmation_days=confirmation_days,
     )
@@ -871,9 +821,7 @@ def create_asset_expansion_diagnostic(
         offensive_result=offensive_spy,
         defensive_result=expanded_allocator,
         initial_capital=initial_capital,
-        trend_sma_days=int(
-            config.get("regime_switch_overlay", {}).get("trend_sma_days", 200)
-        ),
+        trend_sma_days=int(config.get("regime_switch_overlay", {}).get("trend_sma_days", 200)),
         slippage_bps=float(config.get("slippage_bps", 0.0)),
         confirmation_days=confirmation_days,
     )
@@ -989,9 +937,7 @@ def save_asset_expansion_diagnostic(
 
     metrics_path = reports_dir / "asset_expansion_diagnostic_metrics.csv"
     rolling_summary_path = reports_dir / "asset_expansion_diagnostic_rolling_summary.csv"
-    allocation_summary_path = (
-        reports_dir / "asset_expansion_diagnostic_allocation_summary.csv"
-    )
+    allocation_summary_path = reports_dir / "asset_expansion_diagnostic_allocation_summary.csv"
     decision_path = reports_dir / "asset_expansion_diagnostic_decision.csv"
     markdown_path = reports_dir / "asset_expansion_diagnostic.md"
 

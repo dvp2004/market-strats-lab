@@ -1,4 +1,5 @@
 """GMA-1A market-data-foundation configuration loader and validator."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -116,9 +117,7 @@ def _must_be_false(section: dict[str, Any], key: str) -> None:
         raise ValueError(f"{key} must be false for GMA-1A")
 
 
-def validate_gma1a_config(
-    raw: dict[str, Any], *, path: Path | None = None
-) -> GMA1AConfig:
+def validate_gma1a_config(raw: dict[str, Any], *, path: Path | None = None) -> GMA1AConfig:
     _unknown_keys(raw, TOP_LEVEL_KEYS, "config")
     missing_top = sorted(TOP_LEVEL_KEYS - set(raw))
     if missing_top:
@@ -188,6 +187,5 @@ def load_gma1a_config(path: str | Path) -> GMA1AConfig:
 def is_approved_gma_path(path: str) -> bool:
     candidate = Path(path)
     return any(
-        candidate == prefix or prefix in candidate.parents
-        for prefix in APPROVED_PATH_PREFIXES
+        candidate == prefix or prefix in candidate.parents for prefix in APPROVED_PATH_PREFIXES
     )

@@ -66,10 +66,7 @@ def _get_rolling_value(
     if ticker is not None and "ticker" in df.columns:
         df = df[df["ticker"] == ticker]
 
-    row = df[
-        (df["strategy"] == strategy)
-        & (df["window_years"] == window_years)
-    ]
+    row = df[(df["strategy"] == strategy) & (df["window_years"] == window_years)]
 
     if row.empty:
         return float("nan")
@@ -136,8 +133,7 @@ def _classify_base_strategy(
 
     if (
         cagr_delta_vs_buy_hold >= WEALTH_EQUIVALENT_MIN_CAGR_DELTA_PCT_POINTS
-        and drawdown_improvement_vs_buy_hold
-        >= MATERIAL_DRAWDOWN_IMPROVEMENT_PCT_POINTS
+        and drawdown_improvement_vs_buy_hold >= MATERIAL_DRAWDOWN_IMPROVEMENT_PCT_POINTS
     ):
         return (
             "Wealth-equivalent risk reducer",
@@ -147,8 +143,7 @@ def _classify_base_strategy(
 
     if (
         cagr_delta_vs_buy_hold >= WEALTH_EQUIVALENT_MIN_CAGR_DELTA_PCT_POINTS
-        and drawdown_improvement_vs_buy_hold
-        >= DEFENSIVE_DRAWDOWN_IMPROVEMENT_PCT_POINTS
+        and drawdown_improvement_vs_buy_hold >= DEFENSIVE_DRAWDOWN_IMPROVEMENT_PCT_POINTS
     ):
         return (
             "Defensive sleeve candidate",
@@ -163,10 +158,7 @@ def _classify_base_strategy(
             "Passes the wealth hurdle and materially improves drawdown, but gives up noticeable CAGR.",
         )
 
-    if (
-        worst_5y_cagr_delta_vs_buy_hold > 0
-        and drawdown_improvement_vs_buy_hold > 0
-    ):
+    if worst_5y_cagr_delta_vs_buy_hold > 0 and drawdown_improvement_vs_buy_hold > 0:
         return (
             "Risk-control candidate",
             True,
@@ -236,8 +228,7 @@ def _classify_strategy(
     if "Core-Satellite" in strategy:
         if (
             cagr_delta_vs_buy_hold >= -CORE_SATELLITE_MAX_CAGR_LAG_PCT_POINTS
-            and drawdown_improvement_vs_buy_hold
-            >= MATERIAL_DRAWDOWN_IMPROVEMENT_PCT_POINTS
+            and drawdown_improvement_vs_buy_hold >= MATERIAL_DRAWDOWN_IMPROVEMENT_PCT_POINTS
         ):
             return (
                 "Behavioural compromise",
@@ -347,11 +338,7 @@ def classify_strategy_purpose(
 
             cagr_delta = strategy_cagr - benchmark_cagr
             cagr_sacrifice = max(0.0, benchmark_cagr - strategy_cagr)
-            cagr_sacrifice_pct = (
-                cagr_sacrifice / benchmark_cagr
-                if benchmark_cagr > 0
-                else 0.0
-            )
+            cagr_sacrifice_pct = cagr_sacrifice / benchmark_cagr if benchmark_cagr > 0 else 0.0
 
             drawdown_improvement = strategy_drawdown - benchmark_drawdown
 
@@ -424,18 +411,16 @@ def classify_strategy_purpose(
         "Rejected / weak": 10,
     }
 
-    output["classification_rank"] = output["purpose_classification"].map(
-        classification_order
-    ).fillna(99)
+    output["classification_rank"] = (
+        output["purpose_classification"].map(classification_order).fillna(99)
+    )
 
     sort_columns = ["classification_rank", "cagr_pct"]
 
     if "ticker" in output.columns:
         sort_columns = ["ticker", "classification_rank", "cagr_pct"]
 
-    output = output.sort_values(sort_columns, ascending=[True, True, False]).reset_index(
-        drop=True
-    )
+    output = output.sort_values(sort_columns, ascending=[True, True, False]).reset_index(drop=True)
 
     output = output.drop(columns=["classification_rank"])
 
@@ -475,9 +460,7 @@ def write_strategy_purpose_markdown(
         "classification_note",
     ]
 
-    available_columns = [
-        column for column in display_columns if column in classifications.columns
-    ]
+    available_columns = [column for column in display_columns if column in classifications.columns]
 
     markdown_table = classifications[available_columns].to_markdown(index=False)
 

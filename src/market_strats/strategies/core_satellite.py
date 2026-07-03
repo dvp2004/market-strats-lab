@@ -43,9 +43,7 @@ def run_independent_core_satellite_strategy(
         raise ValueError(f"core_result missing columns: {sorted(missing_core_columns)}")
 
     if missing_satellite_columns:
-        raise ValueError(
-            f"satellite_result missing columns: {sorted(missing_satellite_columns)}"
-        )
+        raise ValueError(f"satellite_result missing columns: {sorted(missing_satellite_columns)}")
 
     core = core_result.copy()
     satellite = satellite_result.copy()
@@ -95,9 +93,7 @@ def run_independent_core_satellite_strategy(
         initial_capital * core_weight * (df["equity_core"] / core_start_equity)
     )
     df["satellite_sleeve_equity"] = (
-        initial_capital
-        * satellite_weight
-        * (df["equity_satellite"] / satellite_start_equity)
+        initial_capital * satellite_weight * (df["equity_satellite"] / satellite_start_equity)
     )
 
     df["equity"] = df["core_sleeve_equity"] + df["satellite_sleeve_equity"]
@@ -113,9 +109,7 @@ def run_independent_core_satellite_strategy(
 
     df["cash_position"] = 1.0 - df["position"]
 
-    df["turnover"] = (
-        df["current_satellite_weight"] * df["turnover_satellite"].fillna(0.0)
-    )
+    df["turnover"] = df["current_satellite_weight"] * df["turnover_satellite"].fillna(0.0)
     df.loc[df.index[0], "turnover"] = 1.0
 
     df["core_initial_weight"] = core_weight
@@ -140,6 +134,7 @@ def run_independent_core_satellite_strategy(
             "strategy_name",
         ]
     ].reset_index(drop=True)
+
 
 def run_annual_rebalanced_core_satellite_strategy(
     core_result: pd.DataFrame,
@@ -177,7 +172,7 @@ def run_annual_rebalanced_core_satellite_strategy(
 
     if round(core_weight + satellite_weight, 10) != 1.0:
         raise ValueError("core_weight + satellite_weight must equal 1")
-    
+
     if not 1 <= rebalance_month <= 12:
         raise ValueError("rebalance_month must be between 1 and 12")
 
@@ -197,9 +192,7 @@ def run_annual_rebalanced_core_satellite_strategy(
         raise ValueError(f"core_result missing columns: {sorted(missing_core_columns)}")
 
     if missing_satellite_columns:
-        raise ValueError(
-            f"satellite_result missing columns: {sorted(missing_satellite_columns)}"
-        )
+        raise ValueError(f"satellite_result missing columns: {sorted(missing_satellite_columns)}")
 
     core = core_result.copy()
     satellite = satellite_result.copy()
@@ -245,12 +238,8 @@ def run_annual_rebalanced_core_satellite_strategy(
     next_year = year.shift(-1)
     next_month = month.shift(-1)
 
-    is_rebalance_day = (
-        (month == rebalance_month)
-        & (
-            (next_month != rebalance_month)
-            | (next_year != year)
-        )
+    is_rebalance_day = (month == rebalance_month) & (
+        (next_month != rebalance_month) | (next_year != year)
     )
     is_rebalance_day.iloc[-1] = False
 
@@ -287,9 +276,7 @@ def run_annual_rebalanced_core_satellite_strategy(
             ) / total_equity_before_rebalance
 
             rebalance_cost = rebalance_turnover * (slippage_bps / 10_000.0)
-            total_equity_after_cost = total_equity_before_rebalance * (
-                1.0 - rebalance_cost
-            )
+            total_equity_after_cost = total_equity_before_rebalance * (1.0 - rebalance_cost)
 
             core_sleeve_equity = total_equity_after_cost * core_weight
             satellite_sleeve_equity = total_equity_after_cost * satellite_weight
@@ -297,9 +284,7 @@ def run_annual_rebalanced_core_satellite_strategy(
             total_equity_after_cost = total_equity_before_rebalance
 
         strategy_return = (
-            0.0
-            if index == 0
-            else (total_equity_after_cost / previous_total_equity) - 1.0
+            0.0 if index == 0 else (total_equity_after_cost / previous_total_equity) - 1.0
         )
 
         total_equity = core_sleeve_equity + satellite_sleeve_equity
@@ -307,19 +292,16 @@ def run_annual_rebalanced_core_satellite_strategy(
         current_core_weight = core_sleeve_equity / total_equity
         current_satellite_weight = satellite_sleeve_equity / total_equity
 
-        position = (
-            current_core_weight * float(row["position_core"])
-            + current_satellite_weight * float(row["position_satellite"])
-        )
+        position = current_core_weight * float(
+            row["position_core"]
+        ) + current_satellite_weight * float(row["position_satellite"])
 
-        cash_position = (
-            current_core_weight * float(row["cash_position_core"])
-            + current_satellite_weight * float(row["cash_position_satellite"])
-        )
+        cash_position = current_core_weight * float(
+            row["cash_position_core"]
+        ) + current_satellite_weight * float(row["cash_position_satellite"])
 
         strategy_turnover = (
-            current_satellite_weight * float(row["turnover_satellite"])
-            + rebalance_turnover
+            current_satellite_weight * float(row["turnover_satellite"]) + rebalance_turnover
         )
 
         if index == 0:

@@ -58,9 +58,7 @@ DEFAULT_PHASE13I_CONFIG: dict[str, Any] = {
         "require_no_paper_trading_deployment": True,
         "require_no_candidate_promotion": True,
         "require_no_final_candidate_change": True,
-        "required_execution_role": (
-            "Technical and macro feature calculation execution only"
-        ),
+        "required_execution_role": ("Technical and macro feature calculation execution only"),
     },
 }
 
@@ -226,9 +224,7 @@ def _normalise_date_column(frame: pd.DataFrame, candidates: list[str]) -> pd.Dat
     date_col = next((col for col in candidates if col in out.columns), None)
 
     if date_col is None:
-        date_like = [
-            col for col in out.columns if "date" in str(col).lower()
-        ]
+        date_like = [col for col in out.columns if "date" in str(col).lower()]
         date_col = date_like[0] if date_like else out.columns[0]
 
     out = out.rename(columns={date_col: "as_of_date"})
@@ -248,9 +244,7 @@ def _find_close_column(frame: pd.DataFrame, candidates: list[str]) -> str | None
         if clean in {"close", "adj close", "adjusted_close", "adj_close"}:
             return str(col)
 
-    numeric_cols = [
-        col for col in frame.columns if pd.api.types.is_numeric_dtype(frame[col])
-    ]
+    numeric_cols = [col for col in frame.columns if pd.api.types.is_numeric_dtype(frame[col])]
 
     return str(numeric_cols[0]) if numeric_cols else None
 
@@ -537,9 +531,7 @@ def _calculate_technical_features(
     frame["technical_momentum_252d"] = (
         frame["adjusted_close"] / frame["adjusted_close"].shift(252) - 1
     )
-    frame["technical_volatility_63d_ann"] = (
-        frame["return_1d"].rolling(63).std() * np.sqrt(252)
-    )
+    frame["technical_volatility_63d_ann"] = frame["return_1d"].rolling(63).std() * np.sqrt(252)
     frame["technical_drawdown_252d"] = (
         frame["adjusted_close"] / frame["adjusted_close"].rolling(252).max() - 1
     )
@@ -864,8 +856,7 @@ def build_phase13i_phase13j_boundary_check(
             str(boundary.get("forbidden_next_step", "")),
             "signal creation" in str(boundary.get("forbidden_next_step", "")).lower()
             and "model training" in str(boundary.get("forbidden_next_step", "")).lower()
-            and "strategy backtest"
-            in str(boundary.get("forbidden_next_step", "")).lower(),
+            and "strategy backtest" in str(boundary.get("forbidden_next_step", "")).lower(),
         ),
         (
             "phase13j_may_audit_feature_panel",
@@ -956,9 +947,7 @@ def build_phase13i_summary(
         else set()
     )
     leakage_flags = (
-        int(feature_panel["leakage_flag"].map(_bool_value).sum())
-        if not feature_panel.empty
-        else 0
+        int(feature_panel["leakage_flag"].map(_bool_value).sum()) if not feature_panel.empty else 0
     )
     forbidden = _forbidden_columns(feature_panel)
 
@@ -981,18 +970,16 @@ def build_phase13i_summary(
                 "feature_panel_rows": int(len(feature_panel)),
                 "feature_id_count": int(len(actual_ids)),
                 "required_feature_ids_present": required_ids.issubset(actual_ids),
-                "output_schema_columns_present": set(
-                    REQUIRED_FEATURE_PANEL_COLUMNS
-                ).issubset(set(feature_panel.columns)),
+                "output_schema_columns_present": set(REQUIRED_FEATURE_PANEL_COLUMNS).issubset(
+                    set(feature_panel.columns)
+                ),
                 "leakage_flag_count": leakage_flags,
                 "visual_report_count": int(
                     sum(not frame.empty for frame in visual_reports.values())
                 ),
                 "forbidden_columns": "; ".join(forbidden),
                 "no_forbidden_columns": len(forbidden) == 0,
-                "phase13j_boundary_passed": bool(
-                    phase13j_boundary_check["passed"].all()
-                )
+                "phase13j_boundary_passed": bool(phase13j_boundary_check["passed"].all())
                 if not phase13j_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -1030,8 +1017,7 @@ def build_phase13i_gate_report(
     rows = [
         _gate_row(
             "Phase 13H passed",
-            (not gates.get("require_phase13h_passed", True))
-            or bool(row["phase13h_result_passed"]),
+            (not gates.get("require_phase13h_passed", True)) or bool(row["phase13h_result_passed"]),
             f"phase13h_result_passed={bool(row['phase13h_result_passed'])}",
         ),
         _gate_row(
@@ -1221,12 +1207,8 @@ def save_phase13i_feature_calculation_execution(
         sections={
             "Input Source Check": input_source_check,
             "Feature Panel Sample": feature_panel.head(25),
-            "Feature State Timeline Sample": visual_reports[
-                "feature_state_timeline"
-            ].head(25),
-            "Leakage Audit Panel Sample": visual_reports[
-                "leakage_audit_panel"
-            ].head(25),
+            "Feature State Timeline Sample": visual_reports["feature_state_timeline"].head(25),
+            "Leakage Audit Panel Sample": visual_reports["leakage_audit_panel"].head(25),
             "Summary": summary,
             "Gate Report": gate_report,
             "Conclusion": conclusion,
@@ -1354,9 +1336,7 @@ def build_phase13j_feature_panel_quality_check(
         },
         {
             "check": "Available-state ratio is acceptable",
-            "passed": available_ratio >= float(
-                thresholds.get("min_available_state_ratio", 0.20)
-            ),
+            "passed": available_ratio >= float(thresholds.get("min_available_state_ratio", 0.20)),
             "detail": f"available_ratio={available_ratio:.4f}",
         },
     ]
@@ -1377,8 +1357,7 @@ def build_phase13j_output_schema_quality_check(feature_panel: pd.DataFrame) -> p
         },
         {
             "check": "Feature states use allowed categorical states",
-            "passed": set(feature_panel.get("feature_state", pd.Series(dtype=str)))
-            .difference(
+            "passed": set(feature_panel.get("feature_state", pd.Series(dtype=str))).difference(
                 {"supportive", "neutral", "fragile", "unavailable", "blocked"}
             )
             == set(),
@@ -1486,8 +1465,7 @@ def build_phase13j_visual_reports_quality_check(
             "report": name,
             "present": name in visual_reports,
             "rows": int(len(visual_reports.get(name, pd.DataFrame()))),
-            "passed": name in visual_reports
-            and not visual_reports.get(name, pd.DataFrame()).empty,
+            "passed": name in visual_reports and not visual_reports.get(name, pd.DataFrame()).empty,
         }
         for name in required
     ]
@@ -1537,8 +1515,7 @@ def build_phase13j_phase13k_boundary_check(
             str(boundary.get("forbidden_next_step", "")),
             "signal creation" in str(boundary.get("forbidden_next_step", "")).lower()
             and "model training" in str(boundary.get("forbidden_next_step", "")).lower()
-            and "strategy backtest"
-            in str(boundary.get("forbidden_next_step", "")).lower(),
+            and "strategy backtest" in str(boundary.get("forbidden_next_step", "")).lower(),
         ),
         (
             "phase13k_may_interpret_features",
@@ -1608,9 +1585,7 @@ def build_phase13j_summary(
                 "phase_branch": str(phase_config.get("phase_branch", "")),
                 "source_phase": str(phase_config.get("source_phase", "")),
                 "proposed_next_phase": str(phase_config.get("proposed_next_phase", "")),
-                "phase13i_reports_present": bool(
-                    report_inventory_check["present"].all()
-                )
+                "phase13i_reports_present": bool(report_inventory_check["present"].all())
                 if not report_inventory_check.empty
                 else False,
                 "phase13i_result_passed": bool(phase13i_result_check["passed"].all())
@@ -1619,37 +1594,25 @@ def build_phase13j_summary(
                 "config_flags_clean_for_run": bool(config_flag_check["passed"].all())
                 if not config_flag_check.empty
                 else False,
-                "feature_panel_quality_passed": bool(
-                    feature_panel_quality_check["passed"].all()
-                )
+                "feature_panel_quality_passed": bool(feature_panel_quality_check["passed"].all())
                 if not feature_panel_quality_check.empty
                 else False,
-                "output_schema_quality_passed": bool(
-                    output_schema_quality_check["passed"].all()
-                )
+                "output_schema_quality_passed": bool(output_schema_quality_check["passed"].all())
                 if not output_schema_quality_check.empty
                 else False,
-                "missingness_quality_passed": bool(
-                    missingness_quality_check["passed"].all()
-                )
+                "missingness_quality_passed": bool(missingness_quality_check["passed"].all())
                 if not missingness_quality_check.empty
                 else False,
                 "leakage_quality_passed": bool(leakage_quality_check["passed"].all())
                 if not leakage_quality_check.empty
                 else False,
-                "visual_reports_quality_passed": bool(
-                    visual_reports_quality_check["passed"].all()
-                )
+                "visual_reports_quality_passed": bool(visual_reports_quality_check["passed"].all())
                 if not visual_reports_quality_check.empty
                 else False,
-                "forbidden_column_check_passed": bool(
-                    forbidden_column_check["passed"].all()
-                )
+                "forbidden_column_check_passed": bool(forbidden_column_check["passed"].all())
                 if not forbidden_column_check.empty
                 else False,
-                "phase13k_boundary_passed": bool(
-                    phase13k_boundary_check["passed"].all()
-                )
+                "phase13k_boundary_passed": bool(phase13k_boundary_check["passed"].all())
                 if not phase13k_boundary_check.empty
                 else False,
                 "scope_boundary_passed": bool(scope_boundary_check["passed"].all())
@@ -1726,8 +1689,7 @@ def build_phase13j_gate_report(
         ),
         _gate_row(
             "Leakage quality passed",
-            (not gates.get("require_leakage_quality", True))
-            or bool(row["leakage_quality_passed"]),
+            (not gates.get("require_leakage_quality", True)) or bool(row["leakage_quality_passed"]),
             f"leakage_quality_passed={bool(row['leakage_quality_passed'])}",
         ),
         _gate_row(
@@ -1822,15 +1784,11 @@ def save_phase13j_feature_panel_quality_leakage_audit(
 
     feature_panel = _read_csv_if_exists(reports.get("feature_panel", ""))
     visual_reports = {
-        "feature_state_timeline": _read_csv_if_exists(
-            reports.get("feature_state_timeline", "")
-        ),
+        "feature_state_timeline": _read_csv_if_exists(reports.get("feature_state_timeline", "")),
         "feature_availability_heatmap": _read_csv_if_exists(
             reports.get("feature_availability_heatmap", "")
         ),
-        "leakage_audit_panel": _read_csv_if_exists(
-            reports.get("leakage_audit_panel", "")
-        ),
+        "leakage_audit_panel": _read_csv_if_exists(reports.get("leakage_audit_panel", "")),
         "model_feature_matrix_preview": _read_csv_if_exists(
             reports.get("model_feature_matrix_preview", "")
         ),
@@ -1843,17 +1801,13 @@ def save_phase13j_feature_panel_quality_leakage_audit(
         feature_panel=feature_panel,
         thresholds=thresholds,
     )
-    output_schema_quality_check = build_phase13j_output_schema_quality_check(
-        feature_panel
-    )
+    output_schema_quality_check = build_phase13j_output_schema_quality_check(feature_panel)
     missingness_quality_check = build_phase13j_missingness_quality_check(feature_panel)
     leakage_quality_check = build_phase13j_leakage_quality_check(
         feature_panel=feature_panel,
         thresholds=thresholds,
     )
-    visual_reports_quality_check = build_phase13j_visual_reports_quality_check(
-        visual_reports
-    )
+    visual_reports_quality_check = build_phase13j_visual_reports_quality_check(visual_reports)
     forbidden_column_check = build_phase13j_forbidden_column_check(
         frames={"feature_panel": feature_panel, **visual_reports},
         forbidden_columns=_as_list(thresholds.get("forbidden_columns")),

@@ -109,10 +109,7 @@ def _load_price_data(
         raise ValueError("phase17a_strategy_factory.universe cannot be empty")
 
     data_dir = _preferred_data_dir(universe, section)
-    price_data = {
-        ticker: _load_or_fetch_prices(ticker, config, data_dir)
-        for ticker in universe
-    }
+    price_data = {ticker: _load_or_fetch_prices(ticker, config, data_dir) for ticker in universe}
 
     common_dates = next(iter(price_data.values()))["date"]
     for frame in price_data.values():
@@ -124,7 +121,9 @@ def _load_price_data(
     return price_data, cash_returns, data_dir
 
 
-def _load_overlay_exposure(reports_dir: Path, section: dict[str, Any]) -> tuple[pd.Series | None, str]:
+def _load_overlay_exposure(
+    reports_dir: Path, section: dict[str, Any]
+) -> tuple[pd.Series | None, str]:
     path = Path(
         section.get(
             "phase6_overlay_exposure_file",
@@ -185,9 +184,7 @@ def _metrics_with_benchmark_comparison(metrics: pd.DataFrame) -> pd.DataFrame:
 def classify_strategy(row: pd.Series, benchmark_row: pd.Series) -> str:
     cagr_delta = float(row["cagr_pct"]) - float(benchmark_row["cagr_pct"])
     end_value_delta = float(row["end_value"]) - float(benchmark_row["end_value"])
-    drawdown_advantage = float(row["max_drawdown_pct"]) - float(
-        benchmark_row["max_drawdown_pct"]
-    )
+    drawdown_advantage = float(row["max_drawdown_pct"]) - float(benchmark_row["max_drawdown_pct"])
 
     if end_value_delta > 0 and cagr_delta > 0 and drawdown_advantage >= -5.0:
         return "growth_candidate"
@@ -201,7 +198,9 @@ def classify_strategy(row: pd.Series, benchmark_row: pd.Series) -> str:
     return "rejected"
 
 
-def _gate_report(metrics: pd.DataFrame, status: pd.DataFrame, section: dict[str, Any]) -> pd.DataFrame:
+def _gate_report(
+    metrics: pd.DataFrame, status: pd.DataFrame, section: dict[str, Any]
+) -> pd.DataFrame:
     benchmark_row = metrics.loc[metrics["strategy"] == BENCHMARK_STRATEGY].iloc[0]
     rows = []
     status_lookup = status.set_index("strategy").to_dict(orient="index") if not status.empty else {}
@@ -288,7 +287,9 @@ def _allocation_timeline(results: dict[str, pd.DataFrame]) -> pd.DataFrame:
     return pd.concat(rows, ignore_index=True) if rows else pd.DataFrame()
 
 
-def _rolling_relative_performance(results: dict[str, pd.DataFrame], window: int = 252) -> pd.DataFrame:
+def _rolling_relative_performance(
+    results: dict[str, pd.DataFrame], window: int = 252
+) -> pd.DataFrame:
     benchmark = results[BENCHMARK_STRATEGY][["date", "equity"]].copy()
     benchmark = benchmark.rename(columns={"equity": "benchmark_equity"})
     rows = []
@@ -542,7 +543,9 @@ def save_phase17a_strategy_factory_report(
                 "end_date": panel["date"].max().date().isoformat(),
                 "strict_common_date_intersection": True,
                 "btc_weekend_rows_excluded": True,
-                "cash_return_source": "project_cash_yield" if cash_returns is not None else "zero_cash",
+                "cash_return_source": "project_cash_yield"
+                if cash_returns is not None
+                else "zero_cash",
                 "phase6_overlay_source_status": overlay_status,
                 "live_trading_allowed": False,
                 "real_money_allowed": False,

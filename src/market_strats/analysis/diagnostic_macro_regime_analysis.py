@@ -115,8 +115,7 @@ def _find_final_candidate_frame(
 
     if missing:
         raise ValueError(
-            "Reconstructed final candidate missing required columns: "
-            f"{sorted(missing)}"
+            f"Reconstructed final candidate missing required columns: {sorted(missing)}"
         )
 
     return final_candidate.sort_values("date").reset_index(drop=True)
@@ -133,9 +132,7 @@ def _get_spy_strategy_result(
 
     if strategy_name not in strategy_results:
         available = sorted(strategy_results.keys())
-        raise ValueError(
-            f"SPY strategy {strategy_name!r} not found. Available: {available}"
-        )
+        raise ValueError(f"SPY strategy {strategy_name!r} not found. Available: {available}")
 
     return strategy_results[strategy_name]
 
@@ -340,10 +337,7 @@ def build_phase10d_regime_frame(
         )
         rows.append(frame)
 
-    if (
-        "unrate_6m_change" in macro_panel.columns
-        and "unemployment_6m_change" in regime_defs
-    ):
+    if "unrate_6m_change" in macro_panel.columns and "unemployment_6m_change" in regime_defs:
         config = regime_defs["unemployment_6m_change"]
         labels = config.get("labels", {})
         frame = pd.DataFrame(
@@ -424,14 +418,14 @@ def build_phase10d_regime_frame(
         rows.append(frame)
 
     if not rows:
-        return pd.DataFrame(
-            columns=["date", "regime_family", "regime_bucket", "regime_value"]
-        )
+        return pd.DataFrame(columns=["date", "regime_family", "regime_bucket", "regime_value"])
 
     out = pd.concat(rows, ignore_index=True)
-    out = out.dropna(subset=["regime_bucket"]).sort_values(
-        ["regime_family", "date"]
-    ).reset_index(drop=True)
+    out = (
+        out.dropna(subset=["regime_bucket"])
+        .sort_values(["regime_family", "date"])
+        .reset_index(drop=True)
+    )
 
     return out
 
@@ -468,9 +462,7 @@ def build_phase10d_analysis_frame(
         analysis["candidate_return"] - analysis["spy_12m_return"]
     )
 
-    return analysis.sort_values(["regime_family", "regime_bucket", "date"]).reset_index(
-        drop=True
-    )
+    return analysis.sort_values(["regime_family", "regime_bucket", "date"]).reset_index(drop=True)
 
 
 def _metric_values(frame: pd.DataFrame, return_column: str) -> dict[str, float]:
@@ -516,21 +508,13 @@ def build_phase10d_regime_metrics(
                 "candidate_cagr": candidate["cagr"],
                 "buy_hold_cagr": buy_hold["cagr"],
                 "spy_12m_cagr": spy_12m["cagr"],
-                "candidate_minus_buy_hold_cagr": (
-                    candidate["cagr"] - buy_hold["cagr"]
-                ),
-                "candidate_minus_spy_12m_cagr": (
-                    candidate["cagr"] - spy_12m["cagr"]
-                ),
+                "candidate_minus_buy_hold_cagr": (candidate["cagr"] - buy_hold["cagr"]),
+                "candidate_minus_spy_12m_cagr": (candidate["cagr"] - spy_12m["cagr"]),
                 "candidate_calmar": candidate["calmar"],
                 "buy_hold_calmar": buy_hold["calmar"],
                 "spy_12m_calmar": spy_12m["calmar"],
-                "candidate_minus_buy_hold_calmar": (
-                    candidate["calmar"] - buy_hold["calmar"]
-                ),
-                "candidate_minus_spy_12m_calmar": (
-                    candidate["calmar"] - spy_12m["calmar"]
-                ),
+                "candidate_minus_buy_hold_calmar": (candidate["calmar"] - buy_hold["calmar"]),
+                "candidate_minus_spy_12m_calmar": (candidate["calmar"] - spy_12m["calmar"]),
                 "candidate_max_drawdown": candidate["max_drawdown"],
                 "buy_hold_max_drawdown": buy_hold["max_drawdown"],
                 "spy_12m_max_drawdown": spy_12m["max_drawdown"],
@@ -557,17 +541,13 @@ def build_phase10d_helpful_regime_report(regime_metrics: pd.DataFrame) -> pd.Dat
         return pd.DataFrame()
 
     out = regime_metrics.copy()
-    out["helpful_vs_buy_hold"] = (
-        (out["candidate_minus_buy_hold_calmar"] > 0)
-        & (out["candidate_drawdown_advantage_vs_buy_hold"] > 0)
+    out["helpful_vs_buy_hold"] = (out["candidate_minus_buy_hold_calmar"] > 0) & (
+        out["candidate_drawdown_advantage_vs_buy_hold"] > 0
     )
-    out["helpful_vs_spy_12m"] = (
-        (out["candidate_minus_spy_12m_calmar"] > 0)
-        & (out["candidate_drawdown_advantage_vs_spy_12m"] > 0)
+    out["helpful_vs_spy_12m"] = (out["candidate_minus_spy_12m_calmar"] > 0) & (
+        out["candidate_drawdown_advantage_vs_spy_12m"] > 0
     )
-    out["helpful_both_benchmarks"] = (
-        out["helpful_vs_buy_hold"] & out["helpful_vs_spy_12m"]
-    )
+    out["helpful_both_benchmarks"] = out["helpful_vs_buy_hold"] & out["helpful_vs_spy_12m"]
 
     return out.sort_values(
         [
@@ -584,13 +564,11 @@ def build_phase10d_weak_regime_report(regime_metrics: pd.DataFrame) -> pd.DataFr
         return pd.DataFrame()
 
     out = regime_metrics.copy()
-    out["weak_vs_buy_hold"] = (
-        (out["candidate_minus_buy_hold_calmar"] < 0)
-        | (out["candidate_minus_buy_hold_cagr"] < 0)
+    out["weak_vs_buy_hold"] = (out["candidate_minus_buy_hold_calmar"] < 0) | (
+        out["candidate_minus_buy_hold_cagr"] < 0
     )
-    out["weak_vs_spy_12m"] = (
-        (out["candidate_minus_spy_12m_calmar"] < 0)
-        | (out["candidate_minus_spy_12m_cagr"] < 0)
+    out["weak_vs_spy_12m"] = (out["candidate_minus_spy_12m_calmar"] < 0) | (
+        out["candidate_minus_spy_12m_cagr"] < 0
     )
     out["weak_both_benchmarks"] = out["weak_vs_buy_hold"] & out["weak_vs_spy_12m"]
 
@@ -672,19 +650,13 @@ def build_phase10d_summary(
                 if not regime_frame.empty
                 else 0,
                 "regime_metric_rows": int(len(regime_metrics)),
-                "helpful_regime_rows": int(
-                    helpful_regime_report["helpful_both_benchmarks"].sum()
-                )
+                "helpful_regime_rows": int(helpful_regime_report["helpful_both_benchmarks"].sum())
                 if not helpful_regime_report.empty
                 else 0,
-                "weak_regime_rows": int(
-                    weak_regime_report["weak_both_benchmarks"].sum()
-                )
+                "weak_regime_rows": int(weak_regime_report["weak_both_benchmarks"].sum())
                 if not weak_regime_report.empty
                 else 0,
-                "phase10e_boundary_passed": bool(
-                    phase10e_boundary_check["passed"].all()
-                )
+                "phase10e_boundary_passed": bool(phase10e_boundary_check["passed"].all())
                 if not phase10e_boundary_check.empty
                 else False,
                 "allow_macro_signal_creation": bool(
@@ -696,12 +668,8 @@ def build_phase10d_summary(
                 "allow_model_feature_creation": bool(
                     phase_config.get("allow_model_feature_creation", False)
                 ),
-                "allow_model_training": bool(
-                    phase_config.get("allow_model_training", False)
-                ),
-                "allow_strategy_test": bool(
-                    phase_config.get("allow_strategy_test", False)
-                ),
+                "allow_model_training": bool(phase_config.get("allow_model_training", False)),
+                "allow_strategy_test": bool(phase_config.get("allow_strategy_test", False)),
                 "allow_strategy_promotion": bool(
                     phase_config.get("allow_strategy_promotion", False)
                 ),
@@ -754,8 +722,7 @@ def build_phase10d_gate_report(
         ),
         _gate_row(
             "UNRATE is present",
-            (not gates.get("require_unrate_present", True))
-            or "UNRATE" in macro_panel.columns,
+            (not gates.get("require_unrate_present", True)) or "UNRATE" in macro_panel.columns,
             f"columns={list(macro_panel.columns)}",
         ),
         _gate_row(
@@ -770,8 +737,7 @@ def build_phase10d_gate_report(
         ),
         _gate_row(
             "CPIAUCSL is present",
-            (not gates.get("require_cpi_present", True))
-            or "CPIAUCSL" in macro_panel.columns,
+            (not gates.get("require_cpi_present", True)) or "CPIAUCSL" in macro_panel.columns,
             f"columns={list(macro_panel.columns)}",
         ),
         _gate_row(
@@ -782,8 +748,7 @@ def build_phase10d_gate_report(
         _gate_row(
             "Regime metrics were generated",
             (not gates.get("require_regime_metrics_generated", True))
-            or int(row["regime_metric_rows"])
-            >= int(gates.get("min_regime_metric_rows", 10)),
+            or int(row["regime_metric_rows"]) >= int(gates.get("min_regime_metric_rows", 10)),
             f"regime_metric_rows={int(row['regime_metric_rows'])}",
         ),
         _gate_row(
@@ -796,10 +761,7 @@ def build_phase10d_gate_report(
             "No allocation rule creation is allowed",
             (not gates.get("require_no_allocation_rule_creation", True))
             or not bool(row["allow_allocation_rule_creation"]),
-            (
-                "allow_allocation_rule_creation="
-                f"{bool(row['allow_allocation_rule_creation'])}"
-            ),
+            (f"allow_allocation_rule_creation={bool(row['allow_allocation_rule_creation'])}"),
         ),
         _gate_row(
             "No model feature creation is allowed",
@@ -995,7 +957,9 @@ def save_phase10d_diagnostic_macro_regime_analysis(
 
     if macro_aligned_series is None:
         macro_aligned_series = _load_macro_aligned_series(
-            phase_config.get("macro_aligned_series_path", "reports/phase10c_macro_aligned_series.csv")
+            phase_config.get(
+                "macro_aligned_series_path", "reports/phase10c_macro_aligned_series.csv"
+            )
         )
 
     macro_panel = build_phase10d_macro_panel(

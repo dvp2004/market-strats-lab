@@ -100,9 +100,7 @@ def _phase_result_check(
         and "passed" in str(conclusion.iloc[0].get("verdict", "")).lower()
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -162,10 +160,7 @@ def _policy_frame_to_dict(frame: pd.DataFrame) -> dict[str, Any]:
     if key_col not in frame.columns or value_col not in frame.columns:
         return {}
 
-    return {
-        str(row[key_col]): row[value_col]
-        for _, row in frame.iterrows()
-    }
+    return {str(row[key_col]): row[value_col] for _, row in frame.iterrows()}
 
 
 def _float_gate(gates: dict[str, Any], key: str, default: float) -> float:
@@ -221,12 +216,12 @@ def _feature_columns(
     dataset: pd.DataFrame,
     feature_policy: dict[str, Any],
 ) -> tuple[list[str], list[str]]:
-    numeric_prefixes = tuple(_list_from_policy_value(
-        feature_policy.get("numeric_feature_prefixes", [])
-    ))
-    categorical_prefixes = tuple(_list_from_policy_value(
-        feature_policy.get("categorical_feature_prefixes", [])
-    ))
+    numeric_prefixes = tuple(
+        _list_from_policy_value(feature_policy.get("numeric_feature_prefixes", []))
+    )
+    categorical_prefixes = tuple(
+        _list_from_policy_value(feature_policy.get("categorical_feature_prefixes", []))
+    )
     forbidden_fragments = [
         fragment.lower()
         for fragment in _list_from_policy_value(
@@ -235,12 +230,14 @@ def _feature_columns(
     ]
 
     numeric = [
-        col for col in dataset.columns
+        col
+        for col in dataset.columns
         if str(col).startswith(numeric_prefixes)
         and not any(fragment in str(col).lower() for fragment in forbidden_fragments)
     ]
     categorical = [
-        col for col in dataset.columns
+        col
+        for col in dataset.columns
         if str(col).startswith(categorical_prefixes)
         and not any(fragment in str(col).lower() for fragment in forbidden_fragments)
     ]
@@ -432,8 +429,11 @@ def _calibration_rows(
         return []
 
     confidence = probabilities.max(axis=1)
-    correct = pd.Series(y_pred).astype(str).reset_index(drop=True).eq(
-        y_true.astype(str).reset_index(drop=True)
+    correct = (
+        pd.Series(y_pred)
+        .astype(str)
+        .reset_index(drop=True)
+        .eq(y_true.astype(str).reset_index(drop=True))
     )
 
     bins = pd.cut(
@@ -456,7 +456,9 @@ def _calibration_rows(
                 "accuracy": float(group["correct"].mean()) if len(group) else 0.0,
                 "absolute_calibration_gap": abs(
                     float(group["confidence"].mean()) - float(group["correct"].mean())
-                ) if len(group) else 0.0,
+                )
+                if len(group)
+                else 0.0,
             }
         )
 
@@ -487,9 +489,7 @@ def _prediction_rows(
 
         if probabilities is not None:
             for label_idx, label in enumerate(labels):
-                base[f"predicted_probability__{label}"] = float(
-                    probabilities[idx, label_idx]
-                )
+                base[f"predicted_probability__{label}"] = float(probabilities[idx, label_idx])
 
         rows.append(base)
 
@@ -550,9 +550,7 @@ def _baseline_comparison(metrics: pd.DataFrame) -> pd.DataFrame:
     validation = metrics[metrics["split_label"].astype(str).eq("validation")].copy()
 
     majority = validation[validation["model_id"].astype(str).eq("baseline_majority_class")]
-    stratified = validation[
-        validation["model_id"].astype(str).eq("baseline_stratified_dummy")
-    ]
+    stratified = validation[validation["model_id"].astype(str).eq("baseline_stratified_dummy")]
 
     majority_bal = float(majority.iloc[0]["balanced_accuracy"]) if not majority.empty else 0.0
     majority_f1 = float(majority.iloc[0]["macro_f1"]) if not majority.empty else 0.0
@@ -572,13 +570,9 @@ def _baseline_comparison(metrics: pd.DataFrame) -> pd.DataFrame:
                 "majority_macro_f1": majority_f1,
                 "stratified_balanced_accuracy": strat_bal,
                 "stratified_macro_f1": strat_f1,
-                "delta_balanced_accuracy_vs_majority": (
-                    row["balanced_accuracy"] - majority_bal
-                ),
+                "delta_balanced_accuracy_vs_majority": (row["balanced_accuracy"] - majority_bal),
                 "delta_macro_f1_vs_majority": row["macro_f1"] - majority_f1,
-                "delta_balanced_accuracy_vs_stratified": (
-                    row["balanced_accuracy"] - strat_bal
-                ),
+                "delta_balanced_accuracy_vs_stratified": (row["balanced_accuracy"] - strat_bal),
                 "delta_macro_f1_vs_stratified": row["macro_f1"] - strat_f1,
             }
         )
@@ -615,30 +609,18 @@ def _success_report(
             else 0.0
         )
         delta_f1_majority = (
-            float(comparison.iloc[0]["delta_macro_f1_vs_majority"])
-            if not comparison.empty
-            else 0.0
+            float(comparison.iloc[0]["delta_macro_f1_vs_majority"]) if not comparison.empty else 0.0
         )
         delta_bal_stratified = (
             float(comparison.iloc[0]["delta_balanced_accuracy_vs_stratified"])
             if not comparison.empty
             else 0.0
         )
-        fragile_recall = (
-            float(recall_row.iloc[0]["recall"])
-            if not recall_row.empty
-            else 0.0
-        )
+        fragile_recall = float(recall_row.iloc[0]["recall"]) if not recall_row.empty else 0.0
         balanced_gap = (
-            float(overfit_row.iloc[0]["balanced_accuracy_gap"])
-            if not overfit_row.empty
-            else 0.0
+            float(overfit_row.iloc[0]["balanced_accuracy_gap"]) if not overfit_row.empty else 0.0
         )
-        macro_f1_gap = (
-            float(overfit_row.iloc[0]["macro_f1_gap"])
-            if not overfit_row.empty
-            else 0.0
-        )
+        macro_f1_gap = float(overfit_row.iloc[0]["macro_f1_gap"]) if not overfit_row.empty else 0.0
 
         passes_majority_bal = delta_bal_majority >= _float_gate(
             gates,
@@ -837,9 +819,7 @@ def save_phase13ao_registered_redesigned_model_training(
         train_proba = _predict_proba_aligned(pipeline, x_train, labels)
         validation_proba = _predict_proba_aligned(pipeline, x_validation, labels)
 
-        metric_rows.append(
-            _metric_row(model_id, family, "train", y_train, train_pred, labels)
-        )
+        metric_rows.append(_metric_row(model_id, family, "train", y_train, train_pred, labels))
         metric_rows.append(
             _metric_row(
                 model_id,
@@ -851,9 +831,7 @@ def save_phase13ao_registered_redesigned_model_training(
             )
         )
 
-        confusion_rows.extend(
-            _confusion_rows(model_id, "train", y_train, train_pred, labels)
-        )
+        confusion_rows.extend(_confusion_rows(model_id, "train", y_train, train_pred, labels))
         confusion_rows.extend(
             _confusion_rows(
                 model_id,
@@ -864,9 +842,7 @@ def save_phase13ao_registered_redesigned_model_training(
             )
         )
 
-        class_rows.extend(
-            _class_recall_rows(model_id, "train", y_train, train_pred, labels)
-        )
+        class_rows.extend(_class_recall_rows(model_id, "train", y_train, train_pred, labels))
         class_rows.extend(
             _class_recall_rows(
                 model_id,
@@ -1163,9 +1139,7 @@ def save_phase13ap_redesigned_model_training_result_audit(
         )
 
     config_check = pd.DataFrame(flags)
-    config_check["result"] = config_check["passed"].map(
-        {True: "Passed", False: "Failed"}
-    )
+    config_check["result"] = config_check["passed"].map({True: "Passed", False: "Failed"})
 
     reports = section.get("phase13ao_reports", {})
     inventory = _source_report_check(reports)
@@ -1344,9 +1318,7 @@ def _phase13ar_boundary_check(section: dict[str, Any]) -> pd.DataFrame:
         {
             "check": "failed_boundary_is_kill_pause_or_redesign_only",
             "passed": (
-                "kill" in allowed_fail
-                or "pause" in allowed_fail
-                or "redesign" in allowed_fail
+                "kill" in allowed_fail or "pause" in allowed_fail or "redesign" in allowed_fail
             ),
             "detail": boundary.get("allowed_next_step_if_failed", ""),
         },
@@ -1420,13 +1392,17 @@ def save_phase13aq_validation_to_holdout_decision(
     success = _read_csv_if_exists(source_reports["success_report"])
     ranking = _validation_ranking(success)
 
-    passing = ranking[
-        ranking["passes_all_validation_gates"].map(_bool_value)
-    ].copy() if not ranking.empty else pd.DataFrame()
+    passing = (
+        ranking[ranking["passes_all_validation_gates"].map(_bool_value)].copy()
+        if not ranking.empty
+        else pd.DataFrame()
+    )
 
     holdout_justified = not passing.empty
-    leading_model = str(passing.iloc[0]["model_id"]) if holdout_justified else (
-        str(ranking.iloc[0]["model_id"]) if not ranking.empty else ""
+    leading_model = (
+        str(passing.iloc[0]["model_id"])
+        if holdout_justified
+        else (str(ranking.iloc[0]["model_id"]) if not ranking.empty else "")
     )
 
     if holdout_justified:
@@ -1434,17 +1410,14 @@ def save_phase13aq_validation_to_holdout_decision(
             "if_any_real_model_passes_all_validation_gates",
             "justify_holdout_preregistration",
         )
-        decision_reason = (
-            "At least one real model passed all pre-registered validation gates."
-        )
+        decision_reason = "At least one real model passed all pre-registered validation gates."
     else:
         decision = section.get("decision_policy", {}).get(
             "if_no_real_model_passes_all_validation_gates",
             "do_not_proceed_to_holdout",
         )
         decision_reason = (
-            "No real model passed all pre-registered validation gates; "
-            "holdout remains blocked."
+            "No real model passed all pre-registered validation gates; holdout remains blocked."
         )
 
     decision_report = pd.DataFrame(

@@ -36,6 +36,7 @@ def _prepare_result(result: pd.DataFrame, name: str) -> pd.DataFrame:
 
     return df
 
+
 def _create_confirmed_defensive_signal(
     above_trend: pd.Series,
     trend_ready: pd.Series,
@@ -53,18 +54,10 @@ def _create_confirmed_defensive_signal(
     if confirmation_days == 1:
         return below_trend.fillna(False)
 
-    below_confirmed = (
-        below_trend.astype(int)
-        .rolling(confirmation_days)
-        .sum()
-        .eq(confirmation_days)
-    )
+    below_confirmed = below_trend.astype(int).rolling(confirmation_days).sum().eq(confirmation_days)
 
     above_confirmed = (
-        above_trend_confirmable.astype(int)
-        .rolling(confirmation_days)
-        .sum()
-        .eq(confirmation_days)
+        above_trend_confirmable.astype(int).rolling(confirmation_days).sum().eq(confirmation_days)
     )
 
     defensive_state = False
@@ -83,6 +76,7 @@ def _create_confirmed_defensive_signal(
         states.append(defensive_state)
 
     return pd.Series(states, index=above_trend.index)
+
 
 def _apply_defensive_entry_guard(
     signal_use_defensive: pd.Series,
@@ -116,6 +110,7 @@ def _apply_defensive_entry_guard(
 
     return pd.Series(guarded_states, index=signal_use_defensive.index)
 
+
 def _align_optional_guard_series(
     guard: pd.Series | None,
     dates: pd.Series,
@@ -129,11 +124,7 @@ def _align_optional_guard_series(
     aligned.index = pd.to_datetime(aligned.index)
 
     aligned = (
-        aligned.reindex(pd.to_datetime(dates))
-        .ffill()
-        .bfill()
-        .reset_index(drop=True)
-        .astype(bool)
+        aligned.reindex(pd.to_datetime(dates)).ffill().bfill().reset_index(drop=True).astype(bool)
     )
 
     if aligned.isna().any():
@@ -187,6 +178,7 @@ def _apply_switch_guards(
         guarded_states.append(current_defensive_state)
 
     return pd.Series(guarded_states, index=signal_use_defensive.index)
+
 
 def run_spy_trend_regime_switch_overlay(
     offensive_result: pd.DataFrame,
@@ -266,8 +258,8 @@ def run_spy_trend_regime_switch_overlay(
 
     merged["trend_sma"] = merged["signal_price"].rolling(trend_sma_days).mean()
     merged["trend_ready"] = merged["trend_sma"].notna()
-    merged["offensive_above_trend"] = (
-        merged["trend_ready"] & (merged["signal_price"] > merged["trend_sma"])
+    merged["offensive_above_trend"] = merged["trend_ready"] & (
+        merged["signal_price"] > merged["trend_sma"]
     )
 
     raw_signal_use_defensive = _create_confirmed_defensive_signal(
@@ -305,10 +297,9 @@ def run_spy_trend_regime_switch_overlay(
     held_defensive_weight = held_use_defensive.astype(float)
     held_offensive_weight = 1.0 - held_defensive_weight
 
-    overlay_turnover = (
-        target_defensive_weight.diff().abs().fillna(target_defensive_weight.abs())
-        + target_offensive_weight.diff().abs().fillna(target_offensive_weight.abs())
-    )
+    overlay_turnover = target_defensive_weight.diff().abs().fillna(
+        target_defensive_weight.abs()
+    ) + target_offensive_weight.diff().abs().fillna(target_offensive_weight.abs())
 
     if dynamic_slippage_bps is None:
         applied_overlay_slippage_bps = pd.Series(
@@ -317,9 +308,7 @@ def run_spy_trend_regime_switch_overlay(
         )
     else:
         applied_overlay_slippage_bps = dynamic_slippage_bps.copy()
-        applied_overlay_slippage_bps.index = pd.to_datetime(
-            applied_overlay_slippage_bps.index
-        )
+        applied_overlay_slippage_bps.index = pd.to_datetime(applied_overlay_slippage_bps.index)
         applied_overlay_slippage_bps = (
             applied_overlay_slippage_bps.reindex(pd.to_datetime(merged["date"]))
             .ffill()
@@ -331,9 +320,7 @@ def run_spy_trend_regime_switch_overlay(
         if applied_overlay_slippage_bps.isna().any():
             raise ValueError("dynamic_slippage_bps could not be aligned to overlay dates")
 
-    overlay_slippage_cost = overlay_turnover * (
-        applied_overlay_slippage_bps / 10_000.0
-    )
+    overlay_slippage_cost = overlay_turnover * (applied_overlay_slippage_bps / 10_000.0)
 
     strategy_return = np.where(
         held_use_defensive,

@@ -10,12 +10,10 @@ import pandas as pd
 DEFAULT_PHASE23B_CONFIG: dict[str, Any] = {
     "enabled": False,
     "output_dir": (
-        "reports/individual_equity_decision_system/"
-        "phase23b_point_in_time_universe_source_audit"
+        "reports/individual_equity_decision_system/phase23b_point_in_time_universe_source_audit"
     ),
     "dashboard_status_path": (
-        "reports/paper_trading/dashboard/"
-        "phase23b_point_in_time_universe_source_audit_status.csv"
+        "reports/paper_trading/dashboard/phase23b_point_in_time_universe_source_audit_status.csv"
     ),
     "audit_as_of_date": "2026-06-13",
     "required_start_date": "2006-04-28",
@@ -210,27 +208,35 @@ def build_source_registry() -> pd.DataFrame:
 def build_source_scorecard(source_registry: pd.DataFrame) -> pd.DataFrame:
     frame = source_registry.copy()
     frame["authority_score"] = frame["official_provider"].astype(int) * 3
-    frame["history_score"] = frame["historical_membership_claimed"].map(
-        {True: 3, False: 0}
-    ).fillna(1)
+    frame["history_score"] = (
+        frame["historical_membership_claimed"].map({True: 3, False: 0}).fillna(1)
+    )
     frame["automation_score"] = frame["programmatic_access"].astype(int) * 2
-    frame["timestamp_score"] = frame["announcement_effective_dates_available"].map(
-        {
-            "entitlement_and_field_audit_required": 1,
-            "recent_events_and_methodology_only": 1,
-            "scheduled_rules_and_public_notices": 1,
-            "required_by_import_contract": 2,
-            "not_applicable": 0,
-        }
-    ).fillna(0)
-    frame["identifier_score"] = frame["permanent_identifier_support"].map(
-        {
-            "field_audit_required": 1,
-            "not_sufficient_alone": 0,
-            "CIK_current_mapping_with_history_limits": 1,
-            "required_by_import_contract": 2,
-        }
-    ).fillna(0)
+    frame["timestamp_score"] = (
+        frame["announcement_effective_dates_available"]
+        .map(
+            {
+                "entitlement_and_field_audit_required": 1,
+                "recent_events_and_methodology_only": 1,
+                "scheduled_rules_and_public_notices": 1,
+                "required_by_import_contract": 2,
+                "not_applicable": 0,
+            }
+        )
+        .fillna(0)
+    )
+    frame["identifier_score"] = (
+        frame["permanent_identifier_support"]
+        .map(
+            {
+                "field_audit_required": 1,
+                "not_sufficient_alone": 0,
+                "CIK_current_mapping_with_history_limits": 1,
+                "required_by_import_contract": 2,
+            }
+        )
+        .fillna(0)
+    )
     frame["audit_score"] = frame[
         [
             "authority_score",
@@ -477,9 +483,7 @@ def build_acquisition_plan(phase_config: dict[str, Any]) -> pd.DataFrame:
 def build_scope_boundary(phase_config: dict[str, Any]) -> pd.DataFrame:
     controls = {
         "data_download_allowed": phase_config["allow_data_download"],
-        "membership_reconstruction_allowed": phase_config[
-            "allow_membership_reconstruction"
-        ],
+        "membership_reconstruction_allowed": phase_config["allow_membership_reconstruction"],
         "feature_calculation_allowed": phase_config["allow_feature_calculation"],
         "model_training_allowed": phase_config["allow_model_training"],
         "backtest_allowed": phase_config["allow_backtest"],
@@ -544,9 +548,7 @@ def validate_membership_event_frame(events: pd.DataFrame) -> pd.DataFrame:
         )
     )
 
-    announcement = pd.to_datetime(
-        working["announcement_timestamp_utc"], utc=True, errors="coerce"
-    )
+    announcement = pd.to_datetime(working["announcement_timestamp_utc"], utc=True, errors="coerce")
     effective = pd.to_datetime(working["effective_date"], utc=True, errors="coerce")
     timestamps_parse = bool(announcement.notna().all() and effective.notna().all())
     rows.append(_gate("timestamps_parse", timestamps_parse, f"rows={len(working)}"))
@@ -569,9 +571,7 @@ def validate_membership_event_frame(events: pd.DataFrame) -> pd.DataFrame:
         if "license_class" not in canonical_rows.columns:
             canonical_safe = False
         else:
-            canonical_safe = bool(
-                canonical_rows["license_class"].astype(str).eq("licensed").all()
-            )
+            canonical_safe = bool(canonical_rows["license_class"].astype(str).eq("licensed").all())
     rows.append(
         _gate(
             "canonical_rows_require_licensed_provenance",
@@ -675,9 +675,7 @@ def build_summary(
                 "phase_execution_gates_passed": execution_passed,
                 "all_gates_passed": execution_passed,
                 "universe_data_ready": universe_data_ready,
-                "canonical_sources_ready_count": int(
-                    source_scorecard["canonical_ready_now"].sum()
-                ),
+                "canonical_sources_ready_count": int(source_scorecard["canonical_ready_now"].sum()),
                 "official_canonical_candidates_count": int(
                     source_scorecard["source_class"]
                     .eq("official_licensed_canonical_candidate")

@@ -266,8 +266,7 @@ def build_phase9f_canonical_check(
             "item": "phase9_full_caveat_stack",
             "expected": "; ".join(caveat_phrases),
             "passed": all(
-                _contains_case_insensitive(readme_text, phrase)
-                for phrase in caveat_phrases
+                _contains_case_insensitive(readme_text, phrase) for phrase in caveat_phrases
             ),
         },
     ]
@@ -275,9 +274,7 @@ def build_phase9f_canonical_check(
     frame = pd.DataFrame(rows)
     frame["result"] = frame["passed"].map({True: "Passed", False: "Failed"})
     frame["detail"] = frame.apply(
-        lambda row: "Canonical item present"
-        if row["passed"]
-        else "Canonical item missing",
+        lambda row: "Canonical item present" if row["passed"] else "Canonical item missing",
         axis=1,
     )
 
@@ -386,19 +383,11 @@ def build_phase9f_summary(
     canonical_check: pd.DataFrame,
     closeout_check: pd.DataFrame,
 ) -> pd.DataFrame:
-    required_rows = readme_phrase_check[
-        readme_phrase_check["check_type"] == "required_phrase"
-    ]
-    forbidden_rows = readme_phrase_check[
-        readme_phrase_check["check_type"] == "forbidden_phrase"
-    ]
+    required_rows = readme_phrase_check[readme_phrase_check["check_type"] == "required_phrase"]
+    forbidden_rows = readme_phrase_check[readme_phrase_check["check_type"] == "forbidden_phrase"]
 
-    required_failures = (
-        int((~required_rows["passed"]).sum()) if not required_rows.empty else 0
-    )
-    forbidden_failures = (
-        int((~forbidden_rows["passed"]).sum()) if not forbidden_rows.empty else 0
-    )
+    required_failures = int((~required_rows["passed"]).sum()) if not required_rows.empty else 0
+    forbidden_failures = int((~forbidden_rows["passed"]).sum()) if not forbidden_rows.empty else 0
 
     return pd.DataFrame(
         [
@@ -408,9 +397,7 @@ def build_phase9f_summary(
                 "config_flag_failures": int((~config_flag_check["passed"]).sum())
                 if not config_flag_check.empty
                 else 0,
-                "missing_report_prefixes": int(
-                    (~report_inventory_check["passed"]).sum()
-                )
+                "missing_report_prefixes": int((~report_inventory_check["passed"]).sum())
                 if not report_inventory_check.empty
                 else 0,
                 "canonical_failures": int((~canonical_check["passed"]).sum())
@@ -462,43 +449,29 @@ def build_phase9f_gate_report(
 
     row = summary.iloc[0]
 
-    required_rows = readme_phrase_check[
-        readme_phrase_check["check_type"] == "required_phrase"
-    ]
-    forbidden_rows = readme_phrase_check[
-        readme_phrase_check["check_type"] == "forbidden_phrase"
-    ]
+    required_rows = readme_phrase_check[readme_phrase_check["check_type"] == "required_phrase"]
+    forbidden_rows = readme_phrase_check[readme_phrase_check["check_type"] == "forbidden_phrase"]
 
     required_passed = bool(required_rows["passed"].all()) if not required_rows.empty else True
-    forbidden_passed = (
-        bool(forbidden_rows["passed"].all()) if not forbidden_rows.empty else True
-    )
+    forbidden_passed = bool(forbidden_rows["passed"].all()) if not forbidden_rows.empty else True
     config_passed = (
         bool(config_flag_check["passed"].all()) if not config_flag_check.empty else False
     )
     reports_passed = (
-        bool(report_inventory_check["passed"].all())
-        if not report_inventory_check.empty
-        else False
+        bool(report_inventory_check["passed"].all()) if not report_inventory_check.empty else False
     )
-    canonical_passed = (
-        bool(canonical_check["passed"].all()) if not canonical_check.empty else False
-    )
-    closeout_passed = (
-        bool(closeout_check["passed"].all()) if not closeout_check.empty else False
-    )
+    canonical_passed = bool(canonical_check["passed"].all()) if not canonical_check.empty else False
+    closeout_passed = bool(closeout_check["passed"].all()) if not closeout_check.empty else False
 
     rows = [
         _gate_row(
             "README contains all required Phase 9 wording",
-            (not gates.get("require_all_readme_required_phrases", True))
-            or required_passed,
+            (not gates.get("require_all_readme_required_phrases", True)) or required_passed,
             f"required_phrase_failures={row['required_readme_phrase_failures']}",
         ),
         _gate_row(
             "README contains no forbidden overclaiming phrases",
-            (not gates.get("require_no_forbidden_readme_phrases", True))
-            or forbidden_passed,
+            (not gates.get("require_no_forbidden_readme_phrases", True)) or forbidden_passed,
             f"forbidden_phrase_failures={row['forbidden_readme_phrase_failures']}",
         ),
         _gate_row(
@@ -508,20 +481,17 @@ def build_phase9f_gate_report(
         ),
         _gate_row(
             "Expected Phase 9 report artefacts are present locally",
-            (not gates.get("require_expected_phase9_reports_present", True))
-            or reports_passed,
+            (not gates.get("require_expected_phase9_reports_present", True)) or reports_passed,
             f"missing_report_prefixes={row['missing_report_prefixes']}",
         ),
         _gate_row(
             "Canonical hierarchy and dates are documented",
-            (not gates.get("require_canonical_hierarchy_documented", True))
-            or canonical_passed,
+            (not gates.get("require_canonical_hierarchy_documented", True)) or canonical_passed,
             f"canonical_failures={row['canonical_failures']}",
         ),
         _gate_row(
             "Phase 9 closeout is documented",
-            (not gates.get("require_phase9_closeout_documented", True))
-            or closeout_passed,
+            (not gates.get("require_phase9_closeout_documented", True)) or closeout_passed,
             f"closeout_failures={row['closeout_failures']}",
         ),
         _gate_row(
@@ -676,9 +646,7 @@ def save_phase9f_final_phase9_checkpoint_audit(
 
     readme_phrase_check = build_phase9f_readme_phrase_check(
         readme_text=readme_text,
-        required_phrases=[
-            str(value) for value in phase_config.get("required_readme_phrases", [])
-        ],
+        required_phrases=[str(value) for value in phase_config.get("required_readme_phrases", [])],
         forbidden_phrases=[
             str(value) for value in phase_config.get("forbidden_readme_phrases", [])
         ],

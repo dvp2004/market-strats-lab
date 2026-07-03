@@ -139,9 +139,7 @@ def _validate_simulated_fill_template(template: pd.DataFrame) -> None:
     elif not np.isclose(target_shares, phase23j_target_shares).all():
         blockers.append("target_shares_do_not_match_phase23j_execution_target_shares")
     if blockers:
-        raise ValueError(
-            "Cannot simulate Phase23I fills: " + ";".join(sorted(set(blockers)))
-        )
+        raise ValueError("Cannot simulate Phase23I fills: " + ";".join(sorted(set(blockers))))
 
 
 def _atomic_write_csv(frame: pd.DataFrame, path: Path) -> None:
@@ -171,9 +169,7 @@ def build_filled_shadow_session(
         )
     if confirm_simulated_fill:
         _validate_simulated_fill_template(filled)
-        execution_price = pd.to_numeric(
-            filled["execution_open_price"], errors="coerce"
-        )
+        execution_price = pd.to_numeric(filled["execution_open_price"], errors="coerce")
         proposed_quantity = pd.to_numeric(filled["proposed_quantity"], errors="coerce")
         filled["manual_decision"] = "enter_simulated_shadow_trade"
         filled["session_state"] = "entered"
@@ -181,8 +177,7 @@ def build_filled_shadow_session(
         filled["simulated_fill_quantity"] = proposed_quantity.astype(int)
         filled["override_reason"] = "explicit_user_simulated_shadow_fill_command"
         filled["notes"] = (
-            "SIMULATED PAPER SHADOW FILL ONLY - no broker, no live trading, "
-            "no real money"
+            "SIMULATED PAPER SHADOW FILL ONLY - no broker, no live trading, no real money"
         )
     else:
         filled["manual_decision"] = "skip_user_choice"

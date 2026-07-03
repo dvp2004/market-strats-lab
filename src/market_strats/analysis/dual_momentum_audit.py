@@ -189,16 +189,12 @@ def write_dual_momentum_audit_markdown(
     )
 
     cash_table = (
-        cash_summary.to_markdown(index=False)
-        if not cash_summary.empty
-        else "No cash periods."
+        cash_summary.to_markdown(index=False) if not cash_summary.empty else "No cash periods."
     )
 
     worst_segments = holding_segments.sort_values("segment_return_pct").head(10)
     worst_segments_table = (
-        worst_segments.to_markdown(index=False)
-        if not worst_segments.empty
-        else "No segment data."
+        worst_segments.to_markdown(index=False) if not worst_segments.empty else "No segment data."
     )
 
     content = f"""# Dual Momentum Allocation Audit

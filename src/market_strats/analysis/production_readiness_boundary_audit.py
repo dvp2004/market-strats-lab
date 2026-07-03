@@ -73,8 +73,7 @@ def build_phase8f_blocker_inventory(phase_config: dict[str, Any]) -> pd.DataFram
 
     if missing_columns:
         raise ValueError(
-            "Phase 8F blocker inventory is missing required columns: "
-            f"{sorted(missing_columns)}"
+            f"Phase 8F blocker inventory is missing required columns: {sorted(missing_columns)}"
         )
 
     for column in columns:
@@ -134,9 +133,7 @@ def build_phase8f_summary(
                 "final_candidate": claim_context.get("final_candidate"),
                 "final_candidate_role": claim_context.get("final_candidate_role"),
                 "raw_wealth_benchmark": claim_context.get("raw_wealth_benchmark"),
-                "simple_defensive_benchmark": claim_context.get(
-                    "simple_defensive_benchmark"
-                ),
+                "simple_defensive_benchmark": claim_context.get("simple_defensive_benchmark"),
                 "canonical_start_date": claim_context.get("canonical_start_date"),
                 "canonical_end_date": claim_context.get("canonical_end_date"),
                 "declared_production_ready": declared_production_ready,

@@ -23,7 +23,9 @@ from market_strats.global_multi_asset.gma3a_paper_readiness import (
     GMA3APaperReadinessResult,
     run_gma3a_paper_readiness,
 )
-from market_strats.global_multi_asset.gma3a_post_endpoint_refresh import run_gma3a_post_endpoint_refresh
+from market_strats.global_multi_asset.gma3a_post_endpoint_refresh import (
+    run_gma3a_post_endpoint_refresh,
+)
 from market_strats.global_multi_asset.gma3a_tournament import run_gma3a_transparent_tournament
 
 
@@ -93,7 +95,9 @@ def build_parser() -> argparse.ArgumentParser:
         "validate-manual-fills",
         help="Validate user-entered TradingView paper fills against the active GMA packet",
     )
-    validate_fills.add_argument("--fills", required=True, help="Path to user-entered manual fill CSV")
+    validate_fills.add_argument(
+        "--fills", required=True, help="Path to user-entered manual fill CSV"
+    )
     return parser
 
 
@@ -157,7 +161,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if result.decision.startswith("gma1a_feasible") else 2
     if args.command == "build-macro-cash-foundation":
         config = load_gma1b_config(args.config)
-        diagnostic_mode_count = sum(bool(flag) for flag in [args.live, args.live_diagnose, args.live_diagnose_all])
+        diagnostic_mode_count = sum(
+            bool(flag) for flag in [args.live, args.live_diagnose, args.live_diagnose_all]
+        )
         if diagnostic_mode_count > 1:
             print("GMA-1B decision: gma1b_blocked_provider_limitations")
             print("  warning: choose only one of --live, --live-diagnose, --live-diagnose-all")
@@ -200,7 +206,12 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  warning: {w}")
         if bool(args.live):
             return 0 if result.decision.startswith("gma1b_feasible") else 2
-        return 0 if result.decision.startswith("gma1b_feasible") or result.decision == "gma1b_live_data_incomplete" else 2
+        return (
+            0
+            if result.decision.startswith("gma1b_feasible")
+            or result.decision == "gma1b_live_data_incomplete"
+            else 2
+        )
     if args.command == "build-replay-foundation":
         config = load_gma2_config(args.config)
         result = run_gma2_replay_foundation(config)
@@ -257,7 +268,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "validate-manual-fills":
         config = load_gma3a_config(args.config)
         result = validate_gma3a_manual_fills(config, Path(args.fills))
-        print(f"GMA manual fill validation status: {'valid' if result.session_valid else 'blocked'}")
+        print(
+            f"GMA manual fill validation status: {'valid' if result.session_valid else 'blocked'}"
+        )
         print(f"GMA manual fill accepted rows: {result.accepted_rows}")
         print(f"GMA manual fill rejected rows: {result.rejected_rows}")
         if result.blocking_reason:

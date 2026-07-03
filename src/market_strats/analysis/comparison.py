@@ -174,30 +174,50 @@ def create_strategy_scorecard(
         + 0.05 * scorecard["trade_efficiency_score"]
     ).round(2)
 
-    scorecard["composite_rank"] = scorecard["composite_score"].rank(
-        ascending=False,
-        method="min",
-    ).astype(int)
+    scorecard["composite_rank"] = (
+        scorecard["composite_score"]
+        .rank(
+            ascending=False,
+            method="min",
+        )
+        .astype(int)
+    )
 
-    scorecard["cagr_rank"] = scorecard["cagr_pct"].rank(
-        ascending=False,
-        method="min",
-    ).astype(int)
+    scorecard["cagr_rank"] = (
+        scorecard["cagr_pct"]
+        .rank(
+            ascending=False,
+            method="min",
+        )
+        .astype(int)
+    )
 
-    scorecard["max_drawdown_rank"] = scorecard["max_drawdown_pct"].rank(
-        ascending=False,
-        method="min",
-    ).astype(int)
+    scorecard["max_drawdown_rank"] = (
+        scorecard["max_drawdown_pct"]
+        .rank(
+            ascending=False,
+            method="min",
+        )
+        .astype(int)
+    )
 
-    scorecard["sharpe_rank"] = scorecard["sharpe"].rank(
-        ascending=False,
-        method="min",
-    ).astype(int)
+    scorecard["sharpe_rank"] = (
+        scorecard["sharpe"]
+        .rank(
+            ascending=False,
+            method="min",
+        )
+        .astype(int)
+    )
 
-    scorecard["trade_count_rank"] = scorecard["trade_count"].rank(
-        ascending=True,
-        method="min",
-    ).astype(int)
+    scorecard["trade_count_rank"] = (
+        scorecard["trade_count"]
+        .rank(
+            ascending=True,
+            method="min",
+        )
+        .astype(int)
+    )
 
     scorecard = scorecard.sort_values(
         ["composite_rank", "strategy"],
@@ -220,7 +240,9 @@ def create_strategy_verdicts(scorecard: pd.DataFrame) -> pd.DataFrame:
             return "Best raw compounding benchmark, but worst drawdown pain."
 
         if "12-Month Absolute Momentum" in strategy:
-            return "Best overall active candidate so far: strong return, lower drawdown, low turnover."
+            return (
+                "Best overall active candidate so far: strong return, lower drawdown, low turnover."
+            )
 
         if "10-Month SMA" in strategy:
             return "Useful defensive trend benchmark, but gives up too much upside."

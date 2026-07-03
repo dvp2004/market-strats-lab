@@ -82,16 +82,10 @@ def create_annual_rebalance_audit(
             {
                 "strategy": strategy_name,
                 "rebalance_date": row["date"].date().isoformat(),
-                "portfolio_equity_before_rebalance": float(
-                    row["total_equity_before_rebalance"]
-                ),
+                "portfolio_equity_before_rebalance": float(row["total_equity_before_rebalance"]),
                 "portfolio_equity_after_rebalance": float(row["equity"]),
-                "portfolio_drawdown_at_rebalance_pct": float(
-                    row["portfolio_drawdown"] * 100.0
-                ),
-                "core_equity_before_rebalance": float(
-                    row["core_sleeve_equity_before_rebalance"]
-                ),
+                "portfolio_drawdown_at_rebalance_pct": float(row["portfolio_drawdown"] * 100.0),
+                "core_equity_before_rebalance": float(row["core_sleeve_equity_before_rebalance"]),
                 "satellite_equity_before_rebalance": float(
                     row["satellite_sleeve_equity_before_rebalance"]
                 ),
@@ -99,21 +93,14 @@ def create_annual_rebalance_audit(
                 "satellite_weight_before_rebalance_pct": satellite_weight_before * 100.0,
                 "target_core_weight_pct": target_core_weight * 100.0,
                 "target_satellite_weight_pct": target_satellite_weight * 100.0,
-                "core_weight_drift_pct_points": (
-                    core_weight_before - target_core_weight
-                )
-                * 100.0,
+                "core_weight_drift_pct_points": (core_weight_before - target_core_weight) * 100.0,
                 "satellite_weight_drift_pct_points": (
                     satellite_weight_before - target_satellite_weight
                 )
                 * 100.0,
                 "rebalance_turnover_pct": float(row["rebalance_turnover"] * 100.0),
-                "portfolio_position_after_rebalance_pct": float(
-                    row["position"] * 100.0
-                ),
-                "portfolio_cash_after_rebalance_pct": float(
-                    row["cash_position"] * 100.0
-                ),
+                "portfolio_position_after_rebalance_pct": float(row["position"] * 100.0),
+                "portfolio_cash_after_rebalance_pct": float(row["cash_position"] * 100.0),
                 "next_3m_return_pct": _future_return(df, int(index), 63) * 100.0,
                 "next_6m_return_pct": _future_return(df, int(index), 126) * 100.0,
                 "next_12m_return_pct": _future_return(df, int(index), 252) * 100.0,
@@ -190,13 +177,9 @@ def write_annual_rebalance_audit_markdown(
         )
         return output_path
 
-    summary_table = (
-        summary.to_markdown(index=False) if not summary.empty else "No summary data."
-    )
+    summary_table = summary.to_markdown(index=False) if not summary.empty else "No summary data."
 
-    worst_drawdown_rebalances = audit.sort_values(
-        "portfolio_drawdown_at_rebalance_pct"
-    ).head(10)
+    worst_drawdown_rebalances = audit.sort_values("portfolio_drawdown_at_rebalance_pct").head(10)
 
     largest_turnover_rebalances = audit.sort_values(
         "rebalance_turnover_pct",

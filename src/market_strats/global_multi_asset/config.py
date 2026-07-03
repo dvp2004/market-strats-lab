@@ -173,7 +173,10 @@ def validate_config(raw: dict[str, Any], *, path: Path | None = None) -> GMAConf
         raise ValueError(f"Unknown GMA instruments: {unknown_instruments}")
     registry = {}
     for instrument_id in PROPOSED_INSTRUMENTS:
-        registry[instrument_id] = {**default_registry[instrument_id], **instruments.get(instrument_id, {})}
+        registry[instrument_id] = {
+            **default_registry[instrument_id],
+            **instruments.get(instrument_id, {}),
+        }
     validate_registry(registry)
 
     required_core = list(replay_start.get("required_core_instruments", []))

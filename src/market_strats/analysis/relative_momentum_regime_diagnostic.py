@@ -30,9 +30,7 @@ def _get_strategy_result(
 
     if strategy not in strategy_results:
         available = sorted(strategy_results.keys())
-        raise ValueError(
-            f"Strategy '{strategy}' not found for {ticker}. Available: {available}"
-        )
+        raise ValueError(f"Strategy '{strategy}' not found for {ticker}. Available: {available}")
 
     return strategy_results[strategy]
 
@@ -224,9 +222,7 @@ def create_relative_momentum_regime_diagnostic(
     trend_sma_days = int(diagnostic_config.get("trend_sma_days", 200))
     momentum_lookback_days = int(diagnostic_config.get("momentum_lookback_days", 252))
 
-    first_allocator = next(iter(relative_momentum_outputs.values()))[
-        "allocator_result"
-    ]
+    first_allocator = next(iter(relative_momentum_outputs.values()))["allocator_result"]
     common_dates = list(pd.to_datetime(first_allocator["date"]))
 
     spy_buy_hold = rebase_strategy_result_to_dates(

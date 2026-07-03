@@ -140,8 +140,7 @@ def _create_guard_promotion_summary(
                 "benchmark_cagr_pct": benchmark_row["cagr_pct"],
                 "candidate_cagr_pct": candidate_row["cagr_pct"],
                 "cagr_delta_pct_points": round(
-                    float(candidate_row["cagr_pct"])
-                    - float(benchmark_row["cagr_pct"]),
+                    float(candidate_row["cagr_pct"]) - float(benchmark_row["cagr_pct"]),
                     3,
                 ),
                 "benchmark_calmar": benchmark_row["calmar"],
@@ -160,8 +159,7 @@ def _create_guard_promotion_summary(
                 "benchmark_end_value": benchmark_row["end_value"],
                 "candidate_end_value": candidate_row["end_value"],
                 "end_value_delta": round(
-                    float(candidate_row["end_value"])
-                    - float(benchmark_row["end_value"]),
+                    float(candidate_row["end_value"]) - float(benchmark_row["end_value"]),
                     2,
                 ),
                 "benchmark_trade_count": benchmark_row["trade_count"],
@@ -185,16 +183,12 @@ def _create_guard_promotion_gate_report(
 
     spy_12m_cagr_gate = float(promotion_config.get("spy_12m_cagr_gate", 9.68))
     spy_12m_calmar_gate = float(promotion_config.get("spy_12m_calmar_gate", 0.287))
-    spy_12m_drawdown_gate = float(
-        promotion_config.get("spy_12m_max_drawdown_gate", -33.72)
-    )
+    spy_12m_drawdown_gate = float(promotion_config.get("spy_12m_max_drawdown_gate", -33.72))
 
     max_cagr_damage = float(
         promotion_config.get("max_allowed_segment_cagr_damage_pct_points", -0.50)
     )
-    max_calmar_damage = float(
-        promotion_config.get("max_allowed_segment_calmar_damage", -0.05)
-    )
+    max_calmar_damage = float(promotion_config.get("max_allowed_segment_calmar_damage", -0.05))
     max_drawdown_damage = float(
         promotion_config.get("max_allowed_segment_drawdown_damage_pct_points", -1.00)
     )
@@ -224,9 +218,7 @@ def _create_guard_promotion_gate_report(
     )
 
     improves_dynamic_baseline = (
-        full_cagr_delta > 0
-        and full_calmar_delta > 0
-        and full_drawdown_delta >= max_drawdown_damage
+        full_cagr_delta > 0 and full_calmar_delta > 0 and full_drawdown_delta >= max_drawdown_damage
     )
 
     holdout_damage = False
@@ -256,10 +248,7 @@ def _create_guard_promotion_gate_report(
         damaged = episode[
             (episode["cagr_delta_pct_points"].astype(float) < max_cagr_damage)
             | (episode["calmar_delta"].astype(float) < max_calmar_damage)
-            | (
-                episode["drawdown_delta_pct_points"].astype(float)
-                < max_drawdown_damage
-            )
+            | (episode["drawdown_delta_pct_points"].astype(float) < max_drawdown_damage)
         ].copy()
 
         damaged_episode_count = int(len(damaged))
@@ -344,8 +333,7 @@ def _create_guard_promotion_conclusion(
         return pd.DataFrame()
 
     final_gate = gate_report[
-        gate_report["gate"]
-        == "Candidate can be promoted to execution-realistic overlay candidate."
+        gate_report["gate"] == "Candidate can be promoted to execution-realistic overlay candidate."
     ]
 
     full = summary[summary["period"] == "full"]
@@ -379,9 +367,7 @@ def _create_guard_promotion_conclusion(
                 "claim": "deep_drawdown_guard is validated as the execution-realistic overlay candidate.",
                 "status": "Survived" if final_status == "Passed" else "Not yet",
                 "evidence_quality": "Based on Phase 4F promotion gate report",
-                "interpretation": (
-                    f"{full_interpretation} {holdout_interpretation}"
-                ),
+                "interpretation": (f"{full_interpretation} {holdout_interpretation}"),
             },
             {
                 "claim": "The original flat 5 bps 3D overlay should be replaced silently.",

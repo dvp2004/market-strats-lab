@@ -590,9 +590,7 @@ def save_phase17c_strategy_factory_watchlist_dashboard(
         return {"summary": empty, "candidates": empty, "gate_report": empty}
 
     output_dir = Path(section.get("output_dir", "reports/strategy_factory/watchlist"))
-    dashboard_dir = Path(
-        section.get("dashboard_dir", output_dir / "dashboard")
-    )
+    dashboard_dir = Path(section.get("dashboard_dir", output_dir / "dashboard"))
     output_dir.mkdir(parents=True, exist_ok=True)
     dashboard_dir.mkdir(parents=True, exist_ok=True)
 
@@ -657,23 +655,31 @@ def save_phase17c_strategy_factory_watchlist_dashboard(
     summary = _summary(candidates=candidates, excluded=excluded, gate_report=gate_report)
     conclusion = _conclusion(summary)
     risk_flags = _risk_flags(candidates, caveats)
-    metric_snapshot = candidates[
-        [
-            "candidate_id",
-            "low_friction_cagr_pct",
-            "realistic_stress_cagr_pct",
-            "max_drawdown_pct",
-            "calmar",
-        ]
-    ].copy() if not candidates.empty else pd.DataFrame()
-    rolling_snapshot = candidates[
-        [
-            "candidate_id",
-            "rolling_3y_beat_spy_pct",
-            "worst_3y_active_cagr",
-            "latest_3y_active_cagr",
-        ]
-    ].copy() if not candidates.empty else pd.DataFrame()
+    metric_snapshot = (
+        candidates[
+            [
+                "candidate_id",
+                "low_friction_cagr_pct",
+                "realistic_stress_cagr_pct",
+                "max_drawdown_pct",
+                "calmar",
+            ]
+        ].copy()
+        if not candidates.empty
+        else pd.DataFrame()
+    )
+    rolling_snapshot = (
+        candidates[
+            [
+                "candidate_id",
+                "rolling_3y_beat_spy_pct",
+                "worst_3y_active_cagr",
+                "latest_3y_active_cagr",
+            ]
+        ].copy()
+        if not candidates.empty
+        else pd.DataFrame()
+    )
 
     _write_outputs(
         output_dir=output_dir,

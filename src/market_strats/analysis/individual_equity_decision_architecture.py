@@ -369,9 +369,18 @@ def build_risk_and_execution_contract(phase_config: dict[str, Any]) -> pd.DataFr
         ("corporate_action_guard", "split, merger, delisting, and symbol-change handling"),
         ("turnover_guard", "trade only when score improvement exceeds cost-aware buffer"),
         ("portfolio_drawdown_guard", "reduce risk or halt new entries at preregistered thresholds"),
-        ("model_drift_guard", "halt when feature, prediction, calibration, or residual drift breaches limits"),
-        ("missing_family_policy", "no silent imputation across unavailable fundamental or sentiment history"),
-        ("paper_before_live", "shadow decisions then manual paper then automated paper before any live consideration"),
+        (
+            "model_drift_guard",
+            "halt when feature, prediction, calibration, or residual drift breaches limits",
+        ),
+        (
+            "missing_family_policy",
+            "no silent imputation across unavailable fundamental or sentiment history",
+        ),
+        (
+            "paper_before_live",
+            "shadow decisions then manual paper then automated paper before any live consideration",
+        ),
     ]
     frame = pd.DataFrame(rows, columns=["control", "policy"])
     frame["decision_cadence"] = phase_config["decision_cadence"]
@@ -384,13 +393,37 @@ def build_risk_and_execution_contract(phase_config: dict[str, Any]) -> pd.DataFr
 
 def build_validation_plan() -> pd.DataFrame:
     rows = [
-        (1, "data_contract", "point-in-time universe, timestamps, lags, delistings, and corporate actions"),
+        (
+            1,
+            "data_contract",
+            "point-in-time universe, timestamps, lags, delistings, and corporate actions",
+        ),
         (2, "feature_quality", "coverage, staleness, missingness, outliers, and leakage"),
-        (3, "walk_forward_prediction", "purged expanding/rolling validation with untouched holdout"),
-        (4, "cross_sectional_skill", "rank IC, top-minus-bottom spread, hit rate, calibration, and stability"),
-        (5, "portfolio_backtest", "cost-aware next-day execution with delistings and realistic liquidity"),
-        (6, "robustness", "subperiods, sectors, universes, costs, turnover, and parameter neighborhoods"),
-        (7, "ablation", "technical-only, fundamental-only, sentiment-only, macro-only, and combined"),
+        (
+            3,
+            "walk_forward_prediction",
+            "purged expanding/rolling validation with untouched holdout",
+        ),
+        (
+            4,
+            "cross_sectional_skill",
+            "rank IC, top-minus-bottom spread, hit rate, calibration, and stability",
+        ),
+        (
+            5,
+            "portfolio_backtest",
+            "cost-aware next-day execution with delistings and realistic liquidity",
+        ),
+        (
+            6,
+            "robustness",
+            "subperiods, sectors, universes, costs, turnover, and parameter neighborhoods",
+        ),
+        (
+            7,
+            "ablation",
+            "technical-only, fundamental-only, sentiment-only, macro-only, and combined",
+        ),
         (8, "paper_shadow", "daily autonomous decisions without orders"),
         (9, "manual_paper", "human-approved simulated fills and reconciliation"),
         (10, "automated_paper", "broker sandbox only after manual-paper gates"),
@@ -522,9 +555,11 @@ def build_gate_report(
         _gate(
             "autonomous_layers_defined",
             len(model_architecture) >= 7
-            and {"cross_sectional_alpha_model", "portfolio_constructor", "risk_and_execution_guard"}.issubset(
-                set(model_architecture["layer"])
-            ),
+            and {
+                "cross_sectional_alpha_model",
+                "portfolio_constructor",
+                "risk_and_execution_guard",
+            }.issubset(set(model_architecture["layer"])),
             f"layers={len(model_architecture)}",
         ),
         _gate(
@@ -540,19 +575,17 @@ def build_gate_report(
         _gate(
             "decision_audit_schema_complete",
             len(decision_schema) >= 30
-            and {"predicted_excess_return_20d", "approved_target_weight", "trade_action", "blocking_reasons"}.issubset(
-                set(decision_schema["column"])
-            ),
+            and {
+                "predicted_excess_return_20d",
+                "approved_target_weight",
+                "trade_action",
+                "blocking_reasons",
+            }.issubset(set(decision_schema["column"])),
             f"columns={len(decision_schema)}",
         ),
         _gate(
             "next_phase_is_universe_source_audit",
-            bool(
-                (
-                    (roadmap["phase"] == "23B")
-                    & (roadmap["status"] == "next")
-                ).any()
-            ),
+            bool(((roadmap["phase"] == "23B") & (roadmap["status"] == "next")).any()),
             "Phase23B point-in-time universe source audit",
         ),
         _gate(
@@ -566,18 +599,14 @@ def build_gate_report(
     return frame
 
 
-def build_summary(
-    *, phase_config: dict[str, Any], gate_report: pd.DataFrame
-) -> pd.DataFrame:
+def build_summary(*, phase_config: dict[str, Any], gate_report: pd.DataFrame) -> pd.DataFrame:
     passed = bool(gate_report["passed"].all()) if not gate_report.empty else False
     return pd.DataFrame(
         [
             {
                 "phase": "Phase 23A",
                 "phase23a_decision": (
-                    phase_config["phase_decision"]
-                    if passed
-                    else "phase23a_architecture_blocked"
+                    phase_config["phase_decision"] if passed else "phase23a_architecture_blocked"
                 ),
                 "all_gates_passed": passed,
                 "individual_stock_selection_eventual_scope": True,

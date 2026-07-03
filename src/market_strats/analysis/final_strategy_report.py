@@ -84,9 +84,7 @@ def _load_report_row(
 
     if row.empty:
         available = sorted(df["strategy"].dropna().unique())
-        raise ValueError(
-            f"Strategy '{strategy}' not found in {path}. Available: {available}"
-        )
+        raise ValueError(f"Strategy '{strategy}' not found in {path}. Available: {available}")
 
     return row.iloc[0]
 
@@ -102,6 +100,7 @@ def _safe_get(row: pd.Series, column: str, default: object = "") -> object:
 
     return value
 
+
 def _safe_calmar(row: pd.Series) -> object:
     if "calmar" in row.index and not pd.isna(row["calmar"]):
         return row["calmar"]
@@ -116,6 +115,7 @@ def _safe_calmar(row: pd.Series) -> object:
         return ""
 
     return round(float(cagr) / abs(float(max_drawdown)), 3)
+
 
 def create_final_strategy_decision_report(
     reports_dir: str | Path = "reports",

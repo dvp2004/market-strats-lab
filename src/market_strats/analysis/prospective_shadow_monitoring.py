@@ -98,9 +98,7 @@ def _phase_config(config: dict[str, Any]) -> dict[str, Any]:
     return _deep_merge(DEFAULT_PHASE23K_CONFIG, config.get(PHASE23K_SECTION, {}))
 
 
-def _resolve_reports_path(
-    *, configured_path: str | Path, reports_dir: str | Path
-) -> Path:
+def _resolve_reports_path(*, configured_path: str | Path, reports_dir: str | Path) -> Path:
     reports_root = Path(reports_dir)
     path = Path(configured_path)
     if path.is_absolute():
@@ -110,9 +108,7 @@ def _resolve_reports_path(
     return reports_root / path
 
 
-def _resolve_project_path(
-    *, configured_path: str | Path, reports_dir: str | Path
-) -> Path:
+def _resolve_project_path(*, configured_path: str | Path, reports_dir: str | Path) -> Path:
     path = Path(configured_path)
     if path.is_absolute():
         return path
@@ -248,7 +244,9 @@ def trading_horizon_end_date(
 ) -> pd.Timestamp | pd.NaT:
     if price_frame.empty:
         return pd.NaT
-    dates = pd.DatetimeIndex(pd.to_datetime(price_frame["date"], errors="coerce").dropna()).sort_values()
+    dates = pd.DatetimeIndex(
+        pd.to_datetime(price_frame["date"], errors="coerce").dropna()
+    ).sort_values()
     signal = pd.Timestamp(signal_date).normalize()
     matches = np.flatnonzero(dates == signal)
     if len(matches) == 0:
@@ -307,12 +305,7 @@ def _content_hash(frame: pd.DataFrame, columns: list[str]) -> str:
     if frame.empty:
         return _sha256([])
     use_columns = [column for column in columns if column in frame.columns]
-    records = (
-        frame[use_columns]
-        .sort_values(use_columns)
-        .fillna("")
-        .to_dict(orient="records")
-    )
+    records = frame[use_columns].sort_values(use_columns).fillna("").to_dict(orient="records")
     return _sha256(records)
 
 
@@ -359,7 +352,11 @@ def _build_current_snapshot(
     target_weights = {}
     if not target.empty and "ticker" in target.columns:
         target_weights = dict(
-            zip(target["ticker"].astype(str), pd.to_numeric(target["target_weight"], errors="coerce"), strict=False)
+            zip(
+                target["ticker"].astype(str),
+                pd.to_numeric(target["target_weight"], errors="coerce"),
+                strict=False,
+            )
         )
     score_column = "predicted_20d_excess_return_or_ranking_score"
     rows = []
@@ -434,7 +431,9 @@ def _reference_frame(frame: pd.DataFrame) -> pd.DataFrame:
             working[column] = ""
     working = working[columns].copy()
     working["ticker"] = working["ticker"].astype(str)
-    working["reference_close"] = pd.to_numeric(working["reference_close"], errors="coerce").round(10)
+    working["reference_close"] = pd.to_numeric(working["reference_close"], errors="coerce").round(
+        10
+    )
     working["reference_price_date"] = working["reference_price_date"].map(_date_string)
     return working.sort_values("ticker").reset_index(drop=True)
 
@@ -474,7 +473,11 @@ def _merge_immutable_snapshots(
     if not existing.empty and "session_id" in existing.columns:
         prior = existing.loc[existing["session_id"].astype(str).eq(session_id)]
         if not prior.empty:
-            signal_date = _date_string(current["signal_date"].iloc[0]) if "signal_date" in current.columns else ""
+            signal_date = (
+                _date_string(current["signal_date"].iloc[0])
+                if "signal_date" in current.columns
+                else ""
+            )
             if _immutable_snapshot_equivalent(prior, current):
                 reference_changed = _reference_data_changed(prior, current)
                 correction_allowed = _pre_fill_reference_repair_allowed(
@@ -495,10 +498,18 @@ def _merge_immutable_snapshots(
     return combined.reset_index(drop=True), conflict, correction_allowed
 
 
-def _session_has_entered_fill(*, ledger: pd.DataFrame, positions: pd.DataFrame, signal_date: str) -> bool:
+def _session_has_entered_fill(
+    *, ledger: pd.DataFrame, positions: pd.DataFrame, signal_date: str
+) -> bool:
     if not ledger.empty and "selected_signal_date" in ledger.columns:
         session_ledger = ledger.loc[ledger["selected_signal_date"].astype(str).eq(signal_date)]
-        if not session_ledger.empty and session_ledger.get("session_state", pd.Series(dtype=str)).astype(str).eq("entered").any():
+        if (
+            not session_ledger.empty
+            and session_ledger.get("session_state", pd.Series(dtype=str))
+            .astype(str)
+            .eq("entered")
+            .any()
+        ):
             return True
     if not positions.empty and "ticker" in positions.columns:
         return bool(positions["ticker"].astype(str).ne("CASH").any())
@@ -558,7 +569,11 @@ def _legacy_history_row(
     hashes = _snapshot_hashes(snapshot, pd.DataFrame())
     snapshot_id = _snapshot_id_for(session_id, hashes)
     signal_date = _date_string(snapshot["signal_date"].iloc[0]) if not snapshot.empty else ""
-    model_hash = str(snapshot["model_hash"].iloc[0]) if "model_hash" in snapshot.columns and not snapshot.empty else ""
+    model_hash = (
+        str(snapshot["model_hash"].iloc[0])
+        if "model_hash" in snapshot.columns and not snapshot.empty
+        else ""
+    )
     return {
         "session_id": session_id,
         "snapshot_id": snapshot_id,
@@ -590,7 +605,9 @@ def _update_snapshot_history(
     if (
         session_id
         and "session_id" in existing_snapshots.columns
-        and history.loc[history.get("session_id", pd.Series(dtype=str)).astype(str).eq(session_id)].empty
+        and history.loc[
+            history.get("session_id", pd.Series(dtype=str)).astype(str).eq(session_id)
+        ].empty
     ):
         prior = existing_snapshots.loc[existing_snapshots["session_id"].astype(str).eq(session_id)]
         if not prior.empty:
@@ -612,16 +629,24 @@ def _update_snapshot_history(
     current_hashes = _snapshot_hashes(current_snapshot, reconciliation)
     current_snapshot_id = _snapshot_id_for(session_id, current_hashes) if session_id else ""
     session_history = (
-        history.loc[history.get("session_id", pd.Series(dtype=str)).astype(str).eq(session_id)].copy()
+        history.loc[
+            history.get("session_id", pd.Series(dtype=str)).astype(str).eq(session_id)
+        ].copy()
         if session_id and not history.empty
         else pd.DataFrame(columns=SNAPSHOT_HISTORY_COLUMNS)
     )
-    if current_snapshot_id and "snapshot_id" in session_history.columns and current_snapshot_id in set(session_history["snapshot_id"].astype(str)):
+    if (
+        current_snapshot_id
+        and "snapshot_id" in session_history.columns
+        and current_snapshot_id in set(session_history["snapshot_id"].astype(str))
+    ):
         revision = int(pd.to_numeric(session_history["session_revision"], errors="coerce").max())
         return history, revision, current_snapshot_id, "", ""
     prior_active = pd.DataFrame()
     if not session_history.empty and "snapshot_status" in session_history.columns:
-        prior_active = session_history.loc[session_history["snapshot_status"].astype(str).eq("active")]
+        prior_active = session_history.loc[
+            session_history["snapshot_status"].astype(str).eq("active")
+        ]
     if prior_active.empty:
         prior_active = session_history.tail(1)
     supersedes = str(prior_active.iloc[-1].get("snapshot_id", "")) if not prior_active.empty else ""
@@ -631,9 +656,15 @@ def _update_snapshot_history(
         else 1
     )
     if supersedes and "snapshot_id" in history.columns:
-        history.loc[history["snapshot_id"].astype(str).eq(supersedes), "snapshot_status"] = "superseded"
-    correction_type = "pre_fill_signal_reference_repair" if correction_allowed else "pre_fill_session_progression"
-    correction_reason = "execution_boundary_bugfix" if correction_allowed else "execution_data_observed_before_fill"
+        history.loc[history["snapshot_id"].astype(str).eq(supersedes), "snapshot_status"] = (
+            "superseded"
+        )
+    correction_type = (
+        "pre_fill_signal_reference_repair" if correction_allowed else "pre_fill_session_progression"
+    )
+    correction_reason = (
+        "execution_boundary_bugfix" if correction_allowed else "execution_data_observed_before_fill"
+    )
     row = {
         "session_id": session_id,
         "snapshot_id": current_snapshot_id,
@@ -644,14 +675,24 @@ def _update_snapshot_history(
         "correction_type": correction_type,
         "correction_reason": correction_reason,
         "source_commit_or_code_version": "",
-        "signal_date": _date_string(current_snapshot["signal_date"].iloc[0]) if not current_snapshot.empty else "",
-        "model_hash": str(current_snapshot["model_hash"].iloc[0]) if "model_hash" in current_snapshot.columns and not current_snapshot.empty else "",
+        "signal_date": _date_string(current_snapshot["signal_date"].iloc[0])
+        if not current_snapshot.empty
+        else "",
+        "model_hash": str(current_snapshot["model_hash"].iloc[0])
+        if "model_hash" in current_snapshot.columns and not current_snapshot.empty
+        else "",
         **current_hashes,
     }
     history = pd.concat([history, pd.DataFrame([row])], ignore_index=True)
     if "snapshot_id" in history.columns:
         history = history.drop_duplicates("snapshot_id", keep="last")
-    return history.reset_index(drop=True), revision, current_snapshot_id, correction_type, correction_reason
+    return (
+        history.reset_index(drop=True),
+        revision,
+        current_snapshot_id,
+        correction_type,
+        correction_reason,
+    )
 
 
 def _resolve_incident_lifecycle(
@@ -671,18 +712,21 @@ def _resolve_incident_lifecycle(
     if not reconciliation.empty:
         ready_tickers = set(
             reconciliation.loc[
-                reconciliation["fill_validation_status"].astype(str).eq("execution_price_available"),
+                reconciliation["fill_validation_status"]
+                .astype(str)
+                .eq("execution_price_available"),
                 "ticker",
             ].astype(str)
         )
-    missing_mask = (
-        working["session_id"].astype(str).eq(session_id)
-        & working["category"].astype(str).eq("missing_execution_price")
-    )
+    missing_mask = working["session_id"].astype(str).eq(session_id) & working["category"].astype(
+        str
+    ).eq("missing_execution_price")
     if ready_tickers:
         descriptions = working.loc[missing_mask, "description"].astype(str)
         resolve_index = descriptions.index[
-            descriptions.map(lambda text: any(ticker in text for ticker in ready_tickers)).astype(bool)
+            descriptions.map(lambda text: any(ticker in text for ticker in ready_tickers)).astype(
+                bool
+            )
         ]
         resolve_mask = pd.Series(False, index=working.index)
         resolve_mask.loc[resolve_index] = True
@@ -692,15 +736,12 @@ def _resolve_incident_lifecycle(
             "execution opens observed and validated on 2026-06-15"
         )
     if correction_type:
-        conflict_mask = (
-            working["session_id"].astype(str).eq(session_id)
-            & working["category"].astype(str).eq("immutable_session_content_changed")
-        )
+        conflict_mask = working["session_id"].astype(str).eq(session_id) & working[
+            "category"
+        ].astype(str).eq("immutable_session_content_changed")
         working.loc[conflict_mask, "resolved_flag"] = True
         working.loc[conflict_mask, "blocking_flag"] = False
-        working.loc[conflict_mask, "resolution_note"] = (
-            f"superseded by {correction_type} revision"
-        )
+        working.loc[conflict_mask, "resolution_note"] = f"superseded by {correction_type} revision"
     return working
 
 
@@ -747,7 +788,9 @@ def _session_from_sources(
         and "paper_order_allowed" in proposed_orders.columns
         and not proposed_orders["paper_order_allowed"].map(_bool_value).all()
     )
-    proposal_status = "proposal_ready" if not orders_blocked and not target.empty else "proposal_blocked"
+    proposal_status = (
+        "proposal_ready" if not orders_blocked and not target.empty else "proposal_blocked"
+    )
     execution_status = proposal_status
     if not ledger.empty and "selected_signal_date" in ledger.columns:
         session_ledger = ledger.loc[ledger["selected_signal_date"].astype(str).eq(signal_date)]
@@ -785,8 +828,12 @@ def _session_from_sources(
                 "execution_status": execution_status,
                 "archive_status": "not_archived",
                 "prediction_maturity_status": "prediction_pending",
-                "selected_count": int(target["ticker"].nunique()) if "ticker" in target.columns else 0,
-                "ranking_count": int(ranking["ticker"].nunique()) if "ticker" in ranking.columns else 0,
+                "selected_count": int(target["ticker"].nunique())
+                if "ticker" in target.columns
+                else 0,
+                "ranking_count": int(ranking["ticker"].nunique())
+                if "ticker" in ranking.columns
+                else 0,
                 "orders_blocked": orders_blocked,
                 "blocking_reasons": ";".join(order_blocking_reasons),
                 "incident_count": int(incident_count),
@@ -816,7 +863,9 @@ def _build_reconciliation(
         else {}
     )
     ledger_by_ticker = (
-        ledger.loc[ledger.get("selected_signal_date", pd.Series(dtype=str)).astype(str).eq(signal_date)]
+        ledger.loc[
+            ledger.get("selected_signal_date", pd.Series(dtype=str)).astype(str).eq(signal_date)
+        ]
         if not ledger.empty and "selected_signal_date" in ledger.columns
         else pd.DataFrame()
     )
@@ -824,21 +873,39 @@ def _build_reconciliation(
     for row in proposed_orders.itertuples(index=False):
         ticker = str(getattr(row, "ticker"))
         target_row = target_by_ticker.get(ticker, {})
-        expected_date = _date_string(target_row.get("expected_execution_date", target_row.get("planned_execution_date", "")))
+        expected_date = _date_string(
+            target_row.get("expected_execution_date", target_row.get("planned_execution_date", ""))
+        )
         if not expected_date:
             expected_date = _expected_execution_from_signal(signal_date)
         observed_date = _date_string(target_row.get("observed_execution_date", ""))
         observed_open = _safe_float(target_row.get("execution_open_price", np.nan))
-        reference_close = _safe_float(target_row.get("reference_price", getattr(row, "reference_price", np.nan)))
+        reference_close = _safe_float(
+            target_row.get("reference_price", getattr(row, "reference_price", np.nan))
+        )
         approved_qty = _safe_int(getattr(row, "proposed_quantity", 0))
         entered_quantity = np.nan
         if not ledger_by_ticker.empty and "ticker" in ledger_by_ticker.columns:
             matches = ledger_by_ticker.loc[ledger_by_ticker["ticker"].astype(str).eq(ticker)]
             if not matches.empty:
-                entered_quantity = _safe_float(matches.iloc[-1].get("simulated_fill_quantity", np.nan))
-        opening_gap = observed_open / reference_close - 1.0 if observed_open > 0 and reference_close > 0 else np.nan
-        warning_flag = bool(abs(opening_gap) > float(section["gap_warning_abs_pct"])) if pd.notna(opening_gap) else False
-        severe_flag = bool(abs(opening_gap) > float(section["gap_severe_abs_pct"])) if pd.notna(opening_gap) else False
+                entered_quantity = _safe_float(
+                    matches.iloc[-1].get("simulated_fill_quantity", np.nan)
+                )
+        opening_gap = (
+            observed_open / reference_close - 1.0
+            if observed_open > 0 and reference_close > 0
+            else np.nan
+        )
+        warning_flag = (
+            bool(abs(opening_gap) > float(section["gap_warning_abs_pct"]))
+            if pd.notna(opening_gap)
+            else False
+        )
+        severe_flag = (
+            bool(abs(opening_gap) > float(section["gap_severe_abs_pct"]))
+            if pd.notna(opening_gap)
+            else False
+        )
         if warning_flag:
             incidents.append(
                 _incident(
@@ -895,21 +962,20 @@ def _build_reconciliation(
             fill_status = "execution_price_available"
         if observed_date and ticker in prices:
             price_row = prices[ticker].loc[
-                pd.to_datetime(prices[ticker]["date"], errors="coerce").eq(pd.Timestamp(observed_date))
+                pd.to_datetime(prices[ticker]["date"], errors="coerce").eq(
+                    pd.Timestamp(observed_date)
+                )
             ]
             if not price_row.empty:
                 values = price_row.iloc[0]
-                ohlc_valid = (
-                    _safe_float(values.get("high")) >= max(
-                        _safe_float(values.get("open")),
-                        _safe_float(values.get("low")),
-                        _safe_float(values.get("close")),
-                    )
-                    and _safe_float(values.get("low")) <= min(
-                        _safe_float(values.get("open")),
-                        _safe_float(values.get("high")),
-                        _safe_float(values.get("close")),
-                    )
+                ohlc_valid = _safe_float(values.get("high")) >= max(
+                    _safe_float(values.get("open")),
+                    _safe_float(values.get("low")),
+                    _safe_float(values.get("close")),
+                ) and _safe_float(values.get("low")) <= min(
+                    _safe_float(values.get("open")),
+                    _safe_float(values.get("high")),
+                    _safe_float(values.get("close")),
                 )
                 if not ohlc_valid:
                     fill_status = "blocked_invalid_ohlc"
@@ -939,9 +1005,7 @@ def _build_reconciliation(
             )
         cost_bps = float(section["simulated_cost_bps"])
         estimated_cost = (
-            abs(approved_qty) * observed_open * cost_bps / 10000.0
-            if observed_open > 0
-            else np.nan
+            abs(approved_qty) * observed_open * cost_bps / 10000.0 if observed_open > 0 else np.nan
         )
         rows.append(
             {
@@ -963,7 +1027,9 @@ def _build_reconciliation(
                 "configured_cost_bps": cost_bps,
                 "estimated_transaction_cost": estimated_cost,
                 "fill_validation_status": fill_status,
-                "reconciliation_status": "blocked" if blocking_reason else "ready_for_manual_shadow",
+                "reconciliation_status": "blocked"
+                if blocking_reason
+                else "ready_for_manual_shadow",
                 "blocking_reason": blocking_reason,
             }
         )
@@ -989,7 +1055,9 @@ def _build_maturity_and_outcomes(
             pd.DataFrame(columns=SPREAD_COLUMNS),
             incidents,
         )
-    for (session_id, signal_date), group in snapshots.groupby(["session_id", "signal_date"], dropna=False):
+    for (session_id, signal_date), group in snapshots.groupby(
+        ["session_id", "signal_date"], dropna=False
+    ):
         available = []
         missing = []
         maturity_dates = []
@@ -1006,7 +1074,10 @@ def _build_maturity_and_outcomes(
                 available.append(ticker)
                 maturity_dates.append(pd.Timestamp(maturity_date).date().isoformat())
         expected_maturity = maturity_dates[0] if maturity_dates else ""
-        matured = len(available) >= int(section["expected_universe_size"]) and len(set(maturity_dates)) == 1
+        matured = (
+            len(available) >= int(section["expected_universe_size"])
+            and len(set(maturity_dates)) == 1
+        )
         maturity_rows.append(
             {
                 "session_id": session_id,
@@ -1042,7 +1113,11 @@ def _build_maturity_and_outcomes(
             if signal_price <= 0:
                 signal_price = _price_on(frame, signal_date)
             maturity_price = _price_on(frame, expected_maturity)
-            realised = maturity_price / signal_price - 1.0 if signal_price > 0 and maturity_price > 0 else np.nan
+            realised = (
+                maturity_price / signal_price - 1.0
+                if signal_price > 0 and maturity_price > 0
+                else np.nan
+            )
             outcome_rows.append(
                 {
                     "session_id": session_id,
@@ -1089,7 +1164,9 @@ def _build_maturity_and_outcomes(
         spread_rows.append(ic_rows[-1].copy())
     return (
         pd.DataFrame(maturity_rows),
-        pd.concat(outcome_frames, ignore_index=True) if outcome_frames else pd.DataFrame(columns=OUTCOME_COLUMNS),
+        pd.concat(outcome_frames, ignore_index=True)
+        if outcome_frames
+        else pd.DataFrame(columns=OUTCOME_COLUMNS),
         pd.DataFrame(ic_rows, columns=IC_COLUMNS),
         pd.DataFrame(spread_rows, columns=SPREAD_COLUMNS),
         incidents,
@@ -1117,7 +1194,11 @@ def _build_feature_drift(
         current = pd.to_numeric(current_panel[feature], errors="coerce")
         reference_clean = reference.dropna()
         current_clean = current.dropna()
-        ref_iqr = float(reference_clean.quantile(0.75) - reference_clean.quantile(0.25)) if not reference_clean.empty else np.nan
+        ref_iqr = (
+            float(reference_clean.quantile(0.75) - reference_clean.quantile(0.25))
+            if not reference_clean.empty
+            else np.nan
+        )
         current_median = float(current_clean.median()) if not current_clean.empty else np.nan
         percentile = (
             float((reference_clean <= current_median).mean())
@@ -1145,14 +1226,24 @@ def _build_feature_drift(
                 "feature_id": feature,
                 "reference_count": int(reference_clean.count()),
                 "current_count": int(current_clean.count()),
-                "reference_mean": float(reference_clean.mean()) if not reference_clean.empty else np.nan,
+                "reference_mean": float(reference_clean.mean())
+                if not reference_clean.empty
+                else np.nan,
                 "current_mean": float(current_clean.mean()) if not current_clean.empty else np.nan,
-                "reference_median": float(reference_clean.median()) if not reference_clean.empty else np.nan,
+                "reference_median": float(reference_clean.median())
+                if not reference_clean.empty
+                else np.nan,
                 "current_median": current_median,
-                "reference_std": float(reference_clean.std(ddof=0)) if not reference_clean.empty else np.nan,
-                "current_std": float(current_clean.std(ddof=0)) if not current_clean.empty else np.nan,
+                "reference_std": float(reference_clean.std(ddof=0))
+                if not reference_clean.empty
+                else np.nan,
+                "current_std": float(current_clean.std(ddof=0))
+                if not current_clean.empty
+                else np.nan,
                 "reference_iqr": ref_iqr,
-                "current_iqr": float(current_clean.quantile(0.75) - current_clean.quantile(0.25)) if not current_clean.empty else np.nan,
+                "current_iqr": float(current_clean.quantile(0.75) - current_clean.quantile(0.25))
+                if not current_clean.empty
+                else np.nan,
                 "current_missing_rate": float(current.isna().mean()) if len(current) else np.nan,
                 "reference_percentile_of_current_median": percentile,
                 "normalised_wasserstein_distance": distance,
@@ -1162,7 +1253,9 @@ def _build_feature_drift(
     return pd.DataFrame(rows), incidents
 
 
-def _build_score_drift(snapshots: pd.DataFrame, section: dict[str, Any]) -> tuple[pd.DataFrame, list[dict[str, Any]]]:
+def _build_score_drift(
+    snapshots: pd.DataFrame, section: dict[str, Any]
+) -> tuple[pd.DataFrame, list[dict[str, Any]]]:
     rows = []
     incidents: list[dict[str, Any]] = []
     if snapshots.empty:
@@ -1175,7 +1268,9 @@ def _build_score_drift(snapshots: pd.DataFrame, section: dict[str, Any]) -> tupl
     )
     previous = pd.DataFrame()
     for session in sessions:
-        current = snapshots.loc[snapshots["session_id"].astype(str).eq(str(session["session_id"]))].copy()
+        current = snapshots.loc[
+            snapshots["session_id"].astype(str).eq(str(session["session_id"]))
+        ].copy()
         top = current.nsmallest(5, "rank") if "rank" in current.columns else pd.DataFrame()
         top_members = sorted(top["ticker"].astype(str).tolist()) if not top.empty else []
         rank_turnover = np.nan
@@ -1184,7 +1279,9 @@ def _build_score_drift(snapshots: pd.DataFrame, section: dict[str, Any]) -> tupl
         if not previous.empty:
             prior_top = set(previous.nsmallest(5, "rank")["ticker"].astype(str))
             current_top = set(top_members)
-            rank_turnover = 1.0 - len(prior_top & current_top) / max(len(prior_top | current_top), 1)
+            rank_turnover = 1.0 - len(prior_top & current_top) / max(
+                len(prior_top | current_top), 1
+            )
             jaccard = len(prior_top & current_top) / max(len(prior_top | current_top), 1)
             merged = previous[["ticker", "rank"]].merge(
                 current[["ticker", "rank"]],
@@ -1193,7 +1290,11 @@ def _build_score_drift(snapshots: pd.DataFrame, section: dict[str, Any]) -> tupl
             )
             stability, _ = _safe_spearman(merged["rank_prior"], merged["rank_current"])
         status = "descriptive_only"
-        if len(sessions) >= int(section["minimum_sessions_for_drift_warning"]) and pd.notna(rank_turnover) and rank_turnover > 0.8:
+        if (
+            len(sessions) >= int(section["minimum_sessions_for_drift_warning"])
+            and pd.notna(rank_turnover)
+            and rank_turnover > 0.8
+        ):
             status = "score_drift_warning"
             incidents.append(
                 _incident(
@@ -1215,7 +1316,9 @@ def _build_score_drift(snapshots: pd.DataFrame, section: dict[str, Any]) -> tupl
                 "score_standard_deviation": float(scores.std(ddof=0)),
                 "score_min": float(scores.min()),
                 "score_max": float(scores.max()),
-                "top_five_score_threshold": float(top["model_score"].min()) if not top.empty else np.nan,
+                "top_five_score_threshold": float(top["model_score"].min())
+                if not top.empty
+                else np.nan,
                 "top_five_membership": ";".join(top_members),
                 "rank_turnover_vs_prior_session": rank_turnover,
                 "top_five_jaccard_similarity": jaccard,
@@ -1246,12 +1349,22 @@ def _build_concentration(
                     strict=False,
                 )
             )
-    for (session_id, signal_date), group in snapshots.groupby(["session_id", "signal_date"], dropna=False):
-        sector_by_ticker = dict(zip(group["ticker"].astype(str), group.get("sector", pd.Series("", index=group.index)).astype(str), strict=False))
+    for (session_id, signal_date), group in snapshots.groupby(
+        ["session_id", "signal_date"], dropna=False
+    ):
+        sector_by_ticker = dict(
+            zip(
+                group["ticker"].astype(str),
+                group.get("sector", pd.Series("", index=group.index)).astype(str),
+                strict=False,
+            )
+        )
         if "sector" not in group.columns:
             sector_by_ticker = {}
         selected = group.loc[group["selected_flag"].map(_bool_value)].copy()
-        sector_target = selected.groupby(selected["ticker"].map(lambda ticker: sector_by_ticker.get(str(ticker), "Unknown")))["target_weight"].sum()
+        sector_target = selected.groupby(
+            selected["ticker"].map(lambda ticker: sector_by_ticker.get(str(ticker), "Unknown"))
+        )["target_weight"].sum()
         largest_security = float(selected["target_weight"].max()) if not selected.empty else 0.0
         largest_sector = float(sector_target.max()) if not sector_target.empty else 0.0
         warning = largest_sector > 0.60 or largest_security > 0.25
@@ -1351,7 +1464,9 @@ def save_phase23k_prospective_shadow_monitoring(
     existing_incidents = _read_csv(output_dir / "phase23k_incident_log.csv")
     incidents: list[dict[str, Any]] = []
 
-    summary_row = phase23j_summary.iloc[0] if not phase23j_summary.empty else pd.Series(dtype=object)
+    summary_row = (
+        phase23j_summary.iloc[0] if not phase23j_summary.empty else pd.Series(dtype=object)
+    )
     model_hash = str(summary_row.get("phase23i_freeze_hash", section["required_model_hash"]))
     model_id = str(summary_row.get("model_version", section["required_model_id"]))
     signal_date = _date_string(
@@ -1477,8 +1592,10 @@ def save_phase23k_prospective_shadow_monitoring(
     incidents.extend(maturity_incidents)
     if not maturity.empty and not session_registry.empty:
         maturity_map = dict(zip(maturity["session_id"], maturity["maturity_status"], strict=False))
-        session_registry["prediction_maturity_status"] = session_registry["session_id"].map(maturity_map).fillna(
-            session_registry["prediction_maturity_status"]
+        session_registry["prediction_maturity_status"] = (
+            session_registry["session_id"]
+            .map(maturity_map)
+            .fillna(session_registry["prediction_maturity_status"])
         )
 
     session_count = int(snapshots["session_id"].nunique()) if not snapshots.empty else 0
@@ -1536,8 +1653,12 @@ def save_phase23k_prospective_shadow_monitoring(
             snapshot_history.loc[
                 snapshot_history["snapshot_id"].astype(str).eq(latest_snapshot_id),
                 "supersedes_snapshot_id",
-            ].astype(str).iloc[0]
-            if latest_snapshot_id and not snapshot_history.empty and "snapshot_id" in snapshot_history.columns
+            ]
+            .astype(str)
+            .iloc[0]
+            if latest_snapshot_id
+            and not snapshot_history.empty
+            and "snapshot_id" in snapshot_history.columns
             and snapshot_history["snapshot_id"].astype(str).eq(latest_snapshot_id).any()
             else ""
         )
@@ -1546,15 +1667,22 @@ def save_phase23k_prospective_shadow_monitoring(
             snapshot_history.loc[
                 snapshot_history["snapshot_id"].astype(str).eq(latest_snapshot_id),
                 "created_at_utc",
-            ].astype(str).iloc[0]
-            if latest_snapshot_id and not snapshot_history.empty and "snapshot_id" in snapshot_history.columns
+            ]
+            .astype(str)
+            .iloc[0]
+            if latest_snapshot_id
+            and not snapshot_history.empty
+            and "snapshot_id" in snapshot_history.columns
             and snapshot_history["snapshot_id"].astype(str).eq(latest_snapshot_id).any()
             else ""
         )
         if (
             int(blocking_incidents) == 0
             and not reconciliation.empty
-            and reconciliation["fill_validation_status"].astype(str).eq("execution_price_available").all()
+            and reconciliation["fill_validation_status"]
+            .astype(str)
+            .eq("execution_price_available")
+            .all()
             and not fill_exists
         ):
             session_registry["proposal_status"] = "proposal_ready"
@@ -1575,7 +1703,10 @@ def save_phase23k_prospective_shadow_monitoring(
     ready_manual_fill = bool(
         int(blocking_incidents) == 0
         and not reconciliation.empty
-        and reconciliation["fill_validation_status"].astype(str).eq("execution_price_available").all()
+        and reconciliation["fill_validation_status"]
+        .astype(str)
+        .eq("execution_price_available")
+        .all()
         and not fill_exists
     )
     if phase23j_ranking.empty:
@@ -1586,7 +1717,13 @@ def save_phase23k_prospective_shadow_monitoring(
         .isin(["model_hash_mismatch", "changed_universe", "immutable_session_content_changed"])
     ):
         decision = "phase23k_monitoring_blocked_integrity_failure"
-    elif not reconciliation.empty and reconciliation["fill_validation_status"].astype(str).str.contains("missing_execution_price|pending").any():
+    elif (
+        not reconciliation.empty
+        and reconciliation["fill_validation_status"]
+        .astype(str)
+        .str.contains("missing_execution_price|pending")
+        .any()
+    ):
         decision = "phase23k_monitoring_active_current_session_execution_pending"
     elif blocking_incidents:
         decision = "phase23k_monitoring_written_with_session_blocks"
@@ -1630,9 +1767,18 @@ def save_phase23k_prospective_shadow_monitoring(
     )
     gates = pd.DataFrame(
         [
-            _gate("phase23j_sources_read", not phase23j_summary.empty or not phase23j_ranking.empty, str(phase23j_dir)),
+            _gate(
+                "phase23j_sources_read",
+                not phase23j_summary.empty or not phase23j_ranking.empty,
+                str(phase23j_dir),
+            ),
             _gate("model_hash_verified", model_hash_matches, model_hash),
-            _gate("expected_universe_size", phase23j_ranking.empty or len(phase23j_ranking) == int(section["expected_universe_size"]), f"rows={len(phase23j_ranking)}"),
+            _gate(
+                "expected_universe_size",
+                phase23j_ranking.empty
+                or len(phase23j_ranking) == int(section["expected_universe_size"]),
+                f"rows={len(phase23j_ranking)}",
+            ),
             _gate("ranking_snapshot_written", True, "all available ranking rows preserved"),
             _gate("safety_flags_false", safety_flags_false, "no live/real/broker/promotion"),
             _gate("phase23k_reports_written", True, str(output_dir)),
@@ -1649,9 +1795,13 @@ def save_phase23k_prospective_shadow_monitoring(
                 "remaining_blockers": ";".join(
                     sorted(
                         incident_log.loc[
-                            incident_log.get("blocking_flag", pd.Series(dtype=bool)).map(_bool_value),
+                            incident_log.get("blocking_flag", pd.Series(dtype=bool)).map(
+                                _bool_value
+                            ),
                             "category",
-                        ].astype(str).unique()
+                        ]
+                        .astype(str)
+                        .unique()
                     )
                 )
                 if not incident_log.empty
@@ -1700,19 +1850,31 @@ def save_phase23k_prospective_shadow_monitoring(
         "conclusion": ("phase23k_conclusion.csv", None),
         "session_registry": ("phase23k_session_registry.csv", SESSION_REGISTRY_COLUMNS),
         "full_ranking_snapshots": ("phase23k_full_ranking_snapshots.csv", FULL_RANKING_COLUMNS),
-        "order_execution_reconciliation": ("phase23k_order_execution_reconciliation.csv", RECONCILIATION_COLUMNS),
+        "order_execution_reconciliation": (
+            "phase23k_order_execution_reconciliation.csv",
+            RECONCILIATION_COLUMNS,
+        ),
         "position_history": ("phase23k_position_history.csv", None),
         "cash_history": ("phase23k_cash_history.csv", None),
         "daily_valuation": ("phase23k_daily_valuation.csv", None),
-        "prediction_maturity_registry": ("phase23k_prediction_maturity_registry.csv", MATURITY_COLUMNS),
-        "matured_cross_sectional_outcomes": ("phase23k_matured_cross_sectional_outcomes.csv", OUTCOME_COLUMNS),
+        "prediction_maturity_registry": (
+            "phase23k_prediction_maturity_registry.csv",
+            MATURITY_COLUMNS,
+        ),
+        "matured_cross_sectional_outcomes": (
+            "phase23k_matured_cross_sectional_outcomes.csv",
+            OUTCOME_COLUMNS,
+        ),
         "prospective_ic_history": ("phase23k_prospective_ic_history.csv", IC_COLUMNS),
         "prospective_spread_history": ("phase23k_prospective_spread_history.csv", SPREAD_COLUMNS),
         "feature_drift_report": ("phase23k_feature_drift_report.csv", FEATURE_DRIFT_COLUMNS),
         "score_drift_report": ("phase23k_score_drift_report.csv", SCORE_DRIFT_COLUMNS),
         "concentration_report": ("phase23k_concentration_report.csv", CONCENTRATION_COLUMNS),
         "incident_log": ("phase23k_incident_log.csv", INCIDENT_COLUMNS),
-        "session_snapshot_history": ("phase23k_session_snapshot_history.csv", SNAPSHOT_HISTORY_COLUMNS),
+        "session_snapshot_history": (
+            "phase23k_session_snapshot_history.csv",
+            SNAPSHOT_HISTORY_COLUMNS,
+        ),
     }
     for key, (filename, columns) in file_map.items():
         _write_csv(outputs[key], output_dir / filename, columns)

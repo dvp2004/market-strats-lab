@@ -33,8 +33,7 @@ def _get_spy_strategy_result(
 
     if strategy_name not in strategy_results:
         raise ValueError(
-            f"SPY strategy result missing: {strategy_name}. "
-            f"Available: {sorted(strategy_results)}"
+            f"SPY strategy result missing: {strategy_name}. Available: {sorted(strategy_results)}"
         )
 
     result = strategy_results[strategy_name].copy()
@@ -60,8 +59,7 @@ def _normalise_return_series(
     output = result[["date", "strategy_return"]].copy()
     output["date"] = pd.to_datetime(output["date"])
     output = output[
-        (output["date"] >= pd.Timestamp(start_date))
-        & (output["date"] <= pd.Timestamp(end_date))
+        (output["date"] >= pd.Timestamp(start_date)) & (output["date"] <= pd.Timestamp(end_date))
     ].copy()
 
     output = output.rename(columns={"strategy_return": return_column_name})
@@ -308,17 +306,12 @@ def _create_bootstrap_probability_report(samples: pd.DataFrame) -> pd.DataFrame:
         },
         {
             "claim": "Candidate beats SPY 12M on Calmar",
-            "probability": float(
-                (samples["candidate_calmar"] > samples["spy_12m_calmar"]).mean()
-            ),
+            "probability": float((samples["candidate_calmar"] > samples["spy_12m_calmar"]).mean()),
         },
         {
             "claim": "Candidate has better max drawdown than SPY 12M",
             "probability": float(
-                (
-                    samples["candidate_max_drawdown_pct"]
-                    > samples["spy_12m_max_drawdown_pct"]
-                ).mean()
+                (samples["candidate_max_drawdown_pct"] > samples["spy_12m_max_drawdown_pct"]).mean()
             ),
         },
         {
@@ -329,16 +322,13 @@ def _create_bootstrap_probability_report(samples: pd.DataFrame) -> pd.DataFrame:
         },
         {
             "claim": "Candidate beats SPY Buy & Hold on Calmar",
-            "probability": float(
-                (samples["candidate_calmar"] > samples["buy_hold_calmar"]).mean()
-            ),
+            "probability": float((samples["candidate_calmar"] > samples["buy_hold_calmar"]).mean()),
         },
         {
             "claim": "Candidate has better max drawdown than SPY Buy & Hold",
             "probability": float(
                 (
-                    samples["candidate_max_drawdown_pct"]
-                    > samples["buy_hold_max_drawdown_pct"]
+                    samples["candidate_max_drawdown_pct"] > samples["buy_hold_max_drawdown_pct"]
                 ).mean()
             ),
         },
@@ -427,9 +417,7 @@ def _create_bootstrap_conclusion(
 ) -> pd.DataFrame:
     failed_gates = gate_report[gate_report["status"] == "Failed"]
 
-    spy_12m_gates = gate_report[
-        gate_report["claim"].str.contains("SPY 12M", case=False, na=False)
-    ]
+    spy_12m_gates = gate_report[gate_report["claim"].str.contains("SPY 12M", case=False, na=False)]
     buy_hold_risk_gates = gate_report[
         gate_report["claim"].isin(
             [
@@ -445,8 +433,7 @@ def _create_bootstrap_conclusion(
     spy_12m_passed = (spy_12m_gates["status"] == "Passed").all()
     buy_hold_risk_passed = (buy_hold_risk_gates["status"] == "Passed").all()
     buy_hold_cagr_hierarchy_ok = (
-        not buy_hold_cagr_gate.empty
-        and buy_hold_cagr_gate.iloc[0]["status"] == "Passed"
+        not buy_hold_cagr_gate.empty and buy_hold_cagr_gate.iloc[0]["status"] == "Passed"
     )
 
     return pd.DataFrame(

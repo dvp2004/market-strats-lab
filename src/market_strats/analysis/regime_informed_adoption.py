@@ -123,9 +123,7 @@ def _source_paths(section: dict[str, Any], reports_dir: Path) -> dict[str, Path]
             reports_dir / "paper_trading" / "regime_informed_tracking",
         )
     )
-    dashboard_dir = Path(
-        section.get("dashboard_dir", reports_dir / "paper_trading" / "dashboard")
-    )
+    dashboard_dir = Path(section.get("dashboard_dir", reports_dir / "paper_trading" / "dashboard"))
     return {
         "targets": tracking_dir / "regime_informed_paper_targets.csv",
         "orders": tracking_dir / "regime_informed_paper_orders_preview.csv",
@@ -385,7 +383,9 @@ def _phase_decision(validation: pd.DataFrame, missing_sources: bool = False) -> 
     return "regime_informed_adoption_pending_manual_review"
 
 
-def _empty_outputs(output_dir: Path, dashboard_dir: Path, decision: str, missing: list[str]) -> dict[str, Path]:
+def _empty_outputs(
+    output_dir: Path, dashboard_dir: Path, decision: str, missing: list[str]
+) -> dict[str, Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
     dashboard_dir.mkdir(parents=True, exist_ok=True)
     validation = pd.DataFrame(

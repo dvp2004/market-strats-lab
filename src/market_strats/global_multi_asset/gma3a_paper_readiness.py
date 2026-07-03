@@ -1,4 +1,5 @@
 """GMA paper-readiness reporting for manual TradingView packets."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -49,7 +50,9 @@ def _latest_post_endpoint_dates(data_root: Path) -> dict[str, str]:
     for symbol in TARGET_ASSETS:
         path = root / f"{symbol}_post_endpoint.csv"
         frame = _read_csv(path)
-        latest[symbol] = "" if frame.empty or "date" not in frame.columns else str(frame["date"].iloc[-1])
+        latest[symbol] = (
+            "" if frame.empty or "date" not in frame.columns else str(frame["date"].iloc[-1])
+        )
     return latest
 
 
@@ -59,7 +62,9 @@ def _packet_row_count(packet: pd.DataFrame) -> int:
     return int(len(packet))
 
 
-def _execution_status(blocking_reason: str, expected_execution_date: str, order_packet_rows: int) -> str:
+def _execution_status(
+    blocking_reason: str, expected_execution_date: str, order_packet_rows: int
+) -> str:
     if blocking_reason.startswith("non_retroactive_execution_block"):
         return "retroactive_blocked"
     if "next_execution_unavailable" in blocking_reason:
@@ -161,7 +166,9 @@ def run_gma3a_paper_readiness(config: GMA3AConfig) -> GMA3APaperReadinessResult:
         and not broker_api_allowed
         and ml_influence == 0
     )
-    manual_active = bool(readiness_status == "valid" and order_packet_rows > 0 and safety_flags_valid)
+    manual_active = bool(
+        readiness_status == "valid" and order_packet_rows > 0 and safety_flags_valid
+    )
 
     row: dict[str, Any] = {
         "readiness_status": readiness_status,

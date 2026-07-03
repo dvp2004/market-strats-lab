@@ -72,9 +72,7 @@ def _phase_result_check(conclusion_path: str, gate_path: str, phase_name: str) -
         and "passed" in str(conclusion.iloc[0].get("verdict", "")).lower()
     )
     gate_passed = (
-        not gate.empty
-        and "passed" in gate.columns
-        and bool(gate["passed"].map(_bool_value).all())
+        not gate.empty and "passed" in gate.columns and bool(gate["passed"].map(_bool_value).all())
     )
 
     out = pd.DataFrame(
@@ -125,7 +123,9 @@ def _boundary_check(section: dict[str, Any], key: str) -> pd.DataFrame:
     rows = [
         {
             "check": f"{key}_failed_path_is_correction_only",
-            "passed": "correction" in allowed_failed or "re-run" in allowed_failed or "rerun" in allowed_failed,
+            "passed": "correction" in allowed_failed
+            or "re-run" in allowed_failed
+            or "rerun" in allowed_failed,
             "detail": boundary.get("allowed_next_step_if_failed", ""),
         },
         {
@@ -287,7 +287,9 @@ def _metric_reconciliation_report(
             {
                 "system_id": system_id,
                 "label": system.get("label", ""),
-                "required_in_side_by_side": _bool_value(system.get("required_in_side_by_side", False)),
+                "required_in_side_by_side": _bool_value(
+                    system.get("required_in_side_by_side", False)
+                ),
                 "compare_to_phase14c_candidate": compare_to_candidate,
                 "expected_cagr": expected_cagr,
                 "observed_cagr": observed_cagr,
@@ -415,7 +417,9 @@ def _interpretation_decision_report(
     elif metric_failed:
         decision = "metric_reconciliation_failed_block_paper_workflow"
         next_action = "candidate_source_correction_and_visual_rerun_required"
-        reason = "Phase 14C metrics do not reconcile with canonical candidate metrics within tolerance."
+        reason = (
+            "Phase 14C metrics do not reconcile with canonical candidate metrics within tolerance."
+        )
     elif not signal_determined:
         decision = "signal_state_unclear_block_paper_workflow"
         next_action = "signal_template_correction_required"
@@ -499,11 +503,21 @@ def save_phase14e_visual_backtest_interpretation_source_identity_audit(
                 "audit_role": section.get("audit_role", ""),
                 "implementation_classification": section.get("implementation_classification", ""),
                 "phase14d_passed": bool(phase14d_check["passed"].all()),
-                "source_reports_present": bool(source_check["present"].all()) if not source_check.empty else False,
-                "source_identity_passed": _bool_value(source_identity.iloc[0]["source_identity_passed"]),
-                "source_identity_failed": _bool_value(source_identity.iloc[0]["source_identity_failed"]),
-                "metric_reconciliation_passed": bool(metric_reconciliation["metric_reconciliation_passed"].all()),
-                "current_signal_determined": _bool_value(current_signal.iloc[0].get("signal_determined", False)),
+                "source_reports_present": bool(source_check["present"].all())
+                if not source_check.empty
+                else False,
+                "source_identity_passed": _bool_value(
+                    source_identity.iloc[0]["source_identity_passed"]
+                ),
+                "source_identity_failed": _bool_value(
+                    source_identity.iloc[0]["source_identity_failed"]
+                ),
+                "metric_reconciliation_passed": bool(
+                    metric_reconciliation["metric_reconciliation_passed"].all()
+                ),
+                "current_signal_determined": _bool_value(
+                    current_signal.iloc[0].get("signal_determined", False)
+                ),
                 "interpretation_decision": interpretation.iloc[0]["decision"],
                 "paper_workflow_allowed": _bool_value(
                     interpretation.iloc[0]["paper_trading_workflow_preregistration_allowed"]
@@ -522,16 +536,33 @@ def save_phase14e_visual_backtest_interpretation_source_identity_audit(
     gate_report = pd.DataFrame(
         [
             _gate_row("Phase 14D passed", bool(summary.iloc[0]["phase14d_passed"]), "phase14d"),
-            _gate_row("Source identity report exists", len(source_identity) == 1, "source identity"),
-            _gate_row("Metric reconciliation report exists", len(metric_reconciliation) > 0, "metrics"),
-            _gate_row("Side-by-side comparison report exists", len(side_by_side) >= 5, f"rows={len(side_by_side)}"),
-            _gate_row("Current signal state report exists", len(current_signal) == 1, "signal state"),
-            _gate_row("Interpretation decision report exists", len(interpretation) == 1, str(interpretation.iloc[0]["decision"])),
-            _gate_row("Phase 14F boundary is conditional-only", bool(boundary["passed"].all()), "phase14f"),
+            _gate_row(
+                "Source identity report exists", len(source_identity) == 1, "source identity"
+            ),
+            _gate_row(
+                "Metric reconciliation report exists", len(metric_reconciliation) > 0, "metrics"
+            ),
+            _gate_row(
+                "Side-by-side comparison report exists",
+                len(side_by_side) >= 5,
+                f"rows={len(side_by_side)}",
+            ),
+            _gate_row(
+                "Current signal state report exists", len(current_signal) == 1, "signal state"
+            ),
+            _gate_row(
+                "Interpretation decision report exists",
+                len(interpretation) == 1,
+                str(interpretation.iloc[0]["decision"]),
+            ),
+            _gate_row(
+                "Phase 14F boundary is conditional-only", bool(boundary["passed"].all()), "phase14f"
+            ),
             _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()), "scope"),
             _gate_row(
                 "Audit role is correct",
-                section.get("audit_role") == "Visual backtest interpretation and candidate source identity audit only",
+                section.get("audit_role")
+                == "Visual backtest interpretation and candidate source identity audit only",
                 section.get("audit_role", ""),
             ),
         ]
@@ -549,7 +580,9 @@ def save_phase14e_visual_backtest_interpretation_source_identity_audit(
                     else "Failed visual source identity audit"
                 ),
                 "all_gates_passed": bool(gate_report["passed"].all()),
-                "source_identity_failed": _bool_value(source_identity.iloc[0]["source_identity_failed"]),
+                "source_identity_failed": _bool_value(
+                    source_identity.iloc[0]["source_identity_failed"]
+                ),
                 "paper_trading_workflow_preregistration_allowed": _bool_value(
                     interpretation.iloc[0]["paper_trading_workflow_preregistration_allowed"]
                 ),
@@ -609,7 +642,9 @@ def _correction_spec_report(section: dict[str, Any], interpretation: pd.DataFram
     )
 
 
-def _workflow_prereg_requirement_report(section: dict[str, Any], interpretation: pd.DataFrame) -> pd.DataFrame:
+def _workflow_prereg_requirement_report(
+    section: dict[str, Any], interpretation: pd.DataFrame
+) -> pd.DataFrame:
     allowed = _bool_value(
         interpretation.iloc[0].get("paper_trading_workflow_preregistration_allowed", False)
     )
@@ -688,7 +723,9 @@ def save_phase14f_candidate_source_correction_or_workflow_prereg_decision(
             "decision_if_source_identity_failed",
             "pre_register_candidate_source_correction_and_visual_rerun",
         )
-        next_phase = "Phase 14G - Candidate source correction implementation and visual backtest re-run"
+        next_phase = (
+            "Phase 14G - Candidate source correction implementation and visual backtest re-run"
+        )
     else:
         decision = section.get("correction_policy", {}).get(
             "decision_if_all_identity_checks_pass",
@@ -703,7 +740,9 @@ def save_phase14f_candidate_source_correction_or_workflow_prereg_decision(
                 "next_phase": next_phase,
                 "source_identity_failed": source_failed,
                 "metric_reconciliation_failed": metric_failed,
-                "paper_trading_workflow_preregistration_allowed": workflow_allowed and not source_failed and not metric_failed,
+                "paper_trading_workflow_preregistration_allowed": workflow_allowed
+                and not source_failed
+                and not metric_failed,
                 "correction_required": source_failed or metric_failed,
                 "visual_rerun_required": source_failed or metric_failed,
                 "paper_trading_deployment_allowed": False,
@@ -723,7 +762,9 @@ def save_phase14f_candidate_source_correction_or_workflow_prereg_decision(
                 "implementation_classification": section.get("implementation_classification", ""),
                 "phase14e_passed": bool(phase14e_check["passed"].all()),
                 "config_flags_clean": bool(flags["passed"].all()),
-                "source_reports_present": bool(source_check["present"].all()) if not source_check.empty else False,
+                "source_reports_present": bool(source_check["present"].all())
+                if not source_check.empty
+                else False,
                 "source_identity_failed": source_failed,
                 "metric_reconciliation_failed": metric_failed,
                 "decision": decision,
@@ -742,10 +783,9 @@ def save_phase14f_candidate_source_correction_or_workflow_prereg_decision(
         ]
     )
 
-    correction_spec_exists_if_needed = (
-        len(correction_spec) == 1
-        and _bool_value(correction_spec.iloc[0]["correction_required"]) == (source_failed or metric_failed)
-    )
+    correction_spec_exists_if_needed = len(correction_spec) == 1 and _bool_value(
+        correction_spec.iloc[0]["correction_required"]
+    ) == (source_failed or metric_failed)
     no_workflow_if_failed = not (
         (source_failed or metric_failed)
         and _bool_value(decision_report.iloc[0]["paper_trading_workflow_preregistration_allowed"])
@@ -754,15 +794,28 @@ def save_phase14f_candidate_source_correction_or_workflow_prereg_decision(
     gate_report = pd.DataFrame(
         [
             _gate_row("Phase 14E passed", bool(summary.iloc[0]["phase14e_passed"]), "phase14e"),
-            _gate_row("Config flags clean", bool(summary.iloc[0]["config_flags_clean"]), "runtime flags"),
+            _gate_row(
+                "Config flags clean", bool(summary.iloc[0]["config_flags_clean"]), "runtime flags"
+            ),
             _gate_row("Decision report exists", len(decision_report) == 1, decision),
-            _gate_row("Correction spec exists if source failed", correction_spec_exists_if_needed, "correction spec"),
-            _gate_row("No paper workflow if source failed", no_workflow_if_failed, "workflow blocked if failed"),
-            _gate_row("Phase 14G boundary is conditional-only", bool(boundary["passed"].all()), "phase14g"),
+            _gate_row(
+                "Correction spec exists if source failed",
+                correction_spec_exists_if_needed,
+                "correction spec",
+            ),
+            _gate_row(
+                "No paper workflow if source failed",
+                no_workflow_if_failed,
+                "workflow blocked if failed",
+            ),
+            _gate_row(
+                "Phase 14G boundary is conditional-only", bool(boundary["passed"].all()), "phase14g"
+            ),
             _gate_row("Scope blocks forbidden actions", bool(scope["passed"].all()), "scope"),
             _gate_row(
                 "Decision role is correct",
-                section.get("decision_role") == "Candidate source correction or paper-trading workflow pre-registration decision only",
+                section.get("decision_role")
+                == "Candidate source correction or paper-trading workflow pre-registration decision only",
                 section.get("decision_role", ""),
             ),
         ]

@@ -72,15 +72,11 @@ def create_phase3a_robustness_conclusion(
 ) -> pd.DataFrame:
     reports_dir = Path(reports_dir)
 
-    slippage = _load_report(
-        reports_dir / "regime_switch_overlay_slippage_sensitivity.csv"
-    )
+    slippage = _load_report(reports_dir / "regime_switch_overlay_slippage_sensitivity.csv")
     slippage_summary = _load_report(
         reports_dir / "regime_switch_overlay_slippage_sensitivity_summary.csv"
     )
-    cash_summary = _load_report(
-        reports_dir / "regime_switch_overlay_cash_sensitivity_summary.csv"
-    )
+    cash_summary = _load_report(reports_dir / "regime_switch_overlay_cash_sensitivity_summary.csv")
     raw_close_summary = _load_report(
         reports_dir / "regime_switch_overlay_raw_close_signal_sensitivity_summary.csv"
     )
@@ -282,12 +278,8 @@ def create_phase3a_robustness_current_status(
 ) -> pd.DataFrame:
     reports_dir = Path(reports_dir)
 
-    slippage = _load_report(
-        reports_dir / "regime_switch_overlay_slippage_sensitivity.csv"
-    )
-    cash_summary = _load_report(
-        reports_dir / "regime_switch_overlay_cash_sensitivity_summary.csv"
-    )
+    slippage = _load_report(reports_dir / "regime_switch_overlay_slippage_sensitivity.csv")
+    cash_summary = _load_report(reports_dir / "regime_switch_overlay_cash_sensitivity_summary.csv")
     raw_close_sensitivity = _load_report(
         reports_dir / "regime_switch_overlay_raw_close_signal_sensitivity.csv"
     )

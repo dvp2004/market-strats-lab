@@ -111,9 +111,7 @@ def _load_strategy_row(
 
     if row.empty:
         available = sorted(df["strategy"].dropna().unique())
-        raise ValueError(
-            f"Strategy '{strategy}' not found in {path}. Available: {available}"
-        )
+        raise ValueError(f"Strategy '{strategy}' not found in {path}. Available: {available}")
 
     return row.iloc[0]
 

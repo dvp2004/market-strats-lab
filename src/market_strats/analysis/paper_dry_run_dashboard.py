@@ -16,9 +16,7 @@ VISUAL_ARTIFACTS = {
     "equity_curve": "phase14g_corrected_visual_equity_curve.csv",
     "drawdown_curve": "phase14g_corrected_visual_drawdown_curve.csv",
     "exposure_timeline": "phase14g_corrected_visual_exposure_timeline.csv",
-    "rolling_relative_performance": (
-        "phase14g_corrected_visual_rolling_relative_performance.csv"
-    ),
+    "rolling_relative_performance": ("phase14g_corrected_visual_rolling_relative_performance.csv"),
 }
 
 CHART_OUTPUTS = {
@@ -227,7 +225,9 @@ def _signal_history(existing: pd.DataFrame, latest_signal: pd.DataFrame) -> pd.D
         keep="last",
     )
     base["_phase16b_sort_date"] = pd.to_datetime(
-        base["signal_date"].where(base["signal_date"].astype(str).str.len() > 0, base["data_as_of_date"]),
+        base["signal_date"].where(
+            base["signal_date"].astype(str).str.len() > 0, base["data_as_of_date"]
+        ),
         errors="coerce",
     )
     base = base.sort_values("_phase16b_sort_date", na_position="first").drop(
@@ -236,7 +236,9 @@ def _signal_history(existing: pd.DataFrame, latest_signal: pd.DataFrame) -> pd.D
     return base.reset_index(drop=True)
 
 
-def _paper_journal(existing: pd.DataFrame, latest_signal: pd.DataFrame, order: pd.DataFrame) -> pd.DataFrame:
+def _paper_journal(
+    existing: pd.DataFrame, latest_signal: pd.DataFrame, order: pd.DataFrame
+) -> pd.DataFrame:
     if latest_signal.empty:
         new_row = pd.DataFrame()
     else:
@@ -361,7 +363,9 @@ def _data_freshness(
                 "data_as_of_date": data_as_of.strftime("%Y-%m-%d") if pd.notna(data_as_of) else "",
                 "configured_audit_date": configured_audit_date,
                 "fresh_stream_rows": fresh_rows,
-                "fresh_stream_max_date": fresh_max.strftime("%Y-%m-%d") if pd.notna(fresh_max) else "",
+                "fresh_stream_max_date": fresh_max.strftime("%Y-%m-%d")
+                if pd.notna(fresh_max)
+                else "",
                 "fresh_rows_beyond_signal_date": rows_after_signal,
                 "date_selection_policy": policy,
                 "blocking_warnings": warning,

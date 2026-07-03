@@ -58,9 +58,7 @@ def create_candidate_portfolio_sleeve_attribution(
         final_weight = ending_sleeve_value / portfolio_end_value
 
         sleeve_profit = ending_sleeve_value - starting_sleeve_value
-        contribution_to_portfolio_return_pct_points = (
-            sleeve_profit / initial_capital
-        ) * 100.0
+        contribution_to_portfolio_return_pct_points = (sleeve_profit / initial_capital) * 100.0
 
         rows.append(
             {
@@ -187,14 +185,10 @@ def write_candidate_portfolio_attribution_markdown(
         "component_trade_count",
     ]
 
-    available_columns = [
-        column for column in display_columns if column in attribution.columns
-    ]
+    available_columns = [column for column in display_columns if column in attribution.columns]
 
     attribution_table = attribution[available_columns].to_markdown(index=False)
-    summary_table = (
-        summary.to_markdown(index=False) if not summary.empty else "No summary data."
-    )
+    summary_table = summary.to_markdown(index=False) if not summary.empty else "No summary data."
 
     content = f"""# Candidate Portfolio Sleeve Attribution
 
