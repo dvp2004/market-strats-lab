@@ -63,8 +63,7 @@ def test_create_guard_promotion_gate_report_passes_when_all_gates_pass():
     )
 
     final_gate = gate_report[
-        gate_report["gate"]
-        == "Candidate can be promoted to execution-realistic overlay candidate."
+        gate_report["gate"] == "Candidate can be promoted to execution-realistic overlay candidate."
     ].iloc[0]
 
     assert final_gate["status"] == "Passed"

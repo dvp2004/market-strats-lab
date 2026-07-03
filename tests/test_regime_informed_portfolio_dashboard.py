@@ -11,7 +11,9 @@ from market_strats.analysis.regime_informed_portfolio_dashboard import (
 )
 
 
-def _write_price(root: Path, symbol: str, dates: pd.DatetimeIndex, start: float, drift: float) -> None:
+def _write_price(
+    root: Path, symbol: str, dates: pd.DatetimeIndex, start: float, drift: float
+) -> None:
     price = start * (1.0 + drift + np.sin(np.arange(len(dates)) / 15) * 0.002).cumprod()
     frame = pd.DataFrame(
         {

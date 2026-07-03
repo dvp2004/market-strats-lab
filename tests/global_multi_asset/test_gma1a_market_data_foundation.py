@@ -1,4 +1,5 @@
 """GMA-1A market-data-foundation tests — 40 focused test cases."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -103,9 +104,7 @@ def _base_config() -> dict:
 def _write_config(tmp_path: Path, config: dict | None = None) -> Path:
     path = tmp_path / "configs" / "gma1a.yaml"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        yaml.safe_dump(config or _base_config(), sort_keys=False), encoding="utf-8"
-    )
+    path.write_text(yaml.safe_dump(config or _base_config(), sort_keys=False), encoding="utf-8")
     return path
 
 
@@ -130,17 +129,19 @@ def _price_frame(
             adj_factor = (close_start + dividend_idx * 0.1 - dividend_amount) / (
                 close_start + dividend_idx * 0.1
             )
-        rows.append({
-            "Date": date.date().isoformat(),
-            "Open": close - 0.05,
-            "High": close + 0.2,
-            "Low": close - 0.2,
-            "Close": close,
-            "Adj Close": close * adj_factor,
-            "Volume": 1000000 + i,
-            "Dividends": dividend_amount if i == dividend_idx else 0.0,
-            "Stock Splits": split_ratio if (split_idx is not None and i == split_idx) else 0.0,
-        })
+        rows.append(
+            {
+                "Date": date.date().isoformat(),
+                "Open": close - 0.05,
+                "High": close + 0.2,
+                "Low": close - 0.2,
+                "Close": close,
+                "Adj Close": close * adj_factor,
+                "Volume": 1000000 + i,
+                "Dividends": dividend_amount if i == dividend_idx else 0.0,
+                "Stock Splits": split_ratio if (split_idx is not None and i == split_idx) else 0.0,
+            }
+        )
     return pd.DataFrame(rows)
 
 
@@ -188,12 +189,8 @@ def _write_yahoo_fixture(
         "normalised_file_path": str(norm_path),
         "normalised_file_sha256": sha256_file(norm_path),
         "row_count": len(normalised),
-        "first_observation_date": (
-            first_obs.date().isoformat() if pd.notna(first_obs) else ""
-        ),
-        "last_observation_date": (
-            last_obs.date().isoformat() if pd.notna(last_obs) else ""
-        ),
+        "first_observation_date": (first_obs.date().isoformat() if pd.notna(first_obs) else ""),
+        "last_observation_date": (last_obs.date().isoformat() if pd.notna(last_obs) else ""),
         "columns": list(normalised.columns),
         "warnings": [],
     }
@@ -205,12 +202,8 @@ def _write_yahoo_fixture(
 
 def _fixture_config(tmp_path: Path) -> dict:
     cfg = _base_config()
-    cfg["source_selection"]["gma0_manifest_root"] = str(
-        tmp_path / "manifests"
-    )
-    cfg["paths"]["canonical_bundle_root"] = str(
-        tmp_path / "canonical_market"
-    )
+    cfg["source_selection"]["gma0_manifest_root"] = str(tmp_path / "manifests")
+    cfg["paths"]["canonical_bundle_root"] = str(tmp_path / "canonical_market")
     cfg["paths"]["report_root"] = str(tmp_path / "reports")
     cfg["paths"]["state_root"] = str(tmp_path / "state")
     return cfg
@@ -254,13 +247,19 @@ class TestConfigSafety:
 
 class TestSnapshotSelection:
     def test_05_rejects_missing_manifest(self, tmp_path: Path) -> None:
-        manifest = {"track_id": "gma_alpha", "provider": "yahoo_yfinance",
-                     "library_name": "yfinance", "provider_symbol": "SPY",
-                     "raw_file_path": str(tmp_path / "nonexistent.csv"),
-                     "normalised_file_path": str(tmp_path / "nonexistent_n.csv"),
-                     "raw_file_sha256": "abc", "normalised_file_sha256": "def",
-                     "columns": ["date", "open", "high", "low", "close", "adj_close", "volume"],
-                     "row_count": 100, "_manifest_path": str(tmp_path / "m.json")}
+        manifest = {
+            "track_id": "gma_alpha",
+            "provider": "yahoo_yfinance",
+            "library_name": "yfinance",
+            "provider_symbol": "SPY",
+            "raw_file_path": str(tmp_path / "nonexistent.csv"),
+            "normalised_file_path": str(tmp_path / "nonexistent_n.csv"),
+            "raw_file_sha256": "abc",
+            "normalised_file_sha256": "def",
+            "columns": ["date", "open", "high", "low", "close", "adj_close", "volume"],
+            "row_count": 100,
+            "_manifest_path": str(tmp_path / "m.json"),
+        }
         valid, reason = _is_valid_live_yahoo_candidate(manifest, "SPY", "SPY")
         assert not valid
         assert reason == "raw_file_missing"
@@ -295,7 +294,10 @@ class TestSnapshotSelection:
 
     def test_10_rejects_non_live_fixture(self, tmp_path: Path) -> None:
         manifest = _write_yahoo_fixture(
-            tmp_path, "SPY", _price_frame(), provider="offline_fixture",
+            tmp_path,
+            "SPY",
+            _price_frame(),
+            provider="offline_fixture",
             library_name="pandas_fixture",
         )
         valid, reason = _is_valid_live_yahoo_candidate(manifest, "SPY", "SPY")
@@ -308,6 +310,7 @@ class TestSnapshotSelection:
             _write_yahoo_fixture(tmp_path, inst, _price_frame())
         config = validate_gma1a_config(cfg)
         from market_strats.global_multi_asset.universe import default_instrument_registry
+
         sel1, _ = select_canonical_snapshots(config, default_instrument_registry())
         sel2, _ = select_canonical_snapshots(config, default_instrument_registry())
         for col in ["selected_manifest_sha256", "raw_sha256", "normalised_sha256"]:
@@ -319,6 +322,7 @@ class TestSnapshotSelection:
             _write_yahoo_fixture(tmp_path, inst, _price_frame())
         config = validate_gma1a_config(cfg)
         from market_strats.global_multi_asset.universe import default_instrument_registry
+
         sel1, _ = select_canonical_snapshots(config, default_instrument_registry())
         sel2, _ = select_canonical_snapshots(config, default_instrument_registry())
         assert compute_selection_set_hash(sel1) == compute_selection_set_hash(sel2)
@@ -336,6 +340,7 @@ class TestCompletedHistory:
         frame.loc[4, "Close"] = pd.NA
         normalised = normalise_price_frame(frame)
         from market_strats.global_multi_asset.data.validation import completed_history
+
         completed = completed_history(normalised, "2026-06-15T00:00:00+00:00")
         assert len(completed) <= 4
 
@@ -344,6 +349,7 @@ class TestCompletedHistory:
         frame.loc[9, "Close"] = pd.NA
         normalised = normalise_price_frame(frame)
         from market_strats.global_multi_asset.data.validation import completed_history
+
         completed = completed_history(normalised, "2026-06-15T00:00:00+00:00")
         excluded_count = len(normalised) - len(completed)
         assert excluded_count >= 1
@@ -379,6 +385,7 @@ class TestCorporateActionsAndTotalReturn:
             completed_history,
             corporate_action_frame,
         )
+
         normalised = normalise_price_frame(frame)
         completed = completed_history(normalised, "2026-06-15T00:00:00+00:00")
         actions = corporate_action_frame(frame)
@@ -394,6 +401,7 @@ class TestCorporateActionsAndTotalReturn:
             completed_history,
             corporate_action_frame,
         )
+
         normalised = normalise_price_frame(frame)
         completed = completed_history(normalised, "2026-06-15T00:00:00+00:00")
         actions = corporate_action_frame(frame)
@@ -416,6 +424,7 @@ class TestCorporateActionsAndTotalReturn:
             completed_history,
             corporate_action_frame,
         )
+
         normalised = normalise_price_frame(frame)
         completed = completed_history(normalised, "2026-06-15T00:00:00+00:00")
         actions = corporate_action_frame(frame)
@@ -431,6 +440,7 @@ class TestCorporateActionsAndTotalReturn:
             completed_history,
             corporate_action_frame,
         )
+
         normalised = normalise_price_frame(frame)
         completed = completed_history(normalised, "2026-06-15T00:00:00+00:00")
         actions = corporate_action_frame(frame)
@@ -444,6 +454,7 @@ class TestCorporateActionsAndTotalReturn:
             completed_history,
             corporate_action_frame,
         )
+
         normalised = normalise_price_frame(frame)
         completed = completed_history(normalised, "2026-06-15T00:00:00+00:00")
         actions = corporate_action_frame(frame)
@@ -458,6 +469,7 @@ class TestCorporateActionsAndTotalReturn:
         from market_strats.global_multi_asset.data.validation import (
             completed_history,
         )
+
         normalised = normalise_price_frame(frame)
         completed = completed_history(normalised, "2026-06-15T00:00:00+00:00")
         actions = pd.DataFrame()  # completely empty
@@ -472,34 +484,37 @@ class TestCorporateActionsAndTotalReturn:
 
 class TestReconciliation:
     def _reconcile_fixture(
-        self, periods: int = 50, dividend_idx: int | None = 20,
+        self,
+        periods: int = 50,
+        dividend_idx: int | None = 20,
     ) -> dict:
         frame = _price_frame(periods=periods, dividend_idx=dividend_idx)
         from market_strats.global_multi_asset.data.validation import (
             completed_history,
             corporate_action_frame,
         )
+
         normalised = normalise_price_frame(frame)
         completed = completed_history(normalised, "2026-06-15T00:00:00+00:00")
         actions = corporate_action_frame(frame)
         tr = build_total_return_series(completed, actions)
-        canon = pd.DataFrame({
-            "date": tr["date"],
-            "close_raw": tr["close"],
-            "adj_close_provider": tr["adj_close"],
-            "volume": tr["volume"],
-            "dividend_cash": tr["dividend_cash"],
-            "split_ratio": tr["split_ratio"],
-            "total_return_factor": tr["total_return_factor"],
-            "total_return_index": tr["total_return_index"],
-        })
+        canon = pd.DataFrame(
+            {
+                "date": tr["date"],
+                "close_raw": tr["close"],
+                "adj_close_provider": tr["adj_close"],
+                "volume": tr["volume"],
+                "dividend_cash": tr["dividend_cash"],
+                "split_ratio": tr["split_ratio"],
+                "total_return_factor": tr["total_return_factor"],
+                "total_return_index": tr["total_return_index"],
+            }
+        )
         return reconcile_total_return(canon, tolerance_bps=1.0)
 
     def test_23_reconciliation_within_tolerance(self) -> None:
         result = self._reconcile_fixture(dividend_idx=None)
-        assert result["reconciliation_status"] in (
-            "reconciled", "reconciled_with_immaterial_drift"
-        )
+        assert result["reconciliation_status"] in ("reconciled", "reconciled_with_immaterial_drift")
 
     def test_24_immaterial_floating_point_drift(self) -> None:
         result = self._reconcile_fixture(dividend_idx=None)
@@ -510,7 +525,8 @@ class TestReconciliation:
         result = self._reconcile_fixture(dividend_idx=20)
         # Should be reconciled or action_timing_review
         assert result["reconciliation_status"] in (
-            "reconciled", "reconciled_with_immaterial_drift",
+            "reconciled",
+            "reconciled_with_immaterial_drift",
             "action_timing_review",
         )
 
@@ -520,6 +536,7 @@ class TestReconciliation:
             completed_history,
             corporate_action_frame,
         )
+
         normalised = normalise_price_frame(frame)
         completed = completed_history(normalised, "2026-06-15T00:00:00+00:00")
         actions = corporate_action_frame(frame)
@@ -528,16 +545,18 @@ class TestReconciliation:
         adj = tr["adj_close"].copy()
         for i in range(5, 15):
             adj.iloc[i] = adj.iloc[i] * (1.0 + (i % 3) * 0.02)
-        canon = pd.DataFrame({
-            "date": tr["date"],
-            "close_raw": tr["close"],
-            "adj_close_provider": adj,
-            "volume": tr["volume"],
-            "dividend_cash": tr["dividend_cash"],
-            "split_ratio": tr["split_ratio"],
-            "total_return_factor": tr["total_return_factor"],
-            "total_return_index": tr["total_return_index"],
-        })
+        canon = pd.DataFrame(
+            {
+                "date": tr["date"],
+                "close_raw": tr["close"],
+                "adj_close_provider": adj,
+                "volume": tr["volume"],
+                "dividend_cash": tr["dividend_cash"],
+                "split_ratio": tr["split_ratio"],
+                "total_return_factor": tr["total_return_factor"],
+                "total_return_index": tr["total_return_index"],
+            }
+        )
         result = reconcile_total_return(canon, tolerance_bps=1.0)
         assert result["reconciliation_status"] == "provider_basis_review"
 
@@ -545,19 +564,20 @@ class TestReconciliation:
         # A failed required-core reconciliation must block
         # verify that the code logic does block on failure
         from market_strats.global_multi_asset.gma1a_market_bundle import _build_gate_report
+
         config = validate_gma1a_config(_base_config())
         gate = _build_gate_report(config, {}, "abc123", core_blocked=True)
-        core_gate = gate.loc[
-            gate["gate"].eq("required_core_total_return_reconciliation_passed")
-        ]
+        core_gate = gate.loc[gate["gate"].eq("required_core_total_return_reconciliation_passed")]
         assert not core_gate.iloc[0]["passed"]
 
     def test_28_non_core_review_represented(self) -> None:
         result = self._reconcile_fixture(dividend_idx=None)
         # A passing instrument should have a valid status
         assert result["reconciliation_status"] in (
-            "reconciled", "reconciled_with_immaterial_drift",
-            "action_timing_review", "provider_basis_review",
+            "reconciled",
+            "reconciled_with_immaterial_drift",
+            "action_timing_review",
+            "provider_basis_review",
             "failed_reconciliation",
         )
 
@@ -570,14 +590,16 @@ class TestReconciliation:
 class TestCalendar:
     def _etf_dates(self) -> pd.Series:
         """Business day dates across a week with holiday gap."""
-        dates = pd.to_datetime([
-            "2024-01-02",  # Tue (after New Year)
-            "2024-01-03",  # Wed
-            "2024-01-04",  # Thu
-            "2024-01-05",  # Fri
-            "2024-01-08",  # Mon (next week)
-            "2024-01-09",  # Tue
-        ])
+        dates = pd.to_datetime(
+            [
+                "2024-01-02",  # Tue (after New Year)
+                "2024-01-03",  # Wed
+                "2024-01-04",  # Thu
+                "2024-01-05",  # Fri
+                "2024-01-08",  # Mon (next week)
+                "2024-01-09",  # Tue
+            ]
+        )
         return pd.Series(dates)
 
     def test_29_etf_friday_to_monday(self) -> None:
@@ -588,28 +610,34 @@ class TestCalendar:
 
     def test_30_etf_holiday_gap(self) -> None:
         # Simulate a holiday: remove Jan 8
-        dates = pd.to_datetime([
-            "2024-01-05",  # Fri
-            "2024-01-09",  # Tue (Mon was holiday)
-        ])
+        dates = pd.to_datetime(
+            [
+                "2024-01-05",  # Fri
+                "2024-01-09",  # Tue (Mon was holiday)
+            ]
+        )
         result = next_eligible_completed_observation(pd.Series(dates), pd.Timestamp("2024-01-05"))
         assert result == pd.Timestamp("2024-01-09")
 
     def test_31_bitcoin_weekends_retained(self) -> None:
-        dates = pd.to_datetime([
-            "2024-01-05",  # Fri
-            "2024-01-06",  # Sat
-            "2024-01-07",  # Sun
-            "2024-01-08",  # Mon
-        ])
+        dates = pd.to_datetime(
+            [
+                "2024-01-05",  # Fri
+                "2024-01-06",  # Sat
+                "2024-01-07",  # Sun
+                "2024-01-08",  # Mon
+            ]
+        )
         result = next_eligible_completed_observation(pd.Series(dates), pd.Timestamp("2024-01-05"))
         assert result == pd.Timestamp("2024-01-06")
 
     def test_32_bitcoin_next_observation(self) -> None:
-        dates = pd.to_datetime([
-            "2024-01-06",  # Sat
-            "2024-01-07",  # Sun
-        ])
+        dates = pd.to_datetime(
+            [
+                "2024-01-06",  # Sat
+                "2024-01-07",  # Sun
+            ]
+        )
         result = next_eligible_completed_observation(pd.Series(dates), pd.Timestamp("2024-01-06"))
         assert result == pd.Timestamp("2024-01-07")
 
@@ -618,6 +646,7 @@ class TestCalendar:
         frame.loc[4, "Close"] = pd.NA
         normalised = normalise_price_frame(frame)
         from market_strats.global_multi_asset.data.validation import completed_history
+
         completed = completed_history(normalised, "2026-06-15T00:00:00+00:00")
         last_normalised_date = pd.to_datetime(normalised["date"]).max()
         last_completed_date = pd.to_datetime(completed["date"]).max()
@@ -625,9 +654,7 @@ class TestCalendar:
 
     def test_34_no_future_observation_controlled(self) -> None:
         dates = pd.to_datetime(["2024-01-05"])
-        result = next_eligible_completed_observation(
-            pd.Series(dates), pd.Timestamp("2024-12-31")
-        )
+        result = next_eligible_completed_observation(pd.Series(dates), pd.Timestamp("2024-12-31"))
         assert result is None
 
     def test_35_etf_weekends_not_fabricated(self) -> None:
@@ -671,9 +698,7 @@ class TestIsolation:
 
     def test_39_preexisting_dirty_paths_exempted(self) -> None:
         # Dirty paths under individual_equity_post_endpoint are not GMA paths
-        assert not is_approved_gma_path(
-            "data/individual_equity_post_endpoint/AAPL.csv"
-        )
+        assert not is_approved_gma_path("data/individual_equity_post_endpoint/AAPL.csv")
 
     def test_40_deterministic_report_generation(self, tmp_path: Path) -> None:
         cfg = _fixture_config(tmp_path)
@@ -681,6 +706,7 @@ class TestIsolation:
             _write_yahoo_fixture(tmp_path, inst, _price_frame())
         config = validate_gma1a_config(cfg)
         from market_strats.global_multi_asset.universe import default_instrument_registry
+
         sel1, _ = select_canonical_snapshots(config, default_instrument_registry())
         sel2, _ = select_canonical_snapshots(config, default_instrument_registry())
         hash1 = compute_selection_set_hash(sel1)

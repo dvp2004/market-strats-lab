@@ -12,7 +12,9 @@ from market_strats.analysis.dynamic_opportunity_diagnostics import (
 )
 
 
-def _write_price(root: Path, symbol: str, dates: pd.DatetimeIndex, drift: float, shock: float = 0.0) -> None:
+def _write_price(
+    root: Path, symbol: str, dates: pd.DatetimeIndex, drift: float, shock: float = 0.0
+) -> None:
     output_dir = root / "data" / "fresh" / "processed"
     output_dir.mkdir(parents=True, exist_ok=True)
     seasonal = np.sin(np.arange(len(dates)) / 18) * 0.001
@@ -33,13 +35,7 @@ def _write_price(root: Path, symbol: str, dates: pd.DatetimeIndex, drift: float,
 
 
 def _write_benchmark_equity(root: Path, dates: pd.DatetimeIndex) -> None:
-    output_dir = (
-        root
-        / "reports"
-        / "paper_trading"
-        / "regime_informed_tracking"
-        / "performance"
-    )
+    output_dir = root / "reports" / "paper_trading" / "regime_informed_tracking" / "performance"
     output_dir.mkdir(parents=True, exist_ok=True)
     rows = []
     names = [
@@ -92,7 +88,9 @@ def _config(tmp_path: Path) -> dict:
     return {
         "phase22a_dynamic_multi_asset_opportunity_engine": {
             "enabled": True,
-            "output_dir": str(tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine"),
+            "output_dir": str(
+                tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine"
+            ),
             "dashboard_dir": str(tmp_path / "reports" / "paper_trading" / "dashboard"),
             "starting_cash": 10_000,
             "transaction_cost_bps_cases": [0, 10, 25],
@@ -108,8 +106,12 @@ def _config(tmp_path: Path) -> dict:
         },
         "phase22b_dynamic_opportunity_diagnostics": {
             "enabled": True,
-            "input_dir": str(tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine"),
-            "output_dir": str(tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine_diagnostics"),
+            "input_dir": str(
+                tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine"
+            ),
+            "output_dir": str(
+                tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine_diagnostics"
+            ),
             "dashboard_dir": str(tmp_path / "reports" / "paper_trading" / "dashboard"),
             "starting_cash": 10_000,
             "transaction_cost_bps_cases": [0, 10, 25],
@@ -140,7 +142,9 @@ def _run_phase22a_then_b(tmp_path: Path) -> dict[str, pd.DataFrame]:
 
 def test_phase22b_diagnostics_outputs_and_explanations(tmp_path):
     outputs = _run_phase22a_then_b(tmp_path)
-    output_dir = tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine_diagnostics"
+    output_dir = (
+        tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine_diagnostics"
+    )
 
     assert (output_dir / "phase22b_latest_score_to_weight_audit.csv").exists()
     assert (output_dir / "phase22b_cash_allocation_audit.csv").exists()
@@ -154,7 +158,9 @@ def test_phase22b_diagnostics_outputs_and_explanations(tmp_path):
 
 def test_phase22b_v1_strategies_caps_and_cost_sensitivity(tmp_path):
     outputs = _run_phase22a_then_b(tmp_path)
-    output_dir = tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine_diagnostics"
+    output_dir = (
+        tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine_diagnostics"
+    )
     weights = pd.read_csv(output_dir / "phase22b_v1_daily_weights.csv")
     metrics = outputs["v1_metrics"]
     tc = outputs["transaction_cost_sensitivity"]
@@ -195,8 +201,16 @@ def test_phase22b_benchmark_comparison_includes_current_v0_and_v1(tmp_path):
 
 def test_phase22b_writes_dashboard_charts_and_safety_flags(tmp_path):
     outputs = _run_phase22a_then_b(tmp_path)
-    output_dir = tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine_diagnostics"
-    dashboard_path = tmp_path / "reports" / "paper_trading" / "dashboard" / "phase22b_dynamic_opportunity_diagnostics_status.csv"
+    output_dir = (
+        tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine_diagnostics"
+    )
+    dashboard_path = (
+        tmp_path
+        / "reports"
+        / "paper_trading"
+        / "dashboard"
+        / "phase22b_dynamic_opportunity_diagnostics_status.csv"
+    )
 
     assert dashboard_path.exists()
     assert (output_dir / "visuals" / "phase22b_v1_equity_curves.png").exists()

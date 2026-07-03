@@ -21,9 +21,9 @@ def _write_prior_reports(tmp_path: Path):
         ]
     ).to_csv(tmp_path / "phase13aj_redesign_audit_conclusion.csv", index=False)
 
-    pd.DataFrame(
-        [{"gate": "dummy", "passed": True, "result": "Passed"}]
-    ).to_csv(tmp_path / "phase13aj_redesign_audit_gate_report.csv", index=False)
+    pd.DataFrame([{"gate": "dummy", "passed": True, "result": "Passed"}]).to_csv(
+        tmp_path / "phase13aj_redesign_audit_gate_report.csv", index=False
+    )
 
     pd.DataFrame(
         [
@@ -252,8 +252,7 @@ def _config(tmp_path: Path):
         "phase13ak_target_feature_redesign_interpretation_decision": {
             "enabled": True,
             "decision_role": (
-                "Target-feature redesign interpretation and candidate "
-                "target decision only"
+                "Target-feature redesign interpretation and candidate target decision only"
             ),
             "allow_model_training": False,
             "allow_repair_execution": False,
@@ -266,26 +265,19 @@ def _config(tmp_path: Path):
             "allow_candidate_promotion": False,
             "allow_final_candidate_change": False,
             "source_reports": {
-                "phase13aj_conclusion": str(
-                    tmp_path / "phase13aj_redesign_audit_conclusion.csv"
-                ),
-                "phase13aj_gate_report": str(
-                    tmp_path / "phase13aj_redesign_audit_gate_report.csv"
-                ),
+                "phase13aj_conclusion": str(tmp_path / "phase13aj_redesign_audit_conclusion.csv"),
+                "phase13aj_gate_report": str(tmp_path / "phase13aj_redesign_audit_gate_report.csv"),
                 "feasibility_report": str(
-                    tmp_path
-                    / "phase13ai_redesign_panel_target_variant_feasibility_report.csv"
+                    tmp_path / "phase13ai_redesign_panel_target_variant_feasibility_report.csv"
                 ),
                 "class_balance_report": str(
                     tmp_path / "phase13ai_redesign_panel_class_balance_report.csv"
                 ),
                 "target_outcome_profile_report": str(
-                    tmp_path
-                    / "phase13ai_redesign_panel_target_outcome_profile_report.csv"
+                    tmp_path / "phase13ai_redesign_panel_target_outcome_profile_report.csv"
                 ),
                 "feature_family_availability_report": str(
-                    tmp_path
-                    / "phase13ai_redesign_panel_feature_family_availability_report.csv"
+                    tmp_path / "phase13ai_redesign_panel_feature_family_availability_report.csv"
                 ),
                 "redesign_screen_report": str(
                     tmp_path / "phase13ai_redesign_panel_redesign_screen_report.csv"
@@ -341,15 +333,13 @@ def _config(tmp_path: Path):
                 "conclusion": str(tmp_path / "phase13ak_target_decision_conclusion.csv"),
                 "gate_report": str(tmp_path / "phase13ak_target_decision_gate_report.csv"),
                 "candidate_target_decision_report": str(
-                    tmp_path
-                    / "phase13ak_target_decision_candidate_target_decision_report.csv"
+                    tmp_path / "phase13ak_target_decision_candidate_target_decision_report.csv"
                 ),
                 "blocked_target_report": str(
                     tmp_path / "phase13ak_target_decision_blocked_target_report.csv"
                 ),
                 "feature_family_status_report": str(
-                    tmp_path
-                    / "phase13ak_target_decision_feature_family_status_report.csv"
+                    tmp_path / "phase13ak_target_decision_feature_family_status_report.csv"
                 ),
             },
             "forbidden_overclaim_phrases": [
@@ -387,12 +377,10 @@ def _config(tmp_path: Path):
                     tmp_path / "phase13al_target_checkpoint_gate_report.csv"
                 ),
                 "candidate_target_decision_report": str(
-                    tmp_path
-                    / "phase13ak_target_decision_candidate_target_decision_report.csv"
+                    tmp_path / "phase13ak_target_decision_candidate_target_decision_report.csv"
                 ),
                 "target_assignment_panel": str(
-                    tmp_path
-                    / "phase13ai_redesign_panel_target_assignment_panel.csv"
+                    tmp_path / "phase13ai_redesign_panel_target_assignment_panel.csv"
                 ),
                 "dataset": str(tmp_path / "phase13q_ml_feature_dataset_v1.csv"),
             },
@@ -483,12 +471,10 @@ def _config(tmp_path: Path):
             },
             "source_reports": {
                 "candidate_target_decision_report": str(
-                    tmp_path
-                    / "phase13ak_target_decision_candidate_target_decision_report.csv"
+                    tmp_path / "phase13ak_target_decision_candidate_target_decision_report.csv"
                 ),
                 "target_assignment_panel": str(
-                    tmp_path
-                    / "phase13ai_redesign_panel_target_assignment_panel.csv"
+                    tmp_path / "phase13ai_redesign_panel_target_assignment_panel.csv"
                 ),
                 "dataset": str(tmp_path / "phase13q_ml_feature_dataset_v1.csv"),
             },

@@ -100,18 +100,10 @@ def _config(tmp_path: Path):
             "allow_candidate_promotion": False,
             "allow_final_candidate_change": False,
             "source_reports": {
-                "phase13h_conclusion": str(
-                    tmp_path / "phase13h_readiness_conclusion.csv"
-                ),
-                "phase13h_gate_report": str(
-                    tmp_path / "phase13h_readiness_gate_report.csv"
-                ),
-                "calculation_registry": str(
-                    tmp_path / "phase13g_prereg_calculation_registry.csv"
-                ),
-                "output_column_schema": str(
-                    tmp_path / "phase13g_prereg_output_column_schema.csv"
-                ),
+                "phase13h_conclusion": str(tmp_path / "phase13h_readiness_conclusion.csv"),
+                "phase13h_gate_report": str(tmp_path / "phase13h_readiness_gate_report.csv"),
+                "calculation_registry": str(tmp_path / "phase13g_prereg_calculation_registry.csv"),
+                "output_column_schema": str(tmp_path / "phase13g_prereg_output_column_schema.csv"),
                 "missingness_behaviour": str(
                     tmp_path / "phase13g_prereg_missingness_behaviour.csv"
                 ),
@@ -123,9 +115,7 @@ def _config(tmp_path: Path):
             },
             "input_data": {
                 "technical_price_candidates": [str(tmp_path / "spy_price_panel.csv")],
-                "macro_aligned_candidates": [
-                    str(tmp_path / "phase10c_macro_aligned_series.csv")
-                ],
+                "macro_aligned_candidates": [str(tmp_path / "phase10c_macro_aligned_series.csv")],
                 "date_column_candidates": ["date", "as_of_date"],
                 "close_column_candidates": ["adjusted_close", "close"],
                 "macro_columns": {
@@ -180,15 +170,11 @@ def _config(tmp_path: Path):
             "phase13i_reports": {
                 "input_source_check": str(tmp_path / "phase13i_input_source_check.csv"),
                 "feature_panel": str(tmp_path / "phase13i_feature_panel.csv"),
-                "feature_state_timeline": str(
-                    tmp_path / "phase13i_feature_state_timeline.csv"
-                ),
+                "feature_state_timeline": str(tmp_path / "phase13i_feature_state_timeline.csv"),
                 "feature_availability_heatmap": str(
                     tmp_path / "phase13i_feature_availability_heatmap.csv"
                 ),
-                "leakage_audit_panel": str(
-                    tmp_path / "phase13i_leakage_audit_panel.csv"
-                ),
+                "leakage_audit_panel": str(tmp_path / "phase13i_leakage_audit_panel.csv"),
                 "model_feature_matrix_preview": str(
                     tmp_path / "phase13i_model_feature_matrix_preview.csv"
                 ),

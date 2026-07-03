@@ -135,13 +135,25 @@ def _config(tmp_path: Path):
             "source_reports": {
                 "phase14d_conclusion": str(tmp_path / "phase14d_visual_audit_conclusion.csv"),
                 "phase14d_gate_report": str(tmp_path / "phase14d_visual_audit_gate_report.csv"),
-                "phase14c_source_resolution": str(tmp_path / "phase14c_visual_backtest_candidate_source_resolution_report.csv"),
-                "phase14c_benchmark_comparison": str(tmp_path / "phase14c_visual_backtest_benchmark_comparison.csv"),
-                "phase14c_money_made_lost": str(tmp_path / "phase14c_visual_backtest_money_made_lost_table.csv"),
+                "phase14c_source_resolution": str(
+                    tmp_path / "phase14c_visual_backtest_candidate_source_resolution_report.csv"
+                ),
+                "phase14c_benchmark_comparison": str(
+                    tmp_path / "phase14c_visual_backtest_benchmark_comparison.csv"
+                ),
+                "phase14c_money_made_lost": str(
+                    tmp_path / "phase14c_visual_backtest_money_made_lost_table.csv"
+                ),
                 "phase14c_trade_log": str(tmp_path / "phase14c_visual_backtest_trade_log.csv"),
-                "phase14c_switch_event_log": str(tmp_path / "phase14c_visual_backtest_switch_event_log.csv"),
-                "phase14c_signal_template_preview": str(tmp_path / "phase14c_visual_backtest_signal_template_preview.csv"),
-                "phase13aw_route_selection": str(tmp_path / "phase13aw_route_selection_route_selection_report.csv"),
+                "phase14c_switch_event_log": str(
+                    tmp_path / "phase14c_visual_backtest_switch_event_log.csv"
+                ),
+                "phase14c_signal_template_preview": str(
+                    tmp_path / "phase14c_visual_backtest_signal_template_preview.csv"
+                ),
+                "phase13aw_route_selection": str(
+                    tmp_path / "phase13aw_route_selection_route_selection_report.csv"
+                ),
             },
             "source_identity_policy": {
                 "expected_candidate_system_id": "phase6b_loose_relief_execution_realistic_overlay",
@@ -227,15 +239,29 @@ def _config(tmp_path: Path):
             "source_reports": {
                 "phase14e_conclusion": str(tmp_path / "phase14e_source_identity_conclusion.csv"),
                 "phase14e_gate_report": str(tmp_path / "phase14e_source_identity_gate_report.csv"),
-                "phase14e_source_identity_report": str(tmp_path / "phase14e_source_identity_source_identity_report.csv"),
-                "phase14e_metric_reconciliation_report": str(tmp_path / "phase14e_source_identity_metric_reconciliation_report.csv"),
-                "phase14e_interpretation_decision_report": str(tmp_path / "phase14e_source_identity_interpretation_decision_report.csv"),
-                "phase14e_current_signal_state_report": str(tmp_path / "phase14e_source_identity_current_signal_state_report.csv"),
+                "phase14e_source_identity_report": str(
+                    tmp_path / "phase14e_source_identity_source_identity_report.csv"
+                ),
+                "phase14e_metric_reconciliation_report": str(
+                    tmp_path / "phase14e_source_identity_metric_reconciliation_report.csv"
+                ),
+                "phase14e_interpretation_decision_report": str(
+                    tmp_path / "phase14e_source_identity_interpretation_decision_report.csv"
+                ),
+                "phase14e_current_signal_state_report": str(
+                    tmp_path / "phase14e_source_identity_current_signal_state_report.csv"
+                ),
             },
             "correction_policy": {
                 "decision_if_source_identity_failed": "pre_register_candidate_source_correction_and_visual_rerun",
                 "intended_candidate_system_id": "phase6b_loose_relief_execution_realistic_overlay",
-                "required_corrected_source_fragments": ["phase6b", "loose", "relief", "execution", "realistic"],
+                "required_corrected_source_fragments": [
+                    "phase6b",
+                    "loose",
+                    "relief",
+                    "execution",
+                    "realistic",
+                ],
                 "corrected_visual_rerun_required_reports": [
                     "equity_curve_vs_spy_buy_hold",
                     "drawdown_curve",

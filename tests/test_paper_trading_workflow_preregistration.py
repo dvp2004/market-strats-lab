@@ -87,10 +87,18 @@ def _config(tmp_path: Path):
             "preregistration_role": "Paper-trading workflow pre-registration only",
             "implementation_classification": "A/B",
             "candidate_system_id": "phase6b_loose_relief_execution_realistic_overlay",
-            "exported_daily_file": str(tmp_path / "phase6b_loose_relief_execution_realistic_overlay_daily.csv"),
-            "corrected_current_signal_report": str(tmp_path / "phase14g_corrected_visual_current_signal_state_report.csv"),
-            "corrected_visual_conclusion": str(tmp_path / "phase14h_corrected_visual_audit_conclusion.csv"),
-            "corrected_visual_decision_report": str(tmp_path / "phase14h_corrected_visual_audit_reconciliation_decision_report.csv"),
+            "exported_daily_file": str(
+                tmp_path / "phase6b_loose_relief_execution_realistic_overlay_daily.csv"
+            ),
+            "corrected_current_signal_report": str(
+                tmp_path / "phase14g_corrected_visual_current_signal_state_report.csv"
+            ),
+            "corrected_visual_conclusion": str(
+                tmp_path / "phase14h_corrected_visual_audit_conclusion.csv"
+            ),
+            "corrected_visual_decision_report": str(
+                tmp_path / "phase14h_corrected_visual_audit_reconciliation_decision_report.csv"
+            ),
             "allow_paper_trading_deployment": False,
             "allow_broker_api_integration": False,
             "allow_live_trading": False,
@@ -116,28 +124,67 @@ def _config(tmp_path: Path):
                 "failure_if_switch_mechanics_unresolved": True,
             },
             "daily_signal_file_schema": {
-                "required_fields": ["signal_date", "data_as_of_date", "current_mode", "current_exposure", "target_action"]
+                "required_fields": [
+                    "signal_date",
+                    "data_as_of_date",
+                    "current_mode",
+                    "current_exposure",
+                    "target_action",
+                ]
             },
             "current_signal_state_fields": {
-                "required_fields": ["latest_decision_date", "current_mode", "current_exposure", "current_candidate_action", "preview_only"]
+                "required_fields": [
+                    "latest_decision_date",
+                    "current_mode",
+                    "current_exposure",
+                    "current_candidate_action",
+                    "preview_only",
+                ]
             },
             "manual_paper_broker_entry_template": {
-                "required_fields": ["entry_date", "ticker", "paper_account", "target_exposure", "no_real_money_confirmation"]
+                "required_fields": [
+                    "entry_date",
+                    "ticker",
+                    "paper_account",
+                    "target_exposure",
+                    "no_real_money_confirmation",
+                ]
             },
             "monitoring_dashboard_schema": {
-                "required_panels": ["current_signal_state", "candidate_equity_vs_spy", "data_freshness", "stop_condition_status"]
+                "required_panels": [
+                    "current_signal_state",
+                    "candidate_equity_vs_spy",
+                    "data_freshness",
+                    "stop_condition_status",
+                ]
             },
             "execution_checklist": {
-                "required_checks": ["confirm_signal_file_generated_today", "confirm_paper_account_only", "confirm_stop_conditions_not_triggered"]
+                "required_checks": [
+                    "confirm_signal_file_generated_today",
+                    "confirm_paper_account_only",
+                    "confirm_stop_conditions_not_triggered",
+                ]
             },
             "paper_trading_journal_template": {
-                "required_fields": ["journal_date", "signal_date", "action_taken", "data_freshness_status"]
+                "required_fields": [
+                    "journal_date",
+                    "signal_date",
+                    "action_taken",
+                    "data_freshness_status",
+                ]
             },
             "stop_conditions": {
-                "required_conditions": ["signal_file_missing_or_stale", "switch_reconstruction_missing", "unexpected_live_money_risk"]
+                "required_conditions": [
+                    "signal_file_missing_or_stale",
+                    "switch_reconstruction_missing",
+                    "unexpected_live_money_risk",
+                ]
             },
             "benchmark_update_rules": {
-                "required_rules": ["update_spy_buy_hold_benchmark_each_signal_day", "store_candidate_vs_spy_equity_snapshot"]
+                "required_rules": [
+                    "update_spy_buy_hold_benchmark_each_signal_day",
+                    "store_candidate_vs_spy_equity_snapshot",
+                ]
             },
             "phase15b_boundary": {
                 "allowed_next_step": "Paper-trading workflow readiness audit only",
@@ -170,17 +217,37 @@ def _config(tmp_path: Path):
             "phase15a_reports": {
                 "conclusion": str(tmp_path / "phase15a_paper_workflow_conclusion.csv"),
                 "gate_report": str(tmp_path / "phase15a_paper_workflow_gate_report.csv"),
-                "daily_signal_file_schema": str(tmp_path / "phase15a_paper_workflow_daily_signal_file_schema.csv"),
-                "current_signal_state_schema": str(tmp_path / "phase15a_paper_workflow_current_signal_state_schema.csv"),
-                "operational_switch_policy": str(tmp_path / "phase15a_paper_workflow_operational_switch_policy.csv"),
-                "endpoint_freshness_policy": str(tmp_path / "phase15a_paper_workflow_endpoint_freshness_policy.csv"),
-                "manual_paper_broker_entry_template": str(tmp_path / "phase15a_paper_workflow_manual_paper_broker_entry_template.csv"),
-                "monitoring_dashboard_schema": str(tmp_path / "phase15a_paper_workflow_monitoring_dashboard_schema.csv"),
-                "execution_checklist": str(tmp_path / "phase15a_paper_workflow_execution_checklist.csv"),
-                "paper_trading_journal_template": str(tmp_path / "phase15a_paper_workflow_paper_trading_journal_template.csv"),
+                "daily_signal_file_schema": str(
+                    tmp_path / "phase15a_paper_workflow_daily_signal_file_schema.csv"
+                ),
+                "current_signal_state_schema": str(
+                    tmp_path / "phase15a_paper_workflow_current_signal_state_schema.csv"
+                ),
+                "operational_switch_policy": str(
+                    tmp_path / "phase15a_paper_workflow_operational_switch_policy.csv"
+                ),
+                "endpoint_freshness_policy": str(
+                    tmp_path / "phase15a_paper_workflow_endpoint_freshness_policy.csv"
+                ),
+                "manual_paper_broker_entry_template": str(
+                    tmp_path / "phase15a_paper_workflow_manual_paper_broker_entry_template.csv"
+                ),
+                "monitoring_dashboard_schema": str(
+                    tmp_path / "phase15a_paper_workflow_monitoring_dashboard_schema.csv"
+                ),
+                "execution_checklist": str(
+                    tmp_path / "phase15a_paper_workflow_execution_checklist.csv"
+                ),
+                "paper_trading_journal_template": str(
+                    tmp_path / "phase15a_paper_workflow_paper_trading_journal_template.csv"
+                ),
                 "stop_conditions": str(tmp_path / "phase15a_paper_workflow_stop_conditions.csv"),
-                "benchmark_update_rules": str(tmp_path / "phase15a_paper_workflow_benchmark_update_rules.csv"),
-                "failure_conditions": str(tmp_path / "phase15a_paper_workflow_failure_conditions.csv"),
+                "benchmark_update_rules": str(
+                    tmp_path / "phase15a_paper_workflow_benchmark_update_rules.csv"
+                ),
+                "failure_conditions": str(
+                    tmp_path / "phase15a_paper_workflow_failure_conditions.csv"
+                ),
             },
             "readiness_policy": {
                 "require_switch_reconstruction_passed": True,

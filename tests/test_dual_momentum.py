@@ -81,6 +81,7 @@ def test_dual_momentum_starts_at_initial_capital():
     assert result["equity"].iloc[0] == 10_000
     assert result["strategy_return"].iloc[0] == 0.0
 
+
 def test_dual_momentum_outputs_audit_reason_columns():
     asset_a_prices = make_price_frame(list(range(100, 600)))
     asset_b_prices = make_price_frame([100.0] * 500)

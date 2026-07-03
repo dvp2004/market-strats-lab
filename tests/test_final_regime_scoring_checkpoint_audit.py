@@ -21,9 +21,7 @@ from market_strats.analysis.final_regime_scoring_checkpoint_audit import (
 def _phase_config(tmp_path: Path):
     return {
         "audit_role": "Final Phase 11 regime scoring closeout/checkpoint audit only",
-        "phase_branch": (
-            "Phase 11 regime scoring architecture and diagnostic panel branch"
-        ),
+        "phase_branch": ("Phase 11 regime scoring architecture and diagnostic panel branch"),
         "checkpoint_status": (
             "Phase 11 closed — regime scoring architecture and diagnostic panel "
             "prepared without scoring"
@@ -89,13 +87,9 @@ def _phase_config(tmp_path: Path):
             "phase11f": "diagnostic panel content audit passed",
         },
         "expected_boundary_reports": {
-            "phase11e_boundary": str(
-                tmp_path / "phase11f_content_phase11g_boundary_check.csv"
-            ),
+            "phase11e_boundary": str(tmp_path / "phase11f_content_phase11g_boundary_check.csv"),
             "phase11f_scope": str(tmp_path / "phase11f_content_scope_boundary_check.csv"),
-            "phase11f_boundary_content": str(
-                tmp_path / "phase11f_content_boundary_check.csv"
-            ),
+            "phase11f_boundary_content": str(tmp_path / "phase11f_content_boundary_check.csv"),
         },
         "branch_closure_claims": {
             "regime_score_exists": False,
@@ -143,9 +137,7 @@ def _phase_config(tmp_path: Path):
             "require_no_model_training": True,
             "require_no_new_data_ingestion": True,
             "require_no_candidate_promotion": True,
-            "required_audit_role": (
-                "Final Phase 11 regime scoring closeout/checkpoint audit only"
-            ),
+            "required_audit_role": ("Final Phase 11 regime scoring closeout/checkpoint audit only"),
         },
     }
 
@@ -156,12 +148,8 @@ def _runtime_config(tmp_path: Path):
         "phase11b_regime_scoring_architecture_spec": {"enabled": False},
         "phase11c_regime_scoring_rulebook_spec": {"enabled": False},
         "phase11d_regime_scoring_diagnostic_panel_design": {"enabled": False},
-        "phase11e_regime_scoring_diagnostic_panel_template_audit": {
-            "enabled": False
-        },
-        "phase11f_regime_scoring_diagnostic_panel_content_audit": {
-            "enabled": False
-        },
+        "phase11e_regime_scoring_diagnostic_panel_template_audit": {"enabled": False},
+        "phase11f_regime_scoring_diagnostic_panel_content_audit": {"enabled": False},
         "phase11g_final_regime_scoring_checkpoint_audit": {
             "enabled": True,
             **_phase_config(tmp_path),
@@ -173,9 +161,7 @@ def _runtime_config(tmp_path: Path):
 def _write_reports(tmp_path: Path):
     phase_verdicts = {
         "phase11a_architecture": "Completed — architecture review passed",
-        "phase11b_regime_scoring": (
-            "Completed — regime scoring architecture spec passed"
-        ),
+        "phase11b_regime_scoring": ("Completed — regime scoring architecture spec passed"),
         "phase11c_regime_scoring": "Completed — regime scoring rulebook spec passed",
         "phase11d_diagnostic_panel": "Completed — diagnostic panel design passed",
         "phase11e_template": "Completed — diagnostic panel template audit passed",
@@ -305,12 +291,8 @@ def test_phase11g_save_writes_expected_reports(tmp_path):
     assert not outputs["conclusion"].empty
     assert (tmp_path / "phase11g_final_checkpoint_report_inventory_check.csv").exists()
     assert (tmp_path / "phase11g_final_checkpoint_config_flag_check.csv").exists()
-    assert (
-        tmp_path / "phase11g_final_checkpoint_phase_conclusion_check.csv"
-    ).exists()
-    assert (
-        tmp_path / "phase11g_final_checkpoint_phase_gate_report_check.csv"
-    ).exists()
+    assert (tmp_path / "phase11g_final_checkpoint_phase_conclusion_check.csv").exists()
+    assert (tmp_path / "phase11g_final_checkpoint_phase_gate_report_check.csv").exists()
     assert (tmp_path / "phase11g_final_checkpoint_boundary_report_check.csv").exists()
     assert (tmp_path / "phase11g_final_checkpoint_branch_closure_check.csv").exists()
     assert (tmp_path / "phase11g_final_checkpoint_phase12a_boundary_check.csv").exists()
@@ -318,6 +300,4 @@ def test_phase11g_save_writes_expected_reports(tmp_path):
     assert (tmp_path / "phase11g_final_checkpoint_summary.csv").exists()
     assert (tmp_path / "phase11g_final_checkpoint_gate_report.csv").exists()
     assert (tmp_path / "phase11g_final_checkpoint_conclusion.csv").exists()
-    assert (
-        tmp_path / "phase11g_final_regime_scoring_checkpoint_audit.md"
-    ).exists()
+    assert (tmp_path / "phase11g_final_regime_scoring_checkpoint_audit.md").exists()

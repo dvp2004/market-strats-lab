@@ -127,8 +127,7 @@ def test_end_to_end_pilot_builder_calculates_panel_targets_and_leak_safe_clocks(
     assert panel["ticker"].astype(str).eq(panel["ticker_asof"].astype(str)).all()
     assert set(CORE_FEATURE_COLUMNS).issubset(panel.columns)
     assert not any(
-        column.startswith("forward_") or column.startswith("target_")
-        for column in panel.columns
+        column.startswith("forward_") or column.startswith("target_") for column in panel.columns
     )
     assert "forward_20d_excess_return_vs_universe" in set(targets["target_name"])
     assert "forward_20d_positive_alpha_probability" in set(targets["target_name"])
@@ -166,9 +165,7 @@ def test_pilot_validator_rejects_future_feature_availability():
     )
     panel.loc[0, "feature_max_available_timestamp_utc"] = "2030-01-01T00:00:00Z"
     report = validate_pilot_panel(panel, targets)
-    row = report.loc[
-        report["gate"].eq("feature_availability_not_after_cutoff")
-    ].iloc[0]
+    row = report.loc[report["gate"].eq("feature_availability_not_after_cutoff")].iloc[0]
     assert not bool(row["passed"])
 
 
@@ -177,12 +174,10 @@ def test_phase23f_without_inputs_writes_templates_and_pending_summary(tmp_path: 
         "phase23f_pilot_individual_equity_feature_calculation": {
             "enabled": True,
             "output_dir": (
-                "reports/individual_equity_decision_system/"
-                "phase23f_pilot_feature_calculation"
+                "reports/individual_equity_decision_system/phase23f_pilot_feature_calculation"
             ),
             "dashboard_status_path": (
-                "reports/paper_trading/dashboard/"
-                "phase23f_pilot_feature_calculation_status.csv"
+                "reports/paper_trading/dashboard/phase23f_pilot_feature_calculation_status.csv"
             ),
             "input_dir": "data/individual_equity_pilot",
             "membership_manifest_path": (
@@ -244,13 +239,9 @@ def test_phase23f_with_local_inputs_writes_panel_and_targets(tmp_path: Path):
     assert bool(summary["pilot_input_data_ready"])
     assert bool(summary["pilot_panel_built"])
     assert bool(summary["pilot_panel_validation_passed"])
+    assert summary["phase23f_decision"] == "phase23f_pilot_panel_validated_ready_for_phase23g"
     assert (
-        summary["phase23f_decision"]
-        == "phase23f_pilot_panel_validated_ready_for_phase23g"
-    )
-    assert (
-        summary["next_phase"]
-        == "Phase 23G first interpretable cross-sectional stock-ranking model"
+        summary["next_phase"] == "Phase 23G first interpretable cross-sectional stock-ranking model"
     )
     assert int(summary["pilot_security_count"]) == 3
     output_dir = tmp_path / "reports" / "phase23f"

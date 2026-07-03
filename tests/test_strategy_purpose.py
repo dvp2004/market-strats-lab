@@ -245,6 +245,7 @@ def test_classify_strategy_purpose_returns_empty_for_empty_metrics():
 
     assert result.empty
 
+
 def test_classify_strategy_purpose_demotes_efa_10m_after_monthly_robustness():
     metrics = pd.DataFrame(
         {

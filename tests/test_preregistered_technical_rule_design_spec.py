@@ -164,9 +164,8 @@ def test_save_phase9c_writes_expected_reports(tmp_path):
     assert (tmp_path / "phase9c_preregistered_rule_summary.csv").exists()
     assert (tmp_path / "phase9c_preregistered_rule_gate_report.csv").exists()
     assert (tmp_path / "phase9c_preregistered_rule_conclusion.csv").exists()
-    assert (
-        tmp_path / "phase9c_preregistered_technical_rule_design_spec.md"
-    ).exists()
+    assert (tmp_path / "phase9c_preregistered_technical_rule_design_spec.md").exists()
+
 
 def test_phase9c_forbidden_input_documentation_does_not_fail_keyword_gate():
     phase_config = _sample_phase_config()

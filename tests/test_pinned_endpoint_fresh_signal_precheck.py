@@ -89,28 +89,70 @@ def _write_source_reports(tmp_path: Path):
 
     pd.DataFrame(
         [
-            {"policy": "baseline_protection_policy", "field": "preserve_pinned_research_reports", "value": True},
-            {"policy": "baseline_protection_policy", "field": "preserve_phase6b_canonical_metrics", "value": True},
-            {"policy": "baseline_protection_policy", "field": "fresh_outputs_must_use_prefix", "value": "phase15g_current_signal"},
+            {
+                "policy": "baseline_protection_policy",
+                "field": "preserve_pinned_research_reports",
+                "value": True,
+            },
+            {
+                "policy": "baseline_protection_policy",
+                "field": "preserve_phase6b_canonical_metrics",
+                "value": True,
+            },
+            {
+                "policy": "baseline_protection_policy",
+                "field": "fresh_outputs_must_use_prefix",
+                "value": "phase15g_current_signal",
+            },
         ]
     ).to_csv(tmp_path / "phase15f_fresh_data_extension_baseline_protection_policy.csv", index=False)
 
     pd.DataFrame(
         [
-            {"policy": "fresh_data_source_policy", "field": "require_data_beyond_pinned_endpoint", "value": True},
-            {"policy": "fresh_data_source_policy", "field": "require_data_source_timestamp_field", "value": True},
-            {"policy": "fresh_data_source_policy", "field": "require_data_as_of_date_field", "value": True},
-            {"policy": "fresh_data_source_policy", "field": "allowed_primary_source", "value": "existing_project_market_data_pipeline"},
+            {
+                "policy": "fresh_data_source_policy",
+                "field": "require_data_beyond_pinned_endpoint",
+                "value": True,
+            },
+            {
+                "policy": "fresh_data_source_policy",
+                "field": "require_data_source_timestamp_field",
+                "value": True,
+            },
+            {
+                "policy": "fresh_data_source_policy",
+                "field": "require_data_as_of_date_field",
+                "value": True,
+            },
+            {
+                "policy": "fresh_data_source_policy",
+                "field": "allowed_primary_source",
+                "value": "existing_project_market_data_pipeline",
+            },
         ]
     ).to_csv(tmp_path / "phase15f_fresh_data_extension_fresh_data_source_policy.csv", index=False)
 
     pd.DataFrame(
         [
-            {"policy": "current_signal_update_policy", "field": "max_signal_staleness_days", "value": 3},
-            {"policy": "current_signal_update_policy", "field": "failed_data_pull_policy", "value": "write_blocked_signal_file_with_failure_reason"},
-            {"policy": "current_signal_update_policy", "field": "signal_must_include_data_source", "value": True},
+            {
+                "policy": "current_signal_update_policy",
+                "field": "max_signal_staleness_days",
+                "value": 3,
+            },
+            {
+                "policy": "current_signal_update_policy",
+                "field": "failed_data_pull_policy",
+                "value": "write_blocked_signal_file_with_failure_reason",
+            },
+            {
+                "policy": "current_signal_update_policy",
+                "field": "signal_must_include_data_source",
+                "value": True,
+            },
         ]
-    ).to_csv(tmp_path / "phase15f_fresh_data_extension_current_signal_update_policy.csv", index=False)
+    ).to_csv(
+        tmp_path / "phase15f_fresh_data_extension_current_signal_update_policy.csv", index=False
+    )
 
     schema_cols = [
         "signal_date",
@@ -144,15 +186,31 @@ def _write_source_reports(tmp_path: Path):
 
     pd.DataFrame(
         [
-            {"policy": "cadence_policy", "field": "preferred_frequency", "value": "daily_on_market_days"},
-            {"policy": "cadence_policy", "field": "block_if_latest_market_data_older_than_days", "value": 3},
+            {
+                "policy": "cadence_policy",
+                "field": "preferred_frequency",
+                "value": "daily_on_market_days",
+            },
+            {
+                "policy": "cadence_policy",
+                "field": "block_if_latest_market_data_older_than_days",
+                "value": 3,
+            },
         ]
     ).to_csv(tmp_path / "phase15f_fresh_data_extension_cadence_policy.csv", index=False)
 
     pd.DataFrame(
         [
-            {"policy": "failure_handling_policy", "field": "if_latest_data_missing", "value": "block_signal_and_write_failure_reason"},
-            {"policy": "failure_handling_policy", "field": "if_benchmark_update_missing", "value": "block_signal_and_write_failure_reason"},
+            {
+                "policy": "failure_handling_policy",
+                "field": "if_latest_data_missing",
+                "value": "block_signal_and_write_failure_reason",
+            },
+            {
+                "policy": "failure_handling_policy",
+                "field": "if_benchmark_update_missing",
+                "value": "block_signal_and_write_failure_reason",
+            },
         ]
     ).to_csv(tmp_path / "phase15f_fresh_data_extension_failure_handling_policy.csv", index=False)
 
@@ -176,10 +234,19 @@ def _config(tmp_path: Path):
             "source_reports": {
                 "phase15j_conclusion": str(tmp_path / "phase15j_refined_switch_conclusion.csv"),
                 "phase15j_gate_report": str(tmp_path / "phase15j_refined_switch_gate_report.csv"),
-                "phase15j_decision_report": str(tmp_path / "phase15j_refined_switch_decision_report.csv"),
-                "switch_log": str(tmp_path / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"),
-                "switch_summary": str(tmp_path / "phase15j_refined_switch_refined_switch_summary.csv"),
-                "exported_daily_stream": str(tmp_path / "phase6b_loose_relief_execution_realistic_overlay_daily.csv"),
+                "phase15j_decision_report": str(
+                    tmp_path / "phase15j_refined_switch_decision_report.csv"
+                ),
+                "switch_log": str(
+                    tmp_path
+                    / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
+                ),
+                "switch_summary": str(
+                    tmp_path / "phase15j_refined_switch_refined_switch_summary.csv"
+                ),
+                "exported_daily_stream": str(
+                    tmp_path / "phase6b_loose_relief_execution_realistic_overlay_daily.csv"
+                ),
             },
             "required_endpoint_signal_columns": [
                 "endpoint_date",
@@ -234,15 +301,34 @@ def _config(tmp_path: Path):
             "source_reports": {
                 "phase15k_conclusion": str(tmp_path / "phase15k_endpoint_signal_conclusion.csv"),
                 "phase15k_gate_report": str(tmp_path / "phase15k_endpoint_signal_gate_report.csv"),
-                "phase15k_endpoint_signal": str(tmp_path / "phase15k_pinned_endpoint_signal_file.csv"),
-                "phase15f_baseline_protection_policy": str(tmp_path / "phase15f_fresh_data_extension_baseline_protection_policy.csv"),
-                "phase15f_fresh_data_source_policy": str(tmp_path / "phase15f_fresh_data_extension_fresh_data_source_policy.csv"),
-                "phase15f_current_signal_update_policy": str(tmp_path / "phase15f_fresh_data_extension_current_signal_update_policy.csv"),
-                "phase15f_current_signal_output_schema": str(tmp_path / "phase15f_fresh_data_extension_current_signal_output_schema.csv"),
-                "phase15f_cadence_policy": str(tmp_path / "phase15f_fresh_data_extension_cadence_policy.csv"),
-                "phase15f_failure_handling_policy": str(tmp_path / "phase15f_fresh_data_extension_failure_handling_policy.csv"),
-                "switch_log": str(tmp_path / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"),
-                "pinned_daily_stream": str(tmp_path / "phase6b_loose_relief_execution_realistic_overlay_daily.csv"),
+                "phase15k_endpoint_signal": str(
+                    tmp_path / "phase15k_pinned_endpoint_signal_file.csv"
+                ),
+                "phase15f_baseline_protection_policy": str(
+                    tmp_path / "phase15f_fresh_data_extension_baseline_protection_policy.csv"
+                ),
+                "phase15f_fresh_data_source_policy": str(
+                    tmp_path / "phase15f_fresh_data_extension_fresh_data_source_policy.csv"
+                ),
+                "phase15f_current_signal_update_policy": str(
+                    tmp_path / "phase15f_fresh_data_extension_current_signal_update_policy.csv"
+                ),
+                "phase15f_current_signal_output_schema": str(
+                    tmp_path / "phase15f_fresh_data_extension_current_signal_output_schema.csv"
+                ),
+                "phase15f_cadence_policy": str(
+                    tmp_path / "phase15f_fresh_data_extension_cadence_policy.csv"
+                ),
+                "phase15f_failure_handling_policy": str(
+                    tmp_path / "phase15f_fresh_data_extension_failure_handling_policy.csv"
+                ),
+                "switch_log": str(
+                    tmp_path
+                    / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
+                ),
+                "pinned_daily_stream": str(
+                    tmp_path / "phase6b_loose_relief_execution_realistic_overlay_daily.csv"
+                ),
             },
             "phase15m_current_signal_output": {
                 "minimum_required_columns": [

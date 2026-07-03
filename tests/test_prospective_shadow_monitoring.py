@@ -130,7 +130,9 @@ def _write_sources(
                 "execution_price_available": execution_available and open_price > 0,
                 "estimated_target_shares": 200,
                 "paper_order_allowed": execution_available and open_price > 0,
-                "order_blocking_reason": "" if execution_available and open_price > 0 else "execution_open_price_pending",
+                "order_blocking_reason": ""
+                if execution_available and open_price > 0
+                else "execution_open_price_pending",
             }
         )
         proposed_rows.append(
@@ -147,10 +149,14 @@ def _write_sources(
                 "proposed_quantity": 200,
                 "order_side": "BUY",
                 "paper_order_allowed": execution_available and open_price > 0,
-                "order_blocking_reason": "" if execution_available and open_price > 0 else "execution_open_price_pending",
+                "order_blocking_reason": ""
+                if execution_available and open_price > 0
+                else "execution_open_price_pending",
             }
         )
-    pd.DataFrame(target_rows).to_csv(phase23j / "phase23j_current_target_portfolio.csv", index=False)
+    pd.DataFrame(target_rows).to_csv(
+        phase23j / "phase23j_current_target_portfolio.csv", index=False
+    )
     pd.DataFrame(proposed_rows).to_csv(shadow / "current_proposed_order_plan.csv", index=False)
 
     feature_rows = []
@@ -170,7 +176,9 @@ def _write_sources(
         ]:
             row[feature] = float(index)
         feature_rows.append(row)
-    pd.DataFrame(feature_rows).to_csv(phase23j / "phase23j_prospective_feature_panel.csv", index=False)
+    pd.DataFrame(feature_rows).to_csv(
+        phase23j / "phase23j_prospective_feature_panel.csv", index=False
+    )
     reference = []
     for day in range(12):
         for index, ticker in enumerate(PILOT_UNIVERSE):
@@ -199,17 +207,19 @@ def _write_sources(
                     "portfolio_id": "ridge_top5_equal_weight",
                     "ticker": ticker,
                     "session_state": "entered",
-                    "simulated_fill_quantity": 201 if fill_mismatch and ticker == selected[0] else 200,
+                    "simulated_fill_quantity": 201
+                    if fill_mismatch and ticker == selected[0]
+                    else 200,
                     "simulated_fill_price": 100.0,
                 }
             )
     pd.DataFrame(ledger_rows).to_csv(shadow / "immutable_session_ledger.csv", index=False)
-    pd.DataFrame(
-        [{"ticker": selected[0], "market_value": 20000.0}] if entered else []
-    ).to_csv(shadow / "positions.csv", index=False)
-    pd.DataFrame(
-        [{"cash_balance": -5.0 if negative_cash else 100000.0}]
-    ).to_csv(shadow / "cash_ledger.csv", index=False)
+    pd.DataFrame([{"ticker": selected[0], "market_value": 20000.0}] if entered else []).to_csv(
+        shadow / "positions.csv", index=False
+    )
+    pd.DataFrame([{"cash_balance": -5.0 if negative_cash else 100000.0}]).to_csv(
+        shadow / "cash_ledger.csv", index=False
+    )
     pd.DataFrame([{"portfolio_value": 100000.0, "cash_balance": 100000.0}]).to_csv(
         shadow / "valuation_history.csv", index=False
     )
@@ -234,7 +244,9 @@ def _write_sources(
 
 def _run(tmp_path: Path, **kwargs):
     config = _write_sources(tmp_path, **kwargs)
-    return save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    return save_phase23k_prospective_shadow_monitoring(
+        config=config, reports_dir=tmp_path / "reports"
+    )
 
 
 def test_deterministic_session_id_is_stable() -> None:
@@ -257,14 +269,21 @@ def test_deterministic_session_id_is_stable() -> None:
 
 def test_zero_session_run_writes_empty_reports(tmp_path: Path) -> None:
     outputs = _run(tmp_path, ranking=False)
-    assert outputs["summary"].iloc[0]["phase23k_decision"] == "phase23k_monitoring_written_no_current_session"
+    assert (
+        outputs["summary"].iloc[0]["phase23k_decision"]
+        == "phase23k_monitoring_written_no_current_session"
+    )
     assert outputs["full_ranking_snapshots"].empty
 
 
 def test_blocked_proposal_is_recorded(tmp_path: Path) -> None:
     outputs = _run(tmp_path)
     assert outputs["session_registry"].iloc[0]["proposal_status"] == "proposal_blocked"
-    assert outputs["order_execution_reconciliation"]["fill_validation_status"].str.contains("missing|pending").any()
+    assert (
+        outputs["order_execution_reconciliation"]["fill_validation_status"]
+        .str.contains("missing|pending")
+        .any()
+    )
 
 
 def test_ready_proposal_is_recorded(tmp_path: Path) -> None:
@@ -298,7 +317,10 @@ def test_pending_execution_data_progresses_without_new_logical_session(tmp_path:
     assert registry.iloc[0]["session_id"] == first_session
     assert len(registry) == 1
     assert registry.iloc[0]["execution_status"] == "ready_manual_fill"
-    assert outputs["summary"].iloc[0]["phase23k_decision"] == "phase23k_monitoring_ready_manual_fill_pending"
+    assert (
+        outputs["summary"].iloc[0]["phase23k_decision"]
+        == "phase23k_monitoring_ready_manual_fill_pending"
+    )
     assert outputs["summary"].iloc[0]["latest_session_revision"] >= 2
 
 
@@ -319,11 +341,15 @@ def test_execution_prices_and_quantities_update_before_fill(tmp_path: Path) -> N
 def test_same_updated_snapshot_rerun_is_idempotent(tmp_path: Path) -> None:
     _run(tmp_path)
     config = _write_sources(tmp_path, execution_available=True)
-    first = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    first = save_phase23k_prospective_shadow_monitoring(
+        config=config, reports_dir=tmp_path / "reports"
+    )
     first_history_count = len(first["session_snapshot_history"])
     first_revision = int(first["summary"].iloc[0]["latest_session_revision"])
 
-    second = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    second = save_phase23k_prospective_shadow_monitoring(
+        config=config, reports_dir=tmp_path / "reports"
+    )
     assert len(second["session_snapshot_history"]) == first_history_count
     assert int(second["summary"].iloc[0]["latest_session_revision"]) == first_revision
 
@@ -331,33 +357,48 @@ def test_same_updated_snapshot_rerun_is_idempotent(tmp_path: Path) -> None:
 def test_conflicting_immutable_session_content_blocks(tmp_path: Path) -> None:
     _run(tmp_path)
     config = _write_sources(tmp_path)
-    ranking_path = Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"]) / "phase23j_current_ranking.csv"
+    ranking_path = (
+        Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"])
+        / "phase23j_current_ranking.csv"
+    )
     ranking = pd.read_csv(ranking_path)
     ranking.loc[0, "predicted_rank"] = 16
     ranking.to_csv(ranking_path, index=False)
-    outputs = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    outputs = save_phase23k_prospective_shadow_monitoring(
+        config=config, reports_dir=tmp_path / "reports"
+    )
     assert "immutable_session_content_changed" in set(outputs["incident_log"]["category"])
 
 
 def test_selected_ticker_change_blocks_existing_session(tmp_path: Path) -> None:
     _run(tmp_path)
     config = _write_sources(tmp_path)
-    target_path = Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"]) / "phase23j_current_target_portfolio.csv"
+    target_path = (
+        Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"])
+        / "phase23j_current_target_portfolio.csv"
+    )
     target = pd.read_csv(target_path)
     target.loc[0, "ticker"] = "TSLA"
     target.to_csv(target_path, index=False)
-    outputs = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    outputs = save_phase23k_prospective_shadow_monitoring(
+        config=config, reports_dir=tmp_path / "reports"
+    )
     assert "immutable_session_content_changed" in set(outputs["incident_log"]["category"])
 
 
 def test_target_weight_change_blocks_existing_session(tmp_path: Path) -> None:
     _run(tmp_path)
     config = _write_sources(tmp_path)
-    target_path = Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"]) / "phase23j_current_target_portfolio.csv"
+    target_path = (
+        Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"])
+        / "phase23j_current_target_portfolio.csv"
+    )
     target = pd.read_csv(target_path)
     target.loc[0, "target_weight"] = 0.25
     target.to_csv(target_path, index=False)
-    outputs = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    outputs = save_phase23k_prospective_shadow_monitoring(
+        config=config, reports_dir=tmp_path / "reports"
+    )
     assert "immutable_session_content_changed" in set(outputs["incident_log"]["category"])
 
 
@@ -376,21 +417,34 @@ def test_changed_universe_blocks(tmp_path: Path) -> None:
     assert "changed_universe" in set(outputs["incident_log"]["category"])
 
 
-def test_specific_later_date_to_signal_date_reference_repair_is_allowed_before_fill(tmp_path: Path) -> None:
+def test_specific_later_date_to_signal_date_reference_repair_is_allowed_before_fill(
+    tmp_path: Path,
+) -> None:
     config = _write_sources(tmp_path, execution_available=True)
-    ranking_path = Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"]) / "phase23j_current_ranking.csv"
+    ranking_path = (
+        Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"])
+        / "phase23j_current_ranking.csv"
+    )
     ranking = pd.read_csv(ranking_path)
     ranking["reference_price_date"] = "2026-06-15"
     ranking.loc[ranking["ticker"].eq("META"), "reference_price"] = 999.0
     ranking.to_csv(ranking_path, index=False)
-    first = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
-    assert first["summary"].iloc[0]["phase23k_decision"] == "phase23k_monitoring_ready_manual_fill_pending"
+    first = save_phase23k_prospective_shadow_monitoring(
+        config=config, reports_dir=tmp_path / "reports"
+    )
+    assert (
+        first["summary"].iloc[0]["phase23k_decision"]
+        == "phase23k_monitoring_ready_manual_fill_pending"
+    )
 
     repaired = save_phase23k_prospective_shadow_monitoring(
         config=_write_sources(tmp_path, execution_available=True),
         reports_dir=tmp_path / "reports",
     )
-    assert repaired["summary"].iloc[0]["phase23k_decision"] == "phase23k_monitoring_ready_manual_fill_pending"
+    assert (
+        repaired["summary"].iloc[0]["phase23k_decision"]
+        == "phase23k_monitoring_ready_manual_fill_pending"
+    )
     history = repaired["session_snapshot_history"]
     assert "pre_fill_signal_reference_repair" in set(history["correction_type"].astype(str))
     assert "execution_boundary_bugfix" in set(history["correction_reason"].astype(str))
@@ -399,17 +453,25 @@ def test_specific_later_date_to_signal_date_reference_repair_is_allowed_before_f
 def test_arbitrary_reference_price_change_blocks(tmp_path: Path) -> None:
     _run(tmp_path, execution_available=True)
     config = _write_sources(tmp_path, execution_available=True)
-    ranking_path = Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"]) / "phase23j_current_ranking.csv"
+    ranking_path = (
+        Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"])
+        / "phase23j_current_ranking.csv"
+    )
     ranking = pd.read_csv(ranking_path)
     ranking.loc[ranking["ticker"].eq("META"), "reference_price"] = 999.0
     ranking.to_csv(ranking_path, index=False)
-    outputs = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    outputs = save_phase23k_prospective_shadow_monitoring(
+        config=config, reports_dir=tmp_path / "reports"
+    )
     assert "immutable_session_content_changed" in set(outputs["incident_log"]["category"])
 
 
 def test_reference_correction_is_prohibited_after_fill(tmp_path: Path) -> None:
     config = _write_sources(tmp_path, execution_available=True, entered=True)
-    ranking_path = Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"]) / "phase23j_current_ranking.csv"
+    ranking_path = (
+        Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"])
+        / "phase23j_current_ranking.csv"
+    )
     ranking = pd.read_csv(ranking_path)
     ranking["reference_price_date"] = "2026-06-15"
     ranking.loc[ranking["ticker"].eq("META"), "reference_price"] = 999.0
@@ -430,7 +492,9 @@ def test_ranking_snapshot_preserves_all_sixteen_securities(tmp_path: Path) -> No
 
 def test_exactly_five_selected_flags_and_weights(tmp_path: Path) -> None:
     outputs = _run(tmp_path)
-    selected = outputs["full_ranking_snapshots"].loc[outputs["full_ranking_snapshots"]["selected_flag"]]
+    selected = outputs["full_ranking_snapshots"].loc[
+        outputs["full_ranking_snapshots"]["selected_flag"]
+    ]
     assert len(selected) == 5
     assert selected["target_weight"].eq(0.2).all()
 
@@ -473,14 +537,21 @@ def test_missing_price_incidents_resolve_without_deletion(tmp_path: Path) -> Non
     ]
     assert len(missing) == 5
     assert missing["resolved_flag"].map(lambda value: str(value).lower() == "true").all()
-    assert missing["resolution_note"].astype(str).str.contains("execution opens observed and validated").all()
+    assert (
+        missing["resolution_note"]
+        .astype(str)
+        .str.contains("execution opens observed and validated")
+        .all()
+    )
 
 
 def test_repeated_reruns_do_not_duplicate_resolved_incidents(tmp_path: Path) -> None:
     _run(tmp_path)
     config = _write_sources(tmp_path, execution_available=True)
     save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
-    outputs = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    outputs = save_phase23k_prospective_shadow_monitoring(
+        config=config, reports_dir=tmp_path / "reports"
+    )
     missing = outputs["incident_log"].loc[
         outputs["incident_log"]["category"].astype(str).eq("missing_execution_price")
     ]
@@ -519,7 +590,9 @@ def test_expected_date_can_exist_before_observed_date(tmp_path: Path) -> None:
 
 def test_observed_date_requires_real_row(tmp_path: Path) -> None:
     outputs = _run(tmp_path, execution_available=True)
-    assert outputs["order_execution_reconciliation"]["observed_execution_date"].eq("2026-06-15").all()
+    assert (
+        outputs["order_execution_reconciliation"]["observed_execution_date"].eq("2026-06-15").all()
+    )
 
 
 def test_fill_quantity_mismatch_blocks(tmp_path: Path) -> None:
@@ -529,7 +602,12 @@ def test_fill_quantity_mismatch_blocks(tmp_path: Path) -> None:
 
 def test_correct_delta_order_reconciles(tmp_path: Path) -> None:
     outputs = _run(tmp_path, execution_available=True, entered=True)
-    assert not outputs["order_execution_reconciliation"]["blocking_reason"].astype(str).str.contains("mismatch").any()
+    assert (
+        not outputs["order_execution_reconciliation"]["blocking_reason"]
+        .astype(str)
+        .str.contains("mismatch")
+        .any()
+    )
 
 
 def test_positions_and_cash_are_monitored_from_phase23i_sources(tmp_path: Path) -> None:
@@ -551,8 +629,16 @@ def test_no_ic_before_twenty_trading_days(tmp_path: Path) -> None:
         outputs["incident_log"]["category"].astype(str).eq("prediction_maturity_data_missing")
     ]
     assert not maturity_incidents.empty
-    assert not maturity_incidents["blocking_flag"].map(lambda value: str(value).lower() == "true").any()
-    assert not maturity_incidents["resolved_flag"].map(lambda value: str(value).lower() == "true").any()
+    assert (
+        not maturity_incidents["blocking_flag"]
+        .map(lambda value: str(value).lower() == "true")
+        .any()
+    )
+    assert (
+        not maturity_incidents["resolved_flag"]
+        .map(lambda value: str(value).lower() == "true")
+        .any()
+    )
 
 
 def test_maturity_uses_trading_days_not_calendar_days() -> None:
@@ -583,12 +669,17 @@ def test_ic_reports_insufficient_variation_for_constant_realised_outcomes(tmp_pa
 
 def test_ic_reports_insufficient_variation_for_constant_model_scores(tmp_path: Path) -> None:
     config = _write_sources(tmp_path, mature=True)
-    ranking_path = Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"]) / "phase23j_current_ranking.csv"
+    ranking_path = (
+        Path(config["phase23k_prospective_monitoring"]["source_phase23j_dir"])
+        / "phase23j_current_ranking.csv"
+    )
     ranking = pd.read_csv(ranking_path)
     ranking["predicted_20d_excess_return_or_ranking_score"] = 1.0
     ranking.to_csv(ranking_path, index=False)
 
-    outputs = save_phase23k_prospective_shadow_monitoring(config=config, reports_dir=tmp_path / "reports")
+    outputs = save_phase23k_prospective_shadow_monitoring(
+        config=config, reports_dir=tmp_path / "reports"
+    )
     row = outputs["prospective_ic_history"].iloc[0]
     assert pd.isna(row["spearman_ic"])
     assert row["status"] == "insufficient_cross_sectional_variation"
@@ -611,7 +702,9 @@ def test_score_drift_report_is_written(tmp_path: Path) -> None:
 
 def test_concentration_warning_does_not_change_target_weights(tmp_path: Path) -> None:
     outputs = _run(tmp_path)
-    selected = outputs["full_ranking_snapshots"].loc[outputs["full_ranking_snapshots"]["selected_flag"]]
+    selected = outputs["full_ranking_snapshots"].loc[
+        outputs["full_ranking_snapshots"]["selected_flag"]
+    ]
     assert selected["target_weight"].eq(0.2).all()
 
 

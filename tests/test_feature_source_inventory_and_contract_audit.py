@@ -49,8 +49,7 @@ def _config(tmp_path: Path):
         "phase13c_multifactor_feature_source_inventory_spec": {
             "enabled": True,
             "spec_role": (
-                "Multi-factor feature-source inventory and leakage-feasibility "
-                "spec only"
+                "Multi-factor feature-source inventory and leakage-feasibility spec only"
             ),
             "phase_branch": "Phase 13 multi-factor model architecture planning",
             "source_phase": "Phase 13B",
@@ -66,12 +65,8 @@ def _config(tmp_path: Path):
             "allow_candidate_promotion": False,
             "allow_final_candidate_change": False,
             "source_reports": {
-                "phase13b_conclusion": str(
-                    tmp_path / "phase13b_roadmap_conclusion.csv"
-                ),
-                "phase13b_gate_report": str(
-                    tmp_path / "phase13b_roadmap_gate_report.csv"
-                ),
+                "phase13b_conclusion": str(tmp_path / "phase13b_roadmap_conclusion.csv"),
+                "phase13b_gate_report": str(tmp_path / "phase13b_roadmap_gate_report.csv"),
                 "phase13b_feature_family_registry": str(
                     tmp_path / "phase13b_roadmap_feature_family_registry.csv"
                 ),
@@ -216,9 +211,7 @@ def _config(tmp_path: Path):
                 "relative_momentum_allocator": True,
             },
             "phase13c_reports": {
-                "source_report_check": str(
-                    tmp_path / "phase13c_inventory_source_report_check.csv"
-                ),
+                "source_report_check": str(tmp_path / "phase13c_inventory_source_report_check.csv"),
                 "phase13b_result_check": str(
                     tmp_path / "phase13c_inventory_phase13b_result_check.csv"
                 ),

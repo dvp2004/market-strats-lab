@@ -80,7 +80,8 @@ def test_regime_switch_overlay_rejects_invalid_trend_window():
         assert "trend_sma_days" in str(error)
     else:
         raise AssertionError("Expected ValueError for invalid trend_sma_days")
-    
+
+
 def test_regime_switch_overlay_with_confirmation_reduces_fast_switching():
     dates = pd.bdate_range("2018-01-01", periods=500)
 
@@ -117,13 +118,10 @@ def test_regime_switch_overlay_with_confirmation_reduces_fast_switching():
         confirmation_days=3,
     )
 
-    raw_switches = (
-        raw_result["selected_mode"] != raw_result["selected_mode"].shift(1)
-    ).sum()
+    raw_switches = (raw_result["selected_mode"] != raw_result["selected_mode"].shift(1)).sum()
 
     confirmed_switches = (
-        confirmed_result["selected_mode"]
-        != confirmed_result["selected_mode"].shift(1)
+        confirmed_result["selected_mode"] != confirmed_result["selected_mode"].shift(1)
     ).sum()
 
     assert confirmed_switches < raw_switches

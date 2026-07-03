@@ -47,7 +47,9 @@ def _write_source_reports(tmp_path: Path):
                 "selected": True,
             },
             {
-                "source": str(tmp_path / "regime_switch_overlay_offensive_relief_changed_switch_audit.csv"),
+                "source": str(
+                    tmp_path / "regime_switch_overlay_offensive_relief_changed_switch_audit.csv"
+                ),
                 "candidate_rows": 94,
                 "distance_to_expected": 58,
                 "selected": False,
@@ -114,14 +116,28 @@ def _config(tmp_path: Path):
             "attribution_role": "Operational switch source attribution and true 36-switch reconstruction spec only",
             "implementation_classification": "B",
             "candidate_system_id": "phase6b_loose_relief_execution_realistic_overlay",
-            "exported_daily_file": str(tmp_path / "phase6b_loose_relief_execution_realistic_overlay_daily.csv"),
+            "exported_daily_file": str(
+                tmp_path / "phase6b_loose_relief_execution_realistic_overlay_daily.csv"
+            ),
             "source_reports": {
-                "phase15d_conclusion": str(tmp_path / "phase15d_signal_switch_audit_conclusion.csv"),
-                "phase15d_gate_report": str(tmp_path / "phase15d_signal_switch_audit_gate_report.csv"),
-                "phase15d_readiness_decision": str(tmp_path / "phase15d_signal_switch_audit_readiness_decision_report.csv"),
-                "phase15c_switch_source_inventory": str(tmp_path / "phase15c_operational_signal_switch_source_inventory.csv"),
-                "phase15c_switch_summary": str(tmp_path / "phase15c_switch_reconstruction_summary.csv"),
-                "phase15c_current_signal_summary": str(tmp_path / "phase15c_current_signal_generation_summary.csv"),
+                "phase15d_conclusion": str(
+                    tmp_path / "phase15d_signal_switch_audit_conclusion.csv"
+                ),
+                "phase15d_gate_report": str(
+                    tmp_path / "phase15d_signal_switch_audit_gate_report.csv"
+                ),
+                "phase15d_readiness_decision": str(
+                    tmp_path / "phase15d_signal_switch_audit_readiness_decision_report.csv"
+                ),
+                "phase15c_switch_source_inventory": str(
+                    tmp_path / "phase15c_operational_signal_switch_source_inventory.csv"
+                ),
+                "phase15c_switch_summary": str(
+                    tmp_path / "phase15c_switch_reconstruction_summary.csv"
+                ),
+                "phase15c_current_signal_summary": str(
+                    tmp_path / "phase15c_current_signal_generation_summary.csv"
+                ),
             },
             "candidate_switch_source_files": [
                 str(tmp_path / "regime_switch_overlay_offensive_relief_changed_switch_audit.csv"),
@@ -186,9 +202,15 @@ def _config(tmp_path: Path):
             "pinned_research_endpoint": "2026-05-01",
             "audit_current_date": "2026-06-02",
             "source_reports": {
-                "phase15e_conclusion": str(tmp_path / "phase15e_switch_source_attribution_conclusion.csv"),
-                "phase15e_gate_report": str(tmp_path / "phase15e_switch_source_attribution_gate_report.csv"),
-                "phase15e_attribution_decision": str(tmp_path / "phase15e_switch_source_attribution_attribution_decision.csv"),
+                "phase15e_conclusion": str(
+                    tmp_path / "phase15e_switch_source_attribution_conclusion.csv"
+                ),
+                "phase15e_gate_report": str(
+                    tmp_path / "phase15e_switch_source_attribution_gate_report.csv"
+                ),
+                "phase15e_attribution_decision": str(
+                    tmp_path / "phase15e_switch_source_attribution_attribution_decision.csv"
+                ),
             },
             "baseline_protection_policy": {
                 "preserve_pinned_research_reports": True,

@@ -16,10 +16,7 @@ def test_compound_return():
 
 def test_mode_to_return_column():
     assert _mode_to_return_column("offensive_spy") == "strategy_return_offensive"
-    assert (
-        _mode_to_return_column("defensive_allocator")
-        == "strategy_return_defensive"
-    )
+    assert _mode_to_return_column("defensive_allocator") == "strategy_return_defensive"
 
 
 def test_create_switch_effectiveness_events():

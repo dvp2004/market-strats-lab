@@ -200,15 +200,9 @@ def _config(tmp_path: Path) -> dict:
         "phase23j_post_endpoint_individual_equity_extension": {
             "enabled": True,
             "output_dir": str(tmp_path / "reports" / "phase23j"),
-            "dashboard_status_path": str(
-                tmp_path / "reports" / "dashboard" / "phase23j.csv"
-            ),
-            "historical_input_dir": str(
-                tmp_path / "data" / "individual_equity_pilot"
-            ),
-            "extension_input_dir": str(
-                tmp_path / "data" / "individual_equity_post_endpoint"
-            ),
+            "dashboard_status_path": str(tmp_path / "reports" / "dashboard" / "phase23j.csv"),
+            "historical_input_dir": str(tmp_path / "data" / "individual_equity_pilot"),
+            "extension_input_dir": str(tmp_path / "data" / "individual_equity_post_endpoint"),
             "combined_input_dir": str(
                 tmp_path / "data" / "individual_equity_post_endpoint" / "combined"
             ),
@@ -264,7 +258,9 @@ def test_extension_validation_and_merge_preserve_endpoint_history() -> None:
     )
     assert merged["date"].min() == pd.Timestamp("2026-04-01")
     assert merged["date"].max() == pd.Timestamp("2026-05-15")
-    original_endpoint = history.loc[pd.to_datetime(history["date"]).eq("2026-05-01"), "close"].iloc[0]
+    original_endpoint = history.loc[pd.to_datetime(history["date"]).eq("2026-05-01"), "close"].iloc[
+        0
+    ]
     merged_endpoint = merged.loc[pd.to_datetime(merged["date"]).eq("2026-05-01"), "close"].iloc[0]
     assert original_endpoint == merged_endpoint
 
@@ -329,9 +325,7 @@ def test_phase23j_accepts_partial_execution_open_but_freezes_references(
     assert target["execution_open_price"].gt(0).all()
     assert target["signal_estimated_target_shares"].gt(0).all()
     assert target["execution_target_shares"].gt(0).all()
-    assert (
-        outputs["current_ranking"]["reference_price_date"].dropna().eq("2026-06-12").all()
-    )
+    assert outputs["current_ranking"]["reference_price_date"].dropna().eq("2026-06-12").all()
     assert pd.to_datetime(outputs["current_features"]["signal_date"]).max() == pd.Timestamp(
         "2026-06-12"
     )
@@ -432,19 +426,14 @@ def test_phase23j_keeps_signal_estimate_separate_from_execution_open_quantity(
     )
 
     target = outputs["current_target_portfolio"]
-    expected_signal = np.floor(
-        target["target_notional"] / target["reference_price"]
-    ).astype(int)
+    expected_signal = np.floor(target["target_notional"] / target["reference_price"]).astype(int)
     expected_execution = np.floor(
         target["target_notional"] / target["execution_open_price"]
     ).astype(int)
     assert target["signal_estimated_target_shares"].equals(expected_signal)
     assert target["estimated_target_shares"].equals(expected_signal)
     assert target["execution_target_shares"].equals(expected_execution)
-    assert (
-        target["signal_estimated_target_shares"]
-        != target["execution_target_shares"]
-    ).any()
+    assert (target["signal_estimated_target_shares"] != target["execution_target_shares"]).any()
 
 
 def test_phase23j_expected_execution_date_uses_holiday_calendar() -> None:
@@ -476,9 +465,9 @@ def test_phase23j_preflight_blocks_impossible_overlap_configuration(
 ) -> None:
     _history, _manifest = _prepare_sources(tmp_path)
     config = _config(tmp_path)
-    config["phase23j_post_endpoint_individual_equity_extension"][
-        "overlap_start_date"
-    ] = "2026-04-20"
+    config["phase23j_post_endpoint_individual_equity_extension"]["overlap_start_date"] = (
+        "2026-04-20"
+    )
 
     def download(_ticker: str, _start: str, _end: str) -> pd.DataFrame:
         raise AssertionError("preflight should run before downloads")
@@ -490,9 +479,7 @@ def test_phase23j_preflight_blocks_impossible_overlap_configuration(
     )
 
     summary = outputs["summary"].iloc[0]
-    assert summary["phase23j_decision"] == (
-        "phase23j_blocked_overlap_configuration_insufficient"
-    )
+    assert summary["phase23j_decision"] == ("phase23j_blocked_overlap_configuration_insufficient")
     assert "overlap_configuration_insufficient" in summary["blocking_reasons"]
     gate_details = ";".join(outputs["gate_report"]["detail"].astype(str))
     assert "available_overlap_sessions=10" in gate_details
@@ -518,9 +505,9 @@ def test_phase23j_impossible_overlap_clears_stale_current_outputs(
             }
         ]
     ).to_csv(phase23j_dir / "phase23j_current_target_portfolio.csv", index=False)
-    config["phase23j_post_endpoint_individual_equity_extension"][
-        "overlap_start_date"
-    ] = "2026-04-20"
+    config["phase23j_post_endpoint_individual_equity_extension"]["overlap_start_date"] = (
+        "2026-04-20"
+    )
 
     outputs = save_phase23j_post_endpoint_individual_equity_extension(
         config=config,
@@ -633,9 +620,7 @@ def test_phase23i_shadow_execution_open_sizing_does_not_overdraw_cash_after_cost
     orders = outputs["current_proposed_order_plan"]
     cost_rate = 50 / 10000
     total_cash_required = (
-        orders["proposed_quantity"]
-        * orders["execution_open_price"]
-        * (1 + cost_rate)
+        orders["proposed_quantity"] * orders["execution_open_price"] * (1 + cost_rate)
     ).sum()
     assert total_cash_required <= 10000 + 1e-8
     assert orders["target_shares"].le(orders["phase23j_execution_target_shares"]).all()
@@ -706,9 +691,7 @@ def test_phase23j_proposal_waits_for_next_open_price(tmp_path: Path) -> None:
         return downloads[ticker].copy()
 
     config = _config(tmp_path)
-    config["phase23j_post_endpoint_individual_equity_extension"]["as_of_date"] = (
-        "2026-06-12"
-    )
+    config["phase23j_post_endpoint_individual_equity_extension"]["as_of_date"] = "2026-06-12"
     outputs = save_phase23j_post_endpoint_individual_equity_extension(
         config=config,
         reports_dir=tmp_path / "reports",

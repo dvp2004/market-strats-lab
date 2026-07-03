@@ -45,16 +45,56 @@ def _write_phase13d_reports(tmp_path: Path):
 def _config(tmp_path: Path):
     universal_schema = [
         {"column_name": "as_of_date", "dtype": "date", "required": True, "description": "row date"},
-        {"column_name": "observation_date", "dtype": "date", "required": True, "description": "observation date"},
-        {"column_name": "release_date", "dtype": "date_or_null", "required": True, "description": "release date"},
-        {"column_name": "availability_date", "dtype": "date", "required": True, "description": "availability date"},
-        {"column_name": "decision_date", "dtype": "date", "required": True, "description": "decision date"},
+        {
+            "column_name": "observation_date",
+            "dtype": "date",
+            "required": True,
+            "description": "observation date",
+        },
+        {
+            "column_name": "release_date",
+            "dtype": "date_or_null",
+            "required": True,
+            "description": "release date",
+        },
+        {
+            "column_name": "availability_date",
+            "dtype": "date",
+            "required": True,
+            "description": "availability date",
+        },
+        {
+            "column_name": "decision_date",
+            "dtype": "date",
+            "required": True,
+            "description": "decision date",
+        },
         {"column_name": "family_id", "dtype": "string", "required": True, "description": "family"},
-        {"column_name": "feature_id", "dtype": "string", "required": True, "description": "feature"},
+        {
+            "column_name": "feature_id",
+            "dtype": "string",
+            "required": True,
+            "description": "feature",
+        },
         {"column_name": "feature_state", "dtype": "enum", "required": True, "description": "state"},
-        {"column_name": "missingness_state", "dtype": "enum", "required": True, "description": "missingness"},
-        {"column_name": "leakage_flag", "dtype": "bool", "required": True, "description": "leakage"},
-        {"column_name": "contract_version", "dtype": "string", "required": True, "description": "contract"},
+        {
+            "column_name": "missingness_state",
+            "dtype": "enum",
+            "required": True,
+            "description": "missingness",
+        },
+        {
+            "column_name": "leakage_flag",
+            "dtype": "bool",
+            "required": True,
+            "description": "leakage",
+        },
+        {
+            "column_name": "contract_version",
+            "dtype": "string",
+            "required": True,
+            "description": "contract",
+        },
     ]
 
     technical_features = [
@@ -94,12 +134,42 @@ def _config(tmp_path: Path):
     ]
 
     transform_policy = [
-        {"transform_id": "TE1", "policy": "train only", "ml_principle": "avoid train-test leakage", "required": True},
-        {"transform_id": "TE2", "policy": "no return selection", "ml_principle": "avoid overfitting", "required": True},
-        {"transform_id": "TE3", "policy": "interpretable first", "ml_principle": "interpretability", "required": True},
-        {"transform_id": "TE4", "policy": "separate calculation", "ml_principle": "schema before calculation", "required": True},
-        {"transform_id": "TE5", "policy": "outlier policy", "ml_principle": "stable preprocessing contract", "required": True},
-        {"transform_id": "TE6", "policy": "no target leakage", "ml_principle": "target leakage prevention", "required": True},
+        {
+            "transform_id": "TE1",
+            "policy": "train only",
+            "ml_principle": "avoid train-test leakage",
+            "required": True,
+        },
+        {
+            "transform_id": "TE2",
+            "policy": "no return selection",
+            "ml_principle": "avoid overfitting",
+            "required": True,
+        },
+        {
+            "transform_id": "TE3",
+            "policy": "interpretable first",
+            "ml_principle": "interpretability",
+            "required": True,
+        },
+        {
+            "transform_id": "TE4",
+            "policy": "separate calculation",
+            "ml_principle": "schema before calculation",
+            "required": True,
+        },
+        {
+            "transform_id": "TE5",
+            "policy": "outlier policy",
+            "ml_principle": "stable preprocessing contract",
+            "required": True,
+        },
+        {
+            "transform_id": "TE6",
+            "policy": "no target leakage",
+            "ml_principle": "target leakage prevention",
+            "required": True,
+        },
     ]
 
     missingness_policy = [
@@ -163,10 +233,18 @@ def _config(tmp_path: Path):
             "source_reports": {
                 "phase13d_conclusion": str(tmp_path / "phase13d_contract_conclusion.csv"),
                 "phase13d_gate_report": str(tmp_path / "phase13d_contract_gate_report.csv"),
-                "phase13c_feature_source_inventory": str(tmp_path / "phase13c_inventory_feature_source_inventory.csv"),
-                "phase13c_feature_contract_requirements": str(tmp_path / "phase13c_inventory_feature_contract_requirements.csv"),
-                "phase13c_leakage_control_policy": str(tmp_path / "phase13c_inventory_leakage_control_policy.csv"),
-                "phase13d_contract_coverage_check": str(tmp_path / "phase13d_contract_contract_coverage_check.csv"),
+                "phase13c_feature_source_inventory": str(
+                    tmp_path / "phase13c_inventory_feature_source_inventory.csv"
+                ),
+                "phase13c_feature_contract_requirements": str(
+                    tmp_path / "phase13c_inventory_feature_contract_requirements.csv"
+                ),
+                "phase13c_leakage_control_policy": str(
+                    tmp_path / "phase13c_inventory_leakage_control_policy.csv"
+                ),
+                "phase13d_contract_coverage_check": str(
+                    tmp_path / "phase13d_contract_contract_coverage_check.csv"
+                ),
             },
             "universal_panel_schema": universal_schema,
             "technical_feature_schema": technical_features,
@@ -174,7 +252,13 @@ def _config(tmp_path: Path):
             "transform_policy": transform_policy,
             "missingness_policy": missingness_policy,
             "feature_state_policy": {
-                "allowed_feature_states": ["supportive", "neutral", "fragile", "unavailable", "blocked"],
+                "allowed_feature_states": [
+                    "supportive",
+                    "neutral",
+                    "fragile",
+                    "unavailable",
+                    "blocked",
+                ],
                 "state_direction_required": True,
                 "state_reason_required": True,
                 "no_state_may_directly_create_trade": True,
@@ -220,12 +304,18 @@ def _config(tmp_path: Path):
                 "relative_momentum_allocator": True,
             },
             "phase13e_reports": {
-                "universal_panel_schema": str(tmp_path / "phase13e_schema_universal_panel_schema.csv"),
-                "technical_feature_schema": str(tmp_path / "phase13e_schema_technical_feature_schema.csv"),
+                "universal_panel_schema": str(
+                    tmp_path / "phase13e_schema_universal_panel_schema.csv"
+                ),
+                "technical_feature_schema": str(
+                    tmp_path / "phase13e_schema_technical_feature_schema.csv"
+                ),
                 "macro_feature_schema": str(tmp_path / "phase13e_schema_macro_feature_schema.csv"),
                 "transform_policy": str(tmp_path / "phase13e_schema_transform_policy.csv"),
                 "missingness_policy": str(tmp_path / "phase13e_schema_missingness_policy.csv"),
-                "visual_report_templates": str(tmp_path / "phase13e_schema_visual_report_templates.csv"),
+                "visual_report_templates": str(
+                    tmp_path / "phase13e_schema_visual_report_templates.csv"
+                ),
                 "gate_report": str(tmp_path / "phase13e_schema_gate_report.csv"),
                 "conclusion": str(tmp_path / "phase13e_schema_conclusion.csv"),
             },

@@ -57,7 +57,9 @@ def fixture_config(tmp_path: Path):
 def result(temp_config):
     output_root = temp_config.paths["output_root"]
     summary_path = output_root / "gma3a_summary.csv"
-    assert summary_path.exists(), "production GMA-3A-R summary missing; run full-history tournament first"
+    assert summary_path.exists(), (
+        "production GMA-3A-R summary missing; run full-history tournament first"
+    )
     summary = pd.read_csv(summary_path)
     assert not summary.iloc[0]["decision"].startswith("gma3ar_blocked")
     return ExistingResult(output_root)
@@ -72,8 +74,14 @@ def test_fixture_contamination_blocking(fixture_config):
 
 def test_upstream_hash_verification(temp_config):
     accepted = verify_gma3a_upstream(temp_config)
-    assert accepted["gma1a_accepted_selection_hash"] == temp_config.accepted_inputs["gma1a_accepted_selection_hash"]
-    assert accepted["gma2_accepted_replay_hash"] == temp_config.accepted_inputs["gma2_accepted_replay_hash"]
+    assert (
+        accepted["gma1a_accepted_selection_hash"]
+        == temp_config.accepted_inputs["gma1a_accepted_selection_hash"]
+    )
+    assert (
+        accepted["gma2_accepted_replay_hash"]
+        == temp_config.accepted_inputs["gma2_accepted_replay_hash"]
+    )
 
 
 def test_common_execution_convention(result):
@@ -136,7 +144,10 @@ def test_no_short_positions(result):
 
 def test_asset_concentration_limits(result, temp_config):
     targets = pd.read_csv(result.output_root / "gma3a_live_ensemble_targets.csv")
-    assert targets.loc[targets["symbol"] != "CASH", "final_target_weight"].max() <= temp_config.raw["limits"]["maximum_single_asset_weight"] + 1e-9
+    assert (
+        targets.loc[targets["symbol"] != "CASH", "final_target_weight"].max()
+        <= temp_config.raw["limits"]["maximum_single_asset_weight"] + 1e-9
+    )
 
 
 def test_bitcoin_cap(result, temp_config):
@@ -157,8 +168,12 @@ def test_independent_model_ledgers(result):
 
 
 def test_current_target_idempotency(temp_config):
-    targets_first = (temp_config.paths["output_root"] / "gma3a_live_ensemble_targets.csv").read_text(encoding="utf-8")
-    targets_second = (temp_config.paths["output_root"] / "gma3a_live_ensemble_targets.csv").read_text(encoding="utf-8")
+    targets_first = (
+        temp_config.paths["output_root"] / "gma3a_live_ensemble_targets.csv"
+    ).read_text(encoding="utf-8")
+    targets_second = (
+        temp_config.paths["output_root"] / "gma3a_live_ensemble_targets.csv"
+    ).read_text(encoding="utf-8")
     assert targets_first == targets_second
 
 
@@ -207,7 +222,9 @@ def test_no_real_money_flags(result):
 
 
 def test_no_credentials_or_automatic_order_submission(result):
-    entry = (result.output_root / "gma3a_manual_tradingview_entry_sheet.md").read_text(encoding="utf-8")
+    entry = (result.output_root / "gma3a_manual_tradingview_entry_sheet.md").read_text(
+        encoding="utf-8"
+    )
     assert "NO LIVE TRADING" in entry
     assert "NO REAL MONEY" in entry
     assert "NO BROKER/API" in entry
@@ -313,7 +330,9 @@ def test_no_change_to_accepted_gma2_files():
         "src/market_strats/global_multi_asset/gma2_config.py",
         "src/market_strats/global_multi_asset/gma2_replay.py",
     ]
-    result = subprocess.run(["git", "diff", "--name-only", "--", *files], check=True, capture_output=True, text=True)
+    result = subprocess.run(
+        ["git", "diff", "--name-only", "--", *files], check=True, capture_output=True, text=True
+    )
     assert not result.stdout.strip()
 
 
@@ -382,8 +401,12 @@ def test_operational_post_endpoint_refresh_rows_are_merged(tmp_path: Path, temp_
 
     augmented, _manifest, _input_hashes, data_status = _extend_prices({"SPY": canonical}, config)
 
-    assert augmented["SPY"].loc[pd.Timestamp("2026-05-01").date(), "close_raw"] == pytest.approx(100.0)
-    assert augmented["SPY"].loc[pd.Timestamp("2026-06-12").date(), "close_raw"] == pytest.approx(120.0)
+    assert augmented["SPY"].loc[pd.Timestamp("2026-05-01").date(), "close_raw"] == pytest.approx(
+        100.0
+    )
+    assert augmented["SPY"].loc[pd.Timestamp("2026-06-12").date(), "close_raw"] == pytest.approx(
+        120.0
+    )
     assert data_status[0]["post_endpoint_source"] == "gma3a_post_endpoint_refresh"
 
 
@@ -498,9 +521,14 @@ def test_post_endpoint_materialization_prefers_latest_complete_processed_snapsho
     )
     newer_normalised = older_normalised.copy()
     newer_normalised.loc[newer_normalised["date"].eq(pd.Timestamp("2026-06-18")), "close"] = pd.NA
-    newer_normalised.loc[newer_normalised["date"].eq(pd.Timestamp("2026-06-18")), "adj_close"] = pd.NA
+    newer_normalised.loc[newer_normalised["date"].eq(pd.Timestamp("2026-06-18")), "adj_close"] = (
+        pd.NA
+    )
 
-    for stamp, frame in [("20260618T194650000000Z", older_normalised), ("20260619T111457000000Z", newer_normalised)]:
+    for stamp, frame in [
+        ("20260618T194650000000Z", older_normalised),
+        ("20260619T111457000000Z", newer_normalised),
+    ]:
         normalised_path = processed_root / "yahoo_yfinance" / "IEF" / f"IEF_{stamp}_normalised.csv"
         raw_path = raw_root / "yahoo_yfinance" / "IEF" / f"IEF_{stamp}.csv"
         manifest_path = manifest_root / "yahoo_yfinance" / "IEF" / f"IEF_{stamp}_manifest.json"
@@ -562,7 +590,9 @@ def test_latest_signal_date_requires_later_execution_row():
     assert signal_date == pd.Timestamp("2026-06-17").date()
 
 
-def test_paper_readiness_reports_non_retroactive_block_without_order_packet(tmp_path: Path, temp_config):
+def test_paper_readiness_reports_non_retroactive_block_without_order_packet(
+    tmp_path: Path, temp_config
+):
     raw = dict(temp_config.raw)
     raw["paths"] = {key: str(value) for key, value in temp_config.paths.items()}
     raw["paths"]["output_root"] = str(tmp_path / "reports")
@@ -613,8 +643,12 @@ def test_paper_readiness_reports_non_retroactive_block_without_order_packet(tmp_
             }
         ]
     ).to_csv(out / "gma3a_current_strategy_targets.csv", index=False)
-    pd.DataFrame(columns=_manual_fill_columns()).to_csv(out / "gma3a_tradingview_manual_fill_template.csv", index=False)
-    pd.DataFrame(columns=_order_packet_columns()).to_csv(out / "gma3a_tradingview_order_packet.csv", index=False)
+    pd.DataFrame(columns=_manual_fill_columns()).to_csv(
+        out / "gma3a_tradingview_manual_fill_template.csv", index=False
+    )
+    pd.DataFrame(columns=_order_packet_columns()).to_csv(
+        out / "gma3a_tradingview_order_packet.csv", index=False
+    )
 
     result = run_gma3a_paper_readiness(config)
     summary = pd.read_csv(result.summary_path).iloc[0]
@@ -749,7 +783,9 @@ def test_manual_fill_validation_rejects_when_readiness_blocked(tmp_path: Path, t
 
 def test_manual_fill_validation_rejects_unknown_order_packet_id(tmp_path: Path, temp_config):
     config = _manual_fill_test_config(tmp_path, temp_config, active_packet=True)
-    fills_path = _write_fill_file(tmp_path / "fills.csv", [_valid_fill_row(order_packet_id="unknown-packet")])
+    fills_path = _write_fill_file(
+        tmp_path / "fills.csv", [_valid_fill_row(order_packet_id="unknown-packet")]
+    )
 
     result = validate_gma3a_manual_fills(config, fills_path)
     rows = pd.read_csv(result.row_validation_path)
@@ -760,7 +796,9 @@ def test_manual_fill_validation_rejects_unknown_order_packet_id(tmp_path: Path, 
 
 def test_manual_fill_validation_rejects_symbol_and_side_mismatch(tmp_path: Path, temp_config):
     config = _manual_fill_test_config(tmp_path, temp_config, active_packet=True)
-    fills_path = _write_fill_file(tmp_path / "fills.csv", [_valid_fill_row(symbol="QQQ", submitted_side="SELL")])
+    fills_path = _write_fill_file(
+        tmp_path / "fills.csv", [_valid_fill_row(symbol="QQQ", submitted_side="SELL")]
+    )
 
     result = validate_gma3a_manual_fills(config, fills_path)
     rows = pd.read_csv(result.row_validation_path)
@@ -780,7 +818,11 @@ def test_manual_fill_validation_rejects_duplicate_fill(tmp_path: Path, temp_conf
     assert not result.session_valid
     assert result.rejected_rows == 2
     assert rows["row_blocking_reasons"].str.contains("duplicate_fill_id").all()
-    assert rows["row_blocking_reasons"].str.contains("duplicate_order_packet_id_partial_fill_not_supported").all()
+    assert (
+        rows["row_blocking_reasons"]
+        .str.contains("duplicate_order_packet_id_partial_fill_not_supported")
+        .all()
+    )
 
 
 def test_manual_fill_validation_accepts_valid_active_packet_fill(tmp_path: Path, temp_config):
@@ -812,7 +854,9 @@ def test_non_retroactive_execution_blocks_missed_next_open():
     assert "execution window 2026-06-18 has passed" in blocker
 
 
-def test_daily_paper_cycle_runs_refresh_tournament_then_readiness(tmp_path: Path, monkeypatch, capsys):
+def test_daily_paper_cycle_runs_refresh_tournament_then_readiness(
+    tmp_path: Path, monkeypatch, capsys
+):
     calls: list[str] = []
     config = object()
     output_root = tmp_path / "reports"
@@ -895,7 +939,11 @@ def test_daily_paper_cycle_runs_refresh_tournament_then_readiness(tmp_path: Path
     monkeypatch.setattr(gma_cli, "run_gma3a_paper_readiness", fake_readiness)
 
     result = gma_cli.main(
-        ["--config", "configs/global_multi_asset_alpha/gma3a_full_history_tournament.yaml", "daily-paper-cycle"]
+        [
+            "--config",
+            "configs/global_multi_asset_alpha/gma3a_full_history_tournament.yaml",
+            "daily-paper-cycle",
+        ]
     )
 
     output = capsys.readouterr().out

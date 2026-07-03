@@ -32,13 +32,7 @@ def _write_price(root: Path, symbol: str, dates: pd.DatetimeIndex, drift: float)
 
 
 def _write_benchmark_equity(root: Path, dates: pd.DatetimeIndex) -> None:
-    output_dir = (
-        root
-        / "reports"
-        / "paper_trading"
-        / "regime_informed_tracking"
-        / "performance"
-    )
+    output_dir = root / "reports" / "paper_trading" / "regime_informed_tracking" / "performance"
     output_dir.mkdir(parents=True, exist_ok=True)
     rows = []
     benchmark_names = [
@@ -83,7 +77,9 @@ def _config(tmp_path: Path) -> dict:
     return {
         "phase22a_dynamic_multi_asset_opportunity_engine": {
             "enabled": True,
-            "output_dir": str(tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine"),
+            "output_dir": str(
+                tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine"
+            ),
             "dashboard_dir": str(tmp_path / "reports" / "paper_trading" / "dashboard"),
             "starting_cash": 10_000,
             "transaction_cost_bps_cases": [0, 10, 25],

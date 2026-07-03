@@ -109,24 +109,14 @@ def _config(tmp_path: Path):
             "allow_candidate_promotion": False,
             "allow_final_candidate_change": False,
             "source_score_reports": {
-                "component_state_panel": str(
-                    tmp_path / "phase12c_score_component_state_panel.csv"
-                ),
+                "component_state_panel": str(tmp_path / "phase12c_score_component_state_panel.csv"),
                 "component_state_distribution": str(
                     tmp_path / "phase12c_score_component_state_distribution.csv"
                 ),
-                "aggregate_score": str(
-                    tmp_path / "phase12c_score_aggregate_score.csv"
-                ),
-                "phase12c_conclusion": str(
-                    tmp_path / "phase12c_score_conclusion.csv"
-                ),
-                "phase12d_conclusion": str(
-                    tmp_path / "phase12d_audit_conclusion.csv"
-                ),
-                "phase12d_gate_report": str(
-                    tmp_path / "phase12d_audit_gate_report.csv"
-                ),
+                "aggregate_score": str(tmp_path / "phase12c_score_aggregate_score.csv"),
+                "phase12c_conclusion": str(tmp_path / "phase12c_score_conclusion.csv"),
+                "phase12d_conclusion": str(tmp_path / "phase12d_audit_conclusion.csv"),
+                "phase12d_gate_report": str(tmp_path / "phase12d_audit_gate_report.csv"),
             },
             "expected_aggregate_state": "fragile",
             "allowed_score_states": ["supportive", "neutral", "fragile"],

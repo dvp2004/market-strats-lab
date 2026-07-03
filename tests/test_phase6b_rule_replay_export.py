@@ -123,14 +123,21 @@ def _config(tmp_path: Path):
             "source_reports": {
                 "phase15r_conclusion": str(tmp_path / "phase15r_real_source_conclusion.csv"),
                 "phase15r_gate_report": str(tmp_path / "phase15r_real_source_gate_report.csv"),
-                "phase15r_decision_report": str(tmp_path / "phase15r_real_source_decision_report.csv"),
-                "selected_switch_definition": str(tmp_path / "phase15i_column_semantics_selected_switch_definition.csv"),
+                "phase15r_decision_report": str(
+                    tmp_path / "phase15r_real_source_decision_report.csv"
+                ),
+                "selected_switch_definition": str(
+                    tmp_path / "phase15i_column_semantics_selected_switch_definition.csv"
+                ),
             },
             "source_scan_paths": [str(tmp_path / "src" / "market_strats")],
             "discovery_patterns": {
                 "target_column": ["target_offensive_weight", "target_defensive_weight"],
                 "candidate_logic": ["loose_relief", "deep_drawdown_guard", "phase6b"],
-                "export_logic": ["phase6b_loose_relief_execution_realistic_overlay", "_find_final_candidate_frame"],
+                "export_logic": [
+                    "phase6b_loose_relief_execution_realistic_overlay",
+                    "_find_final_candidate_frame",
+                ],
             },
             "replay_path_decision_policy": {
                 "decision_if_replay_path_discovered": "rule_replay_path_discovered_export_attempt_allowed_next",
@@ -166,14 +173,30 @@ def _config(tmp_path: Path):
             "candidate_system_id": "phase6b_loose_relief_execution_realistic_overlay",
             "pinned_research_endpoint": "2026-05-01",
             "audit_current_date": "2026-06-02",
-            "output_file": str(tmp_path / "reports" / "phase15t_rule_generated_candidate_stream.csv"),
-            "handoff_file_for_phase15q": str(tmp_path / "data" / "fresh" / "phase15q_rule_generated_candidate_stream.csv"),
+            "output_file": str(
+                tmp_path / "reports" / "phase15t_rule_generated_candidate_stream.csv"
+            ),
+            "handoff_file_for_phase15q": str(
+                tmp_path / "data" / "fresh" / "phase15q_rule_generated_candidate_stream.csv"
+            ),
             "source_reports": {
-                "phase15s_conclusion": str(tmp_path / "reports" / "phase15s_rule_replay_discovery_conclusion.csv"),
-                "phase15s_gate_report": str(tmp_path / "reports" / "phase15s_rule_replay_discovery_gate_report.csv"),
-                "phase15s_decision_report": str(tmp_path / "reports" / "phase15s_rule_replay_discovery_decision_report.csv"),
-                "phase15s_target_column_discovery": str(tmp_path / "reports" / "phase15s_rule_replay_discovery_target_column_discovery.csv"),
-                "pinned_endpoint_signal": str(tmp_path / "phase15k_pinned_endpoint_signal_file.csv"),
+                "phase15s_conclusion": str(
+                    tmp_path / "reports" / "phase15s_rule_replay_discovery_conclusion.csv"
+                ),
+                "phase15s_gate_report": str(
+                    tmp_path / "reports" / "phase15s_rule_replay_discovery_gate_report.csv"
+                ),
+                "phase15s_decision_report": str(
+                    tmp_path / "reports" / "phase15s_rule_replay_discovery_decision_report.csv"
+                ),
+                "phase15s_target_column_discovery": str(
+                    tmp_path
+                    / "reports"
+                    / "phase15s_rule_replay_discovery_target_column_discovery.csv"
+                ),
+                "pinned_endpoint_signal": str(
+                    tmp_path / "phase15k_pinned_endpoint_signal_file.csv"
+                ),
             },
             "accepted_target_weight_source": "verified_project_generated",
             "benchmark_policy": {
@@ -223,7 +246,9 @@ def test_phase15s_to_15t_exports_rule_generated_stream_when_post_endpoint_rows_e
     monkeypatch.setattr(
         replay,
         "_find_final_candidate_frame",
-        lambda relative_momentum_outputs, ticker_outputs, config: _mock_final_candidate_with_post_endpoint(),
+        lambda relative_momentum_outputs, ticker_outputs, config: (
+            _mock_final_candidate_with_post_endpoint()
+        ),
     )
 
     reports_dir = tmp_path / "reports"
@@ -265,7 +290,9 @@ def test_phase15s_to_15t_blocks_when_rule_output_has_no_post_endpoint_rows(
     monkeypatch.setattr(
         replay,
         "_find_final_candidate_frame",
-        lambda relative_momentum_outputs, ticker_outputs, config: _mock_final_candidate_without_post_endpoint(),
+        lambda relative_momentum_outputs, ticker_outputs, config: (
+            _mock_final_candidate_without_post_endpoint()
+        ),
     )
 
     reports_dir = tmp_path / "reports"

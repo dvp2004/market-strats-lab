@@ -20,9 +20,9 @@ def _write_prior_reports(tmp_path: Path):
         ]
     ).to_csv(tmp_path / "phase13an_model_readiness_conclusion.csv", index=False)
 
-    pd.DataFrame(
-        [{"gate": "dummy", "passed": True, "result": "Passed"}]
-    ).to_csv(tmp_path / "phase13an_model_readiness_gate_report.csv", index=False)
+    pd.DataFrame([{"gate": "dummy", "passed": True, "result": "Passed"}]).to_csv(
+        tmp_path / "phase13an_model_readiness_gate_report.csv", index=False
+    )
 
     pd.DataFrame(
         [
@@ -57,8 +57,7 @@ def _write_prior_reports(tmp_path: Path):
             {
                 "policy_key": "categorical_feature_prefixes",
                 "policy_value": (
-                    "state__technical_; state__macro_; "
-                    "missingness__technical_; missingness__macro_"
+                    "state__technical_; state__macro_; missingness__technical_; missingness__macro_"
                 ),
             },
             {
@@ -72,9 +71,9 @@ def _write_prior_reports(tmp_path: Path):
         ]
     ).to_csv(tmp_path / "phase13am_model_prereg_feature_policy.csv", index=False)
 
-    pd.DataFrame(
-        [{"policy_key": "fit_preprocessing_on_train_only", "policy_value": True}]
-    ).to_csv(tmp_path / "phase13am_model_prereg_preprocessing_policy.csv", index=False)
+    pd.DataFrame([{"policy_key": "fit_preprocessing_on_train_only", "policy_value": True}]).to_csv(
+        tmp_path / "phase13am_model_prereg_preprocessing_policy.csv", index=False
+    )
 
     pd.DataFrame(
         [
@@ -113,12 +112,18 @@ def _write_prior_reports(tmp_path: Path):
 
     pd.DataFrame(
         [
-            {"policy_key": "min_validation_balanced_accuracy_delta_vs_majority", "policy_value": 0.01},
+            {
+                "policy_key": "min_validation_balanced_accuracy_delta_vs_majority",
+                "policy_value": 0.01,
+            },
             {"policy_key": "min_validation_macro_f1_delta_vs_majority", "policy_value": 0.01},
             {"policy_key": "min_validation_fragile_recall", "policy_value": 0.10},
             {"policy_key": "max_balanced_accuracy_overfit_gap", "policy_value": 0.50},
             {"policy_key": "max_macro_f1_overfit_gap", "policy_value": 0.50},
-            {"policy_key": "require_real_model_beats_stratified_on_balanced_accuracy", "policy_value": True},
+            {
+                "policy_key": "require_real_model_beats_stratified_on_balanced_accuracy",
+                "policy_value": True,
+            },
         ]
     ).to_csv(
         tmp_path / "phase13am_model_prereg_validation_success_gates.csv",
@@ -207,12 +212,20 @@ def _config(tmp_path: Path):
             "allow_final_candidate_change": False,
             "source_reports": {
                 "phase13an_conclusion": str(tmp_path / "phase13an_model_readiness_conclusion.csv"),
-                "phase13an_gate_report": str(tmp_path / "phase13an_model_readiness_gate_report.csv"),
+                "phase13an_gate_report": str(
+                    tmp_path / "phase13an_model_readiness_gate_report.csv"
+                ),
                 "model_run_spec": str(tmp_path / "phase13am_model_prereg_model_run_spec.csv"),
                 "feature_policy": str(tmp_path / "phase13am_model_prereg_feature_policy.csv"),
-                "preprocessing_policy": str(tmp_path / "phase13am_model_prereg_preprocessing_policy.csv"),
-                "registered_model_families": str(tmp_path / "phase13am_model_prereg_registered_model_families.csv"),
-                "validation_success_gates": str(tmp_path / "phase13am_model_prereg_validation_success_gates.csv"),
+                "preprocessing_policy": str(
+                    tmp_path / "phase13am_model_prereg_preprocessing_policy.csv"
+                ),
+                "registered_model_families": str(
+                    tmp_path / "phase13am_model_prereg_registered_model_families.csv"
+                ),
+                "validation_success_gates": str(
+                    tmp_path / "phase13am_model_prereg_validation_success_gates.csv"
+                ),
                 "candidate_target_decision_report": str(
                     tmp_path / "phase13ak_target_decision_candidate_target_decision_report.csv"
                 ),
@@ -258,15 +271,27 @@ def _config(tmp_path: Path):
             "phase13ao_reports": {
                 "conclusion": str(tmp_path / "phase13ao_model_training_conclusion.csv"),
                 "gate_report": str(tmp_path / "phase13ao_model_training_gate_report.csv"),
-                "model_execution_report": str(tmp_path / "phase13ao_model_training_model_execution_report.csv"),
+                "model_execution_report": str(
+                    tmp_path / "phase13ao_model_training_model_execution_report.csv"
+                ),
                 "metric_report": str(tmp_path / "phase13ao_model_training_metric_report.csv"),
-                "baseline_comparison_report": str(tmp_path / "phase13ao_model_training_baseline_comparison_report.csv"),
-                "confusion_matrix_report": str(tmp_path / "phase13ao_model_training_confusion_matrix_report.csv"),
-                "class_recall_report": str(tmp_path / "phase13ao_model_training_class_recall_report.csv"),
-                "calibration_report": str(tmp_path / "phase13ao_model_training_calibration_report.csv"),
+                "baseline_comparison_report": str(
+                    tmp_path / "phase13ao_model_training_baseline_comparison_report.csv"
+                ),
+                "confusion_matrix_report": str(
+                    tmp_path / "phase13ao_model_training_confusion_matrix_report.csv"
+                ),
+                "class_recall_report": str(
+                    tmp_path / "phase13ao_model_training_class_recall_report.csv"
+                ),
+                "calibration_report": str(
+                    tmp_path / "phase13ao_model_training_calibration_report.csv"
+                ),
                 "overfit_report": str(tmp_path / "phase13ao_model_training_overfit_report.csv"),
                 "success_report": str(tmp_path / "phase13ao_model_training_success_report.csv"),
-                "validation_predictions": str(tmp_path / "phase13ao_model_training_validation_predictions.csv"),
+                "validation_predictions": str(
+                    tmp_path / "phase13ao_model_training_validation_predictions.csv"
+                ),
             },
             "forbidden_output_paths": [
                 str(tmp_path / "phase13ao_model_training_holdout_predictions.csv"),
@@ -294,8 +319,12 @@ def _config(tmp_path: Path):
                 "phase13ap_conclusion": str(tmp_path / "phase13ap_model_audit_conclusion.csv"),
                 "phase13ap_gate_report": str(tmp_path / "phase13ap_model_audit_gate_report.csv"),
                 "metric_report": str(tmp_path / "phase13ao_model_training_metric_report.csv"),
-                "baseline_comparison_report": str(tmp_path / "phase13ao_model_training_baseline_comparison_report.csv"),
-                "class_recall_report": str(tmp_path / "phase13ao_model_training_class_recall_report.csv"),
+                "baseline_comparison_report": str(
+                    tmp_path / "phase13ao_model_training_baseline_comparison_report.csv"
+                ),
+                "class_recall_report": str(
+                    tmp_path / "phase13ao_model_training_class_recall_report.csv"
+                ),
                 "overfit_report": str(tmp_path / "phase13ao_model_training_overfit_report.csv"),
                 "success_report": str(tmp_path / "phase13ao_model_training_success_report.csv"),
             },

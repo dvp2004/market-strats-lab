@@ -50,9 +50,7 @@ def _valid_template() -> pd.DataFrame:
                 "proposed_quantity": QUANTITIES[ticker],
                 "order_side": "BUY",
                 "estimated_order_notional": QUANTITIES[ticker] * EXECUTION_OPENS[ticker],
-                "estimated_transaction_cost": QUANTITIES[ticker]
-                * EXECUTION_OPENS[ticker]
-                * 0.001,
+                "estimated_transaction_cost": QUANTITIES[ticker] * EXECUTION_OPENS[ticker] * 0.001,
                 "estimated_post_trade_cash_after_all_orders": 1000.0,
                 "cash_affordability_status": "cost_aware_quantity_ok",
                 "noncanonical_label": "NONCANONICAL PILOT DIAGNOSTIC",
@@ -113,9 +111,7 @@ def test_simulated_fill_uses_execution_open_not_reference_price(tmp_path: Path) 
             EXECUTION_OPENS[ticker]
         )
         assert by_ticker.loc[ticker, "simulated_fill_quantity"] == QUANTITIES[ticker]
-        assert by_ticker.loc[ticker, "reference_price"] == pytest.approx(
-            REFERENCE_PRICES[ticker]
-        )
+        assert by_ticker.loc[ticker, "reference_price"] == pytest.approx(REFERENCE_PRICES[ticker])
         assert by_ticker.loc[ticker, "reference_price"] != pytest.approx(
             by_ticker.loc[ticker, "execution_open_price"]
         )
@@ -152,9 +148,7 @@ def test_blank_observed_execution_date_blocks_fill(tmp_path: Path) -> None:
 
 def test_observed_execution_date_mismatch_blocks_fill(tmp_path: Path) -> None:
     template = _valid_template()
-    template.loc[template["ticker"].eq("AMZN"), "observed_execution_date"] = (
-        "2026-06-16"
-    )
+    template.loc[template["ticker"].eq("AMZN"), "observed_execution_date"] = "2026-06-16"
     _assert_blocks_without_output(tmp_path, template)
 
 
@@ -169,9 +163,7 @@ def test_blocked_order_blocks_fill(tmp_path: Path) -> None:
 
 def test_unaffordable_order_plan_blocks_fill(tmp_path: Path) -> None:
     template = _valid_template()
-    template.loc[template["ticker"].eq("AMZN"), "cash_affordability_status"] = (
-        "insufficient_cash"
-    )
+    template.loc[template["ticker"].eq("AMZN"), "cash_affordability_status"] = "insufficient_cash"
     _assert_blocks_without_output(tmp_path, template)
 
 

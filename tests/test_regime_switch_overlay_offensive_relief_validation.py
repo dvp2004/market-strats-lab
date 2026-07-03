@@ -47,6 +47,7 @@ def test_create_relief_summary():
     assert row["calmar_delta"] == 0.025
     assert row["trade_count_delta"] == -16
 
+
 def test_relief_gate_report_selects_best_passing_candidate():
     summary = pd.DataFrame(
         {
@@ -151,8 +152,7 @@ def test_relief_gate_report_selects_best_passing_candidate():
     )
 
     final_gate = gate_report[
-        gate_report["gate"]
-        == "Offensive relief confirmation is validated for promotion."
+        gate_report["gate"] == "Offensive relief confirmation is validated for promotion."
     ].iloc[0]
 
     assert final_gate["status"] == "Passed"
@@ -160,20 +160,14 @@ def test_relief_gate_report_selects_best_passing_candidate():
 
     baseline_final = gate_report[
         (gate_report["candidate_variant"] == "baseline_relief")
-        & (
-            gate_report["gate"]
-            == "Offensive relief variant passes all validation gates."
-        )
+        & (gate_report["gate"] == "Offensive relief variant passes all validation gates.")
     ].iloc[0]
 
     assert baseline_final["status"] == "Failed"
 
     loose_final = gate_report[
         (gate_report["candidate_variant"] == "loose_relief")
-        & (
-            gate_report["gate"]
-            == "Offensive relief variant passes all validation gates."
-        )
+        & (gate_report["gate"] == "Offensive relief variant passes all validation gates.")
     ].iloc[0]
 
     assert loose_final["status"] == "Passed"

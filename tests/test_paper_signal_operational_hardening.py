@@ -66,9 +66,7 @@ def _base_config(tmp_path: Path, *, audit_date: str | None = "2026-06-02") -> di
     }
     config = {PHASE18A: section, "phase17a_strategy_factory": {"btc_max_weight": 0.10}}
     if audit_date is not None:
-        config["phase15m_fresh_current_signal_generation"] = {
-            "audit_current_date": audit_date
-        }
+        config["phase15m_fresh_current_signal_generation"] = {"audit_current_date": audit_date}
     else:
         config["phase15m_fresh_current_signal_generation"] = {}
     return config
@@ -544,16 +542,10 @@ def test_save_phase18a_writes_outputs_and_passes_manual_preview_gate(tmp_path):
     fresh_processed_dir = tmp_path / "data" / "fresh" / "processed"
     latest_signal_path = reports_dir / "paper_trading" / "latest_signal.csv"
     watchlist_path = (
-        reports_dir
-        / "strategy_factory"
-        / "watchlist"
-        / "phase17c_watchlist_candidates.csv"
+        reports_dir / "strategy_factory" / "watchlist" / "phase17c_watchlist_candidates.csv"
     )
     latest_allocations_path = (
-        reports_dir
-        / "strategy_factory"
-        / "transactions"
-        / "strategy_latest_allocations.csv"
+        reports_dir / "strategy_factory" / "transactions" / "strategy_latest_allocations.csv"
     )
 
     fresh_stream_path.parent.mkdir(parents=True, exist_ok=True)

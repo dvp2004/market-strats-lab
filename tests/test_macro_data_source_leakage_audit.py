@@ -146,9 +146,7 @@ def test_phase10b_gate_report_passes_valid_spec():
     conclusion = build_phase10b_conclusion(gate_report, recommendation)
 
     assert bool(gate_report["passed"].all())
-    assert conclusion.iloc[0]["verdict"] == (
-        "Completed — macro data-source leakage audit passed"
-    )
+    assert conclusion.iloc[0]["verdict"] == ("Completed — macro data-source leakage audit passed")
 
 
 def test_phase10b_gate_report_fails_if_strategy_test_allowed():

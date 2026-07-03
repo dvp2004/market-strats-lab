@@ -111,9 +111,16 @@ def _config(tmp_path: Path):
             "candidate_system_id": "phase6b_loose_relief_execution_realistic_overlay",
             "canonical_endpoint": "2026-05-01",
             "source_reports": {
-                "phase15h_conclusion": str(tmp_path / "phase15h_switch_log_reconciliation_conclusion.csv"),
-                "phase15h_gate_report": str(tmp_path / "phase15h_switch_log_reconciliation_gate_report.csv"),
-                "phase15h_decision": str(tmp_path / "phase15h_switch_log_reconciliation_reconciliation_decision_report.csv"),
+                "phase15h_conclusion": str(
+                    tmp_path / "phase15h_switch_log_reconciliation_conclusion.csv"
+                ),
+                "phase15h_gate_report": str(
+                    tmp_path / "phase15h_switch_log_reconciliation_gate_report.csv"
+                ),
+                "phase15h_decision": str(
+                    tmp_path
+                    / "phase15h_switch_log_reconciliation_reconciliation_decision_report.csv"
+                ),
             },
             "expected_switch_count": 36,
             "switch_count_abs_tolerance": 2,
@@ -182,7 +189,9 @@ def _config(tmp_path: Path):
             "source_reports": {
                 "phase15i_conclusion": str(tmp_path / "phase15i_column_semantics_conclusion.csv"),
                 "phase15i_gate_report": str(tmp_path / "phase15i_column_semantics_gate_report.csv"),
-                "selected_switch_definition": str(tmp_path / "phase15i_column_semantics_selected_switch_definition.csv"),
+                "selected_switch_definition": str(
+                    tmp_path / "phase15i_column_semantics_selected_switch_definition.csv"
+                ),
             },
             "expected_switch_count": 36,
             "switch_count_abs_tolerance": 2,
@@ -261,6 +270,9 @@ def test_phase15i_to_15j_selects_target_allocation_not_noisy_position(tmp_path, 
     assert bool(summary["refined_switch_log_reconciled_and_usable"])
 
     decision = out_j["decision_report"].iloc[0]
-    assert decision["decision"] == "refined_canonical_switch_log_reconciled_fresh_signal_phase_allowed_next"
+    assert (
+        decision["decision"]
+        == "refined_canonical_switch_log_reconciled_fresh_signal_phase_allowed_next"
+    )
     assert bool(decision["fresh_signal_generation_allowed_next"])
     assert not bool(decision["paper_trading_ready"])

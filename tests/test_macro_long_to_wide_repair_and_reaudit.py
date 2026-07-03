@@ -120,8 +120,7 @@ def _config(tmp_path: Path):
         "phase13q_macro_long_to_wide_repair_execution": {
             "enabled": True,
             "execution_role": (
-                "Macro long-to-wide repair execution and guarded dataset "
-                "reassembly only"
+                "Macro long-to-wide repair execution and guarded dataset reassembly only"
             ),
             "phase_branch": "Phase 13 multi-factor model architecture planning",
             "source_phase": "Phase 13P",
@@ -140,27 +139,17 @@ def _config(tmp_path: Path):
             "allow_candidate_promotion": False,
             "allow_final_candidate_change": False,
             "source_reports": {
-                "phase13p_conclusion": str(
-                    tmp_path / "phase13p_repair_spec_conclusion.csv"
-                ),
-                "phase13p_gate_report": str(
-                    tmp_path / "phase13p_repair_spec_gate_report.csv"
-                ),
+                "phase13p_conclusion": str(tmp_path / "phase13p_repair_spec_conclusion.csv"),
+                "phase13p_gate_report": str(tmp_path / "phase13p_repair_spec_gate_report.csv"),
                 "phase13p_repair_decision": str(
                     tmp_path / "phase13p_repair_spec_repair_decision.csv"
                 ),
-                "phase13p_repair_spec": str(
-                    tmp_path / "phase13p_repair_spec_repair_spec.csv"
-                ),
+                "phase13p_repair_spec": str(tmp_path / "phase13p_repair_spec_repair_spec.csv"),
                 "feature_panel": str(tmp_path / "phase13i_feature_panel.csv"),
-                "technical_only_dataset": str(
-                    tmp_path / "phase13m_ml_feature_dataset_v1.csv"
-                ),
+                "technical_only_dataset": str(tmp_path / "phase13m_ml_feature_dataset_v1.csv"),
             },
             "input_data": {
-                "macro_aligned_candidates": [
-                    str(tmp_path / "phase10c_macro_aligned_series.csv")
-                ],
+                "macro_aligned_candidates": [str(tmp_path / "phase10c_macro_aligned_series.csv")],
                 "technical_price_candidates": [str(tmp_path / "spy_price_panel.csv")],
                 "date_column_candidates": ["trading_date", "date", "as_of_date"],
                 "series_column_candidates": ["series_id"],
@@ -191,9 +180,7 @@ def _config(tmp_path: Path):
                 "holdout_end": "2026-05-01",
             },
             "phase13r_boundary": {
-                "allowed_next_step": (
-                    "Repaired macro dataset quality and leakage audit only"
-                ),
+                "allowed_next_step": ("Repaired macro dataset quality and leakage audit only"),
                 "forbidden_next_step": (
                     "model training, model selection, signal creation, allocation "
                     "rule, strategy backtest, paper-trading deployment, candidate "
@@ -232,17 +219,23 @@ def _config(tmp_path: Path):
             },
             "phase13q_reports": {
                 "source_report_check": str(tmp_path / "phase13q_repair_source_report_check.csv"),
-                "phase13p_result_check": str(tmp_path / "phase13q_repair_phase13p_result_check.csv"),
+                "phase13p_result_check": str(
+                    tmp_path / "phase13q_repair_phase13p_result_check.csv"
+                ),
                 "macro_source_check": str(tmp_path / "phase13q_repair_macro_source_check.csv"),
                 "macro_wide_panel": str(tmp_path / "phase13q_repair_macro_wide_panel.csv"),
                 "macro_repair_panel": str(tmp_path / "phase13q_repair_macro_repair_panel.csv"),
-                "macro_availability_report": str(tmp_path / "phase13q_repair_macro_availability_report.csv"),
+                "macro_availability_report": str(
+                    tmp_path / "phase13q_repair_macro_availability_report.csv"
+                ),
                 "family_usage_report": str(tmp_path / "phase13q_repair_family_usage_report.csv"),
                 "reassembled_dataset": str(tmp_path / "phase13q_ml_feature_dataset_v1.csv"),
                 "target_summary": str(tmp_path / "phase13q_repair_target_summary.csv"),
                 "split_summary": str(tmp_path / "phase13q_repair_split_summary.csv"),
                 "dataset_metadata": str(tmp_path / "phase13q_repair_dataset_metadata.csv"),
-                "phase13r_boundary_check": str(tmp_path / "phase13q_repair_phase13r_boundary_check.csv"),
+                "phase13r_boundary_check": str(
+                    tmp_path / "phase13q_repair_phase13r_boundary_check.csv"
+                ),
                 "scope_boundary_check": str(tmp_path / "phase13q_repair_scope_boundary_check.csv"),
                 "summary": str(tmp_path / "phase13q_repair_summary.csv"),
                 "gate_report": str(tmp_path / "phase13q_repair_gate_report.csv"),
@@ -267,8 +260,7 @@ def _config(tmp_path: Path):
             },
             "phase13s_boundary": {
                 "allowed_next_step": (
-                    "ML model training pre-registration and baseline-model "
-                    "design spec only"
+                    "ML model training pre-registration and baseline-model design spec only"
                 ),
                 "forbidden_next_step": (
                     "model training execution, model selection, signal creation, "

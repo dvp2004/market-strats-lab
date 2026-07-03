@@ -6,9 +6,7 @@ import pandas as pd
 
 
 SCRIPT_PATH = (
-    Path(__file__).resolve().parents[1]
-    / "scripts"
-    / "build_regime_informed_results_notebook.py"
+    Path(__file__).resolve().parents[1] / "scripts" / "build_regime_informed_results_notebook.py"
 )
 
 
@@ -130,7 +128,12 @@ def _write_notebook_source_data(root: Path) -> None:
         index=False,
     )
     pd.DataFrame(
-        [{"canonical_candidate_id": "canonical_spy_qqq_60_40", "manual_decision": "skip_due_warning"}]
+        [
+            {
+                "canonical_candidate_id": "canonical_spy_qqq_60_40",
+                "manual_decision": "skip_due_warning",
+            }
+        ]
     ).to_csv(tracking_dir / "regime_informed_manual_session_ledger.csv", index=False)
     pd.DataFrame(
         [{"phase21e_decision": "regime_informed_session_ingested_valid_manual_paper_only"}]
@@ -176,9 +179,7 @@ def test_notebook_contains_required_sections_and_local_only_content(tmp_path):
 
     text = output_notebook.read_text(encoding="utf-8")
     notebook = json.loads(text)
-    joined = "\n".join(
-        "".join(cell.get("source", [])) for cell in notebook["cells"]
-    )
+    joined = "\n".join("".join(cell.get("source", [])) for cell in notebook["cells"])
     for heading in builder.SECTION_HEADINGS:
         assert heading in joined
     assert "http://" not in text

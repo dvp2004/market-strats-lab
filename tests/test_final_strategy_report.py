@@ -25,9 +25,7 @@ def test_create_final_strategy_decision_report(tmp_path: Path):
 
     pd.DataFrame(
         {
-            "strategy": [
-                "60/40 Annual Rebalanced Core-Satellite SPY B&H + 12M Momentum"
-            ],
+            "strategy": ["60/40 Annual Rebalanced Core-Satellite SPY B&H + 12M Momentum"],
             "start_date": ["2000-01-01"],
             "end_date": ["2020-01-01"],
             "end_value": [110_000],

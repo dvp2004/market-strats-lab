@@ -43,7 +43,14 @@ def _session_rows(session_date: str = "2026-06-11", signal_date: str = "2026-06-
     )
 
 
-def _write_base(tmp_path: Path, *, filled: bool = True, stale: bool = False, valid: bool = True, ingested: bool = False) -> Path:
+def _write_base(
+    tmp_path: Path,
+    *,
+    filled: bool = True,
+    stale: bool = False,
+    valid: bool = True,
+    ingested: bool = False,
+) -> Path:
     tracking = tmp_path / "tracking"
     tracking.mkdir(parents=True, exist_ok=True)
     template = _session_rows()
@@ -147,9 +154,7 @@ def test_runbook_and_dashboard_include_safety_language(tmp_path):
         reports_dir=tmp_path,
     )
 
-    runbook = (tracking / "regime_informed_next_session_runbook.md").read_text(
-        encoding="utf-8"
-    )
+    runbook = (tracking / "regime_informed_next_session_runbook.md").read_text(encoding="utf-8")
     assert "NO LIVE TRADING" in runbook
     assert "NO REAL MONEY" in runbook
     assert "NO BROKER/API" in runbook

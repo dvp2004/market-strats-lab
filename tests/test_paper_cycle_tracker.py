@@ -29,7 +29,11 @@ def _tear_sheet(*, warnings: str = "BTC-USD", blocks: str = "none") -> pd.DataFr
     )
     return pd.DataFrame(
         [
-            {"category": "signal_date_policy", "key": "selected_signal_date", "value": "2026-06-08"},
+            {
+                "category": "signal_date_policy",
+                "key": "selected_signal_date",
+                "value": "2026-06-08",
+            },
             {"category": "signal_date_policy", "key": "data_as_of_date", "value": "2026-06-08"},
             {
                 "category": "fresh_data_quality",
@@ -98,7 +102,9 @@ def _phase18a_conclusion(*, passed: bool = True) -> pd.DataFrame:
     )
 
 
-def _quality(*, warnings: str = "btc_weekend_data_available_common_date_caveat", blocks: str = "") -> pd.DataFrame:
+def _quality(
+    *, warnings: str = "btc_weekend_data_available_common_date_caveat", blocks: str = ""
+) -> pd.DataFrame:
     return pd.DataFrame(
         [
             {"symbol": "SPY", "warnings": "", "blocking_failures": "", "quality_status": "passed"},
@@ -182,7 +188,9 @@ def _cycle_row(*, clean: bool, warning: bool = False, blocked: bool = False, day
 def test_cycle_history_is_created_from_phase18a_tear_sheet(tmp_path):
     _write_phase18a_fixture(tmp_path)
 
-    outputs = save_phase18b_paper_cycle_tracker(config=_config(tmp_path), reports_dir=tmp_path / "reports")
+    outputs = save_phase18b_paper_cycle_tracker(
+        config=_config(tmp_path), reports_dir=tmp_path / "reports"
+    )
     history = outputs["paper_cycle_history"]
     latest = outputs["paper_cycle_latest"].iloc[0]
 

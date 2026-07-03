@@ -119,15 +119,9 @@ def test_save_phase8e_writes_expected_reports(tmp_path):
     assert not outputs["inventory"].empty
     assert (tmp_path / "phase8e_research_degrees_of_freedom_inventory.csv").exists()
     assert (tmp_path / "phase8e_research_degrees_of_freedom_summary.csv").exists()
-    assert (
-        tmp_path / "phase8e_research_degrees_of_freedom_claim_adjustment.csv"
-    ).exists()
-    assert (
-        tmp_path / "phase8e_research_degrees_of_freedom_gate_report.csv"
-    ).exists()
-    assert (
-        tmp_path / "phase8e_research_degrees_of_freedom_conclusion.csv"
-    ).exists()
+    assert (tmp_path / "phase8e_research_degrees_of_freedom_claim_adjustment.csv").exists()
+    assert (tmp_path / "phase8e_research_degrees_of_freedom_gate_report.csv").exists()
+    assert (tmp_path / "phase8e_research_degrees_of_freedom_conclusion.csv").exists()
     assert (tmp_path / "phase8e_research_degrees_of_freedom_audit.md").exists()
 
 

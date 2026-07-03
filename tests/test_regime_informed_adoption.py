@@ -106,7 +106,9 @@ def _write_sources(tmp_path: Path) -> dict:
     dashboard_dir.mkdir(parents=True)
     _targets().to_csv(tracking_dir / "regime_informed_paper_targets.csv", index=False)
     _orders().to_csv(tracking_dir / "regime_informed_paper_orders_preview.csv", index=False)
-    _tear_sheet().to_csv(tracking_dir / "regime_informed_daily_tracking_tear_sheet.csv", index=False)
+    _tear_sheet().to_csv(
+        tracking_dir / "regime_informed_daily_tracking_tear_sheet.csv", index=False
+    )
     _adoption_status().to_csv(
         tracking_dir / "regime_informed_tracking_adoption_status.csv",
         index=False,

@@ -13,14 +13,10 @@ def _config(reports_dir: Path) -> dict:
             "enabled": True,
             "output_dir": str(reports_dir / "paper_trading" / "manual_sessions"),
             "dashboard_dir": str(reports_dir / "paper_trading" / "dashboard"),
-            "source_manual_session_dir": str(
-                reports_dir / "paper_trading" / "manual_sessions"
-            ),
+            "source_manual_session_dir": str(reports_dir / "paper_trading" / "manual_sessions"),
             "filled_session_filename": "manual_paper_session_filled.csv",
             "template_filename": "manual_paper_session_template.csv",
-            "archive_dir": str(
-                reports_dir / "paper_trading" / "manual_sessions" / "archive"
-            ),
+            "archive_dir": str(reports_dir / "paper_trading" / "manual_sessions" / "archive"),
             "archive_completed_valid_sessions": True,
             "stale_filled_file_policy": "block_current_ingestion",
             "paper_only": True,
@@ -176,9 +172,7 @@ def test_stale_filled_file_is_blocked(tmp_path):
     status = outputs["manual_paper_session_rollover_status"].iloc[0]
     assert bool(status["filled_session_stale"])
     assert status["rollover_action"] == "stale_file_blocked"
-    assert status["rollover_blocking_reason"] == (
-        "filled_session_does_not_match_current_template"
-    )
+    assert status["rollover_blocking_reason"] == ("filled_session_does_not_match_current_template")
 
 
 def test_valid_already_ingested_filled_file_is_archived(tmp_path):
@@ -231,14 +225,9 @@ def test_next_session_runbook_and_dashboard_are_written_with_safety_language(tmp
 
     manual_dir = reports_dir / "paper_trading" / "manual_sessions"
     dashboard_path = (
-        reports_dir
-        / "paper_trading"
-        / "dashboard"
-        / "manual_paper_session_rollover_status.csv"
+        reports_dir / "paper_trading" / "dashboard" / "manual_paper_session_rollover_status.csv"
     )
-    runbook = (manual_dir / "manual_paper_next_session_runbook.md").read_text(
-        encoding="utf-8"
-    )
+    runbook = (manual_dir / "manual_paper_next_session_runbook.md").read_text(encoding="utf-8")
     dashboard = pd.read_csv(dashboard_path).iloc[0]
     for text in [
         "NO LIVE TRADING",

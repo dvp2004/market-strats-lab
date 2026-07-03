@@ -11,9 +11,7 @@ def test_create_regime_switch_overlay_validation_conclusion_contains_statuses():
     conclusion = create_regime_switch_overlay_validation_conclusion()
 
     assert not conclusion.empty
-    assert {"claim", "status", "evidence_quality", "interpretation"}.issubset(
-        conclusion.columns
-    )
+    assert {"claim", "status", "evidence_quality", "interpretation"}.issubset(conclusion.columns)
     assert "Survived" in set(conclusion["status"])
     assert "Failed" in set(conclusion["status"])
     assert "Not yet" in set(conclusion["status"])

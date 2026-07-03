@@ -131,9 +131,7 @@ def test_phase8g_gate_report_passes_when_all_checks_pass(tmp_path):
     conclusion = build_phase8g_conclusion(gate_report)
 
     assert bool(gate_report["passed"].all())
-    assert conclusion.iloc[0]["verdict"] == (
-        "Completed — Phase 8 checkpoint consistent"
-    )
+    assert conclusion.iloc[0]["verdict"] == ("Completed — Phase 8 checkpoint consistent")
 
 
 def test_save_phase8g_writes_expected_reports(tmp_path, monkeypatch):
@@ -191,9 +189,7 @@ def test_save_phase8g_writes_expected_reports(tmp_path, monkeypatch):
     assert not outputs["gate_report"].empty
     assert (reports_dir / "phase8g_final_checkpoint_readme_phrase_check.csv").exists()
     assert (reports_dir / "phase8g_final_checkpoint_config_flag_check.csv").exists()
-    assert (
-        reports_dir / "phase8g_final_checkpoint_report_inventory_check.csv"
-    ).exists()
+    assert (reports_dir / "phase8g_final_checkpoint_report_inventory_check.csv").exists()
     assert (reports_dir / "phase8g_final_checkpoint_canonical_check.csv").exists()
     assert (reports_dir / "phase8g_final_checkpoint_gate_report.csv").exists()
     assert (reports_dir / "phase8g_final_checkpoint_conclusion.csv").exists()

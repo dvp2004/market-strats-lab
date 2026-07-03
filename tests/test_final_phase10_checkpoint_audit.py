@@ -286,9 +286,7 @@ def test_phase10h_gate_report_passes_valid_checkpoint(tmp_path):
     conclusion = build_phase10h_conclusion(gate_report)
 
     assert bool(gate_report["passed"].all())
-    assert conclusion.iloc[0]["verdict"] == (
-        "Completed — final Phase 10 checkpoint passed"
-    )
+    assert conclusion.iloc[0]["verdict"] == ("Completed — final Phase 10 checkpoint passed")
 
 
 def test_phase10h_fails_if_readme_overclaims(tmp_path):
@@ -324,9 +322,7 @@ def test_save_phase10h_writes_expected_reports(tmp_path):
     assert (tmp_path / "phase10h_final_checkpoint_config_flag_check.csv").exists()
     assert (tmp_path / "phase10h_final_checkpoint_report_inventory_check.csv").exists()
     assert (tmp_path / "phase10h_final_checkpoint_phase10g_closeout_check.csv").exists()
-    assert (
-        tmp_path / "phase10h_final_checkpoint_canonical_hierarchy_check.csv"
-    ).exists()
+    assert (tmp_path / "phase10h_final_checkpoint_canonical_hierarchy_check.csv").exists()
     assert (tmp_path / "phase10h_final_checkpoint_summary.csv").exists()
     assert (tmp_path / "phase10h_final_checkpoint_gate_report.csv").exists()
     assert (tmp_path / "phase10h_final_checkpoint_conclusion.csv").exists()

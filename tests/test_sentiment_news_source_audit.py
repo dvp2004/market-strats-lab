@@ -129,9 +129,9 @@ def test_schemas_require_point_in_time_lineage_and_model_versioning():
 
 def test_timestamp_revision_and_entity_policies_block_lookahead_shortcuts():
     timestamp_text = " ".join(
-        build_timestamp_availability_policy(
-            {"conservative_processing_delay_minutes": 5}
-        )["requirement"].astype(str)
+        build_timestamp_availability_policy({"conservative_processing_delay_minutes": 5})[
+            "requirement"
+        ].astype(str)
     ).lower()
     revision_text = " ".join(
         build_revision_deduplication_policy()["requirement"].astype(str)
@@ -178,16 +178,12 @@ def test_news_event_validator_rejects_canonical_event_without_approved_license()
     events = _valid_events()
     events.loc[0, "license_class"] = "experimental"
     report = validate_news_event_frame(events)
-    row = report.loc[
-        report["gate"].eq("canonical_rows_have_provenance_and_identity")
-    ].iloc[0]
+    row = report.loc[report["gate"].eq("canonical_rows_have_provenance_and_identity")].iloc[0]
     assert not bool(row["passed"])
 
 
 def test_sentiment_validator_accepts_bounded_point_in_time_score():
-    report = validate_sentiment_observation_frame(
-        _valid_sentiment(), source_events=_valid_events()
-    )
+    report = validate_sentiment_observation_frame(_valid_sentiment(), source_events=_valid_events())
     assert report["passed"].all()
 
 
@@ -195,14 +191,10 @@ def test_sentiment_validator_rejects_out_of_bounds_and_pre_source_feature():
     sentiment = _valid_sentiment()
     sentiment.loc[0, "sentiment_score"] = 1.5
     sentiment.loc[0, "feature_available_timestamp_utc"] = "2025-08-01T16:34:00Z"
-    report = validate_sentiment_observation_frame(
-        sentiment, source_events=_valid_events()
-    )
+    report = validate_sentiment_observation_frame(sentiment, source_events=_valid_events())
     assert not bool(report.loc[report["gate"].eq("scores_bounded"), "passed"].iloc[0])
     assert not bool(
-        report.loc[
-            report["gate"].eq("feature_not_before_source_knowledge"), "passed"
-        ].iloc[0]
+        report.loc[report["gate"].eq("feature_not_before_source_knowledge"), "passed"].iloc[0]
     )
 
 
@@ -211,12 +203,10 @@ def test_phase23d_writes_reports_without_reports_reports_and_blocks_training(tmp
         "phase23d_sentiment_news_source_audit": {
             "enabled": True,
             "output_dir": (
-                "reports/individual_equity_decision_system/"
-                "phase23d_sentiment_news_source_audit"
+                "reports/individual_equity_decision_system/phase23d_sentiment_news_source_audit"
             ),
             "dashboard_status_path": (
-                "reports/paper_trading/dashboard/"
-                "phase23d_sentiment_news_source_audit_status.csv"
+                "reports/paper_trading/dashboard/phase23d_sentiment_news_source_audit_status.csv"
             ),
         }
     }

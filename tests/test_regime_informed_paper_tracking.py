@@ -62,11 +62,17 @@ def _phase21a() -> pd.DataFrame:
     )
 
 
-def _tear_sheet(signal: str = "mode=offensive_spy; exposure=1.0; action=risk_on_hold_preview") -> pd.DataFrame:
+def _tear_sheet(
+    signal: str = "mode=offensive_spy; exposure=1.0; action=risk_on_hold_preview",
+) -> pd.DataFrame:
     return pd.DataFrame(
         [
             {"category": "signal", "key": "selected_signal_date", "value": "2026-06-08"},
-            {"category": "baseline_phase6_signal", "key": "phase6_baseline_signal", "value": signal},
+            {
+                "category": "baseline_phase6_signal",
+                "key": "phase6_baseline_signal",
+                "value": signal,
+            },
         ]
     )
 
@@ -125,7 +131,9 @@ def _write_sources(tmp_path: Path) -> dict:
     hardening_dir = tmp_path / "paper_trading" / "operational_hardening"
     for directory in [reconciliation_dir, regime_dir, tracking_dir, hardening_dir]:
         directory.mkdir(parents=True)
-    _shortlist().to_csv(reconciliation_dir / "phase21b_paper_shortlist_recommendation.csv", index=False)
+    _shortlist().to_csv(
+        reconciliation_dir / "phase21b_paper_shortlist_recommendation.csv", index=False
+    )
     pd.DataFrame({"canonical_candidate_id": [SPY_QQQ_60_40_ID, BTC_INVOL_ID]}).to_csv(
         reconciliation_dir / "phase21b_current_paper_candidate_reconciliation.csv",
         index=False,

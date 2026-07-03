@@ -83,8 +83,12 @@ def _config(tmp_path: Path):
             "allow_paper_trading_ready_claim": False,
             "source_reports": {
                 "phase13aw_conclusion": str(tmp_path / "phase13aw_route_selection_conclusion.csv"),
-                "phase13aw_gate_report": str(tmp_path / "phase13aw_route_selection_gate_report.csv"),
-                "phase13aw_route_selection_report": str(tmp_path / "phase13aw_route_selection_route_selection_report.csv"),
+                "phase13aw_gate_report": str(
+                    tmp_path / "phase13aw_route_selection_gate_report.csv"
+                ),
+                "phase13aw_route_selection_report": str(
+                    tmp_path / "phase13aw_route_selection_route_selection_report.csv"
+                ),
             },
             "visual_source_policy": {
                 "candidate_return_columns": ["strategy_return"],
@@ -97,15 +101,55 @@ def _config(tmp_path: Path):
                 "date_columns": ["decision_date"],
             },
             "artefact_registry": [
-                {"artefact_key": "equity_curve", "required": True, "csv_path": "x", "chart_path": "x"},
-                {"artefact_key": "drawdown_curve", "required": True, "csv_path": "x", "chart_path": "x"},
-                {"artefact_key": "exposure_timeline", "required": True, "csv_path": "x", "chart_path": "x"},
+                {
+                    "artefact_key": "equity_curve",
+                    "required": True,
+                    "csv_path": "x",
+                    "chart_path": "x",
+                },
+                {
+                    "artefact_key": "drawdown_curve",
+                    "required": True,
+                    "csv_path": "x",
+                    "chart_path": "x",
+                },
+                {
+                    "artefact_key": "exposure_timeline",
+                    "required": True,
+                    "csv_path": "x",
+                    "chart_path": "x",
+                },
                 {"artefact_key": "trade_log", "required": True, "csv_path": "x", "chart_path": ""},
-                {"artefact_key": "switch_event_log", "required": True, "csv_path": "x", "chart_path": ""},
-                {"artefact_key": "money_made_lost", "required": True, "csv_path": "x", "chart_path": ""},
-                {"artefact_key": "benchmark_comparison", "required": True, "csv_path": "x", "chart_path": ""},
-                {"artefact_key": "rolling_relative_performance", "required": True, "csv_path": "x", "chart_path": "x"},
-                {"artefact_key": "paper_trading_signal_template_preview", "required": True, "csv_path": "x", "chart_path": ""},
+                {
+                    "artefact_key": "switch_event_log",
+                    "required": True,
+                    "csv_path": "x",
+                    "chart_path": "",
+                },
+                {
+                    "artefact_key": "money_made_lost",
+                    "required": True,
+                    "csv_path": "x",
+                    "chart_path": "",
+                },
+                {
+                    "artefact_key": "benchmark_comparison",
+                    "required": True,
+                    "csv_path": "x",
+                    "chart_path": "",
+                },
+                {
+                    "artefact_key": "rolling_relative_performance",
+                    "required": True,
+                    "csv_path": "x",
+                    "chart_path": "x",
+                },
+                {
+                    "artefact_key": "paper_trading_signal_template_preview",
+                    "required": True,
+                    "csv_path": "x",
+                    "chart_path": "",
+                },
             ],
             "signal_mapping_preview_policy": {
                 "preview_only": True,
@@ -145,8 +189,12 @@ def _config(tmp_path: Path):
                 "conclusion": str(tmp_path / "phase14a_visual_prereg_conclusion.csv"),
                 "gate_report": str(tmp_path / "phase14a_visual_prereg_gate_report.csv"),
                 "artefact_registry": str(tmp_path / "phase14a_visual_prereg_artefact_registry.csv"),
-                "signal_mapping_preview_policy": str(tmp_path / "phase14a_visual_prereg_signal_mapping_preview_policy.csv"),
-                "visual_source_policy": str(tmp_path / "phase14a_visual_prereg_visual_source_policy.csv"),
+                "signal_mapping_preview_policy": str(
+                    tmp_path / "phase14a_visual_prereg_signal_mapping_preview_policy.csv"
+                ),
+                "visual_source_policy": str(
+                    tmp_path / "phase14a_visual_prereg_visual_source_policy.csv"
+                ),
             },
             "readiness_thresholds": {"min_rows": 1000},
             "phase14c_boundary": {
@@ -170,7 +218,9 @@ def _config(tmp_path: Path):
                 "phase14b_conclusion": str(tmp_path / "phase14b_visual_readiness_conclusion.csv"),
                 "phase14b_gate_report": str(tmp_path / "phase14b_visual_readiness_gate_report.csv"),
                 "artefact_registry": str(tmp_path / "phase14a_visual_prereg_artefact_registry.csv"),
-                "visual_source_policy": str(tmp_path / "phase14a_visual_prereg_visual_source_policy.csv"),
+                "visual_source_policy": str(
+                    tmp_path / "phase14a_visual_prereg_visual_source_policy.csv"
+                ),
             },
             "report_policy": {
                 "initial_capital": 10000.0,
@@ -203,13 +253,23 @@ def _config(tmp_path: Path):
                 "gate_report": str(tmp_path / "phase14c_visual_backtest_gate_report.csv"),
                 "equity_curve": str(tmp_path / "phase14c_visual_backtest_equity_curve.csv"),
                 "drawdown_curve": str(tmp_path / "phase14c_visual_backtest_drawdown_curve.csv"),
-                "exposure_timeline": str(tmp_path / "phase14c_visual_backtest_exposure_timeline.csv"),
+                "exposure_timeline": str(
+                    tmp_path / "phase14c_visual_backtest_exposure_timeline.csv"
+                ),
                 "trade_log": str(tmp_path / "phase14c_visual_backtest_trade_log.csv"),
                 "switch_event_log": str(tmp_path / "phase14c_visual_backtest_switch_event_log.csv"),
-                "money_made_lost": str(tmp_path / "phase14c_visual_backtest_money_made_lost_table.csv"),
-                "benchmark_comparison": str(tmp_path / "phase14c_visual_backtest_benchmark_comparison.csv"),
-                "rolling_relative_performance": str(tmp_path / "phase14c_visual_backtest_rolling_relative_performance.csv"),
-                "signal_template_preview": str(tmp_path / "phase14c_visual_backtest_signal_template_preview.csv"),
+                "money_made_lost": str(
+                    tmp_path / "phase14c_visual_backtest_money_made_lost_table.csv"
+                ),
+                "benchmark_comparison": str(
+                    tmp_path / "phase14c_visual_backtest_benchmark_comparison.csv"
+                ),
+                "rolling_relative_performance": str(
+                    tmp_path / "phase14c_visual_backtest_rolling_relative_performance.csv"
+                ),
+                "signal_template_preview": str(
+                    tmp_path / "phase14c_visual_backtest_signal_template_preview.csv"
+                ),
             },
             "chart_files": [
                 str(tmp_path / "phase14c_visual_backtest_equity_curve.png"),

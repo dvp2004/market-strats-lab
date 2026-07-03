@@ -121,10 +121,18 @@ def _config(tmp_path: Path):
             "allow_feature_importance": False,
             "source_reports": {
                 "phase14f_conclusion": str(tmp_path / "phase14f_source_correction_conclusion.csv"),
-                "phase14f_gate_report": str(tmp_path / "phase14f_source_correction_gate_report.csv"),
-                "phase14f_decision_report": str(tmp_path / "phase14f_source_correction_decision_report.csv"),
-                "phase14f_correction_spec_report": str(tmp_path / "phase14f_source_correction_correction_spec_report.csv"),
-                "phase13aw_route_selection": str(tmp_path / "phase13aw_route_selection_route_selection_report.csv"),
+                "phase14f_gate_report": str(
+                    tmp_path / "phase14f_source_correction_gate_report.csv"
+                ),
+                "phase14f_decision_report": str(
+                    tmp_path / "phase14f_source_correction_decision_report.csv"
+                ),
+                "phase14f_correction_spec_report": str(
+                    tmp_path / "phase14f_source_correction_correction_spec_report.csv"
+                ),
+                "phase13aw_route_selection": str(
+                    tmp_path / "phase13aw_route_selection_route_selection_report.csv"
+                ),
             },
             "strict_source_resolution_policy": {
                 "required_source_name_fragments": [
@@ -231,20 +239,42 @@ def _config(tmp_path: Path):
             "phase14g_reports": {
                 "conclusion": str(tmp_path / "phase14g_corrected_visual_conclusion.csv"),
                 "gate_report": str(tmp_path / "phase14g_corrected_visual_gate_report.csv"),
-                "strict_source_resolution_report": str(tmp_path / "phase14g_corrected_visual_strict_source_resolution_report.csv"),
-                "rejected_source_report": str(tmp_path / "phase14g_corrected_visual_rejected_source_report.csv"),
-                "benchmark_comparison": str(tmp_path / "phase14g_corrected_visual_benchmark_comparison.csv"),
-                "metric_reconciliation_report": str(tmp_path / "phase14g_corrected_visual_metric_reconciliation_report.csv"),
-                "side_by_side_comparison_report": str(tmp_path / "phase14g_corrected_visual_side_by_side_comparison_report.csv"),
-                "current_signal_state_report": str(tmp_path / "phase14g_corrected_visual_current_signal_state_report.csv"),
+                "strict_source_resolution_report": str(
+                    tmp_path / "phase14g_corrected_visual_strict_source_resolution_report.csv"
+                ),
+                "rejected_source_report": str(
+                    tmp_path / "phase14g_corrected_visual_rejected_source_report.csv"
+                ),
+                "benchmark_comparison": str(
+                    tmp_path / "phase14g_corrected_visual_benchmark_comparison.csv"
+                ),
+                "metric_reconciliation_report": str(
+                    tmp_path / "phase14g_corrected_visual_metric_reconciliation_report.csv"
+                ),
+                "side_by_side_comparison_report": str(
+                    tmp_path / "phase14g_corrected_visual_side_by_side_comparison_report.csv"
+                ),
+                "current_signal_state_report": str(
+                    tmp_path / "phase14g_corrected_visual_current_signal_state_report.csv"
+                ),
                 "equity_curve": str(tmp_path / "phase14g_corrected_visual_equity_curve.csv"),
                 "drawdown_curve": str(tmp_path / "phase14g_corrected_visual_drawdown_curve.csv"),
-                "exposure_timeline": str(tmp_path / "phase14g_corrected_visual_exposure_timeline.csv"),
+                "exposure_timeline": str(
+                    tmp_path / "phase14g_corrected_visual_exposure_timeline.csv"
+                ),
                 "trade_log": str(tmp_path / "phase14g_corrected_visual_trade_log.csv"),
-                "switch_event_log": str(tmp_path / "phase14g_corrected_visual_switch_event_log.csv"),
-                "money_made_lost": str(tmp_path / "phase14g_corrected_visual_money_made_lost_table.csv"),
-                "rolling_relative_performance": str(tmp_path / "phase14g_corrected_visual_rolling_relative_performance.csv"),
-                "signal_template_preview": str(tmp_path / "phase14g_corrected_visual_signal_template_preview.csv"),
+                "switch_event_log": str(
+                    tmp_path / "phase14g_corrected_visual_switch_event_log.csv"
+                ),
+                "money_made_lost": str(
+                    tmp_path / "phase14g_corrected_visual_money_made_lost_table.csv"
+                ),
+                "rolling_relative_performance": str(
+                    tmp_path / "phase14g_corrected_visual_rolling_relative_performance.csv"
+                ),
+                "signal_template_preview": str(
+                    tmp_path / "phase14g_corrected_visual_signal_template_preview.csv"
+                ),
             },
             "chart_files": [
                 str(tmp_path / "phase14g_corrected_visual_equity_curve.png"),

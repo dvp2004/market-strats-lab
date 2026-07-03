@@ -286,9 +286,7 @@ def test_phase11c_gate_report_passes_valid_spec():
     conclusion = build_phase11c_conclusion(gate_report)
 
     assert bool(gate_report["passed"].all())
-    assert conclusion.iloc[0]["verdict"] == (
-        "Completed — regime scoring rulebook spec passed"
-    )
+    assert conclusion.iloc[0]["verdict"] == ("Completed — regime scoring rulebook spec passed")
 
 
 def test_phase11c_fails_if_score_calculation_allowed():
@@ -343,9 +341,7 @@ def test_save_phase11c_writes_expected_reports(tmp_path):
     assert not outputs["conclusion"].empty
     assert (tmp_path / "phase11c_regime_scoring_source_architecture.csv").exists()
     assert (tmp_path / "phase11c_regime_scoring_component_rulebook.csv").exists()
-    assert (
-        tmp_path / "phase11c_regime_scoring_conceptual_direction_rulebook.csv"
-    ).exists()
+    assert (tmp_path / "phase11c_regime_scoring_conceptual_direction_rulebook.csv").exists()
     assert (tmp_path / "phase11c_regime_scoring_missingness_rules.csv").exists()
     assert (tmp_path / "phase11c_regime_scoring_weighting_principles.csv").exists()
     assert (tmp_path / "phase11c_regime_scoring_state_rulebook.csv").exists()

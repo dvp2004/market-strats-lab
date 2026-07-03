@@ -210,9 +210,7 @@ def test_phase10d_gate_report_passes_valid_diagnostic():
     conclusion = build_phase10d_conclusion(gate_report)
 
     assert bool(gate_report["passed"].all())
-    assert conclusion.iloc[0]["verdict"] == (
-        "Completed — diagnostic-only macro regime analysis"
-    )
+    assert conclusion.iloc[0]["verdict"] == ("Completed — diagnostic-only macro regime analysis")
 
 
 def test_phase10d_gate_report_fails_if_strategy_test_allowed():
@@ -288,4 +286,4 @@ def test_save_phase10d_writes_expected_reports(tmp_path):
     assert (tmp_path / "phase10d_macro_summary.csv").exists()
     assert (tmp_path / "phase10d_macro_gate_report.csv").exists()
     assert (tmp_path / "phase10d_macro_conclusion.csv").exists()
-    assert (tmp_path / "phase10d_diagnostic_macro_regime_analysis.md").exists() 
+    assert (tmp_path / "phase10d_diagnostic_macro_regime_analysis.md").exists()

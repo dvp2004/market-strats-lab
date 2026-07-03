@@ -69,8 +69,7 @@ def _write_dataset(tmp_path: Path):
             {
                 "dataset_id": "phase13q_ml_feature_dataset_v1",
                 "dataset_label": "multi_factor_technical_macro_dataset_v1",
-                "decision_date": pd.Timestamp("2010-01-01")
-                + pd.offsets.BDay(idx),
+                "decision_date": pd.Timestamp("2010-01-01") + pd.offsets.BDay(idx),
                 "split_label": split,
                 "future_return_63d": 0.01,
                 "future_63d_spy_return_state": target,
@@ -118,8 +117,7 @@ def _config(tmp_path: Path):
         "phase13u_registered_baseline_ml_training": {
             "enabled": True,
             "execution_role": (
-                "Registered baseline ML training execution and train/validation "
-                "evaluation only"
+                "Registered baseline ML training execution and train/validation evaluation only"
             ),
             "phase_branch": "Phase 13 multi-factor model architecture planning",
             "source_phase": "Phase 13T",
@@ -139,12 +137,8 @@ def _config(tmp_path: Path):
             "allow_candidate_promotion": False,
             "allow_final_candidate_change": False,
             "source_reports": {
-                "phase13t_conclusion": str(
-                    tmp_path / "phase13t_readiness_conclusion.csv"
-                ),
-                "phase13t_gate_report": str(
-                    tmp_path / "phase13t_readiness_gate_report.csv"
-                ),
+                "phase13t_conclusion": str(tmp_path / "phase13t_readiness_conclusion.csv"),
+                "phase13t_gate_report": str(tmp_path / "phase13t_readiness_gate_report.csv"),
                 "dataset": str(tmp_path / "phase13q_ml_feature_dataset_v1.csv"),
                 "dataset_schema_profile": str(
                     tmp_path / "phase13s_prereg_dataset_schema_profile.csv"
@@ -156,12 +150,8 @@ def _config(tmp_path: Path):
                 "model_family_registry": str(
                     tmp_path / "phase13s_prereg_model_family_registry.csv"
                 ),
-                "preprocessing_policy": str(
-                    tmp_path / "phase13s_prereg_preprocessing_policy.csv"
-                ),
-                "split_usage_policy": str(
-                    tmp_path / "phase13s_prereg_split_usage_policy.csv"
-                ),
+                "preprocessing_policy": str(tmp_path / "phase13s_prereg_preprocessing_policy.csv"),
+                "split_usage_policy": str(tmp_path / "phase13s_prereg_split_usage_policy.csv"),
                 "metric_registry": str(tmp_path / "phase13s_prereg_metric_registry.csv"),
             },
             "dataset_policy": {
@@ -244,9 +234,7 @@ def _config(tmp_path: Path):
                 },
             ],
             "phase13v_boundary": {
-                "allowed_next_step": (
-                    "ML training result quality and leakage audit only"
-                ),
+                "allowed_next_step": ("ML training result quality and leakage audit only"),
                 "forbidden_next_step": (
                     "holdout prediction generation, feature importance, signal "
                     "creation, allocation rule, strategy backtest"
@@ -287,16 +275,28 @@ def _config(tmp_path: Path):
                 "phase13t_result_check": str(tmp_path / "phase13u_ml_phase13t_result_check.csv"),
                 "dataset_profile": str(tmp_path / "phase13u_ml_dataset_profile.csv"),
                 "feature_matrix_profile": str(tmp_path / "phase13u_ml_feature_matrix_profile.csv"),
-                "model_registry_execution_report": str(tmp_path / "phase13u_ml_model_registry_execution_report.csv"),
-                "preprocessing_pipeline_report": str(tmp_path / "phase13u_ml_preprocessing_pipeline_report.csv"),
-                "train_validation_metric_report": str(tmp_path / "phase13u_ml_train_validation_metric_report.csv"),
-                "confusion_matrix_report": str(tmp_path / "phase13u_ml_confusion_matrix_report.csv"),
+                "model_registry_execution_report": str(
+                    tmp_path / "phase13u_ml_model_registry_execution_report.csv"
+                ),
+                "preprocessing_pipeline_report": str(
+                    tmp_path / "phase13u_ml_preprocessing_pipeline_report.csv"
+                ),
+                "train_validation_metric_report": str(
+                    tmp_path / "phase13u_ml_train_validation_metric_report.csv"
+                ),
+                "confusion_matrix_report": str(
+                    tmp_path / "phase13u_ml_confusion_matrix_report.csv"
+                ),
                 "calibration_report": str(tmp_path / "phase13u_ml_calibration_report.csv"),
                 "class_support_report": str(tmp_path / "phase13u_ml_class_support_report.csv"),
-                "baseline_comparison_report": str(tmp_path / "phase13u_ml_baseline_comparison_report.csv"),
+                "baseline_comparison_report": str(
+                    tmp_path / "phase13u_ml_baseline_comparison_report.csv"
+                ),
                 "validation_predictions": str(tmp_path / "phase13u_ml_validation_predictions.csv"),
                 "forbidden_output_check": str(tmp_path / "phase13u_ml_forbidden_output_check.csv"),
-                "phase13v_boundary_check": str(tmp_path / "phase13u_ml_phase13v_boundary_check.csv"),
+                "phase13v_boundary_check": str(
+                    tmp_path / "phase13u_ml_phase13v_boundary_check.csv"
+                ),
                 "scope_boundary_check": str(tmp_path / "phase13u_ml_scope_boundary_check.csv"),
                 "summary": str(tmp_path / "phase13u_ml_summary.csv"),
                 "gate_report": str(tmp_path / "phase13u_ml_gate_report.csv"),
@@ -316,8 +316,7 @@ def _config(tmp_path: Path):
             },
             "phase13w_boundary": {
                 "allowed_next_step": (
-                    "ML validation result interpretation and model-continuation "
-                    "decision only"
+                    "ML validation result interpretation and model-continuation decision only"
                 ),
                 "forbidden_next_step": (
                     "holdout prediction generation, signal creation, strategy backtest"

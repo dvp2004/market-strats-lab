@@ -204,12 +204,8 @@ def test_save_phase9d_writes_expected_reports(tmp_path):
     assert (tmp_path / "phase9d_preregistered_rule_returns.csv").exists()
     assert (tmp_path / "phase9d_preregistered_rule_metrics.csv").exists()
     assert (tmp_path / "phase9d_preregistered_rule_stress_metrics.csv").exists()
-    assert (
-        tmp_path / "phase9d_preregistered_rule_behavioural_metrics.csv"
-    ).exists()
-    assert (
-        tmp_path / "phase9d_preregistered_rule_comparison_summary.csv"
-    ).exists()
+    assert (tmp_path / "phase9d_preregistered_rule_behavioural_metrics.csv").exists()
+    assert (tmp_path / "phase9d_preregistered_rule_comparison_summary.csv").exists()
     assert (tmp_path / "phase9d_preregistered_rule_gate_report.csv").exists()
     assert (tmp_path / "phase9d_preregistered_rule_conclusion.csv").exists()
     assert (tmp_path / "phase9d_preregistered_technical_rule_test.md").exists()

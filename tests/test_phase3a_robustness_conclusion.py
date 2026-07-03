@@ -72,9 +72,7 @@ def test_create_phase3a_robustness_conclusion_runs(tmp_path: Path):
     conclusion = create_phase3a_robustness_conclusion(tmp_path)
 
     assert not conclusion.empty
-    assert {"claim", "status", "evidence_quality", "interpretation"}.issubset(
-        conclusion.columns
-    )
+    assert {"claim", "status", "evidence_quality", "interpretation"}.issubset(conclusion.columns)
     assert "Failed" in set(conclusion["status"])
     assert "Survived" in set(conclusion["status"])
 

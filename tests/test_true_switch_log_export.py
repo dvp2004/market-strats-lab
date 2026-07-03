@@ -108,9 +108,15 @@ def _config(tmp_path: Path):
                 tmp_path / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
             ),
             "source_reports": {
-                "phase15f_conclusion": str(tmp_path / "phase15f_fresh_data_extension_conclusion.csv"),
-                "phase15f_gate_report": str(tmp_path / "phase15f_fresh_data_extension_gate_report.csv"),
-                "phase15e_attribution_decision": str(tmp_path / "phase15e_switch_source_attribution_attribution_decision.csv"),
+                "phase15f_conclusion": str(
+                    tmp_path / "phase15f_fresh_data_extension_conclusion.csv"
+                ),
+                "phase15f_gate_report": str(
+                    tmp_path / "phase15f_fresh_data_extension_gate_report.csv"
+                ),
+                "phase15e_attribution_decision": str(
+                    tmp_path / "phase15e_switch_source_attribution_attribution_decision.csv"
+                ),
             },
             "switch_reconstruction_policy": {
                 "expected_switch_count": 36,
@@ -164,9 +170,16 @@ def _config(tmp_path: Path):
             "phase15g_reports": {
                 "conclusion": str(tmp_path / "phase15g_true_switch_log_export_conclusion.csv"),
                 "gate_report": str(tmp_path / "phase15g_true_switch_log_export_gate_report.csv"),
-                "switch_log": str(tmp_path / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"),
-                "switch_summary": str(tmp_path / "phase15g_true_switch_log_export_switch_summary.csv"),
-                "column_selection_report": str(tmp_path / "phase15g_true_switch_log_export_column_selection_report.csv"),
+                "switch_log": str(
+                    tmp_path
+                    / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
+                ),
+                "switch_summary": str(
+                    tmp_path / "phase15g_true_switch_log_export_switch_summary.csv"
+                ),
+                "column_selection_report": str(
+                    tmp_path / "phase15g_true_switch_log_export_column_selection_report.csv"
+                ),
             },
             "expected_switch_count": 36,
             "switch_count_abs_tolerance": 0,

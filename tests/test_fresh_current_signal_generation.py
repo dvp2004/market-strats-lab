@@ -150,12 +150,25 @@ def _config(tmp_path: Path):
             "max_signal_staleness_days": 3,
             "output_file": str(tmp_path / "phase15m_current_signal_file.csv"),
             "source_reports": {
-                "phase15l_conclusion": str(tmp_path / "phase15l_fresh_signal_precheck_conclusion.csv"),
-                "phase15l_gate_report": str(tmp_path / "phase15l_fresh_signal_precheck_gate_report.csv"),
-                "phase15l_decision_report": str(tmp_path / "phase15l_fresh_signal_precheck_decision_report.csv"),
-                "phase15k_endpoint_signal": str(tmp_path / "phase15k_pinned_endpoint_signal_file.csv"),
-                "switch_log": str(tmp_path / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"),
-                "selected_switch_definition": str(tmp_path / "phase15i_column_semantics_selected_switch_definition.csv"),
+                "phase15l_conclusion": str(
+                    tmp_path / "phase15l_fresh_signal_precheck_conclusion.csv"
+                ),
+                "phase15l_gate_report": str(
+                    tmp_path / "phase15l_fresh_signal_precheck_gate_report.csv"
+                ),
+                "phase15l_decision_report": str(
+                    tmp_path / "phase15l_fresh_signal_precheck_decision_report.csv"
+                ),
+                "phase15k_endpoint_signal": str(
+                    tmp_path / "phase15k_pinned_endpoint_signal_file.csv"
+                ),
+                "switch_log": str(
+                    tmp_path
+                    / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
+                ),
+                "selected_switch_definition": str(
+                    tmp_path / "phase15i_column_semantics_selected_switch_definition.csv"
+                ),
             },
             "fresh_candidate_stream_policy": {
                 "preferred_fresh_candidate_stream_file": str(tmp_path / "missing_manual_file.csv"),
@@ -163,9 +176,7 @@ def _config(tmp_path: Path):
             },
             "selected_exposure_fallback_priority": ["target_offensive_weight"],
             "required_current_signal_columns": required_cols,
-            "benchmark_policy": {
-                "acceptable_benchmark_columns": ["SPY_close", "SPY_return"]
-            },
+            "benchmark_policy": {"acceptable_benchmark_columns": ["SPY_close", "SPY_return"]},
             "decision_policy": {
                 "signal_status_if_valid": "fresh_signal_generated_pending_audit",
                 "signal_status_if_blocked": "blocked_fresh_signal_unavailable_or_invalid",
@@ -209,12 +220,21 @@ def _config(tmp_path: Path):
                 "conclusion": str(tmp_path / "phase15m_current_signal_conclusion.csv"),
                 "gate_report": str(tmp_path / "phase15m_current_signal_gate_report.csv"),
                 "current_signal_file": str(tmp_path / "phase15m_current_signal_file.csv"),
-                "generation_summary": str(tmp_path / "phase15m_current_signal_generation_summary.csv"),
-                "required_column_check": str(tmp_path / "phase15m_current_signal_required_column_check.csv"),
+                "generation_summary": str(
+                    tmp_path / "phase15m_current_signal_generation_summary.csv"
+                ),
+                "required_column_check": str(
+                    tmp_path / "phase15m_current_signal_required_column_check.csv"
+                ),
             },
             "source_reports": {
-                "switch_log": str(tmp_path / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"),
-                "pinned_endpoint_signal": str(tmp_path / "phase15k_pinned_endpoint_signal_file.csv"),
+                "switch_log": str(
+                    tmp_path
+                    / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
+                ),
+                "pinned_endpoint_signal": str(
+                    tmp_path / "phase15k_pinned_endpoint_signal_file.csv"
+                ),
             },
             "required_current_signal_columns": required_cols,
             "decision_policy": {

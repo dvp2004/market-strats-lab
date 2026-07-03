@@ -96,9 +96,7 @@ def _config(tmp_path: Path):
         "phase13j_feature_panel_quality_leakage_audit": {"enabled": False},
         "phase13k_feature_panel_interpretation_model_readiness": {
             "enabled": True,
-            "planning_role": (
-                "Feature panel interpretation and model-readiness planning only"
-            ),
+            "planning_role": ("Feature panel interpretation and model-readiness planning only"),
             "phase_branch": "Phase 13 multi-factor model architecture planning",
             "source_phase": "Phase 13J",
             "proposed_next_phase": "Phase 13L",
@@ -111,22 +109,14 @@ def _config(tmp_path: Path):
             "allow_candidate_promotion": False,
             "allow_final_candidate_change": False,
             "source_reports": {
-                "phase13j_conclusion": str(
-                    tmp_path / "phase13j_quality_conclusion.csv"
-                ),
-                "phase13j_gate_report": str(
-                    tmp_path / "phase13j_quality_gate_report.csv"
-                ),
+                "phase13j_conclusion": str(tmp_path / "phase13j_quality_conclusion.csv"),
+                "phase13j_gate_report": str(tmp_path / "phase13j_quality_gate_report.csv"),
                 "feature_panel": str(tmp_path / "phase13i_feature_panel.csv"),
-                "feature_state_timeline": str(
-                    tmp_path / "phase13i_feature_state_timeline.csv"
-                ),
+                "feature_state_timeline": str(tmp_path / "phase13i_feature_state_timeline.csv"),
                 "feature_availability_heatmap": str(
                     tmp_path / "phase13i_feature_availability_heatmap.csv"
                 ),
-                "leakage_audit_panel": str(
-                    tmp_path / "phase13i_leakage_audit_panel.csv"
-                ),
+                "leakage_audit_panel": str(tmp_path / "phase13i_leakage_audit_panel.csv"),
                 "model_feature_matrix_preview": str(
                     tmp_path / "phase13i_model_feature_matrix_preview.csv"
                 ),
@@ -213,12 +203,10 @@ def _config(tmp_path: Path):
                     tmp_path / "phase13k_interpretation_phase13j_result_check.csv"
                 ),
                 "feature_state_distribution": str(
-                    tmp_path
-                    / "phase13k_interpretation_feature_state_distribution.csv"
+                    tmp_path / "phase13k_interpretation_feature_state_distribution.csv"
                 ),
                 "feature_availability_summary": str(
-                    tmp_path
-                    / "phase13k_interpretation_feature_availability_summary.csv"
+                    tmp_path / "phase13k_interpretation_feature_availability_summary.csv"
                 ),
                 "family_coverage_summary": str(
                     tmp_path / "phase13k_interpretation_family_coverage_summary.csv"
@@ -233,12 +221,8 @@ def _config(tmp_path: Path):
                     tmp_path / "phase13k_interpretation_scope_boundary_check.csv"
                 ),
                 "summary": str(tmp_path / "phase13k_interpretation_summary.csv"),
-                "gate_report": str(
-                    tmp_path / "phase13k_interpretation_gate_report.csv"
-                ),
-                "conclusion": str(
-                    tmp_path / "phase13k_interpretation_conclusion.csv"
-                ),
+                "gate_report": str(tmp_path / "phase13k_interpretation_gate_report.csv"),
+                "conclusion": str(tmp_path / "phase13k_interpretation_conclusion.csv"),
             },
             "target_design": {
                 "primary_target_id": "future_63d_spy_return_state",

@@ -151,8 +151,7 @@ def _phase_config():
         "phase11c_boundary": {
             "allowed_next_step": "Regime scoring rulebook spec only",
             "forbidden_next_step": (
-                "score calculation, model training, strategy backtest, "
-                "or candidate promotion"
+                "score calculation, model training, strategy backtest, or candidate promotion"
             ),
             "phase11c_may_define_score_components": True,
             "phase11c_may_define_weighting_policy": True,
@@ -235,9 +234,7 @@ def test_phase11b_gate_report_passes_valid_spec():
     conclusion = build_phase11b_conclusion(gate_report)
 
     assert bool(gate_report["passed"].all())
-    assert conclusion.iloc[0]["verdict"] == (
-        "Completed — regime scoring architecture spec passed"
-    )
+    assert conclusion.iloc[0]["verdict"] == ("Completed — regime scoring architecture spec passed")
 
 
 def test_phase11b_fails_if_score_calculation_allowed():
@@ -288,12 +285,8 @@ def test_save_phase11b_writes_expected_reports(tmp_path):
     assert (tmp_path / "phase11b_regime_scoring_principles.csv").exists()
     assert (tmp_path / "phase11b_regime_scoring_component_registry.csv").exists()
     assert (tmp_path / "phase11b_regime_scoring_state_design.csv").exists()
-    assert (
-        tmp_path / "phase11b_regime_scoring_validation_requirements.csv"
-    ).exists()
-    assert (
-        tmp_path / "phase11b_regime_scoring_phase11c_boundary_check.csv"
-    ).exists()
+    assert (tmp_path / "phase11b_regime_scoring_validation_requirements.csv").exists()
+    assert (tmp_path / "phase11b_regime_scoring_phase11c_boundary_check.csv").exists()
     assert (tmp_path / "phase11b_regime_scoring_scope_boundary_check.csv").exists()
     assert (tmp_path / "phase11b_regime_scoring_summary.csv").exists()
     assert (tmp_path / "phase11b_regime_scoring_gate_report.csv").exists()

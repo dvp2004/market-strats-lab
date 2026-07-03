@@ -146,7 +146,9 @@ def _write_sources(tmp_path: Path) -> dict:
 
 def test_missing_phase21a_output_fails_closed(tmp_path):
     config = _write_sources(tmp_path)
-    (tmp_path / "strategy_factory" / "regime_stress" / "phase21a_master_strategy_candidates.csv").unlink()
+    (
+        tmp_path / "strategy_factory" / "regime_stress" / "phase21a_master_strategy_candidates.csv"
+    ).unlink()
 
     outputs = save_phase21b_regime_candidate_reconciliation(
         config=config,
@@ -261,10 +263,7 @@ def test_candidate_delta_report_has_expected_status_changes(tmp_path):
         changes["canonical_spy_qqq_60_40"]
         == "paper_tracked_clean_growth_to_reference_only_regime_fragile"
     )
-    assert (
-        changes["canonical_inverse_vol_63d_btc_usd_qqq_spy"]
-        == "remains_high_caveat_candidate"
-    )
+    assert changes["canonical_inverse_vol_63d_btc_usd_qqq_spy"] == "remains_high_caveat_candidate"
     assert (
         changes["phase6b_loose_relief_execution_realistic_overlay"]
         == "newly_reintroduced_provisional_core"

@@ -122,9 +122,7 @@ def test_target_registry_separates_forward_labels_from_predictors():
 
 
 def test_availability_missingness_and_normalization_policies_block_leakage():
-    availability = " ".join(
-        build_availability_join_policy()["requirement"].astype(str)
-    ).lower()
+    availability = " ".join(build_availability_join_policy()["requirement"].astype(str)).lower()
     missingness = " ".join(build_missingness_policy()["requirement"].astype(str)).lower()
     normalization = " ".join(
         build_cross_sectional_normalization_policy()["requirement"].astype(str)
@@ -175,9 +173,7 @@ def test_feature_panel_validator_rejects_future_feature_clock():
     panel.loc[0, "sentiment_available_timestamp_utc"] = "2025-08-08T20:10:00Z"
     panel.loc[0, "feature_max_available_timestamp_utc"] = "2025-08-08T20:10:00Z"
     report = validate_feature_panel_frame(panel)
-    row = report.loc[
-        report["gate"].eq("feature_availability_not_after_cutoff")
-    ].iloc[0]
+    row = report.loc[report["gate"].eq("feature_availability_not_after_cutoff")].iloc[0]
     assert not bool(row["passed"])
 
 
@@ -187,15 +183,9 @@ def test_feature_panel_validator_rejects_duplicate_grain_and_wrong_max_clock():
     panel.loc[0, "feature_max_available_timestamp_utc"] = "2025-08-08T19:55:00Z"
     report = validate_feature_panel_frame(panel)
     assert not bool(
-        report.loc[
-            report["gate"].eq("decision_security_universe_grain_unique"), "passed"
-        ].iloc[0]
+        report.loc[report["gate"].eq("decision_security_universe_grain_unique"), "passed"].iloc[0]
     )
-    assert not bool(
-        report.loc[
-            report["gate"].eq("feature_max_clock_reconciles"), "passed"
-        ].iloc[0]
-    )
+    assert not bool(report.loc[report["gate"].eq("feature_max_clock_reconciles"), "passed"].iloc[0])
 
 
 def test_target_validator_accepts_valid_target_and_panel_lineage():
@@ -208,9 +198,7 @@ def test_target_validator_rejects_label_available_before_period_end():
     targets.loc[0, "target_available_timestamp_utc"] = "2025-08-20T00:00:00Z"
     report = validate_target_frame(targets, panel=_valid_panel())
     assert not bool(
-        report.loc[
-            report["gate"].eq("target_available_only_after_period_end"), "passed"
-        ].iloc[0]
+        report.loc[report["gate"].eq("target_available_only_after_period_end"), "passed"].iloc[0]
     )
 
 
@@ -219,8 +207,7 @@ def test_phase23e_writes_reports_without_reports_reports_and_blocks_training(tmp
         "phase23e_combined_feature_panel_contract": {
             "enabled": True,
             "output_dir": (
-                "reports/individual_equity_decision_system/"
-                "phase23e_combined_feature_panel_contract"
+                "reports/individual_equity_decision_system/phase23e_combined_feature_panel_contract"
             ),
             "dashboard_status_path": (
                 "reports/paper_trading/dashboard/"

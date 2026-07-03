@@ -204,9 +204,9 @@ def test_phase15wxyz_helper_does_not_run_when_disabled():
 
 def test_phase15_fresh_extension_uses_separate_processed_data_dir():
     assert run_backtest._processed_data_dir({}) == Path("data/processed")
-    assert run_backtest._processed_data_dir(
-        {"_phase15_fresh_extension_mode": True}
-    ) == Path("data/fresh/processed")
+    assert run_backtest._processed_data_dir({"_phase15_fresh_extension_mode": True}) == Path(
+        "data/fresh/processed"
+    )
     assert run_backtest._processed_data_dir(
         {
             "_phase15_fresh_extension_mode": True,
@@ -969,8 +969,7 @@ def test_phase15_downstream_chain_is_inserted_after_phase8b_bid_ask_diagnostic()
         "            relative_momentum_outputs=relative_momentum_outputs,"
     )
     phase15_call = source.rindex(
-        "_run_phase15_downstream_fresh_signal_chain(\n"
-        "            config=config,"
+        "_run_phase15_downstream_fresh_signal_chain(\n            config=config,"
     )
 
     assert phase8b_call < phase15_call
@@ -984,12 +983,10 @@ def test_phase15wxyz_chain_is_inserted_before_downstream_phase15_chain():
         "            relative_momentum_outputs=relative_momentum_outputs,"
     )
     phase15wxyz_call = source.rindex(
-        "_run_phase15wxyz_fresh_extension_pipeline(\n"
-        "            config=config,"
+        "_run_phase15wxyz_fresh_extension_pipeline(\n            config=config,"
     )
     phase15_downstream_call = source.rindex(
-        "_run_phase15_downstream_fresh_signal_chain(\n"
-        "            config=config,"
+        "_run_phase15_downstream_fresh_signal_chain(\n            config=config,"
     )
 
     assert phase8b_call < phase15wxyz_call < phase15_downstream_call
@@ -1026,7 +1023,9 @@ def test_phase21b_runner_helper_calls_phase_when_enabled(monkeypatch):
 
     def phase21b_recorder(**kwargs):
         calls.append(kwargs)
-        return {"summary": Path("reports/strategy_factory/regime_reconciliation/phase21b_summary.csv")}
+        return {
+            "summary": Path("reports/strategy_factory/regime_reconciliation/phase21b_summary.csv")
+        }
 
     monkeypatch.setattr(run_backtest, PHASE21B_FUNCTION, phase21b_recorder)
     reports_dir = Path("reports")
@@ -1052,7 +1051,9 @@ def test_phase21c_runner_helper_calls_phase_when_enabled(monkeypatch):
 
     def phase21c_recorder(**kwargs):
         calls.append(kwargs)
-        return {"summary": Path("reports/paper_trading/regime_informed_tracking/phase21c_summary.csv")}
+        return {
+            "summary": Path("reports/paper_trading/regime_informed_tracking/phase21c_summary.csv")
+        }
 
     monkeypatch.setattr(run_backtest, PHASE21C_FUNCTION, phase21c_recorder)
     reports_dir = Path("reports")
@@ -1079,9 +1080,7 @@ def test_phase21d_runner_helper_calls_phase_when_enabled(monkeypatch):
     def phase21d_recorder(**kwargs):
         calls.append(kwargs)
         return {
-            "summary": Path(
-                "reports/paper_trading/regime_informed_tracking/phase21d_summary.csv"
-            )
+            "summary": Path("reports/paper_trading/regime_informed_tracking/phase21d_summary.csv")
         }
 
     monkeypatch.setattr(run_backtest, PHASE21D_FUNCTION, phase21d_recorder)
@@ -1108,9 +1107,7 @@ def test_phase21e_runner_helper_calls_phase_when_enabled(monkeypatch):
 
     def phase21e_recorder(**kwargs):
         calls.append(kwargs)
-        return {
-            "summary": pd.DataFrame({"phase21e_decision": ["pending_user_entries"]})
-        }
+        return {"summary": pd.DataFrame({"phase21e_decision": ["pending_user_entries"]})}
 
     monkeypatch.setattr(run_backtest, PHASE21E_FUNCTION, phase21e_recorder)
     reports_dir = Path("reports")
@@ -1150,7 +1147,12 @@ def test_phase23g_runner_helper_calls_phase_when_enabled(monkeypatch):
         reports_dir=reports_dir,
     )
 
-    assert calls == [{"config": {"phase23g_interpretable_stock_ranker": {"enabled": True}}, "reports_dir": reports_dir}]
+    assert calls == [
+        {
+            "config": {"phase23g_interpretable_stock_ranker": {"enabled": True}},
+            "reports_dir": reports_dir,
+        }
+    ]
     assert "summary" in outputs
 
 
@@ -1169,11 +1171,7 @@ def test_phase23h_runner_helper_calls_phase_when_enabled(monkeypatch):
         calls.append(kwargs)
         return {
             "summary": pd.DataFrame(
-                {
-                    "decision": [
-                        "phase23h_robustness_completed_signal_fragile_research_only"
-                    ]
-                }
+                {"decision": ["phase23h_robustness_completed_signal_fragile_research_only"]}
             )
         }
 
@@ -1240,11 +1238,7 @@ def test_phase23i_shadow_runner_helper_calls_phase_when_enabled(monkeypatch):
         calls.append(kwargs)
         return {
             "summary": pd.DataFrame(
-                {
-                    "phase23i_shadow_decision": [
-                        "phase23i_shadow_session_written_but_blocked"
-                    ]
-                }
+                {"phase23i_shadow_decision": ["phase23i_shadow_session_written_but_blocked"]}
             )
         }
 
@@ -1277,6 +1271,7 @@ def test_phase23i_cli_flags_are_available():
     assert "_run_phase23i_frozen_cost_aware_portfolio(" in source
     assert "_run_phase23i_prospective_shadow_runner(" in source
 
+
 def test_phase23j_runner_helper_calls_phase_when_enabled(monkeypatch):
     calls: list[dict] = []
 
@@ -1296,19 +1291,13 @@ def test_phase23j_runner_helper_calls_phase_when_enabled(monkeypatch):
     reports_dir = Path("reports")
 
     outputs = run_backtest._run_phase23j_post_endpoint_individual_equity_extension(
-        config={
-            "phase23j_post_endpoint_individual_equity_extension": {"enabled": True}
-        },
+        config={"phase23j_post_endpoint_individual_equity_extension": {"enabled": True}},
         reports_dir=reports_dir,
     )
 
     assert calls == [
         {
-            "config": {
-                "phase23j_post_endpoint_individual_equity_extension": {
-                    "enabled": True
-                }
-            },
+            "config": {"phase23j_post_endpoint_individual_equity_extension": {"enabled": True}},
             "reports_dir": reports_dir,
         }
     ]

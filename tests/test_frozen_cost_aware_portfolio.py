@@ -133,7 +133,10 @@ def test_model_freeze_is_deterministic() -> None:
         generated_at_utc="2026-01-02T00:00:00+00:00",
     )
     assert first.iloc[0]["phase23i_freeze_hash"] == second.iloc[0]["phase23i_freeze_hash"]
-    assert first_hashes.set_index("hash_name").loc["model_spec_hash", "hash_value"] == second_hashes.set_index("hash_name").loc["model_spec_hash", "hash_value"]
+    assert (
+        first_hashes.set_index("hash_name").loc["model_spec_hash", "hash_value"]
+        == second_hashes.set_index("hash_name").loc["model_spec_hash", "hash_value"]
+    )
     assert bool(first.iloc[0]["research_pilot_only"])
     assert not bool(first.iloc[0]["promotion_allowed"])
 
@@ -174,7 +177,10 @@ def test_next_open_integer_rounding_cash_and_costs() -> None:
     assert not fills["same_close_execution_used"].any()
     assert (fills["order_shares"] % 1 == 0).all()
     assert no_cost["cash_ledger"]["cash_balance"].iloc[-1] >= 0
-    assert with_cost["daily_equity"]["net_equity"].iloc[-1] <= no_cost["daily_equity"]["net_equity"].iloc[-1]
+    assert (
+        with_cost["daily_equity"]["net_equity"].iloc[-1]
+        <= no_cost["daily_equity"]["net_equity"].iloc[-1]
+    )
     assert with_cost["turnover"]["turnover"].sum() > 0
 
 
@@ -271,7 +277,10 @@ def test_save_phase23i_writes_required_outputs_without_broker_files(tmp_path: Pa
         reports_dir=tmp_path / "reports",
     )
     output_dir = tmp_path / "reports" / "phase23i"
-    assert outputs["summary"].iloc[0]["phase23i_decision"] == "phase23i_cost_aware_portfolio_diagnostics_completed_research_only"
+    assert (
+        outputs["summary"].iloc[0]["phase23i_decision"]
+        == "phase23i_cost_aware_portfolio_diagnostics_completed_research_only"
+    )
     for filename in [
         "phase23i_model_freeze.csv",
         "phase23i_historical_metrics.csv",
@@ -292,7 +301,9 @@ def test_save_phase23i_writes_required_outputs_without_broker_files(tmp_path: Pa
     assert not list(output_dir.glob("*broker*"))
 
 
-def test_shadow_runner_blocks_without_post_endpoint_data_and_separates_proposed_from_entered(tmp_path: Path) -> None:
+def test_shadow_runner_blocks_without_post_endpoint_data_and_separates_proposed_from_entered(
+    tmp_path: Path,
+) -> None:
     _write_phase23_sources(tmp_path)
     save_phase23i_frozen_cost_aware_portfolio(
         config=_phase23i_config(tmp_path),
@@ -319,4 +330,3 @@ def test_shadow_runner_blocks_without_post_endpoint_data_and_separates_proposed_
     assert "post_endpoint_data_missing" in status["blocking_reasons"]
     assert outputs["positions"].iloc[0]["position_status"] == "initial_shadow_cash_only"
     assert (tmp_path / "reports" / "shadow" / "current_manual_session_template.csv").exists()
-

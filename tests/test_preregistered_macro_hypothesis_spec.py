@@ -49,9 +49,7 @@ def _sample_phase_config():
                 "hypothesis_id": "H1_supportive_low_rate_low_inflation_relief",
                 "name": "Supportive low-rate / low-inflation macro relief hypothesis",
                 "source_phase": "Phase 10D",
-                "source_evidence": [
-                    "Low short rates and low inflation were helpful in Phase 10D."
-                ],
+                "source_evidence": ["Low short rates and low inflation were helpful in Phase 10D."],
                 "allowed_macro_inputs": [
                     "DGS2",
                     "CPIAUCSL",

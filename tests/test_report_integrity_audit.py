@@ -96,8 +96,6 @@ def test_create_integrity_conclusion_passes_when_all_inputs_pass():
         readme_audit=readme_audit,
     )
 
-    final_row = conclusion[
-        conclusion["claim"] == "Checkpoint is ready to commit and tag."
-    ].iloc[0]
+    final_row = conclusion[conclusion["claim"] == "Checkpoint is ready to commit and tag."].iloc[0]
 
     assert final_row["status"] == "Passed"

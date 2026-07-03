@@ -40,9 +40,14 @@ def test_strategy_factory_candidates_return_non_empty_frames():
     assert set(status["strategy"]) == set(STRATEGY_FACTORY_CANDIDATES)
     for result in results.values():
         assert not result.empty
-        assert {"date", "strategy_return", "equity", "position", "cash_position", "turnover"}.issubset(
-            result.columns
-        )
+        assert {
+            "date",
+            "strategy_return",
+            "equity",
+            "position",
+            "cash_position",
+            "turnover",
+        }.issubset(result.columns)
 
 
 def test_strategy_factory_weights_are_valid_and_cash_non_negative():

@@ -24,15 +24,12 @@ def _phase_config(tmp_path: Path):
         "source_phase": "Phase 11D",
         "proposed_next_phase": "Phase 11F",
         "source_design_reports": {
-            "panel_layout_spec": str(
-                tmp_path / "phase11d_diagnostic_panel_layout_spec.csv"
-            ),
+            "panel_layout_spec": str(tmp_path / "phase11d_diagnostic_panel_layout_spec.csv"),
             "required_columns_spec": str(
                 tmp_path / "phase11d_diagnostic_panel_required_columns_spec.csv"
             ),
             "component_availability_spec": str(
-                tmp_path
-                / "phase11d_diagnostic_panel_component_availability_spec.csv"
+                tmp_path / "phase11d_diagnostic_panel_component_availability_spec.csv"
             ),
             "conceptual_direction_spec": str(
                 tmp_path / "phase11d_diagnostic_panel_conceptual_direction_spec.csv"
@@ -351,12 +348,8 @@ def test_phase11e_builds_schema_compliant_templates(tmp_path):
     source_tables = {
         "panel_layout_spec": pd.read_csv(source_paths["panel_layout_spec"]),
         "required_columns_spec": pd.read_csv(source_paths["required_columns_spec"]),
-        "component_availability_spec": pd.read_csv(
-            source_paths["component_availability_spec"]
-        ),
-        "conceptual_direction_spec": pd.read_csv(
-            source_paths["conceptual_direction_spec"]
-        ),
+        "component_availability_spec": pd.read_csv(source_paths["component_availability_spec"]),
+        "conceptual_direction_spec": pd.read_csv(source_paths["conceptual_direction_spec"]),
         "weighting_policy_spec": pd.read_csv(source_paths["weighting_policy_spec"]),
         "blocked_family_spec": pd.read_csv(source_paths["blocked_family_spec"]),
     }
@@ -389,12 +382,8 @@ def test_phase11e_gate_report_passes_valid_template_audit(tmp_path):
     source_tables = {
         "panel_layout_spec": pd.read_csv(source_paths["panel_layout_spec"]),
         "required_columns_spec": pd.read_csv(source_paths["required_columns_spec"]),
-        "component_availability_spec": pd.read_csv(
-            source_paths["component_availability_spec"]
-        ),
-        "conceptual_direction_spec": pd.read_csv(
-            source_paths["conceptual_direction_spec"]
-        ),
+        "component_availability_spec": pd.read_csv(source_paths["component_availability_spec"]),
+        "conceptual_direction_spec": pd.read_csv(source_paths["conceptual_direction_spec"]),
         "weighting_policy_spec": pd.read_csv(source_paths["weighting_policy_spec"]),
         "blocked_family_spec": pd.read_csv(source_paths["blocked_family_spec"]),
     }
@@ -427,9 +416,7 @@ def test_phase11e_gate_report_passes_valid_template_audit(tmp_path):
     conclusion = build_phase11e_conclusion(gate_report)
 
     assert bool(gate_report["passed"].all())
-    assert conclusion.iloc[0]["verdict"] == (
-        "Completed — diagnostic panel template audit passed"
-    )
+    assert conclusion.iloc[0]["verdict"] == ("Completed — diagnostic panel template audit passed")
 
 
 def test_phase11e_fails_if_score_calculation_allowed(tmp_path):
@@ -441,12 +428,8 @@ def test_phase11e_fails_if_score_calculation_allowed(tmp_path):
     source_tables = {
         "panel_layout_spec": pd.read_csv(source_paths["panel_layout_spec"]),
         "required_columns_spec": pd.read_csv(source_paths["required_columns_spec"]),
-        "component_availability_spec": pd.read_csv(
-            source_paths["component_availability_spec"]
-        ),
-        "conceptual_direction_spec": pd.read_csv(
-            source_paths["conceptual_direction_spec"]
-        ),
+        "component_availability_spec": pd.read_csv(source_paths["component_availability_spec"]),
+        "conceptual_direction_spec": pd.read_csv(source_paths["conceptual_direction_spec"]),
         "weighting_policy_spec": pd.read_csv(source_paths["weighting_policy_spec"]),
         "blocked_family_spec": pd.read_csv(source_paths["blocked_family_spec"]),
     }
@@ -467,9 +450,7 @@ def test_phase11e_fails_if_score_calculation_allowed(tmp_path):
         ),
         schema_compliance=schema,
         template_reports=templates,
-        phase11f_boundary_check=build_phase11e_phase11f_boundary_check(
-            phase_config
-        ),
+        phase11f_boundary_check=build_phase11e_phase11f_boundary_check(phase_config),
     )
     gate_report = build_phase11e_gate_report(
         phase_config=phase_config,
@@ -503,6 +484,4 @@ def test_save_phase11e_writes_expected_reports(tmp_path):
     assert (tmp_path / "phase11e_template_schema_compliance.csv").exists()
     assert (tmp_path / "phase11e_template_gate_report.csv").exists()
     assert (tmp_path / "phase11e_template_conclusion.csv").exists()
-    assert (
-        tmp_path / "phase11e_regime_scoring_diagnostic_panel_template_audit.md"
-    ).exists()
+    assert (tmp_path / "phase11e_regime_scoring_diagnostic_panel_template_audit.md").exists()

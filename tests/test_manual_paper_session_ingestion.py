@@ -14,9 +14,7 @@ def _config(reports_dir: Path) -> dict:
             "enabled": True,
             "output_dir": str(reports_dir / "paper_trading" / "manual_sessions"),
             "dashboard_dir": str(reports_dir / "paper_trading" / "dashboard"),
-            "source_manual_session_dir": str(
-                reports_dir / "paper_trading" / "manual_sessions"
-            ),
+            "source_manual_session_dir": str(reports_dir / "paper_trading" / "manual_sessions"),
             "source_finalist_tracking_dir": str(
                 reports_dir / "paper_trading" / "finalist_tracking"
             ),
@@ -159,10 +157,7 @@ def test_missing_filled_file_writes_pending_status_but_passes_gate(tmp_path):
     result = outputs["manual_paper_session_ingestion_result"].iloc[0]
     gates = outputs["gate_report"]
     ledger_path = (
-        reports_dir
-        / "paper_trading"
-        / "manual_sessions"
-        / "manual_paper_session_ledger.csv"
+        reports_dir / "paper_trading" / "manual_sessions" / "manual_paper_session_ledger.csv"
     )
 
     assert result["filled_session_file_present"] is False or not bool(
@@ -179,10 +174,7 @@ def test_valid_filled_skip_session_passes_validation_and_updates_ledger(tmp_path
     reports_dir = tmp_path / "reports"
     _write_required_sources(reports_dir)
     filled_path = (
-        reports_dir
-        / "paper_trading"
-        / "manual_sessions"
-        / "manual_paper_session_filled.csv"
+        reports_dir / "paper_trading" / "manual_sessions" / "manual_paper_session_filled.csv"
     )
     _filled_skip_session().to_csv(filled_path, index=False)
 
@@ -233,10 +225,7 @@ def test_missing_tear_sheet_acknowledgement_fails_validation(tmp_path):
     filled = _filled_skip_session()
     filled["tear_sheet_reviewed"] = False
     filled.to_csv(
-        reports_dir
-        / "paper_trading"
-        / "manual_sessions"
-        / "manual_paper_session_filled.csv",
+        reports_dir / "paper_trading" / "manual_sessions" / "manual_paper_session_filled.csv",
         index=False,
     )
 
@@ -258,10 +247,7 @@ def test_missing_warning_acknowledgement_fails_when_warnings_present(tmp_path):
     filled = _filled_skip_session()
     filled["warnings_acknowledged"] = False
     filled.to_csv(
-        reports_dir
-        / "paper_trading"
-        / "manual_sessions"
-        / "manual_paper_session_filled.csv",
+        reports_dir / "paper_trading" / "manual_sessions" / "manual_paper_session_filled.csv",
         index=False,
     )
 
@@ -281,10 +267,7 @@ def test_missing_btc_acknowledgement_fails_when_btc_weight_positive(tmp_path):
     filled = _filled_skip_session()
     filled["btc_caveat_acknowledged"] = False
     filled.to_csv(
-        reports_dir
-        / "paper_trading"
-        / "manual_sessions"
-        / "manual_paper_session_filled.csv",
+        reports_dir / "paper_trading" / "manual_sessions" / "manual_paper_session_filled.csv",
         index=False,
     )
 
@@ -316,9 +299,7 @@ def test_entered_row_missing_fill_price_or_quantity_fails(tmp_path):
         reports_dir=reports_dir,
     )
 
-    blockers = outputs["manual_paper_session_row_validation"].iloc[0][
-        "row_blocking_reasons"
-    ]
+    blockers = outputs["manual_paper_session_row_validation"].iloc[0]["row_blocking_reasons"]
     assert "paper_fill_price_missing_or_non_positive" in blockers
     assert "paper_fill_quantity_missing_or_non_positive" in blockers
 
@@ -330,10 +311,7 @@ def test_skipped_row_without_reason_or_notes_fails(tmp_path):
     filled["override_reason"] = ""
     filled["notes"] = ""
     filled.to_csv(
-        reports_dir
-        / "paper_trading"
-        / "manual_sessions"
-        / "manual_paper_session_filled.csv",
+        reports_dir / "paper_trading" / "manual_sessions" / "manual_paper_session_filled.csv",
         index=False,
     )
 
@@ -351,10 +329,7 @@ def test_ledger_dedupes_by_session_date_candidate_and_asset(tmp_path):
     reports_dir = tmp_path / "reports"
     _write_required_sources(reports_dir)
     filled_path = (
-        reports_dir
-        / "paper_trading"
-        / "manual_sessions"
-        / "manual_paper_session_filled.csv"
+        reports_dir / "paper_trading" / "manual_sessions" / "manual_paper_session_filled.csv"
     )
     _filled_skip_session().to_csv(filled_path, index=False)
 
@@ -380,10 +355,7 @@ def test_dashboard_status_is_written_and_safety_flags_remain_false(tmp_path):
     )
 
     dashboard = pd.read_csv(
-        reports_dir
-        / "paper_trading"
-        / "dashboard"
-        / "manual_paper_session_ingestion_status.csv"
+        reports_dir / "paper_trading" / "dashboard" / "manual_paper_session_ingestion_status.csv"
     )
     assert dashboard.iloc[0]["phase20d_decision"] == (
         "manual_paper_session_ingestion_pending_user_entries"
@@ -417,9 +389,7 @@ def test_phase20f_stale_file_guard_blocks_current_ingestion(tmp_path):
 
     result = outputs["manual_paper_session_ingestion_result"].iloc[0]
     blockers = ";".join(
-        outputs["manual_paper_session_row_validation"][
-            "row_blocking_reasons"
-        ].astype(str)
+        outputs["manual_paper_session_row_validation"]["row_blocking_reasons"].astype(str)
     )
     assert result["session_ingestion_status"] == "invalid_manual_review_required"
     assert not bool(result["session_valid"])

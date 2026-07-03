@@ -187,6 +187,7 @@ def test_save_phase8b_writes_expected_reports(tmp_path):
     assert (tmp_path / "phase8b_bid_ask_market_impact_conclusion.csv").exists()
     assert (tmp_path / "phase8b_bid_ask_market_impact_diagnostic.md").exists()
 
+
 def test_phase8b_resolved_inputs_are_aligned_to_candidate_period():
     candidate = pd.DataFrame(
         {

@@ -80,9 +80,7 @@ def _config(tmp_path: Path):
                 "phase12f_branch_closure": str(
                     tmp_path / "phase12f_final_branch_closure_claims_check.csv"
                 ),
-                "phase12c_aggregate_score": str(
-                    tmp_path / "phase12c_score_aggregate_score.csv"
-                ),
+                "phase12c_aggregate_score": str(tmp_path / "phase12c_score_aggregate_score.csv"),
             },
             "baseline_freeze": {
                 "baseline_arc_name": "SPY regime-switch baseline research framework",
@@ -133,9 +131,7 @@ def _config(tmp_path: Path):
         },
         "phase13b_multifactor_model_architecture_roadmap_spec": {
             "enabled": True,
-            "spec_role": (
-                "Multi-factor long-term decision model architecture roadmap spec only"
-            ),
+            "spec_role": ("Multi-factor long-term decision model architecture roadmap spec only"),
             "phase_branch": "Phase 13 multi-factor model architecture planning",
             "source_phase": "Phase 13A",
             "proposed_next_phase": "Phase 13C",
@@ -153,12 +149,8 @@ def _config(tmp_path: Path):
             "allow_candidate_promotion": False,
             "allow_final_candidate_change": False,
             "source_reports": {
-                "phase13a_conclusion": str(
-                    tmp_path / "phase13a_baseline_freeze_conclusion.csv"
-                ),
-                "phase13a_gate_report": str(
-                    tmp_path / "phase13a_baseline_freeze_gate_report.csv"
-                ),
+                "phase13a_conclusion": str(tmp_path / "phase13a_baseline_freeze_conclusion.csv"),
+                "phase13a_gate_report": str(tmp_path / "phase13a_baseline_freeze_gate_report.csv"),
             },
             "feature_family_registry": [
                 {
@@ -259,8 +251,7 @@ def _config(tmp_path: Path):
             ],
             "phase13c_boundary": {
                 "allowed_next_step": (
-                    "Multi-factor feature-source inventory and leakage-feasibility "
-                    "spec only"
+                    "Multi-factor feature-source inventory and leakage-feasibility spec only"
                 ),
                 "forbidden_next_step": (
                     "actual feature ingestion, model training, signal creation, "

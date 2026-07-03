@@ -50,10 +50,7 @@ def test_normalise_cash_rates_schema_converts_legacy_irx_annual_yield():
     expected = 0.04 / (1.0 - 0.04 * 91 / 360)
 
     assert result["annual_yield"].iloc[0] == pytest.approx(expected)
-    assert (
-        result["rate_source_type"].iloc[0]
-        == "legacy_irx_discount_rate_converted_to_yield"
-    )
+    assert result["rate_source_type"].iloc[0] == "legacy_irx_discount_rate_converted_to_yield"
 
 
 def test_normalise_cash_rates_schema_accepts_legacy_daily_cash_return():

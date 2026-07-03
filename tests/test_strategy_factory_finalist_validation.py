@@ -139,9 +139,7 @@ def _candidate_metrics(finalists: pd.DataFrame) -> pd.DataFrame:
                     "Calmar": row["mean_Calmar"],
                     "turnover": row["mean_turnover"],
                     "CAGR_edge_vs_SPY": row["mean_CAGR_edge_vs_SPY"],
-                    "max_drawdown_difference_vs_SPY": row[
-                        "worst_drawdown_difference_vs_SPY"
-                    ],
+                    "max_drawdown_difference_vs_SPY": row["worst_drawdown_difference_vs_SPY"],
                     "score": score,
                     "missing_data_flag": False,
                 }
@@ -283,12 +281,8 @@ def test_severe_drawdown_candidates_are_not_labelled_defensive(tmp_path):
         include_benchmark_baseline=True,
     )
 
-    assert "secondary_paper_candidate_defensive" not in set(
-        selected["paper_candidate_role"]
-    )
-    clean = selected.loc[
-        selected["canonical_candidate_id"] == "canonical_spy_qqq_60_40"
-    ].iloc[0]
+    assert "secondary_paper_candidate_defensive" not in set(selected["paper_candidate_role"])
+    clean = selected.loc[selected["canonical_candidate_id"] == "canonical_spy_qqq_60_40"].iloc[0]
     assert clean["drawdown_quality_tier"] == "severe_drawdown"
     assert "not defensive" in clean["selection_limitations"]
 

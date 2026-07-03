@@ -5,6 +5,7 @@ from market_strats.analysis.finalist_holdout_validation import (
     create_finalist_holdout_validation_summary,
 )
 
+
 def test_create_finalist_holdout_validation_summary_identifies_winners():
     report = pd.DataFrame(
         {
@@ -31,6 +32,7 @@ def test_create_finalist_holdout_validation_summary_identifies_winners():
     assert holdout["best_calmar_strategy"] == "A"
     assert holdout["best_drawdown_strategy"] == "A"
     assert holdout["spy_12m_cagr_pct"] == 8.0
+
 
 def make_strategy_result(dates: pd.DatetimeIndex, returns: list[float]) -> pd.DataFrame:
     equity = 10_000 * (1.0 + pd.Series(returns)).cumprod()

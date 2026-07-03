@@ -404,4 +404,6 @@ def test_dashboard_status_is_written(tmp_path):
     )
 
     assert dashboard_path.exists()
-    assert outputs["regime_informed_session_row_validation"].columns.tolist() == ROW_VALIDATION_COLUMNS
+    assert (
+        outputs["regime_informed_session_row_validation"].columns.tolist() == ROW_VALIDATION_COLUMNS
+    )

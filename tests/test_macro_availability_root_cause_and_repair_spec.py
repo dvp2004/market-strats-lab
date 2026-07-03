@@ -120,9 +120,7 @@ def _config(tmp_path: Path):
                 "assembled_dataset": str(tmp_path / "phase13m_ml_feature_dataset_v1.csv"),
             },
             "macro_sources": {
-                "macro_aligned_candidates": [
-                    str(tmp_path / "phase10c_macro_aligned_series.csv")
-                ],
+                "macro_aligned_candidates": [str(tmp_path / "phase10c_macro_aligned_series.csv")],
                 "date_column_candidates": ["date", "as_of_date"],
                 "long_format_series_column_candidates": ["series_id"],
                 "long_format_value_column_candidates": ["value"],
@@ -179,17 +177,39 @@ def _config(tmp_path: Path):
                 "relative_momentum_allocator": True,
             },
             "phase13o_reports": {
-                "source_report_check": str(tmp_path / "phase13o_macro_root_cause_source_report_check.csv"),
-                "phase13n_result_check": str(tmp_path / "phase13o_macro_root_cause_phase13n_result_check.csv"),
-                "macro_source_inventory": str(tmp_path / "phase13o_macro_root_cause_macro_source_inventory.csv"),
-                "macro_source_schema_profile": str(tmp_path / "phase13o_macro_root_cause_macro_source_schema_profile.csv"),
-                "macro_column_mapping_report": str(tmp_path / "phase13o_macro_root_cause_macro_column_mapping_report.csv"),
-                "macro_long_format_diagnostic": str(tmp_path / "phase13o_macro_root_cause_macro_long_format_diagnostic.csv"),
-                "existing_repair_panel_profile": str(tmp_path / "phase13o_macro_root_cause_existing_repair_panel_profile.csv"),
-                "macro_guard_profile": str(tmp_path / "phase13o_macro_root_cause_macro_guard_profile.csv"),
-                "root_cause_report": str(tmp_path / "phase13o_macro_root_cause_root_cause_report.csv"),
-                "phase13p_boundary_check": str(tmp_path / "phase13o_macro_root_cause_phase13p_boundary_check.csv"),
-                "scope_boundary_check": str(tmp_path / "phase13o_macro_root_cause_scope_boundary_check.csv"),
+                "source_report_check": str(
+                    tmp_path / "phase13o_macro_root_cause_source_report_check.csv"
+                ),
+                "phase13n_result_check": str(
+                    tmp_path / "phase13o_macro_root_cause_phase13n_result_check.csv"
+                ),
+                "macro_source_inventory": str(
+                    tmp_path / "phase13o_macro_root_cause_macro_source_inventory.csv"
+                ),
+                "macro_source_schema_profile": str(
+                    tmp_path / "phase13o_macro_root_cause_macro_source_schema_profile.csv"
+                ),
+                "macro_column_mapping_report": str(
+                    tmp_path / "phase13o_macro_root_cause_macro_column_mapping_report.csv"
+                ),
+                "macro_long_format_diagnostic": str(
+                    tmp_path / "phase13o_macro_root_cause_macro_long_format_diagnostic.csv"
+                ),
+                "existing_repair_panel_profile": str(
+                    tmp_path / "phase13o_macro_root_cause_existing_repair_panel_profile.csv"
+                ),
+                "macro_guard_profile": str(
+                    tmp_path / "phase13o_macro_root_cause_macro_guard_profile.csv"
+                ),
+                "root_cause_report": str(
+                    tmp_path / "phase13o_macro_root_cause_root_cause_report.csv"
+                ),
+                "phase13p_boundary_check": str(
+                    tmp_path / "phase13o_macro_root_cause_phase13p_boundary_check.csv"
+                ),
+                "scope_boundary_check": str(
+                    tmp_path / "phase13o_macro_root_cause_scope_boundary_check.csv"
+                ),
                 "summary": str(tmp_path / "phase13o_macro_root_cause_summary.csv"),
                 "gate_report": str(tmp_path / "phase13o_macro_root_cause_gate_report.csv"),
                 "conclusion": str(tmp_path / "phase13o_macro_root_cause_conclusion.csv"),
@@ -245,21 +265,13 @@ def test_phase13o_detects_numeric_source_but_failed_repair_panel(tmp_path):
     root = build_phase13o_root_cause_report(
         macro_source_inventory=pd.DataFrame([{"present": True}]),
         column_mapping_report=mapping,
-        long_format_diagnostic=pd.DataFrame(
-            [{"long_format_detected": False}]
-        ),
-        repair_panel_profile=pd.DataFrame(
-            [{"available_ratio": 0.0}]
-        ),
-        macro_guard_profile=pd.DataFrame(
-            [{"macro_blocked_for_dataset_v1": True}]
-        ),
+        long_format_diagnostic=pd.DataFrame([{"long_format_detected": False}]),
+        repair_panel_profile=pd.DataFrame([{"available_ratio": 0.0}]),
+        macro_guard_profile=pd.DataFrame([{"macro_blocked_for_dataset_v1": True}]),
     )
 
     assert bool(mapping["numeric_usable"].all())
-    assert root.iloc[0]["root_cause"] == (
-        "macro_repair_panel_logic_failed_despite_numeric_source"
-    )
+    assert root.iloc[0]["root_cause"] == ("macro_repair_panel_logic_failed_despite_numeric_source")
 
 
 def test_phase13o_and_13p_save_reports(tmp_path):

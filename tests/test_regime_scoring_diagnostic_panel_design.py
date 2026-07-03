@@ -215,9 +215,7 @@ def _phase_config():
             },
         ],
         "phase11e_boundary": {
-            "allowed_next_step": (
-                "Regime scoring diagnostic panel implementation audit only"
-            ),
+            "allowed_next_step": ("Regime scoring diagnostic panel implementation audit only"),
             "forbidden_next_step": (
                 "score calculation, signal creation, strategy backtest, "
                 "model training, new data ingestion, or candidate promotion"
@@ -321,9 +319,7 @@ def test_phase11d_gate_report_passes_valid_design():
     conclusion = build_phase11d_conclusion(gate_report)
 
     assert bool(gate_report["passed"].all())
-    assert conclusion.iloc[0]["verdict"] == (
-        "Completed — diagnostic panel design passed"
-    )
+    assert conclusion.iloc[0]["verdict"] == ("Completed — diagnostic panel design passed")
 
 
 def test_phase11d_fails_if_signal_creation_allowed():
@@ -378,29 +374,15 @@ def test_save_phase11d_writes_expected_reports(tmp_path):
     assert not outputs["conclusion"].empty
     assert (tmp_path / "phase11d_diagnostic_panel_source_rulebook.csv").exists()
     assert (tmp_path / "phase11d_diagnostic_panel_layout_spec.csv").exists()
-    assert (
-        tmp_path / "phase11d_diagnostic_panel_required_columns_spec.csv"
-    ).exists()
-    assert (
-        tmp_path / "phase11d_diagnostic_panel_component_availability_spec.csv"
-    ).exists()
-    assert (
-        tmp_path / "phase11d_diagnostic_panel_conceptual_direction_spec.csv"
-    ).exists()
-    assert (
-        tmp_path / "phase11d_diagnostic_panel_missingness_policy_spec.csv"
-    ).exists()
-    assert (
-        tmp_path / "phase11d_diagnostic_panel_weighting_policy_spec.csv"
-    ).exists()
+    assert (tmp_path / "phase11d_diagnostic_panel_required_columns_spec.csv").exists()
+    assert (tmp_path / "phase11d_diagnostic_panel_component_availability_spec.csv").exists()
+    assert (tmp_path / "phase11d_diagnostic_panel_conceptual_direction_spec.csv").exists()
+    assert (tmp_path / "phase11d_diagnostic_panel_missingness_policy_spec.csv").exists()
+    assert (tmp_path / "phase11d_diagnostic_panel_weighting_policy_spec.csv").exists()
     assert (tmp_path / "phase11d_diagnostic_panel_blocked_family_spec.csv").exists()
-    assert (
-        tmp_path / "phase11d_diagnostic_panel_phase11e_boundary_check.csv"
-    ).exists()
+    assert (tmp_path / "phase11d_diagnostic_panel_phase11e_boundary_check.csv").exists()
     assert (tmp_path / "phase11d_diagnostic_panel_scope_boundary_check.csv").exists()
     assert (tmp_path / "phase11d_diagnostic_panel_summary.csv").exists()
     assert (tmp_path / "phase11d_diagnostic_panel_gate_report.csv").exists()
     assert (tmp_path / "phase11d_diagnostic_panel_conclusion.csv").exists()
-    assert (
-        tmp_path / "phase11d_regime_scoring_diagnostic_panel_design.md"
-    ).exists()
+    assert (tmp_path / "phase11d_regime_scoring_diagnostic_panel_design.md").exists()

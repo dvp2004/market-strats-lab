@@ -173,12 +173,8 @@ def _phase_config(tmp_path: Path):
     config["phase10f_reports"] = {
         "conclusion": str(tmp_path / "phase10f_macro_conclusion.csv"),
         "rule_gate_report": str(tmp_path / "phase10f_macro_rule_gate_report.csv"),
-        "rule_comparison_summary": str(
-            tmp_path / "phase10f_macro_rule_comparison_summary.csv"
-        ),
-        "discipline_gate_report": str(
-            tmp_path / "phase10f_macro_discipline_gate_report.csv"
-        ),
+        "rule_comparison_summary": str(tmp_path / "phase10f_macro_rule_comparison_summary.csv"),
+        "discipline_gate_report": str(tmp_path / "phase10f_macro_discipline_gate_report.csv"),
     }
     return config
 
@@ -212,9 +208,7 @@ def test_phase10g_gate_report_passes_valid_closeout(tmp_path):
     conclusion = build_phase10g_conclusion(gate_report)
 
     assert bool(gate_report["passed"].all())
-    assert conclusion.iloc[0]["verdict"] == (
-        "Completed — macro extension closed without promotion"
-    )
+    assert conclusion.iloc[0]["verdict"] == ("Completed — macro extension closed without promotion")
 
 
 def test_phase10g_fails_if_phase10f_rule_passed(tmp_path):
@@ -248,9 +242,7 @@ def test_save_phase10g_writes_expected_reports(tmp_path):
     _write_phase10f_reports(tmp_path)
 
     runtime_config = _runtime_config(enabled=True)
-    runtime_config["phase10g_macro_extension_closeout_audit"].update(
-        _phase_config(tmp_path)
-    )
+    runtime_config["phase10g_macro_extension_closeout_audit"].update(_phase_config(tmp_path))
 
     outputs = save_phase10g_macro_extension_closeout_audit(
         config=runtime_config,

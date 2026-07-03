@@ -25,9 +25,7 @@ def test_point_in_time_universe_contract_blocks_survivorship_shortcuts():
     contract = build_point_in_time_universe_contract()
     assert len(contract) >= 6
     assert contract["required"].all()
-    assert "current_constituents_backfilled_through_history" in set(
-        contract["blocked_shortcut"]
-    )
+    assert "current_constituents_backfilled_through_history" in set(contract["blocked_shortcut"])
     assert "survivors_only_price_panel" in set(contract["blocked_shortcut"])
 
 
@@ -96,13 +94,7 @@ def test_phase23a_writes_reports_and_enforces_research_only_boundary(tmp_path):
     for filename in required_files:
         assert (output_dir / filename).exists()
 
-    dashboard = (
-        tmp_path
-        / "reports"
-        / "paper_trading"
-        / "dashboard"
-        / "phase23a_status.csv"
-    )
+    dashboard = tmp_path / "reports" / "paper_trading" / "dashboard" / "phase23a_status.csv"
     assert dashboard.exists()
 
 

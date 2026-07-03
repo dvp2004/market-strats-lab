@@ -49,7 +49,15 @@ def _base_config(tmp_path: Path) -> dict:
             "timeout_seconds": 10,
         },
         "audit": {
-            "expected_price_columns": ["date", "open", "high", "low", "close", "adj_close", "volume"],
+            "expected_price_columns": [
+                "date",
+                "open",
+                "high",
+                "low",
+                "close",
+                "adj_close",
+                "volume",
+            ],
             "minimum_history_observations": 20,
             "momentum_warmup_months": 12,
             "require_raw_open": True,
@@ -74,7 +82,9 @@ def _base_config(tmp_path: Path) -> dict:
 def _write_config(tmp_path: Path, config: dict | None = None) -> Path:
     path = tmp_path / "configs" / "global_multi_asset_alpha" / "gma0_feasibility.yaml"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(yaml.safe_dump(config or _base_config(tmp_path), sort_keys=False), encoding="utf-8")
+    path.write_text(
+        yaml.safe_dump(config or _base_config(tmp_path), sort_keys=False), encoding="utf-8"
+    )
     return path
 
 
@@ -109,7 +119,9 @@ def _write_fixtures(
     for instrument in PROPOSED_INSTRUMENTS:
         start = btc_start if instrument == "BTC-USD" else "2020-01-01"
         freq = "D" if instrument == "BTC-USD" else "B"
-        _price_frame(start, periods, freq=freq).to_csv(fixture_dir / f"{instrument}.csv", index=False)
+        _price_frame(start, periods, freq=freq).to_csv(
+            fixture_dir / f"{instrument}.csv", index=False
+        )
 
 
 def _write_fixture(fixture_dir: Path, instrument: str, frame: pd.DataFrame) -> None:
@@ -177,7 +189,9 @@ def test_path_isolation_rejects_non_gma_paths(tmp_path: Path) -> None:
         validate_config(config)
 
 
-def test_immutable_snapshot_naming_and_manifest_hashes(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_immutable_snapshot_naming_and_manifest_hashes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.chdir(tmp_path)
     fixture_dir = tmp_path / "fixtures"
     _write_fixtures(fixture_dir)
@@ -258,7 +272,9 @@ def test_missing_raw_open_and_adjusted_close_are_reported() -> None:
     assert result.audit["unavailable_adjusted_close"]
 
 
-def test_etf_and_bitcoin_calendar_handling_is_reported(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_etf_and_bitcoin_calendar_handling_is_reported(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.chdir(tmp_path)
     config_path = _write_config(tmp_path)
     fixture_dir = tmp_path / "fixtures"
@@ -266,8 +282,14 @@ def test_etf_and_bitcoin_calendar_handling_is_reported(tmp_path: Path, monkeypat
     config = load_config(config_path)
     result = run_gma0_availability_audit(config=config, offline_fixtures=fixture_dir)
     availability = pd.read_csv(result.outputs["price_availability"])
-    assert availability.loc[availability["instrument_id"].eq("SPY"), "expected_calendar"].iloc[0] == "us_listed_etf"
-    assert availability.loc[availability["instrument_id"].eq("BTC-USD"), "expected_calendar"].iloc[0] == "bitcoin_utc_daily"
+    assert (
+        availability.loc[availability["instrument_id"].eq("SPY"), "expected_calendar"].iloc[0]
+        == "us_listed_etf"
+    )
+    assert (
+        availability.loc[availability["instrument_id"].eq("BTC-USD"), "expected_calendar"].iloc[0]
+        == "bitcoin_utc_daily"
+    )
 
 
 def test_warmup_next_open_and_bitcoin_not_delaying_core_start(
@@ -278,11 +300,16 @@ def test_warmup_next_open_and_bitcoin_not_delaying_core_start(
     config_path = _write_config(tmp_path)
     fixture_dir = tmp_path / "fixtures"
     _write_fixtures(fixture_dir, btc_start="2022-01-01", periods=500)
-    result = run_gma0_availability_audit(config=load_config(config_path), offline_fixtures=fixture_dir)
+    result = run_gma0_availability_audit(
+        config=load_config(config_path), offline_fixtures=fixture_dir
+    )
     replay = result.replay_start.iloc[0]
     assert replay["earliest_common_core_signal_date"] < replay["earliest_bitcoin_eligible_date"]
     assert not bool(replay["bitcoin_delays_core_start"])
-    assert replay["earliest_core_next_open_execution_date"] > replay["earliest_common_core_signal_date"]
+    assert (
+        replay["earliest_core_next_open_execution_date"]
+        > replay["earliest_common_core_signal_date"]
+    )
 
 
 def test_benchmark_only_excluded_from_core_common_date(tmp_path: Path) -> None:
@@ -304,17 +331,23 @@ def test_unexpected_write_path_detection(tmp_path: Path, monkeypatch: pytest.Mon
     config_path = _write_config(tmp_path)
     fixture_dir = tmp_path / "fixtures"
     _write_fixtures(fixture_dir)
-    result = run_gma0_availability_audit(config=load_config(config_path), offline_fixtures=fixture_dir)
+    result = run_gma0_availability_audit(
+        config=load_config(config_path), offline_fixtures=fixture_dir
+    )
     gate = pd.read_csv(result.outputs["isolation_gate_report"])
     assert gate.loc[gate["gate"].eq("no_frozen_report_or_data_path_written"), "passed"].iloc[0]
 
 
-def test_deterministic_report_generation_from_fixtures(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_deterministic_report_generation_from_fixtures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.chdir(tmp_path)
     config_path = _write_config(tmp_path)
     fixture_dir = tmp_path / "fixtures"
     _write_fixtures(fixture_dir)
-    result = run_gma0_availability_audit(config=load_config(config_path), offline_fixtures=fixture_dir)
+    result = run_gma0_availability_audit(
+        config=load_config(config_path), offline_fixtures=fixture_dir
+    )
     expected = {
         "reuse_map",
         "instrument_registry",
@@ -339,7 +372,9 @@ def test_gma0r_exact_adjusted_close_match_is_classified(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.chdir(tmp_path)
-    row = _reproducibility_after_two_spy_snapshots(tmp_path, _price_frame(periods=30), _price_frame(periods=30))
+    row = _reproducibility_after_two_spy_snapshots(
+        tmp_path, _price_frame(periods=30), _price_frame(periods=30)
+    )
     assert row["reproducibility_classification"] == "exact_match"
     assert row["adj_close_exact_difference_count"] == 0
 
@@ -421,10 +456,18 @@ def test_gma0r_expanded_non_crypto_and_full_allocator_dates_are_explicit(
     config_path = _write_config(tmp_path)
     fixture_dir = tmp_path / "fixtures"
     _write_fixtures(fixture_dir, btc_start="2022-01-01", periods=500)
-    result = run_gma0_availability_audit(config=load_config(config_path), offline_fixtures=fixture_dir)
+    result = run_gma0_availability_audit(
+        config=load_config(config_path), offline_fixtures=fixture_dir
+    )
     replay = pd.read_csv(result.outputs["replay_start_assessment"]).iloc[0]
-    assert replay["earliest_expanded_non_crypto_allocator_date"] < replay["earliest_full_allocator_including_bitcoin_date"]
-    assert replay["earliest_full_allocator_including_bitcoin_date"] >= replay["earliest_bitcoin_eligible_date"]
+    assert (
+        replay["earliest_expanded_non_crypto_allocator_date"]
+        < replay["earliest_full_allocator_including_bitcoin_date"]
+    )
+    assert (
+        replay["earliest_full_allocator_including_bitcoin_date"]
+        >= replay["earliest_bitcoin_eligible_date"]
+    )
     assert bool(replay["legacy_earliest_expanded_universe_date_deprecated"])
 
 
@@ -436,7 +479,9 @@ def test_gma0r_benchmark_only_acwi_does_not_receive_momentum_warmup(
     config_path = _write_config(tmp_path)
     fixture_dir = tmp_path / "fixtures"
     _write_fixtures(fixture_dir, periods=500)
-    result = run_gma0_availability_audit(config=load_config(config_path), offline_fixtures=fixture_dir)
+    result = run_gma0_availability_audit(
+        config=load_config(config_path), offline_fixtures=fixture_dir
+    )
     availability = pd.read_csv(result.outputs["price_availability"])
     acwi = availability.loc[availability["instrument_id"].eq("ACWI")].iloc[0]
     replay = pd.read_csv(result.outputs["replay_start_assessment"]).iloc[0]
@@ -457,12 +502,16 @@ def test_gma0r_warnings_do_not_imply_reduced_universe(
     bil = pd.read_csv(fixture_dir / "BIL.csv")
     bil.loc[1, "Date"] = bil.loc[0, "Date"]
     bil.to_csv(fixture_dir / "BIL.csv", index=False)
-    result = run_gma0_availability_audit(config=load_config(config_path), offline_fixtures=fixture_dir)
+    result = run_gma0_availability_audit(
+        config=load_config(config_path), offline_fixtures=fixture_dir
+    )
     conclusion = result.outputs["gma0_conclusion"].read_text(encoding="utf-8")
     assert result.warnings
     assert result.decision == "gma0_feasible_proceed_to_data_foundation"
     assert "excluded instruments: `none`" in conclusion
-    assert "reason for every reduction: `none; no GMA-0R universe reduction was applied`" in conclusion
+    assert (
+        "reason for every reduction: `none; no GMA-0R universe reduction was applied`" in conclusion
+    )
 
 
 def test_cli_offline_fixture_mode(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

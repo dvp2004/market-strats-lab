@@ -81,9 +81,7 @@ def test_create_regime_switch_overlay_raw_close_signal_sensitivity_runs():
     )
 
     assert not sensitivity.empty
-    assert {"adjusted_close_signal", "raw_close_signal"}.issubset(
-        set(sensitivity["signal_type"])
-    )
+    assert {"adjusted_close_signal", "raw_close_signal"}.issubset(set(sensitivity["signal_type"]))
     assert {"full", "reference", "holdout"}.issubset(set(sensitivity["period"]))
     assert "cagr_pct" in sensitivity.columns
     assert "calmar" in sensitivity.columns
@@ -107,9 +105,7 @@ def test_create_regime_switch_overlay_raw_close_signal_sensitivity_summary_runs(
         }
     )
 
-    summary = create_regime_switch_overlay_raw_close_signal_sensitivity_summary(
-        sensitivity
-    )
+    summary = create_regime_switch_overlay_raw_close_signal_sensitivity_summary(sensitivity)
 
     assert not summary.empty
     assert "raw_minus_adjusted_cagr_pct_points" in summary.columns

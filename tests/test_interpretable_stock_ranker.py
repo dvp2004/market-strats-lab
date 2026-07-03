@@ -253,7 +253,9 @@ def test_walk_forward_ranker_uses_only_phase23f_pilot_features(tmp_path: Path):
     _write_phase23f_sources(tmp_path)
     panel = pd.read_csv(tmp_path / "reports" / "phase23f" / "phase23f_pilot_feature_panel.csv")
     targets = pd.read_csv(tmp_path / "reports" / "phase23f" / "phase23f_pilot_targets.csv")
-    outputs = run_walk_forward_ranker(panel, targets, _phase23g_config()["phase23g_interpretable_stock_ranker"])
+    outputs = run_walk_forward_ranker(
+        panel, targets, _phase23g_config()["phase23g_interpretable_stock_ranker"]
+    )
 
     coefficients = outputs["coefficients"]
     used_features = set(coefficients["feature_name"]) - {"__intercept__"}

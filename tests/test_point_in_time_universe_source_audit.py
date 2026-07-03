@@ -17,11 +17,7 @@ def _config(tmp_path: Path) -> dict:
             "enabled": True,
             "output_dir": str(tmp_path / "reports" / "phase23b"),
             "dashboard_status_path": str(
-                tmp_path
-                / "reports"
-                / "paper_trading"
-                / "dashboard"
-                / "phase23b_status.csv"
+                tmp_path / "reports" / "paper_trading" / "dashboard" / "phase23b_status.csv"
             ),
         }
     }
@@ -51,9 +47,7 @@ def _valid_events() -> pd.DataFrame:
 
 def test_source_registry_identifies_official_candidates_for_both_universes():
     registry = build_source_registry()
-    candidates = registry.loc[
-        registry["source_class"].eq("official_licensed_canonical_candidate")
-    ]
+    candidates = registry.loc[registry["source_class"].eq("official_licensed_canonical_candidate")]
     assert {
         "SP500_POINT_IN_TIME",
         "NASDAQ100_POINT_IN_TIME",
@@ -92,9 +86,7 @@ def test_membership_event_validator_rejects_lookahead_ordering():
     events = _valid_events()
     events.loc[0, "announcement_timestamp_utc"] = "2020-12-22T00:00:00Z"
     report = validate_membership_event_frame(events)
-    row = report.loc[
-        report["gate"].eq("announcement_not_after_effective_date")
-    ].iloc[0]
+    row = report.loc[report["gate"].eq("announcement_not_after_effective_date")].iloc[0]
     assert not bool(row["passed"])
     assert not bool(report["all_gates_passed"].iloc[0])
 
@@ -108,9 +100,7 @@ def test_phase23b_writes_audit_reports_and_blocks_model_training(tmp_path):
     summary = outputs["summary"].iloc[0]
     assert bool(summary["phase_execution_gates_passed"])
     assert not bool(summary["universe_data_ready"])
-    assert summary["phase23b_decision"] == (
-        "phase23b_source_path_identified_acquisition_pending"
-    )
+    assert summary["phase23b_decision"] == ("phase23b_source_path_identified_acquisition_pending")
     assert not bool(summary["model_training_allowed"])
     assert not bool(summary["backtest_allowed"])
     assert not bool(summary["promotion_allowed"])

@@ -207,13 +207,27 @@ def _config(tmp_path: Path):
             "source_reports": {
                 "phase13ab_conclusion": str(tmp_path / "phase13ab_repair_audit_conclusion.csv"),
                 "phase13ab_gate_report": str(tmp_path / "phase13ab_repair_audit_gate_report.csv"),
-                "repair_success_report": str(tmp_path / "phase13aa_repair_execution_success_report.csv"),
-                "repair_metric_report": str(tmp_path / "phase13aa_repair_execution_metric_report.csv"),
-                "repair_class_recall_report": str(tmp_path / "phase13aa_repair_execution_class_recall_report.csv"),
-                "repair_overfit_report": str(tmp_path / "phase13aa_repair_execution_overfit_report.csv"),
-                "original_metric_report": str(tmp_path / "phase13u_ml_train_validation_metric_report.csv"),
-                "original_baseline_comparison_report": str(tmp_path / "phase13u_ml_baseline_comparison_report.csv"),
-                "phase13w_decision_report": str(tmp_path / "phase13w_interpretation_continuation_decision_report.csv"),
+                "repair_success_report": str(
+                    tmp_path / "phase13aa_repair_execution_success_report.csv"
+                ),
+                "repair_metric_report": str(
+                    tmp_path / "phase13aa_repair_execution_metric_report.csv"
+                ),
+                "repair_class_recall_report": str(
+                    tmp_path / "phase13aa_repair_execution_class_recall_report.csv"
+                ),
+                "repair_overfit_report": str(
+                    tmp_path / "phase13aa_repair_execution_overfit_report.csv"
+                ),
+                "original_metric_report": str(
+                    tmp_path / "phase13u_ml_train_validation_metric_report.csv"
+                ),
+                "original_baseline_comparison_report": str(
+                    tmp_path / "phase13u_ml_baseline_comparison_report.csv"
+                ),
+                "phase13w_decision_report": str(
+                    tmp_path / "phase13w_interpretation_continuation_decision_report.csv"
+                ),
                 "dataset": str(tmp_path / "phase13q_ml_feature_dataset_v1.csv"),
             },
             "diagnostic_thresholds": {
@@ -268,12 +282,24 @@ def _config(tmp_path: Path):
             "phase13ac_reports": {
                 "conclusion": str(tmp_path / "phase13ac_failure_attribution_conclusion.csv"),
                 "gate_report": str(tmp_path / "phase13ac_failure_attribution_gate_report.csv"),
-                "failure_summary_report": str(tmp_path / "phase13ac_failure_attribution_failure_summary_report.csv"),
-                "target_distribution_report": str(tmp_path / "phase13ac_failure_attribution_target_distribution_report.csv"),
-                "class_imbalance_report": str(tmp_path / "phase13ac_failure_attribution_class_imbalance_report.csv"),
-                "target_outcome_profile_report": str(tmp_path / "phase13ac_failure_attribution_target_outcome_profile_report.csv"),
-                "failure_attribution_report": str(tmp_path / "phase13ac_failure_attribution_failure_attribution_report.csv"),
-                "continuation_options_report": str(tmp_path / "phase13ac_failure_attribution_continuation_options_report.csv"),
+                "failure_summary_report": str(
+                    tmp_path / "phase13ac_failure_attribution_failure_summary_report.csv"
+                ),
+                "target_distribution_report": str(
+                    tmp_path / "phase13ac_failure_attribution_target_distribution_report.csv"
+                ),
+                "class_imbalance_report": str(
+                    tmp_path / "phase13ac_failure_attribution_class_imbalance_report.csv"
+                ),
+                "target_outcome_profile_report": str(
+                    tmp_path / "phase13ac_failure_attribution_target_outcome_profile_report.csv"
+                ),
+                "failure_attribution_report": str(
+                    tmp_path / "phase13ac_failure_attribution_failure_attribution_report.csv"
+                ),
+                "continuation_options_report": str(
+                    tmp_path / "phase13ac_failure_attribution_continuation_options_report.csv"
+                ),
             },
         },
         "phase13ae_ml_branch_continuation_architecture_pivot": {
@@ -292,9 +318,15 @@ def _config(tmp_path: Path):
             "source_reports": {
                 "phase13ad_conclusion": str(tmp_path / "phase13ad_failure_audit_conclusion.csv"),
                 "phase13ad_gate_report": str(tmp_path / "phase13ad_failure_audit_gate_report.csv"),
-                "failure_summary_report": str(tmp_path / "phase13ac_failure_attribution_failure_summary_report.csv"),
-                "failure_attribution_report": str(tmp_path / "phase13ac_failure_attribution_failure_attribution_report.csv"),
-                "continuation_options_report": str(tmp_path / "phase13ac_failure_attribution_continuation_options_report.csv"),
+                "failure_summary_report": str(
+                    tmp_path / "phase13ac_failure_attribution_failure_summary_report.csv"
+                ),
+                "failure_attribution_report": str(
+                    tmp_path / "phase13ac_failure_attribution_failure_attribution_report.csv"
+                ),
+                "continuation_options_report": str(
+                    tmp_path / "phase13ac_failure_attribution_continuation_options_report.csv"
+                ),
             },
             "decision_policy": {
                 "if_fragile_recall_unresolved": "pivot_to_target_feature_redesign_preregistration",
@@ -336,7 +368,9 @@ def _config(tmp_path: Path):
             "phase13ae_reports": {
                 "conclusion": str(tmp_path / "phase13ae_pivot_decision_conclusion.csv"),
                 "gate_report": str(tmp_path / "phase13ae_pivot_decision_gate_report.csv"),
-                "architecture_decision_report": str(tmp_path / "phase13ae_pivot_decision_architecture_decision_report.csv"),
+                "architecture_decision_report": str(
+                    tmp_path / "phase13ae_pivot_decision_architecture_decision_report.csv"
+                ),
             },
             "checkpoint_reports": {
                 "required_reports": [
@@ -366,8 +400,12 @@ def test_phase13ac_to_13af_failure_attribution_bundle(tmp_path):
     config = _config(tmp_path)
 
     out_ac = save_phase13ac_ml_failure_attribution_diagnostic(config=config, reports_dir=tmp_path)
-    out_ad = save_phase13ad_ml_failure_attribution_readiness_audit(config=config, reports_dir=tmp_path)
-    out_ae = save_phase13ae_ml_branch_continuation_architecture_pivot(config=config, reports_dir=tmp_path)
+    out_ad = save_phase13ad_ml_failure_attribution_readiness_audit(
+        config=config, reports_dir=tmp_path
+    )
+    out_ae = save_phase13ae_ml_branch_continuation_architecture_pivot(
+        config=config, reports_dir=tmp_path
+    )
     out_af = save_phase13af_phase13_ml_branch_checkpoint_audit(config=config, reports_dir=tmp_path)
 
     assert bool(out_ac["conclusion"].iloc[0]["all_gates_passed"])

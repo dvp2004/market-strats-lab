@@ -129,9 +129,7 @@ def test_phase8f_gate_report_passes_when_boundary_is_documented():
 
     assert not gate_report.empty
     assert bool(gate_report["passed"].all())
-    assert conclusion.iloc[0]["verdict"] == (
-        "Completed — research-only boundary documented"
-    )
+    assert conclusion.iloc[0]["verdict"] == ("Completed — research-only boundary documented")
 
 
 def test_phase8f_gate_report_fails_when_live_trading_claim_is_true():

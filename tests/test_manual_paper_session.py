@@ -75,9 +75,11 @@ def _targets() -> pd.DataFrame:
         case=False,
     )
     targets["current_btc_weight"] = targets.apply(
-        lambda row: 0.05
-        if row["canonical_candidate_id"] == "canonical_inverse_vol_63d_btc_usd_qqq_spy"
-        else 0.0,
+        lambda row: (
+            0.05
+            if row["canonical_candidate_id"] == "canonical_inverse_vol_63d_btc_usd_qqq_spy"
+            else 0.0
+        ),
         axis=1,
     )
     return targets
@@ -92,9 +94,7 @@ def _config(reports_dir: Path) -> dict:
             "source_finalist_tracking_dir": str(
                 reports_dir / "paper_trading" / "finalist_tracking"
             ),
-            "source_cycle_tracker_dir": str(
-                reports_dir / "paper_trading" / "cycle_tracker"
-            ),
+            "source_cycle_tracker_dir": str(reports_dir / "paper_trading" / "cycle_tracker"),
             "paper_only": True,
             "live_trading_allowed": False,
             "real_money_allowed": False,
@@ -190,15 +190,11 @@ def test_manual_session_template_status_and_dashboard_are_written(tmp_path):
         status.iloc[0]["session_complete"]
     )
     assert status.iloc[0]["candidate_count"] == 2
-    assert status.iloc[0]["warnings_present"] is True or bool(
-        status.iloc[0]["warnings_present"]
-    )
+    assert status.iloc[0]["warnings_present"] is True or bool(status.iloc[0]["warnings_present"])
     assert status.iloc[0]["btc_positive_weight_present"] is True or bool(
         status.iloc[0]["btc_positive_weight_present"]
     )
-    assert dashboard.iloc[0]["phase20c_decision"] == outputs["summary"].iloc[0][
-        "phase20c_decision"
-    ]
+    assert dashboard.iloc[0]["phase20c_decision"] == outputs["summary"].iloc[0]["phase20c_decision"]
     assert not bool(status.iloc[0]["live_trading_allowed"])
     assert not bool(status.iloc[0]["real_money_allowed"])
     assert not bool(status.iloc[0]["broker_api_integration_allowed"])

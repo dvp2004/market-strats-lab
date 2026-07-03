@@ -140,15 +140,28 @@ def _config(tmp_path: Path):
             "output_file": str(tmp_path / "phase15o_post_endpoint_candidate_stream.csv"),
             "source_reports": {
                 "phase15n_conclusion": str(tmp_path / "phase15n_fresh_signal_audit_conclusion.csv"),
-                "phase15n_gate_report": str(tmp_path / "phase15n_fresh_signal_audit_gate_report.csv"),
-                "phase15n_decision_report": str(tmp_path / "phase15n_fresh_signal_audit_decision_report.csv"),
-                "pinned_endpoint_signal": str(tmp_path / "phase15k_pinned_endpoint_signal_file.csv"),
-                "switch_log": str(tmp_path / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"),
-                "selected_switch_definition": str(tmp_path / "phase15i_column_semantics_selected_switch_definition.csv"),
+                "phase15n_gate_report": str(
+                    tmp_path / "phase15n_fresh_signal_audit_gate_report.csv"
+                ),
+                "phase15n_decision_report": str(
+                    tmp_path / "phase15n_fresh_signal_audit_decision_report.csv"
+                ),
+                "pinned_endpoint_signal": str(
+                    tmp_path / "phase15k_pinned_endpoint_signal_file.csv"
+                ),
+                "switch_log": str(
+                    tmp_path
+                    / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
+                ),
+                "selected_switch_definition": str(
+                    tmp_path / "phase15i_column_semantics_selected_switch_definition.csv"
+                ),
             },
             "candidate_stream_sources": {
                 "preferred_manual_candidate_stream_file": str(tmp_path / "missing_manual.csv"),
-                "preferred_existing_fresh_candidate_stream_file": str(tmp_path / "missing_existing.csv"),
+                "preferred_existing_fresh_candidate_stream_file": str(
+                    tmp_path / "missing_existing.csv"
+                ),
                 "allow_in_memory_final_candidate_frame_if_post_endpoint_rows_exist": True,
             },
             "selected_exposure_fallback_priority": ["target_offensive_weight"],
@@ -196,8 +209,12 @@ def _config(tmp_path: Path):
                 "conclusion": str(tmp_path / "phase15o_candidate_stream_conclusion.csv"),
                 "gate_report": str(tmp_path / "phase15o_candidate_stream_gate_report.csv"),
                 "candidate_stream": str(tmp_path / "phase15o_post_endpoint_candidate_stream.csv"),
-                "extension_summary": str(tmp_path / "phase15o_candidate_stream_extension_summary.csv"),
-                "required_column_check": str(tmp_path / "phase15o_candidate_stream_required_column_check.csv"),
+                "extension_summary": str(
+                    tmp_path / "phase15o_candidate_stream_extension_summary.csv"
+                ),
+                "required_column_check": str(
+                    tmp_path / "phase15o_candidate_stream_required_column_check.csv"
+                ),
             },
             "required_extended_candidate_stream_columns": required_cols,
             "audit_thresholds": {

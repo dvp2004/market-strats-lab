@@ -37,13 +37,7 @@ def _write_price(
 
 
 def _write_benchmark_equity(root: Path, dates: pd.DatetimeIndex) -> None:
-    output_dir = (
-        root
-        / "reports"
-        / "paper_trading"
-        / "regime_informed_tracking"
-        / "performance"
-    )
+    output_dir = root / "reports" / "paper_trading" / "regime_informed_tracking" / "performance"
     output_dir.mkdir(parents=True, exist_ok=True)
     rows = []
     names = [
@@ -94,18 +88,9 @@ def _fixture_root(tmp_path: Path) -> Path:
     return tmp_path
 
 
-
-
 def _write_prior_phase_outputs(root: Path, dates: pd.DatetimeIndex) -> None:
-    phase22a_dir = (
-        root / "reports" / "strategy_factory" / "dynamic_opportunity_engine"
-    )
-    phase22b_dir = (
-        root
-        / "reports"
-        / "strategy_factory"
-        / "dynamic_opportunity_engine_diagnostics"
-    )
+    phase22a_dir = root / "reports" / "strategy_factory" / "dynamic_opportunity_engine"
+    phase22b_dir = root / "reports" / "strategy_factory" / "dynamic_opportunity_engine_diagnostics"
     phase22a_dir.mkdir(parents=True, exist_ok=True)
     phase22b_dir.mkdir(parents=True, exist_ok=True)
 
@@ -151,10 +136,7 @@ def _write_prior_phase_outputs(root: Path, dates: pd.DatetimeIndex) -> None:
         index=False,
     )
     pd.DataFrame(
-        [
-            {"strategy_name": name, "CAGR": drift * 252 * 100}
-            for name, drift in v1_drifts.items()
-        ]
+        [{"strategy_name": name, "CAGR": drift * 252 * 100} for name, drift in v1_drifts.items()]
     ).to_csv(phase22b_dir / "phase22b_v1_strategy_metrics.csv", index=False)
 
 
@@ -184,10 +166,7 @@ def _config(tmp_path: Path) -> dict:
                 tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine"
             ),
             "output_dir": str(
-                tmp_path
-                / "reports"
-                / "strategy_factory"
-                / "dynamic_opportunity_engine_diagnostics"
+                tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine_diagnostics"
             ),
             "dashboard_dir": str(tmp_path / "reports" / "paper_trading" / "dashboard"),
             "starting_cash": 10_000,
@@ -207,16 +186,10 @@ def _config(tmp_path: Path) -> dict:
                 tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine"
             ),
             "phase22b_input_dir": str(
-                tmp_path
-                / "reports"
-                / "strategy_factory"
-                / "dynamic_opportunity_engine_diagnostics"
+                tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_engine_diagnostics"
             ),
             "output_dir": str(
-                tmp_path
-                / "reports"
-                / "strategy_factory"
-                / "dynamic_opportunity_return_enhancement"
+                tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_return_enhancement"
             ),
             "dashboard_dir": str(tmp_path / "reports" / "paper_trading" / "dashboard"),
             "starting_cash": 10_000,
@@ -255,10 +228,7 @@ def phase22c_run(tmp_path_factory):
 def test_phase22c_writes_v2_outputs_scorecard_and_charts(phase22c_run):
     tmp_path, outputs = phase22c_run
     output_dir = (
-        tmp_path
-        / "reports"
-        / "strategy_factory"
-        / "dynamic_opportunity_return_enhancement"
+        tmp_path / "reports" / "strategy_factory" / "dynamic_opportunity_return_enhancement"
     )
 
     for path in [
@@ -275,9 +245,7 @@ def test_phase22c_writes_v2_outputs_scorecard_and_charts(phase22c_run):
         assert path.exists()
 
     assert set(outputs["v2_metrics"]["strategy_name"]) == set(V2_STRATEGIES)
-    assert set(outputs["return_enhancement_scorecard"]["strategy_name"]) == set(
-        V2_STRATEGIES
-    )
+    assert set(outputs["return_enhancement_scorecard"]["strategy_name"]) == set(V2_STRATEGIES)
 
 
 def test_phase22c_v2_caps_and_cost_cases(phase22c_run):
@@ -327,7 +295,9 @@ def test_phase22c_comparison_and_safety_flags(phase22c_run):
 
 
 def test_phase22c_focused_runner_flag_exists_and_daily_runner_skips_phase22c():
-    run_backtest_path = Path(__file__).resolve().parents[1] / "src" / "market_strats" / "run_backtest.py"
+    run_backtest_path = (
+        Path(__file__).resolve().parents[1] / "src" / "market_strats" / "run_backtest.py"
+    )
     source = run_backtest_path.read_text(encoding="utf-8")
 
     assert "--phase22c-only" in source

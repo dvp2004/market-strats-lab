@@ -2,6 +2,7 @@
 GMA-1A-R tests: Required-Core Reconciliation and Split-Basis Verification.
 All 40 tests must pass. No network access. Uses local immutable canonical files.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -30,6 +31,7 @@ CANONICAL_DIR = Path("data/global_multi_asset_alpha/canonical_market")
 
 
 # ── helpers ────────────────────────────────────────────────────────────────────
+
 
 def _make_canonical(
     n_rows: int = 100,
@@ -70,33 +72,36 @@ def _make_canonical(
     for i in range(1, n_rows):
         tr_idx[i] = tr_idx[i - 1] * tr[i]
 
-    return pd.DataFrame({
-        "date": dates,
-        "instrument_id": "TEST",
-        "open_raw": close,
-        "high_raw": close,
-        "low_raw": close,
-        "close_raw": close,
-        "adj_close_provider": adj,
-        "volume": 1_000_000,
-        "dividend_cash": div,
-        "split_ratio": split,
-        "is_completed_observation": [False] + [True] * (n_rows - 1),
-        "calendar_id": "us_listed_etf",
-        "source_manifest_path": "",
-        "source_manifest_sha256": "",
-        "source_raw_sha256": "",
-        "source_normalised_sha256": "",
-        "total_return_factor": tr,
-        "total_return_index": tr_idx,
-        "total_return_construction_status": ["first_observation"] + ["constructed"] * (n_rows - 1),
-    })
+    return pd.DataFrame(
+        {
+            "date": dates,
+            "instrument_id": "TEST",
+            "open_raw": close,
+            "high_raw": close,
+            "low_raw": close,
+            "close_raw": close,
+            "adj_close_provider": adj,
+            "volume": 1_000_000,
+            "dividend_cash": div,
+            "split_ratio": split,
+            "is_completed_observation": [False] + [True] * (n_rows - 1),
+            "calendar_id": "us_listed_etf",
+            "source_manifest_path": "",
+            "source_manifest_sha256": "",
+            "source_raw_sha256": "",
+            "source_normalised_sha256": "",
+            "total_return_factor": tr,
+            "total_return_index": tr_idx,
+            "total_return_construction_status": ["first_observation"]
+            + ["constructed"] * (n_rows - 1),
+        }
+    )
 
 
 # ── TestInventory ──────────────────────────────────────────────────────────────
 
-class TestInventory:
 
+class TestInventory:
     def test_01_inventory_has_30_rows(self) -> None:
         inv = build_inventory()
         assert len(inv) == 30
@@ -104,14 +109,19 @@ class TestInventory:
     def test_02_inventory_columns_present(self) -> None:
         inv = build_inventory()
         required_cols = [
-            "instrument_id", "is_required_core", "is_benchmark_only",
-            "is_dynamic_satellite", "reconciliation_status",
-            "overlap_rows", "median_return_difference_bps",
+            "instrument_id",
+            "is_required_core",
+            "is_benchmark_only",
+            "is_dynamic_satellite",
+            "reconciliation_status",
+            "overlap_rows",
+            "median_return_difference_bps",
             "maximum_return_difference_bps",
             "return_difference_count_gt_tolerance",
             "earliest_material_difference_date",
             "latest_material_difference_date",
-            "dividend_event_count", "split_event_count",
+            "dividend_event_count",
+            "split_event_count",
             "ready_for_replay_engine",
         ]
         for col in required_cols:
@@ -119,24 +129,23 @@ class TestInventory:
 
     def test_03_reviewed_instruments_count_20(self) -> None:
         inv = build_inventory()
-        reviewed = inv[inv["reconciliation_status"].isin(
-            ["action_timing_review", "provider_basis_review"]
-        )]
+        reviewed = inv[
+            inv["reconciliation_status"].isin(["action_timing_review", "provider_basis_review"])
+        ]
         assert len(reviewed) == 20
 
     def test_04_required_core_reviewed_count_16(self) -> None:
         inv = build_inventory()
         core_reviewed = inv[
-            inv["reconciliation_status"].isin(["action_timing_review", "provider_basis_review"]) &
-            inv["is_required_core"]
+            inv["reconciliation_status"].isin(["action_timing_review", "provider_basis_review"])
+            & inv["is_required_core"]
         ]
         assert len(core_reviewed) == 16
 
     def test_05_action_timing_core_instruments_identified(self) -> None:
         inv = build_inventory()
         at_core = inv[
-            (inv["reconciliation_status"] == "action_timing_review") &
-            inv["is_required_core"]
+            (inv["reconciliation_status"] == "action_timing_review") & inv["is_required_core"]
         ]["instrument_id"].tolist()
         for sym in ["SPY", "IWM", "RSP", "IEF", "TLT", "TIP", "LQD", "EMB", "UUP"]:
             assert sym in at_core, f"{sym} missing from action_timing core"
@@ -144,8 +153,7 @@ class TestInventory:
     def test_06_provider_basis_core_instruments_identified(self) -> None:
         inv = build_inventory()
         pb_core = inv[
-            (inv["reconciliation_status"] == "provider_basis_review") &
-            inv["is_required_core"]
+            (inv["reconciliation_status"] == "provider_basis_review") & inv["is_required_core"]
         ]["instrument_id"].tolist()
         for sym in ["EFA", "VGK", "EWJ", "EEM", "HYG", "DBC", "VNQ"]:
             assert sym in pb_core, f"{sym} missing from provider_basis core"
@@ -165,8 +173,8 @@ class TestInventory:
 
 # ── TestSplitBasis ─────────────────────────────────────────────────────────────
 
-class TestSplitBasis:
 
+class TestSplitBasis:
     def test_09_split_evidence_has_rows(self) -> None:
         actions = pd.read_csv(REPORT_DIR / "corporate_action_contract.csv")
         ev = build_split_evidence(actions)
@@ -175,12 +183,15 @@ class TestSplitBasis:
     def test_10_all_evidence_confirmed_split_adjusted(self) -> None:
         actions = pd.read_csv(REPORT_DIR / "corporate_action_contract.csv")
         ev = build_split_evidence(actions)
-        usable = ev[ev["evidence_status"].notna() &
-                    ev["evidence_status"].ne("no_usable_split_rows_in_canonical")]
+        usable = ev[
+            ev["evidence_status"].notna()
+            & ev["evidence_status"].ne("no_usable_split_rows_in_canonical")
+        ]
         # Every usable row must be confirmed from open/high/low/close continuity.
         expected = "raw_ohlc_already_split_adjusted_confirmed"
-        assert (usable["evidence_status"] == expected).all(), \
+        assert (usable["evidence_status"] == expected).all(), (
             f"Unconfirmed rows:\n{usable[usable['evidence_status'] != expected]}"
+        )
         assert usable["all_raw_ohlc_consistent_with_split_adjustment"].all()
 
     def test_11_raw_price_ratio_near_1_for_all_splits(self) -> None:
@@ -190,8 +201,9 @@ class TestSplitBasis:
         for _, r in usable.iterrows():
             ratio = float(r["raw_price_ratio"])
             # Normal daily price variation: within ±15% of 1.0
-            assert abs(ratio - 1.0) < 0.15, \
+            assert abs(ratio - 1.0) < 0.15, (
                 f"{r['instrument_id']} {r['split_date']}: raw_ratio={ratio} expected ~1.0"
+            )
 
     def test_12_split_basis_double_count_flag(self) -> None:
         actions = pd.read_csv(REPORT_DIR / "corporate_action_contract.csv")
@@ -211,13 +223,18 @@ class TestSplitBasis:
         dates = pd.date_range("2020-01-02", periods=n, freq="B")
         close = np.full(n, 100.0)
         close[25:] = 50.0  # 2:1 split applied to raw close
-        df = pd.DataFrame({
-            "date": dates, "close_raw": close, "adj_close_provider": np.full(n, 100.0),
-            "split_ratio": np.where(np.arange(n) == 25, 2.0, 1.0),
-            "dividend_cash": 0.0,
-            "is_completed_observation": [False] + [True] * (n - 1),
-            "total_return_factor": 1.0, "total_return_index": 1.0,
-        })
+        df = pd.DataFrame(
+            {
+                "date": dates,
+                "close_raw": close,
+                "adj_close_provider": np.full(n, 100.0),
+                "split_ratio": np.where(np.arange(n) == 25, 2.0, 1.0),
+                "dividend_cash": 0.0,
+                "is_completed_observation": [False] + [True] * (n - 1),
+                "total_return_factor": 1.0,
+                "total_return_index": 1.0,
+            }
+        )
         raw_ratio = float(df.iloc[25]["close_raw"]) / float(df.iloc[24]["close_raw"])
         # If unadjusted, ratio would be ~0.5
         assert abs(raw_ratio - 0.5) < 0.05
@@ -253,8 +270,8 @@ class TestSplitBasis:
 
 # ── TestActionTimingResolution ─────────────────────────────────────────────────
 
-class TestActionTimingResolution:
 
+class TestActionTimingResolution:
     @pytest.fixture(scope="class")
     def at_res(self) -> pd.DataFrame:
         recon = pd.read_csv(REPORT_DIR / "total_return_reconciliation.csv")
@@ -268,8 +285,9 @@ class TestActionTimingResolution:
         """Every material difference date must have a dividend event."""
         real_diffs = at_res[at_res["event_type"] != "none_above_threshold"]
         for _, r in real_diffs.iterrows():
-            assert float(r["provider_dividend"]) > 0 or r["event_type"] == "split", \
+            assert float(r["provider_dividend"]) > 0 or r["event_type"] == "split", (
                 f"{r['instrument_id']} {r['event_date']}: diff on non-dividend date"
+            )
 
     def test_21_no_unresolved_at_for_required_core(self, at_res: pd.DataFrame) -> None:
         core_at = at_res[at_res["instrument_id"].isin(REQUIRED_CORE)]
@@ -280,10 +298,12 @@ class TestActionTimingResolution:
         real_diffs = at_res[at_res["event_type"] != "none_above_threshold"]
         assert (real_diffs["review_resolution"] == "resolved_immaterial_difference").all()
         assert (
-            real_diffs["difference_cause"].str.contains(
+            real_diffs["difference_cause"]
+            .str.contains(
                 "provider multiplicative dividend-adjustment methodology",
                 regex=False,
-            ).all()
+            )
+            .all()
         )
         assert not real_diffs["date_offset_evidence"].any()
 
@@ -321,8 +341,8 @@ class TestActionTimingResolution:
 
 # ── TestProviderBasisResolution ────────────────────────────────────────────────
 
-class TestProviderBasisResolution:
 
+class TestProviderBasisResolution:
     @pytest.fixture(scope="class")
     def pb_res(self) -> pd.DataFrame:
         recon = pd.read_csv(REPORT_DIR / "total_return_reconciliation.csv")
@@ -334,8 +354,9 @@ class TestProviderBasisResolution:
 
     def test_29_zero_off_dividend_date_differences(self, pb_res: pd.DataFrame) -> None:
         """Critical: all provider-basis differences are on dividend dates."""
-        assert (pb_res["off_dividend_date_difference_count"] == 0).all(), \
+        assert (pb_res["off_dividend_date_difference_count"] == 0).all(), (
             f"Off-dividend differences found:\n{pb_res[pb_res['off_dividend_date_difference_count'] > 0]}"
+        )
 
     def test_30_no_unresolved_pb_for_required_core(self, pb_res: pd.DataFrame) -> None:
         core_pb = pb_res[pb_res["instrument_id"].isin(REQUIRED_CORE)]
@@ -363,14 +384,15 @@ class TestProviderBasisResolution:
         for _, r in pb_res.iterrows():
             expl = str(r["provider_basis_explanation"])
             assert len(expl) > 30, f"{r['instrument_id']}: explanation too short"
-            assert "off_div" in expl or "dividend" in expl.lower(), \
+            assert "off_div" in expl or "dividend" in expl.lower(), (
                 f"{r['instrument_id']}: explanation does not reference dividend dates"
+            )
 
 
 # ── TestCoreReadiness ──────────────────────────────────────────────────────────
 
-class TestCoreReadiness:
 
+class TestCoreReadiness:
     @pytest.fixture(scope="class")
     def readiness(self) -> pd.DataFrame:
         inv = build_inventory()
@@ -384,37 +406,48 @@ class TestCoreReadiness:
     def test_35_all_required_core_ready(self, readiness: pd.DataFrame) -> None:
         core = readiness[readiness["is_required_core"]]
         not_ready = core[~core["ready_for_replay_engine"]]
-        assert len(not_ready) == 0, f"Core not ready:\n{not_ready[['instrument_id','blocking_reason']]}"
+        assert len(not_ready) == 0, (
+            f"Core not ready:\n{not_ready[['instrument_id', 'blocking_reason']]}"
+        )
 
     def test_36_no_instrument_has_empty_resolution(self, readiness: pd.DataFrame) -> None:
         for _, r in readiness.iterrows():
-            assert str(r["review_resolution"]) not in ("", "nan", "None"), \
+            assert str(r["review_resolution"]) not in ("", "nan", "None"), (
                 f"{r['instrument_id']}: empty review_resolution"
+            )
 
     def test_37_unresolved_action_timing_blocks_core(self) -> None:
         """Inject an unresolved AT into a synthetic readiness frame and verify blocking."""
         # Build minimal inventory-like frame
-        inv = pd.DataFrame([{
-            "instrument_id": "SPY",
-            "is_required_core": True,
-            "is_benchmark_only": False,
-            "is_dynamic_satellite": False,
-            "reconciliation_status": "action_timing_review",
-            "overlap_rows": 8000,
-            "median_return_difference_bps": 0.5,
-            "maximum_return_difference_bps": 3.0,
-            "return_difference_count_gt_tolerance": 5,
-            "earliest_material_difference_date": "2020-01-01",
-            "latest_material_difference_date": "2023-01-01",
-            "dividend_event_count": 100,
-            "split_event_count": 0,
-            "ready_for_replay_engine": True,
-        }])
-        at_res_unresolved = pd.DataFrame([{
-            "instrument_id": "SPY",
-            "event_date": "2020-01-15",
-            "review_resolution": "unresolved_action_timing",
-        }])
+        inv = pd.DataFrame(
+            [
+                {
+                    "instrument_id": "SPY",
+                    "is_required_core": True,
+                    "is_benchmark_only": False,
+                    "is_dynamic_satellite": False,
+                    "reconciliation_status": "action_timing_review",
+                    "overlap_rows": 8000,
+                    "median_return_difference_bps": 0.5,
+                    "maximum_return_difference_bps": 3.0,
+                    "return_difference_count_gt_tolerance": 5,
+                    "earliest_material_difference_date": "2020-01-01",
+                    "latest_material_difference_date": "2023-01-01",
+                    "dividend_event_count": 100,
+                    "split_event_count": 0,
+                    "ready_for_replay_engine": True,
+                }
+            ]
+        )
+        at_res_unresolved = pd.DataFrame(
+            [
+                {
+                    "instrument_id": "SPY",
+                    "event_date": "2020-01-15",
+                    "review_resolution": "unresolved_action_timing",
+                }
+            ]
+        )
         pb_res = pd.DataFrame()
         split_ev = pd.DataFrame()
         result = build_core_readiness(inv, at_res_unresolved, pb_res, split_ev)
@@ -424,36 +457,44 @@ class TestCoreReadiness:
 
     def test_38_satellite_ready_even_when_review_unresolved(self) -> None:
         """Non-core instruments get deferred eligibility, not a hard block."""
-        inv = pd.DataFrame([{
-            "instrument_id": "VWO",
-            "is_required_core": False,
-            "is_benchmark_only": False,
-            "is_dynamic_satellite": True,
-            "reconciliation_status": "provider_basis_review",
-            "overlap_rows": 5000,
-            "median_return_difference_bps": 0.5,
-            "maximum_return_difference_bps": 6.0,
-            "return_difference_count_gt_tolerance": 14,
-            "earliest_material_difference_date": "2009-01-01",
-            "latest_material_difference_date": "2023-01-01",
-            "dividend_event_count": 30,
-            "split_event_count": 0,
-            "ready_for_replay_engine": True,
-        }])
-        pb_res_unresolved = pd.DataFrame([{
-            "instrument_id": "VWO",
-            "difference_date_count": 14,
-            "median_difference_bps": 0.5,
-            "maximum_difference_bps": 20.0,  # above threshold
-            "differences_concentrated_on_action_dates": False,
-            "differences_concentrated_on_fx_or_foreign_market_dates": False,
-            "raw_close_consistent": True,
-            "dividend_series_consistent": True,
-            "split_series_consistent": True,
-            "off_dividend_date_difference_count": 5,
-            "provider_basis_explanation": "unresolvable differences",
-            "review_resolution": "unresolved_provider_basis",
-        }])
+        inv = pd.DataFrame(
+            [
+                {
+                    "instrument_id": "VWO",
+                    "is_required_core": False,
+                    "is_benchmark_only": False,
+                    "is_dynamic_satellite": True,
+                    "reconciliation_status": "provider_basis_review",
+                    "overlap_rows": 5000,
+                    "median_return_difference_bps": 0.5,
+                    "maximum_return_difference_bps": 6.0,
+                    "return_difference_count_gt_tolerance": 14,
+                    "earliest_material_difference_date": "2009-01-01",
+                    "latest_material_difference_date": "2023-01-01",
+                    "dividend_event_count": 30,
+                    "split_event_count": 0,
+                    "ready_for_replay_engine": True,
+                }
+            ]
+        )
+        pb_res_unresolved = pd.DataFrame(
+            [
+                {
+                    "instrument_id": "VWO",
+                    "difference_date_count": 14,
+                    "median_difference_bps": 0.5,
+                    "maximum_difference_bps": 20.0,  # above threshold
+                    "differences_concentrated_on_action_dates": False,
+                    "differences_concentrated_on_fx_or_foreign_market_dates": False,
+                    "raw_close_consistent": True,
+                    "dividend_series_consistent": True,
+                    "split_series_consistent": True,
+                    "off_dividend_date_difference_count": 5,
+                    "provider_basis_explanation": "unresolvable differences",
+                    "review_resolution": "unresolved_provider_basis",
+                }
+            ]
+        )
         result = build_core_readiness(inv, pd.DataFrame(), pb_res_unresolved, pd.DataFrame())
         vwo = result[result["instrument_id"] == "VWO"].iloc[0]
         # Non-core should still be ready (deferred, not blocked)
@@ -463,8 +504,8 @@ class TestCoreReadiness:
 
 # ── TestGateAndDecision ────────────────────────────────────────────────────────
 
-class TestGateAndDecision:
 
+class TestGateAndDecision:
     @pytest.fixture(scope="class")
     def full_results(self):
         inv = build_inventory()
@@ -477,9 +518,14 @@ class TestGateAndDecision:
         gate = build_gate_report(readiness, at_res, pb_res, split_ev)
         decision, warnings = determine_decision(readiness, gate, at_res, pb_res)
         return {
-            "inv": inv, "at_res": at_res, "pb_res": pb_res,
-            "split_ev": split_ev, "readiness": readiness,
-            "gate": gate, "decision": decision, "warnings": warnings,
+            "inv": inv,
+            "at_res": at_res,
+            "pb_res": pb_res,
+            "split_ev": split_ev,
+            "readiness": readiness,
+            "gate": gate,
+            "decision": decision,
+            "warnings": warnings,
         }
 
     def test_39_all_gates_pass(self, full_results: dict) -> None:

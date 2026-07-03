@@ -50,9 +50,7 @@ def test_create_probability_stability_summary():
 
     summary = _create_probability_stability_summary(gates)
 
-    cagr_row = summary[
-        summary["claim"] == "Candidate beats SPY 12M on CAGR"
-    ].iloc[0]
+    cagr_row = summary[summary["claim"] == "Candidate beats SPY 12M on CAGR"].iloc[0]
 
     assert cagr_row["profile_count"] == 2
     assert cagr_row["passed_profile_count"] == 1

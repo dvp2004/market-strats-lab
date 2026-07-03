@@ -55,7 +55,7 @@ def test_slice_result_by_rolling_window_rejects_short_partial_window():
     )
 
     assert sliced.empty
-    
+
 
 def test_create_rolling_summary_groups_by_window_and_strategy():
     rolling_metrics = pd.DataFrame(

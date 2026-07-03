@@ -79,6 +79,7 @@ def test_relative_momentum_allocator_rejects_invalid_top_n():
             min_momentum=0.0,
         )
 
+
 def test_relative_momentum_allocator_persists_weights_between_monthly_rebalances():
     dates = pd.bdate_range("2018-01-01", "2021-12-31")
 
@@ -103,6 +104,7 @@ def test_relative_momentum_allocator_persists_weights_between_monthly_rebalances
     assert post_warmup["BBB_weight"].max() > 0.0
     assert post_warmup["CCC_weight"].max() > 0.0
 
+
 def make_prices_from_returns(
     dates: pd.DatetimeIndex,
     start_price: float,
@@ -119,6 +121,7 @@ def make_prices_from_returns(
             "adj_close": prices,
         }
     )
+
 
 def test_inverse_volatility_weighting_allocates_less_to_high_vol_asset():
     dates = pd.bdate_range("2018-01-01", "2021-12-31")
@@ -150,6 +153,7 @@ def test_inverse_volatility_weighting_allocates_less_to_high_vol_asset():
     assert not invested.empty
     assert invested["LOW_weight"].mean() > invested["HIGH_weight"].mean()
 
+
 def test_relative_momentum_allocator_rejects_invalid_weighting():
     dates = pd.bdate_range("2018-01-01", "2021-12-31")
 
@@ -166,6 +170,7 @@ def test_relative_momentum_allocator_rejects_invalid_weighting():
             min_momentum=0.0,
             weighting="bad_weighting",
         )
+
 
 def test_trend_filter_reduces_exposure_when_asset_breaks_below_sma():
     dates = pd.bdate_range("2018-01-01", "2021-12-31")
@@ -218,9 +223,8 @@ def test_trend_filter_reduces_exposure_when_asset_breaks_below_sma():
         pd.to_datetime(result_with_filter["date"]) > pd.Timestamp("2020-10-01")
     ]
 
-    assert late_with_filter["BROKEN_weight"].mean() < late_without_filter[
-        "BROKEN_weight"
-    ].mean()
+    assert late_with_filter["BROKEN_weight"].mean() < late_without_filter["BROKEN_weight"].mean()
+
 
 def test_max_asset_weight_caps_selected_asset_weight():
     dates = pd.bdate_range("2018-01-01", "2021-12-31")
@@ -270,9 +274,7 @@ def test_asset_group_cap_limits_group_exposure():
     post_warmup = result[pd.to_datetime(result["date"]) > pd.Timestamp("2019-06-01")]
 
     commodity_weight = (
-        post_warmup["GLD_weight"]
-        + post_warmup["SLV_weight"]
-        + post_warmup["DBC_weight"]
+        post_warmup["GLD_weight"] + post_warmup["SLV_weight"] + post_warmup["DBC_weight"]
     )
 
     assert commodity_weight.max() <= 0.500001

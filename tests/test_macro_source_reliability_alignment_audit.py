@@ -344,6 +344,4 @@ def test_save_phase10c_writes_expected_reports(tmp_path):
     assert (tmp_path / "phase10c_macro_summary.csv").exists()
     assert (tmp_path / "phase10c_macro_gate_report.csv").exists()
     assert (tmp_path / "phase10c_macro_conclusion.csv").exists()
-    assert (
-        tmp_path / "phase10c_macro_source_reliability_alignment_audit.md"
-    ).exists()
+    assert (tmp_path / "phase10c_macro_source_reliability_alignment_audit.md").exists()

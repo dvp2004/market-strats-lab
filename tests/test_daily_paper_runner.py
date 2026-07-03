@@ -52,9 +52,7 @@ def _write_minimal_daily_sources(tmp_path: Path) -> None:
             {"key": "warnings_present", "value": "True"},
             {"key": "blocking_symbols", "value": "none"},
         ]
-    ).to_csv(
-        tracking_dir / "regime_informed_daily_tracking_tear_sheet.csv", index=False
-    )
+    ).to_csv(tracking_dir / "regime_informed_daily_tracking_tear_sheet.csv", index=False)
     pd.DataFrame(
         [
             {
@@ -72,11 +70,7 @@ def _write_minimal_daily_sources(tmp_path: Path) -> None:
         ]
     ).to_csv(tracking_dir / "regime_informed_session_validation.csv", index=False)
     pd.DataFrame(
-        [
-            {
-                "phase21e_decision": "regime_informed_session_ingested_valid_manual_paper_only"
-            }
-        ]
+        [{"phase21e_decision": "regime_informed_session_ingested_valid_manual_paper_only"}]
     ).to_csv(dashboard_dir / "regime_informed_session_ingestion_status.csv", index=False)
     pd.DataFrame(
         [
@@ -127,9 +121,7 @@ def test_daily_paper_runner_skips_heavy_research_phases(monkeypatch, tmp_path):
         raise AssertionError("heavy research phase should not run")
 
     monkeypatch.setattr(run_backtest, "save_phase17a_strategy_factory_report", fail_if_called)
-    monkeypatch.setattr(
-        run_backtest, "save_phase19a_strategy_factory_multiverse", fail_if_called
-    )
+    monkeypatch.setattr(run_backtest, "save_phase19a_strategy_factory_multiverse", fail_if_called)
     monkeypatch.setattr(run_backtest, "save_phase21a_historical_regime_stress_lab", fail_if_called)
 
     def phase15_chain(**_kwargs):
@@ -157,15 +149,11 @@ def test_daily_paper_runner_skips_heavy_research_phases(monkeypatch, tmp_path):
         return {}
 
     monkeypatch.setattr(run_backtest, "_run_daily_phase15_operational_chain", phase15_chain)
-    monkeypatch.setattr(
-        run_backtest, "save_phase18a_paper_signal_operational_hardening", phase18a
-    )
+    monkeypatch.setattr(run_backtest, "save_phase18a_paper_signal_operational_hardening", phase18a)
     monkeypatch.setattr(run_backtest, "save_phase20b_finalist_dynamic_allocation", phase20b)
     monkeypatch.setattr(run_backtest, "_run_phase21c_regime_informed_paper_tracking", phase21c)
     monkeypatch.setattr(run_backtest, "_run_phase21d_regime_informed_adoption", phase21d)
-    monkeypatch.setattr(
-        run_backtest, "_run_phase21e_regime_informed_session_ingestion", phase21e
-    )
+    monkeypatch.setattr(run_backtest, "_run_phase21e_regime_informed_session_ingestion", phase21e)
 
     outputs = run_backtest._run_daily_paper_workflow(
         config=config,

@@ -49,7 +49,9 @@ def _recommended_tracking_set() -> pd.DataFrame:
     )
 
 
-def _tear_sheet(*, warning_symbols: str = "BTC-USD", blocking_symbols: str = "none") -> pd.DataFrame:
+def _tear_sheet(
+    *, warning_symbols: str = "BTC-USD", blocking_symbols: str = "none"
+) -> pd.DataFrame:
     return pd.DataFrame(
         [
             {
@@ -241,9 +243,7 @@ def test_order_preview_blocks_candidate_when_dynamic_allocation_missing():
     orders = build_finalist_paper_orders_preview(targets=targets, data_quality_blocked=False)
 
     assert not orders["paper_order_allowed"].any()
-    assert orders["paper_order_blocking_reason"].str.contains(
-        "dynamic_weight_source_missing"
-    ).all()
+    assert orders["paper_order_blocking_reason"].str.contains("dynamic_weight_source_missing").all()
 
 
 def test_phase20a_consumes_phase20b_dynamic_allocation_when_available(tmp_path):
@@ -290,9 +290,7 @@ def test_phase20a_consumes_phase20b_dynamic_allocation_when_available(tmp_path):
     dynamic = targets.loc[targets["canonical_candidate_id"] == DYNAMIC_BTC_CANDIDATE]
 
     assert set(dynamic["allocation_status"]) == {"dynamic_allocation_resolved"}
-    assert set(dynamic["allocation_source"]) == {
-        "phase20b_inverse_vol_dynamic_allocation"
-    }
+    assert set(dynamic["allocation_source"]) == {"phase20b_inverse_vol_dynamic_allocation"}
     assert dynamic["paper_preview_allowed"].all()
     assert dynamic["btc_capable_candidate"].all()
     assert dynamic["persistent_btc_caveat"].all()
@@ -329,9 +327,11 @@ def test_order_preview_blocks_all_candidates_when_data_quality_blocks():
     orders = build_finalist_paper_orders_preview(targets=targets, data_quality_blocked=True)
 
     assert not orders["paper_order_allowed"].any()
-    assert orders["paper_order_blocking_reason"].str.contains(
-        "fresh_data_quality_blocking_failure"
-    ).all()
+    assert (
+        orders["paper_order_blocking_reason"]
+        .str.contains("fresh_data_quality_blocking_failure")
+        .all()
+    )
 
 
 def test_warning_run_writes_tear_sheet_dashboard_and_journal(tmp_path):
@@ -342,7 +342,9 @@ def test_warning_run_writes_tear_sheet_dashboard_and_journal(tmp_path):
         reports_dir=tmp_path / "reports",
     )
     out_dir = tmp_path / "reports" / "paper_trading" / "finalist_tracking"
-    dashboard = tmp_path / "reports" / "paper_trading" / "dashboard" / "finalist_tracking_status.csv"
+    dashboard = (
+        tmp_path / "reports" / "paper_trading" / "dashboard" / "finalist_tracking_status.csv"
+    )
     markdown = (out_dir / "finalist_daily_tracking_tear_sheet.md").read_text(encoding="utf-8")
 
     assert (out_dir / "finalist_paper_targets.csv").exists()

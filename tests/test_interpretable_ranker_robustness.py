@@ -32,9 +32,9 @@ def _synthetic_predictions() -> pd.DataFrame:
                 else np.array([0.1, 0.8, -0.1, -0.3])
             )
             ranks = pd.Series(scores).rank(ascending=False, method="first").astype(int)
-            actual_ranks = pd.Series(actual_values).rank(
-                ascending=False, method="first"
-            ).astype(int)
+            actual_ranks = (
+                pd.Series(actual_values).rank(ascending=False, method="first").astype(int)
+            )
             for security, score, rank, actual, actual_rank in zip(
                 securities, scores, ranks, actual_values, actual_ranks, strict=False
             ):
@@ -128,48 +128,52 @@ def test_prediction_grain_reconciles_model_date_security_count():
 
 def test_bootstrap_and_permutation_are_deterministic():
     predictions = _synthetic_predictions()
-    date_metrics = predictions.groupby(["model_version", "decision_timestamp_utc"]).apply(
-        lambda group: pd.Series(
-            {
-                "signal_date": group["signal_date"].iloc[0],
-                "spearman_information_coefficient": group[
-                    "predicted_20d_excess_return_or_ranking_score"
-                ].rank().corr(group["actual_20d_excess_return"].rank()),
-                "top_minus_bottom_rank_spread": (
-                    group.sort_values("predicted_rank").head(2)[
-                        "actual_20d_excess_return"
-                    ].mean()
-                    - group.sort_values("predicted_rank").tail(2)[
-                        "actual_20d_excess_return"
-                    ].mean()
-                ),
-                "security_count": len(group),
-            }
-        ),
-        include_groups=False,
-    ).reset_index()
+    date_metrics = (
+        predictions.groupby(["model_version", "decision_timestamp_utc"])
+        .apply(
+            lambda group: pd.Series(
+                {
+                    "signal_date": group["signal_date"].iloc[0],
+                    "spearman_information_coefficient": group[
+                        "predicted_20d_excess_return_or_ranking_score"
+                    ]
+                    .rank()
+                    .corr(group["actual_20d_excess_return"].rank()),
+                    "top_minus_bottom_rank_spread": (
+                        group.sort_values("predicted_rank")
+                        .head(2)["actual_20d_excess_return"]
+                        .mean()
+                        - group.sort_values("predicted_rank")
+                        .tail(2)["actual_20d_excess_return"]
+                        .mean()
+                    ),
+                    "security_count": len(group),
+                }
+            ),
+            include_groups=False,
+        )
+        .reset_index()
+    )
 
-    first_bootstrap = moving_block_bootstrap(
-        date_metrics, seed=7, samples=25, block_length=2
-    )
-    second_bootstrap = moving_block_bootstrap(
-        date_metrics, seed=7, samples=25, block_length=2
-    )
+    first_bootstrap = moving_block_bootstrap(date_metrics, seed=7, samples=25, block_length=2)
+    second_bootstrap = moving_block_bootstrap(date_metrics, seed=7, samples=25, block_length=2)
     pd.testing.assert_frame_equal(first_bootstrap, second_bootstrap)
 
-    first_permutation = permutation_test(
-        predictions, seed=11, permutations=20, top_k=2
-    )
-    second_permutation = permutation_test(
-        predictions, seed=11, permutations=20, top_k=2
-    )
+    first_permutation = permutation_test(predictions, seed=11, permutations=20, top_k=2)
+    second_permutation = permutation_test(predictions, seed=11, permutations=20, top_k=2)
     pd.testing.assert_frame_equal(first_permutation, second_permutation)
 
 
 def test_sector_horizon_false_positive_and_turnover_diagnostics():
     predictions_panel = _synthetic_predictions().merge(
         _synthetic_panel(),
-        on=["panel_row_id", "decision_timestamp_utc", "signal_date", "permanent_security_id", "ticker"],
+        on=[
+            "panel_row_id",
+            "decision_timestamp_utc",
+            "signal_date",
+            "permanent_security_id",
+            "ticker",
+        ],
         how="left",
     )
 
@@ -179,9 +183,7 @@ def test_sector_horizon_false_positive_and_turnover_diagnostics():
         "sector_neutral_demeaned_prediction_scores",
     } == set(sector_neutral["diagnostic"])
 
-    horizon = _target_horizon_decay(
-        _synthetic_predictions(), _synthetic_targets(), top_k=2
-    )
+    horizon = _target_horizon_decay(_synthetic_predictions(), _synthetic_targets(), top_k=2)
     assert {1, 5, 20, 63} == set(horizon["target_horizon_trading_days"])
 
     topk, false_cases = _topk_diagnostics(predictions_panel, top_values=[1, 3])
@@ -226,9 +228,7 @@ def test_phase23h_save_writes_outputs_and_blocks_no_order_files(tmp_path: Path):
                 "mean_ic": metrics_dict["mean_ic"],
                 "median_ic": metrics_dict["median_ic"],
                 "positive_ic_date_fraction": metrics_dict["positive_ic_fraction"],
-                "top_minus_bottom_rank_spread": metrics_dict[
-                    "top_minus_bottom_rank_spread"
-                ],
+                "top_minus_bottom_rank_spread": metrics_dict["top_minus_bottom_rank_spread"],
                 "prediction_coverage": metrics_dict["prediction_coverage"],
             }
         )
@@ -238,9 +238,7 @@ def test_phase23h_save_writes_outputs_and_blocks_no_order_files(tmp_path: Path):
         [
             {
                 "phase23g_decision": "phase23g_interpretable_ranker_completed_research_only",
-                "mean_ic": metrics.loc[
-                    metrics["model_version"].eq(RIDGE_MODEL), "mean_ic"
-                ].iloc[0],
+                "mean_ic": metrics.loc[metrics["model_version"].eq(RIDGE_MODEL), "mean_ic"].iloc[0],
             }
         ]
     ).to_csv(phase23g_dir / "phase23g_summary.csv", index=False)

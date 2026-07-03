@@ -42,11 +42,9 @@ def test_variant_guard_inputs_composite():
         "relief_condition": pd.Series([False, True, True, False, True], index=dates),
     }
 
-    defensive_allowed, offensive_allowed, defensive_name, offensive_name = (
-        _variant_guard_inputs(
-            variant_name="combined_composite_stress_relief_confirmation",
-            guards=guards,
-        )
+    defensive_allowed, offensive_allowed, defensive_name, offensive_name = _variant_guard_inputs(
+        variant_name="combined_composite_stress_relief_confirmation",
+        guards=guards,
     )
 
     assert defensive_allowed.tolist() == [True, True, False, True, False]

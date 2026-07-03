@@ -55,6 +55,7 @@ def test_build_close_panel_inner_joins_dates():
     assert list(panel.columns) == ["AAA", "BBB"]
     assert panel.index.min() == pd.Timestamp("2020-01-03")
 
+
 def test_create_decision_rows_judges_overlay_not_only_allocator():
     metrics = pd.DataFrame(
         {

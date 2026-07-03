@@ -7,7 +7,9 @@ from market_strats.analysis.paper_dry_run_dashboard import (
 )
 
 
-def _base_config(tmp_path: Path, *, visual_paths: dict[str, str] | None = None, **overrides) -> dict:
+def _base_config(
+    tmp_path: Path, *, visual_paths: dict[str, str] | None = None, **overrides
+) -> dict:
     reports_dir = tmp_path / "reports"
     output_dir = reports_dir / "paper_trading"
     dashboard_dir = output_dir / "dashboard"
@@ -26,9 +28,12 @@ def _base_config(tmp_path: Path, *, visual_paths: dict[str, str] | None = None, 
             "paper_trading_readiness_status": str(
                 output_dir / "paper_trading_readiness_status.csv"
             ),
-            "wxyz_fresh_handoff": str(tmp_path / "data" / "fresh" / "phase15q_rule_generated_candidate_stream.csv"),
+            "wxyz_fresh_handoff": str(
+                tmp_path / "data" / "fresh" / "phase15q_rule_generated_candidate_stream.csv"
+            ),
             "switch_event_log": str(
-                reports_dir / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
+                reports_dir
+                / "phase6b_loose_relief_execution_realistic_overlay_switch_event_log.csv"
             ),
         },
         "visual_artifacts": visual_paths or {},

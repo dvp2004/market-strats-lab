@@ -42,21 +42,65 @@ def _config(tmp_path: Path):
             "allow_new_data_ingestion": False,
             "allow_candidate_promotion": False,
             "source_inputs": {
-                "component_availability_report": str(tmp_path / "phase11e_template_component_availability_report.csv"),
-                "component_direction_report": str(tmp_path / "phase11e_template_component_direction_report.csv"),
+                "component_availability_report": str(
+                    tmp_path / "phase11e_template_component_availability_report.csv"
+                ),
+                "component_direction_report": str(
+                    tmp_path / "phase11e_template_component_direction_report.csv"
+                ),
                 "missingness_report": str(tmp_path / "phase11e_template_missingness_report.csv"),
-                "weighting_policy_report": str(tmp_path / "phase11e_template_weighting_policy_report.csv"),
-                "blocked_family_report": str(tmp_path / "phase11e_template_blocked_family_report.csv"),
+                "weighting_policy_report": str(
+                    tmp_path / "phase11e_template_weighting_policy_report.csv"
+                ),
+                "blocked_family_report": str(
+                    tmp_path / "phase11e_template_blocked_family_report.csv"
+                ),
                 "phase11g_conclusion": str(tmp_path / "phase11g_final_checkpoint_conclusion.csv"),
             },
             "eligible_components": [
-                {"component_id": "technical_regime_context", "family": "technical", "eligibility": "eligible", "source_basis": "Phase 9", "allowed_states": ["supportive", "neutral", "fragile"], "may_affect_future_score": True, "may_create_signal_now": False},
-                {"component_id": "macro_regime_context", "family": "macro", "eligibility": "eligible", "source_basis": "Phase 10", "allowed_states": ["supportive", "neutral", "fragile"], "may_affect_future_score": True, "may_create_signal_now": False},
-                {"component_id": "validation_risk_context", "family": "validation", "eligibility": "eligible_control", "source_basis": "Phase 8", "allowed_states": ["supportive", "neutral", "fragile"], "may_affect_future_score": True, "may_create_signal_now": False},
+                {
+                    "component_id": "technical_regime_context",
+                    "family": "technical",
+                    "eligibility": "eligible",
+                    "source_basis": "Phase 9",
+                    "allowed_states": ["supportive", "neutral", "fragile"],
+                    "may_affect_future_score": True,
+                    "may_create_signal_now": False,
+                },
+                {
+                    "component_id": "macro_regime_context",
+                    "family": "macro",
+                    "eligibility": "eligible",
+                    "source_basis": "Phase 10",
+                    "allowed_states": ["supportive", "neutral", "fragile"],
+                    "may_affect_future_score": True,
+                    "may_create_signal_now": False,
+                },
+                {
+                    "component_id": "validation_risk_context",
+                    "family": "validation",
+                    "eligibility": "eligible_control",
+                    "source_basis": "Phase 8",
+                    "allowed_states": ["supportive", "neutral", "fragile"],
+                    "may_affect_future_score": True,
+                    "may_create_signal_now": False,
+                },
             ],
             "blocked_components": [
-                {"component_id": "future_fundamental_context", "family": "fundamental_valuation", "blocked_reason": "No audit.", "unblock_requires": "Future audit.", "may_affect_future_score": False},
-                {"component_id": "future_sentiment_context", "family": "sentiment_narrative", "blocked_reason": "No audit.", "unblock_requires": "Future audit.", "may_affect_future_score": False},
+                {
+                    "component_id": "future_fundamental_context",
+                    "family": "fundamental_valuation",
+                    "blocked_reason": "No audit.",
+                    "unblock_requires": "Future audit.",
+                    "may_affect_future_score": False,
+                },
+                {
+                    "component_id": "future_sentiment_context",
+                    "family": "sentiment_narrative",
+                    "blocked_reason": "No audit.",
+                    "unblock_requires": "Future audit.",
+                    "may_affect_future_score": False,
+                },
             ],
             "formula_structure": {
                 "formula_id": "pre_registered_three_component_regime_score",
@@ -89,12 +133,31 @@ def _config(tmp_path: Path):
                 "score_calculation_allowed_with_missing_validation_risk": False,
             },
             "score_state_interpretation": [
-                {"state": "supportive", "interpretation": "supportive", "trading_allowed": False, "signal_allowed": False},
-                {"state": "neutral", "interpretation": "neutral", "trading_allowed": False, "signal_allowed": False},
-                {"state": "fragile", "interpretation": "fragile", "trading_allowed": False, "signal_allowed": False},
+                {
+                    "state": "supportive",
+                    "interpretation": "supportive",
+                    "trading_allowed": False,
+                    "signal_allowed": False,
+                },
+                {
+                    "state": "neutral",
+                    "interpretation": "neutral",
+                    "trading_allowed": False,
+                    "signal_allowed": False,
+                },
+                {
+                    "state": "fragile",
+                    "interpretation": "fragile",
+                    "trading_allowed": False,
+                    "signal_allowed": False,
+                },
             ],
-            "future_validation_gates": [{"gate_id": f"g{i}", "gate": "gate", "required": True} for i in range(6)],
-            "failure_conditions": [{"condition_id": f"f{i}", "condition": "fail"} for i in range(6)],
+            "future_validation_gates": [
+                {"gate_id": f"g{i}", "gate": "gate", "required": True} for i in range(6)
+            ],
+            "failure_conditions": [
+                {"condition_id": f"f{i}", "condition": "fail"} for i in range(6)
+            ],
             "phase12b_boundary": {
                 "allowed_next_step": "Score-calculation readiness audit only",
                 "forbidden_next_step": "actual score calculation, signal creation, allocation rule, strategy backtest, model training, new data ingestion, or candidate promotion",

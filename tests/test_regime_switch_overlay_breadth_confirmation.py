@@ -45,11 +45,9 @@ def test_variant_guard_inputs():
         "offensive_breadth_condition": pd.Series([False, True, True, False, True], index=dates),
     }
 
-    defensive_allowed, offensive_allowed, defensive_name, offensive_name = (
-        _variant_guard_inputs(
-            variant_name="combined_breadth_confirmation",
-            guards=guards,
-        )
+    defensive_allowed, offensive_allowed, defensive_name, offensive_name = _variant_guard_inputs(
+        variant_name="combined_breadth_confirmation",
+        guards=guards,
     )
 
     assert defensive_allowed.tolist() == [True, False, False, True, False]
@@ -80,8 +78,6 @@ def test_create_breadth_confirmation_summary():
     )
 
     assert not summary.empty
-    row = summary[
-        summary["variant_name"] == "combined_breadth_confirmation"
-    ].iloc[0]
+    row = summary[summary["variant_name"] == "combined_breadth_confirmation"].iloc[0]
     assert row["cagr_delta_vs_benchmark_pct_points"] == 0.17
     assert row["trade_count_delta_vs_benchmark"] == -2

@@ -70,11 +70,19 @@ def _config(tmp_path: Path):
             "execution_role": "Operational switch and current signal reconstruction implementation only",
             "implementation_classification": "A/B",
             "candidate_system_id": "phase6b_loose_relief_execution_realistic_overlay",
-            "exported_daily_file": str(tmp_path / "phase6b_loose_relief_execution_realistic_overlay_daily.csv"),
+            "exported_daily_file": str(
+                tmp_path / "phase6b_loose_relief_execution_realistic_overlay_daily.csv"
+            ),
             "source_reports": {
-                "phase15b_conclusion": str(tmp_path / "phase15b_paper_workflow_readiness_conclusion.csv"),
-                "phase15b_gate_report": str(tmp_path / "phase15b_paper_workflow_readiness_gate_report.csv"),
-                "phase15b_readiness_decision": str(tmp_path / "phase15b_paper_workflow_readiness_readiness_decision_report.csv"),
+                "phase15b_conclusion": str(
+                    tmp_path / "phase15b_paper_workflow_readiness_conclusion.csv"
+                ),
+                "phase15b_gate_report": str(
+                    tmp_path / "phase15b_paper_workflow_readiness_gate_report.csv"
+                ),
+                "phase15b_readiness_decision": str(
+                    tmp_path / "phase15b_paper_workflow_readiness_readiness_decision_report.csv"
+                ),
             },
             "candidate_switch_source_files": [],
             "switch_reconstruction_policy": {
@@ -167,9 +175,13 @@ def _config(tmp_path: Path):
                 "conclusion": str(tmp_path / "phase15c_operational_signal_conclusion.csv"),
                 "gate_report": str(tmp_path / "phase15c_operational_signal_gate_report.csv"),
                 "switch_event_log": str(tmp_path / "phase15c_operational_switch_event_log.csv"),
-                "switch_reconstruction_summary": str(tmp_path / "phase15c_switch_reconstruction_summary.csv"),
+                "switch_reconstruction_summary": str(
+                    tmp_path / "phase15c_switch_reconstruction_summary.csv"
+                ),
                 "current_signal_file": str(tmp_path / "phase15c_current_signal_file.csv"),
-                "current_signal_generation_summary": str(tmp_path / "phase15c_current_signal_generation_summary.csv"),
+                "current_signal_generation_summary": str(
+                    tmp_path / "phase15c_current_signal_generation_summary.csv"
+                ),
             },
             "required_switch_event_columns": [
                 "switch_event_id",

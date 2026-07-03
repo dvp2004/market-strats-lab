@@ -53,12 +53,10 @@ def make_overlay_result(dates: pd.DatetimeIndex) -> pd.DataFrame:
             "trend_sma": [100.0] * len(dates),
             "overlay_turnover": [0.0] * len(dates),
             "offensive_weight": [
-                1.0 if mode == "offensive_spy" else 0.0
-                for mode in selected_modes
+                1.0 if mode == "offensive_spy" else 0.0 for mode in selected_modes
             ],
             "defensive_weight": [
-                1.0 if mode == "defensive_allocator" else 0.0
-                for mode in selected_modes
+                1.0 if mode == "defensive_allocator" else 0.0 for mode in selected_modes
             ],
         }
     )

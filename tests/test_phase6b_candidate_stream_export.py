@@ -57,7 +57,9 @@ def _config(tmp_path: Path):
             "execution_role": "Phase 6B/6C candidate daily stream export only",
             "implementation_classification": "A/B",
             "intended_candidate_system_id": "phase6b_loose_relief_execution_realistic_overlay",
-            "output_file": str(tmp_path / "phase6b_loose_relief_execution_realistic_overlay_daily.csv"),
+            "output_file": str(
+                tmp_path / "phase6b_loose_relief_execution_realistic_overlay_daily.csv"
+            ),
             "spy_buy_hold_strategy_name": "Buy and Hold",
             "initial_capital": 10000.0,
             "annualisation_days": 252,
@@ -107,7 +109,9 @@ def _config(tmp_path: Path):
             "enabled": True,
             "audit_role": "Phase 6B/6C exported candidate stream audit and metric reconciliation only",
             "implementation_classification": "B",
-            "exported_daily_file": str(tmp_path / "phase6b_loose_relief_execution_realistic_overlay_daily.csv"),
+            "exported_daily_file": str(
+                tmp_path / "phase6b_loose_relief_execution_realistic_overlay_daily.csv"
+            ),
             "allow_visual_backtest_generation": False,
             "allow_paper_trading_workflow_preregistration": False,
             "allow_paper_trading_deployment": False,
@@ -194,5 +198,7 @@ def test_phase14i_to_14j_exports_and_audits_phase6b_stream(tmp_path, monkeypatch
     assert not exported.empty
     assert "strategy_return" in exported.columns
     assert "SPY_return" in exported.columns
-    assert "phase6b_loose_relief_execution_realistic_overlay" in exported["source_system_id"].iloc[0]
+    assert (
+        "phase6b_loose_relief_execution_realistic_overlay" in exported["source_system_id"].iloc[0]
+    )
     assert not bool(out_j["conclusion"].iloc[0]["paper_trading_ready"])

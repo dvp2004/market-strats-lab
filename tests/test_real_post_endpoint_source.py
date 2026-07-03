@@ -158,20 +158,38 @@ def _config(tmp_path: Path):
             "candidate_system_id": "phase6b_loose_relief_execution_realistic_overlay",
             "pinned_research_endpoint": "2026-05-01",
             "audit_current_date": "2026-06-02",
-            "output_file": str(tmp_path / "reports" / "phase15q_post_endpoint_candidate_stream.csv"),
-            "handoff_file_for_phase15o": str(tmp_path / "data" / "fresh" / "phase15o_manual_candidate_stream.csv"),
+            "output_file": str(
+                tmp_path / "reports" / "phase15q_post_endpoint_candidate_stream.csv"
+            ),
+            "handoff_file_for_phase15o": str(
+                tmp_path / "data" / "fresh" / "phase15o_manual_candidate_stream.csv"
+            ),
             "source_reports": {
                 "phase15p_conclusion": str(tmp_path / "phase15p_extended_stream_conclusion.csv"),
                 "phase15p_gate_report": str(tmp_path / "phase15p_extended_stream_gate_report.csv"),
-                "phase15p_decision_report": str(tmp_path / "phase15p_extended_stream_decision_report.csv"),
-                "pinned_endpoint_signal": str(tmp_path / "phase15k_pinned_endpoint_signal_file.csv"),
-                "selected_switch_definition": str(tmp_path / "phase15i_column_semantics_selected_switch_definition.csv"),
+                "phase15p_decision_report": str(
+                    tmp_path / "phase15p_extended_stream_decision_report.csv"
+                ),
+                "pinned_endpoint_signal": str(
+                    tmp_path / "phase15k_pinned_endpoint_signal_file.csv"
+                ),
+                "selected_switch_definition": str(
+                    tmp_path / "phase15i_column_semantics_selected_switch_definition.csv"
+                ),
             },
             "candidate_source_priority": {
-                "rule_generated_candidate_stream": str(tmp_path / "data" / "fresh" / "phase15q_rule_generated_candidate_stream.csv"),
-                "verified_manual_candidate_stream": str(tmp_path / "data" / "fresh" / "phase15q_verified_manual_candidate_stream.csv"),
-                "existing_phase15o_manual_stream": str(tmp_path / "data" / "fresh" / "phase15o_manual_candidate_stream.csv"),
-                "raw_spy_ohlcv_only": str(tmp_path / "data" / "fresh" / "phase15q_fresh_spy_ohlcv.csv"),
+                "rule_generated_candidate_stream": str(
+                    tmp_path / "data" / "fresh" / "phase15q_rule_generated_candidate_stream.csv"
+                ),
+                "verified_manual_candidate_stream": str(
+                    tmp_path / "data" / "fresh" / "phase15q_verified_manual_candidate_stream.csv"
+                ),
+                "existing_phase15o_manual_stream": str(
+                    tmp_path / "data" / "fresh" / "phase15o_manual_candidate_stream.csv"
+                ),
+                "raw_spy_ohlcv_only": str(
+                    tmp_path / "data" / "fresh" / "phase15q_fresh_spy_ohlcv.csv"
+                ),
             },
             "accepted_target_weight_sources": [
                 "phase6b_rule_engine",
@@ -179,7 +197,13 @@ def _config(tmp_path: Path):
                 "project_rule_replay",
                 "verified_project_generated",
             ],
-            "rejected_target_weight_sources": ["manual_fill", "guessed", "carry_forward_only", "unknown", ""],
+            "rejected_target_weight_sources": [
+                "manual_fill",
+                "guessed",
+                "carry_forward_only",
+                "unknown",
+                "",
+            ],
             "benchmark_policy": {
                 "acceptable_close_columns": ["SPY_close", "adj_close"],
                 "acceptable_return_columns": ["SPY_return", "benchmark_return"],
@@ -224,11 +248,19 @@ def _config(tmp_path: Path):
             "phase15q_reports": {
                 "conclusion": str(tmp_path / "reports" / "phase15q_data_source_conclusion.csv"),
                 "gate_report": str(tmp_path / "reports" / "phase15q_data_source_gate_report.csv"),
-                "candidate_stream": str(tmp_path / "reports" / "phase15q_post_endpoint_candidate_stream.csv"),
-                "creation_summary": str(tmp_path / "reports" / "phase15q_data_source_creation_summary.csv"),
-                "required_column_check": str(tmp_path / "reports" / "phase15q_data_source_required_column_check.csv"),
+                "candidate_stream": str(
+                    tmp_path / "reports" / "phase15q_post_endpoint_candidate_stream.csv"
+                ),
+                "creation_summary": str(
+                    tmp_path / "reports" / "phase15q_data_source_creation_summary.csv"
+                ),
+                "required_column_check": str(
+                    tmp_path / "reports" / "phase15q_data_source_required_column_check.csv"
+                ),
             },
-            "handoff_file_for_phase15o": str(tmp_path / "data" / "fresh" / "phase15o_manual_candidate_stream.csv"),
+            "handoff_file_for_phase15o": str(
+                tmp_path / "data" / "fresh" / "phase15o_manual_candidate_stream.csv"
+            ),
             "required_phase15q_output_columns": required_cols,
             "validation_policy": {
                 "min_post_endpoint_rows": 1,

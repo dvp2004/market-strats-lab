@@ -43,8 +43,7 @@ def test_create_regime_switch_overlay_decision_report_runs(tmp_path: Path):
     )
 
     _write_metrics_file(
-        tmp_path
-        / "regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv",
+        tmp_path / "regime_switch_spy_trend_regime_switch_overlay_3d_confirmed_metrics.csv",
         [
             "SPY Trend Regime Switch Overlay 3D Confirmed",
             "SPY Buy and Hold",
@@ -67,9 +66,7 @@ def test_create_regime_switch_overlay_claim_report_contains_statuses():
     report = create_regime_switch_overlay_claim_report()
 
     assert not report.empty
-    assert {"claim", "status", "evidence_quality", "interpretation"}.issubset(
-        report.columns
-    )
+    assert {"claim", "status", "evidence_quality", "interpretation"}.issubset(report.columns)
     assert "Survived" in set(report["status"])
     assert "Failed" in set(report["status"])
     assert "Not yet" in set(report["status"])

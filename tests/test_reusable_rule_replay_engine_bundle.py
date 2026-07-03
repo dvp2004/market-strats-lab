@@ -88,9 +88,15 @@ def _config(tmp_path: Path):
             "pinned_research_endpoint": "2026-05-01",
             "audit_current_date": "2026-06-02",
             "source_reports": {
-                "phase15t_conclusion": str(tmp_path / "reports" / "phase15t_rule_export_conclusion.csv"),
-                "phase15t_gate_report": str(tmp_path / "reports" / "phase15t_rule_export_gate_report.csv"),
-                "phase15t_decision_report": str(tmp_path / "reports" / "phase15t_rule_export_decision_report.csv"),
+                "phase15t_conclusion": str(
+                    tmp_path / "reports" / "phase15t_rule_export_conclusion.csv"
+                ),
+                "phase15t_gate_report": str(
+                    tmp_path / "reports" / "phase15t_rule_export_gate_report.csv"
+                ),
+                "phase15t_decision_report": str(
+                    tmp_path / "reports" / "phase15t_rule_export_decision_report.csv"
+                ),
             },
             "replay_engine_contract": {
                 "module_path": "src/market_strats/strategies/phase6b_loose_relief_replay.py",
@@ -130,11 +136,17 @@ def _config(tmp_path: Path):
             "pinned_research_endpoint": "2026-05-01",
             "audit_current_date": "2026-06-02",
             "rule_input_sources": {
-                "preferred_rule_input_panel": str(tmp_path / "data" / "fresh" / "phase15u_rule_input_panel.csv"),
-                "fallback_rule_input_panel": str(tmp_path / "reports" / "phase15u_rule_input_panel.csv"),
+                "preferred_rule_input_panel": str(
+                    tmp_path / "data" / "fresh" / "phase15u_rule_input_panel.csv"
+                ),
+                "fallback_rule_input_panel": str(
+                    tmp_path / "reports" / "phase15u_rule_input_panel.csv"
+                ),
             },
             "output_file": str(tmp_path / "reports" / "phase15v_rule_based_candidate_stream.csv"),
-            "handoff_file_for_phase15q": str(tmp_path / "data" / "fresh" / "phase15q_rule_generated_candidate_stream.csv"),
+            "handoff_file_for_phase15q": str(
+                tmp_path / "data" / "fresh" / "phase15q_rule_generated_candidate_stream.csv"
+            ),
             "required_rule_input_columns_any_signal": [
                 "final_phase6b_signal",
                 "confirmed_signal",
@@ -177,8 +189,18 @@ def _config(tmp_path: Path):
 def test_replay_engine_maps_rule_signal_to_target_weight():
     rule_input = pd.DataFrame(
         [
-            {"date": "2026-06-01", "SPY_close": 600.0, "SPY_return": 0.01, "final_phase6b_signal": "offensive_spy"},
-            {"date": "2026-06-02", "SPY_close": 590.0, "SPY_return": -0.02, "final_phase6b_signal": "defensive_or_cash"},
+            {
+                "date": "2026-06-01",
+                "SPY_close": 600.0,
+                "SPY_return": 0.01,
+                "final_phase6b_signal": "offensive_spy",
+            },
+            {
+                "date": "2026-06-02",
+                "SPY_close": 590.0,
+                "SPY_return": -0.02,
+                "final_phase6b_signal": "defensive_or_cash",
+            },
         ]
     )
 

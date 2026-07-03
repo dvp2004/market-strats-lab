@@ -33,23 +33,15 @@ def _phase_config(tmp_path: Path):
             "component_direction_report": str(
                 tmp_path / "phase11e_template_component_direction_report.csv"
             ),
-            "missingness_report": str(
-                tmp_path / "phase11e_template_missingness_report.csv"
-            ),
+            "missingness_report": str(tmp_path / "phase11e_template_missingness_report.csv"),
             "weighting_policy_report": str(
                 tmp_path / "phase11e_template_weighting_policy_report.csv"
             ),
-            "blocked_family_report": str(
-                tmp_path / "phase11e_template_blocked_family_report.csv"
-            ),
+            "blocked_family_report": str(tmp_path / "phase11e_template_blocked_family_report.csv"),
             "boundary_report": str(tmp_path / "phase11e_template_boundary_report.csv"),
-            "schema_compliance": str(
-                tmp_path / "phase11e_template_schema_compliance.csv"
-            ),
+            "schema_compliance": str(tmp_path / "phase11e_template_schema_compliance.csv"),
             "template_inventory": str(tmp_path / "phase11e_template_inventory.csv"),
-            "phase11e_conclusion": str(
-                tmp_path / "phase11e_template_conclusion.csv"
-            ),
+            "phase11e_conclusion": str(tmp_path / "phase11e_template_conclusion.csv"),
         },
         "allow_score_calculation": False,
         "allow_numeric_score_weights": False,
@@ -89,9 +81,7 @@ def _phase_config(tmp_path: Path):
             "candidate_promotion",
         ],
         "phase11g_boundary": {
-            "allowed_next_step": (
-                "Regime scoring diagnostic panel closeout audit only"
-            ),
+            "allowed_next_step": ("Regime scoring diagnostic panel closeout audit only"),
             "forbidden_next_step": (
                 "score calculation, signal creation, strategy backtest, "
                 "model training, new data ingestion, or candidate promotion"
@@ -125,9 +115,7 @@ def _phase_config(tmp_path: Path):
             "require_no_model_training": True,
             "require_no_new_data_ingestion": True,
             "require_no_candidate_promotion": True,
-            "required_audit_role": (
-                "Regime scoring diagnostic panel content audit only"
-            ),
+            "required_audit_role": ("Regime scoring diagnostic panel content audit only"),
         },
     }
 
@@ -257,18 +245,12 @@ def _write_phase11e_templates(tmp_path: Path):
     ).to_csv(tmp_path / "phase11e_template_boundary_report.csv", index=False)
 
     pd.DataFrame(
-        [
-            {"report_name": f"r{index}", "schema_passed": True}
-            for index in range(6)
-        ]
+        [{"report_name": f"r{index}", "schema_passed": True} for index in range(6)]
     ).to_csv(tmp_path / "phase11e_template_schema_compliance.csv", index=False)
 
-    pd.DataFrame(
-        [
-            {"report_name": f"r{index}", "generated": True}
-            for index in range(6)
-        ]
-    ).to_csv(tmp_path / "phase11e_template_inventory.csv", index=False)
+    pd.DataFrame([{"report_name": f"r{index}", "generated": True} for index in range(6)]).to_csv(
+        tmp_path / "phase11e_template_inventory.csv", index=False
+    )
 
     pd.DataFrame(
         [
@@ -289,12 +271,8 @@ def test_phase11f_content_checks_pass_valid_templates(tmp_path):
 
     inventory = build_phase11f_source_template_inventory(phase_config)
     phase11e_check = build_phase11f_phase11e_result_check(
-        phase11e_conclusion=pd.read_csv(
-            tmp_path / "phase11e_template_conclusion.csv"
-        ),
-        schema_compliance=pd.read_csv(
-            tmp_path / "phase11e_template_schema_compliance.csv"
-        ),
+        phase11e_conclusion=pd.read_csv(tmp_path / "phase11e_template_conclusion.csv"),
+        schema_compliance=pd.read_csv(tmp_path / "phase11e_template_schema_compliance.csv"),
     )
     component_check = build_phase11f_component_content_check(
         component_availability=pd.read_csv(
@@ -318,9 +296,7 @@ def test_phase11f_content_checks_pass_valid_templates(tmp_path):
         pd.read_csv(tmp_path / "phase11e_template_weighting_policy_report.csv")
     )
     blocked_check = build_phase11f_blocked_family_content_check(
-        blocked_family=pd.read_csv(
-            tmp_path / "phase11e_template_blocked_family_report.csv"
-        ),
+        blocked_family=pd.read_csv(tmp_path / "phase11e_template_blocked_family_report.csv"),
         expected_blocked_families=phase_config["expected_blocked_families"],
     )
     boundary_check = build_phase11f_boundary_content_check(
@@ -348,16 +324,10 @@ def test_phase11f_gate_report_passes_valid_content_audit(tmp_path):
 
     summary = build_phase11f_summary(
         phase_config=phase_config,
-        source_template_inventory=build_phase11f_source_template_inventory(
-            phase_config
-        ),
+        source_template_inventory=build_phase11f_source_template_inventory(phase_config),
         phase11e_result_check=build_phase11f_phase11e_result_check(
-            phase11e_conclusion=pd.read_csv(
-                tmp_path / "phase11e_template_conclusion.csv"
-            ),
-            schema_compliance=pd.read_csv(
-                tmp_path / "phase11e_template_schema_compliance.csv"
-            ),
+            phase11e_conclusion=pd.read_csv(tmp_path / "phase11e_template_conclusion.csv"),
+            schema_compliance=pd.read_csv(tmp_path / "phase11e_template_schema_compliance.csv"),
         ),
         component_content_check=build_phase11f_component_content_check(
             component_availability=pd.read_csv(
@@ -381,18 +351,14 @@ def test_phase11f_gate_report_passes_valid_content_audit(tmp_path):
             pd.read_csv(tmp_path / "phase11e_template_weighting_policy_report.csv")
         ),
         blocked_family_content_check=build_phase11f_blocked_family_content_check(
-            blocked_family=pd.read_csv(
-                tmp_path / "phase11e_template_blocked_family_report.csv"
-            ),
+            blocked_family=pd.read_csv(tmp_path / "phase11e_template_blocked_family_report.csv"),
             expected_blocked_families=phase_config["expected_blocked_families"],
         ),
         boundary_content_check=build_phase11f_boundary_content_check(
             boundary=pd.read_csv(tmp_path / "phase11e_template_boundary_report.csv"),
             expected_boundary_items=phase_config["expected_boundary_items"],
         ),
-        phase11g_boundary_check=build_phase11f_phase11g_boundary_check(
-            phase_config
-        ),
+        phase11g_boundary_check=build_phase11f_phase11g_boundary_check(phase_config),
         scope_boundary_check=build_phase11f_scope_boundary_check(phase_config),
     )
     gate_report = build_phase11f_gate_report(
@@ -402,9 +368,7 @@ def test_phase11f_gate_report_passes_valid_content_audit(tmp_path):
     conclusion = build_phase11f_conclusion(gate_report)
 
     assert bool(gate_report["passed"].all())
-    assert conclusion.iloc[0]["verdict"] == (
-        "Completed — diagnostic panel content audit passed"
-    )
+    assert conclusion.iloc[0]["verdict"] == ("Completed — diagnostic panel content audit passed")
 
 
 def test_phase11f_fails_if_signal_boundary_is_true(tmp_path):
@@ -414,16 +378,10 @@ def test_phase11f_fails_if_signal_boundary_is_true(tmp_path):
 
     summary = build_phase11f_summary(
         phase_config=phase_config,
-        source_template_inventory=build_phase11f_source_template_inventory(
-            phase_config
-        ),
+        source_template_inventory=build_phase11f_source_template_inventory(phase_config),
         phase11e_result_check=build_phase11f_phase11e_result_check(
-            phase11e_conclusion=pd.read_csv(
-                tmp_path / "phase11e_template_conclusion.csv"
-            ),
-            schema_compliance=pd.read_csv(
-                tmp_path / "phase11e_template_schema_compliance.csv"
-            ),
+            phase11e_conclusion=pd.read_csv(tmp_path / "phase11e_template_conclusion.csv"),
+            schema_compliance=pd.read_csv(tmp_path / "phase11e_template_schema_compliance.csv"),
         ),
         component_content_check=build_phase11f_component_content_check(
             component_availability=pd.read_csv(
@@ -447,18 +405,14 @@ def test_phase11f_fails_if_signal_boundary_is_true(tmp_path):
             pd.read_csv(tmp_path / "phase11e_template_weighting_policy_report.csv")
         ),
         blocked_family_content_check=build_phase11f_blocked_family_content_check(
-            blocked_family=pd.read_csv(
-                tmp_path / "phase11e_template_blocked_family_report.csv"
-            ),
+            blocked_family=pd.read_csv(tmp_path / "phase11e_template_blocked_family_report.csv"),
             expected_blocked_families=phase_config["expected_blocked_families"],
         ),
         boundary_content_check=build_phase11f_boundary_content_check(
             boundary=pd.read_csv(tmp_path / "phase11e_template_boundary_report.csv"),
             expected_boundary_items=phase_config["expected_boundary_items"],
         ),
-        phase11g_boundary_check=build_phase11f_phase11g_boundary_check(
-            phase_config
-        ),
+        phase11g_boundary_check=build_phase11f_phase11g_boundary_check(phase_config),
         scope_boundary_check=build_phase11f_scope_boundary_check(phase_config),
     )
     gate_report = build_phase11f_gate_report(
@@ -497,6 +451,4 @@ def test_save_phase11f_writes_expected_reports(tmp_path):
     assert (tmp_path / "phase11f_content_summary.csv").exists()
     assert (tmp_path / "phase11f_content_gate_report.csv").exists()
     assert (tmp_path / "phase11f_content_conclusion.csv").exists()
-    assert (
-        tmp_path / "phase11f_regime_scoring_diagnostic_panel_content_audit.md"
-    ).exists()
+    assert (tmp_path / "phase11f_regime_scoring_diagnostic_panel_content_audit.md").exists()

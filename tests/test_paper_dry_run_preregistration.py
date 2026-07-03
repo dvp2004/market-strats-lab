@@ -37,17 +37,13 @@ def _base_config(tmp_path: Path, **overrides) -> dict:
 
 def _decision_path(config: dict) -> Path:
     return Path(
-        config["phase16a_paper_dry_run_preregistration"]["phase15n_reports"][
-            "decision_report"
-        ]
+        config["phase16a_paper_dry_run_preregistration"]["phase15n_reports"]["decision_report"]
     )
 
 
 def _signal_path(config: dict) -> Path:
     return Path(
-        config["phase16a_paper_dry_run_preregistration"]["phase15m_reports"][
-            "current_signal_file"
-        ]
+        config["phase16a_paper_dry_run_preregistration"]["phase15m_reports"]["current_signal_file"]
     )
 
 
@@ -131,9 +127,7 @@ def test_phase16a_allowed_case_creates_latest_signal_and_order_preview(tmp_path)
     assert order["order_action"] == "PAPER_TARGET_WEIGHT_ONLY"
     assert order["execution_instruction"] == "manual_paper_trade_only"
 
-    output_dir = Path(
-        config["phase16a_paper_dry_run_preregistration"]["output_dir"]
-    )
+    output_dir = Path(config["phase16a_paper_dry_run_preregistration"]["output_dir"])
     assert (output_dir / "latest_signal.csv").exists()
     assert (output_dir / "latest_signal.md").exists()
     assert (output_dir / "paper_orders_preview.csv").exists()
@@ -227,9 +221,7 @@ def test_phase16a_dashboard_manifest_is_created(tmp_path):
     )
 
     manifest = outputs["dashboard_manifest"]
-    dashboard_dir = Path(
-        config["phase16a_paper_dry_run_preregistration"]["dashboard_dir"]
-    )
+    dashboard_dir = Path(config["phase16a_paper_dry_run_preregistration"]["dashboard_dir"])
 
     assert set(manifest["panel_id"]) == set(DASHBOARD_PANELS)
     assert (dashboard_dir / "dashboard_manifest.csv").exists()

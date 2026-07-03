@@ -111,6 +111,7 @@ def test_independent_core_satellite_rejects_invalid_weights():
             strategy_name="Invalid",
         )
 
+
 def test_annual_rebalanced_core_satellite_starts_at_initial_capital():
     dates = pd.bdate_range("2020-01-01", periods=260)
 
@@ -170,6 +171,7 @@ def test_annual_rebalanced_core_satellite_creates_rebalance_days():
     assert result["is_rebalance_day"].sum() >= 1
     assert "rebalance_turnover" in result.columns
 
+
 def test_annual_rebalanced_core_satellite_supports_custom_rebalance_month():
     dates = pd.bdate_range("2020-01-01", "2021-12-31")
 
@@ -201,6 +203,7 @@ def test_annual_rebalanced_core_satellite_supports_custom_rebalance_month():
 
     assert not rebalance_dates.empty
     assert set(pd.to_datetime(rebalance_dates).dt.month) == {6}
+
 
 def test_annual_rebalanced_core_satellite_rejects_invalid_rebalance_month():
     dates = pd.bdate_range("2020-01-01", periods=260)

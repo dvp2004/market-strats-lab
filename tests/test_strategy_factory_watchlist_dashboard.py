@@ -37,8 +37,7 @@ def _write_source_files(tmp_path: Path) -> dict[str, Path]:
                     "strategy": strategy,
                     "phase17b_classification": "paper_watchlist_growth",
                     "rolling_3y_candidate_beats_spy_pct": 93.0,
-                    "btc_cap_dependency_flag": strategy
-                    == "sf_spy_qqq_btc_capped_offensive",
+                    "btc_cap_dependency_flag": strategy == "sf_spy_qqq_btc_capped_offensive",
                     "btc_weekend_gap_diagnostic_available": True,
                     "promotion_allowed": False,
                     "paper_watchlist_only": True,
@@ -74,9 +73,7 @@ def _write_source_files(tmp_path: Path) -> dict[str, Path]:
                     "strategy": strategy,
                     "friction_scenario": scenario,
                     "cagr_pct": cagr,
-                    "max_drawdown_pct": -33.72
-                    if strategy == "sf_spy_buy_hold"
-                    else -31.4,
+                    "max_drawdown_pct": -33.72 if strategy == "sf_spy_buy_hold" else -31.4,
                     "calmar": 0.405 if strategy == "sf_spy_buy_hold" else 0.505,
                     "candidate_minus_spy_cagr_pct": 0.0
                     if strategy == "sf_spy_buy_hold"
@@ -90,9 +87,7 @@ def _write_source_files(tmp_path: Path) -> dict[str, Path]:
         [
             {
                 "strategy": strategy,
-                "rolling_3y_candidate_beats_spy_pct": 93.0
-                if strategy in WATCHLIST
-                else 52.0,
+                "rolling_3y_candidate_beats_spy_pct": 93.0 if strategy in WATCHLIST else 52.0,
                 "worst_3y_active_cagr": -2.0 if strategy in WATCHLIST else -7.0,
                 "latest_3y_active_cagr": 2.0 if strategy in WATCHLIST else -6.0,
             }
@@ -179,9 +174,7 @@ def test_phase17c_watchlist_flags_and_btc_caveats(tmp_path):
     assert not bool(candidates["broker_api_integration_allowed"].any())
     assert "btc_cap_dependency_flag" in candidates.columns
     assert "btc_weekend_gap_diagnostic_available" in caveats.columns
-    btc = candidates.loc[
-        candidates["candidate_id"] == "sf_spy_qqq_btc_capped_offensive"
-    ].iloc[0]
+    btc = candidates.loc[candidates["candidate_id"] == "sf_spy_qqq_btc_capped_offensive"].iloc[0]
     assert bool(btc["btc_cap_dependency_flag"])
 
 
@@ -205,9 +198,7 @@ def test_phase17c_dashboard_index_and_charts_are_written(tmp_path):
         reports_dir=tmp_path / "reports",
     )
 
-    dashboard_dir = (
-        tmp_path / "reports" / "strategy_factory" / "watchlist" / "dashboard"
-    )
+    dashboard_dir = tmp_path / "reports" / "strategy_factory" / "watchlist" / "dashboard"
     for path in [
         dashboard_dir / "index.md",
         dashboard_dir / "watchlist_overview.csv",

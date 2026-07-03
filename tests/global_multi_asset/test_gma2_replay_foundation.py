@@ -85,7 +85,9 @@ def test_asset_holiday_handling_uses_next_common_session(temp_config):
 
 def test_cash_accrues_over_weekends(replay_result):
     cash = pd.read_csv(replay_result.report_root / "cash_accrual_log.csv")
-    weekend = cash.loc[(cash["accrual_start"] == "2024-01-05") & (cash["accrual_end"] == "2024-01-08")]
+    weekend = cash.loc[
+        (cash["accrual_start"] == "2024-01-05") & (cash["accrual_end"] == "2024-01-08")
+    ]
     assert not weekend.empty
     assert int(weekend.iloc[0]["accrual_days"]) == 3
 
@@ -93,7 +95,10 @@ def test_cash_accrues_over_weekends(replay_result):
 def test_cash_uses_only_available_dgs3mo_yield(temp_config):
     cash = _load_cash(temp_config)
     assert set(cash["source_series"]) == {"DGS3MO"}
-    assert (pd.to_datetime(cash["availability_timestamp_utc"], utc=True).dt.date >= cash["observation_date"]).all()
+    assert (
+        pd.to_datetime(cash["availability_timestamp_utc"], utc=True).dt.date
+        >= cash["observation_date"]
+    ).all()
 
 
 def test_spy_smoke_replay_matches_direct_buy_and_hold_within_tolerance(replay_result):
@@ -203,7 +208,9 @@ def test_deterministic_repeated_replay(temp_config):
 
 
 def test_replay_hash_excludes_timestamps(replay_result):
-    manifest = json.loads((replay_result.report_root / "gma2_replay_manifest.json").read_text(encoding="utf-8"))
+    manifest = json.loads(
+        (replay_result.report_root / "gma2_replay_manifest.json").read_text(encoding="utf-8")
+    )
     assert "created_at_utc" not in manifest
     assert manifest["replay_hash"] == replay_result.replay_hash
 
@@ -215,23 +222,31 @@ def test_smoke_policies_are_not_strategy_candidates(replay_result):
 
 
 def test_tradingview_preview_cannot_authorize_broker_submission(replay_result):
-    preview = pd.read_csv(replay_result.report_root / "tradingview_preview" / "paper_order_preview.csv")
+    preview = pd.read_csv(
+        replay_result.report_root / "tradingview_preview" / "paper_order_preview.csv"
+    )
     assert not preview["broker_submission_allowed"].any()
 
 
 def test_paper_order_preview_is_non_executable(replay_result):
-    preview = pd.read_csv(replay_result.report_root / "tradingview_preview" / "paper_order_preview.csv")
+    preview = pd.read_csv(
+        replay_result.report_root / "tradingview_preview" / "paper_order_preview.csv"
+    )
     assert preview["preview_only"].all()
     assert not preview["real_money_allowed"].any()
 
 
 def test_no_network_access_is_required(replay_result):
-    manifest = json.loads((replay_result.report_root / "gma2_replay_manifest.json").read_text(encoding="utf-8"))
+    manifest = json.loads(
+        (replay_result.report_root / "gma2_replay_manifest.json").read_text(encoding="utf-8")
+    )
     assert manifest["accepted_inputs"]["gma1b_accepted_live_hash"] == ""
 
 
 def test_no_accepted_gma1a_or_gma1b_data_is_modified(replay_result):
-    input_hashes = json.loads((replay_result.report_root / "gma2_input_hashes.json").read_text(encoding="utf-8"))
+    input_hashes = json.loads(
+        (replay_result.report_root / "gma2_input_hashes.json").read_text(encoding="utf-8")
+    )
     assert input_hashes["gma1a_accepted_selection_hash"] == GMA1A_HASH
     assert input_hashes["gma1b_accepted_canonical_macro_hash"] == GMA1B_HASH
 

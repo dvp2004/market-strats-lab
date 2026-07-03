@@ -34,9 +34,7 @@ def test_create_materiality_summary():
         benchmark_variant="phase4_execution_candidate",
     )
 
-    row = summary[
-        summary["variant_name"] == "defensive_breadth_threshold_0_50"
-    ].iloc[0]
+    row = summary[summary["variant_name"] == "defensive_breadth_threshold_0_50"].iloc[0]
 
     assert row["cagr_delta_pct_points"] == 0.17
     assert row["calmar_delta"] == 0.008

@@ -186,12 +186,8 @@ def test_save_phase9b_writes_expected_reports(tmp_path):
     assert (tmp_path / "phase9b_technical_cluster_episode_metrics.csv").exists()
     assert (tmp_path / "phase9b_technical_cluster_stability_summary.csv").exists()
     assert (tmp_path / "phase9b_technical_cluster_instability_report.csv").exists()
-    assert (
-        tmp_path / "phase9b_technical_cluster_helpful_stability_report.csv"
-    ).exists()
+    assert (tmp_path / "phase9b_technical_cluster_helpful_stability_report.csv").exists()
     assert (tmp_path / "phase9b_technical_cluster_summary.csv").exists()
     assert (tmp_path / "phase9b_technical_cluster_gate_report.csv").exists()
     assert (tmp_path / "phase9b_technical_cluster_conclusion.csv").exists()
-    assert (
-        tmp_path / "phase9b_technical_regime_cluster_stability_audit.md"
-    ).exists()
+    assert (tmp_path / "phase9b_technical_regime_cluster_stability_audit.md").exists()

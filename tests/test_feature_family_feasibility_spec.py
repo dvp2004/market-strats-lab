@@ -214,9 +214,7 @@ def test_phase10a_gate_report_passes_valid_spec():
     conclusion = build_phase10a_conclusion(gate_report, recommendation)
 
     assert bool(gate_report["passed"].all())
-    assert conclusion.iloc[0]["verdict"] == (
-        "Completed — feature-family feasibility spec only"
-    )
+    assert conclusion.iloc[0]["verdict"] == ("Completed — feature-family feasibility spec only")
 
 
 def test_phase10a_gate_report_fails_if_model_training_allowed():

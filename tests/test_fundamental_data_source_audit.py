@@ -20,11 +20,7 @@ def _config(tmp_path: Path) -> dict:
             "enabled": True,
             "output_dir": str(tmp_path / "reports" / "phase23c"),
             "dashboard_status_path": str(
-                tmp_path
-                / "reports"
-                / "paper_trading"
-                / "dashboard"
-                / "phase23c_status.csv"
+                tmp_path / "reports" / "paper_trading" / "dashboard" / "phase23c_status.csv"
             ),
         }
     }
@@ -64,9 +60,7 @@ def _valid_facts() -> pd.DataFrame:
 
 def test_source_registry_contains_three_official_sec_contract_sources():
     registry = build_source_registry()
-    official = registry.loc[
-        registry["source_class"].str.contains("canonical_candidate", na=False)
-    ]
+    official = registry.loc[registry["source_class"].str.contains("canonical_candidate", na=False)]
     assert {
         "SEC_SUBMISSIONS_API",
         "SEC_XBRL_COMPANYFACTS",
@@ -78,9 +72,7 @@ def test_source_registry_contains_three_official_sec_contract_sources():
 
 def test_current_snapshot_source_is_never_canonical_ready():
     scorecard = build_source_scorecard(build_source_registry())
-    current = scorecard.loc[
-        scorecard["source_id"].eq("CURRENT_WEBSITE_FUNDAMENTALS")
-    ].iloc[0]
+    current = scorecard.loc[scorecard["source_id"].eq("CURRENT_WEBSITE_FUNDAMENTALS")].iloc[0]
     assert not bool(current["source_contract_ready"])
     assert not bool(current["canonical_data_ready_now"])
     assert not bool(scorecard["canonical_data_ready_now"].any())
@@ -102,9 +94,7 @@ def test_fact_schema_requires_accession_and_knowledge_timestamp():
 
 
 def test_availability_and_restatement_policies_block_lookahead_shortcuts():
-    availability = build_filing_availability_policy(
-        {"conservative_processing_delay_minutes": 5}
-    )
+    availability = build_filing_availability_policy({"conservative_processing_delay_minutes": 5})
     restatement = build_restatement_policy()
     availability_text = " ".join(availability["requirement"].astype(str)).lower()
     restatement_text = " ".join(restatement["requirement"].astype(str)).lower()
@@ -112,7 +102,6 @@ def test_availability_and_restatement_policies_block_lookahead_shortcuts():
     assert "accepted" in availability_text
     assert "historical training" in restatement_text
     assert "amendment" in restatement_text
-
 
 
 def test_pre_xbrl_coverage_gap_is_explicit_and_fail_closed():
@@ -127,11 +116,10 @@ def test_pre_xbrl_coverage_gap_is_explicit_and_fail_closed():
         set(policy["coverage_segment"])
     )
     assert not bool(policy["canonical_ready_now"].any())
-    pre = policy.loc[
-        policy["coverage_segment"].eq("pre_standardized_xbrl")
-    ].iloc[0]
+    pre = policy.loc[policy["coverage_segment"].eq("pre_standardized_xbrl")].iloc[0]
     assert pre["start_date"] == "2006-04-28"
     assert "exclude" in pre["training_policy"]
+
 
 def test_fundamental_fact_validator_accepts_valid_point_in_time_fact():
     report = validate_fundamental_fact_frame(_valid_facts())
@@ -143,9 +131,7 @@ def test_fundamental_fact_validator_rejects_knowledge_before_acceptance():
     facts = _valid_facts()
     facts.loc[0, "knowledge_timestamp_utc"] = "2025-08-01T16:20:00Z"
     report = validate_fundamental_fact_frame(facts)
-    row = report.loc[
-        report["gate"].eq("knowledge_not_before_accepted_timestamp")
-    ].iloc[0]
+    row = report.loc[report["gate"].eq("knowledge_not_before_accepted_timestamp")].iloc[0]
     assert not bool(row["passed"])
     assert not bool(report["all_gates_passed"].iloc[0])
 
@@ -164,12 +150,10 @@ def test_phase23c_writes_reports_without_reports_reports_and_blocks_training(tmp
         "phase23c_fundamental_data_source_audit": {
             "enabled": True,
             "output_dir": (
-                "reports/individual_equity_decision_system/"
-                "phase23c_fundamental_data_source_audit"
+                "reports/individual_equity_decision_system/phase23c_fundamental_data_source_audit"
             ),
             "dashboard_status_path": (
-                "reports/paper_trading/dashboard/"
-                "phase23c_fundamental_data_source_audit_status.csv"
+                "reports/paper_trading/dashboard/phase23c_fundamental_data_source_audit_status.csv"
             ),
         }
     }

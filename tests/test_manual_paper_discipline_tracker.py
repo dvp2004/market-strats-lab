@@ -15,12 +15,8 @@ def _config(reports_dir: Path) -> dict:
             "enabled": True,
             "output_dir": str(reports_dir / "paper_trading" / "manual_sessions"),
             "dashboard_dir": str(reports_dir / "paper_trading" / "dashboard"),
-            "source_manual_session_dir": str(
-                reports_dir / "paper_trading" / "manual_sessions"
-            ),
-            "source_cycle_tracker_dir": str(
-                reports_dir / "paper_trading" / "cycle_tracker"
-            ),
+            "source_manual_session_dir": str(reports_dir / "paper_trading" / "manual_sessions"),
+            "source_cycle_tracker_dir": str(reports_dir / "paper_trading" / "cycle_tracker"),
             "source_finalist_tracking_dir": str(
                 reports_dir / "paper_trading" / "finalist_tracking"
             ),
@@ -275,9 +271,7 @@ def test_readiness_false_with_fewer_than_required_cycles():
     ).iloc[0]
 
     assert not bool(streak["ready_for_recurring_paper_tracking"])
-    assert "insufficient_valid_discipline_cycles" in streak[
-        "readiness_blocking_reasons"
-    ]
+    assert "insufficient_valid_discipline_cycles" in streak["readiness_blocking_reasons"]
     assert "insufficient_clean_signal_cycles" in streak["readiness_blocking_reasons"]
 
 
@@ -288,9 +282,9 @@ def test_btc_positive_rows_require_btc_acknowledgement():
     history = _history(ledger=ledger)
 
     assert not bool(history.iloc[0]["valid_discipline_cycle"])
-    assert "btc_caveat_acknowledgement_missing" in history.iloc[0][
-        "discipline_cycle_blocking_reasons"
-    ]
+    assert (
+        "btc_caveat_acknowledgement_missing" in history.iloc[0]["discipline_cycle_blocking_reasons"]
+    )
 
 
 def test_unexplained_override_prevents_valid_discipline_cycle():
@@ -301,9 +295,7 @@ def test_unexplained_override_prevents_valid_discipline_cycle():
     history = _history(ledger=ledger)
 
     assert not bool(history.iloc[0]["valid_discipline_cycle"])
-    assert "unexplained_override_present" in history.iloc[0][
-        "discipline_cycle_blocking_reasons"
-    ]
+    assert "unexplained_override_present" in history.iloc[0]["discipline_cycle_blocking_reasons"]
 
 
 def test_candidate_summary_counts_skipped_and_warning_skip_rows(tmp_path):
@@ -335,16 +327,10 @@ def test_dashboard_markdown_and_status_are_written(tmp_path):
     )
 
     markdown = (
-        reports_dir
-        / "paper_trading"
-        / "manual_sessions"
-        / "manual_paper_discipline_dashboard.md"
+        reports_dir / "paper_trading" / "manual_sessions" / "manual_paper_discipline_dashboard.md"
     ).read_text(encoding="utf-8")
     dashboard = pd.read_csv(
-        reports_dir
-        / "paper_trading"
-        / "dashboard"
-        / "manual_paper_discipline_status.csv"
+        reports_dir / "paper_trading" / "dashboard" / "manual_paper_discipline_status.csv"
     )
 
     assert "NO LIVE TRADING" in markdown

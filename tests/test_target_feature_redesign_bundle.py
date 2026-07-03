@@ -21,9 +21,9 @@ def _write_prior_reports(tmp_path: Path):
         ]
     ).to_csv(tmp_path / "phase13af_checkpoint_conclusion.csv", index=False)
 
-    pd.DataFrame(
-        [{"gate": "dummy", "passed": True, "result": "Passed"}]
-    ).to_csv(tmp_path / "phase13af_checkpoint_gate_report.csv", index=False)
+    pd.DataFrame([{"gate": "dummy", "passed": True, "result": "Passed"}]).to_csv(
+        tmp_path / "phase13af_checkpoint_gate_report.csv", index=False
+    )
 
     pd.DataFrame(
         [
@@ -122,19 +122,13 @@ def _config(tmp_path: Path):
             "allow_candidate_promotion": False,
             "allow_final_candidate_change": False,
             "source_reports": {
-                "phase13af_conclusion": str(
-                    tmp_path / "phase13af_checkpoint_conclusion.csv"
-                ),
-                "phase13af_gate_report": str(
-                    tmp_path / "phase13af_checkpoint_gate_report.csv"
-                ),
+                "phase13af_conclusion": str(tmp_path / "phase13af_checkpoint_conclusion.csv"),
+                "phase13af_gate_report": str(tmp_path / "phase13af_checkpoint_gate_report.csv"),
                 "architecture_decision_report": str(
-                    tmp_path
-                    / "phase13ae_pivot_decision_architecture_decision_report.csv"
+                    tmp_path / "phase13ae_pivot_decision_architecture_decision_report.csv"
                 ),
                 "failure_attribution_report": str(
-                    tmp_path
-                    / "phase13ac_failure_attribution_failure_attribution_report.csv"
+                    tmp_path / "phase13ac_failure_attribution_failure_attribution_report.csv"
                 ),
                 "dataset": str(tmp_path / "phase13q_ml_feature_dataset_v1.csv"),
             },
@@ -336,8 +330,7 @@ def _config(tmp_path: Path):
                 "conclusion": str(tmp_path / "phase13ai_redesign_panel_conclusion.csv"),
                 "gate_report": str(tmp_path / "phase13ai_redesign_panel_gate_report.csv"),
                 "target_variant_feasibility_report": str(
-                    tmp_path
-                    / "phase13ai_redesign_panel_target_variant_feasibility_report.csv"
+                    tmp_path / "phase13ai_redesign_panel_target_variant_feasibility_report.csv"
                 ),
                 "target_assignment_panel": str(
                     tmp_path / "phase13ai_redesign_panel_target_assignment_panel.csv"
@@ -349,16 +342,13 @@ def _config(tmp_path: Path):
                     tmp_path / "phase13ai_redesign_panel_class_balance_report.csv"
                 ),
                 "target_outcome_profile_report": str(
-                    tmp_path
-                    / "phase13ai_redesign_panel_target_outcome_profile_report.csv"
+                    tmp_path / "phase13ai_redesign_panel_target_outcome_profile_report.csv"
                 ),
                 "feature_family_availability_report": str(
-                    tmp_path
-                    / "phase13ai_redesign_panel_feature_family_availability_report.csv"
+                    tmp_path / "phase13ai_redesign_panel_feature_family_availability_report.csv"
                 ),
                 "feature_target_separation_report": str(
-                    tmp_path
-                    / "phase13ai_redesign_panel_feature_target_separation_report.csv"
+                    tmp_path / "phase13ai_redesign_panel_feature_target_separation_report.csv"
                 ),
                 "redesign_screen_report": str(
                     tmp_path / "phase13ai_redesign_panel_redesign_screen_report.csv"

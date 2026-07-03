@@ -199,9 +199,7 @@ def test_save_phase9e_writes_expected_reports(tmp_path):
     )
 
     assert not outputs["conclusion"].empty
-    assert (
-        tmp_path / "phase9e_technical_extension_report_inventory_check.csv"
-    ).exists()
+    assert (tmp_path / "phase9e_technical_extension_report_inventory_check.csv").exists()
     assert (tmp_path / "phase9e_technical_extension_config_flag_check.csv").exists()
     assert (tmp_path / "phase9e_technical_extension_phase9d_failure_check.csv").exists()
     assert (tmp_path / "phase9e_technical_extension_closeout_summary.csv").exists()

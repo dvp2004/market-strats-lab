@@ -156,8 +156,7 @@ def test_candidate_unavailable_before_asset_inception_is_reported(tmp_path):
     )
     unavailable = pd.read_csv(outputs["unavailable_candidate_regimes"])
     btc_unavailable = unavailable.loc[
-        unavailable["canonical_candidate_id"]
-        == "canonical_inverse_vol_63d_btc_usd_qqq_spy"
+        unavailable["canonical_candidate_id"] == "canonical_inverse_vol_63d_btc_usd_qqq_spy"
     ]
 
     assert "asset_inception_after_regime_start:BTC-USD=2014-09-17" in ";".join(
@@ -207,7 +206,11 @@ def test_phase6_loose_relief_baseline_is_included_when_daily_curve_exists(tmp_pa
 
     assert not phase6.empty
     assert phase6["equity_curve_source"].astype(str).str.contains(PHASE6_BASELINE_DAILY_FILE).any()
-    assert phase6.loc[phase6["regime_available"].map(bool), "uses_aggregate_metrics_only"].eq(False).all()
+    assert (
+        phase6.loc[phase6["regime_available"].map(bool), "uses_aggregate_metrics_only"]
+        .eq(False)
+        .all()
+    )
 
 
 def test_phase6_candidate_fails_closed_if_daily_curve_missing(tmp_path):
@@ -319,9 +322,7 @@ def test_robustness_score_penalizes_unavailable_regimes_and_high_drawdown():
     scored = build_regime_robustness_scores(summary)
 
     assert scored.iloc[0]["canonical_candidate_id"] == "broad"
-    assert scored.iloc[0]["regime_robustness_score"] > scored.iloc[1][
-        "regime_robustness_score"
-    ]
+    assert scored.iloc[0]["regime_robustness_score"] > scored.iloc[1]["regime_robustness_score"]
 
 
 def test_score_components_exclude_full_canonical_from_primary_score(tmp_path):
@@ -443,9 +444,10 @@ def test_hard_gate_blocking_reasons_are_written_for_severe_drawdown():
 
     components = build_regime_robustness_score_components(metrics)
 
-    assert "severe_drawdown_worse_than_minus_50pct" in components.iloc[0][
-        "classification_blocking_reasons"
-    ]
+    assert (
+        "severe_drawdown_worse_than_minus_50pct"
+        in components.iloc[0]["classification_blocking_reasons"]
+    )
 
 
 def test_phase21a_outputs_files_and_safety_flags_false(tmp_path):

@@ -89,6 +89,7 @@ def test_create_cash_reason_summary_counts_cash_reasons():
     assert summary.iloc[0]["cash_reason"] == "INSUFFICIENT_HISTORY"
     assert summary.iloc[0]["days_held"] == 2
 
+
 def test_create_holding_segments_uses_equity_to_calculate_segment_return():
     result = pd.DataFrame(
         {

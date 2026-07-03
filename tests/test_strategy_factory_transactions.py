@@ -263,9 +263,7 @@ def test_notebook_builder_writes_valid_ipynb(tmp_path: Path):
 
     notebook = json.loads(text)
     code = "\n".join(
-        "".join(cell["source"])
-        for cell in notebook["cells"]
-        if cell["cell_type"] == "code"
+        "".join(cell["source"]) for cell in notebook["cells"] if cell["cell_type"] == "code"
     )
     assert 'watchlist[\n    [\n        "candidate_id"' not in code
 

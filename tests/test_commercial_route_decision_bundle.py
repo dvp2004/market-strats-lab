@@ -20,9 +20,9 @@ def _write_phase13aq_reports(tmp_path: Path):
         ]
     ).to_csv(tmp_path / "phase13aq_holdout_decision_conclusion.csv", index=False)
 
-    pd.DataFrame(
-        [{"gate": "dummy", "passed": True, "result": "Passed"}]
-    ).to_csv(tmp_path / "phase13aq_holdout_decision_gate_report.csv", index=False)
+    pd.DataFrame([{"gate": "dummy", "passed": True, "result": "Passed"}]).to_csv(
+        tmp_path / "phase13aq_holdout_decision_gate_report.csv", index=False
+    )
 
     pd.DataFrame(
         [
@@ -130,13 +130,27 @@ def _config(tmp_path: Path):
             "allow_final_candidate_change": False,
             "source_reports": {
                 "phase13aq_conclusion": str(tmp_path / "phase13aq_holdout_decision_conclusion.csv"),
-                "phase13aq_gate_report": str(tmp_path / "phase13aq_holdout_decision_gate_report.csv"),
-                "phase13aq_decision_report": str(tmp_path / "phase13aq_holdout_decision_decision_report.csv"),
-                "phase13aq_validation_ranking_report": str(tmp_path / "phase13aq_holdout_decision_validation_ranking_report.csv"),
-                "phase13ao_metric_report": str(tmp_path / "phase13ao_model_training_metric_report.csv"),
-                "phase13ao_class_recall_report": str(tmp_path / "phase13ao_model_training_class_recall_report.csv"),
-                "phase13ao_overfit_report": str(tmp_path / "phase13ao_model_training_overfit_report.csv"),
-                "phase13ao_success_report": str(tmp_path / "phase13ao_model_training_success_report.csv"),
+                "phase13aq_gate_report": str(
+                    tmp_path / "phase13aq_holdout_decision_gate_report.csv"
+                ),
+                "phase13aq_decision_report": str(
+                    tmp_path / "phase13aq_holdout_decision_decision_report.csv"
+                ),
+                "phase13aq_validation_ranking_report": str(
+                    tmp_path / "phase13aq_holdout_decision_validation_ranking_report.csv"
+                ),
+                "phase13ao_metric_report": str(
+                    tmp_path / "phase13ao_model_training_metric_report.csv"
+                ),
+                "phase13ao_class_recall_report": str(
+                    tmp_path / "phase13ao_model_training_class_recall_report.csv"
+                ),
+                "phase13ao_overfit_report": str(
+                    tmp_path / "phase13ao_model_training_overfit_report.csv"
+                ),
+                "phase13ao_success_report": str(
+                    tmp_path / "phase13ao_model_training_success_report.csv"
+                ),
             },
             "commercial_thresholds": {
                 "min_fragile_recall_for_live_path": 0.20,
@@ -186,10 +200,18 @@ def _config(tmp_path: Path):
                 "relative_momentum_allocator": True,
             },
             "source_reports": {
-                "phase13av_conclusion": str(tmp_path / "phase13av_commercial_decision_conclusion.csv"),
-                "phase13av_gate_report": str(tmp_path / "phase13av_commercial_decision_gate_report.csv"),
-                "phase13av_commercial_decision_report": str(tmp_path / "phase13av_commercial_decision_commercial_decision_report.csv"),
-                "phase13av_blocked_next_steps_report": str(tmp_path / "phase13av_commercial_decision_blocked_next_steps_report.csv"),
+                "phase13av_conclusion": str(
+                    tmp_path / "phase13av_commercial_decision_conclusion.csv"
+                ),
+                "phase13av_gate_report": str(
+                    tmp_path / "phase13av_commercial_decision_gate_report.csv"
+                ),
+                "phase13av_commercial_decision_report": str(
+                    tmp_path / "phase13av_commercial_decision_commercial_decision_report.csv"
+                ),
+                "phase13av_blocked_next_steps_report": str(
+                    tmp_path / "phase13av_commercial_decision_blocked_next_steps_report.csv"
+                ),
             },
             "route_registry": [
                 {
@@ -268,6 +290,8 @@ def test_phase13av_to_13aw_commercial_route_decision(tmp_path):
     assert not bool(commercial["minor_model_tuning_allowed"])
 
     selection = out_aw["route_selection_report"].iloc[0]
-    assert selection["selected_route_id"] == "route_3_non_ml_overlay_visual_backtest_paper_readiness"
+    assert (
+        selection["selected_route_id"] == "route_3_non_ml_overlay_visual_backtest_paper_readiness"
+    )
     assert not bool(selection["model_training_permission"])
     assert not bool(selection["paper_trading_permission"])

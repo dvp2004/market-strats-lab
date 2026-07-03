@@ -152,7 +152,20 @@ def test_build_entered_session_computes_fills_and_acknowledgements():
     }
     assert filled["tear_sheet_reviewed"].all()
     assert filled["warnings_acknowledged"].all()
-    assert not filled[list(("live_trading_allowed", "real_money_allowed", "broker_api_integration_allowed", "promotion_allowed"))].any().any()
+    assert (
+        not filled[
+            list(
+                (
+                    "live_trading_allowed",
+                    "real_money_allowed",
+                    "broker_api_integration_allowed",
+                    "promotion_allowed",
+                )
+            )
+        ]
+        .any()
+        .any()
+    )
     assert len(audit) == len(template)
 
 
@@ -253,8 +266,7 @@ def test_reference_and_btc_notes_are_explicit():
     )
     btc_notes = " ".join(
         filled.loc[
-            filled["canonical_candidate_id"]
-            == "canonical_inverse_vol_63d_btc_usd_qqq_spy",
+            filled["canonical_candidate_id"] == "canonical_inverse_vol_63d_btc_usd_qqq_spy",
             "notes",
         ].astype(str)
     )

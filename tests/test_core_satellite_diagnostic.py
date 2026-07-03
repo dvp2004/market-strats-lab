@@ -70,8 +70,7 @@ def test_create_core_satellite_diagnostic_compares_three_strategies():
     assert core_satellite["cagr_delta_vs_12m_momentum_pct_points"] == -0.1
 
     annual_rebalanced = result[
-    result["strategy"]
-        == "60/40 Annual Rebalanced Core-Satellite SPY B&H + 12M Momentum"
+        result["strategy"] == "60/40 Annual Rebalanced Core-Satellite SPY B&H + 12M Momentum"
     ].iloc[0]
 
     assert annual_rebalanced["worst_3y_cagr_pct"] == -9.0

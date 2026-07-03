@@ -10,9 +10,7 @@ def test_create_final_validation_conclusion_contains_required_statuses():
     conclusion = create_final_validation_conclusion()
 
     assert not conclusion.empty
-    assert {"claim", "status", "evidence_quality", "interpretation"}.issubset(
-        conclusion.columns
-    )
+    assert {"claim", "status", "evidence_quality", "interpretation"}.issubset(conclusion.columns)
     assert "Failed" in set(conclusion["status"])
     assert "Survived" in set(conclusion["status"])
 

@@ -257,13 +257,21 @@ def _config(tmp_path: Path):
                 "phase13v_conclusion": str(tmp_path / "phase13v_quality_conclusion.csv"),
                 "phase13v_gate_report": str(tmp_path / "phase13v_quality_gate_report.csv"),
                 "metric_report": str(tmp_path / "phase13u_ml_train_validation_metric_report.csv"),
-                "baseline_comparison_report": str(tmp_path / "phase13u_ml_baseline_comparison_report.csv"),
-                "confusion_matrix_report": str(tmp_path / "phase13u_ml_confusion_matrix_report.csv"),
+                "baseline_comparison_report": str(
+                    tmp_path / "phase13u_ml_baseline_comparison_report.csv"
+                ),
+                "confusion_matrix_report": str(
+                    tmp_path / "phase13u_ml_confusion_matrix_report.csv"
+                ),
                 "calibration_report": str(tmp_path / "phase13u_ml_calibration_report.csv"),
                 "class_support_report": str(tmp_path / "phase13u_ml_class_support_report.csv"),
                 "validation_predictions": str(tmp_path / "phase13u_ml_validation_predictions.csv"),
-                "phase13u_forbidden_output_check": str(tmp_path / "phase13u_ml_forbidden_output_check.csv"),
-                "phase13v_forbidden_output_check": str(tmp_path / "phase13v_quality_forbidden_output_check.csv"),
+                "phase13u_forbidden_output_check": str(
+                    tmp_path / "phase13u_ml_forbidden_output_check.csv"
+                ),
+                "phase13v_forbidden_output_check": str(
+                    tmp_path / "phase13v_quality_forbidden_output_check.csv"
+                ),
             },
             "interpretation_thresholds": {
                 "majority_baseline_model_id": "baseline_majority_class",
@@ -330,16 +338,36 @@ def _config(tmp_path: Path):
                 "relative_momentum_allocator": True,
             },
             "phase13w_reports": {
-                "source_report_check": str(tmp_path / "phase13w_interpretation_source_report_check.csv"),
-                "phase13v_result_check": str(tmp_path / "phase13w_interpretation_phase13v_result_check.csv"),
-                "validation_ranking_report": str(tmp_path / "phase13w_interpretation_validation_ranking_report.csv"),
-                "dummy_comparison_report": str(tmp_path / "phase13w_interpretation_dummy_comparison_report.csv"),
-                "overfit_diagnostic_report": str(tmp_path / "phase13w_interpretation_overfit_diagnostic_report.csv"),
-                "class_recall_report": str(tmp_path / "phase13w_interpretation_class_recall_report.csv"),
-                "continuation_decision_report": str(tmp_path / "phase13w_interpretation_continuation_decision_report.csv"),
-                "phase13x_boundary_check": str(tmp_path / "phase13w_interpretation_phase13x_boundary_check.csv"),
-                "phase13y_boundary_check": str(tmp_path / "phase13w_interpretation_phase13y_boundary_check.csv"),
-                "scope_boundary_check": str(tmp_path / "phase13w_interpretation_scope_boundary_check.csv"),
+                "source_report_check": str(
+                    tmp_path / "phase13w_interpretation_source_report_check.csv"
+                ),
+                "phase13v_result_check": str(
+                    tmp_path / "phase13w_interpretation_phase13v_result_check.csv"
+                ),
+                "validation_ranking_report": str(
+                    tmp_path / "phase13w_interpretation_validation_ranking_report.csv"
+                ),
+                "dummy_comparison_report": str(
+                    tmp_path / "phase13w_interpretation_dummy_comparison_report.csv"
+                ),
+                "overfit_diagnostic_report": str(
+                    tmp_path / "phase13w_interpretation_overfit_diagnostic_report.csv"
+                ),
+                "class_recall_report": str(
+                    tmp_path / "phase13w_interpretation_class_recall_report.csv"
+                ),
+                "continuation_decision_report": str(
+                    tmp_path / "phase13w_interpretation_continuation_decision_report.csv"
+                ),
+                "phase13x_boundary_check": str(
+                    tmp_path / "phase13w_interpretation_phase13x_boundary_check.csv"
+                ),
+                "phase13y_boundary_check": str(
+                    tmp_path / "phase13w_interpretation_phase13y_boundary_check.csv"
+                ),
+                "scope_boundary_check": str(
+                    tmp_path / "phase13w_interpretation_scope_boundary_check.csv"
+                ),
                 "summary": str(tmp_path / "phase13w_interpretation_summary.csv"),
                 "gate_report": str(tmp_path / "phase13w_interpretation_gate_report.csv"),
                 "conclusion": str(tmp_path / "phase13w_interpretation_conclusion.csv"),

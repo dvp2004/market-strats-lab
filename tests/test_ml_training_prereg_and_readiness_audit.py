@@ -55,8 +55,7 @@ def _write_repaired_dataset(tmp_path: Path):
                 "dataset_id": "phase13q_ml_feature_dataset_v1",
                 "dataset_label": "multi_factor_technical_macro_dataset_v1",
                 "macro_repair_passed": True,
-                "decision_date": pd.Timestamp("2010-01-01")
-                + pd.offsets.BDay(idx),
+                "decision_date": pd.Timestamp("2010-01-01") + pd.offsets.BDay(idx),
                 "split_label": split,
                 "future_return_63d": 0.01,
                 "future_63d_spy_return_state": "neutral",
@@ -106,10 +105,7 @@ def _config(tmp_path: Path):
         "phase13r_repaired_macro_dataset_quality_audit": {"enabled": False},
         "phase13s_ml_model_training_preregistration_spec": {
             "enabled": True,
-            "spec_role": (
-                "ML model training pre-registration and baseline model "
-                "design spec only"
-            ),
+            "spec_role": ("ML model training pre-registration and baseline model design spec only"),
             "phase_branch": "Phase 13 multi-factor model architecture planning",
             "source_phase": "Phase 13R",
             "proposed_next_phase": "Phase 13T",
@@ -125,27 +121,15 @@ def _config(tmp_path: Path):
             "allow_candidate_promotion": False,
             "allow_final_candidate_change": False,
             "source_reports": {
-                "phase13r_conclusion": str(
-                    tmp_path / "phase13r_quality_conclusion.csv"
-                ),
-                "phase13r_gate_report": str(
-                    tmp_path / "phase13r_quality_gate_report.csv"
-                ),
-                "repaired_dataset": str(
-                    tmp_path / "phase13q_ml_feature_dataset_v1.csv"
-                ),
-                "dataset_metadata": str(
-                    tmp_path / "phase13q_repair_dataset_metadata.csv"
-                ),
+                "phase13r_conclusion": str(tmp_path / "phase13r_quality_conclusion.csv"),
+                "phase13r_gate_report": str(tmp_path / "phase13r_quality_gate_report.csv"),
+                "repaired_dataset": str(tmp_path / "phase13q_ml_feature_dataset_v1.csv"),
+                "dataset_metadata": str(tmp_path / "phase13q_repair_dataset_metadata.csv"),
                 "macro_availability_report": str(
                     tmp_path / "phase13q_repair_macro_availability_report.csv"
                 ),
-                "split_summary": str(
-                    tmp_path / "phase13q_repair_split_summary.csv"
-                ),
-                "target_summary": str(
-                    tmp_path / "phase13q_repair_target_summary.csv"
-                ),
+                "split_summary": str(tmp_path / "phase13q_repair_split_summary.csv"),
+                "target_summary": str(tmp_path / "phase13q_repair_target_summary.csv"),
             },
             "dataset_requirements": {
                 "required_dataset_label": "multi_factor_technical_macro_dataset_v1",
@@ -251,9 +235,7 @@ def _config(tmp_path: Path):
                 ],
             },
             "phase13t_boundary": {
-                "allowed_next_step": (
-                    "ML training readiness and leakage boundary audit only"
-                ),
+                "allowed_next_step": ("ML training readiness and leakage boundary audit only"),
                 "forbidden_next_step": (
                     "model training execution, model selection, prediction "
                     "generation, signal creation, strategy backtest"
@@ -292,9 +274,7 @@ def _config(tmp_path: Path):
                 "relative_momentum_allocator": True,
             },
             "phase13s_reports": {
-                "source_report_check": str(
-                    tmp_path / "phase13s_prereg_source_report_check.csv"
-                ),
+                "source_report_check": str(tmp_path / "phase13s_prereg_source_report_check.csv"),
                 "phase13r_result_check": str(
                     tmp_path / "phase13s_prereg_phase13r_result_check.csv"
                 ),
@@ -308,15 +288,9 @@ def _config(tmp_path: Path):
                 "model_family_registry": str(
                     tmp_path / "phase13s_prereg_model_family_registry.csv"
                 ),
-                "preprocessing_policy": str(
-                    tmp_path / "phase13s_prereg_preprocessing_policy.csv"
-                ),
-                "split_usage_policy": str(
-                    tmp_path / "phase13s_prereg_split_usage_policy.csv"
-                ),
-                "metric_registry": str(
-                    tmp_path / "phase13s_prereg_metric_registry.csv"
-                ),
+                "preprocessing_policy": str(tmp_path / "phase13s_prereg_preprocessing_policy.csv"),
+                "split_usage_policy": str(tmp_path / "phase13s_prereg_split_usage_policy.csv"),
+                "metric_registry": str(tmp_path / "phase13s_prereg_metric_registry.csv"),
                 "report_template_registry": str(
                     tmp_path / "phase13s_prereg_report_template_registry.csv"
                 ),
