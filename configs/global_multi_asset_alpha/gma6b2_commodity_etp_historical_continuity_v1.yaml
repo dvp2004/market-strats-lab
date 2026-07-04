@@ -1,0 +1,108 @@
+﻿contract:
+  phase_id: gma6b2_commodity_etp_historical_continuity_v1
+  review_scope: historical methodology continuity overlay for USO and DBA only
+  historical_window_start: '2007-05-30'
+  historical_window_end: '2026-05-01'
+  evidence_class: observed development evidence
+  holdout_status: not a pristine final holdout
+  decision_scope: no strategy, portfolio replay, model fit, allocation, execution, or promotion decision is produced
+  evidence_bundle_id: gma6b2_commodity_etp_official_sources_20260623
+  evidence_root_policy: must_be_supplied_explicitly_for_artifact_validation
+  output_root_policy: must_be_supplied_explicitly_for_output_generation
+  output_files:
+    overlay_csv: gma6b2_commodity_etp_historical_continuity_v1.csv
+    overlay_markdown: gma6b2_commodity_etp_historical_continuity_v1.md
+    source_manifest_csv: gma6b2_commodity_etp_historical_source_manifest_v1.csv
+interpretation_preserved:
+  USO: futures_linked_oil_etp_return_exposure
+  DBA: futures_linked_agriculture_etp_return_exposure
+  traded_etp_total_return_interpretation: true
+  spot_proxy_claim_permitted: false
+source_manifest:
+  - ticker: USO
+    issuer: United States Commodity Funds LLC / United States Oil Fund, LP
+    document_title: United States Oil Fund, LP prospectus filed February 2, 2007, SEC 424B3
+    document_type: sec_prospectus
+    filing_or_publication_date: '2007-02-02'
+    effective_date_if_stated: not_documented
+    official_source_id: regulatory_filing_uso_424b3_20070202
+    required_evidence_file: official_sources/uso_424b3_20070202.html
+    source_retrieved_at_utc: '2026-06-23T15:05:00+00:00'
+    source_sha256: 750109ec9f49c7dc158684e7950a50387a7bc7fa46d9cc961e1d4a8fffd0a38f
+    historical_window_role: early_window_reference
+    source_supported_summary: Early-window official prospectus identifies USO as a commodity pool using oil futures contracts with NAV intended to reflect WTI crude oil price changes measured through futures plus collateral interest less expenses.
+  - ticker: USO
+    issuer: United States Commodity Funds LLC / United States Oil Fund, LP
+    document_title: United States Oil Fund, LP prospectus filed June 12, 2020, SEC 424B3
+    document_type: sec_prospectus
+    filing_or_publication_date: '2020-06-12'
+    effective_date_if_stated: May 2020
+    official_source_id: regulatory_filing_uso_424b3_20200612
+    required_evidence_file: official_sources/uso_424b3_20200612.html
+    source_retrieved_at_utc: '2026-06-23T15:05:00+00:00'
+    source_sha256: d2e6b0ac38eecf28484a45bead3e2dbbf0d4d55feddc9460811ce60d95a9b3f3
+    historical_window_role: material_change_reference
+    source_supported_summary: Official 2020 prospectus states that, commencing with the monthly roll that occurred in May 2020, USO positions roll over a ten-day period whereas previously positions would roll over a four-day period, and describes limits on investment in the benchmark futures contract.
+  - ticker: USO
+    issuer: United States Commodity Funds LLC / United States Oil Fund, LP
+    document_title: United States Oil Fund, LP prospectus dated April 24, 2026, SEC 424B3
+    document_type: sec_prospectus
+    filing_or_publication_date: '2026-04-24'
+    effective_date_if_stated: not_documented
+    official_source_id: regulatory_filing_uso_424b3_20260424
+    required_evidence_file: official_sources/uso_424b3_20260424.html
+    source_retrieved_at_utc: '2026-06-23T15:05:00+00:00'
+    source_sha256: 82c1eee89912951d306bbf0c5965789385cd978078e3ab9aa03d2090bc5c8301
+    historical_window_role: current_structure_reference
+    source_supported_summary: Current official prospectus identifies USO as a commodity pool, states a futures-linked objective, collateral-interest component, and warns that USO is not a proxy for trading directly in oil markets.
+  - ticker: DBA
+    issuer: Invesco Capital Management LLC / Invesco DB Agriculture Fund
+    document_title: PowerShares DB Agriculture Fund prospectus filed May 15, 2007, SEC 424B3
+    document_type: sec_prospectus
+    filing_or_publication_date: '2007-05-15'
+    effective_date_if_stated: not_documented
+    official_source_id: regulatory_filing_dba_424b3_20070515
+    required_evidence_file: official_sources/dba_424b3_20070515.html
+    source_retrieved_at_utc: '2026-06-23T15:05:00+00:00'
+    source_sha256: 6db65ee467489bb399d25b1d750a380d1f9d3bf448293f293b8d9e739eaedd56
+    historical_window_role: early_window_reference
+    source_supported_summary: Early-window official prospectus describes the fund/master-fund structure, commodity pool operator, exchange-traded agriculture futures contracts, index tracking, and Treasury or short-term fixed-income collateral income.
+  - ticker: DBA
+    issuer: Invesco Capital Management LLC / Invesco DB Agriculture Fund
+    document_title: Invesco DB Agriculture Fund prospectus dated November 10, 2025, SEC 424B3
+    document_type: sec_prospectus
+    filing_or_publication_date: '2025-11-10'
+    effective_date_if_stated: not_documented
+    official_source_id: regulatory_filing_dba_424b3_20251110
+    required_evidence_file: official_sources/dba_424b3_20251110.html
+    source_retrieved_at_utc: '2026-06-23T15:05:00+00:00'
+    source_sha256: 2fb7b0d88092481b1de79f37ad166197b1232ee5b3ab35b14ca9b95fba9fa022
+    historical_window_role: current_structure_reference
+    source_supported_summary: Current official prospectus describes DBA as a commodity pool seeking to track the DBIQ Diversified Agriculture Index Excess Return through exchange-traded agriculture futures with Optimum Yield methodology and collateral securities.
+audit_records:
+  - ticker: USO
+    historical_window_start: '2007-05-30'
+    historical_window_end: '2026-05-01'
+    historical_continuity_status: material_methodology_change_documented
+    material_methodology_change_detected: true
+    material_change_effective_date: May 2020
+    material_change_description: Official June 2020 prospectus documents that, commencing with the monthly roll that occurred in May 2020, USO futures positions roll over a ten-day period whereas previously positions would roll over a four-day period; later diagnostics must carry this methodology-regime flag.
+    historical_return_interpretation: USO adjusted-price history is interpreted only as realised traded ETP total return with embedded futures-roll, collateral, fee, distribution, split, benchmark, and vehicle-structure effects.
+    spot_proxy_claim_permitted: false
+    traded_etp_total_return_interpretation: true
+    later_research_execution_overlay_eligibility: eligible_only_with_documented_methodology_regime_flags
+    required_later_regime_flag: uso_roll_methodology_pre_may_2020_vs_from_may_2020
+    blocking_reason: ''
+  - ticker: DBA
+    historical_window_start: '2007-05-30'
+    historical_window_end: '2026-05-01'
+    historical_continuity_status: historical_methodology_continuity_documented
+    material_methodology_change_detected: false
+    material_change_effective_date: not_documented
+    material_change_description: No material change identified from reviewed official sources; reviewed early and current prospectuses support a traded agriculture futures-linked ETP return interpretation.
+    historical_return_interpretation: DBA adjusted-price history is interpreted only as realised traded ETP total return with embedded futures-roll, collateral, fee, distribution, split, benchmark, and vehicle-structure effects.
+    spot_proxy_claim_permitted: false
+    traded_etp_total_return_interpretation: true
+    later_research_execution_overlay_eligibility: eligible_for_later_gma6_research_execution
+    required_later_regime_flag: not_required
+    blocking_reason: ''
