@@ -1,0 +1,69 @@
+﻿contract:
+  phase_id: gma6b_commodity_pool_structure_review_v1
+  review_scope: structure and interpretation overlay for USO and DBA only
+  evidence_class: observed development evidence
+  holdout_status: not a pristine final holdout
+  decision_scope: no strategy, portfolio replay, model fit, allocation, execution, or promotion decision is produced
+  evidence_bundle_id: gma6b_commodity_pool_official_sources_20260623
+  evidence_root_policy: must_be_supplied_explicitly_for_artifact_validation
+  output_root_policy: must_be_supplied_explicitly_for_output_generation
+  output_files:
+    overlay_csv: gma6b_commodity_pool_structure_review_v1.csv
+    overlay_markdown: gma6b_commodity_pool_structure_review_v1.md
+    source_manifest_csv: gma6b_commodity_pool_source_manifest_v1.csv
+allowed_values:
+  economic_exposure_label:
+    - futures_linked_oil_etp_return_exposure
+    - futures_linked_agriculture_etp_return_exposure
+    - structure_unresolved
+  structure_review_status:
+    - documented_for_later_research_execution
+    - structure_review_pending
+    - blocked_data_contract_failure
+  later_research_execution_eligibility:
+    - eligible_for_later_research_execution
+    - structure_review_pending
+    - blocked_data_contract_failure
+review_records:
+  - ticker: USO
+    issuer: United States Commodity Funds LLC / United States Oil Fund, LP
+    official_source_id: regulatory_filing_uso_424b3_20260424
+    required_evidence_file: official_sources/uso_424b3_20260424.html
+    official_source_title: United States Oil Fund, LP prospectus dated April 24, 2026, SEC 424B3
+    official_source_type: sec_prospectus
+    source_retrieved_at_utc: '2026-06-23T14:45:00+00:00'
+    source_sha256: 82c1eee89912951d306bbf0c5965789385cd978078e3ab9aa03d2090bc5c8301
+    vehicle_structure: Commodity pool organized as a limited partnership and exchange-traded fund issuing shares on NYSE Arca; managed by United States Commodity Funds LLC as commodity pool operator.
+    stated_investment_objective: Daily percentage changes in per-share NAV are intended to reflect daily percentage changes in the spot price of light sweet crude oil delivered to Cushing, Oklahoma, as measured by the Benchmark Oil Futures Contract, plus collateral interest, less expenses.
+    primary_exposure_instruments: Short-term exchange-traded light sweet crude oil futures contracts, with possible oil-related investments including swaps, forwards, and options when required by regulation, liquidity, risk management, or market conditions.
+    roll_or_contract_management_description: Benchmark exposure changes from the near-month NYMEX futures contract to the next-month contract over an approximately five-day roll period at the beginning of each month.
+    collateral_or_cash_description: Collateral holdings include cash, cash equivalents, and United States government obligations; collateral interest is part of the stated NAV objective.
+    distribution_and_corporate_action_note: Adjusted-price history may include distributions, expenses, collateral interest, and corporate-action effects such as splits; these remain embedded in traded-instrument return.
+    adjusted_price_interpretation: GMA-6 treats adjusted-price performance as realised traded USO ETP return, not as a spot crude oil return series; no additional synthetic roll-cost deduction is applied unless a future separate contract changes that assumption.
+    economic_exposure_label: futures_linked_oil_etp_return_exposure
+    spot_proxy_claim_permitted: false
+    traded_etp_total_return_interpretation: true
+    structure_review_status: documented_for_later_research_execution
+    later_research_execution_eligibility: eligible_for_later_research_execution
+    blocking_reason: ''
+  - ticker: DBA
+    issuer: Invesco Capital Management LLC / Invesco DB Agriculture Fund
+    official_source_id: regulatory_filing_dba_424b3_20251110
+    required_evidence_file: official_sources/dba_424b3_20251110.html
+    official_source_title: Invesco DB Agriculture Fund prospectus dated November 10, 2025, SEC 424B3
+    official_source_type: sec_prospectus
+    source_retrieved_at_utc: '2026-06-23T14:45:00+00:00'
+    source_sha256: 2fb7b0d88092481b1de79f37ad166197b1232ee5b3ab35b14ca9b95fba9fa022
+    vehicle_structure: Commodity pool with Invesco Capital Management LLC serving as managing owner, commodity pool operator, and commodity trading advisor; shares trade on NYSE Arca.
+    stated_investment_objective: The fund seeks to track, over time, the performance of the DBIQ Diversified Agriculture Index Excess Return, intended to reflect changes in value of the agriculture sector.
+    primary_exposure_instruments: Exchange-traded futures contracts on agricultural commodities including corn, soybeans, soybean meal, soybean oil, wheat, Kansas City wheat, sugar, cocoa, coffee, cotton, live cattle, feeder cattle, and lean hogs.
+    roll_or_contract_management_description: The referenced index uses an Optimum Yield methodology for selected commodities to address potential negative roll yield from replacing expiring futures contracts with new contracts.
+    collateral_or_cash_description: The fund holds collateral securities expected to generate income, including Treasury securities, money market mutual funds, and T-Bill ETFs; cash may also be used for creations and redemptions.
+    distribution_and_corporate_action_note: Adjusted-price history may include distributions, expenses, collateral income, contract-management effects, and corporate-action effects; these remain embedded in traded-instrument return.
+    adjusted_price_interpretation: GMA-6 treats adjusted-price performance as realised traded DBA ETP return, not as a spot agriculture commodity return series; no additional synthetic roll-cost deduction is applied unless a future separate contract changes that assumption.
+    economic_exposure_label: futures_linked_agriculture_etp_return_exposure
+    spot_proxy_claim_permitted: false
+    traded_etp_total_return_interpretation: true
+    structure_review_status: documented_for_later_research_execution
+    later_research_execution_eligibility: eligible_for_later_research_execution
+    blocking_reason: ''
