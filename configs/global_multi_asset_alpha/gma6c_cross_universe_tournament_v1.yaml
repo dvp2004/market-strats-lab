@@ -1,0 +1,77 @@
+﻿contract:
+  phase_id: gma6c_cross_universe_tournament_v1
+  design_phase: GMA-6C
+  design_only: true
+  evidence_class: observed_development_evidence
+  holdout_status: not_a_pristine_final_holdout
+  decision_scope: no strategy, portfolio replay, model fit, allocation, execution, or promotion decision is produced
+  performance_results_included: false
+  gma4_gma5_v1_status: unchanged
+  execution_status: design_only_not_executed
+  required_gma6b_commodity_pool_overlay_status: both_documented_for_later_research_execution
+  required_gma6b_universe_status_after_overlay: eligible_only_with_documented_methodology_regime_flags
+  terminal_stop_rule:
+    - After GMA-6C passes, the next and only permitted GMA-6 task is one frozen GMA-6D cross-universe tournament execution.
+    - No GMA-6C.1, new strategy family, parameter sweep, additional asset, or universe alteration is permitted before that execution and results review.
+source_inputs:
+  gma6a_universe_contract: configs/global_multi_asset_alpha/gma6a_expanded_etf_universe_v1.yaml
+  gma6b_data_bundle_config: configs/global_multi_asset_alpha/gma6b_expanded_etf_data_bundle_v1.yaml
+  gma6b_commodity_pool_config: configs/global_multi_asset_alpha/gma6b_commodity_pool_structure_review_v1.yaml
+  gma6b2_continuity_config: configs/global_multi_asset_alpha/gma6b2_commodity_etp_historical_continuity_v1.yaml
+  gma6b_data_bundle_manifest: reports/global_multi_asset_alpha/gma6b_expanded_etf_data_bundle_v1/gma6b_data_bundle_manifest_v1.json
+  gma6b_data_bundle_verdict: reports/global_multi_asset_alpha/gma6b_expanded_etf_data_bundle_v1/gma6b_universe_data_contract_verdict_v1.json
+  gma6b_commodity_pool_overlay: reports/global_multi_asset_alpha/gma6b_commodity_pool_structure_review_v1.csv
+  gma6b2_continuity_overlay: reports/global_multi_asset_alpha/gma6b2_commodity_etp_historical_continuity_v1.csv
+  gma4_tournament_config: configs/global_multi_asset_alpha/gma4_cross_asset_tournament_v1.yaml
+  gma4_trial_registry: configs/global_multi_asset_alpha/gma4_trial_registry_v1.yaml
+outputs:
+  preregistration_csv: reports/global_multi_asset_alpha/gma6c_cross_universe_tournament_preregistration_v1.csv
+  preregistration_md: reports/global_multi_asset_alpha/gma6c_cross_universe_tournament_preregistration_v1.md
+  lock_json: reports/global_multi_asset_alpha/gma6c_cross_universe_tournament_lock_v1.json
+universe_arms:
+  - universe_version: gma6_core_22_control_v1
+    role: control
+    symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC]
+  - universe_version: gma6_expanded_29_v1
+    role: expanded
+    symbols: [SPY, QQQ, IWM, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, EFA, EEM, BIL, IEF, TLT, AGG, LQD, HYG, GLD, DBC, VNQ, TIP, USO, DBA, SLV, EWG, EWJ]
+evaluation_design:
+  history_start: '2007-05-30'
+  history_end: '2026-05-01'
+  cost_scenarios: [baseline_1bps, stressed_10bps, stressed_25bps, severe_50bps]
+  evaluation_views: [full_history, rolling_3y, rolling_5y, sequential_walk_forward, predefined_regimes]
+  required_future_result_metadata: [universe_version, trial_id, cost_scenario, evaluation_scope, methodology_regime_flag]
+matched_sample_comparison:
+  rule: later execution must use identical valid decision and execution dates for each same-template core-versus-expanded comparison
+  sample_comparability_status: matched_sample_required_later_common_valid_dates
+  comparison_period_start: '2007-05-30'
+  comparison_period_end: '2026-05-01'
+  interpretation_limit: no universe is superior merely because one metric is higher; highest historical CAGR or Sharpe alone is not a selection rule
+methodology_regime_rules:
+  USO:
+    methodology_regime_flag: uso_roll_methodology_pre_may_2020_vs_from_may_2020
+    required_for_expanded_results: true
+    descriptive_slices_required: true
+    causation_claim_allowed: false
+    remove_or_alter_return_series_after_outcome_review_allowed: false
+    standalone_selection_rule_allowed: false
+  DBA:
+    methodology_regime_flag: not_required
+    required_for_expanded_results: true
+future_comparison_metrics:
+  - net CAGR
+  - annualised volatility
+  - Sharpe
+  - maximum drawdown
+  - cumulative net return
+  - annualised turnover
+  - cost drag
+  - maximum HHI
+  - rolling 3Y and 5Y positive fractions
+  - regime coverage status
+future_comparison_fields:
+  - core_22_result
+  - expanded_29_result
+  - difference
+  - sample_comparability_status
+  - interpretation_limit

@@ -1,0 +1,57 @@
+﻿contract:
+  phase_id: gma6b_expanded_etf_data_bundle_v1
+  design_input: configs/global_multi_asset_alpha/gma6a_expanded_etf_universe_v1.yaml
+  evidence_class: observed development evidence
+  holdout_status: not a pristine final holdout
+  decision_scope: no strategy, portfolio replay, model fit, allocation, execution, or promotion decision is produced
+  requested_start_date: '2007-05-30'
+  requested_end_date: '2026-05-01'
+  output_root: reports/global_multi_asset_alpha/gma6b_expanded_etf_data_bundle_v1
+  universe_contract_hash_required: true
+provider:
+  provider_name: yahoo_yfinance
+  provider_module_path: market_strats.global_multi_asset.data.price_provider.YFinanceProvider
+  auto_adjust: false
+  actions: true
+  timeout_seconds: 60
+  provider_end_date_is_exclusive: true
+eligibility:
+  required_tickers:
+    - SPY
+    - QQQ
+    - IWM
+    - XLB
+    - XLE
+    - XLF
+    - XLI
+    - XLK
+    - XLP
+    - XLU
+    - XLV
+    - XLY
+    - EFA
+    - EEM
+    - BIL
+    - IEF
+    - TLT
+    - AGG
+    - LQD
+    - HYG
+    - GLD
+    - DBC
+    - VNQ
+    - TIP
+    - USO
+    - DBA
+    - SLV
+    - EWG
+    - EWJ
+  no_silent_ticker_substitution: true
+  no_silent_start_date_shortening: true
+  no_automatic_fallback_allowed: true
+  blocked_status: blocked_data_contract_failure
+  eligible_status: eligible_for_later_research_execution
+structure_review:
+  uso_status: structure_review_pending
+  dba_status: structure_review_pending
+  default_etp_structure_review_status: documented_for_later_execution
