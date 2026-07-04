@@ -1,0 +1,82 @@
+phase_id: gma7c_development_model_evaluation_v1
+evidence_class: nested_development_walk_forward_evidence
+active_cohort: etf_multi_asset_core_v1
+development_period:
+  start: '2007-05-30'
+  end: '2020-12-31'
+lockbox_period_not_used:
+  start: '2021-01-04'
+  end: '2026-05-01'
+latest_eligible_development_decision_date: '2020-11-30'
+outer_folds:
+- fold_id: fold_1
+  training_start_month: 2008-05
+  training_end_month: 2012-11
+  embargo_month: 2012-12
+  test_start_month: 2013-01
+  test_end_month: 2014-12
+- fold_id: fold_2
+  training_start_month: 2008-05
+  training_end_month: 2014-11
+  embargo_month: 2014-12
+  test_start_month: 2015-01
+  test_end_month: 2016-12
+- fold_id: fold_3
+  training_start_month: 2008-05
+  training_end_month: 2016-11
+  embargo_month: 2016-12
+  test_start_month: 2017-01
+  test_end_month: 2018-12
+- fold_id: fold_4
+  training_start_month: 2008-05
+  training_end_month: 2018-11
+  embargo_month: 2018-12
+  test_start_month: 2019-01
+  test_end_month: 2020-11
+inner_fold_rule:
+  minimum_inner_training_months: 36
+  inner_test_months: 12
+  purge_embargo_trading_sessions_minimum: 20
+model_blocks:
+  regularised_linear_return_rank_model:
+    ridge_alpha:
+    - 0.1
+    - 1.0
+    - 10.0
+  bounded_gradient_boosted_tree_return_rank_model:
+    estimator: sklearn.ensemble.GradientBoostingRegressor
+    loss: squared_error
+    random_state: 7
+    grid:
+      max_depth:
+      - 2
+      - 3
+      learning_rate:
+      - 0.03
+      - 0.05
+      n_estimators:
+      - 100
+      - 250
+      min_samples_leaf:
+      - 10
+      - 25
+      subsample:
+      - 0.7
+      - 1.0
+  deterministic_cross_asset_regime_model:
+    fit_parameters: false
+  risk_downside_model:
+    risk_model_ridge_alpha: 1.0
+shared_replay_accounting:
+  gma4_shared_replay_accounting_use_required: true
+  gma5_and_gma6_replay_import_or_invocation_allowed: false
+required_language:
+- This is nested development walk-forward evidence and not a pristine final holdout.
+- The 2021-01-04 through 2026-05-01 GMA-7 model-specific lockbox is not used in GMA-7C.
+- Highest historical CAGR or Sharpe alone is not a selection rule.
+- No execution or promotion decision is produced.
+scope_boundaries:
+  equal_weight_ensemble_built: false
+  lockbox_used: false
+  candidate_or_promotion_decision_produced: false
+  paper_broker_or_live_path_created: false

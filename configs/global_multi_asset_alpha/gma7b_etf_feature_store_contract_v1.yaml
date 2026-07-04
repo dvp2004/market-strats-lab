@@ -1,0 +1,133 @@
+phase_id: gma7b_etf_feature_store_v1
+feature_store_version: gma7b_point_in_time_etf_feature_store_v1
+feature_set_version: gma7b_core22_price_features_v1
+evidence_class: observed_development_evidence
+active_cohort: etf_multi_asset_core_v1
+core22_universe:
+- SPY
+- QQQ
+- IWM
+- XLB
+- XLE
+- XLF
+- XLI
+- XLK
+- XLP
+- XLU
+- XLV
+- XLY
+- EFA
+- EEM
+- BIL
+- IEF
+- TLT
+- AGG
+- LQD
+- HYG
+- GLD
+- DBC
+prediction_assets:
+- SPY
+- QQQ
+- IWM
+- XLB
+- XLE
+- XLF
+- XLI
+- XLK
+- XLP
+- XLU
+- XLV
+- XLY
+- EFA
+- EEM
+- IEF
+- TLT
+- AGG
+- LQD
+- HYG
+- GLD
+- DBC
+bil_roles:
+- benchmark_reference
+- fallback_asset
+- excess_return_feature_reference
+decision_schedule:
+  frequency: monthly
+  decision_session: final available tradable session of each calendar month
+  signal_observation_cutoff: decision-session close
+  decision_timestamp: deterministic UTC bookkeeping timestamp one hour after New York
+    close
+  earliest_execution_session: next available tradable session
+  target_start_session: next available tradable session
+rolling_window_convention:
+  all_price_windows_include_decision_session_close: true
+  return_nd: decision close divided by close exactly n prior sessions minus one
+  realised_volatility_nd: n daily log-return observations ending at decision close
+  ma_gap_nd: rolling mean including decision close
+  drawdown_nd: maximum adjusted price in inclusive rolling window ending at decision
+    close
+features:
+- return_21d
+- return_63d
+- return_126d
+- return_252d
+- excess_return_vs_bil_21d
+- excess_return_vs_bil_63d
+- excess_return_vs_bil_126d
+- excess_return_vs_bil_252d
+- ma_gap_50d
+- ma_gap_200d
+- short_reversal_5d
+- short_reversal_10d
+- realised_volatility_21d
+- realised_volatility_63d
+- drawdown_63d
+- drawdown_252d
+- correlation_to_spy_63d
+- cross_section_rank_return_63d
+- cross_section_rank_return_126d
+- cross_section_rank_return_252d
+- equity_breadth_above_ma200
+- spy_drawdown_252d
+- spy_above_ma200
+- credit_duration_spread_63d
+- bond_equity_relative_return_63d
+- gold_equity_relative_return_63d
+- cross_asset_return_dispersion_63d
+metadata:
+- feature_store_version
+- feature_set_version
+- asset_ticker
+- is_prediction_asset
+- decision_session_date
+- decision_timestamp
+- signal_observation_cutoff
+- earliest_execution_session_date
+- target_start_session_date
+- forward_label_window_available
+- source_last_observed_session
+- feature_availability_status
+- research_partition
+- core22_universe_hash
+- gma7a_contract_hash
+- gma6b_data_bundle_manifest_hash
+- normalised_bundle_hash
+forward_label_window_available_boundary: scheduling_metadata_only_not_model_input_not_feature_dictionary_hash_input
+required_language:
+- This is a point-in-time feature store built from frozen adjusted-price evidence.
+- All feature values use only information available by the monthly decision-session
+  close.
+- Forward target values, forecasts, model outputs, portfolio weights, and performance
+  results are not generated in GMA-7B.
+- This is observed development evidence and not a pristine final holdout.
+- No execution or promotion decision is produced.
+scope_boundaries:
+  forward_target_values_generated: false
+  forecasts_generated: false
+  model_fit_performed: false
+  portfolio_weights_generated: false
+  performance_calculation_performed: false
+  paper_paths_generated: false
+  broker_paths_generated: false
+  live_paths_generated: false

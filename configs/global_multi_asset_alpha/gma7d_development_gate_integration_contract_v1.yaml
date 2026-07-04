@@ -1,0 +1,36 @@
+phase_id: gma7d_development_gate_integration_v1
+evidence_class: fail_closed_frozen_development_evidence_integration
+required_language:
+- This is a fail-closed integration of frozen GMA-7C development evidence.
+- No return-score component met every predeclared stressed-10 bps gate.
+- The fixed equal-weight GMA-7 ensemble is not constructed.
+- The 2021-01-04 through 2026-05-01 GMA-7 model-specific lockbox remains unused.
+- This is observed development evidence and not a pristine final holdout.
+- No execution or promotion decision is produced.
+source_inputs:
+  gma7a_contract: configs/global_multi_asset_alpha/gma7a_predictive_ensemble_contract_v1.yaml
+  gma7b_contract: configs/global_multi_asset_alpha/gma7b_etf_feature_store_contract_v1.yaml
+  gma7c_contract: configs/global_multi_asset_alpha/gma7c_development_model_contract_v1.yaml
+  gma7a_lock: reports/global_multi_asset_alpha/gma7a_predictive_ensemble_lock_v1.json
+  gma7b_manifest: reports/global_multi_asset_alpha/gma7b_etf_feature_store_v1/gma7b_feature_store_manifest_v1.json
+  gma7b_lock: reports/global_multi_asset_alpha/gma7b_etf_feature_store_v1/gma7b_feature_store_lock_v1.json
+  gma7c_label_manifest: reports/global_multi_asset_alpha/gma7c_development_model_evaluation_v1/gma7c_label_manifest_v1.json
+  gma7c_execution_manifest: reports/global_multi_asset_alpha/gma7c_development_model_evaluation_v1/gma7c_execution_manifest_v1.json
+  gma7c_lock: reports/global_multi_asset_alpha/gma7c_development_model_evaluation_v1/gma7c_lock_v1.json
+  gma7c_gate_board: reports/global_multi_asset_alpha/gma7c_development_model_evaluation_v1/gma7c_component_gate_board_v1.csv
+  gma7c_component_metrics: reports/global_multi_asset_alpha/gma7c_development_model_evaluation_v1/gma7c_component_development_metrics_v1.csv
+  gma7c_risk_overlay_metrics: reports/global_multi_asset_alpha/gma7c_development_model_evaluation_v1/gma7c_risk_overlay_development_metrics_v1.csv
+return_score_block_status: not_eligible_for_fixed_equal_weight_ensemble
+programme_level_ensemble_status: not_constructed_no_fully_qualifying_return_score_components
+lockbox_status: unused_preserved
+risk_overlay_integration_status: not_integrated_without_a_fully_qualifying_return_score_component
+gma7_v1_development_state: development_evidence_frozen_no_ensemble_eligible
+prohibited_actions:
+  model_refit: true
+  model_selection_rerun: true
+  label_generation: true
+  score_generation: true
+  portfolio_performance_recalculation: true
+  ensemble_construction: true
+  lockbox_access: true
+  paper_broker_or_live_path_creation: true
