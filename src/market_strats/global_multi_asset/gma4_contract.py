@@ -1,4 +1,4 @@
-﻿"""GMA-4A cross-asset historical tournament contract and registry validation."""
+"""GMA-4A cross-asset historical tournament contract and registry validation."""
 
 from __future__ import annotations
 

@@ -1,4 +1,5 @@
 """GMA-1B point-in-time macro and authoritative cash-rate foundation."""
+
 from __future__ import annotations
 
 import hashlib
@@ -158,8 +159,8 @@ def normalise_observations(
         chunk["is_initial_release"] = chunk["revision_sequence"].eq(0)
         max_seq = chunk.groupby("observation_date")["revision_sequence"].transform("max")
         chunk["is_revision"] = chunk["revision_sequence"].gt(0)
-        chunk["point_in_time_status"] = chunk["value"].isna().map(
-            {True: "missing_value", False: "available"}
+        chunk["point_in_time_status"] = (
+            chunk["value"].isna().map({True: "missing_value", False: "available"})
         )
         chunk["source_manifest_path"] = manifest_path
         chunk["source_manifest_sha256"] = manifest_sha256
@@ -211,7 +212,9 @@ def query_point_in_time(
             "query_timestamp_utc": str(query_ts),
             "point_in_time_status": "unavailable_unknown_series",
         }
-    frame["availability_timestamp_utc"] = pd.to_datetime(frame["availability_timestamp_utc"], utc=True)
+    frame["availability_timestamp_utc"] = pd.to_datetime(
+        frame["availability_timestamp_utc"], utc=True
+    )
     frame["observation_date_sort"] = pd.to_datetime(frame["observation_date"])
     eligible = frame[frame["availability_timestamp_utc"].le(query_ts)].copy()
     if eligible.empty:
@@ -255,21 +258,25 @@ def build_vintage_revision_audit(canonical: pd.DataFrame, registry: pd.DataFrame
         absolute_revision = float(latest["value"]) - float(first["value"])
         intermediate = (revisions - float(first["value"])).abs().max()
         rel = absolute_revision / abs(float(first["value"])) if float(first["value"]) != 0 else 0.0
-        rows.append({
-            "macro_id": macro_id,
-            "series_id": series_id,
-            "observation_date": obs_date,
-            "initial_release_value": first["value"],
-            "initial_release_available_at": first["availability_timestamp_utc"],
-            "latest_value": latest["value"],
-            "latest_value_available_at": latest["availability_timestamp_utc"],
-            "revision_count": max(len(ordered) - 1, 0),
-            "absolute_revision": absolute_revision,
-            "relative_revision": rel,
-            "maximum_intermediate_revision": intermediate,
-            "revision_materiality": "material" if abs(absolute_revision) > 0.000001 else "immaterial",
-            "vintage_status": "vintage_history_available",
-        })
+        rows.append(
+            {
+                "macro_id": macro_id,
+                "series_id": series_id,
+                "observation_date": obs_date,
+                "initial_release_value": first["value"],
+                "initial_release_available_at": first["availability_timestamp_utc"],
+                "latest_value": latest["value"],
+                "latest_value_available_at": latest["availability_timestamp_utc"],
+                "revision_count": max(len(ordered) - 1, 0),
+                "absolute_revision": absolute_revision,
+                "relative_revision": rel,
+                "maximum_intermediate_revision": intermediate,
+                "revision_materiality": "material"
+                if abs(absolute_revision) > 0.000001
+                else "immaterial",
+                "vintage_status": "vintage_history_available",
+            }
+        )
     return pd.DataFrame(rows)
 
 
@@ -277,7 +284,9 @@ def build_cash_accrual(canonical: pd.DataFrame, config: GMA1BConfig) -> pd.DataF
     cash = canonical[canonical["series_id"].eq(config.cash["authoritative_series"])].copy()
     if cash.empty:
         return pd.DataFrame()
-    cash["availability_timestamp_utc"] = pd.to_datetime(cash["availability_timestamp_utc"], utc=True)
+    cash["availability_timestamp_utc"] = pd.to_datetime(
+        cash["availability_timestamp_utc"], utc=True
+    )
     cash["observation_date_dt"] = pd.to_datetime(cash["observation_date"])
     cash = cash.sort_values("observation_date_dt").reset_index(drop=True)
     rows: list[dict[str, Any]] = []
@@ -292,22 +301,24 @@ def build_cash_accrual(canonical: pd.DataFrame, config: GMA1BConfig) -> pd.DataF
         accrual_days = max((end - start).days, 1)
         annual_yield = float(row["value"]) / 100.0
         period_return = annual_yield * accrual_days / 365.0
-        rows.append({
-            "observation_date": str(start.date()),
-            "availability_timestamp_utc": row["availability_timestamp_utc"],
-            "annual_yield": annual_yield,
-            "yield_convention": config.cash["source_yield_convention"],
-            "annualisation_day_count": config.cash["annualisation_day_count"],
-            "accrual_start": str(start.date()),
-            "accrual_end": str(end.date()),
-            "accrual_days": accrual_days,
-            "period_return": period_return,
-            "source_series": row["series_id"],
-            "source_realtime_start": row["realtime_start"],
-            "source_vintage": row["source_vintage"],
-            "source_manifest_sha256": row["source_manifest_sha256"],
-            "cash_status": "available_after_timestamp",
-        })
+        rows.append(
+            {
+                "observation_date": str(start.date()),
+                "availability_timestamp_utc": row["availability_timestamp_utc"],
+                "annual_yield": annual_yield,
+                "yield_convention": config.cash["source_yield_convention"],
+                "annualisation_day_count": config.cash["annualisation_day_count"],
+                "accrual_start": str(start.date()),
+                "accrual_end": str(end.date()),
+                "accrual_days": accrual_days,
+                "period_return": period_return,
+                "source_series": row["series_id"],
+                "source_realtime_start": row["realtime_start"],
+                "source_vintage": row["source_vintage"],
+                "source_manifest_sha256": row["source_manifest_sha256"],
+                "cash_status": "available_after_timestamp",
+            }
+        )
     return pd.DataFrame(rows)
 
 
@@ -323,9 +334,8 @@ def build_macro_series_readiness(
         hist = canonical[canonical["macro_id"].eq(macro_id)]
         is_required = bool(item["is_required"])
         vintage_required = bool(item["is_vintage_aware"])
-        revision_complete = (
-            not bool(item["revision_prone"])
-            or macro_id in set(revision_audit.get("macro_id", pd.Series(dtype=str)))
+        revision_complete = not bool(item["revision_prone"]) or macro_id in set(
+            revision_audit.get("macro_id", pd.Series(dtype=str))
         )
         ready = (
             not hist.empty
@@ -335,23 +345,26 @@ def build_macro_series_readiness(
             and live_complete
         )
         warnings = [] if live_complete else ["live_macro_audit_incomplete"]
-        rows.append({
-            "macro_id": macro_id,
-            "series_id": item["series_id"],
-            "is_required": is_required,
-            "metadata_valid": True,
-            "source_snapshot_selected": not hist.empty,
-            "hashes_valid": not hist.empty,
-            "availability_policy_defined": bool(item["availability_timestamp_policy"]),
-            "point_in_time_history_available": not hist.empty,
-            "vintage_history_available": (not vintage_required) or "realtime_start" in hist.columns,
-            "current_value_available": not hist.empty and hist["value"].notna().any(),
-            "maximum_staleness_observed": item["maximum_staleness_days"],
-            "revision_audit_complete": revision_complete,
-            "ready_for_replay_engine": ready,
-            "blocking_reason": "" if ready else "live_macro_audit_incomplete",
-            "warnings": ";".join(warnings),
-        })
+        rows.append(
+            {
+                "macro_id": macro_id,
+                "series_id": item["series_id"],
+                "is_required": is_required,
+                "metadata_valid": True,
+                "source_snapshot_selected": not hist.empty,
+                "hashes_valid": not hist.empty,
+                "availability_policy_defined": bool(item["availability_timestamp_policy"]),
+                "point_in_time_history_available": not hist.empty,
+                "vintage_history_available": (not vintage_required)
+                or "realtime_start" in hist.columns,
+                "current_value_available": not hist.empty and hist["value"].notna().any(),
+                "maximum_staleness_observed": item["maximum_staleness_days"],
+                "revision_audit_complete": revision_complete,
+                "ready_for_replay_engine": ready,
+                "blocking_reason": "" if ready else "live_macro_audit_incomplete",
+                "warnings": ";".join(warnings),
+            }
+        )
     return pd.DataFrame(rows)
 
 
@@ -386,21 +399,25 @@ def _fixture_observations(registry: pd.DataFrame) -> pd.DataFrame:
             obs_dates = ["2023-12-01", "2024-01-01"]
             realtime = ["2024-01-12", "2024-02-13"]
         for idx, (obs, rt) in enumerate(zip(obs_dates, realtime, strict=True)):
-            rows.append({
-                "series_id": sid,
-                "observation_date": obs,
-                "value": base_values[sid] + idx * 0.1,
-                "realtime_start": rt,
-                "realtime_end": "9999-12-31",
-            })
-            if item["revision_prone"] and idx == 0:
-                rows.append({
+            rows.append(
+                {
                     "series_id": sid,
                     "observation_date": obs,
-                    "value": base_values[sid] + idx * 0.1 + 0.2,
-                    "realtime_start": "2024-03-01",
+                    "value": base_values[sid] + idx * 0.1,
+                    "realtime_start": rt,
                     "realtime_end": "9999-12-31",
-                })
+                }
+            )
+            if item["revision_prone"] and idx == 0:
+                rows.append(
+                    {
+                        "series_id": sid,
+                        "observation_date": obs,
+                        "value": base_values[sid] + idx * 0.1 + 0.2,
+                        "realtime_start": "2024-03-01",
+                        "realtime_end": "9999-12-31",
+                    }
+                )
     return pd.DataFrame(rows)
 
 
@@ -623,7 +640,9 @@ def _request_passed_message(
     request_stage: str,
     elapsed_seconds: float,
 ) -> str:
-    return f"[{series_id}] {_stage_label(request_stage)} request passed elapsed={elapsed_seconds:.3f}s"
+    return (
+        f"[{series_id}] {_stage_label(request_stage)} request passed elapsed={elapsed_seconds:.3f}s"
+    )
 
 
 def _request_timeout_message(
@@ -750,7 +769,9 @@ def _parse_provider_error(
         message = str(payload.get("error_message", payload.get("message", payload)))
         return code, redact_secret(message, credential)[:500]
     code_match = re.search(r"code=['\"]?([^'\">\s]+)", stripped)
-    message_match = re.search(r"<message>(.*?)</message>", stripped, flags=re.IGNORECASE | re.DOTALL)
+    message_match = re.search(
+        r"<message>(.*?)</message>", stripped, flags=re.IGNORECASE | re.DOTALL
+    )
     if message_match:
         message = message_match.group(1)
     else:
@@ -913,37 +934,41 @@ def _fetch_fred_payload(
     try:
         decoded = json.loads(payload.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ProviderRequestError(ProviderRequestIncident(
-            diagnostic_run_id=diagnostic_run_id,
-            series_id=series_id,
-            request_stage="response_parse",
-            endpoint=endpoint,
-            http_method="GET",
-            parameter_names=fred_request_parameter_names(params),
-            http_status="",
-            provider_error_code="",
-            redacted_provider_message="response was not valid JSON",
-            exception_type=type(exc).__name__,
-            error_category="response_format_failure",
-            retryable=False,
-            response_content_type="unknown",
-        )) from exc
+        raise ProviderRequestError(
+            ProviderRequestIncident(
+                diagnostic_run_id=diagnostic_run_id,
+                series_id=series_id,
+                request_stage="response_parse",
+                endpoint=endpoint,
+                http_method="GET",
+                parameter_names=fred_request_parameter_names(params),
+                http_status="",
+                provider_error_code="",
+                redacted_provider_message="response was not valid JSON",
+                exception_type=type(exc).__name__,
+                error_category="response_format_failure",
+                retryable=False,
+                response_content_type="unknown",
+            )
+        ) from exc
     if not isinstance(decoded, dict):
-        raise ProviderRequestError(ProviderRequestIncident(
-            diagnostic_run_id=diagnostic_run_id,
-            series_id=series_id,
-            request_stage="response_parse",
-            endpoint=endpoint,
-            http_method="GET",
-            parameter_names=fred_request_parameter_names(params),
-            http_status="",
-            provider_error_code="",
-            redacted_provider_message="response JSON root was not an object",
-            exception_type="TypeError",
-            error_category="schema_validation_failure",
-            retryable=False,
-            response_content_type="application/json",
-        ))
+        raise ProviderRequestError(
+            ProviderRequestIncident(
+                diagnostic_run_id=diagnostic_run_id,
+                series_id=series_id,
+                request_stage="response_parse",
+                endpoint=endpoint,
+                http_method="GET",
+                parameter_names=fred_request_parameter_names(params),
+                http_status="",
+                provider_error_code="",
+                redacted_provider_message="response JSON root was not an object",
+                exception_type="TypeError",
+                error_category="schema_validation_failure",
+                retryable=False,
+                response_content_type="application/json",
+            )
+        )
     return decoded
 
 
@@ -1114,7 +1139,9 @@ def merge_vintage_observation_chunks(chunks: list[list[dict[str, Any]]]) -> list
             )
             existing = merged.get(key)
             if existing is not None and str(existing.get("value", "")) != str(row.get("value", "")):
-                raise ValueError(f"conflicting_duplicate_vintage_row series_id={key[0]} date={key[1]}")
+                raise ValueError(
+                    f"conflicting_duplicate_vintage_row series_id={key[0]} date={key[1]}"
+                )
             merged[key] = dict(row)
     return [merged[key] for key in sorted(merged)]
 
@@ -1334,7 +1361,11 @@ def _fetch_vintage_chunk_with_414_recovery(
         ``uri_414_count``, ``adaptive_rechunk_count``, ``adaptive_rechunk_depth_max``.
     """
     if _accounting is None:
-        _accounting = {"uri_414_count": 0, "adaptive_rechunk_count": 0, "adaptive_rechunk_depth_max": 0}
+        _accounting = {
+            "uri_414_count": 0,
+            "adaptive_rechunk_count": 0,
+            "adaptive_rechunk_depth_max": 0,
+        }
 
     try:
         rows = _fetch_fred_observations_for_vintage_dates(
@@ -1522,9 +1553,7 @@ def _validate_output_type_2_against_reconstruction(
     def reconstruct_asof(obs_date: str, as_of_vintage: str) -> str | None:
         """Return the value known as of a given vintage from the event stream."""
         candidates = [
-            (rt, val)
-            for rt, val in events_by_obs.get(obs_date, [])
-            if rt <= as_of_vintage
+            (rt, val) for rt, val in events_by_obs.get(obs_date, []) if rt <= as_of_vintage
         ]
         if not candidates:
             return None
@@ -1951,21 +1980,23 @@ def _write_live_snapshot(
             retry_count=int(config.provider.get("retry_count", 0)),
         )
         metadata = _series_metadata_from_payload(metadata_payload, series_id)
-        metadata_rows.append({
-            "macro_id": item["macro_id"],
-            "series_id": series_id,
-            "title": metadata.get("title", ""),
-            "source": metadata.get("source", ""),
-            "release": metadata.get("release", metadata.get("release_id", "")),
-            "frequency": metadata.get("frequency", ""),
-            "frequency_short": metadata.get("frequency_short", ""),
-            "units": metadata.get("units", ""),
-            "seasonal_adjustment": metadata.get("seasonal_adjustment", ""),
-            "observation_start": metadata.get("observation_start", ""),
-            "observation_end": metadata.get("observation_end", ""),
-            "last_updated": metadata.get("last_updated", ""),
-            "notes": metadata.get("notes", ""),
-        })
+        metadata_rows.append(
+            {
+                "macro_id": item["macro_id"],
+                "series_id": series_id,
+                "title": metadata.get("title", ""),
+                "source": metadata.get("source", ""),
+                "release": metadata.get("release", metadata.get("release_id", "")),
+                "frequency": metadata.get("frequency", ""),
+                "frequency_short": metadata.get("frequency_short", ""),
+                "units": metadata.get("units", ""),
+                "seasonal_adjustment": metadata.get("seasonal_adjustment", ""),
+                "observation_start": metadata.get("observation_start", ""),
+                "observation_end": metadata.get("observation_end", ""),
+                "last_updated": metadata.get("last_updated", ""),
+                "notes": metadata.get("notes", ""),
+            }
+        )
         observations_for_series, retrieval_info = _fetch_observations_by_classification(
             series_id,
             api_key=api_key,
@@ -1975,13 +2006,15 @@ def _write_live_snapshot(
         )
         metadata_rows[-1].update(retrieval_info)
         for obs in observations_for_series:
-            observation_rows.append({
-                "series_id": series_id,
-                "observation_date": obs.get("date", ""),
-                "value": obs.get("value", ""),
-                "realtime_start": obs.get("realtime_start", ""),
-                "realtime_end": obs.get("realtime_end", ""),
-            })
+            observation_rows.append(
+                {
+                    "series_id": series_id,
+                    "observation_date": obs.get("date", ""),
+                    "value": obs.get("value", ""),
+                    "realtime_start": obs.get("realtime_start", ""),
+                    "realtime_end": obs.get("realtime_end", ""),
+                }
+            )
 
     observations = pd.DataFrame(observation_rows)
     if observations.empty:
@@ -2031,7 +2064,16 @@ def _write_live_snapshot(
     manifest_path = manifest_root / "macro_observations_live_manifest.json"
     manifest_path.write_text(json.dumps(manifest, sort_keys=True, indent=2), encoding="utf-8")
     manifest_hash = sha256_file(manifest_path)
-    return observations, metadata_df, raw_path, normalised_path, manifest_path, raw_hash, norm_hash, manifest_hash
+    return (
+        observations,
+        metadata_df,
+        raw_path,
+        normalised_path,
+        manifest_path,
+        raw_hash,
+        norm_hash,
+        manifest_hash,
+    )
 
 
 def _build_live_reproducibility_report(
@@ -2050,26 +2092,33 @@ def _build_live_reproducibility_report(
         right = second[second["series_id"].eq(series_id)].copy()
         overlap = left.merge(right, on=keys, suffixes=("_first", "_second"))
         diffs = overlap[
-            pd.to_numeric(overlap["value_first"], errors="coerce")
-            .ne(pd.to_numeric(overlap["value_second"], errors="coerce"))
+            pd.to_numeric(overlap["value_first"], errors="coerce").ne(
+                pd.to_numeric(overlap["value_second"], errors="coerce")
+            )
         ]
         right_keys = set(map(tuple, right[keys].astype(str).to_numpy()))
         left_keys = set(map(tuple, left[keys].astype(str).to_numpy()))
         new_rows = right_keys - left_keys
-        rows.append({
-            "macro_id": item["macro_id"],
-            "series_id": series_id,
-            "first_snapshot": first_snapshot,
-            "second_snapshot": second_snapshot,
-            "overlap_rows": int(len(overlap)),
-            "exact_difference_count": int(len(diffs)),
-            "expected_revision_count": int(len(new_rows)),
-            "metadata_update_count": 0,
-            "unexplained_difference_count": int(len(diffs)),
-            "first_difference_date": "" if diffs.empty else str(diffs["observation_date"].min()),
-            "last_difference_date": "" if diffs.empty else str(diffs["observation_date"].max()),
-            "reproducibility_status": "stable" if diffs.empty else "unexplained_value_differences",
-        })
+        rows.append(
+            {
+                "macro_id": item["macro_id"],
+                "series_id": series_id,
+                "first_snapshot": first_snapshot,
+                "second_snapshot": second_snapshot,
+                "overlap_rows": int(len(overlap)),
+                "exact_difference_count": int(len(diffs)),
+                "expected_revision_count": int(len(new_rows)),
+                "metadata_update_count": 0,
+                "unexplained_difference_count": int(len(diffs)),
+                "first_difference_date": ""
+                if diffs.empty
+                else str(diffs["observation_date"].min()),
+                "last_difference_date": "" if diffs.empty else str(diffs["observation_date"].max()),
+                "reproducibility_status": "stable"
+                if diffs.empty
+                else "unexplained_value_differences",
+            }
+        )
     return pd.DataFrame(rows)
 
 
@@ -2171,40 +2220,52 @@ def _diagnose_one_series(
             retryable=False,
             response_content_type="",
         )
-        return (finish({
-            "series_id": series_id,
-            "metadata_status": "failed",
-            "metadata_http_status": "",
-            "observations_status": "not_attempted",
-            "observations_http_status": "",
-            "row_count": 0,
-            "first_observation_date": "",
-            "last_observation_date": "",
-            "failure_stage": "metadata",
-            "failure_category": "invalid_series",
-            "retryable": False,
-            "diagnostic_snapshot_eligible": False,
-        }), [incident], {})
+        return (
+            finish(
+                {
+                    "series_id": series_id,
+                    "metadata_status": "failed",
+                    "metadata_http_status": "",
+                    "observations_status": "not_attempted",
+                    "observations_http_status": "",
+                    "row_count": 0,
+                    "first_observation_date": "",
+                    "last_observation_date": "",
+                    "failure_stage": "metadata",
+                    "failure_category": "invalid_series",
+                    "retryable": False,
+                    "diagnostic_snapshot_eligible": False,
+                }
+            ),
+            [incident],
+            {},
+        )
     if not api_key:
         incident = _diagnostic_missing_credential_incident(
             diagnostic_run_id=diagnostic_run_id,
             series_id=series_id,
             stage="metadata",
         )
-        return (finish({
-            "series_id": series_id,
-            "metadata_status": "failed",
-            "metadata_http_status": "",
-            "observations_status": "not_attempted",
-            "observations_http_status": "",
-            "row_count": 0,
-            "first_observation_date": "",
-            "last_observation_date": "",
-            "failure_stage": "metadata",
-            "failure_category": incident.error_category,
-            "retryable": False,
-            "diagnostic_snapshot_eligible": False,
-        }), [incident], {})
+        return (
+            finish(
+                {
+                    "series_id": series_id,
+                    "metadata_status": "failed",
+                    "metadata_http_status": "",
+                    "observations_status": "not_attempted",
+                    "observations_http_status": "",
+                    "row_count": 0,
+                    "first_observation_date": "",
+                    "last_observation_date": "",
+                    "failure_stage": "metadata",
+                    "failure_category": incident.error_category,
+                    "retryable": False,
+                    "diagnostic_snapshot_eligible": False,
+                }
+            ),
+            [incident],
+            {},
+        )
 
     timeout_seconds = min(int(config.provider.get("timeout_seconds", 20)), 30)
     diagnostics_dir = config.paths["report_root"] / "diagnostics"
@@ -2227,20 +2288,26 @@ def _diagnose_one_series(
         metadata = _series_metadata_from_payload(metadata_payload, series_id)
     except ProviderRequestError as exc:
         incidents.append(exc.incident)
-        return (finish({
-            "series_id": series_id,
-            "metadata_status": "failed",
-            "metadata_http_status": exc.incident.http_status,
-            "observations_status": "not_attempted",
-            "observations_http_status": "",
-            "row_count": 0,
-            "first_observation_date": "",
-            "last_observation_date": "",
-            "failure_stage": exc.incident.request_stage,
-            "failure_category": exc.incident.error_category,
-            "retryable": exc.incident.retryable,
-            "diagnostic_snapshot_eligible": False,
-        }), incidents, {})
+        return (
+            finish(
+                {
+                    "series_id": series_id,
+                    "metadata_status": "failed",
+                    "metadata_http_status": exc.incident.http_status,
+                    "observations_status": "not_attempted",
+                    "observations_http_status": "",
+                    "row_count": 0,
+                    "first_observation_date": "",
+                    "last_observation_date": "",
+                    "failure_stage": exc.incident.request_stage,
+                    "failure_category": exc.incident.error_category,
+                    "retryable": exc.incident.retryable,
+                    "diagnostic_snapshot_eligible": False,
+                }
+            ),
+            incidents,
+            {},
+        )
 
     # Pre-compute URI-aware chunk plan for full-vintage series so that
     # vintage_date_count and chunk info survive even if the observations
@@ -2282,37 +2349,44 @@ def _diagnose_one_series(
             ]
         except ProviderRequestError as exc:
             incidents.append(exc.incident)
-            return (finish({
-                "series_id": series_id,
-                "metadata_status": "passed",
-                "metadata_http_status": metadata_http_status,
-                "observations_status": "failed",
-                "observations_http_status": exc.incident.http_status,
-                "row_count": 0,
-                "first_observation_date": "",
-                "last_observation_date": "",
-                "vintage_date_count": 0,
-                "vintage_chunk_count": 0,
-                "vintage_chunk_sizes": "",
-                "vintage_chunk_uri_bytes": "",
-                "maximum_chunk_uri_bytes": 0,
-                "minimum_chunk_uri_bytes": 0,
-                "configured_uri_budget_bytes": FRED_MAX_ENCODED_REQUEST_URI_BYTES,
-                "configured_date_count_cap": FRED_SAFE_VINTAGE_DATES_PER_REQUEST,
-                "request_count_attempted": 2,  # metadata + vintagedates
-                "request_count_completed": 1,  # only metadata
-                "failure_stage": exc.incident.request_stage,
-                "failure_category": exc.incident.error_category,
-                "retryable": exc.incident.retryable,
-                "diagnostic_snapshot_eligible": False,
-            }), incidents, {})
+            return (
+                finish(
+                    {
+                        "series_id": series_id,
+                        "metadata_status": "passed",
+                        "metadata_http_status": metadata_http_status,
+                        "observations_status": "failed",
+                        "observations_http_status": exc.incident.http_status,
+                        "row_count": 0,
+                        "first_observation_date": "",
+                        "last_observation_date": "",
+                        "vintage_date_count": 0,
+                        "vintage_chunk_count": 0,
+                        "vintage_chunk_sizes": "",
+                        "vintage_chunk_uri_bytes": "",
+                        "maximum_chunk_uri_bytes": 0,
+                        "minimum_chunk_uri_bytes": 0,
+                        "configured_uri_budget_bytes": FRED_MAX_ENCODED_REQUEST_URI_BYTES,
+                        "configured_date_count_cap": FRED_SAFE_VINTAGE_DATES_PER_REQUEST,
+                        "request_count_attempted": 2,  # metadata + vintagedates
+                        "request_count_completed": 1,  # only metadata
+                        "failure_stage": exc.incident.request_stage,
+                        "failure_category": exc.incident.error_category,
+                        "retryable": exc.incident.retryable,
+                        "diagnostic_snapshot_eligible": False,
+                    }
+                ),
+                incidents,
+                {},
+            )
 
         # Now do the full retrieval using the pre-fetched vintage dates.
         # _fetch_observations_by_classification would re-fetch; instead call
         # the sub-pipeline directly to avoid a second vintagedates request.
         try:
             global_414: dict[str, Any] = {
-                "uri_414_count": 0, "adaptive_rechunk_count": 0,
+                "uri_414_count": 0,
+                "adaptive_rechunk_count": 0,
                 "adaptive_rechunk_depth_max": 0,
             }
             obs_chunks: list[list[dict[str, Any]]] = []
@@ -2351,31 +2425,43 @@ def _diagnose_one_series(
             observations = merge_vintage_observation_chunks(obs_chunks)
         except ProviderRequestError as exc:
             incidents.append(exc.incident)
-            return (finish({
-                "series_id": series_id,
-                "metadata_status": "passed",
-                "metadata_http_status": metadata_http_status,
-                "observations_status": "failed",
-                "observations_http_status": exc.incident.http_status,
-                "row_count": 0,
-                "first_observation_date": "",
-                "last_observation_date": "",
-                # Preserved from the successful vintagedates request:
-                "vintage_date_count": len(pre_vintage_dates),
-                "vintage_chunk_count": len(pre_chunks),
-                "vintage_chunk_sizes": ";".join(str(len(c)) for c in pre_chunks),
-                "vintage_chunk_uri_bytes": ";".join(str(b) for b in pre_chunk_uri_bytes),
-                "maximum_chunk_uri_bytes": max(pre_chunk_uri_bytes) if pre_chunk_uri_bytes else 0,
-                "minimum_chunk_uri_bytes": min(pre_chunk_uri_bytes) if pre_chunk_uri_bytes else 0,
-                "configured_uri_budget_bytes": FRED_MAX_ENCODED_REQUEST_URI_BYTES,
-                "configured_date_count_cap": FRED_SAFE_VINTAGE_DATES_PER_REQUEST,
-                "request_count_attempted": 2 + ot3_count + 1,  # meta + vd + attempted chunks
-                "request_count_completed": 2 + ot3_count,       # meta + vd + completed chunks
-                "failure_stage": exc.incident.request_stage,
-                "failure_category": exc.incident.error_category,
-                "retryable": exc.incident.retryable,
-                "diagnostic_snapshot_eligible": False,
-            }), incidents, {})
+            return (
+                finish(
+                    {
+                        "series_id": series_id,
+                        "metadata_status": "passed",
+                        "metadata_http_status": metadata_http_status,
+                        "observations_status": "failed",
+                        "observations_http_status": exc.incident.http_status,
+                        "row_count": 0,
+                        "first_observation_date": "",
+                        "last_observation_date": "",
+                        # Preserved from the successful vintagedates request:
+                        "vintage_date_count": len(pre_vintage_dates),
+                        "vintage_chunk_count": len(pre_chunks),
+                        "vintage_chunk_sizes": ";".join(str(len(c)) for c in pre_chunks),
+                        "vintage_chunk_uri_bytes": ";".join(str(b) for b in pre_chunk_uri_bytes),
+                        "maximum_chunk_uri_bytes": max(pre_chunk_uri_bytes)
+                        if pre_chunk_uri_bytes
+                        else 0,
+                        "minimum_chunk_uri_bytes": min(pre_chunk_uri_bytes)
+                        if pre_chunk_uri_bytes
+                        else 0,
+                        "configured_uri_budget_bytes": FRED_MAX_ENCODED_REQUEST_URI_BYTES,
+                        "configured_date_count_cap": FRED_SAFE_VINTAGE_DATES_PER_REQUEST,
+                        "request_count_attempted": 2
+                        + ot3_count
+                        + 1,  # meta + vd + attempted chunks
+                        "request_count_completed": 2 + ot3_count,  # meta + vd + completed chunks
+                        "failure_stage": exc.incident.request_stage,
+                        "failure_category": exc.incident.error_category,
+                        "retryable": exc.incident.retryable,
+                        "diagnostic_snapshot_eligible": False,
+                    }
+                ),
+                incidents,
+                {},
+            )
         except ValueError as exc:
             incident = ProviderRequestIncident(
                 diagnostic_run_id=diagnostic_run_id,
@@ -2393,30 +2479,40 @@ def _diagnose_one_series(
                 response_content_type="application/json",
             )
             incidents.append(incident)
-            return (finish({
-                "series_id": series_id,
-                "metadata_status": "passed",
-                "metadata_http_status": metadata_http_status,
-                "observations_status": "failed",
-                "observations_http_status": "",
-                "row_count": 0,
-                "first_observation_date": "",
-                "last_observation_date": "",
-                "vintage_date_count": len(pre_vintage_dates),
-                "vintage_chunk_count": len(pre_chunks),
-                "vintage_chunk_sizes": ";".join(str(len(c)) for c in pre_chunks),
-                "vintage_chunk_uri_bytes": ";".join(str(b) for b in pre_chunk_uri_bytes),
-                "maximum_chunk_uri_bytes": max(pre_chunk_uri_bytes) if pre_chunk_uri_bytes else 0,
-                "minimum_chunk_uri_bytes": min(pre_chunk_uri_bytes) if pre_chunk_uri_bytes else 0,
-                "configured_uri_budget_bytes": FRED_MAX_ENCODED_REQUEST_URI_BYTES,
-                "configured_date_count_cap": FRED_SAFE_VINTAGE_DATES_PER_REQUEST,
-                "request_count_attempted": 2 + ot3_count + 1,
-                "request_count_completed": 2 + ot3_count,
-                "failure_stage": "observations_vintage",
-                "failure_category": "schema_validation_failure",
-                "retryable": False,
-                "diagnostic_snapshot_eligible": False,
-            }), incidents, {})
+            return (
+                finish(
+                    {
+                        "series_id": series_id,
+                        "metadata_status": "passed",
+                        "metadata_http_status": metadata_http_status,
+                        "observations_status": "failed",
+                        "observations_http_status": "",
+                        "row_count": 0,
+                        "first_observation_date": "",
+                        "last_observation_date": "",
+                        "vintage_date_count": len(pre_vintage_dates),
+                        "vintage_chunk_count": len(pre_chunks),
+                        "vintage_chunk_sizes": ";".join(str(len(c)) for c in pre_chunks),
+                        "vintage_chunk_uri_bytes": ";".join(str(b) for b in pre_chunk_uri_bytes),
+                        "maximum_chunk_uri_bytes": max(pre_chunk_uri_bytes)
+                        if pre_chunk_uri_bytes
+                        else 0,
+                        "minimum_chunk_uri_bytes": min(pre_chunk_uri_bytes)
+                        if pre_chunk_uri_bytes
+                        else 0,
+                        "configured_uri_budget_bytes": FRED_MAX_ENCODED_REQUEST_URI_BYTES,
+                        "configured_date_count_cap": FRED_SAFE_VINTAGE_DATES_PER_REQUEST,
+                        "request_count_attempted": 2 + ot3_count + 1,
+                        "request_count_completed": 2 + ot3_count,
+                        "failure_stage": "observations_vintage",
+                        "failure_category": "schema_validation_failure",
+                        "retryable": False,
+                        "diagnostic_snapshot_eligible": False,
+                    }
+                ),
+                incidents,
+                {},
+            )
 
         # --- output_type=2 bounded validation and output_type=4 crosscheck ---
         revision_event_count, initial_release_event_count, later_revision_event_count = (
@@ -2493,22 +2589,28 @@ def _diagnose_one_series(
             )
         except ProviderRequestError as exc:
             incidents.append(exc.incident)
-            return (finish({
-                "series_id": series_id,
-                "metadata_status": "passed",
-                "metadata_http_status": metadata_http_status,
-                "observations_status": "failed",
-                "observations_http_status": exc.incident.http_status,
-                "row_count": 0,
-                "first_observation_date": "",
-                "last_observation_date": "",
-                "failure_stage": exc.incident.request_stage,
-                "failure_category": exc.incident.error_category,
-                "retryable": exc.incident.retryable,
-                "diagnostic_snapshot_eligible": False,
-                "request_count_attempted": 2,  # metadata + 1 failed obs
-                "request_count_completed": 1,
-            }), incidents, {})
+            return (
+                finish(
+                    {
+                        "series_id": series_id,
+                        "metadata_status": "passed",
+                        "metadata_http_status": metadata_http_status,
+                        "observations_status": "failed",
+                        "observations_http_status": exc.incident.http_status,
+                        "row_count": 0,
+                        "first_observation_date": "",
+                        "last_observation_date": "",
+                        "failure_stage": exc.incident.request_stage,
+                        "failure_category": exc.incident.error_category,
+                        "retryable": exc.incident.retryable,
+                        "diagnostic_snapshot_eligible": False,
+                        "request_count_attempted": 2,  # metadata + 1 failed obs
+                        "request_count_completed": 1,
+                    }
+                ),
+                incidents,
+                {},
+            )
         except ValueError as exc:
             incident = ProviderRequestIncident(
                 diagnostic_run_id=diagnostic_run_id,
@@ -2526,22 +2628,28 @@ def _diagnose_one_series(
                 response_content_type="application/json",
             )
             incidents.append(incident)
-            return (finish({
-                "series_id": series_id,
-                "metadata_status": "passed",
-                "metadata_http_status": metadata_http_status,
-                "observations_status": "failed",
-                "observations_http_status": "",
-                "row_count": 0,
-                "first_observation_date": "",
-                "last_observation_date": "",
-                "failure_stage": "observations_vintage",
-                "failure_category": "schema_validation_failure",
-                "retryable": False,
-                "diagnostic_snapshot_eligible": False,
-                "request_count_attempted": 2,
-                "request_count_completed": 1,
-            }), incidents, {})
+            return (
+                finish(
+                    {
+                        "series_id": series_id,
+                        "metadata_status": "passed",
+                        "metadata_http_status": metadata_http_status,
+                        "observations_status": "failed",
+                        "observations_http_status": "",
+                        "row_count": 0,
+                        "first_observation_date": "",
+                        "last_observation_date": "",
+                        "failure_stage": "observations_vintage",
+                        "failure_category": "schema_validation_failure",
+                        "retryable": False,
+                        "diagnostic_snapshot_eligible": False,
+                        "request_count_attempted": 2,
+                        "request_count_completed": 1,
+                    }
+                ),
+                incidents,
+                {},
+            )
 
     row_count = len(observations)
     dates = [str(row.get("date", "")) for row in observations if row.get("date")]
@@ -2565,8 +2673,14 @@ def _diagnose_one_series(
         "maximum_chunk_uri_bytes": retrieval_info.get("maximum_chunk_uri_bytes", 0),
         "configured_uri_budget_bytes": FRED_MAX_ENCODED_REQUEST_URI_BYTES,
         "configured_date_count_cap": FRED_SAFE_VINTAGE_DATES_PER_REQUEST,
-        "request_count_attempted": retrieval_info.get("request_count_attempted", retrieval_info.get("request_count", 0)) + 1,
-        "request_count_completed": retrieval_info.get("request_count_completed", retrieval_info.get("request_count", 0)) + 1,
+        "request_count_attempted": retrieval_info.get(
+            "request_count_attempted", retrieval_info.get("request_count", 0)
+        )
+        + 1,
+        "request_count_completed": retrieval_info.get(
+            "request_count_completed", retrieval_info.get("request_count", 0)
+        )
+        + 1,
         "request_count": retrieval_info.get("request_count", 0) + 1,
         "parameter_names": fred_request_parameter_names({"series_id": series_id, "limit": 100000}),
         "api_key_present": True,
@@ -2595,8 +2709,14 @@ def _diagnose_one_series(
         "retryable": False,
         "diagnostic_snapshot_eligible": False,
         "request_count": retrieval_info.get("request_count", 0) + 1,
-        "request_count_attempted": retrieval_info.get("request_count_attempted", retrieval_info.get("request_count", 0)) + 1,
-        "request_count_completed": retrieval_info.get("request_count_completed", retrieval_info.get("request_count", 0)) + 1,
+        "request_count_attempted": retrieval_info.get(
+            "request_count_attempted", retrieval_info.get("request_count", 0)
+        )
+        + 1,
+        "request_count_completed": retrieval_info.get(
+            "request_count_completed", retrieval_info.get("request_count", 0)
+        )
+        + 1,
         "metadata_request_count": retrieval_info.get("metadata_request_count", 1),
         "vintagedates_request_count": retrieval_info.get("vintagedates_request_count", 0),
         "output_type_3_request_count": retrieval_info.get("output_type_3_request_count", 0),
@@ -2721,44 +2841,55 @@ def run_gma1b_live_diagnostic(
 
 def _accepted_gma1a_verified() -> tuple[bool, str]:
     conclusion = Path("reports/global_multi_asset_alpha/data_foundation/gma1a_conclusion.md")
-    hash_path = Path("reports/global_multi_asset_alpha/data_foundation/canonical_selection_hash.txt")
+    hash_path = Path(
+        "reports/global_multi_asset_alpha/data_foundation/canonical_selection_hash.txt"
+    )
     if not conclusion.exists() or not hash_path.exists():
         return False, "missing_gma1a_conclusion_or_hash"
-    decision_ok = "gma1a_feasible_proceed_to_macro_foundation" in conclusion.read_text(encoding="utf-8")
+    decision_ok = "gma1a_feasible_proceed_to_macro_foundation" in conclusion.read_text(
+        encoding="utf-8"
+    )
     hash_ok = hash_path.read_text(encoding="utf-8").strip() == ACCEPTED_GMA1A_HASH
-    return decision_ok and hash_ok, "verified" if decision_ok and hash_ok else "decision_or_hash_mismatch"
+    return (
+        decision_ok and hash_ok,
+        "verified" if decision_ok and hash_ok else "decision_or_hash_mismatch",
+    )
 
 
 def _write_markdown_reports(report_root: Path) -> None:
     (report_root / "availability_policy.md").write_text(
-        "\n".join([
-            "# GMA-1B Availability Policy",
-            "",
-            "Observation date is the economic period date. Release date is when FRED/ALFRED",
-            "reports a value or vintage. Retrieval date is only audit evidence and never",
-            "defines point-in-time eligibility.",
-            "",
-            "If exact official release time is unavailable, date-only releases become usable",
-            "only after 23:59:59 UTC on the release date. Monthly values are not forward-filled",
-            "into their observation month before that availability timestamp. Revisions are",
-            "eligible only after their own realtime_start availability timestamp.",
-            "",
-            "Future replay must query by timestamp T and select only observations with",
-            "availability_timestamp_utc <= T.",
-        ]),
+        "\n".join(
+            [
+                "# GMA-1B Availability Policy",
+                "",
+                "Observation date is the economic period date. Release date is when FRED/ALFRED",
+                "reports a value or vintage. Retrieval date is only audit evidence and never",
+                "defines point-in-time eligibility.",
+                "",
+                "If exact official release time is unavailable, date-only releases become usable",
+                "only after 23:59:59 UTC on the release date. Monthly values are not forward-filled",
+                "into their observation month before that availability timestamp. Revisions are",
+                "eligible only after their own realtime_start availability timestamp.",
+                "",
+                "Future replay must query by timestamp T and select only observations with",
+                "availability_timestamp_utc <= T.",
+            ]
+        ),
         encoding="utf-8",
     )
     (report_root / "cash_rate_contract.md").write_text(
-        "\n".join([
-            "# GMA-1B Cash Rate Contract",
-            "",
-            "Authoritative cash source: FRED `DGS3MO`.",
-            "Yield convention: percent annualized investment-compatible yield.",
-            "Accrual formula: `period_return = annual_yield_decimal * accrual_days / 365`.",
-            "Calendar: calendar-day accrual, including weekends and holidays, using the",
-            "latest rate whose availability timestamp is not after the accrual start.",
-            "BIL is a tradable ETF proxy and cross-check only, never authoritative cash.",
-        ]),
+        "\n".join(
+            [
+                "# GMA-1B Cash Rate Contract",
+                "",
+                "Authoritative cash source: FRED `DGS3MO`.",
+                "Yield convention: percent annualized investment-compatible yield.",
+                "Accrual formula: `period_return = annual_yield_decimal * accrual_days / 365`.",
+                "Calendar: calendar-day accrual, including weekends and holidays, using the",
+                "latest rate whose availability timestamp is not after the accrual start.",
+                "BIL is a tradable ETF proxy and cross-check only, never authoritative cash.",
+            ]
+        ),
         encoding="utf-8",
     )
 
@@ -2866,21 +2997,23 @@ def run_gma1b_macro_cash_foundation(
         source_request_type = "official_fred_alfred_live"
         selected_as_live_evidence = live_complete
         source_provider_path = "live"
-        source_selection_rows.append({
-            "provider": "fred",
-            "series_id": "MULTI_SERIES_LIVE",
-            "request_type": "official_fred_alfred_live_reproducibility_first_snapshot",
-            "raw_file_path": first_raw_path,
-            "normalised_file_path": first_norm_path,
-            "raw_file_sha256": first_raw_hash,
-            "normalised_file_sha256": first_norm_hash,
-            "manifest_path": first_manifest_path,
-            "manifest_sha256": first_manifest_hash,
-            "selected_as_live_evidence": False,
-            "selection_status": "reproducibility_snapshot_not_canonical",
-            "source_provider_path": "live",
-            "fixture_snapshots_accepted_as_live_evidence": False,
-        })
+        source_selection_rows.append(
+            {
+                "provider": "fred",
+                "series_id": "MULTI_SERIES_LIVE",
+                "request_type": "official_fred_alfred_live_reproducibility_first_snapshot",
+                "raw_file_path": first_raw_path,
+                "normalised_file_path": first_norm_path,
+                "raw_file_sha256": first_raw_hash,
+                "normalised_file_sha256": first_norm_hash,
+                "manifest_path": first_manifest_path,
+                "manifest_sha256": first_manifest_hash,
+                "selected_as_live_evidence": False,
+                "selection_status": "reproducibility_snapshot_not_canonical",
+                "source_provider_path": "live",
+                "fixture_snapshots_accepted_as_live_evidence": False,
+            }
+        )
     else:
         retrieved_at = DEFAULT_RETRIEVED_AT if not live else utc_now_compact()
         observations = _fixture_observations(registry)
@@ -2912,33 +3045,44 @@ def run_gma1b_macro_cash_foundation(
         retrieved_at_utc=retrieved_at,
     )
 
-    source_selection_rows.append({
-        "provider": "fred",
-        "series_id": "MULTI_SERIES_LIVE" if live and api_key_present else "MULTI_SERIES_FIXTURE",
-        "request_type": source_request_type,
-        "raw_file_path": raw_path,
-        "normalised_file_path": norm_path,
-        "raw_file_sha256": raw_hash,
-        "normalised_file_sha256": norm_hash,
-        "manifest_path": manifest_path,
-        "manifest_sha256": manifest_hash,
-        "selected_as_live_evidence": selected_as_live_evidence,
-        "selection_status": live_status,
-        "source_provider_path": source_provider_path,
-        "fixture_snapshots_accepted_as_live_evidence": False,
-    })
-    _safe_write_csv(pd.DataFrame(source_selection_rows), report_root / "source_snapshot_selection.csv")
+    source_selection_rows.append(
+        {
+            "provider": "fred",
+            "series_id": "MULTI_SERIES_LIVE"
+            if live and api_key_present
+            else "MULTI_SERIES_FIXTURE",
+            "request_type": source_request_type,
+            "raw_file_path": raw_path,
+            "normalised_file_path": norm_path,
+            "raw_file_sha256": raw_hash,
+            "normalised_file_sha256": norm_hash,
+            "manifest_path": manifest_path,
+            "manifest_sha256": manifest_hash,
+            "selected_as_live_evidence": selected_as_live_evidence,
+            "selection_status": live_status,
+            "source_provider_path": source_provider_path,
+            "fixture_snapshots_accepted_as_live_evidence": False,
+        }
+    )
+    _safe_write_csv(
+        pd.DataFrame(source_selection_rows), report_root / "source_snapshot_selection.csv"
+    )
 
     _safe_write_csv(canonical, canonical_root / "point_in_time_macro_observations.csv")
-    _safe_write_csv(canonical[[
-        "macro_id",
-        "series_id",
-        "observation_date",
-        "official_availability_date",
-        "availability_timestamp_utc",
-        "realtime_start",
-        "source_manifest_sha256",
-    ]], canonical_root / "release_availability.csv")
+    _safe_write_csv(
+        canonical[
+            [
+                "macro_id",
+                "series_id",
+                "observation_date",
+                "official_availability_date",
+                "availability_timestamp_utc",
+                "realtime_start",
+                "source_manifest_sha256",
+            ]
+        ],
+        canonical_root / "release_availability.csv",
+    )
     vintage_audit = build_vintage_revision_audit(canonical, registry)
     _safe_write_csv(vintage_audit, canonical_root / "vintage_history.csv")
     _safe_write_csv(vintage_audit, report_root / "vintage_revision_audit.csv")
@@ -2947,64 +3091,91 @@ def run_gma1b_macro_cash_foundation(
     _safe_write_csv(cash, report_root / "cash_rate_reconciliation.csv")
     if live and api_key_present and not metadata_df.empty:
         cash_meta = metadata_df[metadata_df["series_id"].eq(config.cash["authoritative_series"])]
-        _safe_write_csv(pd.DataFrame([{
-            "source_series": config.cash["authoritative_series"],
-            "official_units": "" if cash_meta.empty else cash_meta.iloc[0]["units"],
-            "official_frequency": "" if cash_meta.empty else cash_meta.iloc[0]["frequency"],
-            "official_observation_start": "" if cash_meta.empty else cash_meta.iloc[0]["observation_start"],
-            "official_observation_end": "" if cash_meta.empty else cash_meta.iloc[0]["observation_end"],
-            "first_observation": "" if cash.empty else cash["observation_date"].min(),
-            "last_observation": "" if cash.empty else cash["observation_date"].max(),
-            "negative_observation_count": int((cash["annual_yield"] < 0).sum()) if not cash.empty else 0,
-            "maximum_staleness_days": int(config.quality["maximum_staleness_days"]),
-            "cash_formula_supported_by_metadata": (
-                "percent" in str(cash_meta.iloc[0]["units"]).lower() if not cash_meta.empty else False
+        _safe_write_csv(
+            pd.DataFrame(
+                [
+                    {
+                        "source_series": config.cash["authoritative_series"],
+                        "official_units": "" if cash_meta.empty else cash_meta.iloc[0]["units"],
+                        "official_frequency": ""
+                        if cash_meta.empty
+                        else cash_meta.iloc[0]["frequency"],
+                        "official_observation_start": ""
+                        if cash_meta.empty
+                        else cash_meta.iloc[0]["observation_start"],
+                        "official_observation_end": ""
+                        if cash_meta.empty
+                        else cash_meta.iloc[0]["observation_end"],
+                        "first_observation": "" if cash.empty else cash["observation_date"].min(),
+                        "last_observation": "" if cash.empty else cash["observation_date"].max(),
+                        "negative_observation_count": int((cash["annual_yield"] < 0).sum())
+                        if not cash.empty
+                        else 0,
+                        "maximum_staleness_days": int(config.quality["maximum_staleness_days"]),
+                        "cash_formula_supported_by_metadata": (
+                            "percent" in str(cash_meta.iloc[0]["units"]).lower()
+                            if not cash_meta.empty
+                            else False
+                        ),
+                    }
+                ]
             ),
-        }]), report_root / "cash_rate_live_audit.csv")
+            report_root / "cash_rate_live_audit.csv",
+        )
 
-    examples = pd.DataFrame([
-        query_point_in_time(canonical, "cpi", "2024-01-15T00:00:00Z"),
-        query_point_in_time(canonical, "cpi", "2024-03-02T00:00:00Z"),
-        query_point_in_time(canonical, "cash_3m_treasury", "2024-01-08T23:00:00Z"),
-        query_point_in_time(canonical, "cash_3m_treasury", "2024-01-09T00:30:00Z"),
-    ])
+    examples = pd.DataFrame(
+        [
+            query_point_in_time(canonical, "cpi", "2024-01-15T00:00:00Z"),
+            query_point_in_time(canonical, "cpi", "2024-03-02T00:00:00Z"),
+            query_point_in_time(canonical, "cash_3m_treasury", "2024-01-08T23:00:00Z"),
+            query_point_in_time(canonical, "cash_3m_treasury", "2024-01-09T00:30:00Z"),
+        ]
+    )
     _safe_write_csv(examples, report_root / "point_in_time_query_examples.csv")
 
-    availability_audit = canonical[[
-        "macro_id",
-        "series_id",
-        "observation_date",
-        "realtime_start",
-        "official_availability_date",
-        "availability_timestamp_utc",
-        "point_in_time_status",
-    ]].copy()
-    availability_audit["availability_policy"] = "official_realtime_start_date_available_after_235959_utc"
+    availability_audit = canonical[
+        [
+            "macro_id",
+            "series_id",
+            "observation_date",
+            "realtime_start",
+            "official_availability_date",
+            "availability_timestamp_utc",
+            "point_in_time_status",
+        ]
+    ].copy()
+    availability_audit["availability_policy"] = (
+        "official_realtime_start_date_available_after_235959_utc"
+    )
     _safe_write_csv(availability_audit, report_root / "availability_audit.csv")
 
     readiness = build_macro_series_readiness(registry, canonical, vintage_audit, live_complete)
     _safe_write_csv(readiness, report_root / "macro_series_readiness.csv")
 
-    inventory = pd.DataFrame([
-        {
-            "file_type": "canonical_macro_observations",
-            "path": str(canonical_root / "point_in_time_macro_observations.csv"),
-            "row_count": len(canonical),
-            "sha256": sha256_file(canonical_root / "point_in_time_macro_observations.csv"),
-        },
-        {
-            "file_type": "canonical_cash_accrual",
-            "path": str(canonical_root / "canonical_cash_accrual.csv"),
-            "row_count": len(cash),
-            "sha256": sha256_file(canonical_root / "canonical_cash_accrual.csv"),
-        },
-    ])
+    inventory = pd.DataFrame(
+        [
+            {
+                "file_type": "canonical_macro_observations",
+                "path": str(canonical_root / "point_in_time_macro_observations.csv"),
+                "row_count": len(canonical),
+                "sha256": sha256_file(canonical_root / "point_in_time_macro_observations.csv"),
+            },
+            {
+                "file_type": "canonical_cash_accrual",
+                "path": str(canonical_root / "canonical_cash_accrual.csv"),
+                "row_count": len(cash),
+                "sha256": sha256_file(canonical_root / "canonical_cash_accrual.csv"),
+            },
+        ]
+    )
     _safe_write_csv(inventory, report_root / "canonical_macro_inventory.csv")
     canonical_payload = {
         "accepted_gma1a_hash": ACCEPTED_GMA1A_HASH,
         "registry": registry.to_dict(orient="records"),
         "canonical": canonical.drop(columns=["retrieved_at_utc"]).to_dict(orient="records"),
-        "cash": cash.drop(columns=["availability_timestamp_utc"], errors="ignore").to_dict(orient="records"),
+        "cash": cash.drop(columns=["availability_timestamp_utc"], errors="ignore").to_dict(
+            orient="records"
+        ),
     }
     canonical_hash = canonical_json_sha256(canonical_payload)
     (report_root / "canonical_macro_hash.txt").write_text(canonical_hash, encoding="utf-8")
@@ -3027,25 +3198,65 @@ def run_gma1b_macro_cash_foundation(
     _write_markdown_reports(report_root)
 
     gates = [
-        ("track_id_is_gma_alpha", config.track["track_id"] == GMA1B_TRACK_ID, config.track["track_id"]),
-        ("phase_id_is_gma1b_macro_cash_foundation", config.track["phase_id"] == GMA1B_PHASE_ID, config.track["phase_id"]),
+        (
+            "track_id_is_gma_alpha",
+            config.track["track_id"] == GMA1B_TRACK_ID,
+            config.track["track_id"],
+        ),
+        (
+            "phase_id_is_gma1b_macro_cash_foundation",
+            config.track["phase_id"] == GMA1B_PHASE_ID,
+            config.track["phase_id"],
+        ),
         ("live_trading_disabled", not bool(config.track["live_trading_allowed"]), "confirmed"),
         ("real_money_disabled", not bool(config.track["real_money_allowed"]), "confirmed"),
-        ("broker_integration_disabled", not bool(config.track["broker_api_integration_allowed"]), "confirmed"),
+        (
+            "broker_integration_disabled",
+            not bool(config.track["broker_api_integration_allowed"]),
+            "confirmed",
+        ),
         ("accepted_gma1a_baseline_verified", gma1a_ok, gma1a_status),
         ("official_source_policy_followed", True, "fred_and_alfred_only"),
         ("no_unofficial_provider_fallback_occurred", True, "confirmed"),
         ("no_credentials_persisted", True, "credential_value_never_written"),
         ("all_selected_source_hashes_validate", raw_hash == sha256_file(raw_path), "confirmed"),
         ("canonical_macro_hash_deterministic", bool(canonical_hash), canonical_hash),
-        ("required_vintage_aware_series_retain_revisions", not vintage_audit.empty, "verified" if live_complete else "fixture_contract_verified"),
-        ("asof_queries_prevent_future_knowledge", examples["point_in_time_status"].ne("unavailable_unknown_series").all(), "confirmed"),
-        ("cash_rate_never_precedes_availability", cash["availability_timestamp_utc"].notna().all() if not cash.empty else False, "confirmed"),
-        ("bil_not_used_as_authoritative_cash", config.cash["bil_role"] != "authoritative_cash_source", config.cash["bil_role"]),
+        (
+            "required_vintage_aware_series_retain_revisions",
+            not vintage_audit.empty,
+            "verified" if live_complete else "fixture_contract_verified",
+        ),
+        (
+            "asof_queries_prevent_future_knowledge",
+            examples["point_in_time_status"].ne("unavailable_unknown_series").all(),
+            "confirmed",
+        ),
+        (
+            "cash_rate_never_precedes_availability",
+            cash["availability_timestamp_utc"].notna().all() if not cash.empty else False,
+            "confirmed",
+        ),
+        (
+            "bil_not_used_as_authoritative_cash",
+            config.cash["bil_role"] != "authoritative_cash_source",
+            config.cash["bil_role"],
+        ),
         ("no_strategy_output_generated", True, "confirmed"),
         ("no_portfolio_output_generated", True, "confirmed"),
         ("no_order_output_generated", True, "confirmed"),
-        ("all_outputs_within_approved_paths", all(is_approved_gma1b_output_path(p) for p in [report_root, canonical_root, config.paths["raw_root"], config.paths["manifest_root"]]), "confirmed"),
+        (
+            "all_outputs_within_approved_paths",
+            all(
+                is_approved_gma1b_output_path(p)
+                for p in [
+                    report_root,
+                    canonical_root,
+                    config.paths["raw_root"],
+                    config.paths["manifest_root"],
+                ]
+            ),
+            "confirmed",
+        ),
         ("no_frozen_experiment_modified", True, "confirmed"),
         ("no_unexpected_path_introduced", True, "confirmed"),
         ("live_official_source_retrieval_complete", live_complete, live_status),
@@ -3078,18 +3289,27 @@ def run_gma1b_macro_cash_foundation(
         "or broker work was performed.",
     ]
     (report_root / "gma1b_conclusion.md").write_text("\n".join(conclusion), encoding="utf-8")
-    _safe_write_csv(pd.DataFrame([{
-        "decision": decision,
-        "live_retrieval_status": live_status,
-        "canonical_macro_hash": canonical_hash,
-        "fixture_contract_canonical_hash": FIXTURE_CONTRACT_CANONICAL_HASH,
-        "accepted_live_canonical_hash": canonical_hash if live_complete else "",
-        "required_series_ready": bool(readiness.loc[readiness["is_required"], "ready_for_replay_engine"].all()),
-        "live_requested": live,
-        "live_trading_allowed": False,
-        "real_money_allowed": False,
-        "broker_api_integration_allowed": False,
-    }]), report_root / "gma1b_summary.csv")
+    _safe_write_csv(
+        pd.DataFrame(
+            [
+                {
+                    "decision": decision,
+                    "live_retrieval_status": live_status,
+                    "canonical_macro_hash": canonical_hash,
+                    "fixture_contract_canonical_hash": FIXTURE_CONTRACT_CANONICAL_HASH,
+                    "accepted_live_canonical_hash": canonical_hash if live_complete else "",
+                    "required_series_ready": bool(
+                        readiness.loc[readiness["is_required"], "ready_for_replay_engine"].all()
+                    ),
+                    "live_requested": live,
+                    "live_trading_allowed": False,
+                    "real_money_allowed": False,
+                    "broker_api_integration_allowed": False,
+                }
+            ]
+        ),
+        report_root / "gma1b_summary.csv",
+    )
 
     return GMA1BResult(
         decision=decision,

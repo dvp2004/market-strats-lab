@@ -86,8 +86,12 @@ def _write_snapshot_files(
         "normalised_file_path": str(normalised_path),
         "normalised_file_sha256": sha256_file(normalised_path),
         "row_count": int(len(normalised)),
-        "first_observation_date": first_observation.date().isoformat() if pd.notna(first_observation) else "",
-        "last_observation_date": last_observation.date().isoformat() if pd.notna(last_observation) else "",
+        "first_observation_date": first_observation.date().isoformat()
+        if pd.notna(first_observation)
+        else "",
+        "last_observation_date": last_observation.date().isoformat()
+        if pd.notna(last_observation)
+        else "",
         "columns": list(normalised.columns),
         "warnings": warnings,
     }

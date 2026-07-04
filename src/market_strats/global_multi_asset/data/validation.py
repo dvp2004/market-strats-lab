@@ -36,7 +36,9 @@ def _normalise_columns(raw: pd.DataFrame) -> pd.DataFrame:
     frame = raw.copy()
     if isinstance(frame.columns, pd.MultiIndex):
         frame.columns = [str(column[0]) for column in frame.columns]
-    frame = frame.rename(columns={key: value for key, value in RAW_COLUMN_MAP.items() if key in frame.columns})
+    frame = frame.rename(
+        columns={key: value for key, value in RAW_COLUMN_MAP.items() if key in frame.columns}
+    )
     frame.columns = [str(column).strip().lower().replace(" ", "_") for column in frame.columns]
     if "adj_close" not in frame.columns and "adj_close_" in frame.columns:
         frame = frame.rename(columns={"adj_close_": "adj_close"})
@@ -88,7 +90,9 @@ def longest_true_streak(values: pd.Series) -> int:
     return int(longest)
 
 
-def _completed_history(frame: pd.DataFrame, retrieved_at_utc: str) -> tuple[pd.DataFrame, bool, bool]:
+def _completed_history(
+    frame: pd.DataFrame, retrieved_at_utc: str
+) -> tuple[pd.DataFrame, bool, bool]:
     if frame.empty:
         return frame.copy(), False, False
     working = frame.copy()
@@ -126,17 +130,25 @@ def validate_price_frame(
         retrieved_at_utc,
     )
     incomplete_rows = normalised_sorted[PRICE_COLUMNS].isna().any(axis=1)
-    interior_incomplete = bool(incomplete_rows.iloc[:-1].any()) if len(incomplete_rows) > 1 else False
+    interior_incomplete = (
+        bool(incomplete_rows.iloc[:-1].any()) if len(incomplete_rows) > 1 else False
+    )
 
-    non_positive_prices = bool(
-        completed[PRICE_VALUE_COLUMNS].le(0).any().any()
-    ) if not completed.empty else False
+    non_positive_prices = (
+        bool(completed[PRICE_VALUE_COLUMNS].le(0).any().any()) if not completed.empty else False
+    )
     negative_volume = bool(completed["volume"].lt(0).any()) if "volume" in completed else False
     zero_volume = completed["volume"].eq(0) if "volume" in completed else pd.Series(dtype=bool)
-    stale_close = completed["close"].eq(completed["close"].shift(1)) if "close" in completed else pd.Series(dtype=bool)
+    stale_close = (
+        completed["close"].eq(completed["close"].shift(1))
+        if "close" in completed
+        else pd.Series(dtype=bool)
+    )
 
     missing_raw_open = bool(completed["open"].isna().any()) if "open" in completed else True
-    missing_adjusted_close = bool(completed["adj_close"].isna().any()) if "adj_close" in completed else True
+    missing_adjusted_close = (
+        bool(completed["adj_close"].isna().any()) if "adj_close" in completed else True
+    )
     valid_raw_open = completed.loc[completed["open"].notna() & completed["open"].gt(0), "date"]
     valid_adjusted_close = completed.loc[
         completed["adj_close"].notna() & completed["adj_close"].gt(0),
@@ -169,8 +181,12 @@ def validate_price_frame(
     audit = {
         "instrument_id": instrument_id,
         "row_count": row_count,
-        "first_observation_date": first_observation.date().isoformat() if pd.notna(first_observation) else "",
-        "last_observation_date": last_observation.date().isoformat() if pd.notna(last_observation) else "",
+        "first_observation_date": first_observation.date().isoformat()
+        if pd.notna(first_observation)
+        else "",
+        "last_observation_date": last_observation.date().isoformat()
+        if pd.notna(last_observation)
+        else "",
         "duplicate_dates": duplicate_dates,
         "duplicate_date_count": duplicate_date_count,
         "out_of_order_dates": out_of_order_dates,
@@ -213,8 +229,16 @@ def validate_price_frame(
 def corporate_action_audit(raw: pd.DataFrame, instrument_id: str) -> dict[str, Any]:
     actions = corporate_action_frame(raw)
     capability_available = not actions.empty and {"dividends", "splits"}.issubset(actions.columns)
-    dividends = actions.loc[actions["dividends"].fillna(0.0).ne(0.0)] if capability_available else pd.DataFrame()
-    splits = actions.loc[actions["splits"].fillna(0.0).ne(0.0)] if capability_available else pd.DataFrame()
+    dividends = (
+        actions.loc[actions["dividends"].fillna(0.0).ne(0.0)]
+        if capability_available
+        else pd.DataFrame()
+    )
+    splits = (
+        actions.loc[actions["splits"].fillna(0.0).ne(0.0)]
+        if capability_available
+        else pd.DataFrame()
+    )
     warnings = []
     if not capability_available:
         warnings.append("source_capability_unavailable")
@@ -224,8 +248,12 @@ def corporate_action_audit(raw: pd.DataFrame, instrument_id: str) -> dict[str, A
         "instrument_id": instrument_id,
         "dividend_data_available": capability_available,
         "split_data_available": capability_available,
-        "first_dividend_date": dividends["date"].min().date().isoformat() if not dividends.empty else "",
-        "last_dividend_date": dividends["date"].max().date().isoformat() if not dividends.empty else "",
+        "first_dividend_date": dividends["date"].min().date().isoformat()
+        if not dividends.empty
+        else "",
+        "last_dividend_date": dividends["date"].max().date().isoformat()
+        if not dividends.empty
+        else "",
         "dividend_event_count": int(len(dividends)),
         "first_split_date": splits["date"].min().date().isoformat() if not splits.empty else "",
         "last_split_date": splits["date"].max().date().isoformat() if not splits.empty else "",

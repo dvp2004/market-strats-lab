@@ -16,8 +16,10 @@ def _phase7c_config(config: dict) -> dict:
 def _normalise_ticker(ticker: str) -> str:
     return str(ticker).upper()
 
+
 class ProviderAuthenticationRequiredError(RuntimeError):
-    """Raised when the secondary provider requires authentication."""   
+    """Raised when the secondary provider requires authentication."""
+
 
 def _find_primary_price_data(
     ticker_outputs: dict[str, dict[str, pd.DataFrame]],
@@ -46,9 +48,7 @@ def _find_primary_price_data(
             return candidate.copy()
 
     for value in ticker_output.values():
-        if isinstance(value, pd.DataFrame) and {"date", "adj_close"}.issubset(
-            value.columns
-        ):
+        if isinstance(value, pd.DataFrame) and {"date", "adj_close"}.issubset(value.columns):
             return value.copy()
 
     raise ValueError(
@@ -68,8 +68,7 @@ def _normalise_primary_prices(
     output = output.sort_values("date").reset_index(drop=True)
 
     output = output[
-        (output["date"] >= pd.Timestamp(start_date))
-        & (output["date"] <= pd.Timestamp(end_date))
+        (output["date"] >= pd.Timestamp(start_date)) & (output["date"] <= pd.Timestamp(end_date))
     ].copy()
 
     if output.empty:
@@ -98,6 +97,7 @@ def _build_stooq_url(
 
     return f"https://stooq.com/q/d/l/?{urlencode(params)}"
 
+
 def _get_stooq_api_key(config: dict) -> str | None:
     phase_config = _phase7c_config(config)
 
@@ -109,6 +109,7 @@ def _get_stooq_api_key(config: dict) -> str | None:
     env_var = str(phase_config.get("stooq_api_key_env_var", "STOOQ_API_KEY"))
 
     return os.environ.get(env_var)
+
 
 def _download_stooq_prices(
     stooq_symbol: str,
@@ -143,8 +144,7 @@ def _download_stooq_prices(
 
     if not text:
         raise ValueError(
-            f"Empty response from Stooq for {stooq_symbol}. "
-            f"URL={url}, status={status_code}"
+            f"Empty response from Stooq for {stooq_symbol}. URL={url}, status={status_code}"
         )
 
     first_lines = text.splitlines()[:8]
@@ -159,10 +159,7 @@ def _download_stooq_prices(
             f"URL={url}, status={status_code}, first_lines={preview}"
         )
 
-    looks_like_stooq_csv = (
-        first_line.lower().replace(" ", "")
-        == "date,open,high,low,close,volume"
-    )
+    looks_like_stooq_csv = first_line.lower().replace(" ", "") == "date,open,high,low,close,volume"
 
     if not looks_like_stooq_csv:
         raise ValueError(
@@ -203,8 +200,7 @@ def _download_stooq_prices(
     output = output.dropna(subset=["date", "secondary_price"]).copy()
 
     output = output[
-        (output["date"] >= pd.Timestamp(start_date))
-        & (output["date"] <= pd.Timestamp(end_date))
+        (output["date"] >= pd.Timestamp(start_date)) & (output["date"] <= pd.Timestamp(end_date))
     ].copy()
 
     return output[["date", "secondary_price"]].reset_index(drop=True)
@@ -263,14 +259,10 @@ def _classify_cross_check_row(
         return "Insufficient overlap"
 
     clean_corr = float(phase_config.get("clean_min_daily_return_correlation", 0.995))
-    acceptable_corr = float(
-        phase_config.get("acceptable_min_daily_return_correlation", 0.990)
-    )
+    acceptable_corr = float(phase_config.get("acceptable_min_daily_return_correlation", 0.990))
     review_corr = float(phase_config.get("review_min_daily_return_correlation", 0.970))
 
-    clean_median_diff = float(
-        phase_config.get("clean_max_median_abs_daily_return_diff_bps", 5.0)
-    )
+    clean_median_diff = float(phase_config.get("clean_max_median_abs_daily_return_diff_bps", 5.0))
     acceptable_median_diff = float(
         phase_config.get("acceptable_max_median_abs_daily_return_diff_bps", 10.0)
     )
@@ -279,12 +271,8 @@ def _classify_cross_check_row(
     )
 
     clean_cagr_delta = float(phase_config.get("clean_max_cagr_delta_pct_points", 0.25))
-    acceptable_cagr_delta = float(
-        phase_config.get("acceptable_max_cagr_delta_pct_points", 0.75)
-    )
-    review_cagr_delta = float(
-        phase_config.get("review_max_cagr_delta_pct_points", 1.50)
-    )
+    acceptable_cagr_delta = float(phase_config.get("acceptable_max_cagr_delta_pct_points", 0.75))
+    review_cagr_delta = float(phase_config.get("review_max_cagr_delta_pct_points", 1.50))
 
     if (
         daily_return_correlation >= clean_corr
@@ -371,9 +359,7 @@ def _compare_primary_secondary_prices(
         returns["primary_return"] - returns["secondary_return"]
     ).abs() * 10000.0
 
-    daily_return_correlation = float(
-        returns["primary_return"].corr(returns["secondary_return"])
-    )
+    daily_return_correlation = float(returns["primary_return"].corr(returns["secondary_return"]))
     median_abs_diff = float(returns["abs_return_diff_bps"].median())
     mean_abs_diff = float(returns["abs_return_diff_bps"].mean())
 
@@ -432,9 +418,7 @@ def _create_cross_check_summary(cross_check: pd.DataFrame) -> pd.DataFrame:
     provider_auth_required_count = int(
         classification_counts.get("Provider authentication required", 0)
     )
-    potential_issue_count = int(
-        classification_counts.get("Potential data issue", 0)
-    )
+    potential_issue_count = int(classification_counts.get("Potential data issue", 0))
     review_count = int(classification_counts.get("Review difference", 0))
     insufficient_count = int(classification_counts.get("Insufficient overlap", 0))
 
@@ -497,9 +481,7 @@ def _create_cross_check_conclusion(
         )
     elif some_available:
         usable_status = "Survived"
-        usable_interpretation = (
-            f"{available_count} ticker(s) had usable secondary data."
-        )
+        usable_interpretation = f"{available_count} ticker(s) had usable secondary data."
     else:
         usable_status = "Failed"
         usable_interpretation = "No ticker had usable secondary data."
@@ -672,7 +654,7 @@ def create_secondary_data_source_cross_check_v2(
                     "reason": str(exc),
                 }
             )
-            
+
         except Exception as exc:  # noqa: BLE001
             rows.append(
                 {

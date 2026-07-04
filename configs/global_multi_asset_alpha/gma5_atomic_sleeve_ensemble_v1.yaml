@@ -1,0 +1,89 @@
+ensemble_id: gma5_atomic_sleeve_ensemble_v1
+phase_id: gma5a_atomic_sleeve_walk_forward_ensemble
+evidence_class: observed_development_evidence
+holdout_status: not_a_pristine_final_holdout
+historical_research_only: true
+paper_trading_allowed: false
+live_trading_allowed: false
+broker_integration_allowed: false
+prospective_shadow_allowed: false
+selection_or_promotion_allowed: false
+
+source:
+  gma4_source_run_id: gma4_20260621T163423Z
+  gma4_run_dir: reports/global_multi_asset_alpha/gma4_cross_asset_tournament_v1/runs/gma4_20260621T163423Z
+  data_inventory_path: reports/global_multi_asset_alpha/gma4_fixed_22_etf_v1/gma4_market_bundle_inventory.csv
+  cash_path: data/global_multi_asset_alpha/gma4_fixed_22_etf_v1/cash/canonical_cash_accrual.csv
+
+atomic_sleeves:
+  - trial_id: gma4_abs_trend_12m_equal_weight_v1
+    family: absolute_trend
+  - trial_id: gma4_xsmom_12m_top5_inverse_vol_v1
+    family: cross_sectional_momentum
+  - trial_id: gma4_defensive_drawdown_guard_v1
+    family: defensive_risk_regime
+  - trial_id: gma4_defensive_spy_200d_rotation_v1
+    family: defensive_risk_regime
+
+excluded_from_learned_inputs:
+  - gma4_xsmom_12m_top3_equal_weight_v1
+  - gma4_blend_equal_abs12_xsmom12_v1
+  - gma4_blend_risk_abs12_xsmom6_meanrev5_v1
+  - gma4_blend_equal_abs10_xsmom6_defensive_v1
+  - gma4_benchmark_bil_buy_hold_v1
+  - gma4_benchmark_spy_buy_hold_v1
+  - gma4_benchmark_equal_weight_22_monthly_v1
+
+variants:
+  - gma5_equal_weight_atomic_sleeves_v1
+  - gma5_risk_weighted_atomic_sleeves_v1
+  - gma5_fixed_alpha_ridge_atomic_ensemble_v1
+
+cost_scenarios:
+  baseline_1bps: 1.0
+  stressed_10bps: 10.0
+  stressed_25bps: 25.0
+  severe_50bps: 50.0
+
+risk_weighted_formula:
+  trailing_12_month_net_return_coefficient: 2.0
+  trailing_36_month_sharpe_coefficient: 0.35
+  trailing_12_month_max_drawdown_penalty: 1.5
+  trailing_12_month_annualised_turnover_penalty: 0.02
+  trailing_12_month_cost_drag_penalty: 3.0
+  score_floor: 0.01
+  require_completed_monthly_observations: 36
+
+ridge:
+  alpha: 10.0
+  minimum_training_history_months: 60
+  training_window_months: 60
+  feature_columns:
+    - trailing_3_month_sleeve_return
+    - trailing_12_month_sleeve_return
+    - trailing_36_month_sleeve_sharpe
+    - trailing_12_month_sleeve_drawdown
+    - trailing_12_month_sleeve_volatility
+    - trailing_12_month_sleeve_turnover
+    - trailing_12_month_sleeve_cost_drag
+    - market_spy_200d_trend_state
+    - market_spy_252d_drawdown
+    - market_cross_asset_breadth
+
+constraints:
+  individual_sleeve_weight_cap: 0.40
+  strategy_family_weight_cap: 0.50
+  residual_symbol: BIL
+  residual_reason: residual_after_zero_or_limited_learned_allocations_and_caps
+
+comparison_references:
+  - gma4_benchmark_bil_buy_hold_v1
+  - gma4_benchmark_spy_buy_hold_v1
+  - gma4_benchmark_equal_weight_22_monthly_v1
+  - gma4_abs_trend_12m_equal_weight_v1
+  - gma4_xsmom_12m_top5_inverse_vol_v1
+  - gma4_defensive_drawdown_guard_v1
+  - gma4_defensive_spy_200d_rotation_v1
+  - gma4_blend_equal_abs10_xsmom6_defensive_v1
+
+output_root: reports/global_multi_asset_alpha/gma5_atomic_sleeve_ensemble_v1

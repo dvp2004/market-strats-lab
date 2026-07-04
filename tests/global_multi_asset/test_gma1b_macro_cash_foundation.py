@@ -59,80 +59,84 @@ def config():
 
 @pytest.fixture()
 def tiny_registry() -> pd.DataFrame:
-    return pd.DataFrame([
-        {
-            "macro_id": "cash_3m_treasury",
-            "provider": "fred",
-            "series_id": "DGS3MO",
-            "display_name": "3-month Treasury/cash rate",
-            "economic_role": "authoritative_cash_rate",
-            "frequency": "daily",
-            "units": "percent",
-            "seasonal_adjustment": "not_seasonally_adjusted",
-            "native_observation_calendar": "federal_reserve_business_day",
-            "expected_publication_frequency": "daily",
-            "is_required": True,
-            "is_vintage_aware": True,
-            "revision_prone": False,
-            "availability_timestamp_policy": "release_date_available_after_235959_utc",
-            "maximum_staleness_days": 7,
-            "transformation_policy": "percent_to_decimal_yield",
-            "notes": "cash",
-        },
-        {
-            "macro_id": "cpi",
-            "provider": "fred",
-            "series_id": "CPIAUCSL",
-            "display_name": "CPI",
-            "economic_role": "inflation",
-            "frequency": "monthly",
-            "units": "index",
-            "seasonal_adjustment": "seasonally_adjusted",
-            "native_observation_calendar": "monthly_release",
-            "expected_publication_frequency": "monthly",
-            "is_required": True,
-            "is_vintage_aware": True,
-            "revision_prone": True,
-            "availability_timestamp_policy": "release_date_available_after_235959_utc",
-            "maximum_staleness_days": 45,
-            "transformation_policy": "level",
-            "notes": "vintage",
-        },
-    ])
+    return pd.DataFrame(
+        [
+            {
+                "macro_id": "cash_3m_treasury",
+                "provider": "fred",
+                "series_id": "DGS3MO",
+                "display_name": "3-month Treasury/cash rate",
+                "economic_role": "authoritative_cash_rate",
+                "frequency": "daily",
+                "units": "percent",
+                "seasonal_adjustment": "not_seasonally_adjusted",
+                "native_observation_calendar": "federal_reserve_business_day",
+                "expected_publication_frequency": "daily",
+                "is_required": True,
+                "is_vintage_aware": True,
+                "revision_prone": False,
+                "availability_timestamp_policy": "release_date_available_after_235959_utc",
+                "maximum_staleness_days": 7,
+                "transformation_policy": "percent_to_decimal_yield",
+                "notes": "cash",
+            },
+            {
+                "macro_id": "cpi",
+                "provider": "fred",
+                "series_id": "CPIAUCSL",
+                "display_name": "CPI",
+                "economic_role": "inflation",
+                "frequency": "monthly",
+                "units": "index",
+                "seasonal_adjustment": "seasonally_adjusted",
+                "native_observation_calendar": "monthly_release",
+                "expected_publication_frequency": "monthly",
+                "is_required": True,
+                "is_vintage_aware": True,
+                "revision_prone": True,
+                "availability_timestamp_policy": "release_date_available_after_235959_utc",
+                "maximum_staleness_days": 45,
+                "transformation_policy": "level",
+                "notes": "vintage",
+            },
+        ]
+    )
 
 
 @pytest.fixture()
 def tiny_canonical(tiny_registry: pd.DataFrame) -> pd.DataFrame:
-    observations = pd.DataFrame([
-        {
-            "series_id": "DGS3MO",
-            "observation_date": "2024-01-05",
-            "value": 5.0,
-            "realtime_start": "2024-01-05",
-            "realtime_end": "9999-12-31",
-        },
-        {
-            "series_id": "DGS3MO",
-            "observation_date": "2024-01-08",
-            "value": 5.1,
-            "realtime_start": "2024-01-08",
-            "realtime_end": "9999-12-31",
-        },
-        {
-            "series_id": "CPIAUCSL",
-            "observation_date": "2023-12-01",
-            "value": 310.0,
-            "realtime_start": "2024-01-12",
-            "realtime_end": "9999-12-31",
-        },
-        {
-            "series_id": "CPIAUCSL",
-            "observation_date": "2023-12-01",
-            "value": 310.2,
-            "realtime_start": "2024-03-01",
-            "realtime_end": "9999-12-31",
-        },
-    ])
+    observations = pd.DataFrame(
+        [
+            {
+                "series_id": "DGS3MO",
+                "observation_date": "2024-01-05",
+                "value": 5.0,
+                "realtime_start": "2024-01-05",
+                "realtime_end": "9999-12-31",
+            },
+            {
+                "series_id": "DGS3MO",
+                "observation_date": "2024-01-08",
+                "value": 5.1,
+                "realtime_start": "2024-01-08",
+                "realtime_end": "9999-12-31",
+            },
+            {
+                "series_id": "CPIAUCSL",
+                "observation_date": "2023-12-01",
+                "value": 310.0,
+                "realtime_start": "2024-01-12",
+                "realtime_end": "9999-12-31",
+            },
+            {
+                "series_id": "CPIAUCSL",
+                "observation_date": "2023-12-01",
+                "value": 310.2,
+                "realtime_start": "2024-03-01",
+                "realtime_end": "9999-12-31",
+            },
+        ]
+    )
     return normalise_observations(
         observations,
         tiny_registry,
@@ -363,7 +367,9 @@ def test_33_snapshot_hash_validation(config) -> None:
     run_gma1b_macro_cash_foundation(config)
     selection = pd.read_csv(REPORT_DIR / "source_snapshot_selection.csv").iloc[0]
     assert sha256_file(Path(selection["raw_file_path"])) == selection["raw_file_sha256"]
-    assert sha256_file(Path(selection["normalised_file_path"])) == selection["normalised_file_sha256"]
+    assert (
+        sha256_file(Path(selection["normalised_file_path"])) == selection["normalised_file_sha256"]
+    )
 
 
 def test_34_canonical_hash_repeats(config) -> None:
@@ -394,7 +400,12 @@ def test_37_accepted_gma1a_hash_in_manifest(config) -> None:
 
 def test_38_no_writes_outside_approved_paths(config) -> None:
     run_gma1b_macro_cash_foundation(config)
-    for path in [REPORT_DIR, CANONICAL_DIR, config.paths["raw_root"], config.paths["manifest_root"]]:
+    for path in [
+        REPORT_DIR,
+        CANONICAL_DIR,
+        config.paths["raw_root"],
+        config.paths["manifest_root"],
+    ]:
         assert is_approved_gma1b_output_path(path)
 
 
@@ -421,11 +432,13 @@ def test_41_cli_default_macro_command_does_not_access_network(
         "market_strats.global_multi_asset.gma1b_macro_cash.fetch_fred_json",
         fail_network,
     )
-    exit_code = gma_main([
-        "--config",
-        str(CONFIG_PATH),
-        "build-macro-cash-foundation",
-    ])
+    exit_code = gma_main(
+        [
+            "--config",
+            str(CONFIG_PATH),
+            "build-macro-cash-foundation",
+        ]
+    )
     assert exit_code == 0
 
 
@@ -434,12 +447,14 @@ def test_42_cli_live_missing_credential_fails_without_secret(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     monkeypatch.delenv("FRED_API_KEY", raising=False)
-    exit_code = gma_main([
-        "--config",
-        str(CONFIG_PATH),
-        "build-macro-cash-foundation",
-        "--live",
-    ])
+    exit_code = gma_main(
+        [
+            "--config",
+            str(CONFIG_PATH),
+            "build-macro-cash-foundation",
+            "--live",
+        ]
+    )
     captured = capsys.readouterr().out
     assert exit_code == 2
     assert "gma1b_live_data_incomplete" in captured
@@ -459,25 +474,31 @@ def test_43_cli_live_passes_explicit_live_flag(monkeypatch: pytest.MonkeyPatch) 
             live_retrieval_status="official_fred_alfred_live_retrieval_complete",
         )
 
-    monkeypatch.setattr("market_strats.global_multi_asset.cli.run_gma1b_macro_cash_foundation", fake_run)
-    exit_code = gma_main([
-        "--config",
-        str(CONFIG_PATH),
-        "build-macro-cash-foundation",
-        "--live",
-    ])
+    monkeypatch.setattr(
+        "market_strats.global_multi_asset.cli.run_gma1b_macro_cash_foundation", fake_run
+    )
+    exit_code = gma_main(
+        [
+            "--config",
+            str(CONFIG_PATH),
+            "build-macro-cash-foundation",
+            "--live",
+        ]
+    )
     assert exit_code == 0
     assert calls == [True]
 
 
 def test_44_cli_unknown_live_flag_fails() -> None:
     with pytest.raises(SystemExit):
-        gma_main([
-            "--config",
-            str(CONFIG_PATH),
-            "build-macro-cash-foundation",
-            "--live-now",
-        ])
+        gma_main(
+            [
+                "--config",
+                str(CONFIG_PATH),
+                "build-macro-cash-foundation",
+                "--live-now",
+            ]
+        )
 
 
 def test_45_fixture_snapshots_cannot_be_accepted_as_live_evidence(
@@ -491,7 +512,9 @@ def test_45_fixture_snapshots_cannot_be_accepted_as_live_evidence(
     assert not selection["fixture_snapshots_accepted_as_live_evidence"].astype(bool).any()
 
 
-def test_46_live_reports_do_not_store_credential_name(config, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_46_live_reports_do_not_store_credential_name(
+    config, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.delenv("FRED_API_KEY", raising=False)
     run_gma1b_macro_cash_foundation(config, live=True)
     text = "\n".join(
@@ -529,7 +552,9 @@ def _http_error(status: int, body: bytes, *, content_type: str = "application/js
     )
 
 
-def test_47_metadata_request_includes_json_and_exact_endpoint(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_47_metadata_request_includes_json_and_exact_endpoint(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     seen: list[str] = []
 
     def fake_urlopen(url, timeout):
@@ -580,7 +605,9 @@ def test_48_observations_request_includes_json_and_expected_parameters() -> None
         assert key in url
 
 
-def test_49_xml_when_json_expected_is_response_format_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_49_xml_when_json_expected_is_response_format_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(
         "market_strats.global_multi_asset.gma1b_macro_cash.urlopen",
         lambda url, timeout: _FakeResponse(b"<error>xml</error>", "text/xml"),
@@ -660,7 +687,9 @@ def test_52_http_429_and_500_are_retried(monkeypatch: pytest.MonkeyPatch) -> Non
         return _FakeResponse(b'{"observations":[]}')
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
-    monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.time.sleep", lambda seconds: None)
+    monkeypatch.setattr(
+        "market_strats.global_multi_asset.gma1b_macro_cash.time.sleep", lambda seconds: None
+    )
     payload = fetch_fred_json(
         "series/observations",
         {"series_id": "DGS3MO"},
@@ -685,7 +714,9 @@ def test_53_timeout_is_retried(monkeypatch: pytest.MonkeyPatch) -> None:
         return _FakeResponse(b'{"observations":[]}')
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
-    monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.time.sleep", lambda seconds: None)
+    monkeypatch.setattr(
+        "market_strats.global_multi_asset.gma1b_macro_cash.time.sleep", lambda seconds: None
+    )
     fetch_fred_json(
         "series/observations",
         {"series_id": "DGS3MO"},
@@ -704,16 +735,34 @@ def test_54_json_and_xml_provider_errors_are_sanitized(monkeypatch: pytest.Monke
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_json)
     with pytest.raises(Exception) as excinfo:
-        fetch_fred_json("series", {"series_id": "DGS3MO"}, api_key="SECRET", timeout_seconds=1, series_id="DGS3MO", request_stage="metadata")
+        fetch_fred_json(
+            "series",
+            {"series_id": "DGS3MO"},
+            api_key="SECRET",
+            timeout_seconds=1,
+            series_id="DGS3MO",
+            request_stage="metadata",
+        )
     assert excinfo.value.incident.provider_error_code == "E"
     assert "SECRET" not in excinfo.value.incident.redacted_provider_message
 
     def fake_xml(url, timeout):
-        raise _http_error(400, b'<error code="X"><message>bad api_key=SECRET</message></error>', content_type="text/xml")
+        raise _http_error(
+            400,
+            b'<error code="X"><message>bad api_key=SECRET</message></error>',
+            content_type="text/xml",
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_xml)
     with pytest.raises(Exception) as xml_exc:
-        fetch_fred_json("series", {"series_id": "DGS3MO"}, api_key="SECRET", timeout_seconds=1, series_id="DGS3MO", request_stage="metadata")
+        fetch_fred_json(
+            "series",
+            {"series_id": "DGS3MO"},
+            api_key="SECRET",
+            timeout_seconds=1,
+            series_id="DGS3MO",
+            request_stage="metadata",
+        )
     assert xml_exc.value.incident.provider_error_code == "X"
     assert "SECRET" not in xml_exc.value.incident.redacted_provider_message
 
@@ -726,22 +775,28 @@ def test_55_diagnostic_path_parses_success_and_is_ineligible(
 
     def fake_urlopen(url, timeout):
         if "/series?" in url:
-            return _FakeResponse(b'{"seriess":[{"id":"DGS3MO","title":"3M","units":"Percent","frequency":"Daily"}]}')
+            return _FakeResponse(
+                b'{"seriess":[{"id":"DGS3MO","title":"3M","units":"Percent","frequency":"Daily"}]}'
+            )
         return _FakeResponse(
             b'{"count":1,"observations":[{"date":"2024-01-02","value":"5.1","realtime_start":"2024-01-02","realtime_end":"9999-12-31"}]}'
         )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
-    exit_code = gma_main([
-        "--config",
-        str(CONFIG_PATH),
-        "build-macro-cash-foundation",
-        "--live-diagnose",
-        "--series-id",
-        "DGS3MO",
-    ])
+    exit_code = gma_main(
+        [
+            "--config",
+            str(CONFIG_PATH),
+            "build-macro-cash-foundation",
+            "--live-diagnose",
+            "--series-id",
+            "DGS3MO",
+        ]
+    )
     assert exit_code == 0
-    smoke = (REPORT_DIR / "diagnostics" / "production_dgs3mo_smoke_test.json").read_text(encoding="utf-8")
+    smoke = (REPORT_DIR / "diagnostics" / "production_dgs3mo_smoke_test.json").read_text(
+        encoding="utf-8"
+    )
     assert '"diagnostic_only": true' in smoke
     assert '"eligible_for_live_canonical_selection": false' in smoke
     diag = pd.read_csv(REPORT_DIR / "diagnostics" / "per_series_live_diagnostic.csv")
@@ -760,15 +815,19 @@ def test_56_per_series_diagnostic_continues_after_failure(
             raise _http_error(400, b'{"error_message":"bad"}')
         if "/series?" in url:
             return _FakeResponse(b'{"seriess":[{"id":"OK","title":"OK","units":"Percent"}]}')
-        return _FakeResponse(b'{"count":1,"observations":[{"date":"2024-01-02","value":"1","realtime_start":"2024-01-02","realtime_end":"9999-12-31"}]}')
+        return _FakeResponse(
+            b'{"count":1,"observations":[{"date":"2024-01-02","value":"1","realtime_start":"2024-01-02","realtime_end":"9999-12-31"}]}'
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
-    gma_main([
-        "--config",
-        str(CONFIG_PATH),
-        "build-macro-cash-foundation",
-        "--live-diagnose-all",
-    ])
+    gma_main(
+        [
+            "--config",
+            str(CONFIG_PATH),
+            "build-macro-cash-foundation",
+            "--live-diagnose-all",
+        ]
+    )
     diag = pd.read_csv(REPORT_DIR / "diagnostics" / "per_series_live_diagnostic.csv")
     assert set(diag["series_id"]).issuperset({"DGS3MO", "DGS2"})
     assert "failed" in set(diag["metadata_status"])
@@ -777,14 +836,16 @@ def test_56_per_series_diagnostic_continues_after_failure(
 
 def test_57_unknown_diagnostic_series_is_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("FRED_API_KEY", "SECRET")
-    exit_code = gma_main([
-        "--config",
-        str(CONFIG_PATH),
-        "build-macro-cash-foundation",
-        "--live-diagnose",
-        "--series-id",
-        "NOT_REGISTERED",
-    ])
+    exit_code = gma_main(
+        [
+            "--config",
+            str(CONFIG_PATH),
+            "build-macro-cash-foundation",
+            "--live-diagnose",
+            "--series-id",
+            "NOT_REGISTERED",
+        ]
+    )
     assert exit_code == 2
     diag = pd.read_csv(REPORT_DIR / "diagnostics" / "per_series_live_diagnostic.csv")
     assert diag.iloc[0]["failure_category"] == "invalid_series"
@@ -836,12 +897,21 @@ def test_60_full_vintage_series_calls_vintage_dates_and_explicit_chunks(
         seen.append(url)
         if "series/vintagedates" in url:
             return _FakeResponse(json_bytes({"count": 3, "vintage_dates": dates}))
-        return _FakeResponse(json_bytes({
-            "count": 1,
-            "observations": [
-                {"date": "2020-01-01", "value": "1", "realtime_start": dates[0], "realtime_end": "9999-12-31"}
-            ],
-        }))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "count": 1,
+                    "observations": [
+                        {
+                            "date": "2020-01-01",
+                            "value": "1",
+                            "realtime_start": dates[0],
+                            "realtime_end": "9999-12-31",
+                        }
+                    ],
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     rows, info = _fetch_observations_by_classification(
@@ -875,7 +945,13 @@ def test_61_vintage_chunk_sizes_for_5046_dates() -> None:
 
 
 def test_62_merge_vintage_chunks_dedupes_identical_and_rejects_conflicts() -> None:
-    row = {"series_id": "CPIAUCSL", "date": "2020-01-01", "value": "1", "realtime_start": "2020-02-01", "realtime_end": "9999-12-31"}
+    row = {
+        "series_id": "CPIAUCSL",
+        "date": "2020-01-01",
+        "value": "1",
+        "realtime_start": "2020-02-01",
+        "realtime_end": "9999-12-31",
+    }
     merged = merge_vintage_observation_chunks([[row], [dict(row)]])
     assert len(merged) == 1
     conflict = dict(row)
@@ -893,12 +969,21 @@ def test_63_all_requested_vintage_chunks_are_accounted_for(monkeypatch: pytest.M
         if "series/vintagedates" in url:
             return _FakeResponse(json_bytes({"count": len(dates), "vintage_dates": dates}))
         seen_observation_urls.append(url)
-        return _FakeResponse(json_bytes({
-            "count": 1,
-            "observations": [
-                {"date": "2020-01-01", "value": "1", "realtime_start": "2020-02-01", "realtime_end": "9999-12-31"}
-            ],
-        }))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "count": 1,
+                    "observations": [
+                        {
+                            "date": "2020-01-01",
+                            "value": "1",
+                            "realtime_start": "2020-02-01",
+                            "realtime_end": "9999-12-31",
+                        }
+                    ],
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     rows, info = _fetch_observations_by_classification(
@@ -945,35 +1030,41 @@ def test_65_cancellation_preserves_completed_rows(config, monkeypatch: pytest.Mo
         nonlocal calls
         calls += 1
         if calls == 1:
-            return ({
-                "series_id": series_id,
-                "retrieval_classification": "current_history_with_availability",
-                "metadata_status": "passed",
-                "metadata_http_status": 200,
-                "observations_status": "passed",
-                "observations_http_status": 200,
-                "row_count": 1,
-                "first_observation_date": "2024-01-01",
-                "last_observation_date": "2024-01-01",
-                "vintage_status": "not_requested_current_history",
-                "vintage_date_count": 0,
-                "vintage_chunk_count": 0,
-                "vintage_chunk_sizes": "",
-                "failure_stage": "",
-                "failure_category": "",
-                "retryable": False,
-                "diagnostic_snapshot_eligible": False,
-                "started_at_utc": "2024-01-01T00:00:00+00:00",
-                "completed_at_utc": "2024-01-01T00:00:01+00:00",
-                "elapsed_seconds": 1,
-                "request_count": 2,
-                "retry_count": 0,
-                "cancelled": False,
-            }, [], {})
+            return (
+                {
+                    "series_id": series_id,
+                    "retrieval_classification": "current_history_with_availability",
+                    "metadata_status": "passed",
+                    "metadata_http_status": 200,
+                    "observations_status": "passed",
+                    "observations_http_status": 200,
+                    "row_count": 1,
+                    "first_observation_date": "2024-01-01",
+                    "last_observation_date": "2024-01-01",
+                    "vintage_status": "not_requested_current_history",
+                    "vintage_date_count": 0,
+                    "vintage_chunk_count": 0,
+                    "vintage_chunk_sizes": "",
+                    "failure_stage": "",
+                    "failure_category": "",
+                    "retryable": False,
+                    "diagnostic_snapshot_eligible": False,
+                    "started_at_utc": "2024-01-01T00:00:00+00:00",
+                    "completed_at_utc": "2024-01-01T00:00:01+00:00",
+                    "elapsed_seconds": 1,
+                    "request_count": 2,
+                    "retry_count": 0,
+                    "cancelled": False,
+                },
+                [],
+                {},
+            )
         raise KeyboardInterrupt
 
     monkeypatch.setenv("FRED_API_KEY", "SECRET")
-    monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash._diagnose_one_series", fake_diagnose)
+    monkeypatch.setattr(
+        "market_strats.global_multi_asset.gma1b_macro_cash._diagnose_one_series", fake_diagnose
+    )
     result = run_gma1b_live_diagnostic(config, all_series=True)
     assert result.decision == "gma1b_live_diagnostic_failed"
     diag = pd.read_csv(REPORT_DIR / "diagnostics" / "per_series_live_diagnostic.csv")
@@ -990,17 +1081,19 @@ def test_66_dgs3mo_current_request_matches_approved_parameter_plan(
     def fake_urlopen(url, timeout):
         seen.append(url)
         return _FakeResponse(
-            json_bytes({
-                "count": 1,
-                "observations": [
-                    {
-                        "date": "2024-01-02",
-                        "value": "5.1",
-                        "realtime_start": "2024-01-02",
-                        "realtime_end": "9999-12-31",
-                    }
-                ],
-            })
+            json_bytes(
+                {
+                    "count": 1,
+                    "observations": [
+                        {
+                            "date": "2024-01-02",
+                            "value": "5.1",
+                            "realtime_start": "2024-01-02",
+                            "realtime_end": "9999-12-31",
+                        }
+                    ],
+                }
+            )
         )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
@@ -1137,15 +1230,19 @@ def test_71_timeout_updates_smoke_report_and_fails_closed(
         raise TimeoutError("timed out")
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
-    monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.time.sleep", lambda seconds: None)
-    exit_code = gma_main([
-        "--config",
-        str(CONFIG_PATH),
-        "build-macro-cash-foundation",
-        "--live-diagnose",
-        "--series-id",
-        "DGS3MO",
-    ])
+    monkeypatch.setattr(
+        "market_strats.global_multi_asset.gma1b_macro_cash.time.sleep", lambda seconds: None
+    )
+    exit_code = gma_main(
+        [
+            "--config",
+            str(CONFIG_PATH),
+            "build-macro-cash-foundation",
+            "--live-diagnose",
+            "--series-id",
+            "DGS3MO",
+        ]
+    )
     assert exit_code == 2
     smoke = json.loads(
         (REPORT_DIR / "diagnostics" / "production_dgs3mo_smoke_test.json").read_text(
@@ -1168,7 +1265,9 @@ def test_72_timeout_retry_count_is_bounded(monkeypatch: pytest.MonkeyPatch) -> N
         raise TimeoutError("timed out")
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
-    monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.time.sleep", lambda seconds: None)
+    monkeypatch.setattr(
+        "market_strats.global_multi_asset.gma1b_macro_cash.time.sleep", lambda seconds: None
+    )
     with pytest.raises(Exception) as excinfo:
         fetch_fred_json(
             "series/observations",
@@ -1200,19 +1299,34 @@ def test_73_full_vintage_retrieval_uses_output_type_3(
         if "series/vintagedates" in url:
             return _FakeResponse(json_bytes({"count": len(dates), "vintage_dates": dates}))
         # output_type=2 and output_type=4 sub-requests also hit observations
-        return _FakeResponse(json_bytes({
-            "count": 1,
-            "observations": [
-                {"date": "2020-01-01", "value": "1", "realtime_start": dates[0], "realtime_end": "9999-12-31"}
-            ],
-        }))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "count": 1,
+                    "observations": [
+                        {
+                            "date": "2020-01-01",
+                            "value": "1",
+                            "realtime_start": dates[0],
+                            "realtime_end": "9999-12-31",
+                        }
+                    ],
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     _rows, info = _fetch_observations_by_classification(
-        "CPIAUCSL", api_key="SECRET", timeout_seconds=1, retry_count=0, limit=1,
+        "CPIAUCSL",
+        api_key="SECRET",
+        timeout_seconds=1,
+        retry_count=0,
+        limit=1,
     )
     obs_urls = [u for u in seen if "series/observations" in u]
-    assert any("output_type=3" in u for u in obs_urls), "output_type=3 must appear in observation requests"
+    assert any("output_type=3" in u for u in obs_urls), (
+        "output_type=3 must appear in observation requests"
+    )
     assert info["output_type_3_status"] == "used_as_authoritative_revision_event_stream"
 
 
@@ -1227,16 +1341,29 @@ def test_74_output_type_4_is_not_authoritative(
         seen.append(url)
         if "series/vintagedates" in url:
             return _FakeResponse(json_bytes({"count": len(dates), "vintage_dates": dates}))
-        return _FakeResponse(json_bytes({
-            "count": 1,
-            "observations": [
-                {"date": "2020-01-01", "value": "1", "realtime_start": dates[0], "realtime_end": "9999-12-31"}
-            ],
-        }))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "count": 1,
+                    "observations": [
+                        {
+                            "date": "2020-01-01",
+                            "value": "1",
+                            "realtime_start": dates[0],
+                            "realtime_end": "9999-12-31",
+                        }
+                    ],
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     _fetch_observations_by_classification(
-        "UNRATE", api_key="SECRET", timeout_seconds=1, retry_count=0, limit=1,
+        "UNRATE",
+        api_key="SECRET",
+        timeout_seconds=1,
+        retry_count=0,
+        limit=1,
     )
     obs_urls = [u for u in seen if "series/observations" in u]
     # The first authoritative observation request must NOT be output_type=4
@@ -1249,7 +1376,12 @@ def test_74_output_type_4_is_not_authoritative(
 def test_75_output_type_3_captures_initial_events() -> None:
     """_derive_revision_event_counts counts the first event per obs_date as initial."""
     events = [
-        {"date": "2020-01-01", "value": "1.0", "realtime_start": "2020-02-01", "realtime_end": "9999-12-31"},
+        {
+            "date": "2020-01-01",
+            "value": "1.0",
+            "realtime_start": "2020-02-01",
+            "realtime_end": "9999-12-31",
+        },
     ]
     total, initial, later = _derive_revision_event_counts(events)
     assert total == 1
@@ -1260,9 +1392,24 @@ def test_75_output_type_3_captures_initial_events() -> None:
 def test_76_output_type_3_captures_later_revisions() -> None:
     """_derive_revision_event_counts counts subsequent events as later revisions."""
     events = [
-        {"date": "2020-01-01", "value": "1.0", "realtime_start": "2020-02-01", "realtime_end": "9999-12-31"},
-        {"date": "2020-01-01", "value": "1.1", "realtime_start": "2020-03-01", "realtime_end": "9999-12-31"},
-        {"date": "2020-01-01", "value": "1.2", "realtime_start": "2020-04-01", "realtime_end": "9999-12-31"},
+        {
+            "date": "2020-01-01",
+            "value": "1.0",
+            "realtime_start": "2020-02-01",
+            "realtime_end": "9999-12-31",
+        },
+        {
+            "date": "2020-01-01",
+            "value": "1.1",
+            "realtime_start": "2020-03-01",
+            "realtime_end": "9999-12-31",
+        },
+        {
+            "date": "2020-01-01",
+            "value": "1.2",
+            "realtime_start": "2020-04-01",
+            "realtime_end": "9999-12-31",
+        },
     ]
     total, initial, later = _derive_revision_event_counts(events)
     assert total == 3
@@ -1273,8 +1420,18 @@ def test_76_output_type_3_captures_later_revisions() -> None:
 def test_77_revision_sequence_is_deterministic() -> None:
     """Events with the same obs_date but shuffled input order produce a stable sequence."""
     events_a = [
-        {"date": "2020-01-01", "value": "1.0", "realtime_start": "2020-02-01", "realtime_end": "9999-12-31"},
-        {"date": "2020-01-01", "value": "1.1", "realtime_start": "2020-03-01", "realtime_end": "9999-12-31"},
+        {
+            "date": "2020-01-01",
+            "value": "1.0",
+            "realtime_start": "2020-02-01",
+            "realtime_end": "9999-12-31",
+        },
+        {
+            "date": "2020-01-01",
+            "value": "1.1",
+            "realtime_start": "2020-03-01",
+            "realtime_end": "9999-12-31",
+        },
     ]
     events_b = list(reversed(events_a))
     result_a = _derive_revision_event_counts(events_a)
@@ -1296,8 +1453,18 @@ def test_79_output_type_2_bounded_validation_matches_reconstruction() -> None:
     """_validate_output_type_2_against_reconstruction passes when snapshot agrees with events."""
     # Build revision events
     events = [
-        {"date": "2020-01-01", "value": "1.0", "realtime_start": "2020-02-01", "realtime_end": "9999-12-31"},
-        {"date": "2020-01-01", "value": "1.1", "realtime_start": "2020-03-01", "realtime_end": "9999-12-31"},
+        {
+            "date": "2020-01-01",
+            "value": "1.0",
+            "realtime_start": "2020-02-01",
+            "realtime_end": "9999-12-31",
+        },
+        {
+            "date": "2020-01-01",
+            "value": "1.1",
+            "realtime_start": "2020-03-01",
+            "realtime_end": "9999-12-31",
+        },
     ]
     vintage_dates = ["2020-02-01", "2020-03-01"]
 
@@ -1309,8 +1476,18 @@ def test_79_output_type_2_bounded_validation_matches_reconstruction() -> None:
     def fake_fetch(series_id, *, vintage_dates, output_type, **kwargs):
         assert output_type == 2, "bounded validation must use output_type=2"
         return [
-            {"date": "2020-01-01", "value": "1.0", "realtime_start": "2020-02-01", "realtime_end": "9999-12-31"},
-            {"date": "2020-01-01", "value": "1.1", "realtime_start": "2020-03-01", "realtime_end": "9999-12-31"},
+            {
+                "date": "2020-01-01",
+                "value": "1.0",
+                "realtime_start": "2020-02-01",
+                "realtime_end": "9999-12-31",
+            },
+            {
+                "date": "2020-01-01",
+                "value": "1.1",
+                "realtime_start": "2020-03-01",
+                "realtime_end": "9999-12-31",
+            },
         ]
 
     mod._fetch_fred_observations_for_vintage_dates = fake_fetch
@@ -1332,17 +1509,28 @@ def test_79_output_type_2_bounded_validation_matches_reconstruction() -> None:
 def test_80_output_type_2_mismatch_fails_closed() -> None:
     """_validate_output_type_2_against_reconstruction fails when snapshot disagrees with events."""
     events = [
-        {"date": "2020-01-01", "value": "1.0", "realtime_start": "2020-02-01", "realtime_end": "9999-12-31"},
+        {
+            "date": "2020-01-01",
+            "value": "1.0",
+            "realtime_start": "2020-02-01",
+            "realtime_end": "9999-12-31",
+        },
     ]
     vintage_dates = ["2020-02-01"]
 
     import market_strats.global_multi_asset.gma1b_macro_cash as mod
+
     orig = mod._fetch_fred_observations_for_vintage_dates
 
     def fake_fetch(series_id, *, vintage_dates, output_type, **kwargs):
         # Return a different value — simulating a mismatch
         return [
-            {"date": "2020-01-01", "value": "9.9", "realtime_start": "2020-02-01", "realtime_end": "9999-12-31"},
+            {
+                "date": "2020-01-01",
+                "value": "9.9",
+                "realtime_start": "2020-02-01",
+                "realtime_end": "9999-12-31",
+            },
         ]
 
     mod._fetch_fred_observations_for_vintage_dates = fake_fetch
@@ -1364,11 +1552,22 @@ def test_80_output_type_2_mismatch_fails_closed() -> None:
 def test_81_output_type_4_may_crosscheck_initial_values_only() -> None:
     """_crosscheck_output_type_4_initial_releases uses output_type=4 only and passes when values agree."""
     events = [
-        {"date": "2020-01-01", "value": "1.0", "realtime_start": "2020-02-01", "realtime_end": "9999-12-31"},
-        {"date": "2020-01-01", "value": "1.1", "realtime_start": "2020-03-01", "realtime_end": "9999-12-31"},
+        {
+            "date": "2020-01-01",
+            "value": "1.0",
+            "realtime_start": "2020-02-01",
+            "realtime_end": "9999-12-31",
+        },
+        {
+            "date": "2020-01-01",
+            "value": "1.1",
+            "realtime_start": "2020-03-01",
+            "realtime_end": "9999-12-31",
+        },
     ]
 
     import market_strats.global_multi_asset.gma1b_macro_cash as mod
+
     orig = mod._fetch_fred_observations_for_vintage_dates
     seen_output_types: list[int] = []
 
@@ -1376,7 +1575,12 @@ def test_81_output_type_4_may_crosscheck_initial_values_only() -> None:
         seen_output_types.append(output_type)
         # output_type=4 returns only initial values
         return [
-            {"date": "2020-01-01", "value": "1.0", "realtime_start": "2020-02-01", "realtime_end": "9999-12-31"},
+            {
+                "date": "2020-01-01",
+                "value": "1.0",
+                "realtime_start": "2020-02-01",
+                "realtime_end": "9999-12-31",
+            },
         ]
 
     mod._fetch_fred_observations_for_vintage_dates = fake_fetch
@@ -1404,17 +1608,35 @@ def test_82_cpi_diagnostic_reports_revision_event_counts(
     def fake_urlopen(url, timeout):
         if "series/vintagedates" in url:
             return _FakeResponse(json_bytes({"count": len(dates), "vintage_dates": dates}))
-        return _FakeResponse(json_bytes({
-            "count": 2,
-            "observations": [
-                {"date": "2019-12-01", "value": "260.0", "realtime_start": dates[0], "realtime_end": "9999-12-31"},
-                {"date": "2019-12-01", "value": "260.1", "realtime_start": dates[1], "realtime_end": "9999-12-31"},
-            ],
-        }))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "count": 2,
+                    "observations": [
+                        {
+                            "date": "2019-12-01",
+                            "value": "260.0",
+                            "realtime_start": dates[0],
+                            "realtime_end": "9999-12-31",
+                        },
+                        {
+                            "date": "2019-12-01",
+                            "value": "260.1",
+                            "realtime_start": dates[1],
+                            "realtime_end": "9999-12-31",
+                        },
+                    ],
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     _rows, info = _fetch_observations_by_classification(
-        "CPIAUCSL", api_key="SECRET", timeout_seconds=1, retry_count=0, limit=10,
+        "CPIAUCSL",
+        api_key="SECRET",
+        timeout_seconds=1,
+        retry_count=0,
+        limit=10,
     )
     assert "revision_event_count" in info
     assert "initial_release_event_count" in info
@@ -1433,16 +1655,29 @@ def test_83_unrate_uses_corrected_contract(
         seen.append(url)
         if "series/vintagedates" in url:
             return _FakeResponse(json_bytes({"count": len(dates), "vintage_dates": dates}))
-        return _FakeResponse(json_bytes({
-            "count": 1,
-            "observations": [
-                {"date": "2020-01-01", "value": "4.0", "realtime_start": dates[0], "realtime_end": "9999-12-31"}
-            ],
-        }))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "count": 1,
+                    "observations": [
+                        {
+                            "date": "2020-01-01",
+                            "value": "4.0",
+                            "realtime_start": dates[0],
+                            "realtime_end": "9999-12-31",
+                        }
+                    ],
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     _rows, info = _fetch_observations_by_classification(
-        "UNRATE", api_key="SECRET", timeout_seconds=1, retry_count=0, limit=1,
+        "UNRATE",
+        api_key="SECRET",
+        timeout_seconds=1,
+        retry_count=0,
+        limit=1,
     )
     obs_urls = [u for u in seen if "series/observations" in u]
     assert any("output_type=3" in u for u in obs_urls), "UNRATE must use output_type=3"
@@ -1460,16 +1695,29 @@ def test_84_indpro_uses_corrected_contract(
         seen.append(url)
         if "series/vintagedates" in url:
             return _FakeResponse(json_bytes({"count": len(dates), "vintage_dates": dates}))
-        return _FakeResponse(json_bytes({
-            "count": 1,
-            "observations": [
-                {"date": "2020-01-01", "value": "102.0", "realtime_start": dates[0], "realtime_end": "9999-12-31"}
-            ],
-        }))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "count": 1,
+                    "observations": [
+                        {
+                            "date": "2020-01-01",
+                            "value": "102.0",
+                            "realtime_start": dates[0],
+                            "realtime_end": "9999-12-31",
+                        }
+                    ],
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     _rows, info = _fetch_observations_by_classification(
-        "INDPRO", api_key="SECRET", timeout_seconds=1, retry_count=0, limit=1,
+        "INDPRO",
+        api_key="SECRET",
+        timeout_seconds=1,
+        retry_count=0,
+        limit=1,
     )
     obs_urls = [u for u in seen if "series/observations" in u]
     assert any("output_type=3" in u for u in obs_urls), "INDPRO must use output_type=3"
@@ -1484,16 +1732,29 @@ def test_85_dgs3mo_current_history_path_unchanged(
 
     def fake_urlopen(url, timeout):
         seen.append(url)
-        return _FakeResponse(json_bytes({
-            "count": 1,
-            "observations": [
-                {"date": "2024-01-02", "value": "5.1", "realtime_start": "2024-01-02", "realtime_end": "9999-12-31"}
-            ],
-        }))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "count": 1,
+                    "observations": [
+                        {
+                            "date": "2024-01-02",
+                            "value": "5.1",
+                            "realtime_start": "2024-01-02",
+                            "realtime_end": "9999-12-31",
+                        }
+                    ],
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     _rows, info = _fetch_observations_by_classification(
-        "DGS3MO", api_key="SECRET", timeout_seconds=1, retry_count=0, limit=1,
+        "DGS3MO",
+        api_key="SECRET",
+        timeout_seconds=1,
+        retry_count=0,
+        limit=1,
     )
     assert all("series/vintagedates" not in u for u in seen), "DGS3MO must not call vintagedates"
     assert all("output_type" not in u for u in seen), "DGS3MO must not use output_type parameter"
@@ -1553,9 +1814,7 @@ def test_89_1000_dates_do_not_form_one_oversized_uri() -> None:
         series_id="CPIAUCSL",
         api_key=_SHORT_KEY,
     )
-    assert len(chunks) > 1, (
-        "1,000 vintage dates must not form a single URI-safe chunk"
-    )
+    assert len(chunks) > 1, "1,000 vintage dates must not form a single URI-safe chunk"
 
 
 def test_90_every_chunk_at_most_400_dates() -> None:
@@ -1606,6 +1865,7 @@ def test_92_every_encoded_uri_at_most_7000_bytes() -> None:
 def test_93_exact_uri_measurement_includes_endpoint() -> None:
     """_measure_vintage_request_uri_bytes must include the full FRED API root and endpoint path."""
     from market_strats.global_multi_asset.gma1b_macro_cash import FRED_API_ROOT
+
     dates = ["2020-01-01"]
     measured = _measure_vintage_request_uri_bytes(
         "series/observations",
@@ -1660,12 +1920,21 @@ def test_95_api_key_value_absent_from_info(monkeypatch: pytest.MonkeyPatch) -> N
     def fake_urlopen(url, timeout):
         if "series/vintagedates" in url:
             return _FakeResponse(json_bytes({"count": len(dates), "vintage_dates": dates}))
-        return _FakeResponse(json_bytes({
-            "count": 1,
-            "observations": [
-                {"date": "2020-01-01", "value": "1.0", "realtime_start": dates[0], "realtime_end": "9999-12-31"},
-            ],
-        }))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "count": 1,
+                    "observations": [
+                        {
+                            "date": "2020-01-01",
+                            "value": "1.0",
+                            "realtime_start": dates[0],
+                            "realtime_end": "9999-12-31",
+                        },
+                    ],
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     _rows, info = _fetch_observations_by_classification(
@@ -1674,9 +1943,7 @@ def test_95_api_key_value_absent_from_info(monkeypatch: pytest.MonkeyPatch) -> N
         timeout_seconds=1,
     )
     for key, val in info.items():
-        assert secret not in str(val), (
-            f"API-key value must not appear in info field '{key}'"
-        )
+        assert secret not in str(val), f"API-key value must not appear in info field '{key}'"
 
 
 def test_96_deterministic_greedy_chunking_same_input_same_output() -> None:
@@ -1763,9 +2030,7 @@ def test_100_date_exceeding_uri_budget_begins_new_chunk() -> None:
         api_key=_SHORT_KEY,
         uri_byte_budget=tight_budget,
     )
-    assert len(chunks) == 2, (
-        "Each date must be in its own chunk when two-date URI exceeds budget"
-    )
+    assert len(chunks) == 2, "Each date must be in its own chunk when two-date URI exceeds budget"
 
 
 def test_101_single_date_overflow_fails_closed() -> None:
@@ -1788,12 +2053,21 @@ def test_102_output_type_3_uses_uri_aware_chunks(monkeypatch: pytest.MonkeyPatch
         seen.append(url)
         if "series/vintagedates" in url:
             return _FakeResponse(json_bytes({"count": len(dates), "vintage_dates": dates}))
-        return _FakeResponse(json_bytes({
-            "count": 1,
-            "observations": [
-                {"date": "2000-01-01", "value": "1.0", "realtime_start": dates[0], "realtime_end": "9999-12-31"},
-            ],
-        }))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "count": 1,
+                    "observations": [
+                        {
+                            "date": "2000-01-01",
+                            "value": "1.0",
+                            "realtime_start": dates[0],
+                            "realtime_end": "9999-12-31",
+                        },
+                    ],
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     _rows, info = _fetch_observations_by_classification(
@@ -1820,12 +2094,21 @@ def test_103_output_type_2_uses_uri_aware_contract(monkeypatch: pytest.MonkeyPat
         seen.append(url)
         if "series/vintagedates" in url:
             return _FakeResponse(json_bytes({"count": len(dates), "vintage_dates": dates}))
-        return _FakeResponse(json_bytes({
-            "count": 1,
-            "observations": [
-                {"date": "2020-01-01", "value": "1.0", "realtime_start": dates[0], "realtime_end": "9999-12-31"},
-            ],
-        }))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "count": 1,
+                    "observations": [
+                        {
+                            "date": "2020-01-01",
+                            "value": "1.0",
+                            "realtime_start": dates[0],
+                            "realtime_end": "9999-12-31",
+                        },
+                    ],
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     _rows, info = _fetch_observations_by_classification(
@@ -1848,12 +2131,21 @@ def test_104_output_type_4_uses_uri_aware_contract(monkeypatch: pytest.MonkeyPat
         seen.append(url)
         if "series/vintagedates" in url:
             return _FakeResponse(json_bytes({"count": len(dates), "vintage_dates": dates}))
-        return _FakeResponse(json_bytes({
-            "count": 1,
-            "observations": [
-                {"date": "2020-01-01", "value": "1.0", "realtime_start": dates[0], "realtime_end": "9999-12-31"},
-            ],
-        }))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "count": 1,
+                    "observations": [
+                        {
+                            "date": "2020-01-01",
+                            "value": "1.0",
+                            "realtime_start": dates[0],
+                            "realtime_end": "9999-12-31",
+                        },
+                    ],
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     _rows, info = _fetch_observations_by_classification(
@@ -1873,6 +2165,7 @@ def _make_414_incident(series_id: str = "CPIAUCSL"):
         ProviderRequestError,
         ProviderRequestIncident,
     )
+
     incident = ProviderRequestIncident(
         diagnostic_run_id="test",
         series_id=series_id,
@@ -1923,9 +2216,7 @@ def test_105_http_414_does_not_retry_identical_request() -> None:
         mod._fetch_fred_observations_for_vintage_dates = orig
 
     # Identical payload must not appear more than once.
-    assert call_payloads.count(["2020-01-01"]) == 1, (
-        "414 must not re-submit the identical request"
-    )
+    assert call_payloads.count(["2020-01-01"]) == 1, "414 must not re-submit the identical request"
 
 
 def test_106_http_414_splits_chunk_into_ordered_halves() -> None:
@@ -1939,7 +2230,14 @@ def test_106_http_414_splits_chunk_into_ordered_halves() -> None:
         calls.append(list(vintage_dates))
         if len(vintage_dates) > 1:
             raise _make_414_incident()
-        return [{"date": "2020-01-01", "value": "1", "realtime_start": vintage_dates[0], "realtime_end": "9999-12-31"}]
+        return [
+            {
+                "date": "2020-01-01",
+                "value": "1",
+                "realtime_start": vintage_dates[0],
+                "realtime_end": "9999-12-31",
+            }
+        ]
 
     mod._fetch_fred_observations_for_vintage_dates = fake_fetch
     try:
@@ -1982,7 +2280,14 @@ def test_107_adaptive_splitting_preserves_exact_coverage() -> None:
         all_calls.append(list(vintage_dates))
         if len(vintage_dates) > 1:
             raise _make_414_incident()
-        return [{"date": "2020-01-01", "value": str(vintage_dates[0][-2:]), "realtime_start": vintage_dates[0], "realtime_end": "9999-12-31"}]
+        return [
+            {
+                "date": "2020-01-01",
+                "value": str(vintage_dates[0][-2:]),
+                "realtime_start": vintage_dates[0],
+                "realtime_end": "9999-12-31",
+            }
+        ]
 
     mod._fetch_fred_observations_for_vintage_dates = fake_fetch
     input_dates = [f"2020-{m:02d}-01" for m in range(1, 5)]
@@ -2089,18 +2394,42 @@ def test_110_request_count_attempted_accurate_on_failure(monkeypatch: pytest.Mon
     def fake_urlopen(url, timeout):
         call_count["n"] += 1
         if "series/vintagedates" in url:
-            return _FakeResponse(json_bytes({"count": 2, "vintage_dates": ["2020-01-01", "2020-02-01"]}))
+            return _FakeResponse(
+                json_bytes({"count": 2, "vintage_dates": ["2020-01-01", "2020-02-01"]})
+            )
         if "series/observations" in url:
             # Simulate 414 failure.
             from urllib.error import HTTPError
+
             raise HTTPError(url, 414, "Request-URI Too Long", {}, None)
-        return _FakeResponse(json_bytes({"seriess": [{"id": "CPIAUCSL", "title": "CPI", "units": "Index", "frequency": "Monthly", "frequency_short": "M", "seasonal_adjustment": "SA", "observation_start": "1947-01-01", "observation_end": "2024-01-01", "last_updated": "2024-01-01", "notes": "", "source": "BLS"}]}))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "seriess": [
+                        {
+                            "id": "CPIAUCSL",
+                            "title": "CPI",
+                            "units": "Index",
+                            "frequency": "Monthly",
+                            "frequency_short": "M",
+                            "seasonal_adjustment": "SA",
+                            "observation_start": "1947-01-01",
+                            "observation_end": "2024-01-01",
+                            "last_updated": "2024-01-01",
+                            "notes": "",
+                            "source": "BLS",
+                        }
+                    ]
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     config = load_gma1b_config(CONFIG_PATH)
     row, incidents, _smoke = config.__class__.__new__(config.__class__), [], {}
     # Direct call to _diagnose_one_series.
     from market_strats.global_multi_asset.gma1b_macro_cash import _diagnose_one_series
+
     row, incidents, _smoke = _diagnose_one_series(
         config,
         series_id="CPIAUCSL",
@@ -2116,17 +2445,42 @@ def test_110_request_count_attempted_accurate_on_failure(monkeypatch: pytest.Mon
 
 def test_111_request_count_completed_accurate(monkeypatch: pytest.MonkeyPatch) -> None:
     """request_count_completed must be <= request_count_attempted on failure."""
+
     def fake_urlopen(url, timeout):
         if "series/vintagedates" in url:
-            return _FakeResponse(json_bytes({"count": 2, "vintage_dates": ["2020-01-01", "2020-02-01"]}))
+            return _FakeResponse(
+                json_bytes({"count": 2, "vintage_dates": ["2020-01-01", "2020-02-01"]})
+            )
         if "series/observations" in url:
             from urllib.error import HTTPError
+
             raise HTTPError(url, 414, "Request-URI Too Long", {}, None)
-        return _FakeResponse(json_bytes({"seriess": [{"id": "CPIAUCSL", "title": "CPI", "units": "Index", "frequency": "Monthly", "frequency_short": "M", "seasonal_adjustment": "SA", "observation_start": "1947-01-01", "observation_end": "2024-01-01", "last_updated": "2024-01-01", "notes": "", "source": "BLS"}]}))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "seriess": [
+                        {
+                            "id": "CPIAUCSL",
+                            "title": "CPI",
+                            "units": "Index",
+                            "frequency": "Monthly",
+                            "frequency_short": "M",
+                            "seasonal_adjustment": "SA",
+                            "observation_start": "1947-01-01",
+                            "observation_end": "2024-01-01",
+                            "last_updated": "2024-01-01",
+                            "notes": "",
+                            "source": "BLS",
+                        }
+                    ]
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     config = load_gma1b_config(CONFIG_PATH)
     from market_strats.global_multi_asset.gma1b_macro_cash import _diagnose_one_series
+
     row, incidents, _smoke = _diagnose_one_series(
         config,
         series_id="CPIAUCSL",
@@ -2138,7 +2492,9 @@ def test_111_request_count_completed_accurate(monkeypatch: pytest.MonkeyPatch) -
     assert completed <= attempted
 
 
-def test_112_vintage_date_count_survives_observations_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_112_vintage_date_count_survives_observations_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """vintage_date_count must be > 0 in the failure row if vintagedates succeeded."""
     n_dates = 50
     dates = [f"2020-{m:02d}-01" for m in range(1, n_dates + 1)]
@@ -2148,12 +2504,34 @@ def test_112_vintage_date_count_survives_observations_failure(monkeypatch: pytes
             return _FakeResponse(json_bytes({"count": n_dates, "vintage_dates": dates}))
         if "series/observations" in url:
             from urllib.error import HTTPError
+
             raise HTTPError(url, 414, "Request-URI Too Long", {}, None)
-        return _FakeResponse(json_bytes({"seriess": [{"id": "CPIAUCSL", "title": "CPI", "units": "Index", "frequency": "Monthly", "frequency_short": "M", "seasonal_adjustment": "SA", "observation_start": "1947-01-01", "observation_end": "2024-01-01", "last_updated": "2024-01-01", "notes": "", "source": "BLS"}]}))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "seriess": [
+                        {
+                            "id": "CPIAUCSL",
+                            "title": "CPI",
+                            "units": "Index",
+                            "frequency": "Monthly",
+                            "frequency_short": "M",
+                            "seasonal_adjustment": "SA",
+                            "observation_start": "1947-01-01",
+                            "observation_end": "2024-01-01",
+                            "last_updated": "2024-01-01",
+                            "notes": "",
+                            "source": "BLS",
+                        }
+                    ]
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     config = load_gma1b_config(CONFIG_PATH)
     from market_strats.global_multi_asset.gma1b_macro_cash import _diagnose_one_series
+
     row, incidents, _smoke = _diagnose_one_series(
         config,
         series_id="CPIAUCSL",
@@ -2166,7 +2544,9 @@ def test_112_vintage_date_count_survives_observations_failure(monkeypatch: pytes
     assert row.get("observations_status") == "failed"
 
 
-def test_113_planned_chunk_data_survives_observations_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_113_planned_chunk_data_survives_observations_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """vintage_chunk_count and vintage_chunk_sizes must be > 0 / non-empty after obs failure."""
     dates = [f"2020-{m:02d}-01" for m in range(1, 5)]
 
@@ -2175,12 +2555,34 @@ def test_113_planned_chunk_data_survives_observations_failure(monkeypatch: pytes
             return _FakeResponse(json_bytes({"count": len(dates), "vintage_dates": dates}))
         if "series/observations" in url:
             from urllib.error import HTTPError
+
             raise HTTPError(url, 414, "Request-URI Too Long", {}, None)
-        return _FakeResponse(json_bytes({"seriess": [{"id": "CPIAUCSL", "title": "CPI", "units": "Index", "frequency": "Monthly", "frequency_short": "M", "seasonal_adjustment": "SA", "observation_start": "1947-01-01", "observation_end": "2024-01-01", "last_updated": "2024-01-01", "notes": "", "source": "BLS"}]}))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "seriess": [
+                        {
+                            "id": "CPIAUCSL",
+                            "title": "CPI",
+                            "units": "Index",
+                            "frequency": "Monthly",
+                            "frequency_short": "M",
+                            "seasonal_adjustment": "SA",
+                            "observation_start": "1947-01-01",
+                            "observation_end": "2024-01-01",
+                            "last_updated": "2024-01-01",
+                            "notes": "",
+                            "source": "BLS",
+                        }
+                    ]
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     config = load_gma1b_config(CONFIG_PATH)
     from market_strats.global_multi_asset.gma1b_macro_cash import _diagnose_one_series
+
     row, incidents, _smoke = _diagnose_one_series(
         config,
         series_id="CPIAUCSL",
@@ -2198,13 +2600,27 @@ def test_114_cpi_revision_event_semantics_remain_correct(monkeypatch: pytest.Mon
     def fake_urlopen(url, timeout):
         if "series/vintagedates" in url:
             return _FakeResponse(json_bytes({"count": len(dates), "vintage_dates": dates}))
-        return _FakeResponse(json_bytes({
-            "count": 2,
-            "observations": [
-                {"date": "2019-12-01", "value": "260.0", "realtime_start": dates[0], "realtime_end": "9999-12-31"},
-                {"date": "2019-12-01", "value": "260.1", "realtime_start": dates[1], "realtime_end": "9999-12-31"},
-            ],
-        }))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "count": 2,
+                    "observations": [
+                        {
+                            "date": "2019-12-01",
+                            "value": "260.0",
+                            "realtime_start": dates[0],
+                            "realtime_end": "9999-12-31",
+                        },
+                        {
+                            "date": "2019-12-01",
+                            "value": "260.1",
+                            "realtime_start": dates[1],
+                            "realtime_end": "9999-12-31",
+                        },
+                    ],
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     _rows, info = _fetch_observations_by_classification(
@@ -2215,7 +2631,7 @@ def test_114_cpi_revision_event_semantics_remain_correct(monkeypatch: pytest.Mon
         limit=10,
     )
     assert info["initial_release_event_count"] == 1  # one obs_date group
-    assert info["later_revision_event_count"] == 1   # one revision
+    assert info["later_revision_event_count"] == 1  # one revision
 
 
 def test_115_dgs3mo_remains_exactly_two_requests(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -2225,19 +2641,48 @@ def test_115_dgs3mo_remains_exactly_two_requests(monkeypatch: pytest.MonkeyPatch
     def fake_urlopen(url, timeout):
         seen.append(url)
         if "series/observations" in url:
-            return _FakeResponse(json_bytes({
-                "count": 1,
-                "observations": [
-                    {"date": "2024-01-02", "value": "5.1",
-                     "realtime_start": "2024-01-02", "realtime_end": "9999-12-31"},
-                ],
-            }))
+            return _FakeResponse(
+                json_bytes(
+                    {
+                        "count": 1,
+                        "observations": [
+                            {
+                                "date": "2024-01-02",
+                                "value": "5.1",
+                                "realtime_start": "2024-01-02",
+                                "realtime_end": "9999-12-31",
+                            },
+                        ],
+                    }
+                )
+            )
         # metadata
-        return _FakeResponse(json_bytes({"seriess": [{"id": "DGS3MO", "title": "3-Month Treasury", "units": "Percent", "frequency": "Daily", "frequency_short": "D", "seasonal_adjustment": "Not Seasonally Adjusted", "observation_start": "1982-01-04", "observation_end": "2024-01-01", "last_updated": "2024-01-01", "notes": "", "source": "FRED"}]}))
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "seriess": [
+                        {
+                            "id": "DGS3MO",
+                            "title": "3-Month Treasury",
+                            "units": "Percent",
+                            "frequency": "Daily",
+                            "frequency_short": "D",
+                            "seasonal_adjustment": "Not Seasonally Adjusted",
+                            "observation_start": "1982-01-04",
+                            "observation_end": "2024-01-01",
+                            "last_updated": "2024-01-01",
+                            "notes": "",
+                            "source": "FRED",
+                        }
+                    ]
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     config = load_gma1b_config(CONFIG_PATH)
     from market_strats.global_multi_asset.gma1b_macro_cash import _diagnose_one_series
+
     row, incidents, smoke = _diagnose_one_series(
         config,
         series_id="DGS3MO",
@@ -2259,17 +2704,47 @@ def test_116_diagnostics_remain_ineligible_for_canonical_selection(
         if "series/vintagedates" in url:
             return _FakeResponse(json_bytes({"count": len(dates), "vintage_dates": dates}))
         if "series/observations" in url:
-            return _FakeResponse(json_bytes({
-                "count": 1,
-                "observations": [
-                    {"date": "2020-01-01", "value": "1.0", "realtime_start": dates[0], "realtime_end": "9999-12-31"},
-                ],
-            }))
-        return _FakeResponse(json_bytes({"seriess": [{"id": "CPIAUCSL", "title": "CPI", "units": "Index", "frequency": "Monthly", "frequency_short": "M", "seasonal_adjustment": "SA", "observation_start": "1947-01-01", "observation_end": "2024-01-01", "last_updated": "2024-01-01", "notes": "", "source": "BLS"}]}))
+            return _FakeResponse(
+                json_bytes(
+                    {
+                        "count": 1,
+                        "observations": [
+                            {
+                                "date": "2020-01-01",
+                                "value": "1.0",
+                                "realtime_start": dates[0],
+                                "realtime_end": "9999-12-31",
+                            },
+                        ],
+                    }
+                )
+            )
+        return _FakeResponse(
+            json_bytes(
+                {
+                    "seriess": [
+                        {
+                            "id": "CPIAUCSL",
+                            "title": "CPI",
+                            "units": "Index",
+                            "frequency": "Monthly",
+                            "frequency_short": "M",
+                            "seasonal_adjustment": "SA",
+                            "observation_start": "1947-01-01",
+                            "observation_end": "2024-01-01",
+                            "last_updated": "2024-01-01",
+                            "notes": "",
+                            "source": "BLS",
+                        }
+                    ]
+                }
+            )
+        )
 
     monkeypatch.setattr("market_strats.global_multi_asset.gma1b_macro_cash.urlopen", fake_urlopen)
     config = load_gma1b_config(CONFIG_PATH)
     from market_strats.global_multi_asset.gma1b_macro_cash import _diagnose_one_series
+
     row, incidents, smoke = _diagnose_one_series(
         config,
         series_id="CPIAUCSL",
@@ -2291,6 +2766,7 @@ def test_117_no_accepted_live_hash_created(config) -> None:
 def test_118_default_offline_execution_is_no_network(monkeypatch: pytest.MonkeyPatch) -> None:
     """run_gma1b_macro_cash_foundation in fixture mode must not make any HTTP calls."""
     import urllib.request as url_module
+
     network_calls: list[str] = []
 
     original_urlopen = url_module.urlopen

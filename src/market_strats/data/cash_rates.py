@@ -36,9 +36,7 @@ def convert_irx_discount_rate_to_investment_yield(
     Inputs and outputs are decimals:
         4% = 0.04
     """
-    denominator = 1.0 - (
-        discount_rate * IRX_DISCOUNT_DAYS_TO_MATURITY / BANK_DISCOUNT_BASIS_DAYS
-    )
+    denominator = 1.0 - (discount_rate * IRX_DISCOUNT_DAYS_TO_MATURITY / BANK_DISCOUNT_BASIS_DAYS)
 
     return discount_rate / denominator
 
@@ -102,9 +100,11 @@ def fetch_cash_yield_rates(
         cash_rates["annual_yield"] = source_rate_decimal
         cash_rates["rate_source_type"] = "quoted_yield"
 
-    return cash_rates[
-        ["date", "annual_yield", "source_rate_pct", "rate_source_type"]
-    ].sort_values("date").reset_index(drop=True)
+    return (
+        cash_rates[["date", "annual_yield", "source_rate_pct", "rate_source_type"]]
+        .sort_values("date")
+        .reset_index(drop=True)
+    )
 
 
 def save_cash_rates_to_parquet(
@@ -170,17 +170,17 @@ def normalise_cash_rates_schema(
 
         df["annual_yield"] = annual_yield
 
-        return df[
-            ["date", "annual_yield", "source_rate_pct", "rate_source_type"]
-        ].sort_values("date").reset_index(drop=True)
+        return (
+            df[["date", "annual_yield", "source_rate_pct", "rate_source_type"]]
+            .sort_values("date")
+            .reset_index(drop=True)
+        )
 
     if "annual_yield_pct" in df.columns:
         source_rate_decimal = df["annual_yield_pct"].astype(float) / 100.0
 
         if _is_irx_ticker(ticker):
-            df["annual_yield"] = convert_irx_discount_rate_to_investment_yield(
-                source_rate_decimal
-            )
+            df["annual_yield"] = convert_irx_discount_rate_to_investment_yield(source_rate_decimal)
             df["rate_source_type"] = "legacy_irx_discount_rate_converted_to_yield"
         else:
             df["annual_yield"] = source_rate_decimal
@@ -188,27 +188,33 @@ def normalise_cash_rates_schema(
 
         df["source_rate_pct"] = df["annual_yield_pct"].astype(float)
 
-        return df[
-            ["date", "annual_yield", "source_rate_pct", "rate_source_type"]
-        ].sort_values("date").reset_index(drop=True)
+        return (
+            df[["date", "annual_yield", "source_rate_pct", "rate_source_type"]]
+            .sort_values("date")
+            .reset_index(drop=True)
+        )
 
     if "daily_cash_return" in df.columns:
         df["annual_yield"] = (1.0 + df["daily_cash_return"].astype(float)) ** 252 - 1.0
         df["source_rate_pct"] = np.nan
         df["rate_source_type"] = "legacy_daily_cash_return_annualised"
 
-        return df[
-            ["date", "annual_yield", "source_rate_pct", "rate_source_type"]
-        ].sort_values("date").reset_index(drop=True)
+        return (
+            df[["date", "annual_yield", "source_rate_pct", "rate_source_type"]]
+            .sort_values("date")
+            .reset_index(drop=True)
+        )
 
     if "cash_return" in df.columns:
         df["annual_yield"] = (1.0 + df["cash_return"].astype(float)) ** 252 - 1.0
         df["source_rate_pct"] = np.nan
         df["rate_source_type"] = "legacy_cash_return_annualised"
 
-        return df[
-            ["date", "annual_yield", "source_rate_pct", "rate_source_type"]
-        ].sort_values("date").reset_index(drop=True)
+        return (
+            df[["date", "annual_yield", "source_rate_pct", "rate_source_type"]]
+            .sort_values("date")
+            .reset_index(drop=True)
+        )
 
     raise ValueError(
         "Cash rates data must contain one of: annual_yield, annual_yield_pct, "

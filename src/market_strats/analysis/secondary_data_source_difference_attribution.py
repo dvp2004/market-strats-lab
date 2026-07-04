@@ -52,13 +52,10 @@ def _normalise_primary_basis_prices(
     output[output_column] = pd.to_numeric(output[price_column], errors="coerce")
 
     output = output[
-        (output["date"] >= pd.Timestamp(start_date))
-        & (output["date"] <= pd.Timestamp(end_date))
+        (output["date"] >= pd.Timestamp(start_date)) & (output["date"] <= pd.Timestamp(end_date))
     ].copy()
 
-    return output[["date", output_column]].dropna().sort_values("date").reset_index(
-        drop=True
-    )
+    return output[["date", output_column]].dropna().sort_values("date").reset_index(drop=True)
 
 
 def _compare_price_basis_to_secondary(
@@ -67,9 +64,7 @@ def _compare_price_basis_to_secondary(
     primary_basis_prices: pd.DataFrame,
     secondary_prices: pd.DataFrame,
 ) -> dict:
-    primary_column = [
-        column for column in primary_basis_prices.columns if column != "date"
-    ][0]
+    primary_column = [column for column in primary_basis_prices.columns if column != "date"][0]
 
     merged = primary_basis_prices.merge(
         secondary_prices,
@@ -182,13 +177,10 @@ def _classify_attribution(
     phase_config = _phase7c2_config(config)
 
     distribution_sensitive = {
-        _normalise_ticker(value)
-        for value in phase_config.get("distribution_sensitive_tickers", [])
+        _normalise_ticker(value) for value in phase_config.get("distribution_sensitive_tickers", [])
     }
 
-    raw_corr_threshold = float(
-        phase_config.get("raw_close_match_min_correlation", 0.995)
-    )
+    raw_corr_threshold = float(phase_config.get("raw_close_match_min_correlation", 0.995))
     raw_cagr_delta_threshold = float(
         phase_config.get("raw_close_match_max_cagr_delta_pct_points", 0.75)
     )
@@ -202,9 +194,7 @@ def _classify_attribution(
         phase_config.get("potential_issue_min_drawdown_delta_pct_points", 5.00)
     )
 
-    adjusted_cagr_delta = abs(
-        float(adjusted_row["cagr_delta_primary_minus_secondary_pct_points"])
-    )
+    adjusted_cagr_delta = abs(float(adjusted_row["cagr_delta_primary_minus_secondary_pct_points"]))
     adjusted_drawdown_delta = abs(
         float(adjusted_row["drawdown_delta_primary_minus_secondary_pct_points"])
     )
@@ -213,9 +203,7 @@ def _classify_attribution(
 
     if raw_available:
         raw_corr = float(raw_row["daily_return_correlation"])
-        raw_cagr_delta = abs(
-            float(raw_row["cagr_delta_primary_minus_secondary_pct_points"])
-        )
+        raw_cagr_delta = abs(float(raw_row["cagr_delta_primary_minus_secondary_pct_points"]))
 
         if (
             raw_corr >= raw_corr_threshold
@@ -277,9 +265,7 @@ def _create_attribution_summary(attribution: pd.DataFrame) -> pd.DataFrame:
         [
             {
                 "ticker_count": int(len(attribution)),
-                "no_material_concern_count": int(
-                    counts.get("No material data-source concern", 0)
-                ),
+                "no_material_concern_count": int(counts.get("No material data-source concern", 0)),
                 "distribution_or_price_basis_count": distribution_count,
                 "review_difference_count": int(
                     counts.get(
@@ -305,9 +291,7 @@ def _create_attribution_conclusion(
     unresolved_count = int(row["unresolved_potential_data_issue_count"])
     distribution_count = int(row["distribution_or_price_basis_count"])
 
-    unresolved = attribution[
-        attribution["attribution"] == "Unresolved potential data issue"
-    ]
+    unresolved = attribution[attribution["attribution"] == "Unresolved potential data issue"]
 
     return pd.DataFrame(
         [
@@ -489,9 +473,7 @@ def create_secondary_data_source_difference_attribution(
             prior_classification = ""
 
             if not cross_check.empty and "ticker" in cross_check.columns:
-                prior_rows = cross_check[
-                    cross_check["ticker"].astype(str).str.upper() == ticker
-                ]
+                prior_rows = cross_check[cross_check["ticker"].astype(str).str.upper() == ticker]
 
                 if not prior_rows.empty:
                     prior_classification = str(prior_rows.iloc[0]["classification"])
@@ -525,9 +507,7 @@ def create_secondary_data_source_difference_attribution(
                     "adjusted_vs_secondary_return_correlation": adjusted_row[
                         "daily_return_correlation"
                     ],
-                    "raw_vs_secondary_return_correlation": raw_row[
-                        "daily_return_correlation"
-                    ]
+                    "raw_vs_secondary_return_correlation": raw_row["daily_return_correlation"]
                     if raw_row
                     else "",
                     "attribution": attribution,
@@ -590,9 +570,7 @@ def save_secondary_data_source_difference_attribution(
     basis_path = reports_dir / "secondary_data_source_difference_basis_comparison.csv"
     attribution_path = reports_dir / "secondary_data_source_difference_attribution.csv"
     summary_path = reports_dir / "secondary_data_source_difference_attribution_summary.csv"
-    conclusion_path = (
-        reports_dir / "secondary_data_source_difference_attribution_conclusion.csv"
-    )
+    conclusion_path = reports_dir / "secondary_data_source_difference_attribution_conclusion.csv"
     markdown_path = reports_dir / "secondary_data_source_difference_attribution.md"
 
     basis_comparison.to_csv(basis_path, index=False)

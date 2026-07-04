@@ -1,4 +1,4 @@
-﻿"""Reusable GMA-4 replay adapter backed by GMA-3A accounting machinery."""
+"""Reusable GMA-4 replay adapter backed by GMA-3A accounting machinery."""
 
 from __future__ import annotations
 
