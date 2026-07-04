@@ -1,0 +1,69 @@
+contract:
+  contract_id: gma8c_frozen_etf_etp_tournament_contract_v1
+  contract_version: v1
+  source_commit: 86a49fc3cc589ea9b2835423524e33e5fb8cc208
+  evidence_status: observed_development_evidence
+  pristine_final_holdout: false
+  execution_or_promotion_decision_produced: false
+
+frozen_parent:
+  gma8a_lock_sha256: 12b0abffa49095bdc02b5c062c36b5413a94c68e229b552ed30145a1af7b5ee8
+  gma8b_data_lock_sha256: b55795e4458f2bed57b0d09b6c9990b259f6fa4c32141b5391673e0b335f0a30
+  strategy_grid_hash: 513139855cb34a67f735170683dd548724574001d43b7e3c4e29c32ecead5f6a
+  trial_template_count: 80
+  arm_trial_count: 160
+  resolved_normalised_series_count: 29
+  source_first_session: "2007-05-30"
+  source_last_session: "2026-05-01"
+  core_22_253_session_start: "2008-05-29"
+  expanded_29_253_session_start: "2008-05-29"
+  cross_arm_comparable_253_session_start: "2008-05-29"
+  adjusted_price_field: adj_close
+
+evaluation:
+  common_comparable_start: "2008-05-29"
+  common_comparable_end: "2026-05-01"
+  annual_sessions: 252
+  cost_scenarios_bps:
+    baseline_1bps: 1
+    stressed_10bps: 10
+    stressed_25bps: 25
+    severe_50bps: 50
+  chronological_folds:
+    - {fold_id: fold_1, start_date: "2008-05-30", end_date: "2011-12-30"}
+    - {fold_id: fold_2, start_date: "2012-01-03", end_date: "2015-12-31"}
+    - {fold_id: fold_3, start_date: "2016-01-04", end_date: "2019-12-31"}
+    - {fold_id: fold_4, start_date: "2020-01-02", end_date: "2023-12-29"}
+    - {fold_id: fold_5, start_date: "2024-01-02", end_date: "2026-05-01"}
+  rolling_windows_sessions:
+    rolling_3_year: 756
+    rolling_5_year: 1260
+
+timing_and_accounting:
+  signal_information_cutoff: decision-session adjusted close
+  decision_timing: after decision-session close
+  target_effective_session: next tradable session
+  execution_price_reference: next-session adjusted close
+  return_measurement: close_to_close adjusted-price returns after target-effective session
+  turnover_definition: sum_abs_target_weight_minus_prior_weight
+  cost_definition: one_way_turnover_times_cost_bps_divided_by_10000
+  fully_invested_non_negative_weights: true
+  leverage_shorting_borrowing: false
+
+robustness:
+  gate_cost_scenario: stressed_10bps
+  minimum_positive_folds: 3
+  maximum_positive_fold_log_contribution_share: 0.50
+  minimum_drawdown_difference_vs_benchmark: -0.03
+  maximum_positive_regime_log_contribution_share: 0.50
+  contribution_zero_denominator: fail_closed
+
+operations:
+  data_download_performed: false
+  indicator_calculation_performed: true
+  model_fit_performed: false
+  backtest_performed: true
+  strategy_ranking_performed: true
+  portfolio_target_generated: false
+  paper_session_created: false
+  broker_or_real_money_action_created: false

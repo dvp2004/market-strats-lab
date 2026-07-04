@@ -1,0 +1,112 @@
+# =============================================================================
+# PUBLIC NON-RUNNABLE TEMPLATE — GMA-8B.0 Source-Pointer Intake V1
+# =============================================================================
+#
+# PURPOSE
+#   This file is a public configuration schema template illustrating the
+#   structure required to supply the GMA-8B.0 manual source-pointer intake.
+#   It is NOT the frozen local evidence contract and CANNOT be executed as-is.
+#
+# WHY THIS FILE EXISTS
+#   The frozen local contract
+#   (configs/global_multi_asset_alpha/gma8b_source_pointer_intake_contract_v1.yaml)
+#   is NOT published because it contains machine-specific absolute Windows paths
+#   to private GMA-7B lineage evidence that is not included in this repository.
+#
+# HOW TO USE
+#   Replace every REQUIRED_PRIVATE_* placeholder with the exact absolute path
+#   on the operator's machine, and supply the matching SHA-256 hash values.
+#   The GMA-8B.0 source module (gma8b_source_pointer_intake.py) will fail
+#   closed with an explicit error if any required private input is absent,
+#   mismatched, or structurally invalid.
+#
+# IMPORTANT
+#   - Do not submit this template as a real contract.
+#   - Do not invent, guess, or substitute paths.
+#   - Do not include credentials, tokens, or account information.
+#   - The GMA-8B provenance resolver remains fail-closed until an operator
+#     supplies exact local source paths and matching hashes.
+#   - No historical price panel, indicator, strategy signal, portfolio target,
+#     backtest result, strategy ranking, paper session, broker instruction, or
+#     real-money action is produced by GMA-8B.0.
+# =============================================================================
+
+contract:
+  contract_id: gma8b_source_pointer_intake_contract_v1
+  contract_version: v1
+  phase_id: GMA-8B.0
+  purpose: immutable GMA-6 manual source-pointer intake template only
+  submitted_source_pointer_intake_present: false
+  public_template: true
+  runnable: false
+  requires_private_evidence: true
+
+gma8a_parent:
+  # These paths are relative to the GMA-8 worktree root and are portable.
+  config_path: configs/global_multi_asset_alpha/gma8a_broad_multi_asset_tournament_contract_v1.yaml
+  lock_path: reports/global_multi_asset_alpha/gma8a_broad_multi_asset_tournament_v1/gma8a_lock_v1.json
+  execution_manifest_path: reports/global_multi_asset_alpha/gma8a_broad_multi_asset_tournament_v1/gma8a_execution_manifest_v1.json
+  expected_base_strategy_template_count: 80
+  expected_arm_trial_count: 160
+  expected_strategy_grid_hash: 513139855cb34a67f735170683dd548724574001d43b7e3c4e29c32ecead5f6a
+
+gma7b_lineage_evidence:
+  # ---------------------------------------------------------------------------
+  # REQUIRED PRIVATE INPUTS — replace each placeholder with an exact local path
+  # ---------------------------------------------------------------------------
+  #
+  # These three files are GMA-7B lineage evidence artifacts on the operator's
+  # machine. They must be absolute paths to existing files. Relative paths,
+  # inferred locations, and fallback paths fail closed.
+  #
+  # config_path  : absolute path to the GMA-7B feature-store contract YAML.
+  config_path: REQUIRED_PRIVATE_EVIDENCE_PATH
+  #
+  # manifest_path: absolute path to the GMA-7B feature-store manifest JSON.
+  manifest_path: REQUIRED_PRIVATE_EVIDENCE_PATH
+  #
+  # lock_path    : absolute path to the GMA-7B feature-store lock JSON.
+  lock_path: REQUIRED_PRIVATE_EVIDENCE_PATH
+
+frozen_lineage:
+  # These are frozen protocol integrity hashes — not credentials or local paths.
+  gma6_snapshot_manifest_hash: e767cb622bfe41240a8a4536920f79def3d267092b1bd0dcb2e6a06865ecdc6a
+  gma6b_data_bundle_manifest_hash: b93bd9800ddfffa19f12100c4538a4668ae61c20b7e322fec8df9441f63a166b
+  normalised_bundle_hash: 3d3d920e9bafa430fb313fe0f494954826a73f8962a15eb8709d02f2bae14bb6
+
+manual_template:
+  # All values in this section must remain REQUIRED_MANUAL_ENTRY in the
+  # generated template. Operators fill them when submitting a real intake.
+  gma6_snapshot_manifest_path: REQUIRED_MANUAL_ENTRY
+  normalised_file_inventory_path: REQUIRED_MANUAL_ENTRY
+  adjusted_price_panel_path: REQUIRED_MANUAL_ENTRY
+  gma6_snapshot_manifest_sha256: REQUIRED_MANUAL_ENTRY
+  normalised_file_inventory_sha256: REQUIRED_MANUAL_ENTRY
+  adjusted_price_panel_sha256: REQUIRED_MANUAL_ENTRY
+  gma6_snapshot_manifest_expected_lineage_hash: REQUIRED_MANUAL_ENTRY
+  gma6b_data_bundle_manifest_expected_lineage_hash: REQUIRED_MANUAL_ENTRY
+  normalised_bundle_expected_lineage_hash: REQUIRED_MANUAL_ENTRY
+  operator_attestation: REQUIRED_MANUAL_ENTRY
+  created_timestamp_utc: REQUIRED_MANUAL_ENTRY
+
+validation_contract:
+  paths_must_be_absolute_local_windows_files: true
+  gma8_worktree_paths_allowed: false
+  file_hashes_must_match: true
+  snapshot_manifest_must_evidence_frozen_lineage: true
+  inventory_must_evidence_normalised_bundle: true
+  panel_must_be_identified_by_inventory_as_adjusted_price_source: true
+  path_discovery_allowed: false
+  candidate_guessing_allowed: false
+  fallback_path_allowed: false
+  template_accepted_as_submission: false
+
+dry_run:
+  source_pointer_dry_run_status: not_run_missing_manual_source_pointers
+  submitted_source_pointer_intake_present: false
+  historical_price_panel_read: false
+  indicator_calculation_performed: false
+  backtest_performed: false
+  strategy_ranking_performed: false
+  portfolio_target_generated: false
+  paper_broker_or_live_path_created: false
