@@ -1,0 +1,14 @@
+.env
+.env.*
+secrets/
+credentials/
+data/private/
+state/
+logs/
+
+data/global_multi_asset_alpha/
+state/global_multi_asset_alpha/
+
+*.pem
+*.key
+*.pfx
