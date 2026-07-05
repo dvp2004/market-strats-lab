@@ -1,0 +1,92 @@
+phase_id: p1c_local_adjusted_price_snapshot_v1
+strategy_id: gma5_equal_weight_atomic_sleeves_v1
+parent_execution_reference: gma5_clean_execution_20260622T075912Z_v1
+required_language:
+- P-1C defines and validates the local adjusted-price snapshot format required for
+  future manual intake.
+- No actual manual snapshot or intake manifest was supplied to this run.
+- No signal, sleeve weight, ETF target, paper decision, paper session, performance
+  result, broker instruction, or real-money action is produced.
+- P-1 remains a separate manual-paper observation programme for the frozen GMA-5 equal-weight
+  atomic sleeve portfolio.
+snapshot_value_type: adjusted_close_price
+snapshot_header:
+- session_date
+- SPY
+- QQQ
+- IWM
+- XLB
+- XLE
+- XLF
+- XLI
+- XLK
+- XLP
+- XLU
+- XLV
+- XLY
+- EFA
+- EEM
+- BIL
+- IEF
+- TLT
+- AGG
+- LQD
+- HYG
+- GLD
+- DBC
+snapshot_header_line: session_date,SPY,QQQ,IWM,XLB,XLE,XLF,XLI,XLK,XLP,XLU,XLV,XLY,EFA,EEM,BIL,IEF,TLT,AGG,LQD,HYG,GLD,DBC
+snapshot_format: csv_adjusted_close_wide_v1
+snapshot_schema_version: p1c_adjusted_price_snapshot_v1
+p1c_minimum_required_snapshot_sessions: 253
+p1c_required_history_registry_hash: cbebdb107c6a1330f8dc2d5ae373769776a8f7c77658d8e508e2953b8eed036b
+p1a_input_hashes:
+  p1a_contract: ba1e6c94344971392ec4c8892f757dae4c898de2ac942c051943c9bd6238b247
+  p1b_contract: 7b0e0457b853707099907bb8337ec3a1f5b1578ab6e2ea1c0bc3415d5a80d875
+  p1a_parent_resolution: 98aaa92da4c6b618765d317c9b63aea31185ead3bf3fe2a1c593dc9bdbd24dbc
+  p1a_lock: 87e07a38af0dc2dd5f2e84a5e7d71f81d475ed8bf63150017a13fcf49e0cd1e8
+  p1a_ledger: 2c6594dc40d013780aa92b63fcfbef67fbd0116342981f7e867a1ea3c20498e1
+  p1a_session_template: 2c6594dc40d013780aa92b63fcfbef67fbd0116342981f7e867a1ea3c20498e1
+  p1b_dry_run: 0f384136c446a596d8a9be2a59f690430b8c9e66098b5a33c25c170a902db84d
+  p1b_execution_manifest: 7c084ab5c1390e9bcd347d76464abe433852e90fc1dcc3a2521075cd3dfb95d8
+  p1b_lock: b399637ea3cf097594056b17832351cb2a34fe9b9c0b920c560d1c31fc76d726
+validation_requirements:
+- manifest_present
+- snapshot_present
+- snapshot_sha256_verified
+- manifest_schema_exact
+- p1a_parent_lock_hash_verified
+- p1a_parent_strategy_verified
+- p1a_zero_row_ledger_verified
+- p1b_dry_run_boundary_verified
+- snapshot_header_exact
+- snapshot_session_dates_valid
+- snapshot_session_dates_strictly_ascending
+- snapshot_has_no_duplicate_dates
+- snapshot_has_no_missing_values
+- snapshot_has_only_positive_finite_adjusted_prices
+- snapshot_cutoff_is_consistent
+- snapshot_last_session_matches_declared_source_last_observed_session
+- snapshot_history_meets_frozen_gma5_requirement
+- operator_attestation_present
+- paper_only_boundary_verified
+prohibited_actions:
+- forward_fill
+- backfill
+- interpolation
+- price_normalisation
+- split_adjustment
+- dividend_adjustment
+- date_insertion
+- date_removal
+- row_filtering
+- ticker_replacement
+- signals
+- sleeve_weights
+- ETF_targets
+- portfolio_weights
+- turnover
+- costs
+- returns
+- performance
+- paper_decisions
+- orders

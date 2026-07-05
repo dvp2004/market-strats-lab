@@ -1,0 +1,60 @@
+phase_id: p1b_manual_data_intake_preflight_v1
+p1a_phase_id: p1a_manual_paper_contract_v1
+strategy_id: gma5_equal_weight_atomic_sleeves_v1
+parent_execution_reference: gma5_clean_execution_20260622T075912Z_v1
+parent_reference_manifest_sha256: b6c49eb33bbd67d8724d9b29540e8033c3d1d9edffbfa8d5c5ce1d9b6f89cd4c
+required_language:
+- P-1B is a manual data-intake and preflight dry-run only.
+- No actual data snapshot was supplied to this run.
+- No target, paper decision, paper session, performance result, broker instruction,
+  or real-money action is produced.
+- P-1 remains a separate manual-paper observation programme for the frozen GMA-5 equal-weight
+  atomic sleeve portfolio.
+paper_mode: manual_observation_only
+real_money: prohibited
+broker_connection: prohibited
+trade_execution: prohibited
+automated_order_generation: prohibited
+target_generation: prohibited
+performance_calculation: prohibited
+gma7_dependency: none
+allowed_p1a_inputs:
+  p1a_contract: configs\global_multi_asset_alpha\p1a_manual_paper_contract_v1.yaml
+  p1a_parent_resolution: reports\global_multi_asset_alpha\p1a_manual_paper_contract_v1\p1a_parent_reference_resolution_v1.json
+  p1a_session_template: reports\global_multi_asset_alpha\p1a_manual_paper_contract_v1\p1a_manual_paper_session_template_v1.csv
+  p1a_ledger: reports\global_multi_asset_alpha\p1a_manual_paper_contract_v1\p1a_manual_paper_ledger_v1.csv
+  p1a_lock: reports\global_multi_asset_alpha\p1a_manual_paper_contract_v1\p1a_manual_paper_lock_v1.json
+manual_intake_template_fields:
+- intake_id
+- manual_intake_timestamp_utc
+- scheduled_decision_session_date
+- session_data_snapshot_path
+- session_data_snapshot_sha256
+- data_source_description
+- source_last_observed_session
+- data_cutoff_timestamp_utc
+- snapshot_format
+- snapshot_schema_version
+- operator_attestation
+preflight_requirements:
+- p1a_parent_lock_hash_verified
+- p1a_parent_strategy_verified
+- p1a_zero_row_ledger_verified
+- manual_intake_manifest_present
+- session_data_snapshot_present
+- session_data_snapshot_sha256_verified
+- data_source_description_present
+- source_last_observed_session_present
+- data_cutoff_timestamp_present
+- scheduled_decision_session_date_present
+- operator_attestation_present
+- paper_only_boundary_verified
+current_dry_run_expected_failed_requirements:
+- manual_intake_manifest_present
+- session_data_snapshot_present
+- session_data_snapshot_sha256_verified
+- data_source_description_present
+- source_last_observed_session_present
+- data_cutoff_timestamp_present
+- scheduled_decision_session_date_present
+- operator_attestation_present

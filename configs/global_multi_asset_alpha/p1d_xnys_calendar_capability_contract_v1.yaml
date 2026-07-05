@@ -1,0 +1,37 @@
+phase_id: p1d_xnys_calendar_capability_v1
+required_language:
+- P-1D freezes an isolated local XNYS calendar capability for future P-1 snapshot
+  validation.
+- No actual market-price snapshot or manual intake manifest was supplied.
+- No signal, sleeve weight, ETF target, paper decision, paper session, performance
+  result, broker instruction, or real-money action is produced.
+- The shared project virtual environment was not modified.
+- P-1 remains a separate manual-paper observation programme for the frozen GMA-5 equal-weight
+  atomic sleeve portfolio.
+package_name: exchange_calendars
+package_version: 4.13.2
+calendar_identifier: XNYS
+wheel_filename: exchange_calendars-4.13.2-py3-none-any.whl
+wheel_sha256: fc5a2ad0d61b5c3a6539a3061cd4cbb55c59f4a903455cec7926e4b798919996
+wheel_size_bytes: 213306
+dependency_root_path: C:\Users\Devesh Pansare\Desktop\Personal_Projects\p1_xnys_calendar_dependency_v1
+wheels_path: C:\Users\Devesh Pansare\Desktop\Personal_Projects\p1_xnys_calendar_dependency_v1\wheels
+site_packages_path: C:\Users\Devesh Pansare\Desktop\Personal_Projects\p1_xnys_calendar_dependency_v1\site_packages
+python_executable_path: C:\Users\Devesh Pansare\Desktop\Personal_Projects\Market-strats-lab\.venv\Scripts\python.exe
+python_version: 3.11.9
+future_p1e_requirement: P-1E must use this exact dependency root and fail closed if
+  package version, calendar identifier, or wheel hash differs from the P-1D lock.
+prohibited_actions:
+- approximate_weekday_logic
+- manual_holiday_rules
+- market_data_fetch
+- snapshot_validation
+- target_generation
+- sleeve_calculation
+- ETF_target_calculation
+- paper_decision
+- paper_session
+- ledger_write
+- performance_calculation
+- broker_instruction
+- real_money_action

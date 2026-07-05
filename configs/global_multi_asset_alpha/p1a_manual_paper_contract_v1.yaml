@@ -1,0 +1,107 @@
+phase_id: p1a_manual_paper_contract_v1
+strategy_id: gma5_equal_weight_atomic_sleeves_v1
+parent_execution_reference: gma5_clean_execution_20260622T075912Z_v1
+required_language:
+- P-1 is a separate manual-paper observation programme for the frozen GMA-5 equal-weight
+  atomic sleeve portfolio.
+- P-1 does not use or modify GMA-7 outputs.
+- P-1 paper observations are not proof of future profitability.
+- No real-money, broker, execution, or promotion decision is produced.
+sleeves:
+- absolute_trend_12m_equal_weight
+- cross_sectional_momentum_12m_top5_inverse_volatility
+- defensive_drawdown_guard
+- defensive_spy_200d_rotation
+parent_trial_ids:
+  absolute_trend_12m_equal_weight: gma4_abs_trend_12m_equal_weight_v1
+  cross_sectional_momentum_12m_top5_inverse_volatility: gma4_xsmom_12m_top5_inverse_vol_v1
+  defensive_drawdown_guard: gma4_defensive_drawdown_guard_v1
+  defensive_spy_200d_rotation: gma4_defensive_spy_200d_rotation_v1
+parent_portfolio_construction:
+- equal_weight_across_four_atomic_sleeves
+- netted_composite_etf_target_weights
+- not_sleeve_equity_curve_averaging
+gma7_dependency: none
+gma7_outputs_can_modify_p1_rules: false
+gma7_no_ensemble_result_changes_p1_strategy: false
+paper_mode: manual_observation_only
+real_money: prohibited
+broker_connection: prohibited
+trade_execution: prohibited
+automated_order_generation: prohibited
+strategy_rule_changes_after_lock: prohibited
+discretionary_target_overrides: prohibited
+minimum_valid_manual_sessions_before_review: 6
+minimum_forward_observation_period: 6_calendar_months
+review_criteria: operational_completeness_data_integrity_and_forward_observation_only
+return_threshold_for_any_future_decision: prohibited
+manual_decision_values:
+- recorded_manual_paper_session
+- skipped_due_warning
+- not_run_missing_preconditions
+execution_status_values:
+- not_executed_manual_paper_only
+- skipped
+- not_run
+ledger_fields:
+- session_id
+- scheduled_decision_session_date
+- actual_decision_timestamp_utc
+- data_cutoff_timestamp_utc
+- source_last_observed_session
+- session_data_snapshot_path
+- session_data_snapshot_sha256
+- parent_strategy_id
+- parent_execution_reference
+- parent_reference_manifest_sha256
+- manual_preflight_validation_status
+- manual_decision
+- manual_decision_reason
+- target_file_sha256
+- target_row_count
+- target_weight_sum
+- execution_status
+- paper_session_status
+- warning_flags
+- operator_notes
+- ledger_created_timestamp_utc
+preflight_requirements:
+- parent_reference_verified
+- strategy_identity_verified
+- all_four_sleeves_verified
+- netted_composite_target_method_verified
+- input_snapshot_present
+- input_snapshot_hash_verified
+- source_last_observed_session_present
+- monthly_decision_timing_verified
+- target_weight_sum_valid
+- no_discretionary_override
+- paper_only_boundary_verified
+failed_preflight_result:
+  manual_decision: skipped_due_warning
+  execution_status: skipped
+  paper_session_status: invalid_or_skipped_manual_paper_session
+parent_reference_manifest_sha256: b6c49eb33bbd67d8724d9b29540e8033c3d1d9edffbfa8d5c5ce1d9b6f89cd4c
+parent_files_hashed_count: 6
+bounded_history_rows_read:
+  monthly_sleeve_weights: 724
+  composite_target_netting_audit: 1
+  monthly_etf_targets: 1
+session_input_snapshot_requirements:
+- session_data_snapshot_path
+- session_data_snapshot_sha256
+- data_source_description
+- source_last_observed_session
+- data_cutoff_timestamp
+- manual_preflight_validation_status
+prohibited_in_p1a:
+- web_download
+- provider_call
+- data_substitution
+- ticker_substitution
+- input_backfill
+- target_generation
+- paper_session_recording
+- performance_calculation
+- broker_connection
+- live_workflow
