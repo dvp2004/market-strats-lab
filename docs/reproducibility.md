@@ -8,7 +8,8 @@ Use Python 3.11 and install the declared development dependencies:
 py -3.11 -m venv .venv
 .\.venv\Scripts\python -m pip install -e ".[dev]"
 .\.venv\Scripts\python -m ruff check --select E,F,I,UP `
-  src/market_strats/intelligence tests/test_mi*.py
+  src/market_strats/intelligence src/market_strats/universe `
+  tests/test_mi*.py tests/universe
 .\.venv\Scripts\python -m pytest -q -m "not artifact"
 ```
 

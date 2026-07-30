@@ -103,16 +103,19 @@ universe.
 
 ## Current work: remove survivorship bias at zero data cost
 
-The immediate task is to build a free-source, point-in-time historical stock universe. It must
-include additions, removals, delisted companies, ticker changes, corporate actions, stable security
-identities, and explicit coverage gaps.
+The first executable free-source universe qualifier is implemented. It uses an MIT-licensed,
+commit-pinned historical membership seed, a revision-pinned Wikimedia reconciliation, a fixed sample
+of public S&P Global announcements, official SEC identity endpoints, and Yahoo Finance prices through
+`yfinance` under personal-research terms.
 
-The project will use only zero-cost sources and local research access. Free-to-access market prices
-may still be governed by provider terms and must not be described as open-licensed data unless the
-license actually permits that description.
+The bounded 2026-05-01 qualification run returned
+`blocked_identity_reconciliation_failure`. The seed covers 1996-01-02 through 2025-08-23, but free
+evidence did not establish historical identity continuity or delisting treatment, the seed and
+Wikimedia endpoint sets had unresolved differences, complete historical prices were outside the
+bounded audit, and the SEC identity endpoint refused access from the run environment.
 
-No new stock model will be trained until the universe contract passes or reports a transparent
-coverage limitation that can be accepted in advance.
+No model was trained, no feature or target panel was created, and the result does not authorize a
+backtest, portfolio, paper workflow, broker action, or trading decision.
 
 ## Status and boundaries
 
@@ -161,11 +164,13 @@ py -3.11 -m venv .venv
 
 ## Validation
 
-The portable consolidation gate covers the migrated intelligence package and its matching tests:
+The portable gate covers the intelligence and point-in-time universe packages and their matching
+synthetic tests:
 
 ```powershell
 .\.venv\Scripts\python -m ruff check --select E,F,I,UP `
-  src/market_strats/intelligence tests/test_mi*.py
+  src/market_strats/intelligence src/market_strats/universe `
+  tests/test_mi*.py tests/universe
 .\.venv\Scripts\python -m pytest -q -m "not artifact"
 ```
 

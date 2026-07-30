@@ -1,0 +1,126 @@
+registry_id: free_point_in_time_stock_universe_sources_v1
+registry_version: 1
+allowed_cost_classifications:
+  - free_open_licence
+  - free_public_official
+  - free_personal_research_access
+rejected_cost_classifications:
+  - paid
+  - trial_requiring_payment
+  - commercial_subscription
+  - unknown_cost
+sources:
+  - source_id: hanshof_sp500_membership_seed
+    source_name: hanshof S&P 500 historical constituents
+    source_type: third_party_historical_membership_seed
+    source_url_or_repository: https://github.com/hanshof/sp500_constituents
+    source_revision_or_commit: a91ef88fad5ace83bed1f3452f451247295bcd18
+    retrieved_at_utc: recorded_at_runtime_in_local_snapshot_manifest
+    content_sha256: b8225271945e5562a928a675e8120e94f568f01c3584c20def6fbfd0645cfa7a
+    licence_or_terms_classification: MIT
+    cost_classification: free_open_licence
+    authentication_required: false
+    permitted_local_use: local_research_with_mit_attribution
+    redistribution_status: source_licence_permits_with_notice_but_raw_copy_remains_local
+    known_limitations:
+      - noncanonical_third_party_reconstruction
+      - ticker_based_rows_do_not_establish_permanent_security_identity
+      - pinned_snapshot_ends_before_the_contract_endpoint
+    point_in_time_status: reconstructed_daily_membership_seed_from_1996
+    canonical_status: noncanonical_seed_only
+    required_relative_files:
+      - sp_500_historical_components.csv
+      - sp500_constituents.csv
+      - LICENSE
+  - source_id: wikimedia_sp500_reconciliation
+    source_name: English Wikipedia List of S&P 500 companies
+    source_type: revision_pinned_membership_reconciliation
+    source_url_or_repository: https://en.wikipedia.org/w/api.php
+    source_revision_or_commit: "1349933445"
+    retrieved_at_utc: recorded_at_runtime_in_local_snapshot_manifest
+    content_sha256: recorded_at_runtime_in_local_snapshot_manifest
+    licence_or_terms_classification: CC_BY_SA_4_0
+    cost_classification: free_open_licence
+    authentication_required: false
+    permitted_local_use: local_research_with_revision_and_attribution
+    redistribution_status: attribution_and_share_alike_apply
+    known_limitations:
+      - community_edited_reconciliation_source
+      - not_authoritative_index_provider_history
+    point_in_time_status: pinned_revision_at_or_before_historical_endpoint
+    canonical_status: reconciliation_evidence_only
+    page_title: List of S&P 500 companies
+    page_id: 2676045
+    revision_timestamp: 2026-04-19T14:59:47Z
+    revision_sha1: baf197c44ad0db24ba89ba650fbe9149e76b0bda
+  - source_id: sp_global_bounded_announcements
+    source_name: S&P Global public index-change announcements
+    source_type: official_bounded_change_reconciliation
+    source_url_or_repository: https://press.spglobal.com/
+    source_revision_or_commit: per_announcement_content_hash_in_local_snapshot_manifest
+    retrieved_at_utc: recorded_at_runtime_in_local_snapshot_manifest
+    content_sha256: per_announcement_content_hash_in_local_snapshot_manifest
+    licence_or_terms_classification: public_official_factual_metadata_local_research_only
+    cost_classification: free_public_official
+    authentication_required: false
+    permitted_local_use: factual_change_metadata_for_local_reconciliation
+    redistribution_status: full_announcement_text_not_redistributed
+    known_limitations:
+      - historical_announcement_availability_is_not_guaranteed
+      - only_a_frozen_bounded_sample_is_requested
+    point_in_time_status: publication_and_effective_dates_recorded_from_each_snapshot
+    canonical_status: independent_sample_evidence
+    sample_rule:
+      rule_id: fixed_three_announcement_multi_year_sample_v1
+      frozen_before_reconciliation: true
+      announcements:
+        - sample_id: sp500_change_2018_06_20
+          publication_date: 2018-06-15
+          effective_date: 2018-06-20
+          added_tickers: [FLT]
+          announcement_url: https://press.spglobal.com/2018-06-15-NVIDIA-Set-to-Join-S-P-100-FleetCor-Technologies-to-Join-S-P-500-Penn-Virginia-to-Join-S-P-SmallCap-600
+        - sample_id: sp500_change_2020_05_12
+          publication_date: 2020-05-06
+          effective_date: 2020-05-12
+          added_tickers: [DXCM, DPZ]
+          announcement_url: https://press.spglobal.com/2020-05-06-DexCom-Dominos-Pizza-Set-to-Join-S-P-500-Salesforce-com-to-Join-S-P-100-STORE-Capital-to-Join-S-P-MidCap-400-Capri-Holdings-to-Join-S-P-SmallCap-600
+        - sample_id: sp500_change_2024_03_18
+          publication_date: 2024-03-01
+          effective_date: 2024-03-18
+          added_tickers: [SMCI, DECK]
+          announcement_url: https://press.spglobal.com/2024-03-01-Super-Micro-Computer-and-Deckers-Outdoor-Set-to-Join-S-P-500-Others-to-Join-S-P-100%2C-S-P-MidCap-400-and-S-P-SmallCap-600
+  - source_id: sec_edgar_identity
+    source_name: SEC EDGAR public company mappings and submissions
+    source_type: official_security_identity_and_filing_availability
+    source_url_or_repository: https://www.sec.gov/files/company_tickers_exchange.json
+    source_revision_or_commit: response_hash_recorded_at_runtime
+    retrieved_at_utc: recorded_at_runtime_in_local_snapshot_manifest
+    content_sha256: recorded_at_runtime_in_local_snapshot_manifest
+    licence_or_terms_classification: us_federal_public_record_subject_to_sec_fair_access
+    cost_classification: free_public_official
+    authentication_required: false
+    permitted_local_use: local_research_under_sec_fair_access
+    redistribution_status: derived_identity_metadata_only
+    known_limitations:
+      - current_ticker_mapping_does_not_resolve_all_historical_security_identities
+      - issuer_cik_does_not_by_itself_identify_a_share_class
+    point_in_time_status: retrieval_and_filing_acceptance_timestamps_recorded
+    canonical_status: canonical_issuer_identifier_when_resolved
+  - source_id: yfinance_daily_prices
+    source_name: Yahoo Finance daily prices and actions via yfinance
+    source_type: free_personal_research_price_and_action_adapter
+    source_url_or_repository: https://github.com/ranaroussi/yfinance
+    source_revision_or_commit: installed_package_version_recorded_at_runtime
+    retrieved_at_utc: recorded_at_runtime_in_local_snapshot_manifest
+    content_sha256: per_ticker_normalized_snapshot_hash_in_local_manifest
+    licence_or_terms_classification: yahoo_terms_personal_research_access_not_open_licence
+    cost_classification: free_personal_research_access
+    authentication_required: false
+    permitted_local_use: personal_research_subject_to_provider_terms
+    redistribution_status: raw_and_normalized_price_data_remain_local
+    known_limitations:
+      - unofficial_adapter_and_access_may_change
+      - delisted_ticker_history_and_delisting_returns_are_not_guaranteed
+      - adjusted_price_methodology_is_provider_controlled
+    point_in_time_status: retrieval_vintage_recorded_but_historical_vendor_vintages_unavailable
+    canonical_status: noncanonical_price_qualification_source
