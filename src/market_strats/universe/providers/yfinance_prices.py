@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -75,7 +76,22 @@ class YFinancePriceAdapter:
             "auto_adjust": False,
             "actions": True,
         }
-        error_status = "provider_unavailable"
+        request_key = sha256_json(request_parameters)
+        cache_path = self.raw_root / f"request_{request_key}.json"
+        if cache_path.is_file():
+            cached = json.loads(cache_path.read_text(encoding="utf-8"))
+            if cached.get("request_parameters") == request_parameters:
+                return PriceFetchResult(
+                    provider_ticker=provider_ticker,
+                    retrieved_at_utc=str(cached["retrieved_at_utc"]),
+                    request_parameters=request_parameters,
+                    snapshot_sha256=str(cached["snapshot_sha256"]),
+                    status=str(cached["status"]),
+                    rows=tuple(cached.get("rows", ())),
+                    actions=tuple(cached.get("actions", ())),
+                    package_version=str(cached.get("package_version", "unknown")),
+                )
+        error_status = "temporary_provider_failure"
         history: pd.DataFrame | None = None
         for attempt in range(1, self.maximum_attempts + 1):
             try:
@@ -87,11 +103,11 @@ class YFinancePriceAdapter:
                     actions=True,
                 )
                 if history is None or history.empty:
-                    error_status = "unavailable_or_possibly_delisted"
+                    error_status = "possibly_delisted_no_history"
                 else:
                     break
             except Exception:
-                error_status = "provider_unavailable"
+                error_status = "temporary_provider_failure"
             if attempt < self.maximum_attempts:
                 self.sleeper(self.retry_delay_seconds)
         retrieved = datetime.now(UTC).isoformat()
@@ -150,9 +166,17 @@ class YFinancePriceAdapter:
         digest = sha256_json(snapshot)
         self.raw_root.mkdir(parents=True, exist_ok=True)
         path = self.raw_root / f"{provider_ticker.replace('.', '_')}_{digest[:16]}.json"
-        import json
-
         path.write_text(json.dumps(snapshot, default=str, sort_keys=True), encoding="utf-8")
+        cache_payload = {
+            **snapshot,
+            "snapshot_sha256": digest,
+            "status": "available",
+            "package_version": package_version,
+        }
+        cache_path.write_text(
+            json.dumps(cache_payload, default=str, sort_keys=True),
+            encoding="utf-8",
+        )
         return PriceFetchResult(
             provider_ticker=provider_ticker,
             retrieved_at_utc=retrieved,

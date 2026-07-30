@@ -109,10 +109,11 @@ of public S&P Global announcements, official SEC identity endpoints, and Yahoo F
 `yfinance` under personal-research terms.
 
 The bounded 2026-05-01 qualification run returned
-`blocked_identity_reconciliation_failure`. The seed covers 1996-01-02 through 2025-08-23, but free
-evidence did not establish historical identity continuity or delisting treatment, the seed and
-Wikimedia endpoint sets had unresolved differences, complete historical prices were outside the
-bounded audit, and the SEC identity endpoint refused access from the run environment.
+`blocked_identity_reconciliation_failure`. A final remediation now adds compliant cached SEC
+acquisition, event-based post-seed membership extension, explicit conflict resolution, resumable
+effective-dated full price auditing, terminal-value classifications, and coverage-derived interval
+selection. The remediation rerun stopped before acquisition because the required operator-supplied
+`SEC_USER_AGENT` was unavailable; it did not produce or claim a replacement verdict.
 
 No model was trained, no feature or target panel was created, and the result does not authorize a
 backtest, portfolio, paper workflow, broker action, or trading decision.

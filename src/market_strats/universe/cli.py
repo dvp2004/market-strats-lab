@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import os
+import sys
 from datetime import date
 from pathlib import Path
 
+from market_strats.universe.contracts import UniverseContractError
 from market_strats.universe.pipeline import qualify_free_sp500
 
 
@@ -25,26 +28,23 @@ def build_parser() -> argparse.ArgumentParser:
     qualify.add_argument("--data-root", type=Path, required=True)
     qualify.add_argument("--report-root", type=Path, required=True)
     qualify.add_argument("--as-of", type=_date, required=True)
-    qualify.add_argument(
-        "--sec-user-agent",
-        default=(
-            "MarketStratsLab/1.0 (research software; contact: dvp2004@users.noreply.github.com)"
-        ),
-        help="Descriptive SEC-compliant software and contact User-Agent.",
-    )
     return parser
 
 
 def main() -> None:
     args = build_parser().parse_args()
-    result = qualify_free_sp500(
-        contract_path=args.contract,
-        source_registry_path=args.source_registry,
-        data_root=args.data_root,
-        report_root=args.report_root,
-        as_of=args.as_of,
-        sec_user_agent=args.sec_user_agent,
-    )
+    try:
+        result = qualify_free_sp500(
+            contract_path=args.contract,
+            source_registry_path=args.source_registry,
+            data_root=args.data_root,
+            report_root=args.report_root,
+            as_of=args.as_of,
+            sec_user_agent=os.environ.get("SEC_USER_AGENT"),
+        )
+    except UniverseContractError as error:
+        print(f"qualification_incomplete: {error}", file=sys.stderr)
+        raise SystemExit(2) from None
     summary = result["summary"]
     print(f"verdict: {summary['verdict']}")
     print(

@@ -56,7 +56,7 @@ def test_evaluation_segments_cannot_be_shortened(tmp_path: Path) -> None:
 
 def test_source_registry_accepts_only_zero_cost_classes() -> None:
     _, sources = load_source_registry(REGISTRY)
-    assert len(sources) == 5
+    assert len(sources) == 6
     assert {row.cost_classification for row in sources.values()} == {
         "free_open_licence",
         "free_public_official",
