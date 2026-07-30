@@ -36,13 +36,13 @@ frozen_parent_contracts:
     sha256: 4513102d36e4629244a1da0d7ab84d7eded3bf6fe1eeabd13ebb69423e3fc341
   mi2f_b_observation:
     file_name: mi2_technical_prospective_observation_contract_v1.yaml
-    sha256: to_be_recorded_at_contract_freeze_after_b_is_finalised
+    sha256: 86bd2b8f649f68c670d4070095c3188ba28e466c75ac568ea93f88d95ee52da4
   mi2f_b2_snapshot_runner:
     file_name: mi2_technical_prospective_snapshot_runner_contract_v1.yaml
-    sha256: to_be_recorded_at_contract_freeze_after_b2_is_finalised
+    sha256: 58f93a1521aeddaf474c8fd68ea7328544bfb118bd174dc765d3c42d479ff567
   mi2f_b4b_source_adapter:
     file_name: mi2_prospective_source_adapter_contract_v1.yaml
-    sha256: to_be_recorded_at_contract_freeze_after_b4b_is_finalised
+    sha256: bc07697f3e5b5c45a3418db45132fddbdf5ccf82a3c7c8adb0a9fe610fc38b8e
 
 # ---------------------------------------------------------------------------
 # Frozen evaluation population

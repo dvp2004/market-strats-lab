@@ -21,5 +21,9 @@ broker instructions, or authority to modify a portfolio.
 Configurations are in `configs/intelligence`. All data and report roots are explicit CLI arguments.
 Real source access is never part of the portable test suite.
 
+Versioned contracts retain their historical phase statuses. Current implementation status and
+verified configuration/source hashes are recorded in `configs/intelligence/mi_current_status_v1.yaml`
+and explained in `docs/intelligence/contract_status.md`.
+
 No phase is a claim of technical-family qualification, trading readiness, or reliable prospective
 outperformance. SPY Buy & Hold remains the raw-return benchmark.

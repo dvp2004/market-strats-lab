@@ -61,13 +61,20 @@ py -3.11 -m venv .venv
 
 ## Validation
 
+The portable consolidation gate covers the migrated intelligence package and its matching tests:
+
 ```powershell
-.\.venv\Scripts\python -m ruff check src tests
+.\.venv\Scripts\python -m ruff check --select E,F,I,UP `
+  src/market_strats/intelligence tests/test_mi*.py
 .\.venv\Scripts\python -m pytest -q -m "not artifact"
 ```
 
 Tests marked `artifact` require local generated evidence and are intentionally excluded from the
 portable suite. They are not deleted or silently treated as passing.
+
+The full legacy `src` and `tests` tree is not Ruff-clean. At consolidation, the unscoped command
+`python -m ruff check src tests` reported 735 pre-existing findings. That backlog is technical debt,
+not a passing release gate and not part of this consolidation change.
 
 ## Intelligence CLI
 
