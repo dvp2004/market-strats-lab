@@ -220,7 +220,7 @@ def test_sec_adapter_maps_cik_and_records_acceptance_timestamps(tmp_path: Path) 
 
 
 def test_sec_adapter_requires_compliant_contact_user_agent(tmp_path: Path) -> None:
-    with pytest.raises(UniverseContractError, match="contact address"):
+    with pytest.raises(UniverseContractError, match="contact email"):
         SecEdgarAdapter(user_agent="generic", raw_root=tmp_path)
 
 
@@ -281,7 +281,7 @@ def test_yfinance_provider_unavailability_is_bounded(tmp_path: Path) -> None:
         start=date(2024, 1, 1),
         end=date(2024, 1, 31),
     )
-    assert result.status == "provider_unavailable"
+    assert result.status == "temporary_provider_failure"
     assert calls == 2
 
 

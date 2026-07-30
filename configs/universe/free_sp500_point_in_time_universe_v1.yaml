@@ -35,10 +35,14 @@ source_requirements:
   identity: sec_edgar_identity
   prices_and_actions: yfinance_daily_prices
 real_run_limits:
-  maximum_price_tickers: 24
-  maximum_sec_submission_ciks: 5
+  full_effective_dated_price_audit: required
   request_timeout_seconds: 30
-  maximum_attempts: 2
+  maximum_attempts: 3
   retry_delay_seconds: 1
-  sec_minimum_request_interval_seconds: 0.11
+  sec_maximum_requests_per_second: 5
+  sec_bounded_exponential_backoff: true
+  sec_retry_after_handling: required
+  sec_response_caching: required
+  optional_alpha_vantage_endpoint: LISTING_STATUS
+  coverage_derived_minimum_monthly_decisions: 156
 training_validation_holdout_dates: derive_only_after_qualified_contiguous_coverage

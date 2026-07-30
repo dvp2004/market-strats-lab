@@ -37,11 +37,23 @@ from market_strats.universe.providers.historical_membership import (
     load_pinned_membership_seed,
     prepare_pinned_repository,
 )
-from market_strats.universe.providers.sec_edgar import SecEdgarAdapter, SecSnapshot
+from market_strats.universe.providers.sec_edgar import (
+    SecEdgarAdapter,
+    SecSnapshot,
+    resolve_cik_candidates,
+    sec_user_agent_from_environment,
+)
 from market_strats.universe.providers.sp_global import reconcile_bounded_announcements
 from market_strats.universe.providers.wikimedia import fetch_pinned_wikimedia_snapshot
 from market_strats.universe.providers.yfinance_prices import YFinancePriceAdapter
 from market_strats.universe.qualification import build_qualification_summary
+from market_strats.universe.remediation import (
+    apply_membership_extensions,
+    earliest_qualified_interval,
+    membership_events_from_extensions,
+    membership_extensions_from_change_rows,
+    resolve_membership_conflict,
+)
 from market_strats.universe.reporting import records_to_frame, write_qualification_outputs
 
 
@@ -69,7 +81,7 @@ def qualify_free_sp500(
     data_root: Path,
     report_root: Path,
     as_of: date,
-    sec_user_agent: str,
+    sec_user_agent: str | None = None,
 ) -> dict[str, Any]:
     data_root = require_explicit_root(data_root, "data_root")
     report_root = require_explicit_root(report_root, "report_root")
@@ -81,6 +93,7 @@ def qualify_free_sp500(
     if as_of != endpoint:
         raise UniverseContractError("as_of must equal the frozen historical_endpoint")
     limits = contract["real_run_limits"]
+    sec_user_agent = sec_user_agent or sec_user_agent_from_environment()
     raw_root = data_root / "raw"
     source_root = data_root / "sources"
     normalized_root = data_root / "normalized"
@@ -126,15 +139,14 @@ def qualify_free_sp500(
             user_agent=sec_user_agent,
             raw_root=raw_root / "sec_edgar",
             timeout_seconds=int(limits["request_timeout_seconds"]),
-            minimum_request_interval_seconds=float(limits["sec_minimum_request_interval_seconds"]),
+            maximum_requests_per_second=float(limits["sec_maximum_requests_per_second"]),
+            maximum_attempts=int(limits["maximum_attempts"]),
         )
         sec_rows, ticker_snapshot = sec_adapter.fetch_company_ticker_mappings()
         sec_snapshots.append(_serializable_snapshot(ticker_snapshot))
     except Exception as error:
         source_failures.append(f"sec_identity_source_unavailable:{type(error).__name__}")
         sec_adapter = None
-    sec_by_ticker = {normalize_ticker(row.ticker): row for row in sec_rows}
-
     identity_map = IdentityMap()
     security_id_by_ticker: dict[str, str] = {}
     unresolved_identity_ids: set[str] = set()
@@ -147,21 +159,27 @@ def qualify_free_sp500(
             normalized_first_observed.get(normalized, first_observed),
         )
     for normalized, first_observed in sorted(normalized_first_observed.items()):
-        sec_mapping = sec_by_ticker.get(normalized)
         seed_current = current_seed_by_ticker.get(normalized)
-        if sec_mapping is not None and seed_current is not None:
+        identity_resolution, resolved_cik = resolve_cik_candidates(
+            issuer_name=str(seed_current["security"]) if seed_current is not None else normalized,
+            ticker=normalized,
+            exchange=None,
+            mappings=sec_rows,
+        )
+        sec_mapping = next((row for row in sec_rows if row.cik == resolved_cik), None)
+        if identity_resolution == "resolved_sec_cik" and sec_mapping is not None:
             security_id = build_security_id(
                 namespace="sec_cik_share_class",
                 stable_identifier=sec_mapping.cik,
                 share_class=_share_class(normalized),
             )
-            identity_status = "current_sec_cik_resolved_historical_continuity_unverified"
+            identity_status = "resolved_sec_cik"
             cik = sec_mapping.cik
             issuer_name = sec_mapping.name
             exchange = sec_mapping.exchange
         else:
             security_id = provisional_seed_security_id(normalized, first_observed)
-            identity_status = "unresolved_historical_seed_identity"
+            identity_status = identity_resolution
             cik = None
             issuer_name = str(seed_current["security"]) if seed_current is not None else normalized
             exchange = None
@@ -196,8 +214,7 @@ def qualify_free_sp500(
         source_id=seed_source.source_id,
         security_id_for_ticker=resolve_seed_ticker,
     )
-    membership_intervals, interval_conflicts = build_membership_intervals(membership_events)
-    membership_conflicts: list[dict[str, Any]] = list(interval_conflicts)
+    membership_conflicts: list[dict[str, Any]] = []
 
     wiki_source = sources["wikimedia_sp500_reconciliation"]
     wiki_snapshot = None
@@ -239,11 +256,71 @@ def qualify_free_sp500(
                     ),
                     "primary_source": seed_source.source_id,
                     "secondary_source": wiki_source.source_id,
+                    "resolution_status": resolve_membership_conflict(
+                        seed_present=ticker in seed_symbols,
+                        wikimedia_present=ticker in wiki_symbols,
+                        official_announcement=None,
+                    ),
                 }
             )
+        extensions = membership_extensions_from_change_rows(
+            wiki_snapshot.historical_changes,
+            after=seed.snapshots[-1][0],
+            through=endpoint,
+            source_reference=f"wikimedia_revision:{wiki_snapshot.revision_id}",
+            content_hash=wiki_snapshot.content_hash,
+            source_classification=wiki_source.cost_classification,
+        )
+        for extension in extensions:
+            for ticker in (extension.added_ticker, extension.removed_ticker):
+                if not ticker or ticker in security_id_by_ticker:
+                    continue
+                security_id = provisional_seed_security_id(ticker, extension.effective_date)
+                unresolved_identity_ids.add(security_id)
+                identity_map.add_identity(
+                    SecurityIdentity(
+                        security_id=security_id,
+                        issuer_name=ticker,
+                        cik=None,
+                        share_class=_share_class(ticker),
+                        identity_status="unresolved_no_candidate",
+                        source_id=wiki_source.source_id,
+                    )
+                )
+                identity_map.add_ticker_interval(
+                    TickerIdentityInterval(
+                        security_id=security_id,
+                        ticker=ticker,
+                        exchange=None,
+                        valid_from=extension.effective_date,
+                        valid_through=None,
+                        source_id=wiki_source.source_id,
+                    )
+                )
+                security_id_by_ticker[ticker] = security_id
+        membership_events.extend(
+            membership_events_from_extensions(
+                extensions,
+                security_id_by_ticker,
+                source_id=wiki_source.source_id,
+            )
+        )
+        reconstructed, extension_conflicts = apply_membership_extensions(
+            active_tickers=seed_symbols,
+            extensions=extensions,
+        )
+        snapshot_manifest["sources"][wiki_source.source_id]["extension_event_count"] = len(
+            extensions
+        )
+        snapshot_manifest["sources"][wiki_source.source_id]["reconstructed_endpoint_count"] = len(
+            reconstructed
+        )
+        membership_conflicts.extend(extension_conflicts)
     except Exception as error:
         source_failures.append(f"wikimedia_reconciliation_unavailable:{type(error).__name__}")
 
+    membership_intervals, interval_conflicts = build_membership_intervals(membership_events)
+    membership_conflicts.extend(interval_conflicts)
     sp_source = sources["sp_global_bounded_announcements"]
     samples = list(sp_source.metadata["sample_rule"]["announcements"])
     sample_rows = reconcile_bounded_announcements(
@@ -286,16 +363,6 @@ def qualify_free_sp500(
         ],
     }
 
-    if sec_adapter is not None:
-        current_ciks = sorted(
-            {row.cik for row in sec_rows if normalize_ticker(row.ticker) in current_seed_by_ticker}
-        )
-        for cik in current_ciks[: int(limits["maximum_sec_submission_ciks"])]:
-            try:
-                _, submission_snapshot = sec_adapter.fetch_submission_history(cik)
-                sec_snapshots.append(_serializable_snapshot(submission_snapshot))
-            except Exception as error:
-                source_failures.append(f"sec_submission_history_unavailable:{type(error).__name__}")
     snapshot_manifest["sources"][sec_source.source_id] = {
         "mapping_count": len(sec_rows),
         "snapshots": sec_snapshots,
@@ -307,8 +374,7 @@ def qualify_free_sp500(
         maximum_attempts=int(limits["maximum_attempts"]),
         retry_delay_seconds=float(limits["retry_delay_seconds"]),
     )
-    sample_tickers = ["SPY", *sorted(current_seed_by_ticker)]
-    sample_tickers = list(dict.fromkeys(sample_tickers))[: int(limits["maximum_price_tickers"])]
+    sample_tickers = list(dict.fromkeys(["SPY", *sorted(security_id_by_ticker)]))
     price_rows_by_security: dict[str, list[dict[str, Any]]] = defaultdict(list)
     price_results: dict[str, Any] = {}
     corporate_actions: list[CorporateActionEvent] = []
@@ -353,7 +419,7 @@ def qualify_free_sp500(
                 )
             )
     snapshot_manifest["sources"][price_source.source_id] = {
-        "bounded_ticker_limit": int(limits["maximum_price_tickers"]),
+        "audit_scope": "all_effective_dated_provider_tickers",
         "requested_tickers": sample_tickers,
         "results": price_results,
     }
@@ -396,6 +462,7 @@ def qualify_free_sp500(
     eligibility_rows: list[dict[str, Any]] = []
     exclusions: list[dict[str, Any]] = []
     qualified_dates: list[date] = []
+    monthly_coverage_results: list[tuple[date, bool, tuple[str, ...]]] = []
     conflict_ids = {str(row.get("security_id", "")) for row in membership_conflicts}
     for calendar_row in calendar.to_dict(orient="records"):
         decision_date = calendar_row["decision_date"]
@@ -431,6 +498,21 @@ def qualify_free_sp500(
                 )
         if date_results and all(row.eligible for row in date_results):
             qualified_dates.append(decision_date)
+            monthly_coverage_results.append((decision_date, True, ()))
+        else:
+            reasons = tuple(
+                sorted({reason for item in date_results for reason in item.reason_codes})
+            )
+            monthly_coverage_results.append((decision_date, False, reasons))
+
+    qualified_interval, interval_audit = earliest_qualified_interval(
+        monthly_coverage_results,
+        endpoint=endpoint,
+        minimum_months=sum(
+            int(contract["evaluation_segment_minimum_monthly_decisions"][name])
+            for name in ("training", "walk_forward_validation", "untouched_holdout")
+        ),
+    )
 
     sample_passed = sum(bool(row["reconciliation_pass"]) for row in sample_reconciliation)
     sample_failed = len(sample_reconciliation) - sample_passed
@@ -472,6 +554,12 @@ def qualify_free_sp500(
     summary["membership_seed_coverage_start"] = seed.snapshots[0][0].isoformat()
     summary["membership_seed_coverage_end"] = seed.snapshots[-1][0].isoformat()
     summary["price_tickers_requested"] = len(sample_tickers)
+    summary["qualified_interval"] = (
+        None
+        if qualified_interval is None
+        else [qualified_interval[0].isoformat(), qualified_interval[1].isoformat()]
+    )
+    summary["candidate_interval_audit"] = interval_audit
 
     source_licence_audit = {
         "total_data_cost_usd": 0,

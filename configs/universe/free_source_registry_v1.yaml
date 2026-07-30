@@ -124,3 +124,22 @@ sources:
       - adjusted_price_methodology_is_provider_controlled
     point_in_time_status: retrieval_vintage_recorded_but_historical_vendor_vintages_unavailable
     canonical_status: noncanonical_price_qualification_source
+  - source_id: alpha_vantage_listing_status_optional
+    source_name: Alpha Vantage listing status
+    source_type: optional_lifecycle_and_delisting_date_evidence
+    source_url_or_repository: https://www.alphavantage.co/query
+    source_revision_or_commit: LISTING_STATUS_free_endpoint
+    retrieved_at_utc: recorded_at_runtime_when_optional_key_is_supplied
+    content_sha256: per_query_snapshot_hash_in_local_manifest
+    licence_or_terms_classification: alpha_vantage_free_personal_research_access
+    cost_classification: free_personal_research_access
+    authentication_required: true
+    permitted_local_use: supplemental_personal_research_lifecycle_evidence
+    redistribution_status: raw_responses_remain_local
+    known_limitations:
+      - optional_free_api_key_required
+      - free_rate_limits_apply
+      - not_a_historical_price_source
+      - terminal_economic_value_not_guaranteed
+    point_in_time_status: deterministic_query_dates_and_retrieval_vintages_recorded
+    canonical_status: optional_supplemental_evidence_only
