@@ -1,0 +1,40 @@
+source_id: federal_reserve_fomc_statement_html
+archive_url: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
+event_type: fomc_statement
+minimum_event_count: 25
+standalone_predictive_model_minimum_usable_statement_count: 80
+user_agent: MarketIntelligenceLab/0.1 research-only contact=local-user
+
+lexicons:
+  inflation:
+    - inflation
+    - price stability
+    - prices
+  employment:
+    - employment
+    - labor market
+    - jobs
+  growth:
+    - growth
+    - economic activity
+    - output
+  uncertainty:
+    - uncertainty
+    - risks
+    - uncertain
+  policy_rate:
+    - federal funds rate
+    - target range
+    - policy rate
+  balance_sheet:
+    - balance sheet
+    - securities holdings
+    - treasury securities
+  restrictive:
+    - restrictive
+    - tightening
+    - firming
+  easing:
+    - easing
+    - accommodation
+    - accommodative

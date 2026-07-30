@@ -1,0 +1,218 @@
+phase_id: mi2f_b_technical_prospective_observation_contract_v1
+contract_version: v1
+design_only: true
+research_only: true
+portfolio_influence: 0
+prospective_observation_status: not_started
+embedded_performance_results: false
+embedded_model_outputs: false
+trading_decision_created: false
+
+frozen_parent_contracts:
+  mi2_registry:
+    file_name: mi2_research_registry.yaml
+    sha256: 145ee25e3e17d61f9980d85558a96ecd96d84a3cc92349e1e290a7e9509ea10d
+  mi2e_signal_export:
+    file_name: mi2_signal_export_parity_v1.yaml
+    sha256: 1ebbf688677df952f14c78e4932e47de7ed4aa1fca5d600b3279b2e4a71705b8
+  mi2f_a_qualification:
+    file_name: mi2_technical_family_qualification_contract_v1.yaml
+    sha256: 4513102d36e4629244a1da0d7ab84d7eded3bf6fe1eeabd13ebb69423e3fc341
+
+frozen_technical_model:
+  model_identifier: ridge_fixed_alpha_1_0
+  model_class: regularised_linear_model
+  implementation_file_name: technical_baseline.py
+  required_model_specification_sha256: b43ab173262717863dbcdc766d64968aed6c5539534dad8b1445f919b83e1100
+  refit_or_tuning_allowed: false
+
+fixed_universe:
+  universe_id: mi1_us_liquid_etf_22_v1
+  definition_file_name: universe_mi1.yaml
+  definition_sha256: 2381cb1d73b0b58ced6d5d015df3933a4db3293ab0709a2cdbd1fb4cfce0153f
+  asset_count: 22
+  symbols:
+    - SPY
+    - QQQ
+    - IWM
+    - XLB
+    - XLE
+    - XLF
+    - XLI
+    - XLK
+    - XLP
+    - XLU
+    - XLV
+    - XLY
+    - EFA
+    - EEM
+    - BIL
+    - IEF
+    - TLT
+    - AGG
+    - LQD
+    - HYG
+    - GLD
+    - DBC
+  asset_identifier_convention: mi1_etf_lowercase_symbol
+  universe_change_allowed: false
+
+inherited_timing_and_target:
+  decision_cadence: each_eligible_us_equity_session
+  decision_cutoff_local: 20:00 America/New_York
+  earliest_execution_convention: next_valid_us_equity_session_open
+  same_close_execution_allowed: false
+  target_name: 20_trading_session_forward_total_return_excess_vs_BIL
+  target_horizon_sessions: 20
+  target_price_policy: documented_total_return_series_only
+  target_is_future_information: true
+
+required_mi2e_signal_export_fields:
+  - decision_date
+  - asset_identifier
+  - model_identifier
+  - feature_or_signal_schema_identifier
+  - signal_horizon_sessions
+  - signal_score
+  - signal_rank
+  - signal_percentile
+  - data_cutoff_or_availability_reference
+  - source_artifact_sha256
+  - research_only
+  - portfolio_influence
+
+prospective_snapshot_contract:
+  snapshot_identity_components:
+    - decision_date
+    - required_model_specification_sha256
+    - target_horizon_sessions
+    - universe_definition_sha256
+  eligible_creation_window: at_or_after_decision_date_cutoff_and_before_next_valid_session_open
+  retrospective_backfill_allowed: false
+  write_policy: create_once_append_only
+  overwrite_or_revision_allowed: false
+  duplicate_identity_handling: exact_duplicate_is_no_op_different_payload_is_conflict
+  immutable_snapshot_requirements:
+    - complete_frozen_export_rows
+    - source_data_cutoff_timestamp
+    - source_artifact_sha256
+    - feature_snapshot_sha256
+    - availability_audit_sha256
+    - required_model_specification_sha256
+    - universe_definition_sha256
+    - parent_contract_sha256_values
+    - snapshot_payload_sha256
+  source_data_cutoff_rule: every_input_must_be_available_by_20_00_America_New_York_on_decision_date
+  availability_rule: only_rows_passing_the_frozen_MI1_availability_contract_are_eligible
+  complete_universe_rule: exactly_one_eligible_row_for_each_of_22_expected_assets
+
+baseline_common_row_contract:
+  required_baseline_model_identifiers:
+    - zero_forward_excess_return
+    - persistence_last_observed_return
+  comparison_identity_keys:
+    - decision_date
+    - asset_identifier
+  common_row_rule: technical_model_and_both_baselines_must_share_the_exact_same_identity_set
+  incomplete_baseline_handling: mark_snapshot_comparison_incomplete_and_exclude_from_evaluation_without_imputation
+  baseline_recalculation_during_review_allowed: false
+
+deterministic_data_quality_handling:
+  missing_asset: reject_entire_snapshot_before_write
+  duplicate_asset: reject_entire_snapshot_before_write
+  unverified_or_late_input: reject_entire_snapshot_before_write
+  null_or_non_finite_signal: reject_entire_snapshot_before_write
+  signal_tie_primary_order: signal_score_descending
+  signal_tie_break: asset_identifier_ascending
+  incomplete_baseline_rows: snapshot_may_not_enter_common_row_evaluation
+
+outcome_maturity_contract:
+  maturity_horizon_sessions: 20
+  horizon_session_rule: twentieth_valid_us_equity_session_after_the_decision_session
+  earliest_maturity_timestamp: after_20_00_America_New_York_on_the_horizon_end_session
+  maturity_requires:
+    - complete_20_session_target_interval
+    - eligible_horizon_end_source_bar
+    - frozen_target_definition_match
+    - realized_outcome_source_artifact_sha256
+  pre_maturity_assessment_allowed: false
+  outcome_record_write_policy: separate_append_only_immutable_record
+  outcome_overwrite_or_revision_allowed: false
+
+prospective_evaluation_boundary:
+  descriptive_metrics_supported_after_maturity:
+    - forecast_mae
+    - forecast_rank_correlation
+    - common_row_coverage
+  observation_report_may_declare_family_pass: false
+  historical_artifacts_may_declare_family_pass: false
+  prospective_records_must_be_created_after_contract_freeze: true
+  qualification_decision_requires_separate_review: true
+  evidence_sufficiency_numerical_threshold: unresolved_governance_prerequisite_not_inherited
+
+unresolved_governance_prerequisites:
+  - prerequisite_id: approved_prospective_snapshot_runner
+    reason: no_runner_or_storage_protocol_is_authorized_by_this_design_only_phase
+  - prerequisite_id: minimum_matured_prospective_decision_count
+    reason: no_existing_frozen_MI_contract_defines_the_required_count
+  - prerequisite_id: minimum_prospective_calendar_duration
+    reason: no_existing_frozen_MI_contract_defines_the_required_duration
+  - prerequisite_id: prospective_family_metric_thresholds
+    reason: MI2F_A_records_forecast_family_thresholds_as_unresolved
+
+readiness_logic:
+  status_values:
+    - not_started
+    - observation_ready_pending_valid_snapshot_source
+    - observation_in_progress
+    - prospective_evidence_insufficient
+    - prospective_evidence_available_for_separate_review
+  transitions:
+    - from: not_started
+      to: observation_ready_pending_valid_snapshot_source
+      when: this_contract_is_frozen_but_no_separately_approved_valid_snapshot_runner_exists
+    - from: observation_ready_pending_valid_snapshot_source
+      to: observation_in_progress
+      when: a_separately_approved_runner_writes_the_first_valid_immutable_snapshot
+    - from: observation_in_progress
+      to: prospective_evidence_insufficient
+      when: a_review_is_requested_before_separately_frozen_sufficiency_governance_is_satisfied
+    - from: observation_in_progress
+      to: prospective_evidence_available_for_separate_review
+      when: separately_frozen_sufficiency_governance_exists_and_is_satisfied_by_matured_records
+  readiness_status_is_not_qualification: true
+
+prohibited_fields:
+  - target_weight
+  - position_size
+  - portfolio_weight
+  - trade
+  - order
+  - broker
+  - account
+  - execution
+  - cash_allocation
+  - real_money
+
+prohibited_actions:
+  - data_refresh
+  - feature_generation
+  - model_fit_or_refit
+  - hyperparameter_selection
+  - prediction_generation_in_this_phase
+  - outcome_calculation_in_this_phase
+  - target_generation
+  - backtest
+  - portfolio_construction
+  - ensemble_construction
+  - market_strats_allocation_change
+  - paper_workflow
+  - broker_instruction
+  - live_or_real_money_action
+
+required_safety_statements:
+  - No portfolio weights, position sizes, orders, broker instructions, execution decisions, cash allocations, or real-money actions may be created.
+  - A prospective signal snapshot is research evidence only. It is not an investment recommendation, an ensemble member, or an instruction to alter Market Strats Lab.
+  - No future GMA integration may occur unless a separately reviewed integration contract and independently passed family-level gates exist.
+
+next_boundary: create_a_separately_approved_prospective_snapshot_runner_not_an_ensemble

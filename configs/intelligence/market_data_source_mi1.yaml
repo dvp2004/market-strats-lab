@@ -1,0 +1,28 @@
+source:
+  source_id: yfinance_eod_mi1
+  source_name: Yahoo Finance daily EOD via yfinance
+  adapter: yfinance
+  requires_api_key: false
+  credential_policy: no_api_key_required
+  raw_data_handling: local_only_non_redistributable
+  publication_permission: raw_local_only_not_redistributable
+  availability_evidence_level: contractual_assumption
+  provider_timestamp_verified: false
+
+  yfinance:
+    auto_adjust: false
+    actions: true
+
+  availability_rule:
+    rule_id: yfinance_session_close_2000_ny_contractual_assumption
+    description: >
+      Daily ETF bars are treated as available at 20:00 America/New_York on the
+      relevant U.S. equity session date by explicit contractual assumption.
+    session_close_availability_assumption: "20:00 America/New_York"
+
+  contractual_assumption:
+    status: approved
+    approved_for_mi1_research: true
+    notes: >
+      This is a research-only timing assumption. It is not provider timestamp
+      verification and must remain visible in MI-1 reports.

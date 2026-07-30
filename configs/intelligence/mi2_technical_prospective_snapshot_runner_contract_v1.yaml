@@ -1,0 +1,99 @@
+phase_id: mi2f_b2_prospective_snapshot_runner_contract_v1
+contract_version: v1
+design_only: true
+research_only: true
+portfolio_influence: 0
+runner_status: not_implemented
+
+accepted_upstream_input:
+  description: already-existing, point-in-time MI-2 prediction/export artifact
+  required_signal_schema: mi2e_research_only_technical_signal_export_v1
+  required_flags:
+    research_only: true
+    portfolio_influence: 0
+
+fixed_identity:
+  model_identifier: ridge_fixed_alpha_1_0
+  required_implementation_sha256: b43ab173262717863dbcdc766d64968aed6c5539534dad8b1445f919b83e1100
+  universe_identifier: mi1_us_liquid_etf_22_v1
+
+timing_and_cutoff:
+  data_cutoff: 20:00 America/New_York
+  earliest_permitted_snapshot_creation_time: after_20_00_America_New_York_on_decision_date
+  decision_date_convention: matched_to_latest_eligible_mi1_session
+  execution_convention: next_valid_us_equity_session_open
+
+required_provenance:
+  - source_data_cutoff_timestamp
+  - source_artifact_sha256
+
+storage_policy:
+  root_directory: data/private/mi2/prospective_snapshots
+  is_local: true
+  is_private: true
+  is_versioned: false
+  pre_write_verification: must_verify_storage_root_is_ignored_by_git
+  layout_type: append_only
+
+naming_convention:
+  snapshot_file: snapshot_{decision_date}.parquet
+
+snapshot_manifest_schema:
+  fields:
+    - snapshot_id
+    - decision_date
+    - creation_timestamp
+    - model_identifier
+    - universe_identifier
+    - payload_sha256
+    - source_artifact_sha256
+
+ledger_schema:
+  fields:
+    - decision_date
+    - snapshot_id
+    - payload_sha256
+    - registration_timestamp
+  prohibited_ledger_concepts:
+    - targets
+    - weights
+    - orders
+    - execution
+    - performance
+
+safety_and_integrity:
+  duplicate_decision_date_prevention: true
+  overwrite_prohibition: true
+  hash_verification: before_and_after_ledger_registration
+  fail_closed_conditions:
+    - incomplete_universe
+    - invalid_cutoff
+    - wrong_model_identity
+    - absent_provenance
+    - duplicate_decision_date
+    - prohibited_fields_present
+  invocation_policy: manual_operator_invocation_only
+  autonomous_scheduling_allowed: false
+  network_or_data_acquisition_allowed_in_runner: false
+
+workflow_distinctions:
+  snapshot_capture: point_in_time_immutable_storage_only
+  outcome_maturity: strictly_after_20_sessions_pass
+  evaluation: strictly_separate_later_phase
+
+prohibited_fields:
+  - target_weight
+  - position_size
+  - portfolio_weight
+  - order
+  - trade
+  - broker
+  - account
+  - execution
+  - cash_allocation
+  - real_money
+  - portfolio_return
+  - strategy_return
+
+required_safety_statements:
+  - A snapshot is immutable research evidence only. It is not a signal approval, portfolio instruction, paper-trading action, or investment recommendation.

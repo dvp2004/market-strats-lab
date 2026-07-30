@@ -1,0 +1,27 @@
+source_id: sec_edgar_8k_acceptance_qualification
+submission_base_url: https://data.sec.gov/submissions/
+history_start_date: 2016-01-01
+form_types:
+  - 8-K
+minimum_total_accepted_8k_events: 160
+minimum_qualifying_issuers: 6
+minimum_events_per_qualifying_issuer: 12
+minimum_calendar_years_of_coverage: 6
+max_requests_per_second: 2
+issuers:
+  - issuer_id: apple
+    cik: "0000320193"
+  - issuer_id: microsoft
+    cik: "0000789019"
+  - issuer_id: jpmorgan_chase
+    cik: "0000019617"
+  - issuer_id: exxon_mobil
+    cik: "0000034088"
+  - issuer_id: johnson_and_johnson
+    cik: "0000200406"
+  - issuer_id: walmart
+    cik: "0000104169"
+  - issuer_id: procter_and_gamble
+    cik: "0000080424"
+  - issuer_id: caterpillar
+    cik: "0000018230"

@@ -1,0 +1,43 @@
+phase_id: mi2e_research_only_technical_signal_export_parity_v1
+status: frozen_research_only_export_contract
+source_artifact:
+  accepted_table: data/private/mi2/walk_forward_predictions.parquet
+  required_fields:
+    decision_date: session_date
+    asset_identifier: instrument_id
+    model_identifier: model_name
+    signal_score: prediction
+  provenance_sha256_required: true
+  availability_reference_required: true
+export:
+  schema_identifier: mi2e_research_only_technical_signal_export_v1
+  signal_horizon_sessions: 20
+  research_only: true
+  portfolio_influence: 0
+  stable_order:
+    - decision_date ascending
+    - model_identifier ascending
+    - signal_score descending
+    - asset_identifier ascending tie break
+  percentile_rule: top_rank_is_1_bottom_rank_is_0_single_row_is_1
+prohibited_fields:
+  - target_weight
+  - position_size
+  - portfolio_weight
+  - trade
+  - order
+  - broker
+  - account
+  - execution
+  - cash_allocation
+  - real_money
+boundaries:
+  model_training: false
+  model_selection: false
+  feature_recalculation: false
+  target_generation: false
+  backtest: false
+  portfolio_simulation: false
+  market_strats_lab_influence: false
+  candidate_or_ensemble_membership: false
+  paper_broker_or_live_action: false

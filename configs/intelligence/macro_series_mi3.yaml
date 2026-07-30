@@ -1,0 +1,24 @@
+source:
+  source_id: fred_alfred_observations_vintage
+  source_name: FRED/ALFRED observations API
+  requires_api_key_env: FRED_API_KEY
+  raw_data_handling: local_only_non_redistributable
+  publication_permission: raw_local_only_not_redistributable
+  availability_evidence_level: contractual_assumption
+  availability_rule_id: macro_vintage_next_session_cutoff_v1
+  availability_rule: first_valid_us_equity_session_after_realtime_start_2000_new_york
+  provider_timestamp_verified: false
+
+series:
+  - series_id: DFF
+    name: effective_federal_funds_rate
+  - series_id: T10Y2Y
+    name: ten_year_minus_two_year_treasury_spread
+  - series_id: BAA10YM
+    name: baa_corporate_credit_spread
+  - series_id: CPIAUCSL
+    name: inflation_price_index
+  - series_id: UNRATE
+    name: unemployment_rate
+  - series_id: INDPRO
+    name: industrial_production_index
