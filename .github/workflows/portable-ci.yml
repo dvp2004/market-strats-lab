@@ -30,7 +30,10 @@ jobs:
         run: python -m pip install -e ".[dev]"
 
       - name: Lint portable consolidation scope
-        run: python -m ruff check --select E,F,I,UP src/market_strats/intelligence tests/test_mi*.py
+        run: >-
+          python -m ruff check --select E,F,I,UP
+          src/market_strats/intelligence src/market_strats/universe
+          tests/test_mi*.py tests/universe
 
       - name: Run portable tests
         run: python -m pytest -q -m "not artifact"

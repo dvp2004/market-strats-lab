@@ -1,0 +1,44 @@
+contract_id: free_sp500_point_in_time_universe_v1
+contract_version: 1
+research_scope: universe_qualification_only
+index_reference: S&P 500
+historical_start: 1996-01-02
+historical_endpoint: 2026-05-01
+exchange_calendar: XNYS
+decision_cadence: monthly
+decision_time: final eligible US equity session close
+execution_time: next eligible US equity session open
+same_close_execution: prohibited
+minimum_price_history_sessions: 252
+liquidity_window_sessions: 60
+minimum_median_daily_dollar_volume_usd: 20000000
+minimum_decision_close_usd: 5
+current_survivor_filtering: prohibited
+missing_price_imputation: prohibited
+missing_delisting_return_as_zero: prohibited
+primary_raw_return_benchmark: SPY Buy & Hold after comparable costs
+model_training_authorized: false
+root_policy:
+  data_root: must_be_supplied_explicitly
+  report_root: must_be_supplied_explicitly
+  roots_must_be_absolute: true
+  arbitrary_directory_search: prohibited
+evaluation_segment_minimum_monthly_decisions:
+  training: 60
+  walk_forward_validation: 60
+  untouched_holdout: 36
+  prospective_shadow_after_authorization: 12
+source_requirements:
+  historical_membership_seed: hanshof_sp500_membership_seed
+  membership_reconciliation: wikimedia_sp500_reconciliation
+  independent_change_sample: sp_global_bounded_announcements
+  identity: sec_edgar_identity
+  prices_and_actions: yfinance_daily_prices
+real_run_limits:
+  maximum_price_tickers: 24
+  maximum_sec_submission_ciks: 5
+  request_timeout_seconds: 30
+  maximum_attempts: 2
+  retry_delay_seconds: 1
+  sec_minimum_request_interval_seconds: 0.11
+training_validation_holdout_dates: derive_only_after_qualified_contiguous_coverage
