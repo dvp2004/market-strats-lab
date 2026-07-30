@@ -18,6 +18,8 @@ from market_strats.global_multi_asset.gma2_replay import (
     run_gma2_replay_foundation,
 )
 
+pytestmark = pytest.mark.artifact
+
 
 CONFIG_PATH = Path("configs/global_multi_asset_alpha/gma2_replay_foundation.yaml")
 GMA1A_HASH = "953d5615d0773e71f49a9af5b55c598266478381ecf5bcf19c8a9d2831084b78"

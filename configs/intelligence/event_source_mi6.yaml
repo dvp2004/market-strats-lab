@@ -1,0 +1,7 @@
+source_id: bls_cpi_employment_release_qualification
+calendar_url: https://www.bls.gov/schedule/news_release/
+release_types:
+  - cpi
+  - employment_situation
+minimum_historical_event_count: 80
+maximum_crawl_depth: 3

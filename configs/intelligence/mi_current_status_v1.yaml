@@ -1,0 +1,100 @@
+mapping_id: mi_current_status_v1
+mapping_scope: consolidated_market_intelligence_contracts
+as_of_branch: consolidation/market-intelligence
+hash_policy: sha256_of_text_bytes_with_lf_line_endings
+historical_contract_rule: >
+  Status fields inside versioned design and preregistration contracts describe the phase when
+  each contract was frozen. They are preserved as historical evidence and are not current
+  implementation claims. This mapping records current repository status separately.
+
+contracts:
+  event_source_mi5.yaml:
+    contract_sha256: 8bddd9f14f72aaa6651e78254a035fada8fc08a4da6e5276c5689f7664c578fe
+    current_status: implemented_portable_source_qualification
+    implementations:
+      src/market_strats/intelligence/mi5/fomc_event_text.py: 0eb4364ea265d2330defedfa4b9e6d24c8e875ad38c7b914e3ff1c245299d061
+
+  event_source_mi6.yaml:
+    contract_sha256: 7b1650bc8d08ae6164f8c78e56427fb92f923e3063d145417bd8e20874bbe2e7
+    current_status: implemented_portable_source_qualification
+    implementations:
+      src/market_strats/intelligence/mi6/bls_release_qualification.py: c6426295c68505135707c0489be275449fac3aa5b06dc1d2c8ee0e41455de44a
+
+  macro_series_mi3.yaml:
+    contract_sha256: 0dd15fda775619d28bd729e3a33397b180c3ae8dac87c05515f373cf0702c229
+    current_status: implemented_portable_vintage_forecast
+    implementations:
+      src/market_strats/intelligence/mi3/macro_vintage_forecast.py: ab8574311e055fbea7df0859b05019e818f65e94673ce2b673a1d3b1feed97ac
+
+  market_data_source_mi1.yaml:
+    contract_sha256: 520e08baab022c576a1be3149a5335c3139b2cd9273eca0d3f08719ab4937b0f
+    current_status: implemented_portable_point_in_time_pipeline
+    implementations:
+      src/market_strats/intelligence/data/pipeline.py: 9661934e0ae1ffea804c275f5e60e001a4066896233c5717e47850cd1a7b50f8
+      src/market_strats/intelligence/data/adapter_yfinance.py: 48f85d90a5b1a14afa1a16b2f75bbdf605e486d4c1d2e4ec0d32eba559321f2d
+
+  mi2_prospective_source_adapter_contract_v1.yaml:
+    contract_sha256: bc07697f3e5b5c45a3418db45132fddbdf5ccf82a3c7c8adb0a9fe610fc38b8e
+    historical_status: design_only_not_implemented
+    current_status: implemented_portable_and_tested
+    implementations:
+      src/market_strats/intelligence/mi2/prospective_source_adapter.py: 0f188ccea936b583b15adc39d961781beefac22de6da7fe9e1587629a0146940
+
+  mi2_research_registry.yaml:
+    contract_sha256: 263c34fdb9a37578774d82f4f55b81b16da40fead371f31791d74ddf5637544b
+    historical_status: preregistered_not_implemented
+    current_status: baseline_and_comparator_implemented_without_promotion
+    implementations:
+      src/market_strats/intelligence/mi2/technical_baseline.py: 53a2adfdb6751e843ea8aa0e1f2993bca322dd7f73f3073c16c7b65e2c69a2b9
+      src/market_strats/intelligence/mi4/tree_technical_comparator.py: b630b959f8d2c32800cf8f4e492eb90210e3b7672c04d480c118a4564cb236a2
+
+  mi2_signal_export_parity_v1.yaml:
+    contract_sha256: 1ebbf688677df952f14c78e4932e47de7ed4aa1fca5d600b3279b2e4a71705b8
+    current_status: implemented_portable_research_only_export
+    implementations:
+      src/market_strats/intelligence/mi2/signal_export_parity.py: a1915716488f1adf5a47b1fef853c570f95dc568cc4f37eaa63c61a46931fee6
+
+  mi2_technical_family_qualification_contract_v1.yaml:
+    contract_sha256: 4513102d36e4629244a1da0d7ab84d7eded3bf6fe1eeabd13ebb69423e3fc341
+    historical_status: design_only
+    current_status: contract_only_no_family_qualification_result
+    implementations: {}
+
+  mi2_technical_prospective_observation_contract_v1.yaml:
+    contract_sha256: 86bd2b8f649f68c670d4070095c3188ba28e466c75ac568ea93f88d95ee52da4
+    historical_status: design_only_observation_not_started
+    current_status: runner_available_real_observation_not_started
+    implementations:
+      src/market_strats/intelligence/mi2/prospective_snapshot_runner.py: 947c559f47d2863b00a8636ecb89bbcbd2c4403a3247b32d6b49800bbe005a78
+
+  mi2_technical_prospective_scorecard_contract_v1.yaml:
+    contract_sha256: c81352253c3287a6d08422647b21d5cc306db8cd37d9b95dec8156dadfb5921d
+    historical_status: design_only_scorecard_not_started
+    current_status: parent_hashes_resolved_scorecard_not_implemented
+    implementations: {}
+
+  mi2_technical_prospective_snapshot_runner_contract_v1.yaml:
+    contract_sha256: 58f93a1521aeddaf474c8fd68ea7328544bfb118bd174dc765d3c42d479ff567
+    historical_status: design_only_not_implemented
+    current_status: implemented_portable_and_tested
+    implementations:
+      src/market_strats/intelligence/mi2/prospective_snapshot_runner.py: 947c559f47d2863b00a8636ecb89bbcbd2c4403a3247b32d6b49800bbe005a78
+
+  sec_issuer_panel_mi7.yaml:
+    contract_sha256: a561b2e0cf86aac357a3da8be8cf3da95f9db9f370369b913c73b1ecbb92a697
+    current_status: implemented_portable_source_qualification
+    implementations:
+      src/market_strats/intelligence/mi7/sec_edgar_8k_qualification.py: d5ffd81a3900c64a1cbf3710c95fef8bab86894d15eae223a5af8d15cb4033d8
+
+  universe_mi1.yaml:
+    contract_sha256: 2381cb1d73b0b58ced6d5d015df3933a4db3293ab0709a2cdbd1fb4cfce0153f
+    current_status: active_portable_universe_contract
+    implementations:
+      src/market_strats/intelligence/data/pipeline.py: 9661934e0ae1ffea804c275f5e60e001a4066896233c5717e47850cd1a7b50f8
+
+boundaries:
+  real_prospective_observation_started: false
+  technical_family_qualified: false
+  scorecard_implemented: false
+  portfolio_influence: 0
+  trading_or_broker_authority: false

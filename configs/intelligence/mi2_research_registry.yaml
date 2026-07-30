@@ -1,0 +1,69 @@
+registry_id: mi2_preregistered_research_registry_v1
+status: preregistered_not_implemented
+scope: daily_end_of_day_etf_research
+universe_id: mi1_us_liquid_etf_22_v1
+
+research_start_date:
+  rule: first_session_after_all_22_assets_pass_the_mi1_coverage_audit
+  minimum_common_history_sessions: 252
+  manual_override_allowed: false
+
+decision_and_execution:
+  decision_cutoff_local: '20:00 America/New_York'
+  execution_rule: next_valid_us_equity_session_open
+  same_close_execution_allowed: false
+  decision_panel_requires_availability_audit_pass: true
+  allowed_evidence_levels:
+    - provider_timestamp_verified
+    - release_calendar_verified
+    - contractual_assumption
+  contractual_assumption_requires_explicit_approval: true
+
+target_definition:
+  primary_target: 20_trading_session_forward_total_return_excess_vs_BIL
+  return_price_policy: documented_total_return_series_only
+  target_is_future_information: true
+  target_must_not_enter_decision_time_features: true
+
+baseline_set:
+  forecast:
+    - zero_forward_excess_return
+    - persistence_last_observed_return
+  portfolio:
+    - SPY_buy_and_hold_total_return
+    - BIL_cash_proxy_total_return
+    - equal_weight_eligible_universe_monthly_rebalance
+    - 10_month_absolute_trend_equal_weight
+    - 12_1_cross_sectional_momentum_top_quartile
+    - volatility_targeted_trend_baseline_10_percent
+  model_comparators:
+    - regularised_linear_model
+    - tree_based_model
+
+transaction_cost_assumption:
+  one_way_cost_bps: 10
+  applied_to: traded_notional
+  slippage_model: fixed_cost_only_for_initial_baseline
+  no_cost_free_results_allowed: true
+
+walk_forward_and_holdout:
+  initial_training_fraction: 0.50
+  walk_forward_test_block_sessions: 20
+  expanding_window: true
+  purge_sessions: 20
+  embargo_sessions: 20
+  untouched_holdout_fraction: 0.20
+  holdout_rule: final_20_percent_of_coverage_audit_eligible_sessions
+  holdout_tuning_allowed: false
+
+promotion_criteria:
+  require_no_lookahead_or_availability_audit_failure: true
+  require_no_unresolved_high_severity_data_quality_event: true
+  require_improvement_after_costs_over_relevant_baselines: true
+  require_holdout_sharpe_improvement_minimum: 0.10
+  require_holdout_max_drawdown_not_worse_by_more_than: 0.02
+  require_regime_consistency: true
+  require_turnover_and_cost_reporting: true
+  require_candidate_packet_research_only: true
+  portfolio_influence: 0
+  GMA_integration_authorised: false

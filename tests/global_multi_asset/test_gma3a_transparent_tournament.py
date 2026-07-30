@@ -29,6 +29,8 @@ from market_strats.global_multi_asset.gma3a_tournament import (
     verify_gma3a_upstream,
 )
 
+pytestmark = pytest.mark.artifact
+
 
 CONFIG_PATH = Path("configs/global_multi_asset_alpha/gma3a_full_history_tournament.yaml")
 FIXTURE_CONFIG_PATH = Path("configs/global_multi_asset_alpha/gma3a_fixture_contamination_test.yaml")

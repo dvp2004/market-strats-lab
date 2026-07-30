@@ -1,0 +1,576 @@
+# MI-2F-C — Prospective Technical Signal-Family Scorecard Contract V1
+#
+# Design-only. Research-only. No portfolio influence.
+# Applies only to snapshots created AFTER this contract is frozen.
+# Must not evaluate historical MI-2 metric values or alter any model.
+#
+# Resolves the four unresolved prerequisites from MI-2F-A:
+#   1. qualification_comparison_row_policy
+#   2. forecast_family_pass_thresholds  (MAE and rank-IC)
+#   3. portfolio_gate_mapping           (no-portfolio boundary)
+#   4. ridge_to_portfolio_evidence_association (ridge-to-evidence chain)
+
+phase_id: mi2f_c_technical_prospective_scorecard_contract_v1
+contract_version: v1
+design_only: true
+research_only: true
+portfolio_influence: 0
+scorecard_status: not_started
+embedded_performance_results: false
+embedded_model_outputs: false
+trading_decision_created: false
+threshold_selected_using_historical_metric_values: false
+
+# ---------------------------------------------------------------------------
+# Frozen parent contracts — immutable references
+# ---------------------------------------------------------------------------
+frozen_parent_contracts:
+  mi2_registry:
+    file_name: mi2_research_registry.yaml
+    sha256: 263c34fdb9a37578774d82f4f55b81b16da40fead371f31791d74ddf5637544b
+  mi2e_signal_export:
+    file_name: mi2_signal_export_parity_v1.yaml
+    sha256: 1ebbf688677df952f14c78e4932e47de7ed4aa1fca5d600b3279b2e4a71705b8
+  mi2f_a_qualification:
+    file_name: mi2_technical_family_qualification_contract_v1.yaml
+    sha256: 4513102d36e4629244a1da0d7ab84d7eded3bf6fe1eeabd13ebb69423e3fc341
+  mi2f_b_observation:
+    file_name: mi2_technical_prospective_observation_contract_v1.yaml
+    sha256: 86bd2b8f649f68c670d4070095c3188ba28e466c75ac568ea93f88d95ee52da4
+  mi2f_b2_snapshot_runner:
+    file_name: mi2_technical_prospective_snapshot_runner_contract_v1.yaml
+    sha256: 58f93a1521aeddaf474c8fd68ea7328544bfb118bd174dc765d3c42d479ff567
+  mi2f_b4b_source_adapter:
+    file_name: mi2_prospective_source_adapter_contract_v1.yaml
+    sha256: bc07697f3e5b5c45a3418db45132fddbdf5ccf82a3c7c8adb0a9fe610fc38b8e
+
+# ---------------------------------------------------------------------------
+# Frozen evaluation population
+# ---------------------------------------------------------------------------
+frozen_evaluation_population:
+  universe_id: mi1_us_liquid_etf_22_v1
+  universe_definition_file_name: universe_mi1.yaml
+  universe_definition_sha256: 2381cb1d73b0b58ced6d5d015df3933a4db3293ab0709a2cdbd1fb4cfce0153f
+  asset_count: 22
+  symbols:
+    - SPY
+    - QQQ
+    - IWM
+    - XLB
+    - XLE
+    - XLF
+    - XLI
+    - XLK
+    - XLP
+    - XLU
+    - XLV
+    - XLY
+    - EFA
+    - EEM
+    - BIL
+    - IEF
+    - TLT
+    - AGG
+    - LQD
+    - HYG
+    - GLD
+    - DBC
+  asset_identifier_convention: mi1_etf_lowercase_symbol
+  universe_change_allowed: false
+
+  canonical_model_identifier: ridge_fixed_alpha_1_0
+  required_model_implementation_or_specification_sha256: b43ab173262717863dbcdc766d64968aed6c5539534dad8b1445f919b83e1100
+  model_refit_or_tuning_allowed: false
+
+  decision_cutoff_local: "20:00 America/New_York"
+  earliest_execution_convention: next_valid_us_equity_session_open
+  same_close_execution_allowed: false
+
+  target_name: 20_trading_session_forward_total_return_excess_vs_BIL
+  target_horizon_sessions: 20
+  target_price_policy: documented_total_return_series_only
+  target_is_future_information: true
+
+  scorecard_applies_to: snapshots_created_strictly_after_this_contract_is_frozen
+  historical_mi2_artifacts_may_not_enter_scorecard: true
+
+# ---------------------------------------------------------------------------
+# Accepted snapshot / manifest / ledger identity requirements
+# ---------------------------------------------------------------------------
+accepted_snapshot_identity:
+  required_snapshot_identity_components:
+    - decision_date
+    - required_model_specification_sha256
+    - target_horizon_sessions
+    - universe_definition_sha256
+  write_policy: create_once_append_only
+  overwrite_or_revision_allowed: false
+  retrospective_backfill_allowed: false
+  duplicate_identity_handling: exact_duplicate_is_no_op_different_payload_is_conflict
+
+  required_manifest_fields:
+    - snapshot_id
+    - decision_date
+    - creation_timestamp
+    - model_identifier
+    - universe_identifier
+    - payload_sha256
+    - source_artifact_sha256
+
+  required_ledger_fields:
+    - decision_date
+    - snapshot_id
+    - payload_sha256
+    - registration_timestamp
+
+  prohibited_ledger_concepts:
+    - targets
+    - weights
+    - orders
+    - execution
+    - performance
+
+# ---------------------------------------------------------------------------
+# Required provenance-sidecar and raw-artifact hash chain
+# ---------------------------------------------------------------------------
+required_provenance_chain:
+  description: >
+    Every accepted scorecard row must link — directly or through immutable
+    manifest references — to all seven chain fields listed below.
+    Any row whose chain does not reconcile exactly must be rejected.
+  required_chain_fields:
+    - snapshot_id
+    - decision_date
+    - model_identifier
+    - model_implementation_or_specification_sha256
+    - raw_prediction_artifact_sha256
+    - upstream_source_data_artifact_sha256
+    - snapshot_payload_sha256
+  chain_reconciliation_rule: all_seven_fields_must_be_non_null_and_mutually_consistent
+  chain_break_action: reject_row_fail_closed
+
+  required_sidecar_fields:
+    - decision_date
+    - decision_timestamp_utc
+    - data_cutoff_or_availability_reference
+    - raw_prediction_artifact_sha256
+    - upstream_source_data_artifact_sha256
+    - model_identifier
+    - model_implementation_or_specification_sha256
+    - universe_identifier
+    - feature_or_signal_schema_identifier
+    - signal_horizon_sessions
+    - operator_capture_attestation
+
+  sidecar_validation_rules:
+    raw_artifact_hash_match: true
+    canonical_model_identifier_match: true
+    frozen_implementation_hash_match: true
+    frozen_universe_match: true
+    cutoff_compatibility: "20:00 America/New_York"
+    coherent_decision_time: true
+    source_data_identity_present: true
+    operator_attestation_present: true
+
+# ---------------------------------------------------------------------------
+# Common comparison-row policy  (resolves prerequisite 1 from MI-2F-A)
+# ---------------------------------------------------------------------------
+common_comparison_row_policy:
+  prerequisite_resolved: qualification_comparison_row_policy
+  prerequisite_was_unresolved_in: mi2_technical_family_qualification_contract_v1
+  policy_name: simultaneous_availability_common_row
+  definition: >
+    A row is eligible for scorecard evaluation only when the model signal
+    (signal_score), the realised 20-session BIL-excess-return target, and
+    every required baseline value (zero_forward_excess_return AND
+    persistence_last_observed_return) are simultaneously available and valid
+    for the same (decision_date, asset_identifier) pair.
+  eligibility_conditions:
+    - signal_score_is_non_null_and_finite
+    - realised_target_is_non_null_and_finite
+    - zero_forward_excess_return_is_non_null_and_finite
+    - persistence_last_observed_return_is_non_null_and_finite
+    - row_passes_frozen_mi1_availability_contract
+    - decision_date_cutoff_satisfied
+    - snapshot_provenance_chain_valid
+  exclusion_is_deterministic: true
+  imputation_allowed: false
+  baseline_recalculation_during_review_allowed: false
+
+  deterministic_exclusion_logging:
+    log_reason_for_every_excluded_row: true
+    exclusion_categories:
+      - missing_signal_score
+      - non_finite_signal_score
+      - missing_realised_target
+      - non_finite_realised_target
+      - missing_zero_baseline
+      - missing_persistence_baseline
+      - duplicate_decision_date_asset_pair
+      - late_input_after_cutoff
+      - incomplete_universe_on_decision_date
+      - provenance_invalid_or_missing
+      - snapshot_rejected_before_write
+    exclusion_log_is_immutable: true
+    exclusion_log_must_accompany_every_scorecard_report: true
+
+  tie_handling:
+    rank_scope:
+      - decision_date
+      - model_identifier
+    primary_order: signal_score_descending
+    stable_tie_break: asset_identifier_ascending
+
+# ---------------------------------------------------------------------------
+# Overlap and observation rules
+# ---------------------------------------------------------------------------
+overlap_and_observation_rules:
+  daily_snapshot_cadence_permitted: true
+  daily_snapshots_are_descriptive_only: true
+  daily_snapshots_must_not_control_primary_qualification_conclusion: true
+
+  primary_anchor_rule:
+    description: >
+      Every twentieth eligible US equity decision session, starting from
+      the first valid prospective snapshot accepted after this contract is
+      frozen.  The first anchor is session 20, then 40, 60, … of the
+      eligible prospective decision sequence.
+    anchor_spacing_sessions: 20
+    anchor_start: first_valid_prospective_snapshot_post_contract_freeze
+    overlap_fraction_between_adjacent_anchors: 0.0
+
+  minimum_matured_non_overlapping_anchor_decisions: 12
+  minimum_prospective_calendar_sessions: 252
+  minimum_valid_anchor_coverage_ratio: 0.90
+
+  no_pass_permitted_until_all_three_conditions_met:
+    - at_least_12_valid_matured_non_overlapping_anchor_dates
+    - at_least_252_eligible_us_equity_sessions_elapsed_from_first_accepted_snapshot
+    - valid_anchor_coverage_ratio_at_least_0_90
+
+  coverage_ratio_definition: >
+    valid_matured_anchor_dates / expected_anchor_dates_given_sessions_elapsed.
+    Expected anchor dates = floor(elapsed_eligible_sessions / 20).
+
+# ---------------------------------------------------------------------------
+# Metrics  (resolves prerequisite 2 — forecast_family_pass_thresholds)
+# ---------------------------------------------------------------------------
+metrics:
+  prerequisite_resolved: forecast_family_pass_thresholds
+  prerequisite_was_unresolved_in: mi2_technical_family_qualification_contract_v1
+
+  primary_ranking_metric:
+    name: anchor_date_rank_ic
+    description: >
+      Cross-sectional Spearman rank correlation between signal_score and
+      realised 20-session BIL-excess return, calculated independently for
+      each valid anchor date using only common eligible rows on that date.
+    correlation_type: spearman
+    signal_field: signal_score
+    target_field: realised_20_session_bil_excess_return
+    scope: per_valid_anchor_date
+    row_eligibility: common_comparison_row_policy
+    direction: higher_is_better
+
+  primary_forecast_error_metrics:
+    description: >
+      MAE for three predictors computed only on the common eligible
+      population (rows satisfying common_comparison_row_policy) across
+      all valid matured anchor dates.
+    metrics:
+      - name: ridge_mae
+        predictor: signal_score
+        model_identifier: ridge_fixed_alpha_1_0
+        target_field: realised_20_session_bil_excess_return
+        direction: lower_is_better
+      - name: zero_baseline_mae
+        predictor: zero_forward_excess_return
+        model_identifier: zero_forward_excess_return
+        target_field: realised_20_session_bil_excess_return
+        direction: lower_is_better
+      - name: persistence_baseline_mae
+        predictor: persistence_last_observed_return
+        model_identifier: persistence_last_observed_return
+        target_field: realised_20_session_bil_excess_return
+        direction: lower_is_better
+    mae_computed_on: common_eligible_rows_only
+    no_separate_mae_per_asset: true
+
+  secondary_directional_metric:
+    name: positive_rank_ic_rate
+    description: >
+      Percentage of valid anchor dates on which the anchor_date_rank_ic
+      is strictly positive.
+    scope: across_all_valid_matured_anchor_dates
+    direction: higher_is_better
+
+  secondary_spread_diagnostic:
+    name: top_bottom_basket_target_spread
+    description: >
+      Mean realised 20-session BIL-excess return of the top-ranked
+      quartile minus the bottom-ranked quartile on each anchor date,
+      averaged across all valid matured anchor dates.
+    scope: per_valid_anchor_date_then_averaged
+    row_eligibility: common_comparison_row_policy
+    rank_field: signal_score
+    target_field: realised_20_session_bil_excess_return
+    basket_definition: top_quartile_minus_bottom_quartile_by_signal_score_rank
+    classification: descriptive_target_space_diagnostic_only
+    is_portfolio_return: false
+    is_strategy_return: false
+    is_investable_result: false
+    trading_result: false
+    must_not_control_pass_logic: true
+
+# ---------------------------------------------------------------------------
+# Fixed pass logic  (resolves prerequisite 2 — numeric thresholds)
+# ---------------------------------------------------------------------------
+fixed_pass_logic:
+  no_metric_may_compensate_for_failure_of_another: true
+  threshold_invention_using_historical_values_prohibited: true
+  metric_value_inspection_during_contract_design_allowed: false
+
+  qualifying_status_label: prospective_evidence_available_for_separate_review
+  non_qualifying_status_label: prospective_evidence_insufficient
+  not_evaluable_status_label: scorecard_not_evaluable
+
+  all_conditions_required:
+
+    # Evidence-volume gates
+    - condition_id: anchor_count_gate
+      description: At least 12 valid matured non-overlapping anchor dates must exist.
+      rule: valid_matured_non_overlapping_anchor_count >= 12
+
+    - condition_id: calendar_duration_gate
+      description: >
+        At least 252 eligible US equity sessions must have elapsed from
+        the first accepted prospective snapshot to the scorecard evaluation date.
+      rule: elapsed_eligible_sessions >= 252
+
+    - condition_id: coverage_ratio_gate
+      description: Valid anchor coverage ratio must be at least 0.90.
+      rule: valid_anchor_coverage_ratio >= 0.90
+
+    # Rank IC gates
+    - condition_id: mean_rank_ic_gate
+      description: Mean anchor-date rank IC must be strictly positive.
+      rule: mean_anchor_date_rank_ic > 0
+
+    - condition_id: positive_rank_ic_frequency_gate
+      description: >
+        At least 8 of the 12 valid matured anchor dates must have
+        a strictly positive anchor_date_rank_ic.
+      rule: positive_rank_ic_anchor_count >= 8
+      denominator: 12
+
+    # MAE gate
+    - condition_id: ridge_mae_dominance_gate
+      description: >
+        Ridge mean MAE must be strictly lower than both the zero baseline
+        and the persistence baseline on the common eligible population.
+      rule: ridge_mae < zero_baseline_mae AND ridge_mae < persistence_baseline_mae
+      population: common_eligible_rows_only
+
+    # Integrity gates
+    - condition_id: model_identity_integrity_gate
+      description: >
+        No material model-identity, provenance, cutoff, maturity, or
+        leakage breach may exist anywhere in the evidence chain.
+      rule: zero_integrity_breaches_recorded
+
+    - condition_id: no_portfolio_contamination_gate
+      description: >
+        No portfolio, trading, execution, or GMA-influence field may exist
+        anywhere in the evidence chain (snapshots, manifests, ledgers,
+        outcome records, or scorecard rows).
+      rule: zero_portfolio_or_execution_fields_in_evidence_chain
+
+  maximum_achievable_scorecard_outcome: prospective_evidence_available_for_separate_review
+  this_outcome_does_not_authorise:
+    - ensemble_integration
+    - gma_integration
+    - market_strats_lab_allocation_change
+    - paper_session
+    - paper_workflow
+    - broker_instruction
+    - real_money_action
+    - live_action
+
+  separate_review_required_before_any_integration: true
+
+# ---------------------------------------------------------------------------
+# No-portfolio boundary  (resolves prerequisite 3 from MI-2F-A)
+# ---------------------------------------------------------------------------
+no_portfolio_boundary:
+  prerequisite_resolved: portfolio_gate_mapping
+  prerequisite_was_unresolved_in: mi2_technical_family_qualification_contract_v1
+
+  statement: >
+    No portfolio-level metric is evaluated in MI-2F-C.
+
+    There are no portfolio weights, holdings, trades, transaction costs,
+    returns, Sharpe ratios, drawdowns, orders, paper decisions, broker
+    instructions, or real-money actions associated with this scorecard.
+
+    The top-bottom spread is a descriptive target-space diagnostic only,
+    not an investable portfolio result.
+
+  portfolio_metrics_evaluated: none
+  portfolio_weights_exist: false
+  holdings_exist: false
+  trades_exist: false
+  transaction_costs_evaluated: false
+  strategy_returns_evaluated: false
+  sharpe_ratio_evaluated: false
+  drawdown_evaluated: false
+  orders_exist: false
+  paper_decisions_exist: false
+  broker_instructions_exist: false
+  real_money_actions_exist: false
+  top_bottom_spread_is_portfolio_return: false
+  top_bottom_spread_is_investable_result: false
+
+  portfolio_baseline_mapping:
+    description: >
+      The portfolio-level promotion gates inherited from the MI-2 registry
+      (after-cost Sharpe improvement >= 0.10, drawdown worsening <= 0.02,
+      regime consistency, turnover reporting) are portfolio-level criteria
+      that have no defined mapping in a no-portfolio evaluation context.
+      They are explicitly excluded from MI-2F-C and must not be applied,
+      estimated, or proxied.
+    portfolio_gates_applied: false
+    portfolio_gates_proxied: false
+    mapping_rule: portfolio_gates_are_inapplicable_and_excluded_from_this_scorecard
+
+# ---------------------------------------------------------------------------
+# Ridge-to-evidence association  (resolves prerequisite 4 from MI-2F-A)
+# ---------------------------------------------------------------------------
+ridge_to_evidence_association:
+  prerequisite_resolved: ridge_to_portfolio_evidence_association
+  prerequisite_was_unresolved_in: mi2_technical_family_qualification_contract_v1
+
+  statement: >
+    Every scorecard row must be traceable to the Ridge model's raw prediction
+    artifact through the immutable provenance chain.  Association is established
+    by verifying all seven chain fields simultaneously.  No portfolio-level row
+    is used; signal origin is asserted directly through the snapshot manifest.
+
+  required_chain_fields:
+    - snapshot_id
+    - decision_date
+    - model_identifier
+    - model_implementation_or_specification_sha256
+    - raw_prediction_artifact_sha256
+    - upstream_source_data_artifact_sha256
+    - snapshot_payload_sha256
+
+  chain_verification_rule: >
+    model_identifier must equal ridge_fixed_alpha_1_0 AND
+    model_implementation_or_specification_sha256 must equal the frozen
+    required_model_implementation_or_specification_sha256 AND
+    raw_prediction_artifact_sha256 must reconcile with upstream artifact AND
+    snapshot_payload_sha256 must reconcile with the stored snapshot file.
+
+  chain_break_action: reject_row_fail_closed
+  portfolio_rows_used_for_ridge_evidence: false
+
+# ---------------------------------------------------------------------------
+# Prohibited fields — must not appear anywhere in the evidence chain
+# ---------------------------------------------------------------------------
+prohibited_fields:
+  - target_weight
+  - position_size
+  - portfolio_weight
+  - portfolio_return
+  - strategy_return
+  - realised_pnl
+  - order
+  - trade
+  - broker
+  - account
+  - execution
+  - cash_allocation
+  - real_money
+
+# ---------------------------------------------------------------------------
+# Prohibited actions
+# ---------------------------------------------------------------------------
+prohibited_actions:
+  - data_refresh
+  - feature_generation
+  - model_fit_or_refit
+  - hyperparameter_selection
+  - prediction_generation
+  - outcome_calculation
+  - target_generation
+  - backtest
+  - portfolio_construction
+  - portfolio_simulation
+  - ensemble_construction
+  - gma_integration
+  - market_strats_allocation_change
+  - paper_workflow
+  - paper_session
+  - broker_instruction
+  - live_or_real_money_action
+  - threshold_selection_after_results
+  - historical_result_inspection_for_threshold_choice
+  - prior_artifact_mutation
+  - snapshot_revision
+
+# ---------------------------------------------------------------------------
+# Fail-closed conditions
+# ---------------------------------------------------------------------------
+fail_closed_conditions:
+  - missing_or_invalid_provenance_chain
+  - model_identifier_mismatch
+  - model_specification_hash_mismatch
+  - universe_mismatch
+  - cutoff_violation
+  - maturity_not_satisfied
+  - leakage_detected
+  - snapshot_created_before_contract_freeze
+  - historical_artifact_presented_as_prospective_evidence
+  - prohibited_field_present_in_evidence_chain
+  - duplicate_decision_date_asset_pair_in_scorecard
+  - anchor_coverage_ratio_below_minimum_before_scorecard_run
+  - any_portfolio_or_execution_field_in_evidence
+
+# ---------------------------------------------------------------------------
+# Required safety statements
+# ---------------------------------------------------------------------------
+required_safety_statements:
+  - >
+    This scorecard is research evidence only.  It is not an investment
+    recommendation, a trading signal approval, an ensemble-integration
+    decision, or any instruction to alter Market Strats Lab.
+  - >
+    No portfolio weights, position sizes, orders, broker instructions,
+    execution decisions, cash allocations, or real-money actions may be
+    created by or derived from this scorecard.
+  - >
+    Even if all pass conditions are satisfied, the only permitted outcome
+    is prospective_evidence_available_for_separate_review.  A separate
+    review and a separately frozen integration contract are required before
+    any ensemble or Market Strats Lab use.
+  - >
+    No future GMA integration may occur unless a separately reviewed
+    integration contract and independently passed family-level gates exist.
+  - >
+    The top-bottom spread is a descriptive target-space diagnostic only.
+    It is not a portfolio return, strategy return, or investable result.
+
+# ---------------------------------------------------------------------------
+# Mandatory boundary
+# ---------------------------------------------------------------------------
+mandatory_boundary: >
+  Even a passing scorecard can only produce
+  prospective_evidence_available_for_separate_review.
+  A separate review and a separately frozen integration contract would
+  still be required before any ensemble or Market Strats Lab use.
+
+next_boundary: >
+  Perform one synthetic end-to-end adapter-to-runner integration test
+  using synthetic data only.  Then separately authorise the first real
+  snapshot capture after an eligible decision-date cutoff has passed.
+  No real snapshot may be captured under this contract.

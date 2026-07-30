@@ -1,0 +1,98 @@
+phase_id: mi2f_b4b_prospective_source_adapter_contract_v1
+contract_version: v1
+design_only: true
+research_only: true
+portfolio_influence: 0
+adapter_status: not_implemented
+
+description: |
+  Defines the manual-only transformation layer between:
+  raw walk_forward_predictions.parquet + point_in_time_source_provenance_manifest
+  -> MI-2E research-only export packet
+  -> existing immutable snapshot runner
+
+provenance_sidecar_schema:
+  fields:
+    - decision_date
+    - decision_timestamp_utc
+    - data_cutoff_or_availability_reference
+    - raw_prediction_artifact_sha256
+    - upstream_source_data_artifact_sha256
+    - model_identifier
+    - model_implementation_or_specification_sha256
+    - universe_identifier
+    - feature_or_signal_schema_identifier
+    - signal_horizon_sessions
+    - operator_capture_attestation
+
+sidecar_validation_rules:
+  raw_artifact_hash_match: true
+  canonical_model_identifier_match: true
+  frozen_implementation_hash_match: true
+  frozen_universe_match: true
+  cutoff_compatibility: 20:00 America/New_York
+  coherent_decision_time: true
+  source_data_identity_present: true
+  operator_attestation_present: true
+
+source_to_export_mapping:
+  raw_to_export_fields:
+    session_date: decision_date
+    instrument_id: asset_identifier
+    model_name: model_identifier
+    prediction: signal_score
+
+adapter_validations:
+  feature_or_signal_schema_identifier: obtained_from_provenance_sidecar
+  signal_horizon_sessions: obtained_from_provenance_sidecar
+  data_cutoff_or_availability_reference: obtained_from_provenance_sidecar
+  source_artifact_sha256: equals_raw_prediction_artifact_sha256_from_sidecar
+  research_only: hardcoded_true_by_contract
+  portfolio_influence: hardcoded_zero_by_contract
+  signal_rank: computed_deterministically_per_mi2e
+  signal_percentile: computed_deterministically_per_mi2e
+
+leakage_prevention:
+  rules:
+    - never_read_targets_or_outcomes_during_signal_generation_or_provenance
+    - never_copy_targets_or_outcomes_to_export_packet_manifest_or_ledger
+    - reject_selected_row_if_any_target_or_outcome_field_is_non_null
+    - treat_non_null_future_outcome_as_fail_closed_breach
+  prohibited_fields:
+    - target_value
+    - target_weight
+    - position_size
+    - portfolio_weight
+    - portfolio_return
+    - strategy_return
+    - realised_return
+    - order
+    - trade
+    - broker
+    - account
+    - execution
+    - cash_allocation
+    - real_money
+
+runner_compatibility:
+  runner_source_artifact_sha256_meaning: hash_of_the_raw_upstream_prediction_artifact
+  upstream_source_data_artifact_recording: recorded_separately_in_the_sidecar
+  adapter_export_authoritative_status: not_authoritative
+  runner_authoritative_status: runner_append_only_ledger_is_authoritative
+  ledger_write_prohibition: adapter_must_not_write_to_ledger_or_bypass_controls
+
+fail_closed_conditions:
+  - missing_or_invalid_provenance_sidecar
+  - raw_artifact_hash_mismatch
+  - wrong_model_identifier
+  - model_specification_hash_mismatch
+  - universe_mismatch
+  - invalid_or_missing_cutoff
+  - decision_timestamp_incoherent
+  - missing_schema_or_horizon
+  - missing_required_source_fields
+  - duplicate_or_incomplete_assets
+  - prohibited_field_output
+  - selected_row_contains_matured_target_or_outcome
+  - non_research_only_output
+  - nonzero_portfolio_influence

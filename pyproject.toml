@@ -3,27 +3,38 @@ name = "market-strats-lab"
 version = "0.1.0"
 description = "A reproducible systematic trading research lab for testing market strategies honestly."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11,<3.12"
 dependencies = [
-    "pandas>=2.0.0",
-    "numpy>=1.24.0",
-    "yfinance>=0.2.40",
-    "matplotlib>=3.7.0",
-    "pyarrow>=14.0.0",
-    "pyyaml>=6.0.0",
-    "tabulate>=0.9.0",
-    "scikit-learn>=1.4,<2",
+    "pandas>=2.2,<3.0",
+    "numpy>=1.26,<3.0",
+    "yfinance>=0.2.40,<0.3",
+    "matplotlib>=3.7,<4.0",
+    "pandas-market-calendars>=4.4,<6.0",
+    "pyarrow>=15.0,<22.0",
+    "pyyaml>=6.0,<7.0",
+    "tabulate>=0.9,<1.0",
+    "scikit-learn==1.9.0",
 ]
+
+[project.scripts]
+market-strats-intelligence = "market_strats.intelligence.cli:main"
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.0.0",
-    "ruff>=0.5.0",
+    "pytest>=8.0,<9.0",
+    "ruff>=0.11,<1.0",
+]
+
+[tool.pytest.ini_options]
+addopts = "-p no:cacheprovider"
+markers = [
+    "artifact: requires local generated research artifacts and is excluded from portable CI",
 ]
 
 [tool.ruff]
 line-length = 100
 extend-exclude = [".pytest*", ".pytest_*"]
+target-version = "py311"
 
 [tool.setuptools.packages.find]
 where = ["src"]

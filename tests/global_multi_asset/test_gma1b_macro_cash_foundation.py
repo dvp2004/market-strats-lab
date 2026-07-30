@@ -47,6 +47,8 @@ from market_strats.global_multi_asset.gma1b_macro_cash import (
     sha256_file,
 )
 
+pytestmark = pytest.mark.artifact
+
 CONFIG_PATH = Path("configs/global_multi_asset_alpha/gma1b_macro_cash_foundation.yaml")
 REPORT_DIR = Path("reports/global_multi_asset_alpha/macro_foundation")
 CANONICAL_DIR = Path("data/global_multi_asset_alpha/canonical_macro")

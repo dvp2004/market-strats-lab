@@ -1,0 +1,211 @@
+phase_id: mi2f_a_technical_signal_family_qualification_contract_v1
+contract_version: v1
+design_only: true
+evidence_class: observed_development_evidence
+research_only: true
+portfolio_influence: 0
+embedded_performance_results: false
+
+accepted_input_artifact_class:
+  class_id: accepted_mi2_prediction_and_feature_availability_bundle_v1
+  provenance_sha256_required_for_every_artifact: true
+  artifacts:
+    - artifact_id: mi2_walk_forward_predictions
+      file_name: walk_forward_predictions.parquet
+      format: parquet
+      required_fields:
+        - instrument_id
+        - session_date
+        - target_value
+        - prediction
+        - model_name
+        - evaluation_segment
+        - zero_prediction
+        - persistence_prediction
+    - artifact_id: mi2_feature_panel_availability
+      file_name: feature_panel.parquet
+      format: parquet
+      required_fields:
+        - instrument_id
+        - session_date
+        - decision_timestamp_utc
+        - availability_evidence_level
+        - feature_available
+        - feature_block_reason
+
+identity_and_timing:
+  prediction_identity_keys:
+    - session_date
+    - instrument_id
+    - model_name
+  availability_join_keys:
+    - session_date
+    - instrument_id
+  decision_date_field: session_date
+  decision_timestamp_field: decision_timestamp_utc
+  asset_identifier_field: instrument_id
+  model_identifier_field: model_name
+  score_field: prediction
+  target_field: target_value
+  point_in_time_availability_fields:
+    - availability_evidence_level
+    - feature_available
+    - feature_block_reason
+
+inherited_mi2_registry_rules:
+  registry_id: mi2_preregistered_research_registry_v1
+  scope: daily_end_of_day_etf_research
+  universe_id: mi1_us_liquid_etf_22_v1
+  research_start_date:
+    rule: first_session_after_all_22_assets_pass_the_mi1_coverage_audit
+    minimum_common_history_sessions: 252
+    manual_override_allowed: false
+  decision_and_execution:
+    decision_cutoff_local: 20:00 America/New_York
+    execution_rule: next_valid_us_equity_session_open
+    same_close_execution_allowed: false
+    decision_panel_requires_availability_audit_pass: true
+    allowed_evidence_levels:
+      - provider_timestamp_verified
+      - release_calendar_verified
+      - contractual_assumption
+    contractual_assumption_requires_explicit_approval: true
+  target_definition:
+    primary_target: 20_trading_session_forward_total_return_excess_vs_BIL
+    return_price_policy: documented_total_return_series_only
+    target_is_future_information: true
+    target_must_not_enter_decision_time_features: true
+  forecast_baselines:
+    - zero_forward_excess_return
+    - persistence_last_observed_return
+  technical_family_model_identifier: ridge_fixed_alpha_1_0
+  technical_family_model_class: regularised_linear_model
+  transaction_cost_assumption:
+    one_way_cost_bps: 10
+    applied_to: traded_notional
+    slippage_model: fixed_cost_only_for_initial_baseline
+    no_cost_free_results_allowed: true
+  walk_forward_and_holdout:
+    initial_training_fraction: 0.50
+    walk_forward_test_block_sessions: 20
+    expanding_window: true
+    purge_sessions: 20
+    embargo_sessions: 20
+    untouched_holdout_fraction: 0.20
+    holdout_rule: final_20_percent_of_coverage_audit_eligible_sessions
+    holdout_tuning_allowed: false
+  promotion_criteria:
+    require_no_lookahead_or_availability_audit_failure: true
+    require_no_unresolved_high_severity_data_quality_event: true
+    require_improvement_after_costs_over_relevant_baselines: true
+    require_holdout_sharpe_improvement_minimum: 0.10
+    require_holdout_max_drawdown_not_worse_by_more_than: 0.02
+    require_regime_consistency: true
+    require_turnover_and_cost_reporting: true
+    require_candidate_packet_research_only: true
+    portfolio_influence: 0
+    GMA_integration_authorised: false
+
+supported_evaluation:
+  primary_predictive_metric:
+    name: forecast_mae
+    source_field: target_value
+    prediction_field: prediction
+    direction: lower_is_better
+    support: existing_mi2_scoreboard_implementation
+  secondary_predictive_metrics:
+    - name: forecast_rank_correlation
+      source_field: target_value
+      prediction_field: prediction
+      direction: higher_is_better
+      support: existing_mi2_scoreboard_implementation
+  chronological_evaluation_blocks:
+    - walk_forward_validation
+    - untouched_holdout
+  purge_and_embargo:
+    purge_sessions: 20
+    embargo_sessions: 20
+  missing_data_policy:
+    feature_rows: use_only_feature_available_true
+    unverified_availability_rows: never_eligible
+    existing_metric_behavior: pairwise_dropna_for_target_and_evaluated_prediction
+    qualification_comparison_row_policy: unresolved
+  deterministic_tie_handling:
+    rank_scope:
+      - decision_date
+      - model_identifier
+    primary_order: signal_score_descending
+    stable_tie_break: asset_identifier_ascending
+
+evaluation_concept_resolution:
+  accepted_input_artifact_class: frozen
+  required_fields: frozen
+  identity_keys: frozen
+  decision_timestamp: frozen
+  asset_identifier: frozen
+  model_identifier: frozen
+  score_field: frozen
+  target_field: frozen
+  point_in_time_availability: frozen
+  technical_family_baselines: frozen
+  primary_predictive_metric: frozen
+  secondary_predictive_metrics: frozen
+  chronological_evaluation_blocks: frozen
+  purge_and_embargo: frozen
+  missing_data_source_behavior: frozen
+  qualification_comparison_row_policy: unresolved
+  deterministic_tie_handling: frozen
+  forecast_family_pass_thresholds: unresolved
+  portfolio_gate_mapping: unresolved
+  ridge_to_portfolio_evidence_association: unresolved
+  family_level_status_rule: frozen
+
+unresolved_prerequisites:
+  - prerequisite_id: qualification_comparison_row_policy
+    reason: existing_mi2_metrics_use_pairwise_valid_rows_but_registry_does_not_freeze_a_common_family_comparison_row_set
+  - prerequisite_id: forecast_family_pass_thresholds
+    reason: existing_mi2_registry_does_not_define_numeric_MAE_or_rank_correlation_family_qualification_thresholds
+  - prerequisite_id: portfolio_gate_mapping
+    reason: existing_after_cost_Sharpe_drawdown_regime_turnover_gates_are_portfolio_level_and_no_no_portfolio_mapping_is_registered
+  - prerequisite_id: ridge_to_portfolio_evidence_association
+    reason: existing_portfolio_rows_do_not_establish_that_the_ridge_prediction_is_their_signal_source
+
+family_level_status_rule:
+  precedence:
+    - status: not_evaluable_from_existing_accepted_artifacts
+      when: any_required_artifact_field_provenance_or_unresolved_prerequisite_is_absent_or_unresolved
+    - status: not_qualified_for_future_integration
+      when: all_prerequisites_are_resolved_and_any_inherited_mandatory_criterion_fails
+    - status: qualified_for_research_only_future_integration
+      when: all_prerequisites_are_resolved_and_every_inherited_mandatory_criterion_is_evaluable_and_passes
+  result_statuses:
+    - qualified_for_research_only_future_integration
+    - not_qualified_for_future_integration
+    - not_evaluable_from_existing_accepted_artifacts
+  threshold_invention_allowed: false
+  metric_value_inspection_during_contract_design_allowed: false
+
+prohibited_changes:
+  - model_tuning
+  - model_refitting
+  - feature_addition_or_change
+  - target_change
+  - universe_change
+  - baseline_change
+  - timing_change
+  - threshold_selection_after_results
+  - prior_artifact_mutation
+
+prohibited_actions:
+  - prediction_generation
+  - target_generation
+  - backtest
+  - portfolio_construction
+  - ensemble_construction
+  - market_strats_allocation_change
+  - paper_session
+  - broker_instruction
+  - real_money_action
+
+mandatory_boundary: even_a_pass_does_not_authorise_an_ensemble_Market_Strats_Lab_allocation_change_paper_session_broker_instruction_or_real_money_action
+next_boundary: execute_the_frozen_MI2F_qualification_against_accepted_existing_artifacts_with_no_refit_or_tuning

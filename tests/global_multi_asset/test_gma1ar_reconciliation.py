@@ -25,6 +25,8 @@ from market_strats.global_multi_asset.gma1ar_runner import (
     determine_decision,
 )
 
+pytestmark = pytest.mark.artifact
+
 REPORT_DIR = Path("reports/global_multi_asset_alpha/data_foundation")
 CANONICAL_DIR = Path("data/global_multi_asset_alpha/canonical_market")
 

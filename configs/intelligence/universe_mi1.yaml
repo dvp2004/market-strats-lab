@@ -1,0 +1,73 @@
+universe_id: mi1_us_liquid_etf_22_v1
+scope: daily_end_of_day_market_data_only
+registry_version: 1
+research_start_date_policy: coverage_audit_determined_no_manual_assumption
+minimum_common_history_sessions: 252
+
+assets:
+  - symbol: SPY
+    role: us_large_cap_equity
+    asset_family: equity_broad_market
+  - symbol: QQQ
+    role: us_growth_equity
+    asset_family: equity_broad_market
+  - symbol: IWM
+    role: us_small_cap_equity
+    asset_family: equity_broad_market
+  - symbol: XLB
+    role: materials_sector
+    asset_family: equity_sector
+  - symbol: XLE
+    role: energy_sector
+    asset_family: equity_sector
+  - symbol: XLF
+    role: financials_sector
+    asset_family: equity_sector
+  - symbol: XLI
+    role: industrials_sector
+    asset_family: equity_sector
+  - symbol: XLK
+    role: technology_sector
+    asset_family: equity_sector
+  - symbol: XLP
+    role: consumer_staples_sector
+    asset_family: equity_sector
+  - symbol: XLU
+    role: utilities_sector
+    asset_family: equity_sector
+  - symbol: XLV
+    role: health_care_sector
+    asset_family: equity_sector
+  - symbol: XLY
+    role: consumer_discretionary_sector
+    asset_family: equity_sector
+  - symbol: EFA
+    role: international_developed_equity
+    asset_family: equity_international
+  - symbol: EEM
+    role: emerging_market_equity
+    asset_family: equity_international
+  - symbol: BIL
+    role: cash_short_duration_proxy
+    asset_family: cash_proxy
+  - symbol: IEF
+    role: intermediate_treasuries
+    asset_family: government_bonds
+  - symbol: TLT
+    role: long_treasuries
+    asset_family: government_bonds
+  - symbol: AGG
+    role: core_investment_grade_bonds
+    asset_family: broad_bonds
+  - symbol: LQD
+    role: investment_grade_credit
+    asset_family: credit_bonds
+  - symbol: HYG
+    role: high_yield_credit
+    asset_family: credit_bonds
+  - symbol: GLD
+    role: gold
+    asset_family: real_assets
+  - symbol: DBC
+    role: broad_commodities
+    asset_family: real_assets

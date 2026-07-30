@@ -6,7 +6,7 @@ import argparse
 import csv
 import hashlib
 from dataclasses import dataclass
-from pathlib import Path, PurePath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
 import yaml
@@ -153,13 +153,15 @@ def text_value(record: dict[str, Any], field: str) -> str:
 def _relative_path(value: Any, field: str) -> Path:
     text = str(value or "").strip()
     path = Path(text)
-    pure = PurePath(text)
+    posix_path = PurePosixPath(text)
+    windows_path = PureWindowsPath(text)
     if (
         not text
         or "://" in text
-        or path.is_absolute()
-        or path.drive
-        or ".." in pure.parts
+        or posix_path.is_absolute()
+        or windows_path.is_absolute()
+        or ".." in posix_path.parts
+        or ".." in windows_path.parts
         or text.startswith(("/", "\\"))
     ):
         raise GMA6BPortabilityError(f"gma6b_invalid_relative_path:{field}")
