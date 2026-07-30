@@ -1,6 +1,7 @@
 mapping_id: mi_current_status_v1
 mapping_scope: consolidated_market_intelligence_contracts
 as_of_branch: consolidation/market-intelligence
+hash_policy: sha256_of_text_bytes_with_lf_line_endings
 historical_contract_rule: >
   Status fields inside versioned design and preregistration contracts describe the phase when
   each contract was frozen. They are preserved as historical evidence and are not current
@@ -40,7 +41,7 @@ contracts:
       src/market_strats/intelligence/mi2/prospective_source_adapter.py: 0f188ccea936b583b15adc39d961781beefac22de6da7fe9e1587629a0146940
 
   mi2_research_registry.yaml:
-    contract_sha256: 145ee25e3e17d61f9980d85558a96ecd96d84a3cc92349e1e290a7e9509ea10d
+    contract_sha256: 263c34fdb9a37578774d82f4f55b81b16da40fead371f31791d74ddf5637544b
     historical_status: preregistered_not_implemented
     current_status: baseline_and_comparator_implemented_without_promotion
     implementations:
@@ -67,7 +68,7 @@ contracts:
       src/market_strats/intelligence/mi2/prospective_snapshot_runner.py: 947c559f47d2863b00a8636ecb89bbcbd2c4403a3247b32d6b49800bbe005a78
 
   mi2_technical_prospective_scorecard_contract_v1.yaml:
-    contract_sha256: a83eb1dbb2e94385afae2c1e28b4ca74f2a118c43b4e6d58d89b272ca63b8b3b
+    contract_sha256: c81352253c3287a6d08422647b21d5cc306db8cd37d9b95dec8156dadfb5921d
     historical_status: design_only_scorecard_not_started
     current_status: parent_hashes_resolved_scorecard_not_implemented
     implementations: {}

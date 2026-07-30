@@ -27,7 +27,7 @@ threshold_selected_using_historical_metric_values: false
 frozen_parent_contracts:
   mi2_registry:
     file_name: mi2_research_registry.yaml
-    sha256: 145ee25e3e17d61f9980d85558a96ecd96d84a3cc92349e1e290a7e9509ea10d
+    sha256: 263c34fdb9a37578774d82f4f55b81b16da40fead371f31791d74ddf5637544b
   mi2e_signal_export:
     file_name: mi2_signal_export_parity_v1.yaml
     sha256: 1ebbf688677df952f14c78e4932e47de7ed4aa1fca5d600b3279b2e4a71705b8

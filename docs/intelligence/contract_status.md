@@ -6,7 +6,8 @@ contract was frozen; it must not be read as the current repository implementatio
 
 The current machine-readable mapping is
 `configs/intelligence/mi_current_status_v1.yaml`. It records the SHA-256 identity of every migrated
-configuration and each corresponding implementation file.
+configuration and each corresponding implementation file. Hashes use text bytes with LF line
+endings so identities remain stable across Git checkouts on Windows and Linux.
 
 The consolidation review establishes:
 

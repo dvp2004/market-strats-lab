@@ -12,13 +12,15 @@ SCORECARD_PATH = CONFIG_ROOT / "mi2_technical_prospective_scorecard_contract_v1.
 
 
 def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    canonical_text_bytes = path.read_bytes().replace(b"\r\n", b"\n")
+    return hashlib.sha256(canonical_text_bytes).hexdigest()
 
 
 def test_current_status_hashes_match_all_migrated_contracts_and_implementations() -> None:
     status = yaml.safe_load(STATUS_PATH.read_text(encoding="utf-8"))
     contracts = status["contracts"]
 
+    assert status["hash_policy"] == "sha256_of_text_bytes_with_lf_line_endings"
     expected_contracts = {path.name for path in CONFIG_ROOT.glob("*.yaml") if path != STATUS_PATH}
     assert set(contracts) == expected_contracts
 
